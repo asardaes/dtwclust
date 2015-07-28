@@ -1,0 +1,12 @@
+Package: dtwclust
+Type: Package
+Title: Time series clustering with Dynamic Time Warping distance
+Version: 0.1
+Date: 2015-07-27
+Depends: flexclust, proxy, dtw
+Imports: methods, caTools, ggplot2, reshape2, modeltools
+Author: Alexis Sarda Espinosa
+Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
+Description: Perform time series clustering using different techniques related to the DTW distance and its corresponding lower bounds. Additionally, an implementation of kShape clustering is available.
+License: GPL-3
+LazyData: TRUE

@@ -1,3 +1,14 @@
+# Temporarily
+R/SBD.R
+R/shape-extraction.R
+R/TADPole.R
+
+# Custom
+.Rproj.user/
+.Rbuildignore
+.Rhistory
+manual.txt
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
