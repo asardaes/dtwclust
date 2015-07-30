@@ -1,7 +1,9 @@
-#' Lemire's improved lower bound
+#' Lemire's improved DTW lower bound
 #'
 #' This function calculates a lower bound (LB) on the Dynamic Time Warp (DTW) distance between two time
 #' series. It uses a Sakoe-Chiba constraint.
+#'
+#' The lower bound is defined for time series of equal length only.
 #'
 #' Because of the way the different functions being used here are implemented, there is a subtle but critical
 #' mismatch in the way the window size is defined for DTW and the LB. The LB calculation expects an \emph{odd}
@@ -13,8 +15,26 @@
 #' Therefore, if, for example, the LB is calculated with a window of 21, the corresponding DTW distance should
 #' be calculated with \code{21 \%/\% 2 = 10}.
 #'
-#' The internal functions take care of this discrepancy if needed, but you should be careful if you are
-#' testing things manually.
+#' This function expects the \code{window.size} for the running max/min.
+#'
+#' @references
+#'
+#' Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .'' \emph{Pattern Recognition}, \strong{42}(9), pp.
+#' 2169 - 2180. ISSN 0031-3203, \url{http://doi.org/http://dx.doi.org/10.1016/j.patcog.2008.11.030}, \url{
+#' http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
+#'
+#' @examples
+#'
+#' # Sample data
+#' data(uciCT)
+#'
+#' # Lower bound distance between two series
+#' d.lbi <- lb_improved(CharTraj[[1]], CharTraj[[2]], window.size = 11)
+#'
+#' # Corresponding true DTW distance (accounting for window.size discrepancy)
+#' d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]], window.type = "slantedband", window.size = 5)$distance
+#'
+#' d.lbi <= d.dtw
 #'
 #' @param x A time series.
 #' @param y A time series with the same length as \code{x}.
@@ -58,7 +78,7 @@ lb_improved <- function(x, y, window.size, norm = "L1") {
 
      ## Finish
 
-     return(d)
+     d
 }
 
 # ========================================================================================================
@@ -94,10 +114,14 @@ lb_improved_loop <- function(x, y=NULL, ...) {
      }
 
      ## For looping convenience
-     if (class(x) == "matrix")
+     if (is.matrix(x))
           x <- lapply(seq_len(nrow(x)), function(i) x[i,])
-     if (class(y) == "matrix")
-          y <- lapply(seq_len(nrow(y)), function(i) y[i,])
+     else if (is.numeric(x))
+          x <- list(x)
+     else if (is.list(x))
+          x <- x
+     else
+          stop("Unsupported type for x")
 
      if (error.check)
           consistency_check(x, "tslist")
@@ -130,11 +154,11 @@ lb_improved_loop <- function(x, y=NULL, ...) {
                                                          L1 = sum(abs(x-H)) + lb_keogh(y, H, window.size, norm)$d,
                                                          L2 = sqrt(sum((x-H)^2)) + lb_keogh(y, H, window.size, norm)$d)
 
-                                             return(d)
+                                             d
 
                                         })
 
-                            return(D)
+                            D
                        })
 
           if (force.symmetry) {
@@ -151,10 +175,17 @@ lb_improved_loop <- function(x, y=NULL, ...) {
 
           attr(DD, "class") <- "crossdist"
           attr(DD, "method") <- "LB_Improved1"
-          return(t(DD))
-
 
      } else {
+
+          if (is.matrix(y))
+               y <- lapply(seq_len(nrow(y)), function(i) y[i,])
+          else if (is.numeric(y))
+               y <- list(y)
+          else if (is.list(y))
+               y <- y
+          else
+               stop("Unsupported type for y")
 
           if (error.check)
                consistency_check(y, "tslist")
@@ -186,11 +217,11 @@ lb_improved_loop <- function(x, y=NULL, ...) {
                                                          L1 = sum(abs(x-H)) + lb_keogh(y, H, window.size, norm)$d,
                                                          L2 = sqrt(sum((x-H)^2)) + lb_keogh(y, H, window.size, norm)$d)
 
-                                             return(d)
+                                             d
 
                                         })
 
-                            return(D)
+                            D
                        })
 
           if (force.symmetry) {
@@ -207,6 +238,7 @@ lb_improved_loop <- function(x, y=NULL, ...) {
 
           attr(DD, "class") <- "crossdist"
           attr(DD, "method") <- "LB_Improved1"
-          return(t(DD))
      }
+
+     t(DD)
 }

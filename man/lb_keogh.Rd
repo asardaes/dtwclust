@@ -2,7 +2,7 @@
 % Please edit documentation in R/lb-keogh.R
 \name{lb_keogh}
 \alias{lb_keogh}
-\title{Keogh's lower bound}
+\title{Keogh's DTW lower bound}
 \usage{
 lb_keogh(x, y, window.size, norm = "L1")
 }
@@ -27,6 +27,8 @@ This function calculates a lower bound (LB) on the Dynamic Time Warp (DTW) dista
 series. It uses a Sakoe-Chiba constraint.
 }
 \details{
+The lower bound is defined for time series of equal length only.
+
 Because of the way the different functions being used here are implemented, there is a subtle but critical
 mismatch in the way the window size is defined for DTW and the LB. The LB calculation expects an \emph{odd}
 \code{window.size} that represents the whole window width to be used in the running max and min. The
@@ -37,7 +39,22 @@ the edges of the window.
 Therefore, if, for example, the LB is calculated with a window of 21, the corresponding DTW distance should
 be calculated with \code{21 \%/\% 2 = 10}.
 
-The internal functions take care of this discrepancy if needed, but you should be careful if you are
-testing things manually.
+This function expects the \code{window.size} for the running max/min.
+}
+\examples{
+# Sample data
+data(uciCT)
+
+# Lower bound distance between two series
+d.lbk <- lb_keogh(CharTraj[[1]], CharTraj[[2]], window.size = 11)$d
+
+# Corresponding true DTW distance (accounting for window.size discrepancy)
+d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]], window.type = "slantedband", window.size = 5)$distance
+
+d.lbk <= d.dtw
+}
+\references{
+Keogh E and Ratanamahatana CA (2005). ``Exact indexing of dynamic time warping.'' \emph{Knowledge and information systems}, \strong{7}(3),
+pp. 358-386.
 }
 

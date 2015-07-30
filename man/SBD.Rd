@@ -4,12 +4,14 @@
 \alias{SBD}
 \title{Shape-based distance}
 \usage{
-SBD(x, y)
+SBD(x, y, znorm = TRUE)
 }
 \arguments{
 \item{x}{A time series.}
 
 \item{y}{Another time series.}
+
+\item{znorm}{Should each series be z-normalized before calculating the distance?}
 }
 \value{
 A list with: \itemize{
@@ -18,14 +20,25 @@ A list with: \itemize{
 }
 }
 \description{
-See Paparrizos 2015.
+Distance based on coefficient-normalized cross-correlation as proposed by Papparizos and Gravano, 2015,
+for the k-Shape clustering algorithm.
 }
 \details{
-This function works best if the inputs are \emph{z-normalized}. If not, at least they should have
-corresponding amplitudes, since the values of the signal \strong{does} affect the outcome.
+This function works best if the series are \emph{z-normalized}. If not, at least they should have
+corresponding amplitudes, since the values of the signal \strong{do} affect the outcome.
 
 If \code{x} and \code{y} do \strong{not} have the same length, it would be best if the longer sequence is
 provided in \code{y}, because it will be shifted to match \code{x}. Anything before the matching point is
 discarded and the series is padded with trailing zeros as needed.
+
+The output values lie between 0 and 2, with 0 indicating perfect similarity.
+}
+\references{
+Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.'' In \emph{Proceedings of the 2015
+ACM SIGMOD International Conference on Management of Data}, series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{
+http://doi.org/10.1145/2723372.2737793}.
+}
+\seealso{
+\code{\link{NCCc}}, \code{\link{shape_extraction}}
 }
 

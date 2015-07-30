@@ -8,17 +8,19 @@
 #'
 #' Optionally, you can manually provide the clustering result as well as the data in \code{data}.
 #'
+#' @name plot-dtwclust
+#' @docType methods
+#' @rdname plot-methods
+#'
+#' @seealso \code{\link{dtwclust-class}}, \code{\link{dtwclust}}
+#'
 #' @param x An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.
 #' @param y Ignored.
 #' @param clus Which clusters to plot.
 #' @param data The data in the same format as it was provided to \code{\link{dtwclust}}.
 #' @param ... Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
-#' \emph{cluster centers}. Default values are provided.
-#'
-#' @name plot-dtwclust
-#'
-#' @docType methods
-#' @rdname plot-methods
+#' \emph{cluster centers}. Default values are: \code{linetype = "dashed", size = 1.5, colour = "black",
+#' alpha = 0.5}.
 #'
 #' @exportMethod plot
 #' @import ggplot2
@@ -89,4 +91,6 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                          theme_bw()
                     print(g)
                }
+
+               invisible(NULL)
           })

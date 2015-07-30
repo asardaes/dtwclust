@@ -1,4 +1,168 @@
 # ========================================================================================================
+# Return a custom family for kcca
+# ========================================================================================================
+
+kccaFamilies <- function(distance, cent, window.size, norm) {
+
+     family <- switch(EXPR = distance,
+
+                      ## Full DTW with L1 norm
+                      dtw = kccaFamily(name = "DTW",
+
+                                       dist = function(x, centers) {
+                                            window.size <- get("window.size", envir = attr(x, "env"))
+
+                                            if (!is.null(attr(x, "distmat")))
+                                                 d <- dsub_pam(x, centers)
+                                            else if (is.null(window.size)) {
+                                                 d <- proxy::dist(x = x, y = centers,
+                                                                  method = "DTW", dist.method = "L1")
+                                            } else {
+                                                 d <- proxy::dist(x = x, y = centers,
+                                                                  method = "DTW", dist.method = "L1",
+                                                                  window.type = "slantedband",
+                                                                  window.size = window.size)
+                                            }
+
+                                            d
+                                       },
+
+
+                                       cent = cent),
+
+                      ## Full DTW with L2 norm
+                      dtw2 = kccaFamily(name = "DTW2",
+
+                                        dist = function(x, centers) {
+                                             window.size <- get("window.size", envir = attr(x, "env"))
+
+                                             if (!is.null(attr(x, "distmat")))
+                                                  d <- dsub_pam(x, centers)
+                                             else if (is.null(window.size)) {
+                                                  d <- proxy::dist(x = x, y = centers,
+                                                                   method = "DTW2")
+                                             } else {
+                                                  d <- proxy::dist(x = x, y = centers,
+                                                                   method = "DTW2",
+                                                                   window.type = "slantedband",
+                                                                   window.size = window.size)
+                                             }
+
+                                             d
+                                        },
+
+
+                                        cent = cent),
+
+
+                      ## DTW with aid of lower bounds
+                      dtw_lb = {
+                           if (is.null(window.size))
+                                stop("You must provide a window size for this method")
+
+                           kccaFamily(name = "DTW_LB",
+
+                                      dist = function(x, centers) {
+                                           window.size <- get("window.size", envir = attr(x, "env"))
+                                           norm <- get("norm", envir = attr(x, "env"))
+
+                                           if (!is.null(attr(x, "distmat")))
+                                                d <- dsub_pam(x, centers)
+                                           else
+                                                d <- dtw_lb(x, centers, window.size, norm, error.check=FALSE)
+
+                                           d
+                                      },
+
+                                      cent = cent)
+                      },
+
+
+
+                      ## Lemire's improved lower bound
+                      lbi = {
+                           if (is.null(window.size))
+                                stop("You must provide a window size for this method")
+
+                           kccaFamily(name = "LB_Improved",
+
+                                      dist = function(x, centers) {
+                                           window.size <- get("window.size", envir = attr(x, "env"))
+                                           norm <- get("norm", envir = attr(x, "env"))
+
+                                           if (!is.null(attr(x, "distmat")))
+                                                d <- dsub_pam(x, centers)
+                                           else {
+                                                d <- proxy::dist(x = x, y = centers,
+                                                                 method = "LBI",
+                                                                 norm = norm,
+                                                                 window.size = window.size,
+                                                                 force.symmetry = TRUE,
+                                                                 error.check=FALSE)
+                                           }
+
+                                           d
+                                      },
+
+
+                                      cent = cent)
+                      },
+
+                      ## Keogh's lower bound
+                      lbk = {
+                           if (is.null(window.size))
+                                stop("You must provide a window size for this method")
+
+                           kccaFamily(name = "LB_Keogh",
+
+                                      dist = function(x, centers) {
+                                           window.size <- get("window.size", envir = attr(x, "env"))
+                                           norm <- get("norm", envir = attr(x, "env"))
+
+                                           if (!is.null(attr(x, "distmat")))
+                                                d <- dsub_pam(x, centers)
+                                           else {
+                                                d <- proxy::dist(x = x, y = centers,
+                                                                 method = "LBK",
+                                                                 norm = norm,
+                                                                 window.size = window.size,
+                                                                 force.symmetry = TRUE,
+                                                                 error.check=FALSE)
+                                           }
+
+                                           d
+                                      },
+
+
+                                      cent = cent)
+                      },
+
+                      ## Paparrizos' shape-based distance
+                      sbd = kccaFamily(name = "SBD",
+
+                                       dist = function(x, centers) {
+                                            if (!is.null(attr(x, "distmat")))
+                                                 d <- dsub_pam(x, centers)
+                                            else {
+                                                 d <- proxy::dist(x = x, y = centers,
+                                                                  method = "SBD")
+                                            }
+
+                                            d
+                                       },
+
+
+                                       cent = cent),
+
+
+                      ## Otherwise
+                      kccaFamily(distance)
+     )
+
+     family
+}
+
+# ========================================================================================================
 # Check consistency, used by other functions
 # ========================================================================================================
 
@@ -61,10 +225,10 @@ allcent_pam <- function(x, cluster, k) {
      C <- sapply(indX, function(i.x) {
           d <- apply(distmat[i.x, i.x, drop=FALSE], 1, sum)
 
-          return( x[i.x[which.min(d)], ] )
+          x[i.x[which.min(d)], ]
      })
 
-     return(t(C))
+     t(C)
 }
 
 # Custom function to speed up the subsetting of the distance matrix for PAM
@@ -79,12 +243,12 @@ dsub_pam <- function(x, centers) {
                all(i.x == i.c)
           })
 
-          return(which(i.row)[1])
+          which(i.row)[1] # Take the first one in case a series is repeated more than once in the dataset
      })
 
      d <- distmat[ , indXC]
 
-     return(d)
+     d
 }
 
 # Preprocessing when using PAM. The whole distance matrix is calculated once and assigned as an attribute
@@ -97,7 +261,7 @@ preproc_pam <- function(x) {
 
      attr(x, "distmat") <- d
 
-     return(x)
+     x
 }
 
 # ========================================================================================================
@@ -107,6 +271,7 @@ preproc_pam <- function(x) {
 # Custom function to obtain centroids when using SBD averaging
 
 allcent_se <- function(x, cluster, k) {
+
      # This will be read from parent environment
      cen <- get("centers", envir=parent.frame())
      C <- lapply(seq_len(nrow(cen)), function(i) cen[i,])
@@ -120,31 +285,17 @@ allcent_se <- function(x, cluster, k) {
                      FUN = function(x, c) {
                           new.c <- shape_extraction(x, c)
 
-                          return(new.c)
+                          new.c
                      })
 
-     new.C <- t(new.C)
-
-     ## I'm not sure if this can happen
-     if (ncl < k) {
-          miss.ind <- !((1:k) %in% cl)
-          miss.ind <- (1:k)[miss.ind]
-
-          #new.C <- rbind(new.C, cen[miss.ind, ])
-          new.C <- rbind( new.C, matrix(0, length(miss.ind), ncol(new.C)) )
-
-          order.ind <- sort(c(cl, miss.ind), index.return=T)
-          new.C <- new.C[order.ind$ix, ]
-     }
-
-     return(new.C)
+     t(new.C)
 }
 
 # Preprocessing when using SBD averaging (z-normalization)
 
 preproc_se <- function (x) {
      xz <- apply(x, 1, zscore)
-     return(t(xz))
+     t(xz)
 }
 
 # ========================================================================================================
@@ -152,6 +303,7 @@ preproc_se <- function (x) {
 # ========================================================================================================
 
 allcent_dba <- function(x, cluster, k) {
+
      # This will be read from parent environment
      cen <- get("centers", envir=parent.frame())
      C <- lapply(seq_len(nrow(cen)), function(i) cen[i,])
@@ -159,7 +311,6 @@ allcent_dba <- function(x, cluster, k) {
      X <- split.data.frame(x, cluster)
 
      cl <- sort(unique(cluster))
-     #ncl <- length(cl)
 
      new.C <- mapply(X, C[cl],
                      FUN = function(x, c) {
@@ -168,7 +319,5 @@ allcent_dba <- function(x, cluster, k) {
                           new.c
                      })
 
-     new.C <- t(new.C)
-
-     new.C
+     t(new.C)
 }

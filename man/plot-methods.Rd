@@ -19,7 +19,8 @@
 \item{data}{The data in the same format as it was provided to \code{\link{dtwclust}}.}
 
 \item{...}{Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
-\emph{cluster centers}. Default values are provided.}
+\emph{cluster centers}. Default values are: \code{linetype = "dashed", size = 1.5, colour = "black",
+alpha = 0.5}.}
 }
 \description{
 Plots the time series of each cluster along with the obtained centroid. It uses \code{ggplot2} plotting
@@ -30,5 +31,8 @@ The flag \code{save.data} must be set to \code{TRUE} when running \code{\link{dt
 use this.
 
 Optionally, you can manually provide the clustering result as well as the data in \code{data}.
+}
+\seealso{
+\code{\link{dtwclust-class}}, \code{\link{dtwclust}}
 }
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/dtw-lb.R
 \name{dtw_lb}
 \alias{dtw_lb}
-\title{DTW calculation guided by Lemire's lower bound}
+\title{DTW calculation guided by Lemire's lower bound (LB_Improved)}
 \usage{
 dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE)
 }
@@ -21,13 +21,15 @@ dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE)
 The distance matrix with class \code{crossdist}.
 }
 \description{
-Calculation of a distance matrix with the Dynamic Time Warp (DTW) distance guided by Lemire's lower bound
+Calculation of a distance matrix with the Dynamic Time Warping (DTW) distance guided by Lemire's lower bound
 (LB).
 }
 \details{
 This function first calculates an initial estimate of a distance matrix between two sets of time series
 using Lemire's improved lower bound. Afterwards, it uses the estimate to calculate the true DTW distances
-of \emph{only} the nearest neighbors for each series in \code{x}.
+between \emph{only} the nearest neighbors of each series in \code{x} found in \code{y}. If only \code{x}
+is provided, the distance matrix is calculated between all its time series. This could be useful in case
+one is interested in only the nearest neighbor of one or more series among a dataset.
 
 Because of the way the different functions being used here are implemented, there is a subtle but critical
 mismatch in the way the window size is defined for DTW and the LB. The DTW calculation with
@@ -39,7 +41,39 @@ functions are centered with respect to the window width.
 Therefore, if, for example, the DTW is calculated with a window of 10, the corresponding LB should
 be calculated with \code{2*10 + 1 = 21}.
 
-The function takes care of this discrepancy if needed, but you should be careful if you are
-testing things manually.
+This function expects the \code{window.size} for \code{DTW} and takes care of this discrepancy automatically.
+}
+\note{
+This function uses a lower bound that is only defined for time series of equal lengths.
+}
+\examples{
+# Load data
+data(uciCT)
+
+# Reinterpolate to same length
+data <- lapply(CharTraj, reinterpolate, newLength = 205)
+
+# Calculate the DTW distance between a certain subset aided with the lower bound
+system.time(d <- dtw_lb(data[1:5], data[6:100], window.size = 20))
+
+# Nearest neighbors
+NN1 <- apply(d, 1, which.min)
+
+# Calculate the DTW distances between all elements (about seven times slower)
+system.time(d2 <- proxy::dist(data[1:5], data[6:100], method = "DTW",
+                              window.type = "slantedband", window.size = 20))
+
+# Nearest neighbors
+NN2 <- apply(d2, 1, which.min)
+
+all(NN1 == NN2)
+}
+\references{
+Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .'' \emph{Pattern Recognition}, \strong{42}(9), pp.
+2169 - 2180. ISSN 0031-3203, \url{http://doi.org/http://dx.doi.org/10.1016/j.patcog.2008.11.030}, \url{
+http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
+}
+\seealso{
+\code{\link{lb_improved}}
 }
 

@@ -9,7 +9,8 @@ DBA(X, center = NULL, max.iter = 25, error.check = TRUE, trace = FALSE)
 \arguments{
 \item{X}{A data matrix where each row is a time series. Optionally, a list where each element is a time series.}
 
-\item{center}{Optionally, a time series to use as reference. Defaults to a random series of \code{X} if \code{NULL}.}
+\item{center}{Optionally, a time series to use as reference. It must be a numeric vector.Defaults to a
+random series of \code{X} if \code{NULL}.}
 
 \item{max.iter}{Maximum number of iterations allowed.}
 
@@ -21,6 +22,31 @@ DBA(X, center = NULL, max.iter = 25, error.check = TRUE, trace = FALSE)
 The average time series.
 }
 \description{
-See Petitjean 2011
+A global averaging method for time series under DTW (Petitjean, Ketterlin and Gancarski, 2011).
+}
+\details{
+This function tries to find the optimum average series between a group time series in DTW space. Refer to
+the cited article for specific details on the algorithm.
+
+If a given series reference is provided in \code{center}, the algorithm should always converge to the same
+result provided the rows \code{X} keep the same values, although their order may change.
+}
+\examples{
+# Sample data
+data(uciCT)
+
+# Obtain an average for the first 5 time series
+dtw.avg <- DBA(CharTraj[1:5], CharTraj[[1]], trace = TRUE)
+plot(dtw.avg, type="l")
+
+# Change the provided order
+dtw.avg2 <- DBA(CharTraj[5:1], CharTraj[[1]], trace = TRUE)
+all(dtw.avg == dtw.avg2)
+}
+\references{
+Petitjean F, Ketterlin A and Gancarski P (2011). ``A global averaging method for dynamic time warping, with applications to
+clustering.'' \emph{Pattern Recognition}, \strong{44}(3), pp. 678 - 693. ISSN 0031-3203, \url{
+http://doi.org/http://dx.doi.org/10.1016/j.patcog.2010.09.013}, \url{
+http://www.sciencedirect.com/science/article/pii/S003132031000453X}.
 }
 

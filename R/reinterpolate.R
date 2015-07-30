@@ -13,5 +13,5 @@ reinterpolate <- function(ts, newLength) {
 
      newTS <- approx(ts, method='linear', n=newLength)
 
-     return(newTS$y)
+     newTS$y
 }

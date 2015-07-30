@@ -7,7 +7,7 @@
 TADPole(data, window.size = NULL, k = 2, dc, error.check = TRUE)
 }
 \arguments{
-\item{data}{The data matrix. Optionally a list with each time series.}
+\item{data}{The data matrix where each row is a time series. Optionally a list with each time series.}
 
 \item{window.size}{Window size constraint for DTW.}
 
@@ -15,7 +15,7 @@ TADPole(data, window.size = NULL, k = 2, dc, error.check = TRUE)
 
 \item{dc}{The cutoff distance.}
 
-\item{error.check}{Should inconsistencies in the data be checked?}
+\item{error.check}{Should the data be checked for inconsistencies?}
 }
 \value{
 A list with: \itemize{
@@ -25,6 +25,40 @@ A list with: \itemize{
 }
 }
 \description{
-See Begum et al. 2015
+Time-series Anytime Density Peaks Clustering as proposed by Begum et al., 2015.
+}
+\details{
+This function can be called either directly or through \code{\link{dtwclust}}.
+
+TADPole clustering adopts a relatively new clustering framework and adapts it to time series clustering
+with DTW. See the cited article for the details of the algorithm.
+
+Because of the way the algorithm works, it can be considered a kind of Partitioning Around Medoids (PAM).
+This means that the cluster centers are always elements of the data.
+
+The algorithm first uses the DTW's upper and lower bounds to find series with many close neighbors (in
+DTW space). Anything below the cutoff distance (\code{dc}) is considered a neighbor. Aided with this
+information, the algorithm then tries to prune as many DTW calculations as possible in order to accelerate
+the clustering procedure. The series that lie in dense areas (i.e. that have lots of neighbors) are taken
+as cluster centers.
+
+The algorithm relies on the DTW bounds, which are only defined for time series of equal lengths.
+
+Because of the way the different functions being used here are implemented, there is a subtle but critical
+mismatch in the way the window size is defined for DTW and the lower bounds (LB). The DTW calculation with
+\code{\link[dtw]{dtw}} expects an \emph{even} \code{window.size} that represents the distance between the
+diagonal and one of the edges of the window. The LB calculation expects an \emph{odd} window.size that
+represents the whole window width to be used in the running max and min. The outcome of said running
+functions are centered with respect to the window width.
+
+Therefore, if, for example, the DTW is calculated with a window of 10, the corresponding LB should
+be calculated with \code{2*10 + 1 = 21}.
+
+This function expects the \code{window.size} for \code{DTW} and takes care of this discrepancy automatically.
+}
+\references{
+Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering with a Novel Admissible Pruning
+Strategy.'' In \emph{Conference on Knowledge Discovery and Data Mining}, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{
+http://doi.org/http://dx.doi.org/10.1145/2783258.2783286}.
 }
 

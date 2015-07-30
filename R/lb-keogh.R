@@ -1,7 +1,9 @@
-#' Keogh's lower bound
+#' Keogh's DTW lower bound
 #'
 #' This function calculates a lower bound (LB) on the Dynamic Time Warp (DTW) distance between two time
 #' series. It uses a Sakoe-Chiba constraint.
+#'
+#' The lower bound is defined for time series of equal length only.
 #'
 #' Because of the way the different functions being used here are implemented, there is a subtle but critical
 #' mismatch in the way the window size is defined for DTW and the LB. The LB calculation expects an \emph{odd}
@@ -13,8 +15,25 @@
 #' Therefore, if, for example, the LB is calculated with a window of 21, the corresponding DTW distance should
 #' be calculated with \code{21 \%/\% 2 = 10}.
 #'
-#' The internal functions take care of this discrepancy if needed, but you should be careful if you are
-#' testing things manually.
+#' This function expects the \code{window.size} for the running max/min.
+#'
+#' @references
+#'
+#' Keogh E and Ratanamahatana CA (2005). ``Exact indexing of dynamic time warping.'' \emph{Knowledge and information systems}, \strong{7}(3),
+#' pp. 358-386.
+#'
+#' @examples
+#'
+#' # Sample data
+#' data(uciCT)
+#'
+#' # Lower bound distance between two series
+#' d.lbk <- lb_keogh(CharTraj[[1]], CharTraj[[2]], window.size = 11)$d
+#'
+#' # Corresponding true DTW distance (accounting for window.size discrepancy)
+#' d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]], window.type = "slantedband", window.size = 5)$distance
+#'
+#' d.lbk <= d.dtw
 #'
 #' @param x A time series.
 #' @param y A time series with the same length as \code{x}.
@@ -51,12 +70,11 @@ lb_keogh <- function(x, y, window.size, norm = "L1") {
      }
 
      # from 'caTools' package
-     upper.env <- runmax(y, window.size)
-     lower.env <- runmin(y, window.size)
+     upper.env <- runmax(y, window.size, endrule="constant")
+     lower.env <- runmin(y, window.size, endrule="constant")
 
      D <- rep(0, length(x))
 
-     # Using L1 in accordance with Lemire 2009
      ind1 <- which(x > upper.env)
      D[ind1] <- x[ind1] - upper.env[ind1]
      ind2 <- which(x < lower.env)
@@ -66,9 +84,9 @@ lb_keogh <- function(x, y, window.size, norm = "L1") {
                  L1 = sum(D),
                  L2 = sqrt(sum(D^2)))
 
-     return(list(d = d,
-                 upper.env = upper.env,
-                 lower.env = lower.env))
+     list(d = d,
+          upper.env = upper.env,
+          lower.env = lower.env)
 }
 
 # ========================================================================================================
@@ -107,10 +125,14 @@ lb_keogh_loop <- function(x, y=NULL, ...) {
      }
 
      ## For looping convenience
-     if (class(x) == "matrix")
+     if (is.matrix(x))
           x <- lapply(seq_len(nrow(x)), function(i) x[i,])
-     if (class(y) == "matrix")
-          y <- lapply(seq_len(nrow(y)), function(i) y[i,])
+     else if (is.numeric(x))
+          x <- list(x)
+     else if (is.list(x))
+          x <- x
+     else
+          stop("Unsupported type for x")
 
      if (error.check)
           consistency_check(x, "tslist")
@@ -134,7 +156,6 @@ lb_keogh_loop <- function(x, y=NULL, ...) {
 
                                              D <- rep(0, length(x))
 
-                                             # Using L1 in accordance with Lemire 2009
                                              ind1 <- which(x > u)
                                              D[ind1] <- x[ind1] - u[ind1]
                                              ind2 <- which(x < l)
@@ -144,11 +165,11 @@ lb_keogh_loop <- function(x, y=NULL, ...) {
                                                          L1 = sum(D),
                                                          L2 = sqrt(sum(D^2)))
 
-                                             return(d)
+                                             d
 
                                         })
 
-                            return(D)
+                            D
                        })
 
           if (force.symmetry) {
@@ -165,10 +186,17 @@ lb_keogh_loop <- function(x, y=NULL, ...) {
 
           attr(DD, "class") <- "crossdist"
           attr(DD, "method") <- "LB_Keogh1"
-          return(t(DD))
-
 
      } else {
+
+          if (is.matrix(y))
+               y <- lapply(seq_len(nrow(y)), function(i) y[i,])
+          else if (is.numeric(y))
+               y <- list(y)
+          else if (is.list(y))
+               y <- y
+          else
+               stop("Unsupported type for y")
 
           if (error.check)
                consistency_check(y, "tslist")
@@ -191,7 +219,6 @@ lb_keogh_loop <- function(x, y=NULL, ...) {
 
                                              D <- rep(0, length(x))
 
-                                             # Using L1 in accordance with Lemire 2009
                                              ind1 <- which(x > u)
                                              D[ind1] <- x[ind1] - u[ind1]
                                              ind2 <- which(x < l)
@@ -201,11 +228,11 @@ lb_keogh_loop <- function(x, y=NULL, ...) {
                                                          L1 = sum(D),
                                                          L2 = sqrt(sum(D^2)))
 
-                                             return(d)
+                                             d
 
                                         })
 
-                            return(D)
+                            D
                        })
 
           if (force.symmetry) {
@@ -222,6 +249,7 @@ lb_keogh_loop <- function(x, y=NULL, ...) {
 
           attr(DD, "class") <- "crossdist"
           attr(DD, "method") <- "LB_Keogh1"
-          return(t(DD))
      }
+
+     t(DD)
 }

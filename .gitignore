@@ -1,8 +1,3 @@
-# Temporarily
-R/SBD.R
-R/shape-extraction.R
-R/TADPole.R
-
 # Custom
 .Rproj.user/
 .Rbuildignore
@@ -52,3 +47,4 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.RData

@@ -1,30 +1,174 @@
-#' Time series clustering with DTW
+#' Time series clustering under DTW
 #'
 #' This function uses the DTW distance and related lower bounds to cluster time series. For now, all series
-#' must have equal length.
+#' must be univariate and, in the case of partitional methods, have equal lengths.
 #'
-#' @param data Numeric matrix where each row is a time series.
+#' Partitional algorithms are implemented via \code{\link[flexclust]{kcca}}. Hierarchical algorithms use the
+#' \code{\link[stats]{hclust}} function. The \code{tadpole} algorithm uses the \code{\link{TADPole}} function.
+#'
+#' In case of partitional algorithms, \code{data} should be in the form of a matrix. In the other cases,
+#' it may be a matrix or a list, but the matrix will be coerced to a list. A matrix input requires that all
+#' time series have equal lengths. If the lengths vary slightly between time series, reinterpolating them to
+#' a common length is most likely an acceptable approach (Ratanamahatana and Keogh, 2004). If this is not the
+#' case, then clustering them directly is probably ill-advised. See the examples.
+#'
+#' @section Distance:
+#'
+#' If a custom distance function is provided, it will receive the data as the first argument. For partitional
+#' algorithms, the second argument will be the cluster centers (i.e. other time series) in the form of a matrix
+#' where each row is a center series. If hierarchical algorithms are used, the function will also receive the
+#' elements of \code{...}.
+#'
+#' For partitional algorithms, the function \emph{could} make use of the \code{window.size} and \code{norm}
+#' parameters, which \emph{should} be detected thanks to \code{R}'s lexical scoping, however this cannot
+#' be guaranteed.
+#'
+#' The function should return a distance matrix, ideally of class \code{crossdist}. In case of partitional
+#' algorithms, the time series in the data should be along the rows, and the cluster centers along the
+#' columns of the distance matrix.
+#'
+#' The other option is to provide a string. For partitional algorithms, it can be a supported distance of
+#' \code{\link[flexclust]{kccaFamily}}. For hierarchical, it can be any distance function registered in
+#' \code{\link[proxy]{dist}}. In the latter case, all extra parameters should be provided in \code{...}.
+#'
+#' Additionally, with either type of algorithm, it can be one of the following
+#' custom implementations:
+#'
+#' \itemize{
+#'   \item \code{"dtw"}: DTW with L1 norm and optionally a Sakoe-Chiba constraint.
+#'   \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba constraint.
+#'   \item \code{"dtw_lb"}: DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some computations
+#'   are avoided by first estimating the distance matrix with Lemire's lower bound and then iteratively
+#'   refining with DTW. See \code{\link{dtw_lb}}.
+#'   \item \code{"lbk"}: Keogh's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint.
+#'   \item \code{"lbi"}: Lemire's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint.
+#'   \item \code{"sbd"}: Shape-based distance. Each series is z-normalized in this case. As a result,
+#'   the cluster centers (for partitional methods) are also z-normalized. See \code{\link{SBD}} for more
+#'   details.
+#' }
+#'
+#' @section Centroid:
+#'
+#' In the case of partitional algorithms, a suitable function should calculate the cluster centers. In this
+#' case, the centers are themselves time series.
+#'
+#' If a custom function is provided, it will receive a matrix as only argument. Each row will be a time series
+#' that belongs to a given cluster. The function should return a numeric vector with the center time series.
+#'
+#' The other option is to provide a character string. The following options are available:
+#'
+#' \itemize{
+#'   \item \code{"mean"}: The average along each dimension. In other words, the average of all \eqn{x^j_i}
+#'   among the \eqn{j} series that belong to the same cluster for all time points \eqn{t_i}.
+#'   \item \code{"median"}: The median along each dimension. Similar to mean.
+#'   \item \code{"shape"}: Shape averaging. See \code{\link{shape_extraction}} for more details.
+#'   \item \code{"dba"}: DTW Barycenter Averaging. See \code{\link{DBA}} for more details.
+#'   \item \code{"pam"}: Partition around medoids. This basically means that the cluster centers are always
+#'   one of the time series in the data. In this case, the distance matrix is pre-computed once using all
+#'   time series in the data and then re-used at each iteration.
+#' }
+#'
+#' @section Sakoe-Chiba Constraint:
+#'
+#' A global constraint to speed up the DTW calculation is the Sakoe-Chiba band (Sakoe and Chiba, 1978). To
+#' use it, a window width must be defined via \code{window.size}.
+#'
+#' Because of the way the different functions being used here are implemented, there is a subtle but critical
+#' mismatch in the way the window size is defined for DTW and the lower bounds (LB). The DTW calculation with
+#' \code{\link[dtw]{dtw}} expects an \emph{even} \code{window.size} that represents the distance between the
+#' diagonal and one of the edges of the window. The LB calculation expects an \emph{odd} window.size that
+#' represents the whole window width to be used in the running max and min. The outcome of said running
+#' functions are centered with respect to the window width.
+#'
+#' Therefore, if, for example, the DTW is calculated with a window of 10, the corresponding LB should
+#' be calculated with \code{2*10 + 1 = 21}.
+#'
+#' The functions that rely on both the LB and DTW take care of this discrepancy, but the user should be
+#' careful if things are tested manually. Namely, \code{\link{dtw_lb}} and \code{\link{TADPole}} expect the
+#' DTW \code{window.size}, as well as \code{DTW} and \code{DTW2}. The lower bounds expect the
+#' \code{window.size} of the running max/min. See the examples in \code{\link{lb_keogh}} and
+#' \code{\link{lb_improved}}.
+#'
+#' @note
+#'
+#' Notice that the lower bounds are defined only for time series of equal lengths. \code{DTW} and \code{DTW2}
+#' don't require this, but they are much slower to compute.
+#'
+#' The lower bounds are \strong{not} symmetrical, and \code{DTW} is only symmetrical if series are of equal
+#' lengths.
+#'
+#' Specifying \code{distance = "sbd"} and \code{centroid = "shape"} is equivalent to the k-Shape algorithm
+#' (Papparizos and Gravano, 2015). See \code{\link{SBD}} and \code{\link{shape_extraction}} for more info.
+#'
+#' @references
+#'
+#' Sakoe H and Chiba S (1978). ``Dynamic programming algorithm optimization for spoken word recognition.'' \emph{Acoustics, Speech
+#' and
+#' Signal Processing, IEEE Transactions on}, \strong{26}(1), pp. 43-49. ISSN 0096-3518, \url{http://doi.org/10.1109/TASSP.1978.1163055}.
+#'
+#' Ratanamahatana A and Keogh E (2004). ``Everything you know about dynamic time warping is wrong.'' In \emph{3rd Workshop on Mining
+#' Temporal and Sequential Data, in conjunction with 10th ACM SIGKDD Int. Conf. Knowledge Discovery and Data Mining (KDD-2004),
+#' Seattle, WA}.
+#'
+#' Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.'' In \emph{Proceedings of the 2015
+#' ACM SIGMOD International Conference on Management of Data}, series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{
+#' http://doi.org/10.1145/2723372.2737793}.
+#'
+#' @examples
+#'
+#' # Load data
+#' data(uciCT)
+#'
+#' # Reinterpolate to same length and coerce as matrix
+#' data <- t(sapply(CharTraj, reinterpolate, newLength = 205))
+#'
+#' # Simple partitional clustering with L2 distance and PAM
+#' kc.l2 <- dtwclust(data, k = 20, distance = "kmeans", centroid = "pam", seed = 3247, trace = TRUE)
+#' cat("Rand index for L2+PAM:", randIndex(kc.l2, CharTrajLabels), "\n\n")
+#'
+#' # TADPole clustering (takes around 5 seconds)
+#' kc.tadp <- dtwclust(data, type = "tadpole", k = 20, window.size = 20, dc = 1.5, save.data = TRUE)
+#' cat("Rand index for TADPole:", randIndex(kc.tadp, CharTrajLabels), "\n\n")
+#' plot(kc.tadp)
+#'
+#' # Hierarchical clustering based on shabe-based distance
+#' hc.sbd <- dtwclust(data, type = "hierarchical", distance = "sbd")
+#' cl.sbd <- cutree(hc.sbd, 20)
+#' cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\n\n")
+#'
+#' \dontrun{
+#' # Use full DTW and PAM (takes around two minutes)
+#' kc.dtw <- dtwclust(data, k = 20, seed = 3251, trace = TRUE)
+#'
+#' # Use full DTW with DBA centroids (takes around five minutes)
+#' kc.dba <- dtwclust(data, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
+#' }
+#'
+#' @author Alexis Sarda-Espinosa
+#'
+#' @param data A list where each element is a time series, or a numerical matrix where each row is a time
+#' series. Only the latter is supported in case of \code{type = "partitional"}.
 #' @param type What type of clustering method to use, \code{partitional}, \code{hierarchical} or \code{tadpole}.
 #' @param k Numer of desired clusters in partitional methods.
-#' @param method Which linkage method to use in hierarchical methods.
-#' @param distance One of the supported distance measurements (see details). It can also be the name of a
-#' family to use with function \code{\link[flexclust]{kcca}} if \code{type == "partitional"}, or a supported
-#' distance of \code{\link[proxy]{dist}} if \code{type == "hierarchical"}.
-#' @param centroid Either a supported string (see details) or an appropriate function to calculate centroids
-#' when using partitional methods.
-#' @param window.size Window constraint for DTW and LB calculations.
-#' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
+#' @param method Which linkage method to use in hierarchical methods. See \code{\link[stats]{hclust}}.
+#' @param distance One of the supported distance definitions (see Distance section). Ignored for
+#' \code{type = "tadpole"}.
+#' @param centroid Either a supported string or an appropriate function to calculate centroids
+#' when using partitional methods (see Centroid section).
+#' @param window.size Window constraint for DTW and LB calculations. \strong{See Sakoe-Chiba section}.
+#' @param norm Pointwise distance for DTW and LB. Either \code{L1} for Manhattan distance or \code{L2}
+#' for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{L1}) and
+#' \code{distance = "DTW2"} (which always uses \code{L2}).
 #' @param dc Cutoff distance for TADPole algorithm.
-#' @param seed Random seed for reproducibility
-#' @param control Parameters for partitional clustering algorithm. See \code{\link[flexclust]{flexclustControl}}.
-#' @param save.data Return a copy of the data in the returned object?
+#' @param seed Random seed for reproducibility of partitional algorithms.
+#' @param control Parameters for partitional clustering algorithms. See
+#' \code{\link[flexclust]{flexclustControl}}.
+#' @param save.data Return a copy of the data in the returned object? Ignored for hierarchical clustering.
 #' @param trace Boolean flag. If true, more output regarding the progress is printed to screen.
-#' @param ... Additional arguments to pass to \code{\link[proxy]{dist}}.
+#' @param ... Additional arguments to pass to \code{\link[proxy]{dist}} or a custom distance function.
 #'
-#' @return An object with formal class \code{\link{dtwclust-class}} if \code{type == "partitional" | "tadpole"}. Otherwise
+#' @return An object with formal class \code{\link{dtwclust-class}} if \code{type = "partitional" | "tadpole"}. Otherwise
 #' an object with class \code{hclust} as returned by \code{\link[stats]{hclust}}.
-#'
-#' @author Alexis Sarda
 #'
 #' @export
 #' @import flexclust
@@ -32,12 +176,16 @@
 #' @importFrom modeltools ModelEnvMatrix
 
 dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average",
-                     distance = "dtw_lb", centroid = "median",
-                     window.size = NULL, norm = "L1", dc,
+                     distance = "dtw", centroid = "pam",
+                     window.size = NULL, norm = "L1", dc = NULL,
                      control = NULL, save.data = FALSE,
-                     seed = NULL, trace = F,
+                     seed = NULL, trace = FALSE,
                      ...)
 {
+     ## =================================================================================================================
+     ## Start
+     ## =================================================================================================================
+
      if (is.null(data))
           stop("No data provided")
 
@@ -46,31 +194,26 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
      type <- match.arg(type, c("partitional", "hierarchical", "tadpole"))
      norm <- match.arg(norm, c("L1", "L2"))
 
-#      distance <- match.arg(distance, c("dtw", "dtw_lb", "lbk", "lbi", "sbd",
-#                                        "kmeans", "kmedians", "angle", "jaccard", "ejaccard"))
-
-     if (distance == "dtw") {
-          distance <- switch(EXPR = norm,
-                             L1 = "dtw",
-                             L2 = "dtw2")
-     }
-
      if (type == "partitional") {
 
           ## =================================================================================================================
           ## Partitional
           ## =================================================================================================================
 
-          if (is.function(centroid))
+          ## Used by some of the custom functions so that they know where to look for 'window.size'
+          ## This is done automatically due to lexical scoping, but I rather do it explicitly
+          attr(data, "env") <- environment()
+
+          if (is.function(centroid)) {
                cent <- centroid
-          else {
+          } else {
                centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
 
                cent <- switch(EXPR = centroid,
 
-                              mean = function(x) { return(apply(x, 2, mean)) },
+                              mean = function(x) { apply(x, 2, mean) },
 
-                              median = function(x) { return(apply(x, 2, median)) },
+                              median = function(x) { apply(x, 2, median) },
 
                               shape = shape_extraction, # placeholder, will be ignored (see utils.R)
 
@@ -82,149 +225,21 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                               stop("Unsupported centroid calculation method"))
           }
 
-          family <- switch(EXPR = distance,
+          if (is.function(distance)) {
+               family <- kccaFamily(name = as.character(substitute(distance)),
+                                    dist = distance,
+                                    cent = cent)
 
-                           ## Full DTW with L1 norm
-                           dtw = kccaFamily(name = "DTW",
-                                            dist = function(x, centers) {
-                                                 if (!is.null(attr(x, "distmat")))
-                                                      d <- dsub_pam(x, centers)
-                                                 else if (is.null(window.size)) {
-                                                      d <- proxy::dist(x = x, y = centers,
-                                                                       method = "DTW", dist.method = "L1",
-                                                                       ...)
-                                                 } else {
-                                                      d <- proxy::dist(x = x, y = centers,
-                                                                       method = "DTW", dist.method = "L1",
-                                                                       window.type = "sakoechiba",
-                                                                       window.size = window.size,
-                                                                       ...)
-                                                 }
+          } else if (is.character(distance)) {
+               family <- kccaFamilies(distance, cent, window.size, norm)
 
-                                                 return(d)
-                                            },
+          } else {
+               stop("Unspported distance definition")
+          }
 
-
-                                            cent = cent),
-
-                           ## Full DTW with L2 norm
-                           dtw2 = kccaFamily(name = "DTW2",
-                                            dist = function(x, centers) {
-                                                 if (!is.null(attr(x, "distmat")))
-                                                      d <- dsub_pam(x, centers)
-                                                 else if (is.null(window.size)) {
-                                                      d <- proxy::dist(x = x, y = centers,
-                                                                       method = "DTW2",
-                                                                       ...)
-                                                 } else {
-                                                      d <- proxy::dist(x = x, y = centers,
-                                                                       method = "DTW2",
-                                                                       window.type = "sakoechiba",
-                                                                       window.size = window.size,
-                                                                       ...)
-                                                 }
-
-                                                 return(d)
-                                            },
-
-
-                                            cent = cent),
-
-
-                           ## DTW with aid of lower bounds
-                           dtw_lb = {
-                                if (is.null(window.size))
-                                     stop("You must provide a window size for this method")
-
-                                kccaFamily(name = "DTW_LB",
-
-                                           dist = function(x, centers) {
-                                                if (!is.null(attr(x, "distmat")))
-                                                     d <- dsub_pam(x, centers)
-                                                else
-                                                     d <- dtw_lb(x, centers, window.size, error.check=FALSE)
-
-                                                return(d)
-                                           },
-
-                                           cent = cent)
-                           },
-
-
-
-                           ## Lemire's improved lower bound with L1
-                           lbi = {
-                                if (is.null(window.size))
-                                     stop("You must provide a window size for this method")
-
-                                kccaFamily(name = "LB_Improved",
-                                           dist = function(x, centers) {
-                                                if (!is.null(attr(x, "distmat")))
-                                                     d <- dsub_pam(x, centers)
-                                                else {
-                                                     d <- proxy::dist(x = x, y = centers,
-                                                                      method = "LBI",
-                                                                      norm = norm,
-                                                                      window.size = window.size,
-                                                                      error.check=FALSE,
-                                                                      ...)
-                                                }
-
-                                                return(d)
-                                           },
-
-
-                                           cent = cent)
-                           },
-
-                           ## Keogh's lower bound but with L1
-                           lbk = {
-                                if (is.null(window.size))
-                                     stop("You must provide a window size for this method")
-
-                                kccaFamily(name = "LB_Keogh",
-                                           dist = function(x, centers) {
-                                                if (!is.null(attr(x, "distmat")))
-                                                     d <- dsub_pam(x, centers)
-                                                else {
-                                                     d <- proxy::dist(x = x, y = centers,
-                                                                      method = "LBK",
-                                                                      norm = norm,
-                                                                      window.size = window.size,
-                                                                      error.check=FALSE,
-                                                                      ...)
-                                                }
-
-                                                return(d)
-                                           },
-
-
-                                           cent = cent)
-                           },
-
-                           ## Paparrizos' shape-based distance
-                           sbd = {
-                                kccaFamily(name = "SBD",
-                                           dist = function(x, centers) {
-                                                if (!is.null(attr(x, "distmat")))
-                                                     d <- dsub_pam(x, centers)
-                                                else {
-                                                     d <- proxy::dist(x = x, y = centers,
-                                                                      method = "SBD",
-                                                                      ...)
-                                                }
-
-                                                return(d)
-                                           },
-
-
-                                           cent = cent)
-                           },
-
-
-                           ## Otherwise
-                           kccaFamily(distance)
-          )
+          ## ----------------------------------------------------------------------------------------------------------
+          ## Replace specific functions if necessary
+          ## ----------------------------------------------------------------------------------------------------------
 
           if (centroid == "shape") {
                family@allcent <- allcent_se
@@ -240,6 +255,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                family@preproc <- preproc_pam
           }
 
+          ## ----------------------------------------------------------------------------------------------------------
+          ## Further options
+          ## ----------------------------------------------------------------------------------------------------------
 
           if (is.null(control))
                ctrl <- new("flexclustControl")
@@ -252,12 +270,20 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           if (!is.null(seed))
                set.seed(seed)
 
+          ## ----------------------------------------------------------------------------------------------------------
+          ## Cluster
+          ## ----------------------------------------------------------------------------------------------------------
+
           kc <- kcca(x = data,
                      k = k,
                      family = family,
                      simple = TRUE,
                      control = ctrl,
                      save.data = save.data)
+
+          ## ----------------------------------------------------------------------------------------------------------
+          ## Prepare results
+          ## ----------------------------------------------------------------------------------------------------------
 
           toc <- proc.time() - tic
 
@@ -266,8 +292,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
 
           dtwc <- new("dtwclust", kc,
                       type = type,
-                      distance = distance,
-                      centroid = ifelse(is.function(centroid), "custom", centroid))
+                      distance = ifelse(is.function(distance), as.character(substitute(distance)), distance),
+                      centroid = ifelse(is.function(centroid), as.character(substitute(centroid)), centroid))
 
           dtwc
 
@@ -280,90 +306,100 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           if (trace)
                cat("\n\tCalculating distance matrix...\n")
 
-          if (class(data) == "matrix")
+          if (is.matrix(data))
                x <- lapply(seq_len(nrow(data)), function(i) data[i,])
+          else if (is.list(data))
+               x <- data
+          else
+               stop("Unsupported type for data")
 
-          D <- switch(EXPR = distance,
+          if (is.function(distance)) {
+               D <- call(as.character(substitute(distance)),
+                         data, ...)
 
-                      ## Full DTW with L1 norm
-                      dtw = {
-                           if (is.null(window.size)) {
-                                d <- proxy::dist(x = x, y = x,
-                                                 method = "DTW", dist.method = "L1",
-                                                 ...)
-                           } else {
-                                d <- proxy::dist(x = x, y = x,
-                                                 method = "DTW", dist.method = "L1",
-                                                 window.type = "sakoechiba", window.size = window.size,
-                                                 ...)
-                           }
+          } else if (is.character(distance)) {
+               D <- switch(EXPR = distance,
 
-                           d
-                      },
+                           ## Full DTW with L1 norm
+                           dtw = {
+                                if (is.null(window.size)) {
+                                     d <- proxy::dist(x = x, y = x,
+                                                      method = "DTW", dist.method = "L1",
+                                                      ...)
+                                } else {
+                                     d <- proxy::dist(x = x, y = x,
+                                                      method = "DTW", dist.method = "L1",
+                                                      window.type = "slantedband", window.size = window.size,
+                                                      ...)
+                                }
 
-                      ## Full DTW with L2 norm
-                      dtw2 = {
-                           if (is.null(window.size)) {
-                                d <- proxy::dist(x = x, y = x,
-                                                 method = "DTW2",
-                                                 ...)
-                           } else {
-                                d <- proxy::dist(x = x, y = x,
-                                                 method = "DTW2",
-                                                 window.type = "sakoechiba", window.size = window.size,
-                                                 ...)
-                           }
+                                d
+                           },
 
-                           d
-                      },
+                           ## Full DTW with L2 norm
+                           dtw2 = {
+                                if (is.null(window.size)) {
+                                     d <- proxy::dist(x = x, y = x,
+                                                      method = "DTW2",
+                                                      ...)
+                                } else {
+                                     d <- proxy::dist(x = x, y = x,
+                                                      method = "DTW2",
+                                                      window.type = "slantedband", window.size = window.size,
+                                                      ...)
+                                }
 
-                      ## DTW with aid of lower bounds
-                      dtw_lb = {
-                           if (is.null(window.size))
-                                stop("You must provide a window size for this method")
+                                d
+                           },
 
-                           d <- dtw_lb(x, x, window.size, error.check=TRUE)
+                           ## DTW with aid of lower bounds
+                           dtw_lb = {
+                                if (is.null(window.size))
+                                     stop("You must provide a window size for this method")
 
-                           d
-                      },
+                                dtw_lb(x, x, window.size, norm = norm, error.check=TRUE)
+                           },
 
 
-                      ## Lemire's improved lower bound with L1
-                      lbi = {
-                           if (is.null(window.size))
-                                stop("You must provide a window size for this method")
+                           ## Lemire's improved lower bound with L1
+                           lbi = {
+                                if (is.null(window.size))
+                                     stop("You must provide a window size for this method")
 
-                           d <- proxy::dist(x = x, y = x,
-                                            method = "LBI", window.size = window.size, norm = norm, error.check=TRUE,
+                                proxy::dist(x = x, y = x,
+                                            method = "LBI", window.size = window.size, norm = norm,
+                                            force.symmetry = TRUE, error.check=TRUE,
                                             ...)
+                           },
 
-                           d
-                      },
+                           ## Keogh's lower bound but with L1
+                           lbk = {
+                                if (is.null(window.size))
+                                     stop("You must provide a window size for this method")
 
-                      ## Keogh's lower bound but with L1
-                      lbk = {
-                           if (is.null(window.size))
-                                stop("You must provide a window size for this method")
-
-                           d <- proxy::dist(x = x, y = x,
-                                            method = "LBK", window.size = window.size, norm = norm, error.check=TRUE,
+                                proxy::dist(x = x, y = x,
+                                            method = "LBK", window.size = window.size, norm = norm,
+                                            force.symmetry = TRUE, error.check=TRUE,
                                             ...)
+                           },
 
-                           d
-                      },
+                           ## Paparrizos' shape-based distance
+                           sbd = {
+                                x <- lapply(x, zscore)
 
-                      ## Paparrizos' shape-based distance
-                      sbd = {
-                           d <- proxy::dist(x = x, y = x,
+                                proxy::dist(x = x, y = x,
                                             method = "SBD",
                                             ...)
-                           d
-                      },
+                           },
 
 
-                      ## Otherwise
-                      proxy::dist(x = x, y = x, method = distance, ...)
-          )
+                           ## Otherwise
+                           proxy::dist(x = x, y = x, method = distance, ...)
+               )
+
+          } else {
+               stop("Unspported distance definition")
+          }
 
           if (trace)
                cat("\n\tPerforming hierarchical clustering...\n")
@@ -399,12 +435,34 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                stop("Window width must be larger than 1")
           }
 
-          if (class(data) == "matrix")
+          if (is.null(dc))
+               stop("The user must specify 'dc' for this method")
+
+          ## ----------------------------------------------------------------------------------------------------------
+          ## Adjust inputs
+          ## ----------------------------------------------------------------------------------------------------------
+
+          if (is.matrix(data))
                x <- lapply(seq_len(nrow(data)), function(i) data[i,])
+          else if (is.list(data))
+               x <- data
+          else
+               stop("Unsupported type for data")
 
           consistency_check(x, "tslist")
 
+          ## ----------------------------------------------------------------------------------------------------------
+          ## Cluster
+          ## ----------------------------------------------------------------------------------------------------------
+
+          if (trace)
+               cat("\nEntering TADPole...\n")
+
           R <- TADPole(x, window.size = window.size, k = k, dc = dc, error.check = FALSE)
+
+          ## ----------------------------------------------------------------------------------------------------------
+          ## Prepare results
+          ## ----------------------------------------------------------------------------------------------------------
 
           if (save.data) {
                tadpc <- new("dtwclust",
