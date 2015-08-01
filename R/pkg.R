@@ -36,7 +36,7 @@
 #'
 #' Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering with a Novel Admissible Pruning
 #' Strategy.'' In \emph{Conference on Knowledge Discovery and Data Mining}, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{
-#' http://dx.doi.org/10.1145/2783258.2783286}.
+#' http://www.cs.ucr.edu/~eamonn/Speeded\%20Clustering\%20Paper\%20Camera\%20Ready.pdf}.
 #'
 #' Giorgino T (2009). ``Computing and Visualizing Dynamic Time Warping Alignments in \code{R}: The 'dtw' Package.'' \emph{Journal
 #' of Statistical Software}, \strong{31}(7), pp. 1-24. \url{http://www.jstatsoft.org/v31/i07/}.
@@ -49,7 +49,7 @@
 #' pp. 358-386.
 #'
 #' Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .'' \emph{Pattern Recognition}, \strong{42}(9), pp.
-#' 2169 - 2180. ISSN 0031-3203, \url{http://doi.org/http://dx.doi.org/10.1016/j.patcog.2008.11.030}, \url{
+#' 2169 - 2180. ISSN 0031-3203, \url{http://dx.doi.org/10.1016/j.patcog.2008.11.030}, \url{
 #' http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
 #'
 #' Liao TW (2005). ``Clustering of time series data - a survey.'' \emph{Pattern recognition}, \strong{38}(11), pp. 1857-1874.
@@ -60,7 +60,7 @@
 #'
 #' Petitjean F, Ketterlin A and Gancarski P (2011). ``A global averaging method for dynamic time warping, with applications to
 #' clustering.'' \emph{Pattern Recognition}, \strong{44}(3), pp. 678 - 693. ISSN 0031-3203, \url{
-#' http://doi.org/http://dx.doi.org/10.1016/j.patcog.2010.09.013}, \url{
+#' http://dx.doi.org/10.1016/j.patcog.2010.09.013}, \url{
 #' http://www.sciencedirect.com/science/article/pii/S003132031000453X}.
 #'
 #' Sakoe H and Chiba S (1978). ``Dynamic programming algorithm optimization for spoken word recognition.'' \emph{Acoustics, Speech and

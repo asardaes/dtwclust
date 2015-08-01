@@ -28,7 +28,7 @@
 #'
 #' Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering with a Novel Admissible Pruning
 #' Strategy.'' In \emph{Conference on Knowledge Discovery and Data Mining}, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{
-#' http://dx.doi.org/10.1145/2783258.2783286}.
+#' http://www.cs.ucr.edu/~eamonn/Speeded\%20Clustering\%20Paper\%20Camera\%20Ready.pdf}.
 #'
 #' @param data The data matrix where each row is a time series. Optionally a list with each time series.
 #' @param window.size Window size constraint for DTW. See details.

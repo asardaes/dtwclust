@@ -4,10 +4,11 @@
 * win-builder (devel and release)
 
 ## R CMD check results
-There were no ERRORs or WARNINGs or NOTEs
+* There were no ERRORs or WARNINGs
+* Examples take around 20 seconds total to run
 
-Suggested package "TSdist" couldn't be installed under Linux (dependency X11 required but not available)
+### NOTEs
 
-Examples take around 20 seconds total to run
+* New package
 
 ## Downstream dependencies
