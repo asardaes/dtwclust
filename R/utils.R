@@ -57,8 +57,7 @@ kccaFamilies <- function(distance, cent, window.size, norm) {
 
                       ## DTW with aid of lower bounds
                       dtw_lb = {
-                           if (is.null(window.size))
-                                stop("You must provide a window size for this method")
+                           window.size <- consistency_check(window.size, "window")
 
                            kccaFamily(name = "DTW_LB",
 
@@ -81,8 +80,7 @@ kccaFamilies <- function(distance, cent, window.size, norm) {
 
                       ## Lemire's improved lower bound
                       lbi = {
-                           if (is.null(window.size))
-                                stop("You must provide a window size for this method")
+                           window.size <- consistency_check(window.size, "window")
 
                            kccaFamily(name = "LB_Improved",
 
@@ -110,8 +108,7 @@ kccaFamilies <- function(distance, cent, window.size, norm) {
 
                       ## Keogh's lower bound
                       lbk = {
-                           if (is.null(window.size))
-                                stop("You must provide a window size for this method")
+                           window.size <- consistency_check(window.size, "window")
 
                            kccaFamily(name = "LB_Keogh",
 
@@ -167,8 +164,7 @@ kccaFamilies <- function(distance, cent, window.size, norm) {
 # ========================================================================================================
 
 consistency_check <- function(obj, case) {
-     case <- match.arg(case,
-                       c("ts", "tslist"))
+     case <- match.arg(case, c("ts", "tslist", "window"))
 
      if (case == "ts") {
           if (!is.numeric(obj)) {
@@ -206,7 +202,19 @@ consistency_check <- function(obj, case) {
 
           if (any( sapply(obj, function(ts) {any(is.na(ts))}) ))
                stop("Time series cannot have missing elements")
+
+     } else if (case == "window") {
+          if (is.null(obj)) {
+               stop("Please provide the 'window.size' parameter")
+          }
+          if (obj <= 0) {
+               stop("Window width must be larger than 0")
+          }
+
+          return(round(obj))
      }
+
+     invisible(NULL)
 }
 
 # ========================================================================================================

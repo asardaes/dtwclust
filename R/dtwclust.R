@@ -73,7 +73,7 @@
 #' A global constraint to speed up the DTW calculation is the Sakoe-Chiba band (Sakoe and Chiba, 1978). To
 #' use it, a window width must be defined via \code{window.size}.
 #'
-#' The windowing constraint uses a centered window. The calculations expect an \emph{even} \code{window.size}
+#' The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 #' that represents the distance between the point considered and one of the edges of the window. Therefore,
 #' if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
 #' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
@@ -145,8 +145,7 @@
 #' \code{type = "tadpole"}.
 #' @param centroid Either a supported string or an appropriate function to calculate centroids
 #' when using partitional methods (see Centroid section).
-#' @param window.size Window constraint for DTW and LB calculations (must be even).
-#' \strong{See Sakoe-Chiba section}.
+#' @param window.size Window constraint for DTW and LB calculations. See Sakoe-Chiba section.
 #' @param norm Pointwise distance for DTW and LB. Either \code{L1} for Manhattan distance or \code{L2}
 #' for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{L1}) and
 #' \code{distance = "DTW2"} (which always uses \code{L2}).
@@ -191,7 +190,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           ## Partitional
           ## =================================================================================================================
 
-          ## Used by some of the custom functions so that they know where to look for 'window.size'
+          ## Used by some of the custom functions so that they know where to look for 'window.size' and 'norm'
           ## This is done automatically due to lexical scoping, but I rather do it explicitly
           attr(data, "env") <- environment()
 
@@ -345,8 +344,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
 
                            ## DTW with aid of lower bounds
                            dtw_lb = {
-                                if (is.null(window.size))
-                                     stop("You must provide a window size for this method")
+                                window.size <- consistency_check(window.size, "window")
 
                                 dtw_lb(x, x, window.size, norm = norm, error.check=TRUE)
                            },
@@ -354,8 +352,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
 
                            ## Lemire's improved lower bound with L1
                            lbi = {
-                                if (is.null(window.size))
-                                     stop("You must provide a window size for this method")
+                                window.size <- consistency_check(window.size, "window")
 
                                 proxy::dist(x = x, y = x,
                                             method = "LBI", window.size = window.size, norm = norm,
@@ -365,8 +362,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
 
                            ## Keogh's lower bound but with L1
                            lbk = {
-                                if (is.null(window.size))
-                                     stop("You must provide a window size for this method")
+                                window.size <- consistency_check(window.size, "window")
 
                                 proxy::dist(x = x, y = x,
                                             method = "LBK", window.size = window.size, norm = norm,
@@ -416,18 +412,12 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           ## TADPole
           ## =================================================================================================================
 
-          if (is.null(window.size)) {
-               stop("Please provide the 'window.size' parameter")
-          }
-          if (window.size%%2 != 0) {
-               stop("For the Sakoe-Chiba band, the window must be symmetric and window.size must be even")
-          }
-          if (window.size <= 1) {
-               stop("Window width must be larger than 1")
-          }
+          window.size <- consistency_check(window.size, "window")
 
           if (is.null(dc))
                stop("The user must specify 'dc' for this method")
+          if (dc < 0)
+               stop("The cutoff distance 'dc' must be positive")
 
           ## ----------------------------------------------------------------------------------------------------------
           ## Adjust inputs

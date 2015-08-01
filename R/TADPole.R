@@ -18,7 +18,7 @@
 #'
 #' The algorithm relies on the DTW bounds, which are only defined for time series of equal lengths.
 #'
-#' The windowing constraint uses a centered window. The calculations expect an \emph{even} \code{window.size}
+#' The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 #' that represents the distance between the point considered and one of the edges of the window. Therefore,
 #' if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
 #' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
@@ -31,7 +31,7 @@
 #' http://dx.doi.org/10.1145/2783258.2783286}.
 #'
 #' @param data The data matrix where each row is a time series. Optionally a list with each time series.
-#' @param window.size Window size constraint for DTW. Must be even. See details.
+#' @param window.size Window size constraint for DTW. See details.
 #' @param k The number of desired clusters.
 #' @param dc The cutoff distance.
 #' @param error.check Should the data be checked for inconsistencies?
@@ -46,10 +46,6 @@
 #' @importFrom caTools combs
 
 TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
-     if (is.null(window.size))
-          stop("Please provide the window.size parameter")
-     if (window.size%%2 == 1)
-          stop("For a symmetric band please provide an even window.size")
 
      ## For looping convenience
      if (is.matrix(data)) {
@@ -149,7 +145,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
      RhoSorted <- sort(Rho, decreasing = TRUE, index.return = TRUE)
 
      deltaUB <- t(sapply(2:n, function (i) {
-          ## Index of higer density neighbors
+          ## Index of higher density neighbors
           indHDN <- RhoSorted$ix[1:(i-1)]
           ## Index of current object
           ii <- RhoSorted$ix[i]
@@ -176,7 +172,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
      ## ============================================================================================================================
 
      DNN <- t(sapply(2:n, function (i) {
-          ## Index of higer density neighbors
+          ## Index of higher density neighbors
           indHDN <- TADPorder$ix[1:(i-1)]
           ## Index of current object
           ii <- TADPorder$ix[i]

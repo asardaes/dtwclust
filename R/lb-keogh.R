@@ -5,7 +5,7 @@
 #'
 #' The lower bound is defined for time series of equal length only.
 #'
-#' The windowing constraint uses a centered window. The calculations expect an \emph{even} \code{window.size}
+#' The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 #' that represents the distance between the point considered and one of the edges of the window. Therefore,
 #' if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
 #' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
@@ -31,7 +31,7 @@
 #'
 #' @param x A time series.
 #' @param y A time series with the same length as \code{x}.
-#' @param window.size An even window size for envelope calculation. \strong{See details}.
+#' @param window.size Window size for envelope calculation. See details.
 #' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
 #'
 #' @return A list with: \itemize{
@@ -44,7 +44,7 @@
 #' @importFrom caTools runmax
 #' @importFrom caTools runmin
 
-lb_keogh <- function(x, y, window.size, norm = "L1") {
+lb_keogh <- function(x, y, window.size = NULL, norm = "L1") {
 
      norm <- match.arg(norm, c("L1", "L2"))
 
@@ -54,14 +54,11 @@ lb_keogh <- function(x, y, window.size, norm = "L1") {
      if (length(x) != length(y)) {
           stop("The series must have the same length")
      }
-     if (window.size%%2 != 0) {
-          stop("For the Sakoe-Chiba band, the window must be symmetric and window.size must be even")
-     }
-     if (window.size > length(x)) {
+
+     window.size <- consistency_check(window.size, "window")
+
+     if (window.size > length(x))
           stop("The width of the window should not exceed the length of the series")
-     } else if (window.size <= 1) {
-          stop("Window width must be larger than 1")
-     }
 
      # from 'caTools' package
      ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runmax/min'
@@ -109,15 +106,8 @@ lb_keogh_loop <- function(x, y=NULL, ...) {
           norm <- match.arg(norm, c("L1", "L2"))
 
 
-     if (is.null(window.size)) {
-          stop("Please provide the 'window.size' parameter")
-     }
-     if (window.size%%2 != 0) {
-          stop("For the Sakoe-Chiba band, the window must be symmetric and window.size must be even")
-     }
-     if (window.size <= 1) {
-          stop("Window width must be larger than 1")
-     }
+     if (error.check)
+          window.size <- consistency_check(window.size, "window")
 
      ## For looping convenience
      if (is.matrix(x))

@@ -9,7 +9,7 @@ TADPole(data, window.size = NULL, k = 2, dc, error.check = TRUE)
 \arguments{
 \item{data}{The data matrix where each row is a time series. Optionally a list with each time series.}
 
-\item{window.size}{Window size constraint for DTW. Must be even. See details.}
+\item{window.size}{Window size constraint for DTW. See details.}
 
 \item{k}{The number of desired clusters.}
 
@@ -44,7 +44,7 @@ as cluster centers.
 
 The algorithm relies on the DTW bounds, which are only defined for time series of equal lengths.
 
-The windowing constraint uses a centered window. The calculations expect an \emph{even} \code{window.size}
+The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 that represents the distance between the point considered and one of the edges of the window. Therefore,
 if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
 between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within

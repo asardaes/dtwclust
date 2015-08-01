@@ -25,8 +25,7 @@ series. Only the latter is supported in case of \code{type = "partitional"}.}
 \item{centroid}{Either a supported string or an appropriate function to calculate centroids
 when using partitional methods (see Centroid section).}
 
-\item{window.size}{Window constraint for DTW and LB calculations (must be even).
-\strong{See Sakoe-Chiba section}.}
+\item{window.size}{Window constraint for DTW and LB calculations. See Sakoe-Chiba section.}
 
 \item{norm}{Pointwise distance for DTW and LB. Either \code{L1} for Manhattan distance or \code{L2}
 for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{L1}) and
@@ -139,7 +138,7 @@ The other option is to provide a character string. The following options are ava
 A global constraint to speed up the DTW calculation is the Sakoe-Chiba band (Sakoe and Chiba, 1978). To
 use it, a window width must be defined via \code{window.size}.
 
-The windowing constraint uses a centered window. The calculations expect an \emph{even} \code{window.size}
+The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 that represents the distance between the point considered and one of the edges of the window. Therefore,
 if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
 between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
