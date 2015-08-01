@@ -21,6 +21,12 @@
 #' matrix is squared and the result is fed into \code{\link[dtw]{dtw}}, which finds the optimum warping path.
 #' The square root of the resulting distance is \emph{then} computed.
 #'
+#' Please note that the \code{\link[proxy]{dist}} function in the \code{proxy} package accepts one or two
+#' arguments for data objects. Users should usually use the two-input version, even if there is just one
+#' dataset (i.e. \code{proxy::dist(x=data, y=data, ...)}), because the one-input version sometimes fails to
+#' detect a whole time series as a single object and, instead, calculates distances between each observation
+#' of each time series.
+#'
 #' @docType package
 #' @name dtwclust-package
 #'
@@ -30,7 +36,7 @@
 #'
 #' Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering with a Novel Admissible Pruning
 #' Strategy.'' In \emph{Conference on Knowledge Discovery and Data Mining}, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{
-#' http://doi.org/http://dx.doi.org/10.1145/2783258.2783286}.
+#' http://dx.doi.org/10.1145/2783258.2783286}.
 #'
 #' Giorgino T (2009). ``Computing and Visualizing Dynamic Time Warping Alignments in \code{R}: The 'dtw' Package.'' \emph{Journal
 #' of Statistical Software}, \strong{31}(7), pp. 1-24. \url{http://www.jstatsoft.org/v31/i07/}.

@@ -25,7 +25,8 @@ series. Only the latter is supported in case of \code{type = "partitional"}.}
 \item{centroid}{Either a supported string or an appropriate function to calculate centroids
 when using partitional methods (see Centroid section).}
 
-\item{window.size}{Window constraint for DTW and LB calculations. \strong{See Sakoe-Chiba section}.}
+\item{window.size}{Window constraint for DTW and LB calculations (must be even).
+\strong{See Sakoe-Chiba section}.}
 
 \item{norm}{Pointwise distance for DTW and LB. Either \code{L1} for Manhattan distance or \code{L2}
 for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{L1}) and
@@ -138,21 +139,11 @@ The other option is to provide a character string. The following options are ava
 A global constraint to speed up the DTW calculation is the Sakoe-Chiba band (Sakoe and Chiba, 1978). To
 use it, a window width must be defined via \code{window.size}.
 
-Because of the way the different functions being used here are implemented, there is a subtle but critical
-mismatch in the way the window size is defined for DTW and the lower bounds (LB). The DTW calculation with
-\code{\link[dtw]{dtw}} expects an \emph{even} \code{window.size} that represents the distance between the
-diagonal and one of the edges of the window. The LB calculation expects an \emph{odd} window.size that
-represents the whole window width to be used in the running max and min. The outcome of said running
-functions are centered with respect to the window width.
-
-Therefore, if, for example, the DTW is calculated with a window of 10, the corresponding LB should
-be calculated with \code{2*10 + 1 = 21}.
-
-The functions that rely on both the LB and DTW take care of this discrepancy, but the user should be
-careful if things are tested manually. Namely, \code{\link{dtw_lb}} and \code{\link{TADPole}} expect the
-DTW \code{window.size}, as well as \code{DTW} and \code{DTW2}. The lower bounds expect the
-\code{window.size} of the running max/min. See the examples in \code{\link{lb_keogh}} and
-\code{\link{lb_improved}}.
+The windowing constraint uses a centered window. The calculations expect an \emph{even} \code{window.size}
+that represents the distance between the point considered and one of the edges of the window. Therefore,
+if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
+between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
+the window.
 }
 \examples{
 # Load data

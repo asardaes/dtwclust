@@ -9,7 +9,7 @@ TADPole(data, window.size = NULL, k = 2, dc, error.check = TRUE)
 \arguments{
 \item{data}{The data matrix where each row is a time series. Optionally a list with each time series.}
 
-\item{window.size}{Window size constraint for DTW.}
+\item{window.size}{Window size constraint for DTW. Must be even. See details.}
 
 \item{k}{The number of desired clusters.}
 
@@ -44,21 +44,15 @@ as cluster centers.
 
 The algorithm relies on the DTW bounds, which are only defined for time series of equal lengths.
 
-Because of the way the different functions being used here are implemented, there is a subtle but critical
-mismatch in the way the window size is defined for DTW and the lower bounds (LB). The DTW calculation with
-\code{\link[dtw]{dtw}} expects an \emph{even} \code{window.size} that represents the distance between the
-diagonal and one of the edges of the window. The LB calculation expects an \emph{odd} window.size that
-represents the whole window width to be used in the running max and min. The outcome of said running
-functions are centered with respect to the window width.
-
-Therefore, if, for example, the DTW is calculated with a window of 10, the corresponding LB should
-be calculated with \code{2*10 + 1 = 21}.
-
-This function expects the \code{window.size} for \code{DTW} and takes care of this discrepancy automatically.
+The windowing constraint uses a centered window. The calculations expect an \emph{even} \code{window.size}
+that represents the distance between the point considered and one of the edges of the window. Therefore,
+if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
+between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
+the window.
 }
 \references{
 Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering with a Novel Admissible Pruning
 Strategy.'' In \emph{Conference on Knowledge Discovery and Data Mining}, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{
-http://doi.org/http://dx.doi.org/10.1145/2783258.2783286}.
+http://dx.doi.org/10.1145/2783258.2783286}.
 }
 

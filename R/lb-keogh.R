@@ -5,17 +5,11 @@
 #'
 #' The lower bound is defined for time series of equal length only.
 #'
-#' Because of the way the different functions being used here are implemented, there is a subtle but critical
-#' mismatch in the way the window size is defined for DTW and the LB. The LB calculation expects an \emph{odd}
-#' \code{window.size} that represents the whole window width to be used in the running max and min. The
-#' outcome of said running functions are centered with respect to the window. The DTW calculation with
-#' \code{\link[dtw]{dtw}} expects a window.size that represents the distance between the diagonal and one of
-#' the edges of the window.
-#'
-#' Therefore, if, for example, the LB is calculated with a window of 21, the corresponding DTW distance should
-#' be calculated with \code{21 \%/\% 2 = 10}.
-#'
-#' This function expects the \code{window.size} for the running max/min.
+#' The windowing constraint uses a centered window. The calculations expect an \emph{even} \code{window.size}
+#' that represents the distance between the point considered and one of the edges of the window. Therefore,
+#' if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
+#' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
+#' the window.
 #'
 #' @references
 #'
@@ -28,16 +22,16 @@
 #' data(uciCT)
 #'
 #' # Lower bound distance between two series
-#' d.lbk <- lb_keogh(CharTraj[[1]], CharTraj[[2]], window.size = 11)$d
+#' d.lbk <- lb_keogh(CharTraj[[1]], CharTraj[[2]], window.size = 20)$d
 #'
-#' # Corresponding true DTW distance (accounting for window.size discrepancy)
-#' d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]], window.type = "slantedband", window.size = 5)$distance
+#' # Corresponding true DTW distance
+#' d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]], window.type = "slantedband", window.size = 20)$distance
 #'
 #' d.lbk <= d.dtw
 #'
 #' @param x A time series.
 #' @param y A time series with the same length as \code{x}.
-#' @param window.size Window size for envelop calculation. \strong{See details}.
+#' @param window.size An even window size for envelope calculation. \strong{See details}.
 #' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
 #'
 #' @return A list with: \itemize{
@@ -60,8 +54,8 @@ lb_keogh <- function(x, y, window.size, norm = "L1") {
      if (length(x) != length(y)) {
           stop("The series must have the same length")
      }
-     if (window.size%%2 != 1) {
-          stop("For the Sakoe-Chiba band, the window must be symmetric and window.size must be odd")
+     if (window.size%%2 != 0) {
+          stop("For the Sakoe-Chiba band, the window must be symmetric and window.size must be even")
      }
      if (window.size > length(x)) {
           stop("The width of the window should not exceed the length of the series")
@@ -70,8 +64,9 @@ lb_keogh <- function(x, y, window.size, norm = "L1") {
      }
 
      # from 'caTools' package
-     upper.env <- runmax(y, window.size, endrule="constant")
-     lower.env <- runmin(y, window.size, endrule="constant")
+     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runmax/min'
+     upper.env <- runmax(y, window.size*2+1, endrule="constant")
+     lower.env <- runmin(y, window.size*2+1, endrule="constant")
 
      D <- rep(0, length(x))
 
@@ -90,7 +85,7 @@ lb_keogh <- function(x, y, window.size, norm = "L1") {
 }
 
 # ========================================================================================================
-# Loop without using native 'proxy' (to avoid multiple calculations of the envelop)
+# Loop without using native 'proxy' (to avoid multiple calculations of the envelope)
 # - About 10 times faster
 # ========================================================================================================
 
@@ -117,8 +112,8 @@ lb_keogh_loop <- function(x, y=NULL, ...) {
      if (is.null(window.size)) {
           stop("Please provide the 'window.size' parameter")
      }
-     if (window.size%%2 != 1) {
-          stop("For the Sakoe-Chiba band, the window must be symmetric and window.size must be odd")
+     if (window.size%%2 != 0) {
+          stop("For the Sakoe-Chiba band, the window must be symmetric and window.size must be even")
      }
      if (window.size <= 1) {
           stop("Window width must be larger than 1")
@@ -142,8 +137,9 @@ lb_keogh_loop <- function(x, y=NULL, ...) {
 
      if (is.null(y)) {
           # from 'caTools' package
-          upper.env <- lapply(x, runmax, k=window.size, endrule="constant")
-          lower.env <- lapply(x, runmin, k=window.size, endrule="constant")
+          ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runmax/min'
+          upper.env <- lapply(x, runmax, k=window.size*2+1, endrule="constant")
+          lower.env <- lapply(x, runmin, k=window.size*2+1, endrule="constant")
 
           DD <- sapply(X=x, U=upper.env, L=lower.env,
                        FUN = function(x, ...) {
@@ -205,8 +201,9 @@ lb_keogh_loop <- function(x, y=NULL, ...) {
                stop("Window size should not exceed length of the time series")
 
           # from 'caTools' package
-          upper.env <- lapply(y, runmax, k=window.size, endrule="constant")
-          lower.env <- lapply(y, runmin, k=window.size, endrule="constant")
+          ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runmax/min'
+          upper.env <- lapply(y, runmax, k=window.size*2+1, endrule="constant")
+          lower.env <- lapply(y, runmin, k=window.size*2+1, endrule="constant")
 
           DD <- sapply(X=x, U=upper.env, L=lower.env,
                        FUN = function(x, ...) {

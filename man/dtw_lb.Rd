@@ -11,7 +11,7 @@ dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE)
 
 \item{y}{An object similar to \code{x}.}
 
-\item{window.size}{The window size to use with the DTW calculation. \strong{See details}.}
+\item{window.size}{An even window size to use with the DTW calculation. \strong{See details}.}
 
 \item{norm}{Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.}
 
@@ -31,17 +31,11 @@ between \emph{only} the nearest neighbors of each series in \code{x} found in \c
 is provided, the distance matrix is calculated between all its time series. This could be useful in case
 one is interested in only the nearest neighbor of one or more series among a dataset.
 
-Because of the way the different functions being used here are implemented, there is a subtle but critical
-mismatch in the way the window size is defined for DTW and the LB. The DTW calculation with
-\code{\link[dtw]{dtw}} expects an \emph{even} \code{window.size} that represents the distance between the
-diagonal and one of the edges of the window. The LB calculation expects an \emph{odd} window.size that
-represents the whole window width to be used in the running max and min. The outcome of said running
-functions are centered with respect to the window width.
-
-Therefore, if, for example, the DTW is calculated with a window of 10, the corresponding LB should
-be calculated with \code{2*10 + 1 = 21}.
-
-This function expects the \code{window.size} for \code{DTW} and takes care of this discrepancy automatically.
+The windowing constraint uses a centered window. The calculations expect an \emph{even} \code{window.size}
+that represents the distance between the point considered and one of the edges of the window. Therefore,
+if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
+between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
+the window.
 }
 \note{
 This function uses a lower bound that is only defined for time series of equal lengths.

@@ -9,17 +9,11 @@
 #' is provided, the distance matrix is calculated between all its time series. This could be useful in case
 #' one is interested in only the nearest neighbor of one or more series among a dataset.
 #'
-#' Because of the way the different functions being used here are implemented, there is a subtle but critical
-#' mismatch in the way the window size is defined for DTW and the LB. The DTW calculation with
-#' \code{\link[dtw]{dtw}} expects an \emph{even} \code{window.size} that represents the distance between the
-#' diagonal and one of the edges of the window. The LB calculation expects an \emph{odd} window.size that
-#' represents the whole window width to be used in the running max and min. The outcome of said running
-#' functions are centered with respect to the window width.
-#'
-#' Therefore, if, for example, the DTW is calculated with a window of 10, the corresponding LB should
-#' be calculated with \code{2*10 + 1 = 21}.
-#'
-#' This function expects the \code{window.size} for \code{DTW} and takes care of this discrepancy automatically.
+#' The windowing constraint uses a centered window. The calculations expect an \emph{even} \code{window.size}
+#' that represents the distance between the point considered and one of the edges of the window. Therefore,
+#' if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
+#' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
+#' the window.
 #'
 #' @note
 #'
@@ -60,7 +54,7 @@
 #'
 #' @param x A matrix where rows are time series, or a list of time series.
 #' @param y An object similar to \code{x}.
-#' @param window.size The window size to use with the DTW calculation. \strong{See details}.
+#' @param window.size An even window size to use with the DTW calculation. \strong{See details}.
 #' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
 #' @param error.check Should inconsistencies in the data be checked?
 #'
@@ -108,8 +102,9 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = T
      }
 
      ## Initial estimate
+
      d <- proxy::dist(X, Y, method = "LBI",
-                      window.size = window.size*2+1,
+                      window.size = window.size,
                       norm = norm,
                       error.check = error.check)
 
@@ -118,7 +113,6 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = T
      singleIndexing <- seq(from=0, by=nrow(d), length.out=ncol(d))
 
      ## Update with DTW
-     ## NOTE: the 'window.size' definition varies with respect to the LB, see above
 
      new.indNN <- apply(d, 2, which.min) # index of nearest neighbors
      indNN <- new.indNN + 1

@@ -11,7 +11,7 @@ lb_keogh(x, y, window.size, norm = "L1")
 
 \item{y}{A time series with the same length as \code{x}.}
 
-\item{window.size}{Window size for envelop calculation. \strong{See details}.}
+\item{window.size}{An even window size for envelope calculation. \strong{See details}.}
 
 \item{norm}{Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.}
 }
@@ -29,27 +29,21 @@ series. It uses a Sakoe-Chiba constraint.
 \details{
 The lower bound is defined for time series of equal length only.
 
-Because of the way the different functions being used here are implemented, there is a subtle but critical
-mismatch in the way the window size is defined for DTW and the LB. The LB calculation expects an \emph{odd}
-\code{window.size} that represents the whole window width to be used in the running max and min. The
-outcome of said running functions are centered with respect to the window. The DTW calculation with
-\code{\link[dtw]{dtw}} expects a window.size that represents the distance between the diagonal and one of
-the edges of the window.
-
-Therefore, if, for example, the LB is calculated with a window of 21, the corresponding DTW distance should
-be calculated with \code{21 \%/\% 2 = 10}.
-
-This function expects the \code{window.size} for the running max/min.
+The windowing constraint uses a centered window. The calculations expect an \emph{even} \code{window.size}
+that represents the distance between the point considered and one of the edges of the window. Therefore,
+if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
+between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
+the window.
 }
 \examples{
 # Sample data
 data(uciCT)
 
 # Lower bound distance between two series
-d.lbk <- lb_keogh(CharTraj[[1]], CharTraj[[2]], window.size = 11)$d
+d.lbk <- lb_keogh(CharTraj[[1]], CharTraj[[2]], window.size = 20)$d
 
-# Corresponding true DTW distance (accounting for window.size discrepancy)
-d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]], window.type = "slantedband", window.size = 5)$distance
+# Corresponding true DTW distance
+d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]], window.type = "slantedband", window.size = 20)$distance
 
 d.lbk <= d.dtw
 }

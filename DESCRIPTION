@@ -1,14 +1,14 @@
 Package: dtwclust
 Type: Package
-Title: Time series clustering with Dynamic Time Warping distance
+Title: Univariate Time Series Clustering With Dynamic Time Warping
 Version: 0.1.0
-Date: 2015-07-30
+Date: 2015-08-01
 Depends: flexclust, proxy, dtw
 Imports: methods, caTools, ggplot2, reshape2, modeltools
 Suggests: TSdist
 Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
-Description: Ttime series clustering using different techniques related to the Dynamic Time Warping distance and its corresponding lower bounds. Additionally, an implementation of k-Shape clustering is available.
+Description: Time series clustering using different techniques related to the Dynamic Time Warping distance and its corresponding lower bounds. Additionally, an implementation of k-Shape clustering is available.
 URL: https://github.com/asardaes/dtwclust
 License: GPL-3
 LazyData: TRUE
