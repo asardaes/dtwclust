@@ -4,7 +4,7 @@ Title: Time Series Clustering with Dynamic Time Warping
 Version: 0.1.0
 Date: 2015-08-01
 Depends: flexclust, proxy, dtw
-Imports: methods, caTools, ggplot2, reshape2, modeltools
+Imports: stats, methods, caTools, ggplot2, reshape2, modeltools
 Suggests: TSdist
 Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>

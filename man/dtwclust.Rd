@@ -160,12 +160,12 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20, window.size = 20, dc = 1.5, 
 cat("Rand index for TADPole:", randIndex(kc.tadp, CharTrajLabels), "\\n\\n")
 plot(kc.tadp)
 
+\dontrun{
 # Hierarchical clustering based on shabe-based distance
 hc.sbd <- dtwclust(data, type = "hierarchical", distance = "sbd")
 cl.sbd <- cutree(hc.sbd, 20)
 cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\\n\\n")
 
-\dontrun{
 # Use full DTW and PAM (takes around two minutes)
 kc.dtw <- dtwclust(data, k = 20, seed = 3251, trace = TRUE)
 

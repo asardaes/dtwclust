@@ -38,6 +38,7 @@
 #' @return The average time series.
 #'
 #' @export
+#' @importFrom stats aggregate
 
 DBA <- function(X, center = NULL, max.iter = 25, error.check = TRUE, trace = FALSE) {
 

@@ -207,10 +207,8 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
      indOrig <- sort(TADPorder$ix, index.return = TRUE)$ix
 
      delta <- c(max(DNN[, 1]), DNN[, 1])
-     #delta <- delta[indOrig]
 
      NN <- c(-1, DNN[, 2])
-     #NN <- NN[indOrig]
 
      ## ============================================================================================================================
      ## Cluster assignment

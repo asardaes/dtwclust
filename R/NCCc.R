@@ -19,6 +19,7 @@
 #' @return The cross-correlation sequence with length \code{length(x) + length(y) - 1}.
 #'
 #' @export
+#' @importFrom stats convolve
 
 NCCc <- function(x, y) {
 

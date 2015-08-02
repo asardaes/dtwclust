@@ -48,18 +48,19 @@ data(uciCT)
 data <- lapply(CharTraj, reinterpolate, newLength = 205)
 
 # Calculate the DTW distance between a certain subset aided with the lower bound
-system.time(d <- dtw_lb(data[1:5], data[6:100], window.size = 20))
+system.time(d <- dtw_lb(data[1:5], data[6:50], window.size = 20))
 
 # Nearest neighbors
 NN1 <- apply(d, 1, which.min)
 
 # Calculate the DTW distances between all elements (about seven times slower)
-system.time(d2 <- proxy::dist(data[1:5], data[6:100], method = "DTW",
+system.time(d2 <- proxy::dist(data[1:5], data[6:50], method = "DTW",
                               window.type = "slantedband", window.size = 20))
 
 # Nearest neighbors
 NN2 <- apply(d2, 1, which.min)
 
+# Same results?
 all(NN1 == NN2)
 }
 \references{
