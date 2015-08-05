@@ -113,13 +113,19 @@
 #' data <- t(sapply(CharTraj, reinterpolate, newLength = 205))
 #'
 #' # Simple partitional clustering with L2 distance and PAM
-#' kc.l2 <- dtwclust(data, k = 20, distance = "kmeans", centroid = "pam", seed = 3247, trace = TRUE)
+#' kc.l2 <- dtwclust(data, k = 20, distance = "kmeans", centroid = "pam",
+#'                   seed = 3247, trace = TRUE)
 #' cat("Rand index for L2+PAM:", randIndex(kc.l2, CharTrajLabels), "\n\n")
 #'
 #' # TADPole clustering (takes around 5 seconds)
-#' kc.tadp <- dtwclust(data, type = "tadpole", k = 20, window.size = 20, dc = 1.5, save.data = TRUE)
+#' kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
+#'                     window.size = 20, dc = 1.5, save.data = TRUE)
 #' cat("Rand index for TADPole:", randIndex(kc.tadp, CharTrajLabels), "\n\n")
 #' plot(kc.tadp)
+#'
+#' # Modify plot
+#' plot(kc.tadp, cl = 1:4, labs.arg = list(title = "TADPole, clusters 1 through 4",
+#'                                         x = "time", y = "series"))
 #'
 #' \dontrun{
 #' # Hierarchical clustering based on shabe-based distance

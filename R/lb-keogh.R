@@ -25,7 +25,8 @@
 #' d.lbk <- lb_keogh(CharTraj[[1]], CharTraj[[2]], window.size = 20)$d
 #'
 #' # Corresponding true DTW distance
-#' d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]], window.type = "slantedband", window.size = 20)$distance
+#' d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]],
+#'              window.type = "slantedband", window.size = 20)$distance
 #'
 #' d.lbk <= d.dtw
 #'

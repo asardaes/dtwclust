@@ -39,7 +39,8 @@ data(uciCT)
 d.lbi <- lb_improved(CharTraj[[1]], CharTraj[[2]], window.size = 20)
 
 # Corresponding true DTW distance
-d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]], window.type = "slantedband", window.size = 20)$distance
+d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]],
+             window.type = "slantedband", window.size = 20)$distance
 
 d.lbi <= d.dtw
 }

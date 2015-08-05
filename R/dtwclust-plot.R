@@ -8,19 +8,23 @@
 #'
 #' Optionally, you can manually provide the clustering result as well as the data in \code{data}.
 #'
+#' The function returns the \code{gg} object invisibly, in case you want to modify it to your liking.
+#'
 #' @name plot-dtwclust
 #' @docType methods
 #' @rdname plot-methods
 #'
-#' @seealso \code{\link{dtwclust-class}}, \code{\link{dtwclust}}
+#' @seealso \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}}
 #'
 #' @param x An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.
 #' @param y Ignored.
 #' @param clus Which clusters to plot.
 #' @param data The data in the same format as it was provided to \code{\link{dtwclust}}.
+#' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
+#' information
 #' @param ... Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
-#' \emph{cluster centers}. Default values are: \code{linetype = "dashed", size = 1.5, colour = "black",
-#' alpha = 0.5}.
+#' \emph{cluster centers}. Default values are: \code{linetype = "dashed"}, \code{size = 1.5},
+#' \code{colour = "black"}, \code{alpha = 0.5}.
 #'
 #' @exportMethod plot
 #' @import ggplot2
@@ -29,12 +33,11 @@
 NULL
 
 
-
 #' @rdname plot-methods
 #' @aliases plot,dtwclust,missing-method
 #'
 setMethod("plot", signature(x="dtwclust", y="missing"),
-          function(x, y, clus=seq_len(x@k), data=NULL, ...) {
+          function(x, y, clus=seq_len(x@k), data=NULL, labs.arg = NULL, ...) {
 
                if (!is.null(data))
                     df <- t(data)
@@ -77,20 +80,25 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                          geom_line(data = cenm[cenm$cl %in% clus, ], linetype = "dashed", size = 1.5, colour = "black", alpha = 0.5) +
                          geom_line(aes(colour = color)) +
                          facet_wrap(~cl, scales = "free_y") +
-                         labs(title = titleStr) +
                          guides(colour=FALSE) +
                          theme_bw()
-                    print(g)
+
                } else {
                     g <- ggplot(dfm[dfm$cl %in% clus, ], aes_string(x="t", y="value", group="variable")) +
                          geom_line(data = cenm[cenm$cl %in% clus, ], ...) +
                          geom_line(aes(colour = color)) +
                          facet_wrap(~cl, scales = "free_y") +
-                         labs(title = titleStr) +
                          guides(colour=FALSE) +
                          theme_bw()
-                    print(g)
+
                }
 
-               invisible(NULL)
+               if (!is.null(labs.arg))
+                    g <- g + labs(labs.arg)
+               else
+                    g <- g + labs(title = titleStr)
+
+               print(g)
+
+               invisible(g)
           })
