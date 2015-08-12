@@ -60,6 +60,8 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
 
      if (n < 2)
           stop("data should have more than one time series")
+	 if (k >= n)
+		  stop("Number of clusters should be less that the number of time series")
 
      ## Calculate matrices with bounds
      LBM <- proxy::dist(x, x, method = "LBK",
@@ -195,12 +197,9 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
                                  window.type = "slantedband", window.size = window.size)
 
                delta[indCompute] <- d2
-
-          } else {
-               d2 <- numeric(0)
           }
 
-          c(delta = min(delta), NN = indHDN[which.min(delta)], distCalc = length(d2))
+          c(delta = min(delta), NN = indHDN[which.min(delta)], distCalc = sum(indCompute))
      }))
 
      ## To order according to default order

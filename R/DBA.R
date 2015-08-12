@@ -2,11 +2,11 @@
 #'
 #' A global averaging method for time series under DTW (Petitjean, Ketterlin and Gancarski, 2011).
 #'
-#' This function tries to find the optimum average series between a group time series in DTW space. Refer to
+#' This function tries to find the optimum average series between a group of time series in DTW space. Refer to
 #' the cited article for specific details on the algorithm.
 #'
 #' If a given series reference is provided in \code{center}, the algorithm should always converge to the same
-#' result provided the rows \code{X} keep the same values, although their order may change.
+#' result provided the rows of \code{X} keep the same values, although their order may change.
 #'
 #' @references
 #'
@@ -40,7 +40,7 @@
 #' @export
 #' @importFrom stats aggregate
 
-DBA <- function(X, center = NULL, max.iter = 25, error.check = TRUE, trace = FALSE) {
+DBA <- function(X, center = NULL, max.iter = 50, error.check = TRUE, trace = FALSE) {
 
      ## For looping convenience
      if (is.matrix(X))
