@@ -35,7 +35,8 @@ use this.
 
 Optionally, you can manually provide the clustering result as well as the data in \code{data}.
 
-The function returns the \code{gg} object invisibly, in case you want to modify it to your liking.
+The function returns the \code{gg} object invisibly, in case you want to modify it to your liking. You
+might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 }
 \seealso{
 \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}}

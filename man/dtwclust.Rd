@@ -6,8 +6,8 @@
 \usage{
 dtwclust(data = NULL, type = "partitional", k = 2, method = "average",
   distance = "dtw", centroid = "pam", window.size = NULL, norm = "L1",
-  dc = NULL, control = NULL, save.data = FALSE, seed = NULL,
-  trace = FALSE, ...)
+  dc = NULL, dba.iter = 50, control = NULL, save.data = FALSE,
+  seed = NULL, trace = FALSE, ...)
 }
 \arguments{
 \item{data}{A list where each element is a time series, or a numerical matrix where each row is a time
@@ -32,6 +32,8 @@ for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{L1})
 \code{distance = "DTW2"} (which always uses \code{L2}).}
 
 \item{dc}{Cutoff distance for TADPole algorithm.}
+
+\item{dba.iter}{Maximum number of iterations for \code{\link{DBA}} centroids.}
 
 \item{control}{Parameters for partitional clustering algorithms. See
 \code{\link[flexclust]{flexclustControl}}.}

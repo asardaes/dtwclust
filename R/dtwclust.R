@@ -156,10 +156,11 @@
 #' for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{L1}) and
 #' \code{distance = "DTW2"} (which always uses \code{L2}).
 #' @param dc Cutoff distance for TADPole algorithm.
-#' @param seed Random seed for reproducibility of partitional algorithms.
+#' @param dba.iter Maximum number of iterations for \code{\link{DBA}} centroids.
 #' @param control Parameters for partitional clustering algorithms. See
 #' \code{\link[flexclust]{flexclustControl}}.
 #' @param save.data Return a copy of the data in the returned object? Ignored for hierarchical clustering.
+#' @param seed Random seed for reproducibility of partitional algorithms.
 #' @param trace Boolean flag. If true, more output regarding the progress is printed to screen.
 #' @param ... Additional arguments to pass to \code{\link[proxy]{dist}} or a custom distance function.
 #'
@@ -176,7 +177,7 @@
 dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average",
                      distance = "dtw", centroid = "pam",
                      window.size = NULL, norm = "L1", dc = NULL,
-                     control = NULL, save.data = FALSE,
+                     dba.iter = 50, control = NULL, save.data = FALSE,
                      seed = NULL, trace = FALSE,
                      ...)
 {

@@ -311,6 +311,7 @@ preproc_se <- function (x) {
 # ========================================================================================================
 
 allcent_dba <- function(x, cluster, k) {
+     max.iter <- get("dba.iter", envir = attr(x, "env"))
 
      # This will be read from parent environment
      cen <- get("centers", envir=parent.frame())
@@ -322,7 +323,7 @@ allcent_dba <- function(x, cluster, k) {
 
      new.C <- mapply(X, C[cl],
                      FUN = function(x, c) {
-                          new.c <- DBA(x, c, error.check = FALSE)
+                          new.c <- DBA(x, c, max.iter = max.iter, error.check = FALSE)
 
                           new.c
                      })

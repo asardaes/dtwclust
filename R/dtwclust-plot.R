@@ -8,7 +8,8 @@
 #'
 #' Optionally, you can manually provide the clustering result as well as the data in \code{data}.
 #'
-#' The function returns the \code{gg} object invisibly, in case you want to modify it to your liking.
+#' The function returns the \code{gg} object invisibly, in case you want to modify it to your liking. You
+#' might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 #'
 #' @name plot-dtwclust
 #' @docType methods
@@ -77,7 +78,8 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
 
                if (length(list(...)) == 0) {
                     g <- ggplot(dfm[dfm$cl %in% clus, ], aes_string(x="t", y="value", group="variable")) +
-                         geom_line(data = cenm[cenm$cl %in% clus, ], linetype = "dashed", size = 1.5, colour = "black", alpha = 0.5) +
+                         geom_line(data = cenm[cenm$cl %in% clus, ], linetype = "dashed", size = 1.5,
+                                   colour = "black", alpha = 0.5) +
                          geom_line(aes(colour = color)) +
                          facet_wrap(~cl, scales = "free_y") +
                          guides(colour=FALSE) +
