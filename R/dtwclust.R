@@ -27,9 +27,9 @@
 #' algorithms, the time series in the data should be along the rows, and the cluster centers along the
 #' columns of the distance matrix.
 #'
-#' The other option is to provide a string. For partitional algorithms, it can be a supported distance of
-#' \code{\link[flexclust]{kccaFamily}}. For hierarchical, it can be any distance function registered in
-#' \code{\link[proxy]{dist}}. In the latter case, all extra parameters should be provided in \code{...}.
+#' The other option is to provide a string. The string can represent a compatible registered distance of
+#' \code{\link[proxy]{dist}}. In the case of hierarchical algorithms, extra parameters can be provided in
+#' \code{...}.
 #'
 #' Additionally, with either type of algorithm, it can be one of the following
 #' custom implementations:
@@ -131,7 +131,7 @@
 #' data <- t(sapply(CharTraj, reinterpolate, newLength = 205))
 #'
 #' # Simple partitional clustering with L2 distance and PAM
-#' kc.l2 <- dtwclust(data, k = 20, distance = "kmeans", centroid = "pam",
+#' kc.l2 <- dtwclust(data, k = 20, distance = "L2", centroid = "pam",
 #'                   seed = 3247, trace = TRUE)
 #' cat("Rand index for L2+PAM:", randIndex(kc.l2, CharTrajLabels), "\n\n")
 #'
@@ -156,6 +156,13 @@
 #'
 #' # Use full DTW with DBA centroids (takes around five minutes)
 #' kc.dba <- dtwclust(data, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
+#'
+#' # Use constrained DTW with original series (around one minute)
+#' kc.cdtw <- dtwclust(CharTraj, k = 20, window.size = 20,
+#'                     seed = 3251, trace = TRUE, save.data = TRUE)
+#'
+#' # Plot one of the clusters
+#' plot(kc.cdtw, cl=18)
 #' }
 #'
 #' @author Alexis Sarda-Espinosa
@@ -248,7 +255,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           }
 
           if (is.function(distance)) {
-               family <- kccaFamily(name = as.character(substitute(distance)),
+               family <- kccaFamily(name = as.character(substitute(distance))[1],
                                     dist = distance,
                                     cent = cent)
 
@@ -285,8 +292,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                     family@preproc <- preproc
                else
                     stop("Invalid preprocessing")
+
           } else if (centroid == "shape") {
                preproc <- "zscore"
+
           } else {
                preproc <- "none"
           }
@@ -310,12 +319,32 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           ## Cluster
           ## ----------------------------------------------------------------------------------------------------------
 
-          kc <- flexclust::kcca(x = data,
-                                k = k,
-                                family = family,
-                                simple = TRUE,
-                                control = ctrl,
-                                save.data = save.data)
+          if (is.list(data)) {
+               lengths <- sapply(data, length)
+
+               if (length(unique(lengths)) > 1) {
+                    if (!is.function(distance) && !(distance %in% c("dtw", "dtw2", "sbd")))
+                         stop("Only the following distances are supported for series of different lengths:\n
+                              \tdtw \tdtw2 \tsbd")
+
+                    if (!is.function(centroid) && !(centroid %in% c("dba", "pam")))
+                         stop("Only the following centroids are supported for series of different lengths:\n
+                              \tdba \tpam")
+               }
+
+               kc <- kcca.list(x = data,
+                               k = k,
+                               family = family,
+                               control = ctrl)
+
+          } else {
+               kc <- flexclust::kcca(x = data,
+                                     k = k,
+                                     family = family,
+                                     simple = TRUE,
+                                     control = ctrl,
+                                     save.data = save.data)
+          }
 
           ## ----------------------------------------------------------------------------------------------------------
           ## Prepare results
@@ -326,11 +355,17 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           if (trace)
                cat("\n\tElapsed time is", toc["elapsed"], "seconds.\n\n")
 
+          if (save.data)
+               datalist <- consistency_check(data, "tsmat")
+          else
+               datalist <- list()
+
           dtwc <- new("dtwclust", kc,
                       type = type,
                       distance = ifelse(is.function(distance), as.character(substitute(distance))[1], distance),
                       centroid = ifelse(is.function(centroid), as.character(substitute(centroid))[1], centroid),
-                      preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc))
+                      preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc),
+                      datalist = datalist)
 
           dtwc
 
@@ -343,19 +378,22 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           if (trace)
                cat("\n\tCalculating distance matrix...\n")
 
-          if (is.matrix(data))
-               x <- lapply(seq_len(nrow(data)), function(i) data[i,])
-          else if (is.list(data))
-               x <- data
-          else
-               stop("Unsupported type for data")
+          x <- consistency_check(data, "tsmat")
+
+          lengths <- sapply(x, length)
+
+          if (length(unique(lengths)) > 1) {
+               if (!is.function(distance) && !(distance %in% c("dtw", "dtw2", "sbd")))
+                    stop("Only the following distances are supported for series of different lengths:\n
+                         \tdtw \tdtw2 \tsbd")
+          }
 
           if (!is.null(preproc) && is.function(preproc)) {
-               data <- preproc(data, ...)
+               x <- preproc(x, ...)
           }
 
           if (is.function(distance)) {
-               D <- distance(data, ...)
+               D <- distance(x, ...)
 
           } else if (is.character(distance)) {
                D <- switch(EXPR = distance,
@@ -478,16 +516,12 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                     data <- preproc(data, ...)
                else
                     stop("Invalid preprocessing")
+
           } else {
                preproc <- "none"
           }
 
-          if (is.matrix(data))
-               x <- lapply(seq_len(nrow(data)), function(i) data[i,])
-          else if (is.list(data))
-               x <- data
-          else
-               stop("Unsupported type for data")
+          x <- consistency_check(data, "tsmat")
 
           consistency_check(x, "tslist")
 

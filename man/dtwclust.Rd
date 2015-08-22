@@ -83,9 +83,9 @@ The function should return a distance matrix, ideally of class \code{crossdist}.
 algorithms, the time series in the data should be along the rows, and the cluster centers along the
 columns of the distance matrix.
 
-The other option is to provide a string. For partitional algorithms, it can be a supported distance of
-\code{\link[flexclust]{kccaFamily}}. For hierarchical, it can be any distance function registered in
-\code{\link[proxy]{dist}}. In the latter case, all extra parameters should be provided in \code{...}.
+The other option is to provide a string. The string can represent a compatible registered distance of
+\code{\link[proxy]{dist}}. In the case of hierarchical algorithms, extra parameters can be provided in
+\code{...}.
 
 Additionally, with either type of algorithm, it can be one of the following
 custom implementations:
@@ -180,7 +180,7 @@ data(uciCT)
 data <- t(sapply(CharTraj, reinterpolate, newLength = 205))
 
 # Simple partitional clustering with L2 distance and PAM
-kc.l2 <- dtwclust(data, k = 20, distance = "kmeans", centroid = "pam",
+kc.l2 <- dtwclust(data, k = 20, distance = "L2", centroid = "pam",
                   seed = 3247, trace = TRUE)
 cat("Rand index for L2+PAM:", randIndex(kc.l2, CharTrajLabels), "\\n\\n")
 
@@ -205,6 +205,13 @@ kc.dtw <- dtwclust(data, k = 20, seed = 3251, trace = TRUE)
 
 # Use full DTW with DBA centroids (takes around five minutes)
 kc.dba <- dtwclust(data, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
+
+# Use constrained DTW with original series (around one minute)
+kc.cdtw <- dtwclust(CharTraj, k = 20, window.size = 20,
+                    seed = 3251, trace = TRUE, save.data = TRUE)
+
+# Plot one of the clusters
+plot(kc.cdtw, cl=18)
 }
 }
 \author{

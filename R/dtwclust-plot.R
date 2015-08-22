@@ -30,6 +30,7 @@
 #' @exportMethod plot
 #' @import ggplot2
 #' @importFrom reshape2 melt
+#' @importFrom modeltools empty
 #'
 NULL
 
@@ -39,43 +40,79 @@ NULL
 #'
 setMethod("plot", signature(x="dtwclust", y="missing"),
           function(x, y, clus=seq_len(x@k), labs.arg = NULL, data=NULL, ...) {
-
-               if (!is.null(data))
-                    df <- t(data)
-               else if (!is.null(x@data))
+               
+               if (!is.null(data)) {
+                    if (is.matrix(data))
+                         df <- t(data)
+                    
+                    else if (is.list(data)) {
+                         lengths <- sapply(data, length)
+                         trail <- max(lengths) - lengths
+                         
+                         df <- mapply(data, trail, SIMPLIFY = FALSE,
+                                      FUN = function(series, trail) {
+                                           c(series, rep(NA, trail))
+                                      })
+                    }
+                    
+               } else if (!modeltools::empty(x@data)) {
                     df <- t(x@data@get("designMatrix"))
-               else
-                    stop("Provided object hast no data. Please re-run the algorithm with save.data = TRUE
+                    
+               } else if (length(x@datalist) > 0){
+                    lengths <- sapply(x@datalist, length)
+                    L <- max(lengths)
+                    trail <- L - lengths
+                    
+                    df <- mapply(x@datalist, trail, SIMPLIFY = FALSE,
+                                 FUN = function(series, trail) {
+                                      c(series, rep(NA, trail))
+                                 })
+               } else {
+                    stop("Provided object has no data. Please re-run the algorithm with save.data = TRUE
                          or provide the data manually.")
-
+               }
+               
+               if (is.matrix(x@centers)) {
+                    cen <- as.data.frame(t(x@centers))
+               } else if (is.list(x@centers)) {
+                    lengths <- sapply(x@centers, length)
+                    trail <- L - lengths
+                    
+                    cen <- mapply(x@centers, trail, SIMPLIFY = FALSE,
+                                  FUN = function(series, trail) {
+                                       c(series, rep(NA, trail))
+                                  })
+                    
+                    cen <- as.data.frame(cen)
+               }
+               
+               df <- as.data.frame(df)
+               
                if (x@centroid == "shape") {
                     df <- apply(df, 2, zscore)
                     titleStr <- "Clusters and their members, including cluster center (all z-normalized)"
                } else {
                     titleStr <- "Clusters and their members, including cluster center"
                }
-
-               df <- as.data.frame(df)
-
+               
                n <- nrow(df)
                t <- seq_len(n)
                df <- cbind(t, df)
                dfm <- reshape2::melt(df, id.vars = "t")
-
+               
                cl <- rep(x@cluster, each = n)
                color <- sapply(tabulate(x@cluster), function(i) {
                     rep(1:i, each = n)
                })
                color <- factor(unlist(color))
-
+               
                dfm <- cbind(dfm, cl, color)
-
-               cen <- as.data.frame(t(x@centers))
+               
                cen <- cbind(t, cen)
                cenm <- reshape2::melt(cen, id.vars = "t")
                cl <- rep(1:x@k, each = n)
                cenm <- cbind(cenm, cl)
-
+               
                if (length(list(...)) == 0) {
                     g <- ggplot(dfm[dfm$cl %in% clus, ], aes_string(x="t", y="value", group="variable")) +
                          geom_line(data = cenm[cenm$cl %in% clus, ], linetype = "dashed", size = 1.5,
@@ -84,7 +121,7 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                          facet_wrap(~cl, scales = "free_y") +
                          guides(colour=FALSE) +
                          theme_bw()
-
+                    
                } else {
                     g <- ggplot(dfm[dfm$cl %in% clus, ], aes_string(x="t", y="value", group="variable")) +
                          geom_line(data = cenm[cenm$cl %in% clus, ], ...) +
@@ -92,15 +129,17 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                          facet_wrap(~cl, scales = "free_y") +
                          guides(colour=FALSE) +
                          theme_bw()
-
+                    
                }
-
+               
                if (!is.null(labs.arg))
                     g <- g + labs(labs.arg)
                else
                     g <- g + labs(title = titleStr)
-
-               print(g)
-
+               
+               ## If NAs were introduced by me, I want them to be removed automatically (for length
+               ## consistency), and I don't want a warning
+               suppressWarnings(print(g))
+               
                invisible(g)
           })

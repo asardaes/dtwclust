@@ -22,7 +22,7 @@
 #' The square root of the resulting distance is \emph{then} computed.
 #'
 #' Please note that the \code{\link[proxy]{dist}} function in the \code{proxy} package accepts one or two
-#' arguments for data objects. Users should usually use the two-input version, even if there is just one
+#' arguments for data objects. Users should usually use the two-input list version, even if there is just one
 #' dataset (i.e. \code{proxy::dist(x=data, y=data, ...)}), because the one-input version sometimes fails to
 #' detect a whole time series as a single object and, instead, calculates distances between each observation
 #' of each time series.

@@ -13,6 +13,9 @@ kccaFamilies <- function(distance, cent, window.size, norm) {
                                                        window.size <- get("window.size", envir = attr(x, "env"))
                                                        distmat <- get("distmat", envir = attr(x, "env"))
 
+                                                       x <- consistency_check(x, "tsmat")
+                                                       centers <- consistency_check(centers, "tsmat")
+
                                                        if (!is.null(distmat))
                                                             d <- dsub_pam(x, centers)
                                                        else if (is.null(window.size)) {
@@ -37,6 +40,9 @@ kccaFamilies <- function(distance, cent, window.size, norm) {
                                                    dist = function(x, centers) {
                                                         window.size <- get("window.size", envir = attr(x, "env"))
                                                         distmat <- get("distmat", envir = attr(x, "env"))
+
+                                                        x <- consistency_check(x, "tsmat")
+                                                        centers <- consistency_check(centers, "tsmat")
 
                                                         if (!is.null(distmat))
                                                              d <- dsub_pam(x, centers)
@@ -145,6 +151,9 @@ kccaFamilies <- function(distance, cent, window.size, norm) {
                                                   dist = function(x, centers) {
                                                        distmat <- get("distmat", envir = attr(x, "env"))
 
+                                                       x <- consistency_check(x, "tsmat")
+                                                       centers <- consistency_check(centers, "tsmat")
+
                                                        if (!is.null(distmat))
                                                             d <- dsub_pam(x, centers)
                                                        else {
@@ -160,7 +169,26 @@ kccaFamilies <- function(distance, cent, window.size, norm) {
 
 
                       ## Otherwise
-                      flexclust::kccaFamily(distance)
+                      flexclust::kccaFamily(name = distance,
+
+                                            dist = function(x, centers) {
+                                                 distmat <- get("distmat", envir = attr(x, "env"))
+
+                                                 x <- consistency_check(x, "tsmat")
+                                                 centers <- consistency_check(centers, "tsmat")
+
+                                                 if (!is.null(distmat))
+                                                      d <- dsub_pam(x, centers)
+                                                 else {
+                                                      d <- proxy::dist(x = x, y = centers,
+                                                                       method = distance)
+                                                 }
+
+                                                 d
+                                            },
+
+
+                                            cent = cent)
      )
 
      family
@@ -171,7 +199,7 @@ kccaFamilies <- function(distance, cent, window.size, norm) {
 # ========================================================================================================
 
 consistency_check <- function(obj, case) {
-     case <- match.arg(case, c("ts", "tslist", "window"))
+     case <- match.arg(case, c("ts", "tslist", "vltslist", "window", "tsmat"))
 
      if (case == "ts") {
           if (!is.numeric(obj)) {
@@ -188,12 +216,11 @@ consistency_check <- function(obj, case) {
           }
 
      } else if (case == "tslist") {
-          ## For now, only support for list of time series
           if (class(obj) != "list")
                stop("Series must be provided in the form of a list")
 
           if (length(obj) < 1)
-               stop("List is empty")
+               stop("Data is empty")
 
           if (any(!sapply(obj, is.vector)))
                stop("Each element of the list must be a univariate vector")
@@ -201,8 +228,30 @@ consistency_check <- function(obj, case) {
           if (any(!sapply(obj, is.numeric)))
                stop("Each element of the list must be a numeric vector")
 
-          if (any(length(obj[[1]]) != sapply(obj, length)))
+          if (length(unique(sapply(obj, length))) > 1)
                stop("All series must have the same length")
+
+          if (any(sapply(obj, length) < 1))
+               stop("All series must have at least one element")
+
+          if (any( sapply(obj, function(ts) {any(is.na(ts))}) ))
+               stop("Time series cannot have missing elements")
+
+     } else if (case == "vltslist") {
+
+          ## list of variable-length time series
+
+          if (class(obj) != "list")
+               stop("Series must be provided in the form of a list")
+
+          if (length(obj) < 1)
+               stop("Data is empty")
+
+          if (any(!sapply(obj, is.vector)))
+               stop("Each element of the list must be a univariate vector")
+
+          if (any(!sapply(obj, is.numeric)))
+               stop("Each element of the list must be a numeric vector")
 
           if (any(sapply(obj, length) < 1))
                stop("All series must have at least one element")
@@ -219,6 +268,24 @@ consistency_check <- function(obj, case) {
           }
 
           return(round(obj))
+
+     } else if (case == "tsmat") {
+
+          env <- attr(obj, "env")
+
+          if (is.matrix(obj))
+               obj <- lapply(seq_len(nrow(obj)), function(i) obj[i,])
+          else if (is.numeric(obj))
+               obj <- list(obj)
+          else if (!is.list(obj))
+               stop("Unsupported type for data")
+
+          attr(obj, "env") <- env
+
+          return(obj)
+
+     } else {
+          stop("Possibly a typo in consistency_check")
      }
 
      invisible(NULL)
@@ -234,16 +301,22 @@ allcent_pam <- function(x, cluster, k) {
      distmat <- get("distmat", envir = attr(x, "env"))
 
      indX <- lapply(sort(unique(cluster)), function(i) {
-          which(cluster %in% i)
+          which(cluster == i)
      })
 
      C <- sapply(indX, function(i.x) {
           d <- apply(distmat[i.x, i.x, drop=FALSE], 1, sum)
 
-          x[i.x[which.min(d)], ]
+          if (is.matrix(x))
+               x[i.x[which.min(d)], ]
+          else if (is.list(x))
+               x[i.x[which.min(d)]]
      })
 
-     t(C)
+     if (is.matrix(C))
+          return(t(C))
+     else
+          return(C)
 }
 
 # Custom function to speed up the subsetting of the distance matrix for PAM
@@ -251,11 +324,17 @@ allcent_pam <- function(x, cluster, k) {
 dsub_pam <- function(x, centers) {
      distmat <- get("distmat", envir = attr(x, "env"))
 
-     C <- lapply(seq_len(nrow(centers)), function(i) centers[i,])
+     C <- consistency_check(centers, "tsmat")
+     X <- consistency_check(x, "tsmat")
 
      indXC <- sapply(C, FUN = function(i.c) {
-          i.row <- apply(x, 1, function(i.x) {
-               all(i.x == i.c)
+          i.row <- sapply(X, function(i.x) {
+               if (length(i.x) == length(i.c))
+                    ret <- all(i.x == i.c)
+               else
+                    ret <- FALSE
+
+               ret
           })
 
           which(i.row)[1] # Take the first one in case a series is repeated more than once in the dataset
@@ -270,6 +349,8 @@ dsub_pam <- function(x, centers) {
 # of the data.
 
 preproc_pam <- function(x, fam) {
+     x <- consistency_check(x, "tsmat")
+
      d <- fam@dist(x, x)
 
      d
@@ -285,7 +366,7 @@ allcent_se <- function(x, cluster, k) {
 
      # This will be read from parent environment
      cen <- get("centers", envir=parent.frame())
-     C <- lapply(seq_len(nrow(cen)), function(i) cen[i,])
+     C <- consistency_check(cen, "tsmat")
 
      X <- split.data.frame(x, cluster)
 
@@ -302,7 +383,7 @@ allcent_se <- function(x, cluster, k) {
      t(new.C)
 }
 
-# Preprocessing when using SBD averaging (z-normalization)
+# Preprocessing when using shape_extraction (z-normalization)
 
 preproc_se <- function (x) {
      xz <- apply(x, 1, zscore)
@@ -319,11 +400,17 @@ allcent_dba <- function(x, cluster, k) {
 
      # This will be read from parent environment
      cen <- get("centers", envir=parent.frame())
-     C <- lapply(seq_len(nrow(cen)), function(i) cen[i,])
-
-     X <- split.data.frame(x, cluster)
+     C <- consistency_check(cen, "tsmat")
 
      cl <- sort(unique(cluster))
+
+     if (is.matrix(x))
+          X <- split.data.frame(x, cluster)
+     else if (is.list(x)) {
+          indXC <- lapply(cl, function(i.cl) which(cluster == i.cl))
+          X <- lapply(indXC, function(ii) x[ii])
+     } else
+          stop("Invalid format for data")
 
      new.C <- mapply(X, C[cl],
                      FUN = function(x, c) {

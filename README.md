@@ -8,7 +8,7 @@ DTW is, however, computationally expensive, so several optimization techniques e
 
 Additionally, a recently proposed algorithm called k-Shape could serve as an alternative. k-Shape clustering relies on custom distance and centroid definitions, which are unrelated to DTW. The shape extraction algorithm proposed therein is particularly interesting if time series can be normalized.
 
-For now, only univariate series are supported.
+Most of the algorithms and optimizations require that all series have the same length. The ones that don't are usually slow but can still be used.
 
 Please see the included references for more information.
 

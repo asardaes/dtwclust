@@ -105,19 +105,10 @@ lb_keogh_loop <- function(x, y=NULL, ...) {
      else
           norm <- match.arg(norm, c("L1", "L2"))
 
-
      if (error.check)
           window.size <- consistency_check(window.size, "window")
 
-     ## For looping convenience
-     if (is.matrix(x))
-          x <- lapply(seq_len(nrow(x)), function(i) x[i,])
-     else if (is.numeric(x))
-          x <- list(x)
-     else if (is.list(x))
-          x <- x
-     else
-          stop("Unsupported type for x")
+     x <- consistency_check(x, "tsmat")
 
      if (error.check)
           consistency_check(x, "tslist")
@@ -129,14 +120,7 @@ lb_keogh_loop <- function(x, y=NULL, ...) {
           y <- x
 
      } else {
-          if (is.matrix(y))
-               y <- lapply(seq_len(nrow(y)), function(i) y[i,])
-          else if (is.numeric(y))
-               y <- list(y)
-          else if (is.list(y))
-               y <- y
-          else
-               stop("Unsupported type for y")
+          y <- consistency_check(y, "tsmat")
 
           if (error.check)
                consistency_check(y, "tslist")

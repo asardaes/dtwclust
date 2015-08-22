@@ -47,21 +47,14 @@
 
 TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
 
-     ## For looping convenience
-     if (is.matrix(data)) {
-          n <- nrow(data)
-          x <- lapply(seq_len(n), function(i) data[i,])
-     } else if (is.list(data)) {
-          n <- length(data)
-          x <- data
-     } else {
-          stop("Unsupported type for data")
-     }
+     x <- consistency_check(data, "tsmat")
+
+     n <- length(x)
 
      if (n < 2)
           stop("data should have more than one time series")
-	 if (k >= n)
-		  stop("Number of clusters should be less that the number of time series")
+     if (k >= n)
+          stop("Number of clusters should be less that the number of time series")
 
      ## Calculate matrices with bounds
      LBM <- proxy::dist(x, x, method = "LBK",

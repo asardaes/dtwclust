@@ -43,13 +43,7 @@
 
 DBA <- function(X, center = NULL, max.iter = 50, error.check = TRUE, trace = FALSE) {
 
-     ## For looping convenience
-     if (is.matrix(X))
-          X <- lapply(seq_len(nrow(X)), function(i) X[i,])
-     else if (is.numeric(X))
-          X <- list(X)
-     else if (!is.list(X))
-          stop("Unsupported format for X")
+     X <- consistency_check(X, "tsmat")
 
      n <- length(X)
 
@@ -57,7 +51,7 @@ DBA <- function(X, center = NULL, max.iter = 50, error.check = TRUE, trace = FAL
           center <- X[[sample(n, 1)]] # Random choice
 
      if (error.check) {
-          consistency_check(X, "tslist")
+          consistency_check(X, "vltslist")
           consistency_check(center, "ts")
      }
 
