@@ -28,7 +28,7 @@
 #'
 #' Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering with a Novel Admissible Pruning
 #' Strategy.'' In \emph{Conference on Knowledge Discovery and Data Mining}, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{
-#' http://www.cs.ucr.edu/~eamonn/Speeded\%20Clustering\%20Paper\%20Camera\%20Ready.pdf}.
+#' http://dx.doi.org/10.1145/2783258.2783286}.
 #'
 #' @param data The data matrix where each row is a time series. Optionally a list with each time series.
 #' @param window.size Window size constraint for DTW. See details.
@@ -87,7 +87,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
      Flags <- matrix(-1, n, n)
 
      ## Obtain pairs with possible combinations for the upper triangular part of the matrix (n choose k)
-     nck <- combs(seq_len(n), 2)
+     nck <- caTools::combs(seq_len(n), 2)
      ## Order it according to columns (in order to be able to assign it after wards with 'upper.tri')
      nck <- nck[sort(nck[,2], index.return = TRUE)$ix, ]
 

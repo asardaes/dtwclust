@@ -39,6 +39,7 @@
 #'
 #' @export
 #' @importFrom stats aggregate
+#' @importFrom dtw dtw
 
 DBA <- function(X, center = NULL, max.iter = 50, error.check = TRUE, trace = FALSE) {
 
@@ -68,20 +69,20 @@ DBA <- function(X, center = NULL, max.iter = 50, error.check = TRUE, trace = FAL
           ## Return the coordinates of each series in X grouped by the coordinate they match to in the center time series
           ## Also return the number of coordinates used in each case (for averaging below)
           xg <- lapply(X, function(x) {
-               d <- dtw(x, center)
+               d <- dtw::dtw(x, center)
 
-               x.sub <- aggregate(x[d$index1], by=list(ind = d$index2), sum)
+               x.sub <- stats::aggregate(x[d$index1], by=list(ind = d$index2), sum)
 
-               n.sub <- aggregate(x[d$index1], by=list(ind = d$index2), length)
+               n.sub <- stats::aggregate(x[d$index1], by=list(ind = d$index2), length)
 
                cbind(sum = x.sub$x, n = n.sub$x)
           })
 
           ## Put everything in one big data frame
-          xg <- melt(xg) # from reshape2
+          xg <- reshape2::melt(xg)
 
           ## Aggregate according to index of center time series (Var1) and also the variable type (Var2)
-          xg <- aggregate(xg$value, by = list(xg$Var1, xg$Var2), sum)
+          xg <- stats::aggregate(xg$value, by = list(xg$Var1, xg$Var2), sum)
 
           ## Average
           center <- xg$x[xg$Group.2 == "sum"] / xg$x[xg$Group.2 == "n"]

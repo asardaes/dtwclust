@@ -6,8 +6,8 @@
 \alias{plot-dtwclust}
 \title{Plot the result of \code{dtwclust}}
 \usage{
-\S4method{plot}{dtwclust,missing}(x, y, clus = seq_len(x@k), data = NULL,
-  labs.arg = NULL, ...)
+\S4method{plot}{dtwclust,missing}(x, y, clus = seq_len(x@k),
+  labs.arg = NULL, data = NULL, ...)
 }
 \arguments{
 \item{x}{An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.}
@@ -16,10 +16,10 @@
 
 \item{clus}{Which clusters to plot.}
 
-\item{data}{The data in the same format as it was provided to \code{\link{dtwclust}}.}
-
 \item{labs.arg}{Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
 information}
+
+\item{data}{The data in the same format as it was provided to \code{\link{dtwclust}}.}
 
 \item{...}{Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
 \emph{cluster centers}. Default values are: \code{linetype = "dashed"}, \code{size = 1.5},

@@ -1,0 +1,9 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+manual.txt
+NEWS.md
+cran-comments.md
+
+^revdep$
+^README\.Rmd$
+^README-.*\.png$

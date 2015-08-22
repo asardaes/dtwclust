@@ -1,8 +1,5 @@
 # Custom
-.gitignore
-.gitattributes
 .Rproj.user/
-.Rbuildignore
 .Rhistory
 manual.txt
 

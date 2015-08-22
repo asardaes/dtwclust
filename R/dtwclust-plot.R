@@ -20,9 +20,9 @@
 #' @param x An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.
 #' @param y Ignored.
 #' @param clus Which clusters to plot.
-#' @param data The data in the same format as it was provided to \code{\link{dtwclust}}.
 #' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
 #' information
+#' @param data The data in the same format as it was provided to \code{\link{dtwclust}}.
 #' @param ... Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
 #' \emph{cluster centers}. Default values are: \code{linetype = "dashed"}, \code{size = 1.5},
 #' \code{colour = "black"}, \code{alpha = 0.5}.
@@ -38,7 +38,7 @@ NULL
 #' @aliases plot,dtwclust,missing-method
 #'
 setMethod("plot", signature(x="dtwclust", y="missing"),
-          function(x, y, clus=seq_len(x@k), data=NULL, labs.arg = NULL, ...) {
+          function(x, y, clus=seq_len(x@k), labs.arg = NULL, data=NULL, ...) {
 
                if (!is.null(data))
                     df <- t(data)
@@ -60,7 +60,7 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                n <- nrow(df)
                t <- seq_len(n)
                df <- cbind(t, df)
-               dfm <- melt(df, id.vars = "t")
+               dfm <- reshape2::melt(df, id.vars = "t")
 
                cl <- rep(x@cluster, each = n)
                color <- sapply(tabulate(x@cluster), function(i) {
@@ -72,7 +72,7 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
 
                cen <- as.data.frame(t(x@centers))
                cen <- cbind(t, cen)
-               cenm <- melt(cen, id.vars = "t")
+               cenm <- reshape2::melt(cen, id.vars = "t")
                cl <- rep(1:x@k, each = n)
                cenm <- cbind(cenm, cl)
 

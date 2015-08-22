@@ -9,7 +9,7 @@ shape_extraction(X, cz = NULL, znorm = TRUE)
 \arguments{
 \item{X}{Numeric matrix where each row is a time series.}
 
-\item{cz}{Center to use as basis. Should already be \emph{normalized}. Calculation uses all \code{X}
+\item{cz}{Center to use as basis. It should already be \emph{normalized}. Calculation uses all \code{X}
 if \code{cz = NULL}.}
 
 \item{znorm}{Boolean flag. Should z-scores be calculated for \code{X} before processing?}

@@ -12,7 +12,7 @@
 
 reinterpolate <- function(ts, newLength) {
 
-     newTS <- approx(ts, method='linear', n=newLength)
+     newTS <- stats::approx(ts, method='linear', n=newLength)
 
      newTS$y
 }

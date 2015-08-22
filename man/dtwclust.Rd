@@ -5,9 +5,9 @@
 \title{Time series clustering under DTW}
 \usage{
 dtwclust(data = NULL, type = "partitional", k = 2, method = "average",
-  distance = "dtw", centroid = "pam", window.size = NULL, norm = "L1",
-  dc = NULL, dba.iter = 50, control = NULL, save.data = FALSE,
-  seed = NULL, trace = FALSE, ...)
+  distance = "dtw", centroid = "pam", preproc = NULL,
+  window.size = NULL, norm = "L1", dc = NULL, dba.iter = 50,
+  control = NULL, save.data = FALSE, seed = NULL, trace = FALSE, ...)
 }
 \arguments{
 \item{data}{A list where each element is a time series, or a numerical matrix where each row is a time
@@ -24,6 +24,9 @@ series. Only the latter is supported in case of \code{type = "partitional"}.}
 
 \item{centroid}{Either a supported string or an appropriate function to calculate centroids
 when using partitional methods (see Centroid section).}
+
+\item{preproc}{Function to preprocess data. Defaults to \code{zscore} \emph{only} if \code{centroid =
+"shape"}, but will be replaced by a custom function if provided. See Preprocessing section.}
 
 \item{window.size}{Window constraint for DTW and LB calculations. See Sakoe-Chiba section.}
 
@@ -44,7 +47,7 @@ for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{L1})
 
 \item{trace}{Boolean flag. If true, more output regarding the progress is printed to screen.}
 
-\item{...}{Additional arguments to pass to \code{\link[proxy]{dist}} or a custom distance function.}
+\item{...}{Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function.}
 }
 \value{
 An object with formal class \code{\link{dtwclust-class}} if \code{type = "partitional" | "tadpole"}. Otherwise
@@ -63,16 +66,6 @@ it may be a matrix or a list, but the matrix will be coerced to a list. A matrix
 time series have equal lengths. If the lengths vary slightly between time series, reinterpolating them to
 a common length is most likely an acceptable approach (Ratanamahatana and Keogh, 2004). If this is not the
 case, then clustering them directly is probably ill-advised. See the examples.
-}
-\note{
-Notice that the lower bounds are defined only for time series of equal lengths. \code{DTW} and \code{DTW2}
-don't require this, but they are much slower to compute.
-
-The lower bounds are \strong{not} symmetrical, and \code{DTW} is only symmetrical if series are of equal
-lengths.
-
-Specifying \code{distance = "sbd"} and \code{centroid = "shape"} is equivalent to the k-Shape algorithm
-(Papparizos and Gravano, 2015). See \code{\link{SBD}} and \code{\link{shape_extraction}} for more info.
 }
 \section{Distance}{
 
@@ -145,6 +138,39 @@ that represents the distance between the point considered and one of the edges o
 if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
 between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
 the window.
+}
+
+\section{Preprocessing}{
+
+
+It is strongly advised to use z-normalization in case of \code{centroid = "shape"}, because the resulting
+series have this normalization (see \code{\link{shape_extraction}}). The user can, however, specify a
+custom function that performs any transformation on the data, but the user must make sure that the format
+stays consistent, i.e. that a matrix where each row is a series for partitional methods, or a list of time
+series for hierarchical methods. For example, the z-normalization could be implemented as
+\code{t(apply(data, 1, zscore))} or \code{lapply(data, zscore)} respectively.
+
+The function will receive the data as first argument and, in case hierarchical methods are used, the
+contents of \code{...} as the second argument.
+}
+
+\section{Notes}{
+
+
+In order to ensure that the parameter values are detected correctly by the included functions
+when partitional clustering is used, the
+environment of the \code{dtwclust} function is assigned as an attribute of \code{data} via
+\code{attr(data, "env")} \code{<-} \code{environment()}. If the user alters the dataset with a
+preprocessing function, it should make sure that this attribute is maintained.
+
+Notice that the lower bounds are defined only for time series of equal lengths. \code{DTW} and \code{DTW2}
+don't require this, but they are much slower to compute.
+
+The lower bounds are \strong{not} symmetrical, and \code{DTW} is only symmetrical if series are of equal
+lengths.
+
+Specifying \code{distance = "sbd"} and \code{centroid = "shape"} is equivalent to the k-Shape algorithm
+(Papparizos and Gravano, 2015). See \code{\link{SBD}} and \code{\link{shape_extraction}} for more info.
 }
 \examples{
 # Load data

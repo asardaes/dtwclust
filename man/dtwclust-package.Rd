@@ -39,7 +39,7 @@ Alexis Sarda-Espinosa
 \references{
 Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering with a Novel Admissible Pruning
 Strategy.'' In \emph{Conference on Knowledge Discovery and Data Mining}, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{
-http://www.cs.ucr.edu/~eamonn/Speeded\%20Clustering\%20Paper\%20Camera\%20Ready.pdf}.
+http://dx.doi.org/10.1145/2783258.2783286}.
 
 Giorgino T (2009). ``Computing and Visualizing Dynamic Time Warping Alignments in \code{R}: The 'dtw' Package.'' \emph{Journal
 of Statistical Software}, \strong{31}(7), pp. 1-24. \url{http://www.jstatsoft.org/v31/i07/}.

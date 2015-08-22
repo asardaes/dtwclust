@@ -7,73 +7,76 @@ kccaFamilies <- function(distance, cent, window.size, norm) {
      family <- switch(EXPR = distance,
 
                       ## Full DTW with L1 norm
-                      dtw = kccaFamily(name = "DTW",
+                      dtw = flexclust::kccaFamily(name = "DTW",
 
-                                       dist = function(x, centers) {
-                                            window.size <- get("window.size", envir = attr(x, "env"))
+                                                  dist = function(x, centers) {
+                                                       window.size <- get("window.size", envir = attr(x, "env"))
+                                                       distmat <- get("distmat", envir = attr(x, "env"))
 
-                                            if (!is.null(attr(x, "distmat")))
-                                                 d <- dsub_pam(x, centers)
-                                            else if (is.null(window.size)) {
-                                                 d <- proxy::dist(x = x, y = centers,
-                                                                  method = "DTW", dist.method = "L1")
-                                            } else {
-                                                 d <- proxy::dist(x = x, y = centers,
-                                                                  method = "DTW", dist.method = "L1",
-                                                                  window.type = "slantedband",
-                                                                  window.size = window.size)
-                                            }
+                                                       if (!is.null(distmat))
+                                                            d <- dsub_pam(x, centers)
+                                                       else if (is.null(window.size)) {
+                                                            d <- proxy::dist(x = x, y = centers,
+                                                                             method = "DTW", dist.method = "L1")
+                                                       } else {
+                                                            d <- proxy::dist(x = x, y = centers,
+                                                                             method = "DTW", dist.method = "L1",
+                                                                             window.type = "slantedband",
+                                                                             window.size = window.size)
+                                                       }
 
-                                            d
-                                       },
+                                                       d
+                                                  },
 
 
-                                       cent = cent),
+                                                  cent = cent),
 
                       ## Full DTW with L2 norm
-                      dtw2 = kccaFamily(name = "DTW2",
+                      dtw2 = flexclust::kccaFamily(name = "DTW2",
 
-                                        dist = function(x, centers) {
-                                             window.size <- get("window.size", envir = attr(x, "env"))
+                                                   dist = function(x, centers) {
+                                                        window.size <- get("window.size", envir = attr(x, "env"))
+                                                        distmat <- get("distmat", envir = attr(x, "env"))
 
-                                             if (!is.null(attr(x, "distmat")))
-                                                  d <- dsub_pam(x, centers)
-                                             else if (is.null(window.size)) {
-                                                  d <- proxy::dist(x = x, y = centers,
-                                                                   method = "DTW2")
-                                             } else {
-                                                  d <- proxy::dist(x = x, y = centers,
-                                                                   method = "DTW2",
-                                                                   window.type = "slantedband",
-                                                                   window.size = window.size)
-                                             }
+                                                        if (!is.null(distmat))
+                                                             d <- dsub_pam(x, centers)
+                                                        else if (is.null(window.size)) {
+                                                             d <- proxy::dist(x = x, y = centers,
+                                                                              method = "DTW2")
+                                                        } else {
+                                                             d <- proxy::dist(x = x, y = centers,
+                                                                              method = "DTW2",
+                                                                              window.type = "slantedband",
+                                                                              window.size = window.size)
+                                                        }
 
-                                             d
-                                        },
+                                                        d
+                                                   },
 
 
-                                        cent = cent),
+                                                   cent = cent),
 
 
                       ## DTW with aid of lower bounds
                       dtw_lb = {
                            window.size <- consistency_check(window.size, "window")
 
-                           kccaFamily(name = "DTW_LB",
+                           flexclust::kccaFamily(name = "DTW_LB",
 
-                                      dist = function(x, centers) {
-                                           window.size <- get("window.size", envir = attr(x, "env"))
-                                           norm <- get("norm", envir = attr(x, "env"))
+                                                 dist = function(x, centers) {
+                                                      window.size <- get("window.size", envir = attr(x, "env"))
+                                                      norm <- get("norm", envir = attr(x, "env"))
+                                                      distmat <- get("distmat", envir = attr(x, "env"))
 
-                                           if (!is.null(attr(x, "distmat")))
-                                                d <- dsub_pam(x, centers)
-                                           else
-                                                d <- dtw_lb(x, centers, window.size, norm, error.check=FALSE)
+                                                      if (!is.null(distmat))
+                                                           d <- dsub_pam(x, centers)
+                                                      else
+                                                           d <- dtw_lb(x, centers, window.size, norm, error.check=FALSE)
 
-                                           d
-                                      },
+                                                      d
+                                                 },
 
-                                      cent = cent)
+                                                 cent = cent)
                       },
 
 
@@ -82,78 +85,82 @@ kccaFamilies <- function(distance, cent, window.size, norm) {
                       lbi = {
                            window.size <- consistency_check(window.size, "window")
 
-                           kccaFamily(name = "LB_Improved",
+                           flexclust::kccaFamily(name = "LB_Improved",
 
-                                      dist = function(x, centers) {
-                                           window.size <- get("window.size", envir = attr(x, "env"))
-                                           norm <- get("norm", envir = attr(x, "env"))
+                                                 dist = function(x, centers) {
+                                                      window.size <- get("window.size", envir = attr(x, "env"))
+                                                      norm <- get("norm", envir = attr(x, "env"))
+                                                      distmat <- get("distmat", envir = attr(x, "env"))
 
-                                           if (!is.null(attr(x, "distmat")))
-                                                d <- dsub_pam(x, centers)
-                                           else {
-                                                d <- proxy::dist(x = x, y = centers,
-                                                                 method = "LBI",
-                                                                 norm = norm,
-                                                                 window.size = window.size,
-                                                                 force.symmetry = TRUE,
-                                                                 error.check=FALSE)
-                                           }
+                                                      if (!is.null(distmat))
+                                                           d <- dsub_pam(x, centers)
+                                                      else {
+                                                           d <- proxy::dist(x = x, y = centers,
+                                                                            method = "LBI",
+                                                                            norm = norm,
+                                                                            window.size = window.size,
+                                                                            force.symmetry = TRUE,
+                                                                            error.check=FALSE)
+                                                      }
 
-                                           d
-                                      },
+                                                      d
+                                                 },
 
 
-                                      cent = cent)
+                                                 cent = cent)
                       },
 
                       ## Keogh's lower bound
                       lbk = {
                            window.size <- consistency_check(window.size, "window")
 
-                           kccaFamily(name = "LB_Keogh",
+                           flexclust::kccaFamily(name = "LB_Keogh",
 
-                                      dist = function(x, centers) {
-                                           window.size <- get("window.size", envir = attr(x, "env"))
-                                           norm <- get("norm", envir = attr(x, "env"))
+                                                 dist = function(x, centers) {
+                                                      window.size <- get("window.size", envir = attr(x, "env"))
+                                                      norm <- get("norm", envir = attr(x, "env"))
+                                                      distmat <- get("distmat", envir = attr(x, "env"))
 
-                                           if (!is.null(attr(x, "distmat")))
-                                                d <- dsub_pam(x, centers)
-                                           else {
-                                                d <- proxy::dist(x = x, y = centers,
-                                                                 method = "LBK",
-                                                                 norm = norm,
-                                                                 window.size = window.size,
-                                                                 force.symmetry = TRUE,
-                                                                 error.check=FALSE)
-                                           }
+                                                      if (!is.null(distmat))
+                                                           d <- dsub_pam(x, centers)
+                                                      else {
+                                                           d <- proxy::dist(x = x, y = centers,
+                                                                            method = "LBK",
+                                                                            norm = norm,
+                                                                            window.size = window.size,
+                                                                            force.symmetry = TRUE,
+                                                                            error.check=FALSE)
+                                                      }
 
-                                           d
-                                      },
+                                                      d
+                                                 },
 
 
-                                      cent = cent)
+                                                 cent = cent)
                       },
 
                       ## Paparrizos' shape-based distance
-                      sbd = kccaFamily(name = "SBD",
+                      sbd = flexclust::kccaFamily(name = "SBD",
 
-                                       dist = function(x, centers) {
-                                            if (!is.null(attr(x, "distmat")))
-                                                 d <- dsub_pam(x, centers)
-                                            else {
-                                                 d <- proxy::dist(x = x, y = centers,
-                                                                  method = "SBD")
-                                            }
+                                                  dist = function(x, centers) {
+                                                       distmat <- get("distmat", envir = attr(x, "env"))
 
-                                            d
-                                       },
+                                                       if (!is.null(distmat))
+                                                            d <- dsub_pam(x, centers)
+                                                       else {
+                                                            d <- proxy::dist(x = x, y = centers,
+                                                                             method = "SBD")
+                                                       }
+
+                                                       d
+                                                  },
 
 
-                                       cent = cent),
+                                                  cent = cent),
 
 
                       ## Otherwise
-                      kccaFamily(distance)
+                      flexclust::kccaFamily(distance)
      )
 
      family
@@ -224,7 +231,7 @@ consistency_check <- function(obj, case) {
 # Custom function to obtain centroids when using PAM
 
 allcent_pam <- function(x, cluster, k) {
-     distmat <- attr(x, "distmat")
+     distmat <- get("distmat", envir = attr(x, "env"))
 
      indX <- lapply(sort(unique(cluster)), function(i) {
           which(cluster %in% i)
@@ -242,7 +249,7 @@ allcent_pam <- function(x, cluster, k) {
 # Custom function to speed up the subsetting of the distance matrix for PAM
 
 dsub_pam <- function(x, centers) {
-     distmat <- attr(x, "distmat")
+     distmat <- get("distmat", envir = attr(x, "env"))
 
      C <- lapply(seq_len(nrow(centers)), function(i) centers[i,])
 
@@ -262,14 +269,10 @@ dsub_pam <- function(x, centers) {
 # Preprocessing when using PAM. The whole distance matrix is calculated once and assigned as an attribute
 # of the data.
 
-preproc_pam <- function(x) {
-     fam <- get("family", envir=parent.frame())
-
+preproc_pam <- function(x, fam) {
      d <- fam@dist(x, x)
 
-     attr(x, "distmat") <- d
-
-     x
+     d
 }
 
 # ========================================================================================================
@@ -303,6 +306,7 @@ allcent_se <- function(x, cluster, k) {
 
 preproc_se <- function (x) {
      xz <- apply(x, 1, zscore)
+     attr(xz,"env") <- attr(x,"env")
      t(xz)
 }
 

@@ -62,7 +62,6 @@
 #' @return The distance matrix with class \code{crossdist}.
 #'
 #' @export
-#' @importFrom dtw dtw
 
 dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE) {
 
