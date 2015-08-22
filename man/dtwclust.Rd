@@ -146,8 +146,8 @@ the window.
 It is strongly advised to use z-normalization in case of \code{centroid = "shape"}, because the resulting
 series have this normalization (see \code{\link{shape_extraction}}). The user can, however, specify a
 custom function that performs any transformation on the data, but the user must make sure that the format
-stays consistent, i.e. that a matrix where each row is a series for partitional methods, or a list of time
-series for hierarchical methods. For example, the z-normalization could be implemented as
+stays consistent, i.e. that a matrix where each row is a series for partitional/tadpole methods, or a list
+of time series for hierarchical methods. For example, the z-normalization could be implemented as
 \code{t(apply(data, 1, zscore))} or \code{lapply(data, zscore)} respectively.
 
 The function will receive the data as first argument and, in case hierarchical methods are used, the

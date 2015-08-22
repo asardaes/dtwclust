@@ -84,8 +84,8 @@
 #' It is strongly advised to use z-normalization in case of \code{centroid = "shape"}, because the resulting
 #' series have this normalization (see \code{\link{shape_extraction}}). The user can, however, specify a
 #' custom function that performs any transformation on the data, but the user must make sure that the format
-#' stays consistent, i.e. that a matrix where each row is a series for partitional methods, or a list of time
-#' series for hierarchical methods. For example, the z-normalization could be implemented as
+#' stays consistent, i.e. that a matrix where each row is a series for partitional/tadpole methods, or a list
+#' of time series for hierarchical methods. For example, the z-normalization could be implemented as
 #' \code{t(apply(data, 1, zscore))} or \code{lapply(data, zscore)} respectively.
 #'
 #' The function will receive the data as first argument and, in case hierarchical methods are used, the
@@ -285,6 +285,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                     family@preproc <- preproc
                else
                     stop("Invalid preprocessing")
+          } else if (centroid == "shape") {
+               preproc <- "zscore"
+          } else {
+               preproc <- "none"
           }
 
           ## ----------------------------------------------------------------------------------------------------------
@@ -324,8 +328,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
 
           dtwc <- new("dtwclust", kc,
                       type = type,
-                      distance = ifelse(is.function(distance), as.character(substitute(distance)), distance),
-                      centroid = ifelse(is.function(centroid), as.character(substitute(centroid)), centroid))
+                      distance = ifelse(is.function(distance), as.character(substitute(distance))[1], distance),
+                      centroid = ifelse(is.function(centroid), as.character(substitute(centroid))[1], centroid),
+                      preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc))
 
           dtwc
 
@@ -468,6 +473,15 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           ## Adjust inputs
           ## ----------------------------------------------------------------------------------------------------------
 
+          if (!is.null(preproc)) {
+               if (is.function(preproc))
+                    data <- preproc(data, ...)
+               else
+                    stop("Invalid preprocessing")
+          } else {
+               preproc <- "none"
+          }
+
           if (is.matrix(data))
                x <- lapply(seq_len(nrow(data)), function(i) data[i,])
           else if (is.list(data))
@@ -493,8 +507,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           if (save.data) {
                tadpc <- new("dtwclust",
                             type = type,
-                            distance = "dtw",
+                            distance = "DTW2",
                             centroid = "TADPole (PAM)",
+                            preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc),
 
                             centers = data[R$centers, ],
                             k = as.integer(k),
@@ -503,8 +518,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           } else {
                tadpc <- new("dtwclust",
                             type = type,
-                            distance = "dtw",
+                            distance = "DTW2",
                             centroid = "TADPole (PAM)",
+                            preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc),
 
                             centers = data[R$centers, ],
                             k = as.integer(k),

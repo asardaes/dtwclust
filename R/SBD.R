@@ -33,7 +33,7 @@
 #'
 #' @export
 
-SBD <- function(x, y, znorm = TRUE) {
+SBD <- function(x, y, znorm = FALSE) {
 
      x <- as.numeric(x)
      y <- as.numeric(y)
@@ -67,7 +67,7 @@ SBD <- function(x, y, znorm = TRUE) {
 # Wrapper for proxy::dist
 # ========================================================================================================
 
-SBD.proxy <- function(x, y, znorm = TRUE) {
+SBD.proxy <- function(x, y, znorm = FALSE) {
 
      x <- as.numeric(x)
      y <- as.numeric(y)

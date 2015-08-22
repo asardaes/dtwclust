@@ -4,7 +4,7 @@
 \alias{SBD}
 \title{Shape-based distance}
 \usage{
-SBD(x, y, znorm = TRUE)
+SBD(x, y, znorm = FALSE)
 }
 \arguments{
 \item{x}{A time series.}

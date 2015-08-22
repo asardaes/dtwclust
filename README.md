@@ -19,6 +19,7 @@ Dependencies
 -   Hierarchical procedures use the native `hclust` function.
 -   Cross-distances make use of the `proxy` package.
 -   The core DTW calculations are done by the `dtw` package.
+-   Plotting is done with the `ggplot2` package.
 
 Implementations
 ---------------
