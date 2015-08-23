@@ -1,3 +1,7 @@
+# ========================================================================================================
+# Modified version of kcca to use lists of time series (to support different lengths)
+# ========================================================================================================
+
 kcca.list <- function (x, k, family = kccaFamily("kmeans"), control = NULL)
 {
      MYCALL <- match.call()
@@ -32,8 +36,7 @@ kcca.list <- function (x, k, family = kccaFamily("kmeans"), control = NULL)
                     stop("Unimplemented here")
                }
 
-               centers <- family@allcent(x, cluster = cluster,
-                                         k = k)
+               centers <- family@allcent(x, cluster = cluster, k = k)
 
                k <- length(centers)
 

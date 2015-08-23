@@ -67,25 +67,10 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = T
 
      norm <- match.arg(norm, c("L1", "L2"))
 
-     ## For looping convenience
-     if (is.matrix(x))
-          X <- lapply(seq_len(nrow(x)), function(i) x[i,])
-     else if (is.numeric(x))
-          X <- list(x)
-     else if (is.list(x))
-          X <- x
-     else
-          stop("Unsupported type for x")
+     X <- consistency_check(x, "tsmat")
 
      if (!is.null(y)) {
-          if (is.matrix(y))
-               Y <- lapply(seq_len(nrow(y)), function(i) y[i,])
-          else if (is.numeric(y))
-               Y <- list(y)
-          else if (is.list(y))
-               Y <- y
-          else
-               stop("Unsupported type for y")
+          Y <- consistency_check(y, "tsmat")
 
      } else {
           Y <- X

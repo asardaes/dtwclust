@@ -1,16 +1,19 @@
 ---
 output:
-  md_document:
-    variant: markdown_github
+     md_document:
+          variant: markdown_github
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r, echo = FALSE}
+```{r setOptions, cache = FALSE, echo = FALSE, warning = FALSE, message = FALSE}
+library(knitr)
+library(dtwclust)
+
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "README-"
+     collapse = TRUE,
+     comment = "#>",
+     fig.path = "README-"
 )
 ```
 
@@ -22,9 +25,27 @@ DTW is, however, computationally expensive, so several optimization techniques e
 
 Additionally, a recently proposed algorithm called k-Shape could serve as an alternative. k-Shape clustering relies on custom distance and centroid definitions, which are unrelated to DTW. The shape extraction algorithm proposed therein is particularly interesting if time series can be normalized.
 
-Most of the algorithms and optimizations require that all series have the same length. The ones that don't are usually slow but can still be used.
+Many of the algorithms and optimizations require that all series have the same length. The ones that don't are usually slow but can still be used.
 
 Please see the included references for more information.
+
+## Example
+
+```{r example}
+# Load data
+data(uciCT)
+
+# Reinterpolate data to equal lengths
+data <- lapply(CharTraj, reinterpolate, newLength = 205)
+
+kc <- dtwclust(data = data, k = 20, distance = "dtw_lb",
+               window.size = 20, centroid = "pam",
+               save.data = TRUE,
+               seed = 3247, trace = TRUE)
+
+plot(kc)
+```
+
 
 ## Dependencies
 

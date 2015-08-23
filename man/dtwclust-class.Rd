@@ -18,7 +18,7 @@ It contains the following specific slots:
   \item \code{datalist}: The provided data in the form of a list, where each element is a time series.
 }
 
-Additionally, the class inherits from \code{\link[flexclust]{kccasimple-class}}, so all related slots and
+Additionally, the class inherits from \code{\link[flexclust]{kccasimple-class}}, so most related slots and
 methods are also supported.
 }
 

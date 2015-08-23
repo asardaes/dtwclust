@@ -4,8 +4,11 @@
 #' corresponding lower bounds (LB). Additionally, an implementation of k-Shape clustering is available.
 #'
 #' This package tries to consolidate the different procedures available to perform clustering of time series
-#' under DTW. Right now only univariate time series are supported. Similarly, time series should have equal
-#' lengths for partitional methods.
+#' under DTW. Most of the optimizations require time series to have equal lengths. DTW itself doesn't, but
+#' it's much slower to compute. The shape-based distance (SBD) can also be used for series of different
+#' lengths, and it could be faster. If series have different lengths, it is debatable whether it makes sense
+#' to cluster them directly. If possible, reinterpolating them could be one way of speeding up calculations
+#' (see Ratanamahatana and Keogh, 2004; also \code{\link{reinterpolate}}).
 #'
 #' Please see the documentation for \code{\link{dtwclust}}, which serves as the main entry point.
 #'
@@ -22,8 +25,8 @@
 #' The square root of the resulting distance is \emph{then} computed.
 #'
 #' Please note that the \code{\link[proxy]{dist}} function in the \code{proxy} package accepts one or two
-#' arguments for data objects. Users should usually use the two-input list version, even if there is just one
-#' dataset (i.e. \code{proxy::dist(x=data, y=data, ...)}), because the one-input version sometimes fails to
+#' arguments for data objects. Users should usually use the two-input \strong{list} version, even if there is
+#' just one dataset (i.e. \code{proxy::dist(x=data, y=data, ...)}), because otherwise it sometimes fails to
 #' detect a whole time series as a single object and, instead, calculates distances between each observation
 #' of each time series.
 #'

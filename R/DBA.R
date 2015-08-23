@@ -29,7 +29,7 @@
 #' all(dtw.avg == dtw.avg2)
 #'
 #' @param X A data matrix where each row is a time series. Optionally, a list where each element is a time series.
-#' @param center Optionally, a time series to use as reference. It must be a numeric vector.Defaults to a
+#' @param center Optionally, a time series to use as reference. It must be a numeric vector. Defaults to a
 #' random series of \code{X} if \code{NULL}.
 #' @param max.iter Maximum number of iterations allowed.
 #' @param error.check Should inconsistencies in the data be checked?
@@ -55,7 +55,7 @@ DBA <- function(X, center = NULL, max.iter = 50, error.check = TRUE, trace = FAL
           consistency_check(center, "ts")
      }
 
-     iter <- 0
+     iter <- 1
      C.old <- center-1
 
      while(iter<=max.iter) {
@@ -85,7 +85,7 @@ DBA <- function(X, center = NULL, max.iter = 50, error.check = TRUE, trace = FAL
                iter <- iter+1
 
                if (trace)
-                    cat("Iteration", iter ,"- Converged!\n\n")
+                    cat("DBA: Iteration", iter ,"- Converged!\n\n")
 
                break
 
@@ -94,7 +94,7 @@ DBA <- function(X, center = NULL, max.iter = 50, error.check = TRUE, trace = FAL
                C.old <- center
 
                if (trace)
-                    cat("Iteration", iter, "\n")
+                    cat("DBA: Iteration", iter, "\n")
           }
      }
 

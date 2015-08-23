@@ -7,7 +7,7 @@
 * Added more slots to the dtwclust class
 * Some parameters changed order
 * Default values of some auxiliary functions were changed (DBA and SBD)
-* No longer supporting native kccaFamilies
+* No longer supporting native kccaFamilies, supporting any distance registered in 'proxy' instead
 * Several bug fixes, especially if 'dtw' or 'dtw2' were being used, in which case they may have been erroneously computed before
 
 ## Version 0.1.0

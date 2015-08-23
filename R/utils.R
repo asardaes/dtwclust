@@ -105,7 +105,6 @@ kccaFamilies <- function(distance, cent, window.size, norm) {
                                                                             method = "LBI",
                                                                             norm = norm,
                                                                             window.size = window.size,
-                                                                            force.symmetry = TRUE,
                                                                             error.check=FALSE)
                                                       }
 
@@ -134,7 +133,6 @@ kccaFamilies <- function(distance, cent, window.size, norm) {
                                                                             method = "LBK",
                                                                             norm = norm,
                                                                             window.size = window.size,
-                                                                            force.symmetry = TRUE,
                                                                             error.check=FALSE)
                                                       }
 
@@ -199,6 +197,7 @@ kccaFamilies <- function(distance, cent, window.size, norm) {
 # ========================================================================================================
 
 consistency_check <- function(obj, case) {
+
      case <- match.arg(case, c("ts", "tslist", "vltslist", "window", "tsmat"))
 
      if (case == "ts") {
@@ -337,7 +336,8 @@ dsub_pam <- function(x, centers) {
                ret
           })
 
-          which(i.row)[1] # Take the first one in case a series is repeated more than once in the dataset
+          ## Take the first one in case a series is repeated more than once in the dataset
+          which(i.row)[1]
      })
 
      d <- distmat[ , indXC]
@@ -345,10 +345,9 @@ dsub_pam <- function(x, centers) {
      d
 }
 
-# Preprocessing when using PAM. The whole distance matrix is calculated once and assigned as an attribute
-# of the data.
+# Preprocessing when using PAM. The whole distance matrix is calculated once and reused
 
-preproc_pam <- function(x, fam) {
+distmat_pam <- function(x, fam) {
      x <- consistency_check(x, "tsmat")
 
      d <- fam@dist(x, x)
@@ -373,6 +372,7 @@ allcent_se <- function(x, cluster, k) {
      cl <- sort(unique(cluster))
      ncl <- length(cl)
 
+     ## notice that the centers have to be in ascending order
      new.C <- mapply(X, C[cl],
                      FUN = function(x, c) {
                           new.c <- shape_extraction(x, c)
@@ -412,6 +412,7 @@ allcent_dba <- function(x, cluster, k) {
      } else
           stop("Invalid format for data")
 
+     ## notice that the centers have to be in ascending order
      new.C <- mapply(X, C[cl],
                      FUN = function(x, c) {
                           new.c <- DBA(x, c, max.iter = max.iter, error.check = FALSE)
@@ -419,5 +420,8 @@ allcent_dba <- function(x, cluster, k) {
                           new.c
                      })
 
-     t(new.C)
+     if (is.matrix(new.C))
+          return(t(new.C))
+     else
+          return(new.C)
 }

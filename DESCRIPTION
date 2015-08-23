@@ -1,7 +1,7 @@
 Package: dtwclust
 Type: Package
 Title: Time Series Clustering with Dynamic Time Warping
-Version: 1.0.0.9000
+Version: 1.0.0
 Date: 2015-08-23
 Depends: flexclust, proxy, dtw, ggplot2
 Imports: stats, methods, caTools, reshape2, modeltools
