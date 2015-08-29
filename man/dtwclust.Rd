@@ -193,8 +193,18 @@ data <- t(sapply(CharTraj, reinterpolate, newLength = 205))
 
 # Simple partitional clustering with L2 distance and PAM
 kc.l2 <- dtwclust(data, k = 20, distance = "L2", centroid = "pam",
-                  seed = 3247, trace = TRUE)
+                  seed = 3247, trace = TRUE, save.data = TRUE)
 cat("Rand index for L2+PAM:", randIndex(kc.l2, CharTrajLabels), "\\n\\n")
+
+\dontrun{
+# Saving and modifying the ggplot object with custom time
+t <- seq(Sys.Date(), len = 205, by = "day")
+gkc <- plot(kc.l2, time = t, plot = FALSE)
+
+require(scales)
+gkc + scale_x_date(labels = date_format("\%b-\%Y"),
+                   breaks = date_breaks("2 months"))
+}
 
 # TADPole clustering (takes around 5 seconds)
 kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
@@ -241,5 +251,8 @@ Seattle, WA}.
 Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.'' In \emph{Proceedings of the 2015
 ACM SIGMOD International Conference on Management of Data}, series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{
 http://doi.org/10.1145/2723372.2737793}.
+}
+\seealso{
+\code{\link{plot-dtwclust}}, \code{\link{dtwclust-class}}
 }
 

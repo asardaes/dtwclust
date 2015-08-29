@@ -23,6 +23,10 @@
 #' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
 #' information
 #' @param data The data in the same format as it was provided to \code{\link{dtwclust}}.
+#' @param time Optional values for the time axis. If series have different lengths, provide the time values of
+#' the longest series.
+#' @param plot Boolean flag. You can set this to FALSE in case you want to save the ggplot object without
+#' printing anything to screen
 #' @param ... Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
 #' \emph{cluster centers}. Default values are: \code{linetype = "dashed"}, \code{size = 1.5},
 #' \code{colour = "black"}, \code{alpha = 0.5}.
@@ -39,7 +43,8 @@ NULL
 #' @aliases plot,dtwclust,missing-method
 #'
 setMethod("plot", signature(x="dtwclust", y="missing"),
-          function(x, y, clus=seq_len(x@k), labs.arg = NULL, data=NULL, ...) {
+          function(x, y, clus=seq_len(x@k),
+                   labs.arg = NULL, data=NULL, time = NULL, plot = TRUE, ...) {
 
                ## Obtain data, the priority is: provided data > included data matrix > included data list
 
@@ -60,6 +65,7 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
 
                } else if (!modeltools::empty(x@data)) {
                     df <- t(x@data@get("designMatrix"))
+                    L <- nrow(df)
 
                } else if (length(x@datalist) > 0){
                     lengths <- sapply(x@datalist, length)
@@ -105,14 +111,22 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
 
                ## transform data
 
-               n <- nrow(df)
-               t <- seq_len(n)
+               #n <- nrow(df)
+               if (is.null(time)) {
+                    t <- seq_len(L)
+               } else {
+                    if (length(time) != L)
+                         stop("Length mismatch between values and time stamps")
+
+                    t <- time
+               }
+
                df <- cbind(t, df)
                dfm <- reshape2::melt(df, id.vars = "t")
 
-               cl <- rep(x@cluster, each = n)
+               cl <- rep(x@cluster, each = L)
                color <- sapply(tabulate(x@cluster), function(i) {
-                    rep(1:i, each = n)
+                    rep(1:i, each = L)
                })
                color <- factor(unlist(color))
 
@@ -122,7 +136,7 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
 
                cen <- cbind(t, cen)
                cenm <- reshape2::melt(cen, id.vars = "t")
-               cl <- rep(1:x@k, each = n)
+               cl <- rep(1:x@k, each = L)
                cenm <- cbind(cenm, cl)
 
                ## create gg object
@@ -153,7 +167,8 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
 
                ## If NAs were introduced by me (for length consistency), I want them to be removed
                ## automatically, and I don't want a warning
-               suppressWarnings(print(g))
+               if (plot)
+                    suppressWarnings(print(g))
 
                invisible(g)
           })
