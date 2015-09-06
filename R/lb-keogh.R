@@ -11,6 +11,11 @@
 #' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
 #' the window.
 #'
+#' @note
+#'
+#' If you wish to calculate the lower bound between several time series, it would be better to use the version
+#' registered with the 'proxy' package, since it includes some small optimizations. See the examples.
+#'
 #' @references
 #'
 #' Keogh E and Ratanamahatana CA (2005). ``Exact indexing of dynamic time warping.'' \emph{Knowledge and information systems}, \strong{7}(3),
@@ -29,6 +34,18 @@
 #'              window.type = "slantedband", window.size = 20)$distance
 #'
 #' d.lbk <= d.dtw
+#'
+#' # Calculating the LB between several time series using the 'proxy' package
+#' # (notice how both argments must be lists)
+#' D.lbk <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "LB_Keogh",
+#'                      window.size = 20, norm = "L2")
+#'
+#' # Corresponding true DTW distance
+#' # (see dtwclust-package description for an explanation of DTW2)
+#' D.dtw <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "DTW2",
+#'                      window.type = "slantedband", window.size = 20)
+#'
+#' D.lbk <= D.dtw
 #'
 #' @param x A time series.
 #' @param y A time series with the same length as \code{x}.
@@ -162,15 +179,19 @@ lb_keogh_loop <- function(x, y=NULL, ...) {
                   })
 
      if (force.symmetry) {
-          ind.tri <- lower.tri(DD)
+          if (nrow(DD) != ncol(DD)) {
+               warning("Unable to force symmetry. Resulting distance matrix is not square.")
+          } else {
+               ind.tri <- lower.tri(DD)
 
-          new.low.tri.vals <- t(DD)[ind.tri]
-          indCorrect <- DD[ind.tri] > new.low.tri.vals
-          new.low.tri.vals[indCorrect] <- DD[ind.tri][indCorrect]
+               new.low.tri.vals <- t(DD)[ind.tri]
+               indCorrect <- DD[ind.tri] > new.low.tri.vals
+               new.low.tri.vals[indCorrect] <- DD[ind.tri][indCorrect]
 
-          DD[ind.tri] <- new.low.tri.vals
-          DD <- t(DD)
-          DD[ind.tri] <- new.low.tri.vals
+               DD[ind.tri] <- new.low.tri.vals
+               DD <- t(DD)
+               DD[ind.tri] <- new.low.tri.vals
+          }
      }
 
      attr(DD, "class") <- "crossdist"

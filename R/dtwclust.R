@@ -189,7 +189,9 @@
 #'
 #' @seealso
 #'
-#' \code{\link{plot-dtwclust}}, \code{\link{dtwclust-class}}
+#' Please check the brief description in \code{\link{dtwclust-package}}.
+#'
+#' Additionally: \code{\link{plot-dtwclust}}, \code{\link{dtwclust-class}}.
 #'
 #' @author Alexis Sarda-Espinosa
 #'
@@ -205,7 +207,7 @@
 #' @param preproc Function to preprocess data. Defaults to \code{zscore} \emph{only} if \code{centroid}
 #' \code{=} \code{"shape"}, but will be replaced by a custom function if provided. See Preprocessing section.
 #' @param window.size Window constraint for DTW and LB calculations. See Sakoe-Chiba section.
-#' @param norm Pointwise distance for DTW and LB. Either \code{L1} for Manhattan distance or \code{L2}
+#' @param norm Pointwise distance for DTW, DBA and the LB. Either \code{L1} for Manhattan distance or \code{L2}
 #' for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{L1}) and
 #' \code{distance = "DTW2"} (which always uses \code{L2}).
 #' @param dc Cutoff distance for TADPole algorithm.
@@ -261,6 +263,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
 
           if (is.function(centroid)) {
                cent <- centroid
+
           } else {
                centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
 

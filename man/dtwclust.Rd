@@ -30,7 +30,7 @@ when using partitional methods (see Centroid section).}
 
 \item{window.size}{Window constraint for DTW and LB calculations. See Sakoe-Chiba section.}
 
-\item{norm}{Pointwise distance for DTW and LB. Either \code{L1} for Manhattan distance or \code{L2}
+\item{norm}{Pointwise distance for DTW, DBA and the LB. Either \code{L1} for Manhattan distance or \code{L2}
 for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{L1}) and
 \code{distance = "DTW2"} (which always uses \code{L2}).}
 
@@ -253,6 +253,8 @@ ACM SIGMOD International Conference on Management of Data}, series SIGMOD '15, p
 http://doi.org/10.1145/2723372.2737793}.
 }
 \seealso{
-\code{\link{plot-dtwclust}}, \code{\link{dtwclust-class}}
+Please check the brief description in \code{\link{dtwclust-package}}.
+
+Additionally: \code{\link{plot-dtwclust}}, \code{\link{dtwclust-class}}.
 }
 

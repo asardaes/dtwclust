@@ -11,6 +11,11 @@
 #' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
 #' the window.
 #'
+#' @note
+#'
+#' If you wish to calculate the lower bound between several time series, it would be better to use the version
+#' registered with the 'proxy' package, since it includes some small optimizations. See the examples.
+#'
 #' @references
 #'
 #' Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .'' \emph{Pattern Recognition}, \strong{42}(9), pp.
@@ -30,6 +35,18 @@
 #'              window.type = "slantedband", window.size = 20)$distance
 #'
 #' d.lbi <= d.dtw
+#'
+#' # Calculating the LB between several time series using the 'proxy' package
+#' # (notice how both argments must be lists)
+#' D.lbi <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "LB_Improved",
+#'                      window.size = 20, norm = "L2")
+#'
+#' # Corresponding true DTW distance
+#' # (see dtwclust-package description for an explanation of DTW2)
+#' D.dtw <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "DTW2",
+#'                      window.type = "slantedband", window.size = 20)
+#'
+#' D.lbi <= D.dtw
 #'
 #' @param x A time series.
 #' @param y A time series with the same length as \code{x}.
@@ -56,17 +73,41 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1") {
      if (window.size > length(x))
           stop("The width of the window should not exceed the length of the series")
 
-     ## LB_Keogh first
-     D <- lb_keogh(x, y, window.size, norm)
+     ## LB Keogh first
+
+     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runmax/min'
+     upper.env <- caTools::runmax(y, window.size*2+1, endrule="constant")
+     lower.env <- caTools::runmin(y, window.size*2+1, endrule="constant")
+
+     ind1 <- which(x > upper.env)
+     ind2 <- which(x < lower.env)
+
+     H <- x
+     H[ind1] <- upper.env[ind1]
+     H[ind2] <- lower.env[ind2]
+
+     d1 <- abs(x-H)
 
      ## From here on is Lemire's improvement
-     ind1 <- which(x > D$upper.env)
-     ind2 <- which(x < D$lower.env)
-     H <- x
-     H[ind1] <- D$upper.env[ind1]
-     H[ind2] <- D$lower.env[ind2]
+     UH <- caTools::runmax(H, window.size*2+1, endrule="constant")
+     LH <- caTools::runmin(H, window.size*2+1, endrule="constant")
 
-     d <- D$d + lb_keogh(y, H, window.size, norm)$d
+     d2 <- y
+
+     ind3 <- which(y > UH)
+     ind4 <- which(y < LH)
+
+     H2 <- y
+     H2[ind3] <- UH[ind3]
+     H2[ind4] <- LH[ind4]
+
+     d2 <- abs(y-H2)
+
+     ## LB_Imporved is defined as root-p of the sum of LB_Keoghs^p
+     d <- switch(EXPR = norm,
+                 L1 = sum(d1) + sum(d2),
+                 L2 = sqrt(sum(d1^2) + sum(d2^2))
+     )
 
      ## Finish
 
@@ -135,33 +176,58 @@ lb_improved_loop <- function(x, y=NULL, ...) {
                        D <- mapply(U, L, Y, MoreArgs=list(x=x),
                                    FUN = function(u, l, y, x) {
 
+                                        ## LB Keogh
                                         ind1 <- which(x > u)
                                         ind2 <- which(x < l)
+
                                         H <- x
                                         H[ind1] <- u[ind1]
                                         H[ind2] <- l[ind2]
 
+                                        d1 <- abs(x-H)
+
+                                        ## Lemire's improvement
+                                        UH <- caTools::runmax(H, window.size*2+1, endrule="constant")
+                                        LH <- caTools::runmin(H, window.size*2+1, endrule="constant")
+
+                                        d2 <- y
+
+                                        ind3 <- which(y > UH)
+                                        ind4 <- which(y < LH)
+
+                                        H2 <- y
+                                        H2[ind3] <- UH[ind3]
+                                        H2[ind4] <- LH[ind4]
+
+                                        d2 <- abs(y-H2)
+
+                                        ## calculate LB_Improved
+
                                         d <- switch(EXPR = norm,
-                                                    L1 = sum(abs(x-H)) + lb_keogh(y, H, window.size, norm)$d,
-                                                    L2 = sqrt(sum((x-H)^2)) + lb_keogh(y, H, window.size, norm)$d)
+                                                    L1 = sum(d1) + sum(d2),
+                                                    L2 = sqrt(sum(d1^2) + sum(d2^2))
+                                        )
 
                                         d
-
                                    })
 
                        D
                   })
 
      if (force.symmetry) {
-          ind.tri <- lower.tri(DD)
+          if (nrow(DD) != ncol(DD)) {
+               warning("Unable to force symmetry. Resulting distance matrix is not square.")
+          } else {
+               ind.tri <- lower.tri(DD)
 
-          new.low.tri.vals <- t(DD)[ind.tri]
-          indCorrect <- DD[ind.tri] > new.low.tri.vals
-          new.low.tri.vals[indCorrect] <- DD[ind.tri][indCorrect]
+               new.low.tri.vals <- t(DD)[ind.tri]
+               indCorrect <- DD[ind.tri] > new.low.tri.vals
+               new.low.tri.vals[indCorrect] <- DD[ind.tri][indCorrect]
 
-          DD[ind.tri] <- new.low.tri.vals
-          DD <- t(DD)
-          DD[ind.tri] <- new.low.tri.vals
+               DD[ind.tri] <- new.low.tri.vals
+               DD <- t(DD)
+               DD[ind.tri] <- new.low.tri.vals
+          }
      }
 
      attr(DD, "class") <- "crossdist"

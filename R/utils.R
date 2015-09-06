@@ -396,6 +396,8 @@ preproc_se <- function (x) {
 # ========================================================================================================
 
 allcent_dba <- function(x, cluster, k) {
+     window.size <- get("window.size", envir = attr(x, "env"))
+     norm <- get("norm", envir = attr(x, "env"))
      max.iter <- get("dba.iter", envir = attr(x, "env"))
 
      # This will be read from parent environment
@@ -404,18 +406,22 @@ allcent_dba <- function(x, cluster, k) {
 
      cl <- sort(unique(cluster))
 
-     if (is.matrix(x))
+     if (is.matrix(x)) {
           X <- split.data.frame(x, cluster)
-     else if (is.list(x)) {
+
+     } else if (is.list(x)) {
           indXC <- lapply(cl, function(i.cl) which(cluster == i.cl))
           X <- lapply(indXC, function(ii) x[ii])
+
      } else
           stop("Invalid format for data")
 
      ## notice that the centers have to be in ascending order
      new.C <- mapply(X, C[cl],
                      FUN = function(x, c) {
-                          new.c <- DBA(x, c, max.iter = max.iter, error.check = FALSE)
+                          new.c <- DBA(x, c,
+                                       norm = norm, window.size = window.size,
+                                       max.iter = max.iter, error.check = FALSE)
 
                           new.c
                      })

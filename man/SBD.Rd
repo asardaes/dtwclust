@@ -33,6 +33,16 @@ discarded and the series is padded with trailing zeros as needed.
 
 The output values lie between 0 and 2, with 0 indicating perfect similarity.
 }
+\examples{
+# load data
+data(uciCT)
+
+# distance between series of different lengths
+sbd <- SBD(CharTraj[[1]], CharTraj[[100]], znorm = TRUE)$dist
+
+# cross-distance matrix for series subset (notice the two-list input)
+sbD <- proxy::dist(CharTraj[1:10], CharTraj[1:10], method = "SBD", znorm = TRUE)
+}
 \references{
 Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.'' In \emph{Proceedings of the 2015
 ACM SIGMOD International Conference on Management of Data}, series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{

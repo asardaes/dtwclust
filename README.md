@@ -32,7 +32,7 @@ kc <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #>      4 Changes / Distsum : 1 / 752.1322 
 #>      5 Changes / Distsum : 0 / 752.1322 
 #> 
-#>  Elapsed time is 5.53 seconds.
+#>  Elapsed time is 6.14 seconds.
 
 plot(kc)
 ```

@@ -4,7 +4,8 @@
 \alias{DBA}
 \title{DTW Barycenter Averaging}
 \usage{
-DBA(X, center = NULL, max.iter = 50, error.check = TRUE, trace = FALSE)
+DBA(X, center = NULL, max.iter = 20, norm = "L1", window.size = NULL,
+  error.check = TRUE, trace = FALSE)
 }
 \arguments{
 \item{X}{A data matrix where each row is a time series. Optionally, a list where each element is a time series.}
@@ -13,6 +14,11 @@ DBA(X, center = NULL, max.iter = 50, error.check = TRUE, trace = FALSE)
 random series of \code{X} if \code{NULL}.}
 
 \item{max.iter}{Maximum number of iterations allowed.}
+
+\item{norm}{Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for Euclidean
+distance.}
+
+\item{window.size}{Window constraint for the DTW calculations. \code{NULL} means no constraint.}
 
 \item{error.check}{Should inconsistencies in the data be checked?}
 

@@ -1,5 +1,12 @@
 # NEWS
 
+## Version 1.1.0
+* Added more options to the plot method for custom time labels
+* Fixed an error in the calculation of Lemire's improved lower bound
+* Added L2 norm to DBA, as well as window contraint
+* Optimized DBA calculations
+* More examples
+
 ## Version 1.0.0
 * Limited support for time series of different lengths
 * Improved plot method

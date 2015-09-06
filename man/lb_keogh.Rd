@@ -35,6 +35,10 @@ if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_
 between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
 the window.
 }
+\note{
+If you wish to calculate the lower bound between several time series, it would be better to use the version
+registered with the 'proxy' package, since it includes some small optimizations. See the examples.
+}
 \examples{
 # Sample data
 data(uciCT)
@@ -47,6 +51,18 @@ d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]],
              window.type = "slantedband", window.size = 20)$distance
 
 d.lbk <= d.dtw
+
+# Calculating the LB between several time series using the 'proxy' package
+# (notice how both argments must be lists)
+D.lbk <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "LB_Keogh",
+                     window.size = 20, norm = "L2")
+
+# Corresponding true DTW distance
+# (see dtwclust-package description for an explanation of DTW2)
+D.dtw <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "DTW2",
+                     window.type = "slantedband", window.size = 20)
+
+D.lbk <= D.dtw
 }
 \references{
 Keogh E and Ratanamahatana CA (2005). ``Exact indexing of dynamic time warping.'' \emph{Knowledge and information systems}, \strong{7}(3),
