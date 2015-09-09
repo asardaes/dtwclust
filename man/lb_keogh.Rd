@@ -4,7 +4,8 @@
 \alias{lb_keogh}
 \title{Keogh's DTW lower bound}
 \usage{
-lb_keogh(x, y, window.size = NULL, norm = "L1")
+lb_keogh(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
+  upper.env = NULL)
 }
 \arguments{
 \item{x}{A time series.}
@@ -14,12 +15,16 @@ lb_keogh(x, y, window.size = NULL, norm = "L1")
 \item{window.size}{Window size for envelope calculation. See details.}
 
 \item{norm}{Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.}
+
+\item{lower.env}{Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided.}
+
+\item{upper.env}{Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided.}
 }
 \value{
 A list with: \itemize{
   \item \code{d}: The lower bound of the DTW distance.
-  \item \code{upper.env}: The time series of the upper envelope.
-  \item \code{lower.env}: The time series of the lower envelope.
+  \item \code{upper.env}: The time series of \code{y}'s upper envelope.
+  \item \code{lower.env}: The time series of \code{y}'s lower envelope.
 }
 }
 \description{

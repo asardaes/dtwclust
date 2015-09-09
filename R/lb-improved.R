@@ -52,12 +52,14 @@
 #' @param y A time series with the same length as \code{x}.
 #' @param window.size Window size for envelope calculation. See details.
 #' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
+#' @param lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided.
+#' @param upper.env Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided.
 #'
 #' @return The improved lower bound for the DTW distance.
 #'
 #' @export
 
-lb_improved <- function(x, y, window.size = NULL, norm = "L1") {
+lb_improved <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, upper.env = NULL) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 
@@ -76,8 +78,19 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1") {
      ## LB Keogh first
 
      ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runmax/min'
-     upper.env <- caTools::runmax(y, window.size*2+1, endrule="constant")
-     lower.env <- caTools::runmin(y, window.size*2+1, endrule="constant")
+     if (is.null(lower.env)) {
+          lower.env <- caTools::runmin(y, window.size*2+1, endrule="constant")
+     } else {
+          if (length(lower.env) != length(y))
+               stop("Length mismatch between 'y' and its lower envelope")
+     }
+
+     if (is.null(upper.env)) {
+          upper.env <- caTools::runmax(y, window.size*2+1, endrule="constant")
+     } else {
+          if (length(upper.env) != length(y))
+               stop("Length mismatch between 'y' and its upper envelope")
+     }
 
      ind1 <- which(x > upper.env)
      ind2 <- which(x < lower.env)

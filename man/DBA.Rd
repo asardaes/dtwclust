@@ -5,7 +5,7 @@
 \title{DTW Barycenter Averaging}
 \usage{
 DBA(X, center = NULL, max.iter = 20, norm = "L1", window.size = NULL,
-  error.check = TRUE, trace = FALSE)
+  delta = 1e-06, error.check = TRUE, trace = FALSE)
 }
 \arguments{
 \item{X}{A data matrix where each row is a time series. Optionally, a list where each element is a time series.}
@@ -19,6 +19,9 @@ random series of \code{X} if \code{NULL}.}
 distance.}
 
 \item{window.size}{Window constraint for the DTW calculations. \code{NULL} means no constraint.}
+
+\item{delta}{At iteration \code{i}, if \code{all(abs(center_{i}} \code{ - center_{i-1})} \code{ < delta)},
+convergence is assumed.}
 
 \item{error.check}{Should inconsistencies in the data be checked?}
 

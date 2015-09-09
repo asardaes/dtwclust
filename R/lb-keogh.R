@@ -51,18 +51,20 @@
 #' @param y A time series with the same length as \code{x}.
 #' @param window.size Window size for envelope calculation. See details.
 #' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
+#' @param lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided.
+#' @param upper.env Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided.
 #'
 #' @return A list with: \itemize{
 #'   \item \code{d}: The lower bound of the DTW distance.
-#'   \item \code{upper.env}: The time series of the upper envelope.
-#'   \item \code{lower.env}: The time series of the lower envelope.
+#'   \item \code{upper.env}: The time series of \code{y}'s upper envelope.
+#'   \item \code{lower.env}: The time series of \code{y}'s lower envelope.
 #' }
 #'
 #' @export
 #' @importFrom caTools runmax
 #' @importFrom caTools runmin
 
-lb_keogh <- function(x, y, window.size = NULL, norm = "L1") {
+lb_keogh <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, upper.env = NULL) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 
@@ -79,8 +81,19 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1") {
           stop("The width of the window should not exceed the length of the series")
 
      ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runmax/min'
-     upper.env <- caTools::runmax(y, window.size*2+1, endrule="constant")
-     lower.env <- caTools::runmin(y, window.size*2+1, endrule="constant")
+     if (is.null(lower.env)) {
+          lower.env <- caTools::runmin(y, window.size*2+1, endrule="constant")
+     } else {
+          if (length(lower.env) != length(y))
+               stop("Length mismatch between 'y' and its lower envelope")
+     }
+
+     if (is.null(upper.env)) {
+          upper.env <- caTools::runmax(y, window.size*2+1, endrule="constant")
+     } else {
+          if (length(upper.env) != length(y))
+               stop("Length mismatch between 'y' and its upper envelope")
+     }
 
      D <- rep(0, length(x))
 
