@@ -8,4 +8,3 @@
 
 ## R CMD check results
 * There were no ERRORs, WARNINGs or NOTEs
-* Longest example takes around 10 seconds to run

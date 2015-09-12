@@ -105,8 +105,6 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
      UH <- caTools::runmax(H, window.size*2+1, endrule="constant")
      LH <- caTools::runmin(H, window.size*2+1, endrule="constant")
 
-     d2 <- y
-
      ind3 <- which(y > UH)
      ind4 <- which(y < LH)
 
@@ -202,8 +200,6 @@ lb_improved_loop <- function(x, y=NULL, ...) {
                                         ## Lemire's improvement
                                         UH <- caTools::runmax(H, window.size*2+1, endrule="constant")
                                         LH <- caTools::runmin(H, window.size*2+1, endrule="constant")
-
-                                        d2 <- y
 
                                         ind3 <- which(y > UH)
                                         ind4 <- which(y < LH)

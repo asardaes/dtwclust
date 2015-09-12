@@ -56,21 +56,21 @@ shape_extraction <- function(X, cz = NULL, znorm = TRUE) {
 
           cz <- as.numeric(cz)
 
-          if (all(cz == 0))
+          if (all(cz == 0)) {
                a <- Xz
-          else {
-               a <- apply(Xz, 1, function(A) {
+
+          } else {
+               a <- t(apply(Xz, 1, function(A) {
                     sbd <- SBD(zscore(cz), A)
 
                     sbd$yshift
-               })
-
-               a <- t(a)
+               }))
           }
 
      } else {
 
           a <- Xz
+
      }
 
      Y <- t(apply(a, 1, zscore))
