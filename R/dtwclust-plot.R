@@ -49,10 +49,11 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                ## Obtain data, the priority is: provided data > included data matrix > included data list
 
                if (!is.null(data)) {
-                    if (is.matrix(data))
+                    if (is.matrix(data)) {
                          df <- t(data)
+                         L <- nrow(df)
 
-                    else if (is.list(data)) {
+                    } else if (is.list(data)) {
                          lengths <- sapply(data, length)
                          L <- max(lengths)
                          trail <- L - lengths
