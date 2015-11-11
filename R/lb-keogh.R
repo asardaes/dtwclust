@@ -116,7 +116,7 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, up
 # - About 10 times faster
 # ========================================================================================================
 
-lb_keogh_loop <- function(x, y=NULL, ...) {
+lb_keogh_loop <- function(x, y = NULL, ...) {
 
      ARGS <- list(...)
      window.size <- ARGS$window.size

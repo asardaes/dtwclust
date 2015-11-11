@@ -114,7 +114,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
 
      d2 <- abs(y-H2)
 
-     ## LB_Imporved is defined as root-p of the sum of LB_Keoghs^p
+     ## LB_Improved is defined as root-p of the sum of LB_Keoghs^p
      d <- switch(EXPR = norm,
                  L1 = sum(d1) + sum(d2),
                  L2 = sqrt(sum(d1^2) + sum(d2^2))
@@ -129,7 +129,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
 # Loop without using native 'proxy' looping (to avoid multiple calculations of the envelope)
 # ========================================================================================================
 
-lb_improved_loop <- function(x, y=NULL, ...) {
+lb_improved_loop <- function(x, y = NULL, ...) {
 
      ARGS <- list(...)
      window.size <- ARGS$window.size

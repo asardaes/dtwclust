@@ -63,6 +63,9 @@ NN2 <- apply(d2, 1, which.min)
 # Same results?
 all(NN1 == NN2)
 }
+\author{
+Alexis Sarda-Espinosa
+}
 \references{
 Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .'' \emph{Pattern Recognition}, \strong{42}(9), pp.
 2169 - 2180. ISSN 0031-3203, \url{http://dx.doi.org/10.1016/j.patcog.2008.11.030}, \url{

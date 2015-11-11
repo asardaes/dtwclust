@@ -3,7 +3,7 @@
 ## Version 1.1.0
 * Added more options to the plot method for custom time labels
 * Fixed an error in the calculation of Lemire's improved lower bound
-* Added L2 norm to DBA, as well as window contraint
+* Added L2 norm to DBA, as well as window constraint
 * Optimized DBA calculations
 * More examples
 

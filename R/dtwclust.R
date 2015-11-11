@@ -292,7 +292,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                family <- kccaFamilies(distance, cent, window.size, norm) # utils.R
 
           } else {
-               stop("Unspported distance definition")
+               stop("Unsupported distance definition")
           }
 
           ## ----------------------------------------------------------------------------------------------------------
