@@ -1,5 +1,11 @@
 # NEWS
 
+## Version 1.1.1
+* Added the option to prevent pre-computation of distance matrix when using PAM centroids
+* Added an example with a custom distance function
+* Using closures instead of relying on passing environments as attributes
+* Bug fixes (in case custom distances were used)
+
 ## Version 1.1.0
 * Added more options to the plot method for custom time labels
 * Fixed an error in the calculation of Lemire's improved lower bound
@@ -18,5 +24,4 @@
 * Several bug fixes, especially if 'dtw' or 'dtw2' were being used, in which case they may have been erroneously computed before
 
 ## Version 0.1.0
-
 * Initial release

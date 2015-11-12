@@ -1,4 +1,4 @@
-## Update to version 1.1.0
+## Update to version 1.1.1
 * Improvements and error fixes
 
 ## Test environments

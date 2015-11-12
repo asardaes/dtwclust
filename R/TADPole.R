@@ -64,6 +64,8 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
 
      UBM <- proxy::dist(x, x, method = "L2")
 
+     step.pattern <- get("symmetric1") # so that CHECK doesn't complain
+
      ## ============================================================================================================================
      ## Pruning during local density calculation
      ## ============================================================================================================================
@@ -110,7 +112,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
 
      if (length(ind1) > 0) {
           d1 <- proxy::dist(x[ind1[, 1]], x[ind1[, 2]], method = "DTW2",
-                            step.pattern = symmetric1,
+                            step.pattern = step.pattern,
                             window.type = "slantedband", window.size = window.size,
                             pairwise = TRUE)
 
@@ -188,7 +190,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
 
           if (sum(indCompute) > 0) {
                d2 <- proxy::dist(x[ii], x[indHDN[indCompute]], method = "DTW2",
-                                 step.pattern = symmetric1,
+                                 step.pattern = step.pattern,
                                  window.type = "slantedband", window.size = window.size)
 
                delta[indCompute] <- d2

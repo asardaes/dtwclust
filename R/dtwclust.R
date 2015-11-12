@@ -31,7 +31,7 @@
 #'
 #' The other option is to provide a string. The string can represent a compatible registered distance of
 #' \code{\link[proxy]{dist}}. In the case of hierarchical algorithms, extra parameters can be provided in
-#' \code{...}.
+#' \code{...}. See the examples.
 #'
 #' Additionally, with either type of algorithm, it can be one of the following custom implementations:
 #'
@@ -105,12 +105,6 @@
 #'
 #' @section Notes:
 #'
-#' In order to ensure that the parameter values are detected correctly by the included functions
-#' when partitional clustering is used, the
-#' environment of the \code{dtwclust} function is assigned as an attribute of \code{data} via
-#' \code{attr(data, "env")} \code{<-} \code{environment()}. If the user alters the dataset with a
-#' preprocessing function, it should make sure that this attribute is maintained.
-#'
 #' Notice that the lower bounds are defined only for time series of equal lengths. \code{DTW} and \code{DTW2}
 #' don't require this, but they are much slower to compute.
 #'
@@ -142,13 +136,13 @@
 #' # Reinterpolate to same length and coerce as matrix
 #' data <- t(sapply(CharTraj, reinterpolate, newLength = 205))
 #'
-#' # Simple partitional clustering with L2 distance and PAM
+#' #### Simple partitional clustering with L2 distance and PAM
 #' kc.l2 <- dtwclust(data, k = 20, distance = "L2", centroid = "pam",
-#'                   seed = 3247, trace = TRUE, save.data = TRUE)
+#'                   seed = 3247, trace = TRUE)
 #' cat("Rand index for L2+PAM:", randIndex(kc.l2, CharTrajLabels), "\n\n")
 #'
 #' \dontrun{
-#' # Saving and modifying the ggplot object with custom time
+#' #### Saving and modifying the ggplot object with custom time
 #' t <- seq(Sys.Date(), len = 205, by = "day")
 #' gkc <- plot(kc.l2, time = t, plot = FALSE)
 #'
@@ -157,9 +151,9 @@
 #'                    breaks = date_breaks("2 months"))
 #' }
 #'
-#' # TADPole clustering (takes around 5 seconds)
+#' #### TADPole clustering (takes around 5 seconds)
 #' kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
-#'                     window.size = 20, dc = 1.5, save.data = TRUE)
+#'                     window.size = 20, dc = 1.5)
 #' cat("Rand index for TADPole:", randIndex(kc.tadp, CharTrajLabels), "\n\n")
 #' plot(kc.tadp)
 #'
@@ -167,21 +161,42 @@
 #' plot(kc.tadp, cl = 1:4, labs.arg = list(title = "TADPole, clusters 1 through 4",
 #'                                         x = "time", y = "series"))
 #'
+#' #### Registering a custom distance with the 'proxy' package and using it
+#' # Normalized DTW distance
+#' ndtw <- function(x, y, ...) {
+#'   dtw::dtw(x, y, step.pattern = symmetric2,
+#'            distance.only = TRUE, ...)$normalizedDistance
+#' }
+#'
+#' # Registering the function with 'proxy'
+#' proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
+#'                        loop = TRUE, type = "metric", distance = TRUE,
+#'                        description = "Normalized DTW with L1 norm")
+#'
+#' # Subset of (original) data for speed
+#' # Change pam.precompute to TRUE to see time difference
+#' kc.ndtw <- dtwclust(CharTraj[31:40], distance = "nDTW",
+#'                     trace = TRUE, pam.precompute = FALSE,
+#'                     seed = 8319)
+#' cat("Rand index for nDTW (subset):",
+#'     randIndex(kc.ndtw, CharTrajLabels[31:40]), "\n\n")
+#' plot(kc.ndtw)
+#'
 #' \dontrun{
-#' # Hierarchical clustering based on shabe-based distance
+#' #### Hierarchical clustering based on shabe-based distance
 #' hc.sbd <- dtwclust(data, type = "hierarchical", distance = "sbd")
 #' cl.sbd <- cutree(hc.sbd, 20)
 #' cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\n\n")
 #'
-#' # Use full DTW and PAM (takes around two minutes)
+#' #### Use full DTW and PAM (takes around two minutes)
 #' kc.dtw <- dtwclust(data, k = 20, seed = 3251, trace = TRUE)
 #'
-#' # Use full DTW with DBA centroids (takes around five minutes)
+#' #### Use full DTW with DBA centroids (takes around five minutes)
 #' kc.dba <- dtwclust(data, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
 #'
-#' # Use constrained DTW with original series of different lengths (around one minute)
+#' #### Use constrained DTW with original series of different lengths (around one minute)
 #' kc.cdtw <- dtwclust(CharTraj, k = 20, window.size = 20,
-#'                     seed = 3251, trace = TRUE, save.data = TRUE)
+#'                     seed = 3251, trace = TRUE)
 #'
 #' # Plot one of the clusters
 #' plot(kc.cdtw, cl=18)
@@ -212,6 +227,8 @@
 #' \code{distance = "DTW2"} (which always uses \code{L2}).
 #' @param dc Cutoff distance for TADPole algorithm.
 #' @param dba.iter Maximum number of iterations for \code{\link{DBA}} centroids.
+#' @param pam.precompute Precompute the whole distance matrix once and reuse it at each iteration if using PAM
+#' centroids. Otherwise calculate distances at every iteration.
 #' @param control Parameters for partitional clustering algorithms. See
 #' \code{\link[flexclust]{flexclustControl}}.
 #' @param save.data Return a copy of the data in the returned object? Ignored for hierarchical clustering.
@@ -232,8 +249,8 @@
 dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average",
                      distance = "dtw", centroid = "pam", preproc = NULL,
                      window.size = NULL, norm = "L1", dc = NULL,
-                     dba.iter = 50, control = NULL, save.data = FALSE,
-                     seed = NULL, trace = FALSE,
+                     dba.iter = 50, pam.precompute = TRUE, control = NULL,
+                     save.data = TRUE, seed = NULL, trace = FALSE,
                      ...)
 {
      ## =================================================================================================================
@@ -256,10 +273,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
 
           if (k < 2)
                stop("At least two clusters must be defined")
-
-          ## Used by some of the custom functions so that they know where to look for parameters
-          ## This is done automatically due to lexical scoping, but I rather do it explicitly
-          attr(data, "env") <- environment()
 
           if (is.function(centroid)) {
                cent <- centroid
@@ -289,7 +302,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                                     cent = cent)
 
           } else if (is.character(distance)) {
-               family <- kccaFamilies(distance, cent, window.size, norm) # utils.R
+               family <- kccaFamilies(distance, cent, window.size, norm, NULL) # utils.R
 
           } else {
                stop("Unsupported distance definition")
@@ -299,21 +312,25 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           ## Replace specific functions if necessary
           ## ----------------------------------------------------------------------------------------------------------
 
-          distmat <- NULL
+          distmat <- NULL # replaced if appropriate
 
+          # replace with functions from utils.R
           if (is.character(centroid) && centroid == "shape") {
                family@allcent <- allcent_se
 
                family@preproc <- preproc_se
 
           } else if (is.character(centroid) && centroid == "dba") {
-               family@allcent <- allcent_dba
+               family@allcent <- allcent_dba(dba.iter, window.size, norm) # closure, utils.R
 
           } else if (is.character(centroid) && centroid == "pam") {
-               family@allcent <- allcent_pam
+               if (pam.precompute)
+                    distmat <- distmat_pam(data, family) # utils.R
 
-               distmat <- distmat_pam(data, family)
+               ## Redefine family with new distmat (to update closures)
+               family <- kccaFamilies(distance, cent, window.size, norm, distmat) # utils.R
 
+               family@allcent <- allcent_pam(distmat, family@dist) # another closure, utils.R
           }
 
           if (!is.null(preproc)) {
@@ -323,7 +340,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                     stop("Invalid preprocessing")
 
           } else if (is.character(centroid) && centroid == "shape") {
-               preproc <- "zscore"
+               preproc <- "zscore" # string, just to indicate what was used...
 
           } else {
                preproc <- "none"
@@ -352,13 +369,15 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                lengths <- sapply(data, length)
 
                if (length(unique(lengths)) > 1) {
-                    if (is.character(distance) && !(distance %in% c("dtw", "dtw2", "sbd")))
-                         stop("Only the following distances are supported for series of different lengths:\n
-                              \tdtw \tdtw2 \tsbd")
+                    if (is.character(distance) &&
+                        (distance %in% c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd")) && # restrict check to these
+                        !(distance %in% c("dtw", "dtw2", "sbd")))
+                         stop("Only the following distances are supported for series of different lengths:\n\tdtw \tdtw2 \tsbd")
 
-                    if (is.character(centroid) && !(centroid %in% c("dba", "pam")))
-                         stop("Only the following centroids are supported for series of different lengths:\n
-                              \tdba \tpam")
+                    if (is.character(centroid) &&
+                        (centroid %in%  c("mean", "median", "shape", "dba", "pam")) && # restrict check to these
+                        !(centroid %in% c("dba", "pam")))
+                         stop("Only the following centroids are supported for series of different lengths:\n\tdba \tpam")
                }
 
                if (is.function(centroid))
@@ -466,7 +485,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                            dtw_lb = {
                                 window.size <- consistency_check(window.size, "window")
 
-                                dtw_lb(x, x, window.size, norm = norm, error.check=TRUE)
+                                dtw_lb(x, x, window.size, norm = norm, error.check = TRUE)
                            },
 
 
@@ -476,7 +495,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
 
                                 proxy::dist(x = x, y = x,
                                             method = "LBI", window.size = window.size, norm = norm,
-                                            force.symmetry = TRUE, error.check=TRUE,
+                                            force.symmetry = TRUE, error.check = TRUE,
                                             ...)
                            },
 
