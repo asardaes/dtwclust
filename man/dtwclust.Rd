@@ -90,14 +90,13 @@ algorithms, the time series in the data should be along the rows, and the cluste
 columns of the distance matrix.
 
 The other option is to provide a string. The string can represent a compatible registered distance of
-\code{\link[proxy]{dist}}. In the case of hierarchical algorithms, extra parameters can be provided in
-\code{...}. See the examples.
+\code{\link[proxy]{dist}}. Extra parameters can be provided in \code{...}. See the examples.
 
 Additionally, with either type of algorithm, it can be one of the following custom implementations:
 
 \itemize{
-  \item \code{"dtw"}: DTW with L1 norm and optionally a Sakoe-Chiba constraint.
-  \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba constraint.
+  \item \code{"dtw"}: DTW with L1 norm and optionally a Sakoe-Chiba/Slanted-band constraint.
+  \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint.
   \item \code{"dtw_lb"}: DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some computations
   are avoided by first estimating the distance matrix with Lemire's lower bound and then iteratively
   refining with DTW. See \code{\link{dtw_lb}}.
@@ -121,7 +120,7 @@ If a custom function is provided, it will receive different inputs depending on 
 
 \itemize{
   \item For matrix input, it will receive a matrix as single input. Each row will be a series that belongs
-  to a given cluster. The function should return a numeric vector representing the centroid series.
+  to a given cluster. The function should return a numeric vector with the centroid time series.
   \item For a list input, the function will receive three inputs in the following order: the \emph{whole}
   data list; a numeric vector with length equal to the number of series in \code{data}, indicating which
   cluster a series belongs to; the current number of total clusters.
@@ -136,8 +135,8 @@ The other option is to provide a character string. The following options are ava
   \item \code{"shape"}: Shape averaging. See \code{\link{shape_extraction}} for more details.
   \item \code{"dba"}: DTW Barycenter Averaging. See \code{\link{DBA}} for more details.
   \item \code{"pam"}: Partition around medoids. This basically means that the cluster centers are always
-  one of the time series in the data. In this case, the distance matrix is pre-computed once using all
-  time series in the data and then re-used at each iteration.
+  one of the time series in the data. In this case, the distance matrix can be pre-computed once using all
+  time series in the data and then re-used at each iteration. It usually saves overhead overall.
 }
 
 Note that only \code{dba} and \code{pam} support series of different lengths
@@ -236,17 +235,18 @@ cat("Rand index for nDTW (subset):",
     randIndex(kc.ndtw, CharTrajLabels[31:40]), "\\n\\n")
 plot(kc.ndtw)
 
-\dontrun{
 #### Hierarchical clustering based on shabe-based distance
-hc.sbd <- dtwclust(data, type = "hierarchical", distance = "sbd")
+hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
+                   distance = "sbd", trace = TRUE)
 cl.sbd <- cutree(hc.sbd, 20)
 cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\\n\\n")
 
+\dontrun{
 #### Use full DTW and PAM (takes around two minutes)
-kc.dtw <- dtwclust(data, k = 20, seed = 3251, trace = TRUE)
+kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, trace = TRUE)
 
 #### Use full DTW with DBA centroids (takes around five minutes)
-kc.dba <- dtwclust(data, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
+kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
 
 #### Use constrained DTW with original series of different lengths (around one minute)
 kc.cdtw <- dtwclust(CharTraj, k = 20, window.size = 20,

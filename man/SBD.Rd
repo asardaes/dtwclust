@@ -33,6 +33,10 @@ discarded and the series is padded with trailing zeros as needed.
 
 The output values lie between 0 and 2, with 0 indicating perfect similarity.
 }
+\note{
+If you wish to calculate the distance between several time series, it would be better to use the version
+registered with the 'proxy' package, since it includes some small optimizations. See the examples.
+}
 \examples{
 
 # load data

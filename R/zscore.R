@@ -12,6 +12,7 @@
 zscore <- function(x, ...) {
      x <- scale(x, ...)
      x[is.nan(x)] <- 0
+     dim(x) <- NULL # scale returns columns
 
      x
 }

@@ -36,9 +36,9 @@ kcca.list <- function (x, k, family = kccaFamily("kmeans"), control = NULL)
                     stop("Unimplemented here")
                }
 
-               centers <- family@allcent(x, cluster = cluster, k = k)
+               k <- ifelse(is.matrix(centers), nrow(centers), length(centers))
 
-               k <- length(centers)
+               centers <- family@allcent(x, cluster = cluster, k = k)
 
                changes <- sum(cluster != clustold)
 

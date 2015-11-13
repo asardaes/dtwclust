@@ -114,6 +114,6 @@ NULL
           proxy::pr_DB$delete_entry("SBD")
 
      proxy::pr_DB$set_entry(FUN = SBD.proxy, names=c("SBD", "shape"),
-                            loop = TRUE, type = "metric", distance = TRUE,
+                            loop = FALSE, type = "metric", distance = TRUE,
                             description = "Paparrizos' shape-based distance for time series")
 }

@@ -42,7 +42,7 @@
 #'
 #' @export
 
-shape_extraction <- function(X, cz = NULL, znorm = TRUE) {
+shape_extraction <- function(X, cz = NULL, znorm = FALSE) {
 
      if (!is.matrix(X))
           stop("Unsupported type for X")
@@ -61,7 +61,7 @@ shape_extraction <- function(X, cz = NULL, znorm = TRUE) {
 
           } else {
                a <- t(apply(Xz, 1, function(A) {
-                    sbd <- SBD(zscore(cz), A)
+                    sbd <- SBD(cz, A)
 
                     sbd$yshift
                }))

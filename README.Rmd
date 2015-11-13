@@ -29,23 +29,59 @@ Many of the algorithms and optimizations require that all series have the same l
 
 Please see the included references for more information.
 
-## Example
+## Implementations
 
-```{r example}
-# Load data
+* Keogh's and Lemire's lower bounds
+* DTW Barycenter Averaging
+* k-Shape clustering
+* TADPole clustering
+
+## Examples
+
+```{r examples}
+## Load data
 data(uciCT)
 
-# Reinterpolate data to equal lengths
-data <- lapply(CharTraj, reinterpolate, newLength = 205)
+## Reinterpolate data to equal lengths
+data <- lapply(CharTraj, reinterpolate, newLength = 180)
 
+#### Using DTW with help of lower bounds and PAM centroids
 kc <- dtwclust(data = data, k = 20, distance = "dtw_lb",
                window.size = 20, centroid = "pam",
-               save.data = TRUE,
                seed = 3247, trace = TRUE)
 
 plot(kc)
-```
 
+#### Registering a custom distance with proxy and using it (normalized DTW)
+ndtw <- function(x, y, ...) {
+  dtw::dtw(x, y, step.pattern = symmetric2,
+           distance.only = TRUE, ...)$normalizedDistance
+}
+
+# Registering the function with 'proxy'
+proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
+                       loop = TRUE, type = "metric", distance = TRUE,
+                       description = "Normalized DTW with L1 norm")
+
+# Subset of data for speed (but using different lengths)
+kc.ndtw <- dtwclust(CharTraj[21:40], k = 4, distance = "nDTW",
+                    trace = TRUE, seed = 8319)
+
+# Modifying some plot parameters
+plot(kc.ndtw, labs.arg = list(title = "nDTW clustering", x = "time", y = "series"))
+
+#### Hierarchical clustering based on shape-based distance
+hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
+                   distance = "sbd", trace = TRUE)
+cl.sbd <- cutree(hc.sbd, 20)
+cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\n\n")
+
+#### TADPole clustering
+kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
+                    window.size = 20, dc = 1.5, trace = TRUE)
+
+plot(kc.tadp, cl = 1:4)
+```
 
 ## Dependencies
 
@@ -54,10 +90,3 @@ plot(kc)
 * Cross-distances make use of the `proxy` package.
 * The core DTW calculations are done by the `dtw` package.
 * Plotting is done with the `ggplot2` package.
-
-## Implementations
-
-* Keogh's and Lemire's lower bounds
-* DTW Barycenter Averaging
-* k-Shape clustering
-* TADPole clustering

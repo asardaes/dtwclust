@@ -30,14 +30,13 @@
 #' columns of the distance matrix.
 #'
 #' The other option is to provide a string. The string can represent a compatible registered distance of
-#' \code{\link[proxy]{dist}}. In the case of hierarchical algorithms, extra parameters can be provided in
-#' \code{...}. See the examples.
+#' \code{\link[proxy]{dist}}. Extra parameters can be provided in \code{...}. See the examples.
 #'
 #' Additionally, with either type of algorithm, it can be one of the following custom implementations:
 #'
 #' \itemize{
-#'   \item \code{"dtw"}: DTW with L1 norm and optionally a Sakoe-Chiba constraint.
-#'   \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba constraint.
+#'   \item \code{"dtw"}: DTW with L1 norm and optionally a Sakoe-Chiba/Slanted-band constraint.
+#'   \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint.
 #'   \item \code{"dtw_lb"}: DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some computations
 #'   are avoided by first estimating the distance matrix with Lemire's lower bound and then iteratively
 #'   refining with DTW. See \code{\link{dtw_lb}}.
@@ -59,7 +58,7 @@
 #'
 #' \itemize{
 #'   \item For matrix input, it will receive a matrix as single input. Each row will be a series that belongs
-#'   to a given cluster. The function should return a numeric vector representing the centroid series.
+#'   to a given cluster. The function should return a numeric vector with the centroid time series.
 #'   \item For a list input, the function will receive three inputs in the following order: the \emph{whole}
 #'   data list; a numeric vector with length equal to the number of series in \code{data}, indicating which
 #'   cluster a series belongs to; the current number of total clusters.
@@ -74,8 +73,8 @@
 #'   \item \code{"shape"}: Shape averaging. See \code{\link{shape_extraction}} for more details.
 #'   \item \code{"dba"}: DTW Barycenter Averaging. See \code{\link{DBA}} for more details.
 #'   \item \code{"pam"}: Partition around medoids. This basically means that the cluster centers are always
-#'   one of the time series in the data. In this case, the distance matrix is pre-computed once using all
-#'   time series in the data and then re-used at each iteration.
+#'   one of the time series in the data. In this case, the distance matrix can be pre-computed once using all
+#'   time series in the data and then re-used at each iteration. It usually saves overhead overall.
 #' }
 #'
 #' Note that only \code{dba} and \code{pam} support series of different lengths
@@ -182,17 +181,18 @@
 #'     randIndex(kc.ndtw, CharTrajLabels[31:40]), "\n\n")
 #' plot(kc.ndtw)
 #'
-#' \dontrun{
 #' #### Hierarchical clustering based on shabe-based distance
-#' hc.sbd <- dtwclust(data, type = "hierarchical", distance = "sbd")
+#' hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
+#'                    distance = "sbd", trace = TRUE)
 #' cl.sbd <- cutree(hc.sbd, 20)
 #' cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\n\n")
 #'
+#' \dontrun{
 #' #### Use full DTW and PAM (takes around two minutes)
-#' kc.dtw <- dtwclust(data, k = 20, seed = 3251, trace = TRUE)
+#' kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, trace = TRUE)
 #'
 #' #### Use full DTW with DBA centroids (takes around five minutes)
-#' kc.dba <- dtwclust(data, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
+#' kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
 #'
 #' #### Use constrained DTW with original series of different lengths (around one minute)
 #' kc.cdtw <- dtwclust(CharTraj, k = 20, window.size = 20,
@@ -302,7 +302,13 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                                     cent = cent)
 
           } else if (is.character(distance)) {
-               family <- kccaFamilies(distance, cent, window.size, norm, NULL) # utils.R
+               # utils.R
+               family <- kccaFamilies(distance = distance,
+                                      cent = cent,
+                                      window.size = window.size,
+                                      norm = norm,
+                                      distmat = NULL,
+                                      ...)
 
           } else {
                stop("Unsupported distance definition")
@@ -316,19 +322,24 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
 
           # replace with functions from utils.R
           if (is.character(centroid) && centroid == "shape") {
-               family@allcent <- allcent_se
+               family@allcent <- allcent_se() # closure, utils.R
 
                family@preproc <- preproc_se
 
           } else if (is.character(centroid) && centroid == "dba") {
-               family@allcent <- allcent_dba(dba.iter, window.size, norm) # closure, utils.R
+               family@allcent <- allcent_dba(dba.iter, window.size, norm, trace) # closure, utils.R
 
           } else if (is.character(centroid) && centroid == "pam") {
                if (pam.precompute)
                     distmat <- distmat_pam(data, family) # utils.R
 
                ## Redefine family with new distmat (to update closures)
-               family <- kccaFamilies(distance, cent, window.size, norm, distmat) # utils.R
+               family <- kccaFamilies(distance = distance,
+                                      cent = cent,
+                                      window.size = window.size,
+                                      norm = norm,
+                                      distmat = distmat,
+                                      ...)
 
                family@allcent <- allcent_pam(distmat, family@dist) # another closure, utils.R
           }
@@ -380,15 +391,35 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                          stop("Only the following centroids are supported for series of different lengths:\n\tdba \tpam")
                }
 
-               if (is.function(centroid))
+               ## Replace allcent function with an appropriate one, either user provided or a custom for mean/median
+               if (is.function(centroid)) {
                     family@allcent <- centroid
 
+               } else if(is.character(centroid) && centroid == "mean") {
+                    family@allcent <- function(x, cluster, k) {
+                         X <- split(x, cluster)
+                         X <- lapply(X, function(l) t(sapply(l, rbind)))
+
+                         centers <- lapply(X, colMeans)
+                    }
+
+               } else if (is.character(centroid) && centroid == "median") {
+                    family@allcent <- function(x, cluster, k) {
+                         X <- split(x, cluster)
+                         X <- lapply(X, function(l) t(sapply(l, rbind)))
+
+                         centers <- lapply(X, function(x) apply(x, 2, stats::median))
+                    }
+               }
+
+               ## Cluster
                kc <- kcca.list(x = data,
                                k = k,
                                family = family,
                                control = ctrl)
 
           } else {
+               ## Cluster
                kc <- flexclust::kcca(x = data,
                                      k = k,
                                      family = family,
@@ -402,6 +433,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           ## ----------------------------------------------------------------------------------------------------------
 
           toc <- proc.time() - tic
+          class(toc) <- "numeric"
 
           if (save.data)
                datalist <- consistency_check(data, "tsmat")
@@ -413,7 +445,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                       distance = ifelse(is.function(distance), as.character(substitute(distance))[1], distance),
                       centroid = ifelse(is.function(centroid), as.character(substitute(centroid))[1], centroid),
                       preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc),
-                      datalist = datalist)
+                      datalist = datalist,
+                      proctime = toc)
 
           if (trace)
                cat("\n\tElapsed time is", toc["elapsed"], "seconds.\n\n")
@@ -434,9 +467,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           lengths <- sapply(x, length)
 
           if (length(unique(lengths)) > 1) {
-               if (!is.function(distance) && !(distance %in% c("dtw", "dtw2", "sbd")))
-                    stop("Only the following distances are supported for series of different lengths:\n
-                         \tdtw \tdtw2 \tsbd")
+               if (is.character(distance) &&
+                   (distance %in% c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd")) && # restrict check to these
+                   !(distance %in% c("dtw", "dtw2", "sbd")))
+                    stop("Only the following distances are supported for series of different lengths:\n\tdtw \tdtw2 \tsbd")
           }
 
           if (!is.null(preproc) && is.function(preproc)) {
@@ -514,7 +548,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                                 x <- lapply(x, zscore)
 
                                 proxy::dist(x = x, y = x,
-                                            method = "SBD",
+                                            method = "SBD", error.check = TRUE,
                                             ...)
                            },
 
@@ -531,14 +565,16 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                cat("\n\tPerforming hierarchical clustering...\n")
 
           ## Required form for 'hclust'
-          D <- D[lower.tri(D)]
+          DD <- D[lower.tri(D)]
 
           ## Needed attribute for 'hclust' (case sensitive)
-          attr(D, "Size") <- length(x)
+          attr(DD, "Size") <- length(x)
+          attr(DD, "method") <- attr(D, "method")
 
-          hc <- stats::hclust(D, method = method)
+          hc <- stats::hclust(DD, method = method)
 
           toc <- proc.time() - tic
+          class(toc) <- "numeric"
 
           if (trace)
                cat("\n\tElapsed time is", toc["elapsed"], "seconds.\n\n")
@@ -573,9 +609,17 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                preproc <- "none"
           }
 
-          x <- consistency_check(data, "tsmat")
+          if (is.list(data)) {
+               consistency_check(data, "tslist")
+               x <- data
+               data <- t(sapply(data, rbind))
 
-          consistency_check(x, "tslist")
+          } else if (is.matrix(data)) {
+               x <- consistency_check(data, "tsmat")
+
+          } else {
+               stop("Unsupported format for data")
+          }
 
           ## ----------------------------------------------------------------------------------------------------------
           ## Cluster
@@ -597,15 +641,19 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           ## Prepare results
           ## ----------------------------------------------------------------------------------------------------------
 
+          toc <- proc.time() - tic
+          class(toc) <- "numeric"
+
           if (save.data) {
                tadpc <- new("dtwclust",
                             type = type,
                             distance = "DTW2",
                             centroid = "TADPole (PAM)",
                             preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc),
+                            proctime = toc,
 
                             call = MYCALL,
-                            centers = data[R$centers, ],
+                            centers = data[R$centers, , drop = FALSE],
                             k = as.integer(k),
                             cluster = as.integer(R$cl),
                             data = modeltools::ModelEnvMatrix(designMatrix = data),
@@ -616,14 +664,13 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                             distance = "DTW2",
                             centroid = "TADPole (PAM)",
                             preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc),
+                            proctime = toc,
 
                             call = MYCALL,
-                            centers = data[R$centers, ],
+                            centers = data[R$centers, , drop = FALSE],
                             k = as.integer(k),
                             cluster = as.integer(R$cl))
           }
-
-          toc <- proc.time() - tic
 
           if (trace)
                cat("\n\tElapsed time is", toc["elapsed"], "seconds.\n\n")

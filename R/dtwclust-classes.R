@@ -10,6 +10,7 @@
 #'   \item \code{centroid}: A string indicating the centroid used with \code{\link{dtwclust}}.
 #'   \item \code{preproc}: A string indicating the preprocessing used with \code{\link{dtwclust}}.
 #'   \item \code{datalist}: The provided data in the form of a list, where each element is a time series.
+#'   \item \code{proctime}: Time during function execution, as measured by \code{proc.time()}.
 #' }
 #'
 #' Additionally, the class inherits from \code{\link[flexclust]{kccasimple-class}}, so most related slots and
@@ -26,4 +27,5 @@ setClass("dtwclust", contains = c("kccasimple"),
                    distance = "character",
                    centroid = "character",
                    preproc = "character",
-                   datalist = "list"))
+                   datalist = "list",
+                   proctime = "numeric"))

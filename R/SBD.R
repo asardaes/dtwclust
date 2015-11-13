@@ -12,6 +12,11 @@
 #'
 #' The output values lie between 0 and 2, with 0 indicating perfect similarity.
 #'
+#' @note
+#'
+#' If you wish to calculate the distance between several time series, it would be better to use the version
+#' registered with the 'proxy' package, since it includes some small optimizations. See the examples.
+#'
 #' @examples
 #'
 #' # load data
@@ -78,20 +83,67 @@ SBD <- function(x, y, znorm = FALSE) {
 # Wrapper for proxy::dist
 # ========================================================================================================
 
-SBD.proxy <- function(x, y, znorm = FALSE) {
+SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE) {
 
-     x <- as.numeric(x)
-     y <- as.numeric(y)
+     x <- consistency_check(x, "tsmat")
 
-     consistency_check(x, "ts")
-     consistency_check(y, "ts")
+     if (error.check)
+          consistency_check(x, "vltslist")
 
-     if (znorm)
-          CCseq <- NCCc(zscore(x), zscore(y))
-     else
-          CCseq <- NCCc(x,y)
+     if (is.null(y)) {
+          if(znorm) {
+               x <- lapply(x, function(xx) as.numeric(zscore(xx)))
+          }
 
-     dist <- 1 - max(CCseq)
+          y <- x
 
-     dist
+     } else {
+          y <- consistency_check(y, "tsmat")
+
+          if (error.check)
+               consistency_check(y, "vltslist")
+
+          if(znorm) {
+               x <- lapply(x, function(xx) as.numeric(zscore(xx)))
+               y <- lapply(y, function(yy) as.numeric(zscore(yy)))
+          }
+     }
+
+     ## Precompute FFTs, padding with zeros as necessary, which will be compensated later
+     L <- max(sapply(x, length)) + max(sapply(y, length)) - 1
+     fftlen <- nextn(L, 2)
+
+     fftx <- lapply(x, function(u) {
+          fft(c(u, rep(0L, fftlen-length(u))))
+     })
+
+     ffty <- lapply(y, function(v) {
+          fft(c(v, rep(0L, fftlen-length(v))))
+     })
+
+     ## Calculate distance matrix
+     D <- mapply(x, fftx, MoreArgs = list(Y = y, FFTY = ffty),
+                 FUN = function(x, fftx, Y, FFTY) {
+
+                      d <- mapply(Y, FFTY, MoreArgs = list(x = x, fftx = fftx),
+                                  FUN = function(y, ffty, x, fftx) {
+
+                                       CCseq <- Re(fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
+                                       ## Truncate to correct length
+                                       CCseq <- c(CCseq[(length(ffty)-length(y)+2):length(CCseq)],
+                                                  CCseq[1:length(x)])
+                                       CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
+
+                                       dd <- 1 - max(CCseq)
+
+                                       dd
+                                  })
+
+                      d
+                 })
+
+     attr(D, "class") <- "crossdist"
+     attr(D, "method") <- "SBD"
+
+     t(D)
 }

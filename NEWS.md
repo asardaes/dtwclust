@@ -1,10 +1,13 @@
 # NEWS
 
-## Version 1.1.1
+## Version 1.2.0
 * Added the option to prevent pre-computation of distance matrix when using PAM centroids
 * Added an example with a custom distance function
 * Using closures instead of relying on passing environments as attributes
-* Bug fixes (in case custom distances were used)
+* Optimized the SBD function registered with proxy, it's a lot faster now
+* Optimized clustering with DBA and shape_extraction so that centers are only recomputed if necessary
+* Added processing time slot to class definition
+* Several bug fixes (especially in case custom distances were used, and also for plot method)
 
 ## Version 1.1.0
 * Added more options to the plot method for custom time labels

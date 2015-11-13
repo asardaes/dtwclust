@@ -2,10 +2,12 @@
 # Return a custom family for kcca
 # ========================================================================================================
 
-kccaFamilies <- function(distance, cent, window.size, norm, distmat) {
+kccaFamilies <- function(distance, cent, window.size, norm, distmat, ...) {
 
      ## Closures will capture the values of the constants,
      ## so that I don't have to use environments anymore...
+
+     dots <- list(...)
 
      dtwdist <- switch(EXPR = distance,
 
@@ -16,7 +18,7 @@ kccaFamilies <- function(distance, cent, window.size, norm, distmat) {
                                  centers <- consistency_check(centers, "tsmat")
 
                                  if (!is.null(distmat))
-                                 d <- dsub_pam(x, centers, distmat)
+                                      d <- dsub_pam(x, centers, distmat)
                                  else if (is.null(window.size)) {
                                       d <- proxy::dist(x = x, y = centers,
                                                        method = "DTW", dist.method = "L1")
@@ -126,7 +128,7 @@ kccaFamilies <- function(distance, cent, window.size, norm, distmat) {
                                       d <- dsub_pam(x, centers, distmat)
                                  else {
                                       d <- proxy::dist(x = x, y = centers,
-                                                       method = "SBD")
+                                                       method = "SBD", error.check = FALSE)
                                  }
 
                                  d
@@ -143,8 +145,12 @@ kccaFamilies <- function(distance, cent, window.size, norm, distmat) {
                             if (!is.null(distmat))
                                  d <- dsub_pam(x, centers, distmat)
                             else {
-                                 d <- proxy::dist(x = x, y = centers,
-                                                  method = distance)
+                                 ## do.call to ensure that the 'dots' argument is passed as '...'
+                                 d <- do.call(proxy::dist,
+                                              args = c(list(x = x,
+                                                            y = centers,
+                                                            method = distance),
+                                                       dots))
                             }
 
                             d
@@ -172,7 +178,7 @@ consistency_check <- function(obj, case) {
           if (!is.numeric(obj)) {
                stop("The series must be numeric")
           }
-          if (!is.vector(obj)) {
+          if (!is.null(dim(obj)) && min(dim(obj)) != 1) {
                stop("The series must be univariate vectors")
           }
           if (length(obj) < 1) {
@@ -189,7 +195,9 @@ consistency_check <- function(obj, case) {
           if (length(obj) < 1)
                stop("Data is empty")
 
-          if (any(!sapply(obj, is.vector)))
+          if (any(sapply(obj, function(obj) {
+               ifelse(!is.null(dim(obj)) && min(dim(obj)) != 1, TRUE, FALSE)
+          })))
                stop("Each element of the list must be a univariate vector")
 
           if (any(!sapply(obj, is.numeric)))
@@ -214,7 +222,9 @@ consistency_check <- function(obj, case) {
           if (length(obj) < 1)
                stop("Data is empty")
 
-          if (any(!sapply(obj, is.vector)))
+          if (any(sapply(obj, function(obj) {
+               ifelse(!is.null(dim(obj)) && min(dim(obj)) != 1, TRUE, FALSE)
+          })))
                stop("Each element of the list must be a univariate vector")
 
           if (any(!sapply(obj, is.numeric)))
@@ -346,43 +356,11 @@ distmat_pam <- function(x, fam) {
 # Custom functions when using SBD averaging
 # ========================================================================================================
 
-# Custom function to obtain centroids when using SBD averaging
+# Custom function (closure) to obtain centroids when using SBD averaging
 
-allcent_se <- function(x, cluster, k) {
+allcent_se <- function() {
 
-     # This will be read from parent environment
-     cen <- get("centers", envir=parent.frame())
-     C <- consistency_check(cen, "tsmat")
-
-     X <- split.data.frame(x, cluster)
-
-     cl <- sort(unique(cluster))
-
-     ## notice that the centers have to be in ascending order
-     new.C <- mapply(X, C[cl],
-                     FUN = function(x, c) {
-                          new.c <- shape_extraction(x, c)
-
-                          new.c
-                     })
-
-     t(new.C)
-}
-
-# Preprocessing when using shape_extraction (z-normalization)
-
-preproc_se <- function (x) {
-     xz <- apply(x, 1, zscore)
-     attr(xz,"env") <- attr(x,"env")
-     t(xz)
-}
-
-# ========================================================================================================
-# Custom function to obtain centroids when using DBA
-# ========================================================================================================
-
-allcent_dba <- function(dba.iter, window.size, norm) {
-     ## Closure
+     cluster.old <- NULL
 
      foo <- function(x, cluster, k) {
 
@@ -390,31 +368,135 @@ allcent_dba <- function(dba.iter, window.size, norm) {
           cen <- get("centers", envir=parent.frame())
           C <- consistency_check(cen, "tsmat")
 
-          cl <- sort(unique(cluster))
-
           if (is.matrix(x)) {
                X <- split.data.frame(x, cluster)
-
           } else if (is.list(x)) {
-               indXC <- lapply(cl, function(i.cl) which(cluster == i.cl))
-               X <- lapply(indXC, function(ii) x[ii])
+               X <- split(x, cluster)
+               X <- lapply(X, function(l) t(sapply(l, rbind)))
+          }
 
-          } else
-               stop("Invalid format for data")
+          cl <- sort(unique(cluster))
 
-          new.C <- mapply(X, C,
-                          FUN = function(x, c) {
-                               new.c <- DBA(x, c,
-                                            norm = norm, window.size = window.size,
-                                            max.iter = dba.iter, error.check = FALSE)
+          ## Check which clusters changed
+          if (is.null(cluster.old)) {
+               indChanged <- cl
 
-                               new.c
-                          })
+          } else {
+               idchng <- cluster != cluster.old
+               indChanged <- which( cl %in% sort(unique(c( cluster[idchng], cluster.old[idchng] ))) )
+          }
 
-          if (is.matrix(new.C))
-               return(t(new.C))
-          else
-               return(new.C)
+          if(length(indChanged) == 0) {
+               return(cen)
+          }
+
+          cluster.old <<- cluster # update
+
+          new.C <- cen # initialize
+
+          ## recompute centers for the clusters that changed
+          if(is.matrix(cen)) {
+               new.C[indChanged, ] <- t(mapply(X[indChanged], C[indChanged],
+                                               FUN = function(x, c) {
+                                                    new.c <- shape_extraction(x, c)
+
+                                                    new.c
+                                               }))
+
+          } else if (is.list(cen)) {
+               new.C[indChanged] <- mapply(X[indChanged], C[indChanged], SIMPLIFY = FALSE,
+                                           FUN = function(x, c) {
+                                                new.c <- shape_extraction(x, c)
+
+                                                new.c
+                                           })
+          }
+
+          new.C
+     }
+
+     foo
+}
+
+# Preprocessing when using shape_extraction (z-normalization)
+
+preproc_se <- function (x) {
+     if (is.matrix(x)) {
+          xz <- apply(x, 1, zscore)
+          t(xz)
+
+     } else if (is.list(x)) {
+          xz <- lapply(x, zscore)
+     }
+}
+
+# ========================================================================================================
+# Custom function to obtain centroids when using DBA
+# ========================================================================================================
+
+allcent_dba <- function(dba.iter, window.size, norm, trace) {
+
+     cluster.old <- NULL
+
+     ## Closure
+     foo <- function(x, cluster, k) {
+
+          # This will be read from parent environment
+          cen <- get("centers", envir=parent.frame())
+          C <- consistency_check(cen, "tsmat")
+          x <- consistency_check(x, "tsmat")
+
+          cl <- sort(unique(cluster))
+
+          indXC <- lapply(cl, function(i.cl) which(cluster == i.cl))
+          X <- lapply(indXC, function(ii) x[ii])
+
+          ## Check which clusters changed
+          if (is.null(cluster.old)) {
+               indChanged <- cl
+
+          } else {
+               idchng <- cluster != cluster.old
+               indChanged <- which( cl %in% sort(unique(c( cluster[idchng], cluster.old[idchng] ))) )
+          }
+
+          if(length(indChanged) == 0) {
+               return(cen)
+          }
+
+          cluster.old <<- cluster # update
+
+          new.C <- cen # initialize
+
+          ## Recompute centers for those clusters that changed
+          if (is.matrix(cen)) {
+               new.C[indChanged, ] <- t(mapply(X[indChanged], C[indChanged], indChanged,
+                                               FUN = function(x, c, i) {
+                                                    if(trace)
+                                                         cat("\t\tComputing DBA center ", i, "...\n", sep = "")
+
+                                                    new.c <- DBA(x, c,
+                                                                 norm = norm, window.size = window.size,
+                                                                 max.iter = dba.iter, error.check = FALSE)
+
+                                                    new.c
+                                               }))
+
+          } else if (is.list(cen)) {
+               new.C[indChanged] <- mapply(X[indChanged], C[indChanged], indChanged, SIMPLIFY = FALSE,
+                                           FUN = function(x, c, i) {
+                                                if(trace)
+                                                     cat("\t\tComputing DBA center ", i, "...\n", sep = "")
+
+                                                new.c <- DBA(x, c,
+                                                             norm = norm, window.size = window.size,
+                                                             max.iter = dba.iter, error.check = FALSE)
+
+                                                new.c
+                                           })
+          }
+
+          new.C
      }
 
      foo

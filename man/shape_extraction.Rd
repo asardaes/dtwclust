@@ -4,7 +4,7 @@
 \alias{shape_extraction}
 \title{Shape average of several time series}
 \usage{
-shape_extraction(X, cz = NULL, znorm = TRUE)
+shape_extraction(X, cz = NULL, znorm = FALSE)
 }
 \arguments{
 \item{X}{Numeric matrix where each row is a time series.}
