@@ -43,7 +43,6 @@
 #' }
 #'
 #' @export
-#' @importFrom caTools combs
 
 TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
 
@@ -53,7 +52,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
 
      if (n < 2)
           stop("data should have more than one time series")
-     if (k >= n)
+     if (k > n)
           stop("Number of clusters should be less than the number of time series")
 
      ## Calculate matrices with bounds
@@ -79,30 +78,25 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
 
      ## Initialize matrices
      D <- matrix(NA, n, n)
-     Flags <- matrix(-1, n, n)
+     Flags <- matrix(-1L, n, n)
 
-     ## Obtain pairs with possible combinations for the upper triangular part of the matrix (n choose k)
-     nck <- caTools::combs(seq_len(n), 2)
-     ## Order it according to columns (in order to be able to assign it after wards with 'upper.tri')
-     nck <- nck[sort(nck[,2], index.return = TRUE)$ix, ]
+     ## Calculate values for the upper triangular part of the flag matrix (column-wise)
+     utv <- unlist(lapply(2:n, function(j) {
 
-     ## Calculate values for the upper triangular part of the flag matrix
-     utv <- apply(nck, 1, function(ij) {
+          sapply(1:(j-1), function(i) {
 
-          i <- ij[1]
-          j <- ij[2]
+               if (LBM[i,j]<=dc && UBM[i,j]>dc)
+                    f <- 1L
+               else if (LBM[i,j]<=dc && UBM[i,j]<dc)
+                    f <- 2L
+               else if (LBM[i,j] > dc)
+                    f <- 3L
+               else
+                    f <- 4L
 
-          if (LBM[i,j]<=dc && UBM[i,j]>dc)
-               f <- 1
-          else if (LBM[i,j]<=dc && UBM[i,j]<dc)
-               f <- 2
-          else if (LBM[i,j] > dc)
-               f <- 3
-          else
-               f <- 4
-
-          f
-     })
+               f
+          })
+     }))
 
      ## NOTE: only the upper triangular is filled here to avoid unnecessary calculations of DTW
      Flags[upper.tri(Flags)] <- utv
@@ -110,7 +104,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
      ## Calculate full DTW for those entries whose lower bounds lie around 'dc'
      ind1 <- which(Flags == 1, arr.ind = TRUE)
 
-     if (length(ind1) > 0) {
+     if (nrow(ind1) > 0) {
           d1 <- proxy::dist(x[ind1[, 1]], x[ind1[, 2]], method = "DTW2",
                             step.pattern = step.pattern,
                             window.type = "slantedband", window.size = window.size,
@@ -132,7 +126,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
           stop("No density peaks detected, choose a different value for cutoff distance 'dc'")
 
      if (max(Rho) == min(Rho))
-          Rho <- Rho / max(Rho)
+          Rho <- rep(1L, length(Rho))
      else
           Rho <- (Rho - min(Rho)) / (max(Rho) - min(Rho))
 
@@ -211,15 +205,18 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
      ## ============================================================================================================================
 
      ## Normalize
-     zDelta <- (delta - min(delta)) / (max(delta) - min(delta))
+     if(max(delta) == min(delta))
+          zDelta <- rep(1L, length(delta))
+     else
+          zDelta <- (delta - min(delta)) / (max(delta) - min(delta))
 
      ## Those with the most density are the cluster centers (PAM)
      C <- sort(Rho * zDelta[indOrig], decreasing = TRUE, index.return = TRUE)$ix[1:k]
      C <- sort(C)
 
      ## Assign a unique number to each cluster center
-     cl <- rep(-1, n)
-     cl[C] <- 1:k
+     cl <- rep(-1L, n)
+     cl[C] <- 1L:k
 
      ## Which elements don't have a label yet (this is ordered according to the density values of TADPorder,
      ## because the assignment is sequential)
@@ -234,8 +231,12 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
      ## How many calculations were actually performed
      distCalc <-  sum(utv == 1) + sum(DNN[,3])
 
+     if(any(cl == -1))
+          warning(c("At least one series wasn't assigned to a cluster. ",
+                    "This shouldn't happen, please contact maintainer."))
+
      ## Return
      list(cl = cl,
           centers = C,
-          distCalcPercentage = (distCalc / (n * (n+1) / 2)) * 100)
+          distCalcPercentage = (distCalc / (n * (n+1) / 2 - n)) * 100)
 }

@@ -48,6 +48,8 @@
 #' }
 #'
 #' @export
+#' @importFrom stats nextn
+#' @importFrom stats fft
 
 SBD <- function(x, y, znorm = FALSE) {
 
@@ -111,14 +113,14 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE) {
 
      ## Precompute FFTs, padding with zeros as necessary, which will be compensated later
      L <- max(sapply(x, length)) + max(sapply(y, length)) - 1
-     fftlen <- nextn(L, 2)
+     fftlen <- stats::nextn(L, 2)
 
      fftx <- lapply(x, function(u) {
-          fft(c(u, rep(0L, fftlen-length(u))))
+          stats::fft(c(u, rep(0L, fftlen-length(u))))
      })
 
      ffty <- lapply(y, function(v) {
-          fft(c(v, rep(0L, fftlen-length(v))))
+          stats::fft(c(v, rep(0L, fftlen-length(v))))
      })
 
      ## Calculate distance matrix
@@ -128,7 +130,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE) {
                       d <- mapply(Y, FFTY, MoreArgs = list(x = x, fftx = fftx),
                                   FUN = function(y, ffty, x, fftx) {
 
-                                       CCseq <- Re(fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
+                                       CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
                                        ## Truncate to correct length
                                        CCseq <- c(CCseq[(length(ffty)-length(y)+2):length(CCseq)],
                                                   CCseq[1:length(x)])

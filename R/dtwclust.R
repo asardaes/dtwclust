@@ -129,35 +129,30 @@
 #'
 #' @examples
 #'
-#' # Load data
+#' #### Load data
 #' data(uciCT)
 #'
 #' # Reinterpolate to same length and coerce as matrix
-#' data <- t(sapply(CharTraj, reinterpolate, newLength = 205))
+#' data <- t(sapply(CharTraj, reinterpolate, newLength = 180))
+#'
+#' # Subset for speed
+#' data <- data[1:20, ]
+#' labels <- CharTrajLabels[1:20]
 #'
 #' #### Simple partitional clustering with L2 distance and PAM
-#' kc.l2 <- dtwclust(data, k = 20, distance = "L2", centroid = "pam",
+#' kc.l2 <- dtwclust(data, k = 4, distance = "L2", centroid = "pam",
 #'                   seed = 3247, trace = TRUE)
-#' cat("Rand index for L2+PAM:", randIndex(kc.l2, CharTrajLabels), "\n\n")
+#' cat("Rand index for L2+PAM:", randIndex(kc.l2, labels), "\n\n")
 #'
-#' \dontrun{
-#' #### Saving and modifying the ggplot object with custom time
-#' t <- seq(Sys.Date(), len = 205, by = "day")
-#' gkc <- plot(kc.l2, time = t, plot = FALSE)
-#'
-#' require(scales)
-#' gkc + scale_x_date(labels = date_format("%b-%Y"),
-#'                    breaks = date_breaks("2 months"))
-#' }
-#'
-#' #### TADPole clustering (takes around 5 seconds)
-#' kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
-#'                     window.size = 20, dc = 1.5)
-#' cat("Rand index for TADPole:", randIndex(kc.tadp, CharTrajLabels), "\n\n")
+#' #### TADPole clustering
+#' kc.tadp <- dtwclust(data, type = "tadpole", k = 4,
+#'                     window.size = 20, dc = 1.5,
+#'                     trace = TRUE)
+#' cat("Rand index for TADPole:", randIndex(kc.tadp, labels), "\n\n")
 #' plot(kc.tadp)
 #'
 #' # Modify plot
-#' plot(kc.tadp, cl = 1:4, labs.arg = list(title = "TADPole, clusters 1 through 4",
+#' plot(kc.tadp, cl = 1:2, labs.arg = list(title = "TADPole, clusters 1 and 2",
 #'                                         x = "time", y = "series"))
 #'
 #' #### Registering a custom distance with the 'proxy' package and using it
@@ -173,21 +168,29 @@
 #'                        description = "Normalized DTW with L1 norm")
 #'
 #' # Subset of (original) data for speed
-#' # Change pam.precompute to TRUE to see time difference
+#' # Change pam.precompute to FALSE to see time difference
 #' kc.ndtw <- dtwclust(CharTraj[31:40], distance = "nDTW",
-#'                     trace = TRUE, pam.precompute = FALSE,
+#'                     trace = TRUE, pam.precompute = TRUE,
 #'                     seed = 8319)
 #' cat("Rand index for nDTW (subset):",
 #'     randIndex(kc.ndtw, CharTrajLabels[31:40]), "\n\n")
 #' plot(kc.ndtw)
 #'
-#' #### Hierarchical clustering based on shabe-based distance
+#' #### Hierarchical clustering based on shabe-based distance (different lengths)
 #' hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
 #'                    distance = "sbd", trace = TRUE)
 #' cl.sbd <- cutree(hc.sbd, 20)
 #' cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\n\n")
 #'
 #' \dontrun{
+#' #### Saving and modifying the ggplot object with custom time
+#' t <- seq(Sys.Date(), len = 205, by = "day")
+#' gkc <- plot(kc.l2, time = t, plot = FALSE)
+#'
+#' require(scales)
+#' gkc + scale_x_date(labels = date_format("%b-%Y"),
+#'                    breaks = date_breaks("2 months"))
+#'
 #' #### Use full DTW and PAM (takes around two minutes)
 #' kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, trace = TRUE)
 #'
@@ -632,7 +635,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
 
           if (trace) {
                cat("\nTADPole completed, pruning percentage = ",
-                   formatC(100-R$distCalcPercentage, format = "fg", digits = 3),
+                   formatC(100-R$distCalcPercentage, digits = 3, width = -1, format = "fg"),
                    "%\n",
                    sep = "")
           }

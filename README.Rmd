@@ -75,6 +75,7 @@ hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
                    distance = "sbd", trace = TRUE)
 cl.sbd <- cutree(hc.sbd, 20)
 cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\n\n")
+plot(hc.sbd)
 
 #### TADPole clustering
 kc.tadp <- dtwclust(data, type = "tadpole", k = 20,

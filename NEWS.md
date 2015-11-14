@@ -8,6 +8,7 @@
 * Optimized clustering with DBA and shape_extraction so that centers are only recomputed if necessary
 * Added processing time slot to class definition
 * Several bug fixes (especially in case custom distances were used, and also for plot method)
+* Fixed minor bugs in TADPole
 
 ## Version 1.1.0
 * Added more options to the plot method for custom time labels
