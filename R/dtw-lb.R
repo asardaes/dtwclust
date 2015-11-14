@@ -52,7 +52,7 @@
 #'
 #' # Same results?
 #' all(NN1 == NN2)
-#' 
+#'
 #' @author Alexis Sarda-Espinosa
 #'
 #' @param x A matrix where rows are time series, or a list of time series.

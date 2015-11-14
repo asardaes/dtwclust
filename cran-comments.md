@@ -1,5 +1,5 @@
 ## Update to version 1.2.0
-* Improvements and error fixes
+* Optimizations and bug fixes
 
 ## Test environments
 * Local Windows 10, R 3.2.2
