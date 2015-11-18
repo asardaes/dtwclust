@@ -436,7 +436,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           ## ----------------------------------------------------------------------------------------------------------
 
           toc <- proc.time() - tic
-          class(toc) <- "numeric"
 
           if (save.data)
                datalist <- consistency_check(data, "tsmat")
@@ -645,7 +644,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           ## ----------------------------------------------------------------------------------------------------------
 
           toc <- proc.time() - tic
-          class(toc) <- "numeric"
 
           if (save.data) {
                tadpc <- new("dtwclust",

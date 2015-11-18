@@ -31,6 +31,9 @@ printing anything to screen}
 \emph{cluster centers}. Default values are: \code{linetype = "dashed"}, \code{size = 1.5},
 \code{colour = "black"}, \code{alpha = 0.5}.}
 }
+\value{
+A \code{gg} object invisibly.
+}
 \description{
 Plots the time series of each cluster along with the obtained centroid. It uses \code{ggplot2} plotting
 system.

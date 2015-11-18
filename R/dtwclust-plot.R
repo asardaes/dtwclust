@@ -12,7 +12,6 @@
 #' might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 #'
 #' @name plot-dtwclust
-#' @docType methods
 #' @rdname plot-methods
 #'
 #' @seealso \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}}
@@ -30,6 +29,8 @@
 #' @param ... Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
 #' \emph{cluster centers}. Default values are: \code{linetype = "dashed"}, \code{size = 1.5},
 #' \code{colour = "black"}, \code{alpha = 0.5}.
+#'
+#' @return A \code{gg} object invisibly.
 #'
 #' @exportMethod plot
 #' @import ggplot2

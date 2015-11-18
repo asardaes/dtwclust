@@ -1,7 +1,5 @@
-## Update to version 1.2.0 (re-submission)
-* Optimizations and bug fixes
-* Added missing imports from stats
-* Reduced running time of examples
+## Update to version 
+
 
 ## Test environments
 * Local Windows 10, R 3.2.2

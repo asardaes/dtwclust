@@ -1,5 +1,7 @@
 # NEWS
 
+## Version 1.2.1
+
 ## Version 1.2.0
 * Added the option to prevent pre-computation of distance matrix when using PAM centroids
 * Added an example with a custom distance function
