@@ -81,7 +81,7 @@ plot(hc.sbd)
 kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
                     window.size = 20, dc = 1.5, trace = TRUE)
 
-plot(kc.tadp, cl = 1:4)
+plot(kc.tadp, clus = 1:4)
 ```
 
 ## Dependencies

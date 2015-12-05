@@ -102,6 +102,29 @@
 #' The function will receive the data as first argument and, in case hierarchical methods are used, the
 #' contents of \code{...} as the second argument.
 #'
+#' @section Repetitions:
+#'
+#' Due to their stochastic nature, partitional clustering is usually repeated several times with different random
+#' seeds to allow for different starting points. This function can now run several repetitions by using the
+#' \code{doRNG} package. This package ensures that each repetition uses a statistically independent random sequence.
+#' The user only needs to provide an initial seed in the corresponding parameter of this function.
+#'
+#' Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is precomputed,
+#' since said matrix is reused for every repetition.
+#'
+#' Additionally, the user can register a parallel backend with the \code{doParallel} package in order to do the
+#' repetitions in parallel (see the examples). Please note that running tasks in parallel does \strong{not} guarantee
+#' faster computations. The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+#' Unless each repetitions requires a few seconds, parallel computing probably isn't worth it. As such, I would only
+#' use this feature with \code{shape} and \code{DBA} centroids, or for \code{pam.precompute} \code{=} \code{FALSE}
+#' with a relatively small \code{k} and an expensive distance function like \code{DTW}.
+#'
+#' Be aware that parallel computation is only used for the clustering itself. If the distance matrix is precomputed,
+#' that calculation will be done sequentially.
+#'
+#' If you do more than 1 repetition sequentially, you can safely ignore the warning given by \code{doRNG} about
+#' no parallel backend registration.
+#'
 #' @section Notes:
 #'
 #' Notice that the lower bounds are defined only for time series of equal lengths. \code{DTW} and \code{DTW2}
@@ -152,8 +175,8 @@
 #' plot(kc.tadp)
 #'
 #' # Modify plot
-#' plot(kc.tadp, cl = 1:2, labs.arg = list(title = "TADPole, clusters 1 and 2",
-#'                                         x = "time", y = "series"))
+#' plot(kc.tadp, clus = 3:4, labs.arg = list(title = "TADPole, clusters 3 and 4",
+#'                                           x = "time", y = "series"))
 #'
 #' #### Registering a custom distance with the 'proxy' package and using it
 #' # Normalized DTW distance
@@ -184,25 +207,48 @@
 #'
 #' \dontrun{
 #' #### Saving and modifying the ggplot object with custom time
-#' t <- seq(Sys.Date(), len = 205, by = "day")
+#' t <- seq(Sys.Date(), len = 180, by = "day")
 #' gkc <- plot(kc.l2, time = t, plot = FALSE)
 #'
 #' require(scales)
 #' gkc + scale_x_date(labels = date_format("%b-%Y"),
 #'                    breaks = date_breaks("2 months"))
 #'
-#' #### Use full DTW and PAM (takes around two minutes)
+#' #### Use full DTW and PAM (takes around 1 minute)
 #' kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, trace = TRUE)
 #'
-#' #### Use full DTW with DBA centroids (takes around five minutes)
+#' #### Use full DTW with DBA centroids (takes around 1 minute)
 #' kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
 #'
-#' #### Use constrained DTW with original series of different lengths (around one minute)
+#' #### Use constrained DTW with original series of different lengths (takes around 1 minute)
 #' kc.cdtw <- dtwclust(CharTraj, k = 20, window.size = 20,
 #'                     seed = 3251, trace = TRUE)
 #'
-#' # Plot one of the clusters
-#' plot(kc.cdtw, cl=18)
+#' #### Using parallel computing to optimize several random repetitions
+#' # This uses the "nDTW" function registered in another example above
+#' require(doParallel)
+#'
+#' # Create parallel workers
+#' cl <- makeCluster(detectCores())
+#' registerDoParallel(cl)
+#'
+#' # For reference, this took around 2.5 minutes with 8 cores (all 8 repetitions).
+#' # The second 'window' is used instead of 'window.size' to ensure it is given to the custom
+#' # distance function in '...'. Same goes for 'window.type'.
+#' kc.ndtw.list <- dtwclust(CharTraj, k = 20, distance = "nDTW",
+#'                          centroid = "dba", window.size = 10,
+#'                          preproc = zscore, window.type = "slantedband", window = 10,
+#'                          seed = 8319, save.data = FALSE, reps = 8L)
+#'
+#' # Stop parallel workers
+#' stopCluster(cl)
+#'
+#' # Return to sequential computations
+#' registerDoSEQ()
+#'
+#' # See Rand Index for each repetition
+#' sapply(kc.ndtw.list, randIndex, y = CharTrajLabels)
+#'
 #' }
 #'
 #' @seealso
@@ -237,23 +283,27 @@
 #' @param save.data Return a copy of the data in the returned object? Ignored for hierarchical clustering.
 #' @param seed Random seed for reproducibility of partitional algorithms.
 #' @param trace Boolean flag. If true, more output regarding the progress is printed to screen.
+#' @param reps How many times to repeat partitional clustering with different starting points. See section Repetitions.
 #' @param ... Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function.
 #'
 #' @return An object with formal class \code{\link{dtwclust-class}} if \code{type = "partitional" | "tadpole"}.
-#' Otherwise an object with class \code{hclust} as returned by \code{\link[stats]{hclust}}.
+#' Otherwise an object with class \code{hclust} as returned by \code{\link[stats]{hclust}}. If \code{reps > 1}
+#' and a partitional procedure is used, a list of objects is returned.
 #'
 #' @export
 #' @import flexclust
+#' @import doRNG
+#' @import proxy
+#' @importFrom foreach foreach
 #' @importFrom stats median
 #' @importFrom stats hclust
-#' @importFrom proxy dist
 #' @importFrom modeltools ModelEnvMatrix
 
 dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average",
                      distance = "dtw", centroid = "pam", preproc = NULL,
                      window.size = NULL, norm = "L1", dc = NULL,
-                     dba.iter = 50, pam.precompute = TRUE, control = NULL,
-                     save.data = TRUE, seed = NULL, trace = FALSE,
+                     dba.iter = 15, pam.precompute = TRUE, control = NULL,
+                     save.data = TRUE, seed = NULL, trace = FALSE, reps = 1L,
                      ...)
 {
      ## =================================================================================================================
@@ -276,6 +326,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
 
           if (k < 2)
                stop("At least two clusters must be defined")
+          if (reps < 1)
+               stop("At least one repetition must be performed")
 
           if (is.function(centroid)) {
                cent <- centroid
@@ -333,16 +385,17 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                family@allcent <- allcent_dba(dba.iter, window.size, norm, trace) # closure, utils.R
 
           } else if (is.character(centroid) && centroid == "pam") {
-               if (pam.precompute)
+               if (pam.precompute) {
                     distmat <- distmat_pam(data, family) # utils.R
 
-               ## Redefine family with new distmat (to update closures)
-               family <- kccaFamilies(distance = distance,
-                                      cent = cent,
-                                      window.size = window.size,
-                                      norm = norm,
-                                      distmat = distmat,
-                                      ...)
+                    ## Redefine family with new distmat (to update closures)
+                    family <- kccaFamilies(distance = distance,
+                                           cent = cent,
+                                           window.size = window.size,
+                                           norm = norm,
+                                           distmat = distmat,
+                                           ...)
+               }
 
                family@allcent <- allcent_pam(distmat, family@dist) # another closure, utils.R
           }
@@ -369,8 +422,12 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
           else
                ctrl <- as(control, "flexclustControl")
 
-          if (trace)
-               ctrl@verbose <- 1
+          if (trace) {
+               if (reps > 1L)
+                    message("Tracing will not be available if parallel computing is used.")
+
+               ctrl@verbose <- 1L
+          }
 
           if (!is.null(seed))
                set.seed(seed)
@@ -416,19 +473,59 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
                }
 
                ## Cluster
-               kc <- kcca.list(x = data,
-                               k = k,
-                               family = family,
-                               control = ctrl)
+               if (reps > 1L) {
+                    ## I need to re-register any custom distances in each parallel worker
+                    if (is.character(distance))
+                         dist_entry <- proxy::pr_DB$get_entry(distance)
+
+                    kc.list <- foreach(i = 1:reps,
+                                       .combine = list,
+                                       .multicombine = TRUE,
+                                       .packages = "dtwclust") %dorng% {
+                                            if (!proxy::pr_DB$entry_exists(dist_entry$names[1]))
+                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
+
+                                            kcca.list(x = data,
+                                                      k = k,
+                                                      family = family,
+                                                      control = ctrl)
+                                       }
+               } else {
+                    kc.list <- kcca.list(x = data,
+                                         k = k,
+                                         family = family,
+                                         control = ctrl)
+               }
 
           } else {
                ## Cluster
-               kc <- flexclust::kcca(x = data,
-                                     k = k,
-                                     family = family,
-                                     simple = TRUE,
-                                     control = ctrl,
-                                     save.data = save.data)
+               if (reps > 1L) {
+                    ## I need to re-register any custom distances in each parallel worker
+                    if (is.character(distance))
+                         dist_entry <- proxy::pr_DB$get_entry(distance)
+
+                    kc.list <- foreach(i = 1:reps,
+                                       .combine = list,
+                                       .multicombine = TRUE,
+                                       .packages = "dtwclust") %dorng% {
+                                            if (!proxy::pr_DB$entry_exists(dist_entry$names[1]))
+                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
+
+                                            flexclust::kcca(x = data,
+                                                            k = k,
+                                                            family = family,
+                                                            simple = TRUE,
+                                                            control = ctrl,
+                                                            save.data = save.data)
+                                       }
+               } else {
+                    kc.list <-flexclust::kcca(x = data,
+                                              k = k,
+                                              family = family,
+                                              simple = TRUE,
+                                              control = ctrl,
+                                              save.data = save.data)
+               }
           }
 
           ## ----------------------------------------------------------------------------------------------------------
@@ -437,18 +534,36 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2, method = "average
 
           toc <- proc.time() - tic
 
-          if (save.data)
+          if (save.data) {
                datalist <- consistency_check(data, "tsmat")
-          else
+
+               if (reps > 1L)
+                    message("\nConsider setting save.data to FALSE if performing several repetitions.")
+          } else
                datalist <- list()
 
-          dtwc <- new("dtwclust", kc,
-                      type = type,
-                      distance = ifelse(is.function(distance), as.character(substitute(distance))[1], distance),
-                      centroid = ifelse(is.function(centroid), as.character(substitute(centroid))[1], centroid),
-                      preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc),
-                      datalist = datalist,
-                      proctime = toc)
+          if (is.list(kc.list)) {
+
+               dtwc <- lapply(kc.list, function(kc) {
+                    new("dtwclust", kc,
+                        type = type,
+                        distance = ifelse(is.function(distance), as.character(substitute(distance))[1], distance),
+                        centroid = ifelse(is.function(centroid), as.character(substitute(centroid))[1], centroid),
+                        preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc),
+                        datalist = datalist,
+                        proctime = toc)
+               })
+
+          } else {
+
+               dtwc <- new("dtwclust", kc.list,
+                           type = type,
+                           distance = ifelse(is.function(distance), as.character(substitute(distance))[1], distance),
+                           centroid = ifelse(is.function(centroid), as.character(substitute(centroid))[1], centroid),
+                           preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc),
+                           datalist = datalist,
+                           proctime = toc)
+          }
 
           if (trace)
                cat("\n\tElapsed time is", toc["elapsed"], "seconds.\n\n")

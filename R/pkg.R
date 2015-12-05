@@ -85,7 +85,7 @@ NULL
      if (proxy::pr_DB$entry_exists("DTW2"))
           proxy::pr_DB$delete_entry("DTW2")
 
-     proxy::pr_DB$set_entry(FUN = dtw2, names=c("DTW2"),
+     proxy::pr_DB$set_entry(FUN = dtw2, names=c("DTW2", "dtw2"),
                             loop = TRUE, type = "metric", distance = TRUE,
                             description = "DTW with L2 as pointwise norm")
 
@@ -94,7 +94,7 @@ NULL
      if (proxy::pr_DB$entry_exists("LB_Keogh"))
           proxy::pr_DB$delete_entry("LB_keogh")
 
-     proxy::pr_DB$set_entry(FUN = lb_keogh_loop, names=c("LBK", "LB_Keogh"),
+     proxy::pr_DB$set_entry(FUN = lb_keogh_loop, names=c("LBK", "LB_Keogh", "lbk"),
                             loop = FALSE, type = "metric", distance = TRUE,
                             description = "Keogh's DTW lower bound but using L1 norm")
 
@@ -104,7 +104,7 @@ NULL
      if (proxy::pr_DB$entry_exists("LB_Improved"))
           proxy::pr_DB$delete_entry("LB_Improved")
 
-     proxy::pr_DB$set_entry(FUN = lb_improved_loop, names=c("LBI", "LB_Improved"),
+     proxy::pr_DB$set_entry(FUN = lb_improved_loop, names=c("LBI", "LB_Improved", "lbi"),
                             loop = FALSE, type = "metric", distance = TRUE,
                             description = "Lemire's improved DTW lower bound using L1 norm")
 
@@ -113,7 +113,7 @@ NULL
      if (proxy::pr_DB$entry_exists("SBD"))
           proxy::pr_DB$delete_entry("SBD")
 
-     proxy::pr_DB$set_entry(FUN = SBD.proxy, names=c("SBD", "shape"),
+     proxy::pr_DB$set_entry(FUN = SBD.proxy, names=c("SBD", "sbd"),
                             loop = FALSE, type = "metric", distance = TRUE,
                             description = "Paparrizos' shape-based distance for time series")
 }

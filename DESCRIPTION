@@ -1,8 +1,8 @@
 Package: dtwclust
 Type: Package
 Title: Time Series Clustering with Dynamic Time Warping
-Version: 1.2.1.9000
-Date: 2015-11-18
+Version: 1.3.0.9000
+Date: 2015-12-05
 Depends:
     flexclust,
     proxy,
@@ -13,9 +13,12 @@ Imports:
     methods,
     caTools,
     reshape2,
-    modeltools
+    modeltools,
+    doRNG,
+    foreach
 Suggests:
-    TSdist
+    TSdist,
+    doParallel
 Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
 Description: Time series clustering using different techniques related to the

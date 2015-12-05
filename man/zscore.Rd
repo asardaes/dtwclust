@@ -7,7 +7,7 @@
 zscore(x, ...)
 }
 \arguments{
-\item{x}{Data to normalize.}
+\item{x}{Data to normalize. Either a vector or a list of vectors.}
 
 \item{...}{Further arguments to pass to \code{\link[base]{scale}}.}
 }
@@ -15,6 +15,7 @@ zscore(x, ...)
 Normalized data.
 }
 \description{
-Wrapper for function \code{\link[base]{scale}} that returns zeros instead of \code{NaN}.
+Wrapper for function \code{\link[base]{scale}} that returns zeros instead of \code{NaN}. It also
+supports a list of vectors.
 }
 

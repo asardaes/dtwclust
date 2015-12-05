@@ -6,13 +6,17 @@
 \alias{plot-dtwclust}
 \title{Plot the result of \code{dtwclust}}
 \usage{
-\S4method{plot}{dtwclust,missing}(x, y, clus = seq_len(x@k),
-  labs.arg = NULL, data = NULL, time = NULL, plot = TRUE, ...)
+\S4method{plot}{dtwclust,missing}(x, y, ..., clus = seq_len(x@k),
+  labs.arg = NULL, data = NULL, time = NULL, plot = TRUE)
 }
 \arguments{
 \item{x}{An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.}
 
 \item{y}{Ignored.}
+
+\item{...}{Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
+\emph{cluster centers}. Default values are: \code{linetype = "dashed"}, \code{size = 1.5},
+\code{colour = "black"}, \code{alpha = 0.5}.}
 
 \item{clus}{Which clusters to plot.}
 
@@ -26,10 +30,6 @@ the longest series.}
 
 \item{plot}{Boolean flag. You can set this to FALSE in case you want to save the ggplot object without
 printing anything to screen}
-
-\item{...}{Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
-\emph{cluster centers}. Default values are: \code{linetype = "dashed"}, \code{size = 1.5},
-\code{colour = "black"}, \code{alpha = 0.5}.}
 }
 \value{
 A \code{gg} object invisibly.

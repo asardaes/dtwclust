@@ -44,8 +44,8 @@ NULL
 #' @aliases plot,dtwclust,missing-method
 #'
 setMethod("plot", signature(x="dtwclust", y="missing"),
-          function(x, y, clus = seq_len(x@k),
-                   labs.arg = NULL, data = NULL, time = NULL, plot = TRUE, ...) {
+          function(x, y, ..., clus = seq_len(x@k),
+                   labs.arg = NULL, data = NULL, time = NULL, plot = TRUE) {
 
                ## Obtain data, the priority is: provided data > included data matrix > included data list
 

@@ -6,9 +6,9 @@
 \usage{
 dtwclust(data = NULL, type = "partitional", k = 2, method = "average",
   distance = "dtw", centroid = "pam", preproc = NULL,
-  window.size = NULL, norm = "L1", dc = NULL, dba.iter = 50,
+  window.size = NULL, norm = "L1", dc = NULL, dba.iter = 15,
   pam.precompute = TRUE, control = NULL, save.data = TRUE, seed = NULL,
-  trace = FALSE, ...)
+  trace = FALSE, reps = 1L, ...)
 }
 \arguments{
 \item{data}{A list where each element is a time series, or a numerical matrix where each row is a time
@@ -51,11 +51,14 @@ centroids. Otherwise calculate distances at every iteration.}
 
 \item{trace}{Boolean flag. If true, more output regarding the progress is printed to screen.}
 
+\item{reps}{How many times to repeat partitional clustering with different starting points. See section Repetitions.}
+
 \item{...}{Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function.}
 }
 \value{
 An object with formal class \code{\link{dtwclust-class}} if \code{type = "partitional" | "tadpole"}.
-Otherwise an object with class \code{hclust} as returned by \code{\link[stats]{hclust}}.
+Otherwise an object with class \code{hclust} as returned by \code{\link[stats]{hclust}}. If \code{reps > 1}
+and a partitional procedure is used, a list of objects is returned.
 }
 \description{
 This function uses the DTW distance and related lower bounds to cluster time series. For now, all series
@@ -169,6 +172,31 @@ The function will receive the data as first argument and, in case hierarchical m
 contents of \code{...} as the second argument.
 }
 
+\section{Repetitions}{
+
+
+Due to their stochastic nature, partitional clustering is usually repeated several times with different random
+seeds to allow for different starting points. This function can now run several repetitions by using the
+\code{doRNG} package. This package ensures that each repetition uses a statistically independent random sequence.
+The user only needs to provide an initial seed in the corresponding parameter of this function.
+
+Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is precomputed,
+since said matrix is reused for every repetition.
+
+Additionally, the user can register a parallel backend with the \code{doParallel} package in order to do the
+repetitions in parallel (see the examples). Please note that running tasks in parallel does \strong{not} guarantee
+faster computations. The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+Unless each repetitions requires a few seconds, parallel computing probably isn't worth it. As such, I would only
+use this feature with \code{shape} and \code{DBA} centroids, or for \code{pam.precompute} \code{=} \code{FALSE}
+with a relatively small \code{k} and an expensive distance function like \code{DTW}.
+
+Be aware that parallel computation is only used for the clustering itself. If the distance matrix is precomputed,
+that calculation will be done sequentially.
+
+If you do more than 1 repetition sequentially, you can safely ignore the warning given by \code{doRNG} about
+no parallel backend registration.
+}
+
 \section{Notes}{
 
 
@@ -206,8 +234,8 @@ cat("Rand index for TADPole:", randIndex(kc.tadp, labels), "\\n\\n")
 plot(kc.tadp)
 
 # Modify plot
-plot(kc.tadp, cl = 1:2, labs.arg = list(title = "TADPole, clusters 1 and 2",
-                                        x = "time", y = "series"))
+plot(kc.tadp, clus = 3:4, labs.arg = list(title = "TADPole, clusters 3 and 4",
+                                          x = "time", y = "series"))
 
 #### Registering a custom distance with the 'proxy' package and using it
 # Normalized DTW distance
@@ -238,25 +266,48 @@ cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\\n\\n")
 
 \dontrun{
 #### Saving and modifying the ggplot object with custom time
-t <- seq(Sys.Date(), len = 205, by = "day")
+t <- seq(Sys.Date(), len = 180, by = "day")
 gkc <- plot(kc.l2, time = t, plot = FALSE)
 
 require(scales)
 gkc + scale_x_date(labels = date_format("\%b-\%Y"),
                    breaks = date_breaks("2 months"))
 
-#### Use full DTW and PAM (takes around two minutes)
+#### Use full DTW and PAM (takes around 1 minute)
 kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, trace = TRUE)
 
-#### Use full DTW with DBA centroids (takes around five minutes)
+#### Use full DTW with DBA centroids (takes around 1 minute)
 kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
 
-#### Use constrained DTW with original series of different lengths (around one minute)
+#### Use constrained DTW with original series of different lengths (takes around 1 minute)
 kc.cdtw <- dtwclust(CharTraj, k = 20, window.size = 20,
                     seed = 3251, trace = TRUE)
 
-# Plot one of the clusters
-plot(kc.cdtw, cl=18)
+#### Using parallel computing to optimize several random repetitions
+# This uses the "nDTW" function registered in another example above
+require(doParallel)
+
+# Create parallel workers
+cl <- makeCluster(detectCores())
+registerDoParallel(cl)
+
+# For reference, this took around 2.5 minutes with 8 cores (all 8 repetitions).
+# The second 'window' is used instead of 'window.size' to ensure it is given to the custom
+# distance function in '...'. Same goes for 'window.type'.
+kc.ndtw.list <- dtwclust(CharTraj, k = 20, distance = "nDTW",
+                         centroid = "dba", window.size = 10,
+                         preproc = zscore, window.type = "slantedband", window = 10,
+                         seed = 8319, save.data = FALSE, reps = 8L)
+
+# Stop parallel workers
+stopCluster(cl)
+
+# Return to sequential computations
+registerDoSEQ()
+
+# See Rand Index for each repetition
+sapply(kc.ndtw.list, randIndex, y = CharTrajLabels)
+
 }
 
 }
