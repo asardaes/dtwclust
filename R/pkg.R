@@ -16,13 +16,13 @@
 #' clustering, the \code{proxy} package for distance matrix calculations, and the \code{dtw} package for the
 #' core DTW calculations.
 #'
-#' Four distances are registered via \code{\link[proxy]{pr_DB}}: \code{"LB_Keogh", "LB_Improved", "SBD"} and
-#' \code{"DTW2"}. See \code{\link{lb_keogh}}, \code{\link{lb_improved}} and \code{\link{SBD}} for more
-#' details on the first 3. The last one is done with \code{\link[dtw]{dtw}} using \code{L2} norm, but it
+#' Five distances are registered via \code{\link[proxy]{pr_DB}}: \code{"LB_Keogh", "LB_Improved", "SBD", "DTW2"}
+#' and \code{"DTW_LB"}. See \code{\link{lb_keogh}}, \code{\link{lb_improved}} and \code{\link{SBD}} for more
+#' details on the first 3. DTW2 is done with \code{\link[dtw]{dtw}} using \code{L2} norm, but it
 #' differs from the result you would obtain if you specify \code{L2} as \code{dist.method}: with \code{DTW2},
 #' pointwise distances (the local cost matrix) are calculated with \code{L1} norm, \emph{each} element of the
 #' matrix is squared and the result is fed into \code{\link[dtw]{dtw}}, which finds the optimum warping path.
-#' The square root of the resulting distance is \emph{then} computed.
+#' The square root of the resulting distance is \emph{then} computed. See \code{\link{dtw_lb}} for the last one.
 #'
 #' Please note that the \code{\link[proxy]{dist}} function in the \code{proxy} package accepts one or two
 #' arguments for data objects. Users should usually use the two-input \strong{list} version, even if there is
@@ -76,6 +76,9 @@
 #'
 #' @seealso \code{\link{dtwclust}}, \code{\link[flexclust]{kcca}}, \code{\link[proxy]{dist}},
 #' \code{\link[dtw]{dtw}}
+#'
+#' @useDynLib dtwclust
+#'
 NULL
 
 .onAttach <- function(lib, pkg) {
@@ -116,4 +119,17 @@ NULL
      proxy::pr_DB$set_entry(FUN = SBD.proxy, names=c("SBD", "sbd"),
                             loop = FALSE, type = "metric", distance = TRUE,
                             description = "Paparrizos' shape-based distance for time series")
+
+     ## Register DTW_LB
+
+     if (proxy::pr_DB$entry_exists("DTW_LB"))
+          proxy::pr_DB$delete_entry("DTW_LB")
+
+     proxy::pr_DB$set_entry(FUN = dtw_lb, names=c("DTW_LB", "dtw_lb"),
+                            loop = FALSE, type = "metric", distance = TRUE,
+                            description = "DTW distance aided with Lemire's lower bound")
+}
+
+.onUnload <- function(libpath) {
+     library.dynam.unload("dtwclust", libpath)
 }

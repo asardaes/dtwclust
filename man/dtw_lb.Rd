@@ -4,7 +4,8 @@
 \alias{dtw_lb}
 \title{DTW calculation guided by Lemire's lower bound (LB_Improved)}
 \usage{
-dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE)
+dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
+  ...)
 }
 \arguments{
 \item{x}{A matrix where rows are time series, or a list of time series.}
@@ -16,6 +17,8 @@ dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE)
 \item{norm}{Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.}
 
 \item{error.check}{Should inconsistencies in the data be checked?}
+
+\item{...}{Further arguments to pass to \code{\link[proxy]{dist}} for the initial estimate.}
 }
 \value{
 The distance matrix with class \code{crossdist}.
@@ -39,6 +42,9 @@ the window.
 }
 \note{
 This function uses a lower bound that is only defined for time series of equal lengths.
+
+The \code{...} argument is better left alone, however the function definition needs it so that the internal
+functions can call it appropriately if parallel computing is enabled.
 }
 \examples{
 

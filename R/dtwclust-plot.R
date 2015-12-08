@@ -3,28 +3,26 @@
 #' Plots the time series of each cluster along with the obtained centroid. It uses \code{ggplot2} plotting
 #' system.
 #'
-#' The flag \code{save.data} must be set to \code{TRUE} when running \code{\link{dtwclust}} to be able to
-#' use this.
-#'
-#' Optionally, you can manually provide the clustering result as well as the data in \code{data}.
+#' The flag \code{save.data} should be set to \code{TRUE} when running \code{\link{dtwclust}} to be able to
+#' use this. Optionally, you can manually provide the data in the \code{data} parameter.
 #'
 #' The function returns the \code{gg} object invisibly, in case you want to modify it to your liking. You
 #' might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 #'
-#' @name plot-dtwclust
+#' @name plot-method
 #' @rdname plot-methods
 #'
 #' @seealso \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}}
 #'
 #' @param x An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.
 #' @param y Ignored.
-#' @param clus Which clusters to plot.
+#' @param clus A numeric vector indicating which clusters to plot.
 #' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
 #' information
 #' @param data The data in the same format as it was provided to \code{\link{dtwclust}}.
 #' @param time Optional values for the time axis. If series have different lengths, provide the time values of
 #' the longest series.
-#' @param plot Boolean flag. You can set this to FALSE in case you want to save the ggplot object without
+#' @param plot Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot object without
 #' printing anything to screen
 #' @param ... Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
 #' \emph{cluster centers}. Default values are: \code{linetype = "dashed"}, \code{size = 1.5},

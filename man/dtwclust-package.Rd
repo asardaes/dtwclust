@@ -22,13 +22,13 @@ Other packages that are particularly leveraged here are the \code{flexclust} pac
 clustering, the \code{proxy} package for distance matrix calculations, and the \code{dtw} package for the
 core DTW calculations.
 
-Four distances are registered via \code{\link[proxy]{pr_DB}}: \code{"LB_Keogh", "LB_Improved", "SBD"} and
-\code{"DTW2"}. See \code{\link{lb_keogh}}, \code{\link{lb_improved}} and \code{\link{SBD}} for more
-details on the first 3. The last one is done with \code{\link[dtw]{dtw}} using \code{L2} norm, but it
+Five distances are registered via \code{\link[proxy]{pr_DB}}: \code{"LB_Keogh", "LB_Improved", "SBD", "DTW2"}
+and \code{"DTW_LB"}. See \code{\link{lb_keogh}}, \code{\link{lb_improved}} and \code{\link{SBD}} for more
+details on the first 3. DTW2 is done with \code{\link[dtw]{dtw}} using \code{L2} norm, but it
 differs from the result you would obtain if you specify \code{L2} as \code{dist.method}: with \code{DTW2},
 pointwise distances (the local cost matrix) are calculated with \code{L1} norm, \emph{each} element of the
 matrix is squared and the result is fed into \code{\link[dtw]{dtw}}, which finds the optimum warping path.
-The square root of the resulting distance is \emph{then} computed.
+The square root of the resulting distance is \emph{then} computed. See \code{\link{dtw_lb}} for the last one.
 
 Please note that the \code{\link[proxy]{dist}} function in the \code{proxy} package accepts one or two
 arguments for data objects. Users should usually use the two-input \strong{list} version, even if there is

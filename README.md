@@ -39,7 +39,7 @@ kc <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #>      3 Changes / Distsum : 2 / 596.8066 
 #>      4 Changes / Distsum : 0 / 596.5887 
 #> 
-#>  Elapsed time is 4.392 seconds.
+#>  Elapsed time is 4.34 seconds.
 
 plot(kc)
 ```
@@ -67,7 +67,7 @@ kc.ndtw <- dtwclust(CharTraj[21:40], k = 4, distance = "nDTW",
 #>      3 Changes / Distsum : 2 / 1.065037 
 #>      4 Changes / Distsum : 0 / 1.063034 
 #> 
-#>  Elapsed time is 1.58 seconds.
+#>  Elapsed time is 1.557 seconds.
 
 # Modifying some plot parameters
 plot(kc.ndtw, labs.arg = list(title = "nDTW clustering", x = "time", y = "series"))
@@ -85,10 +85,10 @@ hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.678 seconds.
+#>  Elapsed time is 0.55 seconds.
 cl.sbd <- cutree(hc.sbd, 20)
 cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\n\n")
-#> Rand index for HC+SBD: 0.512583
+#> Rand index for HC+SBD: 0.5600497
 plot(hc.sbd)
 ```
 
@@ -104,7 +104,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 3.886 seconds.
+#>  Elapsed time is 3.766 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```

@@ -13,6 +13,8 @@
 zscore <- function(x, ...) {
 
      if (is.list(x)) {
+          consistency_check(x, "vltslist")
+
           dots <- list(...)
 
           x <- lapply(x, function(xx) {
@@ -24,6 +26,8 @@ zscore <- function(x, ...) {
           })
 
      } else {
+          consistency_check(x, "ts")
+
           x <- scale(x, ...)
           dim(x) <- NULL # scale returns columns
           x[is.nan(x)] <- 0

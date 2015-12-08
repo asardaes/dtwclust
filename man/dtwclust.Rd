@@ -4,11 +4,11 @@
 \alias{dtwclust}
 \title{Time series clustering under DTW}
 \usage{
-dtwclust(data = NULL, type = "partitional", k = 2, method = "average",
+dtwclust(data = NULL, type = "partitional", k = 2L, method = "average",
   distance = "dtw", centroid = "pam", preproc = NULL,
-  window.size = NULL, norm = "L1", dc = NULL, dba.iter = 15,
+  window.size = NULL, norm = "L1", dc = NULL, dba.iter = 15L,
   pam.precompute = TRUE, control = NULL, save.data = TRUE, seed = NULL,
-  trace = FALSE, reps = 1L, ...)
+  trace = FALSE, reps = 1L, packages = character(0), ...)
 }
 \arguments{
 \item{data}{A list where each element is a time series, or a numerical matrix where each row is a time
@@ -53,6 +53,9 @@ centroids. Otherwise calculate distances at every iteration.}
 
 \item{reps}{How many times to repeat partitional clustering with different starting points. See section Repetitions.}
 
+\item{packages}{Character vector with the names of any packages required for custom \code{proxy} functions. See
+Parallel Computing section.}
+
 \item{...}{Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function.}
 }
 \value{
@@ -69,33 +72,30 @@ Partitional algorithms are implemented via \code{\link[flexclust]{kcca}}. Hierar
 \code{\link[stats]{hclust}} function. The \code{tadpole} algorithm uses the \code{\link{TADPole}} function.
 
 The \code{data} may be a matrix or a list, but the matrix will be coerced to a list. A matrix input requires
-that all
-time series have equal lengths. If the lengths vary slightly between time series, reinterpolating them to
+that all time series have equal lengths. If the lengths vary slightly between time series, reinterpolating them to
 a common length is most likely an acceptable approach (Ratanamahatana and Keogh, 2004). If this is not the
 case, then clustering them directly is probably ill-advised. See the examples.
 }
 \section{Distance}{
 
 
-If a custom distance function is provided, it will receive the data as the first argument. For partitional
+If a custom distance function is provided, it will receive the data as the first argument.
+
+For partitional
 algorithms, the second argument will be the cluster centers (i.e. other time series). If \code{data} is a
-matrix, the cluster centers will also be given in the form of a matrix where each row is a center series;
-if \code{data} is a list of series, so will the centers.
+matrix, it will be coerced to a list of series, and the centers will also be provided in the form of a list.
 
 If hierarchical algorithms are used, the function will also receive the elements of \code{...}.
 
-For partitional algorithms, the function \emph{could} make use of the \code{window.size} and \code{norm}
-parameters, which \emph{should} be detected thanks to \code{R}'s lexical scoping, however this cannot
-be guaranteed.
-
-The function should return a distance matrix, ideally of class \code{crossdist}. In case of partitional
-algorithms, the time series in the data should be along the rows, and the cluster centers along the
-columns of the distance matrix.
+The function should return a distance matrix, ideally of class \code{crossdist}. The time series in the
+data should be along the rows, and the cluster centers along the columns of the distance matrix.
 
 The other option is to provide a string. The string can represent a compatible registered distance of
-\code{\link[proxy]{dist}}. Extra parameters can be provided in \code{...}. See the examples.
+\code{proxy}'s \code{\link[proxy]{dist}}. Extra parameters can be provided in \code{...}. See the examples
+but please finish reading this section before that.
 
-Additionally, with either type of algorithm, it can be one of the following custom implementations:
+Additionally, with either type of algorithm, it can be a string of one of the following custom
+implementations (all registered with \code{proxy}):
 
 \itemize{
   \item \code{"dtw"}: DTW with L1 norm and optionally a Sakoe-Chiba/Slanted-band constraint.
@@ -111,6 +111,19 @@ Additionally, with either type of algorithm, it can be one of the following cust
 }
 
 Note that only \code{dtw}, \code{dtw2} and \code{sbd} support series of different lengths.
+
+If the user wants to create its own distance and register it with \code{proxy}, it should include a \code{...}
+in its definition so that it is correctly called. Such functions will always receive the following parameters:
+
+\itemize{
+  \item \code{window.type}: Either \code{"none"} for a \code{NULL} \code{window.size}, or \code{"slantedband"}
+  otherwise
+  \item \code{window.size}: The provided window size
+  \item \code{norm}: The provided desired norm
+  \item \code{...}: Any additional parameters provided in the original call's ellipsis
+}
+
+Whether the function makes use of them or not, is up to the user.
 }
 
 \section{Centroid}{
@@ -129,20 +142,21 @@ If a custom function is provided, it will receive different inputs depending on 
   cluster a series belongs to; the current number of total clusters.
 }
 
-The other option is to provide a character string. The following options are available:
+The other option is to provide a character string for the custom implementations. The following options
+are available:
 
 \itemize{
-  \item \code{"mean"}: The average along each dimension. In other words, the average of all \eqn{x^j_i}
+  \item "mean": The average along each dimension. In other words, the average of all \eqn{x^j_i}
   among the \eqn{j} series that belong to the same cluster for all time points \eqn{t_i}.
-  \item \code{"median"}: The median along each dimension. Similar to mean.
-  \item \code{"shape"}: Shape averaging. See \code{\link{shape_extraction}} for more details.
-  \item \code{"dba"}: DTW Barycenter Averaging. See \code{\link{DBA}} for more details.
-  \item \code{"pam"}: Partition around medoids. This basically means that the cluster centers are always
+  \item "median": The median along each dimension. Similar to mean.
+  \item "shape": Shape averaging. See \code{\link{shape_extraction}} for more details.
+  \item "dba": DTW Barycenter Averaging. See \code{\link{DBA}} for more details.
+  \item: "pam": Partition around medoids. This basically means that the cluster centers are always
   one of the time series in the data. In this case, the distance matrix can be pre-computed once using all
   time series in the data and then re-used at each iteration. It usually saves overhead overall.
 }
 
-Note that only \code{dba} and \code{pam} support series of different lengths
+Note that only \code{dba} and \code{pam} support series of different lengths.
 }
 
 \section{Sakoe-Chiba Constraint}{
@@ -156,6 +170,10 @@ that represents the distance between the point considered and one of the edges o
 if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
 between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
 the window.
+
+The computations actually use a \code{slantedband} window, which is equivalent to the Sakoe-Chiba one
+if series have equal lengths, and stays along the diagonal of the local cost matrix if series have
+different lengths.
 }
 
 \section{Preprocessing}{
@@ -182,19 +200,29 @@ The user only needs to provide an initial seed in the corresponding parameter of
 
 Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is precomputed,
 since said matrix is reused for every repetition.
+}
 
-Additionally, the user can register a parallel backend with the \code{doParallel} package in order to do the
-repetitions in parallel (see the examples). Please note that running tasks in parallel does \strong{not} guarantee
-faster computations. The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+\section{Parallel Computing}{
+
+
+Please note that running tasks in parallel does \strong{not} guarantee faster computations.
+The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+
+The user can register a parallel backend with the \code{doParallel} package in order to do the
+repetitions in parallel, as well as distance calculations (see the examples).
+
 Unless each repetitions requires a few seconds, parallel computing probably isn't worth it. As such, I would only
 use this feature with \code{shape} and \code{DBA} centroids, or for \code{pam.precompute} \code{=} \code{FALSE}
 with a relatively small \code{k} and an expensive distance function like \code{DTW}.
 
-Be aware that parallel computation is only used for the clustering itself. If the distance matrix is precomputed,
-that calculation will be done sequentially.
-
 If you do more than 1 repetition sequentially, you can safely ignore the warning given by \code{doRNG} about
 no parallel backend registration.
+
+If the user registers a parallel backend, the function will also try to do the calculation of the distance
+matrices in parallel. This should work with any function registered with \code{\link[proxy]{dist}} via
+\code{\link[proxy]{pr_DB}} whose \code{loop} flag is set to \code{TRUE}. If the function requires special packages
+to be loaded, provide their names in the \code{packages} argument. In addition, "dtwclust" is always loaded
+in each parallel worker, so the user doesn't need to include that.
 }
 
 \section{Notes}{
@@ -284,6 +312,7 @@ kc.cdtw <- dtwclust(CharTraj, k = 20, window.size = 20,
                     seed = 3251, trace = TRUE)
 
 #### Using parallel computing to optimize several random repetitions
+#### and distance matrix calculation
 # This uses the "nDTW" function registered in another example above
 require(doParallel)
 
@@ -291,13 +320,11 @@ require(doParallel)
 cl <- makeCluster(detectCores())
 registerDoParallel(cl)
 
-# For reference, this took around 2.5 minutes with 8 cores (all 8 repetitions).
-# The second 'window' is used instead of 'window.size' to ensure it is given to the custom
-# distance function in '...'. Same goes for 'window.type'.
+# For reference, this took around 2.25 minutes with 8 cores (all 8 repetitions).
 kc.ndtw.list <- dtwclust(CharTraj, k = 20, distance = "nDTW",
                          centroid = "dba", window.size = 10,
-                         preproc = zscore, window.type = "slantedband", window = 10,
-                         seed = 8319, save.data = FALSE, reps = 8L)
+                         preproc = zscore, seed = 8319,
+                         save.data = FALSE, reps = 8L)
 
 # Stop parallel workers
 stopCluster(cl)
@@ -307,6 +334,9 @@ registerDoSEQ()
 
 # See Rand Index for each repetition
 sapply(kc.ndtw.list, randIndex, y = CharTrajLabels)
+
+# Try re-running the previous examples with a parallel backend. In my tests it provided a
+# reduction of 2 to 6 times in run times.
 
 }
 
@@ -330,6 +360,6 @@ http://doi.org/10.1145/2723372.2737793}.
 \seealso{
 Please check the brief description in \code{\link{dtwclust-package}}.
 
-Additionally: \code{\link{plot-dtwclust}}, \code{\link{dtwclust-class}}.
+Additionally: \code{\link{plot-method}}, \code{\link{dtwclust-class}}.
 }
 

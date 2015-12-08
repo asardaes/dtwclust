@@ -19,6 +19,9 @@
 #'
 #' This function uses a lower bound that is only defined for time series of equal lengths.
 #'
+#' The \code{...} argument is better left alone, however the function definition needs it so that the internal
+#' functions can call it appropriately if parallel computing is enabled.
+#'
 #' @seealso
 #'
 #' \code{\link{lb_improved}}
@@ -60,12 +63,13 @@
 #' @param window.size Window size to use with the LB and DTW calculation. See details.
 #' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
 #' @param error.check Should inconsistencies in the data be checked?
+#' @param ... Further arguments to pass to \code{\link[proxy]{dist}} for the initial estimate.
 #'
 #' @return The distance matrix with class \code{crossdist}.
 #'
 #' @export
 
-dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE) {
+dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE, ...) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 
@@ -83,7 +87,8 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = T
      d <- proxy::dist(X, Y, method = "LBI",
                       window.size = window.size,
                       norm = norm,
-                      error.check = error.check)
+                      error.check = error.check,
+                      ...)
 
      ## For indexing convenience
      d <- t(d)

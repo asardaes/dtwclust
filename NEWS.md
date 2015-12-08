@@ -3,6 +3,7 @@
 ## Version 1.3.0
 * Added the possibility to run several repetitions for partitional procedures, using different random starts each time by using the doRNG package
 * Additionally, the repetitions can be done in parallel if the user provides a backend registered with doParallel
+* Calculation of distance matrices also takes advantage of parallel backends.
 
 ## Version 1.2.0
 * Added the option to prevent pre-computation of distance matrix when using PAM centroids

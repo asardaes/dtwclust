@@ -2,160 +2,196 @@
 # Return a custom family for kcca
 # ========================================================================================================
 
-kccaFamilies <- function(distance, cent, window.size, norm, distmat, ...) {
+kccaFamilies <- function(distance, cent, window.size, norm, distmat, packages, ...) {
 
-     ## Closures will capture the values of the constants,
-     ## so that I don't have to use environments anymore...
+     ## If I call this function is because 'distance' was a character
 
      dots <- list(...)
 
-     dtwdist <- switch(EXPR = distance,
+     needs_window <- c("dtw_lb", "lbk", "lbi")
 
-                       ## Full DTW with L1 norm
-                       dtw = {
-                            foo <- function(x, centers) {
-                                 x <- consistency_check(x, "tsmat")
-                                 centers <- consistency_check(centers, "tsmat")
+     if (distance %in% needs_window)
+          window.size <- consistency_check(window.size, "window")
 
-                                 if (!is.null(distmat))
-                                      d <- dsub_pam(x, centers, distmat)
-                                 else if (is.null(window.size)) {
-                                      d <- proxy::dist(x = x, y = centers,
-                                                       method = "DTW", dist.method = "L1")
-                                 } else {
-                                      d <- proxy::dist(x = x, y = centers,
-                                                       method = "DTW", dist.method = "L1",
-                                                       window.type = "slantedband",
-                                                       window.size = window.size)
-                                 }
+     if (is.null(window.size))
+          window.type <- "none"
+     else
+          window.type <- "slantedband"
 
-                                 d
-                            }
+     ## Closures will capture the values of the constants
 
-                            foo
-                       },
+     dtwdist <- function(x, centers, whole = FALSE, ...) {
 
-                       ## Full DTW with L2 norm
-                       dtw2 = {
-                            foo <- function(x, centers) {
-                                 x <- consistency_check(x, "tsmat")
-                                 centers <- consistency_check(centers, "tsmat")
+          ## Just in case, always empty for now
+          dots2 <- c(dots, list(...))
 
-                                 if (!is.null(distmat))
-                                      d <- dsub_pam(x, centers, distmat)
-                                 else if (is.null(window.size)) {
-                                      d <- proxy::dist(x = x, y = centers,
-                                                       method = "DTW2")
-                                 } else {
-                                      d <- proxy::dist(x = x, y = centers,
-                                                       method = "DTW2",
-                                                       window.type = "slantedband",
-                                                       window.size = window.size)
-                                 }
+          x <- consistency_check(x, "tsmat")
+          centers <- consistency_check(centers, "tsmat")
 
-                                 d
-                            }
+          if (!is.null(distmat)) {
+               ## distmat matrix already full, just subset it
 
-                            foo
-                       },
+               C <- consistency_check(centers, "tsmat")
+               X <- consistency_check(x, "tsmat")
 
-                       ## DTW with aid of lower bounds
-                       dtw_lb = {
-                            window.size <- consistency_check(window.size, "window")
+               indXC <- sapply(C, FUN = function(i.c) {
+                    i.row <- sapply(X, function(i.x) {
+                         if (length(i.x) == length(i.c))
+                              ret <- all(i.x == i.c)
+                         else
+                              ret <- FALSE
 
-                            foo <- function(x, centers) {
-                                 if (!is.null(distmat))
-                                      d <- dsub_pam(x, centers, distmat)
-                                 else
-                                      d <- dtw_lb(x, centers, window.size, norm, error.check=FALSE)
+                         ret
+                    })
 
-                                 d
-                            }
+                    ## Take the first one in case a series is repeated more than once in the dataset
+                    which(i.row)[1]
+               })
 
-                            foo
-                       },
+               d <- distmat[ , indXC]
 
+          } else {
+               ## Attempt to calculate in parallel?
+               do_par <- pr_DB$get_entry(distance)$loop && foreach::getDoParRegistered()
 
-                       ## Lemire's improved lower bound
-                       lbi = {
-                            window.size <- consistency_check(window.size, "window")
+               if (do_par) {
 
-                            foo <- function(x, centers) {
-                                 if (!is.null(distmat))
-                                      d <- dsub_pam(x, centers, distmat)
-                                 else {
-                                      d <- proxy::dist(x = x, y = centers,
-                                                       method = "LBI",
-                                                       norm = norm,
-                                                       window.size = window.size,
-                                                       error.check=FALSE)
-                                 }
+                    ## I need to re-register any custom distances in each parallel worker
+                    dist_entry <- proxy::pr_DB$get_entry(distance)
 
-                                 d
-                            }
+                    ## variables from the parent environment that should be exported
+                    export <- c("distance", "cent", "window.size", "norm", "distmat",
+                                "dots", "window.type")
 
-                            foo
-                       },
+                    tasks <- foreach::getDoParWorkers()
 
-                       ## Keogh's lower bound
-                       lbk = {
-                            window.size <- consistency_check(window.size, "window")
+                    if (whole) {
+                         ## Whole distmat is calculated
 
-                            foo <- function(x, centers) {
-                                 if (!is.null(distmat))
-                                      d <- dsub_pam(x, centers, distmat)
-                                 else {
-                                      d <- proxy::dist(x = x, y = centers,
-                                                       method = "LBK",
-                                                       norm = norm,
-                                                       window.size = window.size,
-                                                       error.check=FALSE)
-                                 }
+                         ## by column so that I can assign it with upper.tri at the end
+                         pairs <- call_pairs(length(x), byrow = FALSE)
 
-                                 d
-                            }
+                         tasks <- parallel::splitIndices(nrow(pairs), tasks)
 
-                            foo
-                       },
+                         pairs <- lapply(tasks, function(id){
+                              pairs[id,]
+                         })
 
-                       ## Paparrizos' shape-based distance
-                       sbd = {
-                            foo <- function(x, centers) {
-                                 x <- consistency_check(x, "tsmat")
-                                 centers <- consistency_check(centers, "tsmat")
+                         d <- foreach(pairs = pairs,
+                                      .combine = c,
+                                      .multicombine = TRUE,
+                                      .packages = c("dtwclust", packages),
+                                      .export = export) %dopar% {
 
-                                 if (!is.null(distmat))
-                                      d <- dsub_pam(x, centers, distmat)
-                                 else {
-                                      d <- proxy::dist(x = x, y = centers,
-                                                       method = "SBD", error.check = FALSE)
-                                 }
+                                           if (!proxy::pr_DB$entry_exists(dist_entry$names[1]))
+                                                do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                                 d
-                            }
+                                           ## Does the registered function posses '...' in its definition?
+                                           has_dots <- is.function(dist_entry$FUN) &&
+                                                any(grepl("...", names(as.list(args(dist_entry$FUN))),
+                                                          fixed = TRUE))
 
-                            foo
-                       },
+                                           if (has_dots) {
+                                                dd <- do.call(proxy::dist,
+                                                              args = c(list(x = x[pairs[,1]],
+                                                                            y = centers[pairs[,2]],
+                                                                            method = distance,
+                                                                            window.type = window.type,
+                                                                            window.size = window.size,
+                                                                            norm = norm,
+                                                                            error.check = FALSE,
+                                                                            pairwise = TRUE),
 
-                       ## Otherwise
-                       foo <- function(x, centers) {
-                            x <- consistency_check(x, "tsmat")
-                            centers <- consistency_check(centers, "tsmat")
+                                                                       dots2))
+                                           } else {
+                                                dd <- proxy::dist(x[pairs[,1]], centers[pairs[,2]],
+                                                                  method = distance, pairwise = TRUE)
+                                           }
 
-                            if (!is.null(distmat))
-                                 d <- dsub_pam(x, centers, distmat)
-                            else {
-                                 ## do.call to ensure that the 'dots' argument is passed as '...'
-                                 d <- do.call(proxy::dist,
-                                              args = c(list(x = x,
-                                                            y = centers,
-                                                            method = distance),
-                                                       dots))
-                            }
+                                           dd
 
-                            d
-                       }
-     )
+                                      }
+
+                         D <- matrix(0, nrow = length(x), ncol = length(x))
+                         D[upper.tri(D)] <- d
+                         D <- t(D)
+                         D[upper.tri(D)] <- d
+
+                         d <- D
+                         attr(d, "class") <- "crossdist"
+                         attr(d, "method") <- distance
+
+                    } else {
+                         ## Only subset of distmat is calculated
+
+                         tasks <- parallel::splitIndices(length(x), tasks)
+
+                         x <- lapply(tasks, function(idx) {
+                              x[idx]
+                         })
+
+                         d <- foreach(x = x,
+                                      .combine = rbind,
+                                      .multicombine = TRUE,
+                                      .packages = c("dtwclust", packages),
+                                      .export = export) %dopar% {
+
+                                           if (!proxy::pr_DB$entry_exists(dist_entry$names[1]))
+                                                do.call(proxy::pr_DB$set_entry, dist_entry)
+
+                                           ## Does the registered function posses '...' in its definition?
+                                           has_dots <- is.function(dist_entry$FUN) &&
+                                                any(grepl("...", names(as.list(args(dist_entry$FUN))),
+                                                          fixed = TRUE))
+
+                                           if (has_dots) {
+                                                dd <- do.call(proxy::dist,
+                                                              args = c(list(x = x, y = centers,
+                                                                            method = distance,
+                                                                            window.type = window.type,
+                                                                            window.size = window.size,
+                                                                            norm = norm,
+                                                                            error.check = FALSE),
+
+                                                                       dots2))
+                                           } else {
+                                                dd <- proxy::dist(x, centers, method = distance)
+                                           }
+
+                                           dd
+
+                                      }
+                    }
+
+               } else {
+                    ## NO PARALLEL
+
+                    ## Does the registered function posses '...' in its definition?
+                    has_dots <- is.function(pr_DB$get_entry(distance)$FUN) &&
+                         any(grepl("...", names(as.list(args(pr_DB$get_entry(distance)$FUN))),
+                                   fixed = TRUE))
+
+                    if (has_dots) {
+                         ## If it has '...', put everything there and let it use whatever it needs
+
+                         ## do.call to ensure that the 'dots2' argument is passed as '...'
+                         d <- do.call(proxy::dist,
+                                      args = c(list(x = x, y = centers,
+                                                    method = distance,
+                                                    window.type = window.type, window.size = window.size,
+                                                    norm = norm, error.check = FALSE),
+
+                                               dots2))
+                    } else {
+                         ## Otherwise just call it like this
+                         d <- proxy::dist(x, centers, method = distance)
+                    }
+
+               }
+          }
+
+          d
+     }
 
      family <- flexclust::kccaFamily(name = distance,
 
@@ -169,6 +205,17 @@ kccaFamilies <- function(distance, cent, window.size, norm, distmat, ...) {
 # ========================================================================================================
 # Check consistency, used by other functions
 # ========================================================================================================
+
+#' Check consistency of provided object
+#'
+#' Used extensively internally. Exported just for detection in case of parallel computing.
+#'
+#' @param obj Object to check.
+#' @param case One of \code{c("ts", "tslist", "vltslist", "window", "tsmat")}
+#'
+#' @return \code{NULL} invisibly
+#'
+#' @export
 
 consistency_check <- function(obj, case) {
 
@@ -316,40 +363,23 @@ allcent_pam <- function(distmat, distfun){
      foo
 }
 
-# Custom function to speed up the subsetting of the distance matrix for PAM
-
-dsub_pam <- function(x, centers, distmat) {
-
-     C <- consistency_check(centers, "tsmat")
-     X <- consistency_check(x, "tsmat")
-
-     indXC <- sapply(C, FUN = function(i.c) {
-          i.row <- sapply(X, function(i.x) {
-               if (length(i.x) == length(i.c))
-                    ret <- all(i.x == i.c)
-               else
-                    ret <- FALSE
-
-               ret
-          })
-
-          ## Take the first one in case a series is repeated more than once in the dataset
-          which(i.row)[1]
-     })
-
-     d <- distmat[ , indXC]
-
-     d
-}
-
 # Pre-computing when using PAM. The whole distance matrix is calculated once and then reused
 
 distmat_pam <- function(x, fam) {
      x <- consistency_check(x, "tsmat")
 
-     d <- fam@dist(x, x)
+     d <- fam@dist(x, x, TRUE)
 
      d
+}
+
+# Create combinations of all possible pairs
+
+call_pairs <- function(n = 2L, byrow = TRUE) {
+     if (n < 2)
+          stop("I need at least two elements to create pairs.")
+
+     .Call("pairs", n, byrow, PACKAGE = "dtwclust")
 }
 
 # ========================================================================================================
@@ -426,7 +456,7 @@ preproc_se <- function (x) {
           t(xz)
 
      } else if (is.list(x)) {
-          xz <- lapply(x, zscore)
+          xz <- zscore(x)
      }
 }
 

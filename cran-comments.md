@@ -1,5 +1,5 @@
 ## Update to version 1.3.0
-* Support for multiple repetitions, possibly in parallel
+* Support for multiple repetitions and parallel computing
 
 ## Test environments
 * Local Windows 10, R 3.2.2
