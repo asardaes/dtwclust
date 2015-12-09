@@ -4,18 +4,20 @@
 \alias{zscore}
 \title{Wrapper for z-normalization}
 \usage{
-zscore(x, ...)
+zscore(x, ..., na.rm = FALSE)
 }
 \arguments{
-\item{x}{Data to normalize. Either a vector or a list of vectors.}
+\item{x}{Data to normalize. Either a vector, a matrix where each row is to be normalized, or a list of vectors.}
 
 \item{...}{Further arguments to pass to \code{\link[base]{scale}}.}
+
+\item{na.rm}{Logical flag. Should \code{NA}s be removed? Ignored for matrix input.}
 }
 \value{
 Normalized data.
 }
 \description{
 Wrapper for function \code{\link[base]{scale}} that returns zeros instead of \code{NaN}. It also
-supports a list of vectors.
+supports a list of vectors and matrices
 }
 

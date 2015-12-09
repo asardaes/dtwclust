@@ -43,7 +43,9 @@ Please see the included references for more information.
 data(uciCT)
 
 ## Reinterpolate data to equal lengths
+datalist <- zscore(CharTraj)
 data <- lapply(CharTraj, reinterpolate, newLength = 180)
+data <- zscore(data)
 
 #### Using DTW with help of lower bounds and PAM centroids
 kc <- dtwclust(data = data, k = 20, distance = "dtw_lb",
@@ -64,14 +66,14 @@ proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
                        description = "Normalized DTW with L1 norm")
 
 # Subset of data for speed (but using different lengths)
-kc.ndtw <- dtwclust(CharTraj[21:40], k = 4, distance = "nDTW",
+kc.ndtw <- dtwclust(datalist[21:40], k = 4, distance = "nDTW",
                     trace = TRUE, seed = 8319)
 
 # Modifying some plot parameters
 plot(kc.ndtw, labs.arg = list(title = "nDTW clustering", x = "time", y = "series"))
 
 #### Hierarchical clustering based on shape-based distance
-hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
+hc.sbd <- dtwclust(datalist, type = "hierarchical",
                    distance = "sbd", trace = TRUE)
 cl.sbd <- cutree(hc.sbd, 20)
 cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\n\n")
@@ -79,7 +81,8 @@ plot(hc.sbd)
 
 #### TADPole clustering
 kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
-                    window.size = 20, dc = 1.5, trace = TRUE)
+                    window.size = 20, dc = 1.5, 
+                    trace = TRUE)
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -91,3 +94,4 @@ plot(kc.tadp, clus = 1:4)
 * Cross-distances make use of the `proxy` package.
 * The core DTW calculations are done by the `dtw` package.
 * Plotting is done with the `ggplot2` package.
+* Parallel computation depends on the `foreach` package.

@@ -28,18 +28,20 @@ Examples
 data(uciCT)
 
 ## Reinterpolate data to equal lengths
+datalist <- zscore(CharTraj)
 data <- lapply(CharTraj, reinterpolate, newLength = 180)
+data <- zscore(data)
 
 #### Using DTW with help of lower bounds and PAM centroids
 kc <- dtwclust(data = data, k = 20, distance = "dtw_lb",
                window.size = 20, centroid = "pam",
                seed = 3247, trace = TRUE)
-#>      1 Changes / Distsum : 100 / 932.183 
-#>      2 Changes / Distsum : 18 / 632.6588 
-#>      3 Changes / Distsum : 2 / 596.8066 
-#>      4 Changes / Distsum : 0 / 596.5887 
+#>      1 Changes / Distsum : 100 / 1179.209 
+#>      2 Changes / Distsum : 13 / 857.7509 
+#>      3 Changes / Distsum : 2 / 857.9886 
+#>      4 Changes / Distsum : 0 / 857.9886 
 #> 
-#>  Elapsed time is 4.34 seconds.
+#>  Elapsed time is 5.908 seconds.
 
 plot(kc)
 ```
@@ -60,14 +62,13 @@ proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
                        description = "Normalized DTW with L1 norm")
 
 # Subset of data for speed (but using different lengths)
-kc.ndtw <- dtwclust(CharTraj[21:40], k = 4, distance = "nDTW",
+kc.ndtw <- dtwclust(datalist[21:40], k = 4, distance = "nDTW",
                     trace = TRUE, seed = 8319)
-#>      1 Changes / Distsum :  20 / 2.0415 
-#>      2 Changes / Distsum : 5 / 1.087727 
-#>      3 Changes / Distsum : 2 / 1.065037 
-#>      4 Changes / Distsum : 0 / 1.063034 
+#>      1 Changes / Distsum : 20 / 2.520941 
+#>      2 Changes / Distsum : 6 / 0.8101177 
+#>      3 Changes / Distsum : 0 / 0.7401798 
 #> 
-#>  Elapsed time is 1.557 seconds.
+#>  Elapsed time is 2.228 seconds.
 
 # Modifying some plot parameters
 plot(kc.ndtw, labs.arg = list(title = "nDTW clustering", x = "time", y = "series"))
@@ -78,17 +79,17 @@ plot(kc.ndtw, labs.arg = list(title = "nDTW clustering", x = "time", y = "series
 ``` r
 
 #### Hierarchical clustering based on shape-based distance
-hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
+hc.sbd <- dtwclust(datalist, type = "hierarchical",
                    distance = "sbd", trace = TRUE)
 #> 
 #>  Calculating distance matrix...
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.55 seconds.
+#>  Elapsed time is 0.814 seconds.
 cl.sbd <- cutree(hc.sbd, 20)
 cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\n\n")
-#> Rand index for HC+SBD: 0.5600497
+#> Rand index for HC+SBD: 0.512583
 plot(hc.sbd)
 ```
 
@@ -98,13 +99,14 @@ plot(hc.sbd)
 
 #### TADPole clustering
 kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
-                    window.size = 20, dc = 1.5, trace = TRUE)
+                    window.size = 20, dc = 1.5, 
+                    trace = TRUE)
 #> 
 #> Entering TADPole...
 #> 
-#> TADPole completed, pruning percentage = 86.7%
+#> TADPole completed, pruning percentage = 78.5%
 #> 
-#>  Elapsed time is 3.766 seconds.
+#>  Elapsed time is 8.418 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -119,3 +121,4 @@ Dependencies
 -   Cross-distances make use of the `proxy` package.
 -   The core DTW calculations are done by the `dtw` package.
 -   Plotting is done with the `ggplot2` package.
+-   Parallel computation depends on the `foreach` package.

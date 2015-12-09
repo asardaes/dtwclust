@@ -50,6 +50,46 @@ if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_
 between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
 the window.
 }
+\section{Parallel Computing}{
+
+
+Please note that running tasks in parallel does \strong{not} guarantee faster computations.
+The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+
+The user can register a parallel backend with the \code{doParallel} package in order to attempt to
+speed up the calculations (see the examples).
+}
+\examples{
+
+\dontrun{
+#### Running TADPole with parallel support
+require(doParallel)
+
+# Load data
+data(uciCT)
+
+# Reinterpolate to same length and coerce as matrix
+data <- t(sapply(CharTraj, reinterpolate, newLength = 180))
+
+# Create parallel workers
+cl <- makeCluster(detectCores())
+registerDoParallel(cl)
+
+# Cluster
+kc.tadp <- TADPole(data, k = 20, window.size = 20, dc = 1.5)
+
+
+# Stop parallel workers
+stopCluster(cl)
+
+# Return to sequential computations
+registerDoSEQ()
+
+# Compute Rand Index
+cat("Rand index for TADPole:", randIndex(kc.tadp$cl, CharTrajLabels), "\\n\\n")
+}
+
+}
 \references{
 Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering with a Novel Admissible Pruning
 Strategy.'' In \emph{Conference on Knowledge Discovery and Data Mining}, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{

@@ -125,21 +125,23 @@
 #' The user only needs to provide an initial seed in the corresponding parameter of this function.
 #'
 #' Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is precomputed,
-#' since said matrix is reused for every repetition.
+#' since said matrix is reused for every repetition, and can be comptued in parallel (see next section).
 #'
 #' @section Parallel Computing:
 #'
 #' Please note that running tasks in parallel does \strong{not} guarantee faster computations.
 #' The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 #'
-#' The user can register a parallel backend with the \code{doParallel} package in order to do the
-#' repetitions in parallel, as well as distance calculations (see the examples).
+#' The user can register a parallel backend with the \code{doParallel} package (and possibly any other package compatible with
+#' \code{foreach}'s \code{\%dopar\%} operator) in order to do the
+#' repetitions in parallel, as well as distance calculations (see the examples). \code{\link{TADPole}} also
+#' takes advantage of parallel support.
 #'
 #' Unless each repetitions requires a few seconds, parallel computing probably isn't worth it. As such, I would only
 #' use this feature with \code{shape} and \code{DBA} centroids, or for \code{pam.precompute} \code{=} \code{FALSE}
 #' with a relatively small \code{k} and an expensive distance function like \code{DTW}.
 #'
-#' If you do more than 1 repetition sequentially, you can safely ignore the warning given by \code{doRNG} about
+#' If you do more than 1 repetition sequentially, you can safely ignore the warning given by \code{dopar} about
 #' no parallel backend registration.
 #'
 #' If the user registers a parallel backend, the function will also try to do the calculation of the distance
@@ -147,6 +149,14 @@
 #' \code{\link[proxy]{pr_DB}} whose \code{loop} flag is set to \code{TRUE}. If the function requires special packages
 #' to be loaded, provide their names in the \code{packages} argument. In addition, "dtwclust" is always loaded
 #' in each parallel worker, so the user doesn't need to include that.
+#'
+#' Note that, by default, if a parallel backend is registered, multiple repetitions are to be performed (partitional clustering,
+#' \code{reps} \code{>=} 1)
+#' AND \code{centroid} \code{!=} \code{"pam"}, each parallel worker will get a repetition task, but any distance calculations
+#' within each worker will be done sequentially. Load balance for such a scenario should be fine as long as the \code{reps}
+#' \code{>=} the number of parallel workers. If you believe your task would benefit more from parallelization within each repetition,
+#' consider registering the parallel backend and calling \code{dtwclust} several times sequentially, with \code{reps = 1} and
+#' different \code{seeds}.
 #'
 #' @section Notes:
 #'
@@ -237,25 +247,25 @@
 #' gkc + scale_x_date(labels = date_format("%b-%Y"),
 #'                    breaks = date_breaks("2 months"))
 #'
-#' #### Use full DTW and PAM (takes around 1 minute)
-#' kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, trace = TRUE)
-#'
-#' #### Use full DTW with DBA centroids (takes around 1 minute)
-#' kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
-#'
-#' #### Use constrained DTW with original series of different lengths (takes around 1 minute)
-#' kc.cdtw <- dtwclust(CharTraj, k = 20, window.size = 20,
-#'                     seed = 3251, trace = TRUE)
-#'
-#' #### Using parallel computing to optimize several random repetitions
+#' #### Using parallel computation to optimize several random repetitions
 #' #### and distance matrix calculation
-#' # This uses the "nDTW" function registered in another example above
 #' require(doParallel)
 #'
 #' # Create parallel workers
 #' cl <- makeCluster(detectCores())
 #' registerDoParallel(cl)
 #'
+#' ## Use full DTW and PAM
+#' kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, trace = TRUE)
+#'
+#' ## Use full DTW with DBA centroids
+#' kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
+#'
+#' ## Use constrained DTW with original series of different lengths
+#' kc.cdtw <- dtwclust(CharTraj, k = 20, window.size = 20,
+#'                     seed = 3251, trace = TRUE)
+#'
+#' ## This uses the "nDTW" function registered in another example above
 #' # For reference, this took around 2.25 minutes with 8 cores (all 8 repetitions).
 #' kc.ndtw.list <- dtwclust(CharTraj, k = 20, distance = "nDTW",
 #'                          centroid = "dba", window.size = 10,
@@ -270,17 +280,13 @@
 #'
 #' # See Rand Index for each repetition
 #' sapply(kc.ndtw.list, randIndex, y = CharTrajLabels)
-#'
-#' # Try re-running the previous examples with a parallel backend. In my tests it provided a
-#' # reduction of 2 to 6 times in run times.
-#'
 #' }
 #'
 #' @seealso
 #'
 #' Please check the brief description in \code{\link{dtwclust-package}}.
 #'
-#' Additionally: \code{\link{plot-method}}, \code{\link{dtwclust-class}}.
+#' Additionally: \code{\link{plot-dtwclust}}, \code{\link{dtwclust-class}}.
 #'
 #' @author Alexis Sarda-Espinosa
 #'
@@ -331,8 +337,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                      distance = "dtw", centroid = "pam", preproc = NULL,
                      window.size = NULL, norm = "L1", dc = NULL,
                      dba.iter = 15L, pam.precompute = TRUE, control = NULL,
-                     save.data = TRUE, seed = NULL, trace = FALSE, reps = 1L,
-                     packages = character(0),
+                     save.data = TRUE, seed = NULL, trace = FALSE,
+                     reps = 1L, packages = character(0),
                      ...)
 {
      ## =================================================================================================================
@@ -358,42 +364,30 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           if (reps < 1)
                stop("At least one repetition must be performed")
 
-          if (is.function(centroid)) {
-               cent <- centroid
+          ## For parallel computation
+          packages <- c("dtwclust", packages)
 
-          } else {
+          if (is.character(centroid))
                centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
 
-               cent <- switch(EXPR = centroid,
-
-                              mean = function(x) { apply(x, 2, mean) },
-
-                              median = function(x) { apply(x, 2, stats::median) },
-
-                              shape = shape_extraction, # placeholder, will be ignored (see utils.R)
-
-                              dba = DBA, # placeholder, will be ignored (see utils.R)
-
-                              pam = function(x) NULL, # placeholder, will be ignored (see utils.R)
-
-                              ## Otherwise
-                              stop("Unsupported centroid calculation method"))
-          }
-
+          ## Distance function (cent is unusued, allcent is set appropriately below)
           if (is.function(distance)) {
                family <- kccaFamily(name = as.character(substitute(distance))[1],
                                     dist = distance,
-                                    cent = cent)
+                                    cent = NULL)
 
           } else if (is.character(distance)) {
-               # utils.R
-               family <- kccaFamilies(distance = distance,
-                                      cent = cent,
-                                      window.size = window.size,
-                                      norm = norm,
-                                      distmat = NULL,
-                                      packages = packages,
-                                      ...)
+               # dtwdistfun.R
+               distfun <- dtwdistfun(distance = distance,
+                                     window.size = window.size,
+                                     norm = norm,
+                                     distmat = NULL,
+                                     packages = packages,
+                                     ...)
+
+               family <- flexclust::kccaFamily(name = distance,
+                                               dist = distfun,
+                                               cent = NULL)
 
           } else {
                stop("Unsupported distance definition")
@@ -403,46 +397,45 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## Replace specific functions if necessary
           ## ----------------------------------------------------------------------------------------------------------
 
-          distmat <- NULL # replaced if appropriate
-
-          # replace with functions from utils.R
-          if (is.character(centroid) && centroid == "shape") {
-               family@allcent <- allcent_se() # closure, utils.R
-
-               family@preproc <- preproc_se
-
-          } else if (is.character(centroid) && centroid == "dba") {
-               family@allcent <- allcent_dba(dba.iter, window.size, norm, trace) # closure, utils.R
-
-          } else if (is.character(centroid) && centroid == "pam") {
-               if (pam.precompute) {
+          # precompute distance matrix?
+          if (is.character(centroid) && centroid == "pam" && pam.precompute) {
                     distmat <- distmat_pam(data, family) # utils.R
 
-                    ## Redefine family with new distmat (to update closures)
-                    family <- kccaFamilies(distance = distance,
-                                           cent = cent,
-                                           window.size = window.size,
-                                           norm = norm,
-                                           distmat = distmat,
-                                           packages = packages,
-                                           ...)
-               }
+                    ## Redefine dist with new distmat (to update closure)
+                    family@dist <- dtwdistfun(distance = distance,
+                                              window.size = window.size,
+                                              norm = norm,
+                                              distmat = distmat,
+                                              packages = packages,
+                                              ...)
 
-               family@allcent <- allcent_pam(distmat, family@dist) # another closure, utils.R
+
+          } else {
+               distmat <- NULL
           }
 
           if (!is.null(preproc)) {
                if (is.function(preproc))
-                    family@preproc <- preproc
+                    family@preproc <- preproc # highest priority, possibly replaces zscore
                else
                     stop("Invalid preprocessing")
 
           } else if (is.character(centroid) && centroid == "shape") {
-               preproc <- "zscore" # string, just to indicate what was used...
+               preproc <- "zscore" # character to indicate what was done
+               family@preproc <- zscore
 
           } else {
-               preproc <- "none"
+               preproc <- "none" # character to indicate what was done
           }
+
+          ## Closures, all_cent.R
+          family@allcent <- all_cent(case = centroid,
+                                     distmat = distmat,
+                                     distfun = family@dist,
+                                     dba.iter = dba.iter,
+                                     window.size = window.size,
+                                     norm = norm,
+                                     trace = trace)
 
           ## ----------------------------------------------------------------------------------------------------------
           ## Further options
@@ -472,36 +465,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                lengths <- sapply(data, length)
 
                if (length(unique(lengths)) > 1) {
-                    if (is.character(distance) &&
-                        (distance %in% c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd")) && # restrict check to these
-                        !(distance %in% c("dtw", "dtw2", "sbd")))
-                         stop("Only the following distances are supported for series of different lengths:\n\tdtw \tdtw2 \tsbd")
-
-                    if (is.character(centroid) &&
-                        (centroid %in%  c("mean", "median", "shape", "dba", "pam")) && # restrict check to these
-                        !(centroid %in% c("dba", "pam")))
-                         stop("Only the following centroids are supported for series of different lengths:\n\tdba \tpam")
-               }
-
-               ## Replace allcent function with an appropriate one, either user provided or a custom for mean/median
-               if (is.function(centroid)) {
-                    family@allcent <- centroid
-
-               } else if(is.character(centroid) && centroid == "mean") {
-                    family@allcent <- function(x, cluster, k) {
-                         X <- split(x, cluster)
-                         X <- lapply(X, function(l) t(sapply(l, rbind)))
-
-                         centers <- lapply(X, colMeans)
-                    }
-
-               } else if (is.character(centroid) && centroid == "median") {
-                    family@allcent <- function(x, cluster, k) {
-                         X <- split(x, cluster)
-                         X <- lapply(X, function(l) t(sapply(l, rbind)))
-
-                         centers <- lapply(X, function(x) apply(x, 2, stats::median))
-                    }
+                    consistency_check(distance, "dist")
+                    consistency_check(centroid, "cent")
                }
 
                if (reps > 1L) {
@@ -514,7 +479,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     kc.list <- foreach(i = 1:reps,
                                        .combine = list,
                                        .multicombine = TRUE,
-                                       .packages = "dtwclust") %dorng% {
+                                       .packages = packages) %dorng% {
                                             if (!is.null(dist_entry) && !proxy::pr_DB$entry_exists(dist_entry$names[1]))
                                                  do.call(proxy::pr_DB$set_entry, dist_entry)
 
@@ -532,6 +497,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                }
 
           } else {
+
                ## Cluster matrix
                if (reps > 1L) {
                     ## I need to re-register any custom distances in each parallel worker
@@ -543,7 +509,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     kc.list <- foreach(i = 1:reps,
                                        .combine = list,
                                        .multicombine = TRUE,
-                                       .packages = "dtwclust") %dorng% {
+                                       .packages = packages) %dorng% {
                                             if (!is.null(dist_entry) && !proxy::pr_DB$entry_exists(dist_entry$names[1]))
                                                  do.call(proxy::pr_DB$set_entry, dist_entry)
 
@@ -556,12 +522,12 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                        }
                } else {
                     ## Just one repetition
-                    kc.list <-flexclust::kcca(x = data,
-                                              k = k,
-                                              family = family,
-                                              simple = TRUE,
-                                              control = ctrl,
-                                              save.data = save.data)
+                    kc.list <- flexclust::kcca(x = data,
+                                               k = k,
+                                               family = family,
+                                               simple = TRUE,
+                                               control = ctrl,
+                                               save.data = save.data)
                }
           }
 
@@ -620,12 +586,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           lengths <- sapply(x, length)
 
-          if (length(unique(lengths)) > 1) {
-               if (is.character(distance) &&
-                   (distance %in% c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd")) && # restrict check to these
-                   !(distance %in% c("dtw", "dtw2", "sbd")))
-                    stop("Only the following distances are supported for series of different lengths:\n\tdtw \tdtw2 \tsbd")
-          }
+          if (length(unique(lengths)) > 1)
+               consistency_check(distance, "dist")
 
           if (!is.null(preproc) && is.function(preproc)) {
                x <- preproc(x, ...)
@@ -635,18 +597,17 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                D <- distance(x, ...)
 
           } else if (is.character(distance)) {
-               ## Take advantage of the function I defined for the kcca family
-               ## Which can do calculations if parallel if appropriate
-               fam <- kccaFamilies(distance = distance,
-                                   cent = NULL,
-                                   window.size = window.size,
-                                   norm = norm,
-                                   distmat = NULL,
-                                   packages = packages,
-                                   ...)
+               ## Take advantage of the function I defined for the partitional methods
+               ## Which can do calculations in parallel if appropriate
+               distfun <- dtwdistfun(distance = distance,
+                                     window.size = window.size,
+                                     norm = norm,
+                                     distmat = NULL,
+                                     packages = packages,
+                                     ...)
 
                ## TRUE is to calculate whole distance matrix
-               D <- fam@dist(x, x, TRUE)
+               D <- distfun(x, x, whole = TRUE)
 
           } else {
                stop("Unspported distance definition")

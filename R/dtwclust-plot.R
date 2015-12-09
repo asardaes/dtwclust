@@ -9,7 +9,7 @@
 #' The function returns the \code{gg} object invisibly, in case you want to modify it to your liking. You
 #' might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 #'
-#' @name plot-method
+#' @name plot-dtwclust
 #' @rdname plot-methods
 #'
 #' @seealso \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}}
@@ -100,12 +100,7 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
 
                ## Check if data was z-normalized
 
-               if (x@preproc == "zscore") {
-                    df <- apply(df, 2, zscore)
-                    titleStr <- "Clusters and their members, including cluster center (all z-normalized)"
-               } else {
-                    titleStr <- "Clusters and their members, including cluster center"
-               }
+               titleStr <- "Clusters and their members, including cluster center"
 
                ## transform data
 

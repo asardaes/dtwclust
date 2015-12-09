@@ -199,7 +199,7 @@ seeds to allow for different starting points. This function can now run several 
 The user only needs to provide an initial seed in the corresponding parameter of this function.
 
 Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is precomputed,
-since said matrix is reused for every repetition.
+since said matrix is reused for every repetition, and can be comptued in parallel (see next section).
 }
 
 \section{Parallel Computing}{
@@ -208,14 +208,16 @@ since said matrix is reused for every repetition.
 Please note that running tasks in parallel does \strong{not} guarantee faster computations.
 The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 
-The user can register a parallel backend with the \code{doParallel} package in order to do the
-repetitions in parallel, as well as distance calculations (see the examples).
+The user can register a parallel backend with the \code{doParallel} package (and possibly any other package compatible with
+\code{foreach}'s \code{\%dopar\%} operator) in order to do the
+repetitions in parallel, as well as distance calculations (see the examples). \code{\link{TADPole}} also
+takes advantage of parallel support.
 
 Unless each repetitions requires a few seconds, parallel computing probably isn't worth it. As such, I would only
 use this feature with \code{shape} and \code{DBA} centroids, or for \code{pam.precompute} \code{=} \code{FALSE}
 with a relatively small \code{k} and an expensive distance function like \code{DTW}.
 
-If you do more than 1 repetition sequentially, you can safely ignore the warning given by \code{doRNG} about
+If you do more than 1 repetition sequentially, you can safely ignore the warning given by \code{dopar} about
 no parallel backend registration.
 
 If the user registers a parallel backend, the function will also try to do the calculation of the distance
@@ -223,6 +225,14 @@ matrices in parallel. This should work with any function registered with \code{\
 \code{\link[proxy]{pr_DB}} whose \code{loop} flag is set to \code{TRUE}. If the function requires special packages
 to be loaded, provide their names in the \code{packages} argument. In addition, "dtwclust" is always loaded
 in each parallel worker, so the user doesn't need to include that.
+
+Note that, by default, if a parallel backend is registered, multiple repetitions are to be performed (partitional clustering,
+\code{reps} \code{>=} 1)
+AND \code{centroid} \code{!=} \code{"pam"}, each parallel worker will get a repetition task, but any distance calculations
+within each worker will be done sequentially. Load balance for such a scenario should be fine as long as the \code{reps}
+\code{>=} the number of parallel workers. If you believe your task would benefit more from parallelization within each repetition,
+consider registering the parallel backend and calling \code{dtwclust} several times sequentially, with \code{reps = 1} and
+different \code{seeds}.
 }
 
 \section{Notes}{
@@ -301,25 +311,25 @@ require(scales)
 gkc + scale_x_date(labels = date_format("\%b-\%Y"),
                    breaks = date_breaks("2 months"))
 
-#### Use full DTW and PAM (takes around 1 minute)
-kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, trace = TRUE)
-
-#### Use full DTW with DBA centroids (takes around 1 minute)
-kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
-
-#### Use constrained DTW with original series of different lengths (takes around 1 minute)
-kc.cdtw <- dtwclust(CharTraj, k = 20, window.size = 20,
-                    seed = 3251, trace = TRUE)
-
-#### Using parallel computing to optimize several random repetitions
+#### Using parallel computation to optimize several random repetitions
 #### and distance matrix calculation
-# This uses the "nDTW" function registered in another example above
 require(doParallel)
 
 # Create parallel workers
 cl <- makeCluster(detectCores())
 registerDoParallel(cl)
 
+## Use full DTW and PAM
+kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, trace = TRUE)
+
+## Use full DTW with DBA centroids
+kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
+
+## Use constrained DTW with original series of different lengths
+kc.cdtw <- dtwclust(CharTraj, k = 20, window.size = 20,
+                    seed = 3251, trace = TRUE)
+
+## This uses the "nDTW" function registered in another example above
 # For reference, this took around 2.25 minutes with 8 cores (all 8 repetitions).
 kc.ndtw.list <- dtwclust(CharTraj, k = 20, distance = "nDTW",
                          centroid = "dba", window.size = 10,
@@ -334,10 +344,6 @@ registerDoSEQ()
 
 # See Rand Index for each repetition
 sapply(kc.ndtw.list, randIndex, y = CharTrajLabels)
-
-# Try re-running the previous examples with a parallel backend. In my tests it provided a
-# reduction of 2 to 6 times in run times.
-
 }
 
 }
@@ -360,6 +366,6 @@ http://doi.org/10.1145/2723372.2737793}.
 \seealso{
 Please check the brief description in \code{\link{dtwclust-package}}.
 
-Additionally: \code{\link{plot-method}}, \code{\link{dtwclust-class}}.
+Additionally: \code{\link{plot-dtwclust}}, \code{\link{dtwclust-class}}.
 }
 
