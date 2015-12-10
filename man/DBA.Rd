@@ -51,6 +51,8 @@ plot(dtw.avg, type="l")
 
 # Change the provided order
 dtw.avg2 <- DBA(CharTraj[5:1], CharTraj[[1]], trace = TRUE)
+
+# Same result?
 all(dtw.avg == dtw.avg2)
 
 }

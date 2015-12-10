@@ -5,7 +5,7 @@
 * Parallel computing all around. Watch out for RAM! Use Linux if possible.
      + Repetitions can be done in parallel if the user provides a suitable backend
      + Calculation of distance matrices also takes advantage of parallel backends.
-     + TADPole too, probably negligible for small datasets.
+     + TADPole and dtw_lb too, probably negligible (maybe even detrimental) for small datasets.
 
 ## Version 1.2.0
 * Added the option to prevent pre-computation of distance matrix when using PAM centroids

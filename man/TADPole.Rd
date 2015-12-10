@@ -78,7 +78,6 @@ registerDoParallel(cl)
 # Cluster
 kc.tadp <- TADPole(data, k = 20, window.size = 20, dc = 1.5)
 
-
 # Stop parallel workers
 stopCluster(cl)
 

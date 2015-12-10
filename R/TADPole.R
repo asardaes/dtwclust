@@ -51,7 +51,6 @@
 #' # Cluster
 #' kc.tadp <- TADPole(data, k = 20, window.size = 20, dc = 1.5)
 #'
-#'
 #' # Stop parallel workers
 #' stopCluster(cl)
 #'
@@ -274,7 +273,6 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
                                    indCompute <- !(indPrune | indPre)
 
                                    if (sum(indCompute) > 0) {
-                                        ## TODO: parallel support
                                         d2 <- proxy::dist(x[ii], x[indHDN[indCompute]], method = "DTW2",
                                                           step.pattern = step.pattern,
                                                           window.type = "slantedband", window.size = window.size)
