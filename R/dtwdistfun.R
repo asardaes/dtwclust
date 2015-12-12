@@ -69,6 +69,7 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
                          pairs <- call_pairs(length(x), byrow = FALSE)
 
                          tasks <- parallel::splitIndices(nrow(pairs), tasks)
+                         tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) != 0]
 
                          pairs <- lapply(tasks, function(id){
                               pairs[id,]
@@ -122,6 +123,7 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
                          ## Only subset of distmat is calculated
 
                          tasks <- parallel::splitIndices(length(x), tasks)
+                         tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) != 0]
 
                          x <- lapply(tasks, function(idx) {
                               x[idx]

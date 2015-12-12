@@ -163,6 +163,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
           ## Attempt parallel calculations?
           if (do_par) {
                tasks <- parallel::splitIndices(nrow(ind1), workers)
+               tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) != 0]
 
                ind1 <- lapply(tasks, function(id) {
                     ind1[id,]
@@ -243,6 +244,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
      ## Attempt parallel calculations?
      if (do_par) {
           tasks <- parallel::splitIndices(n-1L, workers)
+          tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) != 0]
 
           i <- lapply(tasks, function(id) {
                id + 1 # start at two

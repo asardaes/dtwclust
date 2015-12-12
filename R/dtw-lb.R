@@ -144,6 +144,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = T
 
           if (do_par) {
                tasks <- parallel::splitIndices(length(indNew), workers)
+               tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) != 0]
 
                indNew <- lapply(tasks, function(id) {
                     indNew[id]
