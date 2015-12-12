@@ -1,6 +1,7 @@
 # NEWS
 
 ## Version 1.3.1
+* `shape_extraction` now accepts series with different lengths!
 * More parallel support
      + DBA and Shape centroid calculations 
      + DBA itself (probably unnecessary unless you're averaging a lot of series)

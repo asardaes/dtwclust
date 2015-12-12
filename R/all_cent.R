@@ -68,12 +68,10 @@ all_cent <- function(case = NULL,
                                  cen <- get("centers", envir=parent.frame())
                                  C <- consistency_check(cen, "tsmat")
 
-                                 if (is.matrix(x)) {
+                                 if (is.matrix(x))
                                       X <- split.data.frame(x, cluster)
-                                 } else if (is.list(x)) {
+                                 else if (is.list(x))
                                       X <- split(x, cluster)
-                                      X <- lapply(X, function(l) do.call(rbind, l))
-                                 }
 
                                  cl <- sort(unique(cluster))
 

@@ -99,7 +99,6 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                }
 
                ## Check if data was z-normalized
-
                titleStr <- "Clusters and their members, including cluster center"
 
                ## transform data

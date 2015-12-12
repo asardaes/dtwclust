@@ -59,6 +59,19 @@ SBD <- function(x, y, znorm = FALSE) {
      consistency_check(x, "ts")
      consistency_check(y, "ts")
 
+     nx <- length(x)
+     ny <- length(y)
+
+     if (nx > ny) {
+          ## The order in which I provide the arguments to NCCc affects 'shift'
+          flip <- x
+          x <- y
+          y <- flip
+
+     } else {
+          flip <- NULL
+     }
+
      if (znorm)
           CCseq <- NCCc(zscore(x), zscore(y))
      else
@@ -66,14 +79,29 @@ SBD <- function(x, y, znorm = FALSE) {
 
      m <- max(CCseq)
      d <- which.max(CCseq)
-     n <- length(y)
 
-     shift <- d - max(length(x), length(y))
+     shift <- d - max(nx, ny)
 
-     if (shift < 0)
-          yshift <- c( y[(-shift+1):n], rep(0, -shift) )
+     if (is.null(flip)) {
+          if (shift < 0)
+               yshift <- y[(-shift+1):ny]
+          else
+               yshift <- c( rep(0, shift), y )
+
+     } else {
+          ## Remember, if I flipped them, then I have to shift what is now saved in 'x'
+          if (shift < 0)
+               yshift <- c( rep(0, -shift), x )
+          else
+               yshift <- x[(shift+1):ny]
+     }
+
+     nys <- length(yshift)
+
+     if (nys < nx)
+          yshift <- c( yshift, rep(0, nx-nys) )
      else
-          yshift <- c( rep(0, shift), y[1:(n-shift)] )
+          yshift <- yshift[1:nx]
 
      dist <- 1 - m
 

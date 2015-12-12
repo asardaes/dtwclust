@@ -96,14 +96,14 @@ consistency_check <- function(obj, case, ...) {
           valid <- c("dtw", "dtw2", "sbd")
 
           if (is.character(obj) && (obj %in% included) && !(obj %in% valid))
-               stop("Only the following distances are supported for series of different lengths:\n\tdtw \tdtw2 \tsbd")
+               stop("Only the following distances are supported for series of different lengths:\n\tdtw\tdtw2\tsbd")
 
      } else if (case == "cent") {
           included <- c("mean", "median", "shape", "dba", "pam")
-          valid <- c("dba", "pam")
+          valid <- c("dba", "pam", "shape")
 
           if (is.character(obj) && (obj %in% included) && !(obj %in% valid))
-               stop("Only the following centroids are supported for series of different lengths:\n\tdba \tpam")
+               stop("Only the following centroids are supported for series of different lengths:\n\tdba\tpam\tshape")
 
      } else {
           stop("Possibly a typo in function consistency_check")

@@ -88,7 +88,7 @@
 #'   time series in the data and then re-used at each iteration. It usually saves overhead overall.
 #' }
 #'
-#' Note that only \code{dba} and \code{pam} support series of different lengths.
+#' Note that only \code{shape}, \code{dba} and \code{pam} support series of different lengths.
 #'
 #' @section Sakoe-Chiba Constraint:
 #'

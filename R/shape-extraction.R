@@ -3,7 +3,10 @@
 #' Time-series shape extraction based on optimal alignments as proposed by Papparizos and Gravano, 2015, for
 #' the k-Shape clustering algorithm.
 #'
-#' This works only if the signals are \emph{z-normalized}, since the output will also have this normalization.
+#' This works only if the series are \emph{z-normalized}, since the output will also have this normalization.
+#' The resulting centroid will have the same length as \code{cz} if provided, or the same length as the time
+#' series in \code{X} if \code{cz = NULL}. Therefore, in the latter case, all series of \code{X} must have
+#' equal lengths.
 #'
 #' This centroid computation is casted as an optimization problem called maximization of Rayleigh Quotient.
 #' See the cited article for more details.
@@ -23,20 +26,22 @@
 #' # Sample data
 #' data(uciCT)
 #'
-#' # Subset of interest, normalized
-#' X <- t(sapply(CharTraj[1:5], zscore))
+#' # Normalize desired subset
+#' X <- zscore(CharTraj[1:5])
 #'
 #' # Obtain centroid series
-#' C <- shape_extraction(X, znorm = FALSE)
+#' C <- shape_extraction(X)
 #'
 #' # Result
-#' matplot(t(X), type = "l", col = 1:5)
+#' matplot(do.call(cbind, X),
+#'         type = "l", col = 1:5)
 #' points(C)
 #'
-#' @param X Numeric matrix where each row is a time series.
-#' @param cz Center to use as basis. It should already be \emph{normalized}. Calculation uses all \code{X}
-#' if \code{cz = NULL}.
-#' @param znorm Boolean flag. Should z-scores be calculated for \code{X} before processing?
+#' @param X Numeric matrix where each row is a time series, or a list of time series.
+#' @param cz Center to use as basis. \emph{It will be z-normalized}. Function uses all \code{X}
+#' if \code{cz = NULL}. Must be provided and different than a zero-line if time series in
+#' \code{X} have different lengths.
+#' @param znorm Logical flag. Should z-scores be calculated for \code{X} before processing?
 #'
 #' @return Centroid time series.
 #'
@@ -44,36 +49,37 @@
 
 shape_extraction <- function(X, cz = NULL, znorm = FALSE) {
 
-     if (!is.matrix(X))
-          stop("Unsupported type for X")
+     X <- consistency_check(X, "tsmat")
+
+     if (is.null(cz))
+          consistency_check(X, "tslist")
+     else
+          consistency_check(X, "vltslist")
 
      if (znorm)
-          Xz <- t(apply(X, 1, zscore))
+          Xz <- zscore(X)
      else
           Xz <- X
 
      if (!is.null(cz)) {
-
-          cz <- as.numeric(cz)
+          cz <- zscore(cz)
 
           if (all(cz == 0)) {
-               a <- Xz
+               a <- do.call(rbind, Xz)
 
           } else {
-               a <- t(apply(Xz, 1, function(A) {
-                    sbd <- SBD(cz, A)
+               a <- lapply(Xz, function(A) {
+                    SBD(cz, A)$yshift
+               })
 
-                    sbd$yshift
-               }))
+               a <- do.call(rbind, a)
           }
 
      } else {
-
-          a <- Xz
-
+          a <- do.call(rbind, Xz)
      }
 
-     Y <- t(apply(a, 1, zscore))
+     Y <- zscore(a)
 
      if (is.matrix(Y))
           S <- t(Y) %*% Y
@@ -93,8 +99,6 @@ shape_extraction <- function(X, cz = NULL, znorm = FALSE) {
           ksc <- -ksc
 
      ksc <- zscore(ksc)
-     attributes(ksc) <- NULL
-     ksc <- as.numeric(ksc)
 
      ksc
 }

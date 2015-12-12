@@ -7,12 +7,13 @@
 shape_extraction(X, cz = NULL, znorm = FALSE)
 }
 \arguments{
-\item{X}{Numeric matrix where each row is a time series.}
+\item{X}{Numeric matrix where each row is a time series, or a list of time series.}
 
-\item{cz}{Center to use as basis. It should already be \emph{normalized}. Calculation uses all \code{X}
-if \code{cz = NULL}.}
+\item{cz}{Center to use as basis. \emph{It will be z-normalized}. Function uses all \code{X}
+if \code{cz = NULL}. Must be provided and different than a zero-line if time series in
+\code{X} have different lengths.}
 
-\item{znorm}{Boolean flag. Should z-scores be calculated for \code{X} before processing?}
+\item{znorm}{Logical flag. Should z-scores be calculated for \code{X} before processing?}
 }
 \value{
 Centroid time series.
@@ -22,7 +23,10 @@ Time-series shape extraction based on optimal alignments as proposed by Pappariz
 the k-Shape clustering algorithm.
 }
 \details{
-This works only if the signals are \emph{z-normalized}, since the output will also have this normalization.
+This works only if the series are \emph{z-normalized}, since the output will also have this normalization.
+The resulting centroid will have the same length as \code{cz} if provided, or the same length as the time
+series in \code{X} if \code{cz = NULL}. Therefore, in the latter case, all series of \code{X} must have
+equal lengths.
 
 This centroid computation is casted as an optimization problem called maximization of Rayleigh Quotient.
 See the cited article for more details.
@@ -32,14 +36,15 @@ See the cited article for more details.
 # Sample data
 data(uciCT)
 
-# Subset of interest, normalized
-X <- t(sapply(CharTraj[1:5], zscore))
+# Normalize desired subset
+X <- zscore(CharTraj[1:5])
 
 # Obtain centroid series
-C <- shape_extraction(X, znorm = FALSE)
+C <- shape_extraction(X)
 
 # Result
-matplot(t(X), type = "l", col = 1:5)
+matplot(do.call(cbind, X),
+        type = "l", col = 1:5)
 points(C)
 
 }

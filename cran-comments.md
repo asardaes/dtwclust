@@ -1,5 +1,5 @@
 ## Update to version 1.3.1
-* Bug fixes and more parallel support
+* Bug fixes, more parallel support and some extended functionality.
 
 ## Test environments
 * Local Windows 10, R 3.2.3
