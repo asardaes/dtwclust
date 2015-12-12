@@ -41,7 +41,7 @@ kc <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #>      3 Changes / Distsum : 2 / 857.9886 
 #>      4 Changes / Distsum : 0 / 857.9886 
 #> 
-#>  Elapsed time is 5.908 seconds.
+#>  Elapsed time is 4.219 seconds.
 
 plot(kc)
 ```
@@ -68,7 +68,7 @@ kc.ndtw <- dtwclust(datalist[21:40], k = 4, distance = "nDTW",
 #>      2 Changes / Distsum : 6 / 0.8101177 
 #>      3 Changes / Distsum : 0 / 0.7401798 
 #> 
-#>  Elapsed time is 2.228 seconds.
+#>  Elapsed time is 1.541 seconds.
 
 # Modifying some plot parameters
 plot(kc.ndtw, labs.arg = list(title = "nDTW clustering", x = "time", y = "series"))
@@ -86,7 +86,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.814 seconds.
+#>  Elapsed time is 0.59 seconds.
 cl.sbd <- cutree(hc.sbd, 20)
 cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\n\n")
 #> Rand index for HC+SBD: 0.512583
@@ -106,12 +106,41 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 78.5%
 #> 
-#>  Elapsed time is 8.418 seconds.
+#>  Elapsed time is 6.051 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
 
 ![](README-examples-4.png)
+
+``` r
+
+#### Parallel support
+require(doParallel)
+#> Loading required package: doParallel
+#> Loading required package: iterators
+#> Loading required package: parallel
+cl <- makeCluster(detectCores())
+registerDoParallel(cl)
+
+# Using the previously registered distance
+kc <- dtwclust(datalist, k = 20,
+               distance = "nDTW", centroid = "dba",
+               trace = TRUE, seed = 9421)
+#>      1 Changes / Distsum : 100 / 5.162033 
+#>      2 Changes / Distsum : 3 / 3.739462 
+#>      3 Changes / Distsum : 2 / 3.687197 
+#>      4 Changes / Distsum : 0 / 3.631238 
+#> 
+#>  Elapsed time is 23.85 seconds.
+
+randIndex(kc, CharTrajLabels)
+#>       ARI 
+#> 0.4913907
+
+stopCluster(cl)
+registerDoSEQ()
+```
 
 Dependencies
 ------------
@@ -122,3 +151,4 @@ Dependencies
 -   The core DTW calculations are done by the `dtw` package.
 -   Plotting is done with the `ggplot2` package.
 -   Parallel computation depends on the `foreach` package.
+-   Random streams for repetitions of partitional procedures use the `doRNG` package.

@@ -112,12 +112,10 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
      step.pattern <- get("symmetric1") # so that CHECK doesn't complain
 
      ## Attempt parallel computations?
-     do_par <- foreach::getDoParRegistered()
+     do_par <- foreach::getDoParRegistered() && foreach::getDoParWorkers() > 1L
 
      if (do_par)
           workers <- foreach::getDoParWorkers()
-     else
-          workers <- 1L
 
      ## ============================================================================================================================
      ## Pruning during local density calculation

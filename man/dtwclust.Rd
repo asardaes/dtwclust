@@ -208,10 +208,10 @@ since said matrix is reused for every repetition, and can be comptued in paralle
 Please note that running tasks in parallel does \strong{not} guarantee faster computations.
 The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 
-The user can register a parallel backend with the \code{doParallel} package (and possibly any other package compatible with
-\code{foreach}'s \code{\%dopar\%} operator) in order to do the
-repetitions in parallel, as well as distance calculations (see the examples). \code{\link{TADPole}} also
-takes advantage of parallel support.
+The user can register a parallel backend with the \code{doParallel} package (and possibly any other
+package compatible with \code{foreach}'s \code{\%dopar\%} operator) in order to do the
+repetitions in parallel, as well as distance and some centroid calculations (see the examples).
+\code{\link{TADPole}} and \code{\link{DBA}} also take advantage of parallel support.
 
 Unless each repetitions requires a few seconds, parallel computing probably isn't worth it. As such, I would only
 use this feature with \code{shape} and \code{DBA} centroids, or for \code{pam.precompute} \code{=} \code{FALSE}
@@ -228,7 +228,7 @@ in each parallel worker, so the user doesn't need to include that.
 
 Note that, by default, if a parallel backend is registered, multiple repetitions are to be performed (partitional clustering,
 \code{reps} \code{>=} 1)
-AND \code{centroid} \code{!=} \code{"pam"}, each parallel worker will get a repetition task, but any distance calculations
+AND \code{centroid} \code{!=} \code{"pam"}, each parallel worker will get a repetition task, but any calculations
 within each worker will be done sequentially. Load balance for such a scenario should be fine as long as the \code{reps}
 \code{>=} the number of parallel workers. If you believe your task would benefit more from parallelization within each repetition,
 consider registering the parallel backend and calling \code{dtwclust} several times sequentially, with \code{reps = 1} and

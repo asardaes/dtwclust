@@ -40,6 +40,15 @@ the cited article for specific details on the algorithm.
 If a given series reference is provided in \code{center}, the algorithm should always converge to the same
 result provided the rows of \code{X} keep the same values, although their order may change.
 }
+\section{Parallel Computing}{
+
+
+Please note that running tasks in parallel does \strong{not} guarantee faster computations.
+The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+
+The user can register a parallel backend with the \code{doParallel} package in order to attempt to
+speed up the calculations (see the examples).
+}
 \examples{
 
 # Sample data
@@ -54,6 +63,25 @@ dtw.avg2 <- DBA(CharTraj[5:1], CharTraj[[1]], trace = TRUE)
 
 # Same result?
 all(dtw.avg == dtw.avg2)
+
+\dontrun{
+#### Running DBA with parallel support
+# For such a small dataset, this is probably slower in parallel
+require(doParallel)
+
+# Create parallel workers
+cl <- makeCluster(detectCores())
+registerDoParallel(cl)
+
+# DTW Average
+cen <- DBA(CharTraj[1:5], CharTraj[[1]], trace = TRUE)
+
+# Stop parallel workers
+stopCluster(cl)
+
+# Return to sequential computations
+registerDoSEQ()
+}
 
 }
 \references{

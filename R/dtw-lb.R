@@ -122,7 +122,8 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = T
                       ...)
 
      ## Attempt parallel computations?
-     do_par <- foreach::getDoParRegistered()
+     do_par <- foreach::getDoParRegistered() &&
+          foreach::getDoParWorkers() > 1L
 
      if (do_par)
           workers <- foreach::getDoParWorkers()
@@ -172,10 +173,6 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = T
                                                             window.type = "slantedband",
                                                             window.size = window.size))
                                }
-
-               indD <- indNN + singleIndexing
-               d[indD[unlist(indNew)]] <- dSub
-
           } else {
                dSub <- switch(EXPR = norm,
 
@@ -191,10 +188,10 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = T
                                                method = "DTW2",
                                                window.type = "slantedband",
                                                window.size = window.size))
-
-               indD <- indNN + singleIndexing
-               d[indD[indNew]] <- dSub
           }
+
+          indD <- indNN + singleIndexing
+          d[indD[unlist(indNew)]] <- dSub
 
           new.indNN <- apply(d, 2, which.min)
      }

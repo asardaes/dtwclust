@@ -1,5 +1,10 @@
 # NEWS
 
+## Version 1.3.1
+* More parallel support
+     + DBA and Shape centroid calculations 
+     + DBA itself (probably unnecessary unless you're averaging a lot of series)
+
 ## Version 1.3.0
 * Added the possibility to run several repetitions for partitional procedures, using different random starts each time by using the doRNG package
 * Parallel computing all around. Watch out for RAM! Use Linux if possible.

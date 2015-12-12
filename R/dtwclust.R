@@ -132,10 +132,10 @@
 #' Please note that running tasks in parallel does \strong{not} guarantee faster computations.
 #' The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 #'
-#' The user can register a parallel backend with the \code{doParallel} package (and possibly any other package compatible with
-#' \code{foreach}'s \code{\%dopar\%} operator) in order to do the
-#' repetitions in parallel, as well as distance calculations (see the examples). \code{\link{TADPole}} also
-#' takes advantage of parallel support.
+#' The user can register a parallel backend with the \code{doParallel} package (and possibly any other
+#' package compatible with \code{foreach}'s \code{\%dopar\%} operator) in order to do the
+#' repetitions in parallel, as well as distance and some centroid calculations (see the examples).
+#' \code{\link{TADPole}} and \code{\link{DBA}} also take advantage of parallel support.
 #'
 #' Unless each repetitions requires a few seconds, parallel computing probably isn't worth it. As such, I would only
 #' use this feature with \code{shape} and \code{DBA} centroids, or for \code{pam.precompute} \code{=} \code{FALSE}
@@ -152,7 +152,7 @@
 #'
 #' Note that, by default, if a parallel backend is registered, multiple repetitions are to be performed (partitional clustering,
 #' \code{reps} \code{>=} 1)
-#' AND \code{centroid} \code{!=} \code{"pam"}, each parallel worker will get a repetition task, but any distance calculations
+#' AND \code{centroid} \code{!=} \code{"pam"}, each parallel worker will get a repetition task, but any calculations
 #' within each worker will be done sequentially. Load balance for such a scenario should be fine as long as the \code{reps}
 #' \code{>=} the number of parallel workers. If you believe your task would benefit more from parallelization within each repetition,
 #' consider registering the parallel backend and calling \code{dtwclust} several times sequentially, with \code{reps = 1} and
@@ -359,10 +359,12 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## Partitional
           ## =================================================================================================================
 
-          if (k < 2)
+          if (k < 2L)
                stop("At least two clusters must be defined")
-          if (reps < 1)
+          if (reps < 1L)
                stop("At least one repetition must be performed")
+          if(reps > 1L && save.data)
+               message("Consider setting save.data to FALSE if performing several repetitions.\n")
 
           ## For parallel computation
           packages <- c("dtwclust", packages)
@@ -448,7 +450,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           if (trace) {
                if (reps > 1L)
-                    message("Tracing will not be available if parallel computing is used.")
+                    message("Tracing will not be available if parallel computing is used.\n")
 
                ctrl@verbose <- 1L
           }
@@ -537,12 +539,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           toc <- proc.time() - tic
 
-          if (save.data) {
+          if (save.data)
                datalist <- consistency_check(data, "tsmat")
-
-               if (reps > 1L)
-                    message("\nConsider setting save.data to FALSE if performing several repetitions.")
-          } else
+          else
                datalist <- list()
 
           if (is.list(kc.list)) {

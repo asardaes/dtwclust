@@ -8,6 +8,14 @@
 #' If a given series reference is provided in \code{center}, the algorithm should always converge to the same
 #' result provided the rows of \code{X} keep the same values, although their order may change.
 #'
+#' @section Parallel Computing:
+#'
+#' Please note that running tasks in parallel does \strong{not} guarantee faster computations.
+#' The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+#'
+#' The user can register a parallel backend with the \code{doParallel} package in order to attempt to
+#' speed up the calculations (see the examples).
+#'
 #' @references
 #'
 #' Petitjean F, Ketterlin A and Gancarski P (2011). ``A global averaging method for dynamic time warping, with applications to
@@ -29,6 +37,25 @@
 #'
 #' # Same result?
 #' all(dtw.avg == dtw.avg2)
+#'
+#' \dontrun{
+#' #### Running DBA with parallel support
+#' # For such a small dataset, this is probably slower in parallel
+#' require(doParallel)
+#'
+#' # Create parallel workers
+#' cl <- makeCluster(detectCores())
+#' registerDoParallel(cl)
+#'
+#' # DTW Average
+#' cen <- DBA(CharTraj[1:5], CharTraj[[1]], trace = TRUE)
+#'
+#' # Stop parallel workers
+#' stopCluster(cl)
+#'
+#' # Return to sequential computations
+#' registerDoSEQ()
+#' }
 #'
 #' @param X A data matrix where each row is a time series. Optionally, a list where each element is a time series.
 #' @param center Optionally, a time series to use as reference. It must be a numeric vector. Defaults to a
@@ -79,6 +106,23 @@ DBA <- function(X, center = NULL, max.iter = 20,
           x %*% rprox
      })
 
+     ## Attempt parallel?
+     do_par <- foreach::getDoParRegistered() && foreach::getDoParWorkers() > 1L
+
+     if (do_par) {
+          # in parallel
+          tasks <- parallel::splitIndices(n, foreach::getDoParWorkers())
+          tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) != 0]
+
+          X <- lapply(tasks, function(id) {
+               X[id]
+          })
+
+          M <- lapply(tasks, function(id) {
+               M[id]
+          })
+     }
+
      ## Iterations
 
      iter <- 1
@@ -91,24 +135,58 @@ DBA <- function(X, center = NULL, max.iter = 20,
 
           ## Return the coordinates of each series in X grouped by the coordinate they match to in the center time series
           ## Also return the number of coordinates used in each case (for averaging below)
-          xg <- mapply(X, M, SIMPLIFY = FALSE, FUN = function(x, xm) {
-               lcm <- switch(EXPR = norm,
-                             L1 = abs(xm - CM[1:nrow(xm), , drop = FALSE]),
-                             L2 = (xm - CM[1:nrow(xm), , drop = FALSE])^2
-               )
+          if (do_par) {
+               # in parallel
+               xg <- foreach(X = X, M = M,
+                             .combine = c,
+                             .multicombine = TRUE,
+                             .packages = "dtwclust") %dopar% {
+                                  mapply(X, M, SIMPLIFY = FALSE, FUN = function(x, xm) {
+                                       lcm <- switch(EXPR = norm,
+                                                     L1 = abs(xm - CM[1:nrow(xm), , drop = FALSE]),
+                                                     L2 = (xm - CM[1:nrow(xm), , drop = FALSE])^2
+                                       )
 
-               if (is.null(window.size)) {
-                    d <- dtw::dtw(lcm)
-               } else {
-                    d <- dtw::dtw(lcm, window.type = "slantedband", window.size = w)
-               }
+                                       if (is.null(window.size)) {
+                                            d <- dtw::dtw(lcm)
+                                       } else {
+                                            d <- dtw::dtw(lcm,
+                                                          window.type = "slantedband",
+                                                          window.size = w)
+                                       }
 
-               x.sub <- stats::aggregate(x[d$index1], by=list(ind = d$index2), sum)
+                                       x.sub <- stats::aggregate(x[d$index1],
+                                                                 by=list(ind = d$index2),
+                                                                 sum)
 
-               n.sub <- stats::aggregate(x[d$index1], by=list(ind = d$index2), length)
+                                       n.sub <- stats::aggregate(x[d$index1],
+                                                                 by=list(ind = d$index2),
+                                                                 length)
 
-               cbind(sum = x.sub$x, n = n.sub$x)
-          })
+                                       cbind(sum = x.sub$x, n = n.sub$x)
+                                  })
+                             }
+          } else {
+               # not in parallel
+               xg <- mapply(X, M, SIMPLIFY = FALSE, FUN = function(x, xm) {
+                    lcm <- switch(EXPR = norm,
+                                  L1 = abs(xm - CM[1:nrow(xm), , drop = FALSE]),
+                                  L2 = (xm - CM[1:nrow(xm), , drop = FALSE])^2
+                    )
+
+                    if (is.null(window.size)) {
+                         d <- dtw::dtw(lcm)
+                    } else {
+                         d <- dtw::dtw(lcm, window.type = "slantedband", window.size = w)
+                    }
+
+                    x.sub <- stats::aggregate(x[d$index1], by=list(ind = d$index2), sum)
+
+                    n.sub <- stats::aggregate(x[d$index1], by=list(ind = d$index2), length)
+
+                    cbind(sum = x.sub$x, n = n.sub$x)
+               })
+          }
 
           ## Put everything in one big data frame
           xg <- reshape2::melt(xg)

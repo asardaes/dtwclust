@@ -72,7 +72,7 @@ all_cent <- function(case = NULL,
                                       X <- split.data.frame(x, cluster)
                                  } else if (is.list(x)) {
                                       X <- split(x, cluster)
-                                      X <- lapply(X, function(l) t(sapply(l, rbind)))
+                                      X <- lapply(X, function(l) do.call(rbind, l))
                                  }
 
                                  cl <- sort(unique(cluster))
@@ -97,23 +97,46 @@ all_cent <- function(case = NULL,
                                  new.C <- cen # initialize
 
                                  ## recompute centers for the clusters that changed
-                                 if(is.matrix(cen)) {
-                                      new.C[indChanged, ] <- t(mapply(X[indChanged], C[indChanged],
-                                                                      FUN = function(x, c) {
-                                                                           new.c <- shape_extraction(x, c)
+                                 if (foreach::getDoParRegistered() && foreach::getDoParWorkers() > 1L) {
+                                      # in parallel
+                                      tasks <- parallel::splitIndices(length(indChanged),
+                                                                      foreach::getDoParWorkers())
+                                      tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) != 0]
 
-                                                                           new.c
-                                                                      }))
+                                      indChanged <- lapply(tasks, function(id) {
+                                           indChanged[id]
+                                      })
 
-                                 } else if (is.list(cen)) {
-                                      new.C[indChanged] <- mapply(X[indChanged], C[indChanged],
-                                                                  SIMPLIFY = FALSE,
-                                                                  FUN = function(x, c) {
-                                                                       new.c <- shape_extraction(x, c)
+                                      exclude <- setdiff(ls(), c("X", "C", "cen"))
 
-                                                                       new.c
-                                                                  })
+                                      sub.C <- foreach(indChanged = indChanged,
+                                                       .combine = ifelse(is.matrix(cen), cbind, c),
+                                                       .multicombine = TRUE,
+                                                       .packages = "dtwclust",
+                                                       .noexport = exclude) %dopar% {
+                                                            mapply(X[indChanged], C[indChanged],
+                                                                   SIMPLIFY = is.matrix(cen),
+                                                                   FUN = function(x, c) {
+                                                                        new.c <- shape_extraction(x, c)
+
+                                                                        new.c
+                                                                   })
+                                                       }
+                                 } else {
+                                      # not in parallel
+                                      sub.C <- mapply(X[indChanged], C[indChanged],
+                                                      SIMPLIFY = is.matrix(cen),
+                                                      FUN = function(x, c) {
+                                                           new.c <- shape_extraction(x, c)
+
+                                                           new.c
+                                                      })
                                  }
+
+                                 if (is.matrix(cen))
+                                      new.C[unlist(indChanged), ] <- t(sub.C)
+                                 else
+                                      new.C[unlist(indChanged)] <- sub.C
 
                                  new.C
                             }
@@ -157,47 +180,72 @@ all_cent <- function(case = NULL,
                                  new.C <- cen # initialize
 
                                  ## Recompute centers for those clusters that changed
-                                 if (is.matrix(cen)) {
-                                      new.C[indChanged, ] <- t(mapply(X[indChanged],
-                                                                      C[indChanged],
-                                                                      indChanged,
-                                                                      FUN = function(x, c, i) {
-                                                                           if(trace)
-                                                                                cat("\t\tComputing DBA center ",
-                                                                                    i,
-                                                                                    "...\n",
-                                                                                    sep = "")
+                                 if (foreach::getDoParRegistered() && foreach::getDoParWorkers() > 1L) {
+                                      # in parallel
+                                      tasks <- parallel::splitIndices(length(indChanged),
+                                                                      foreach::getDoParWorkers())
+                                      tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) != 0]
 
-                                                                           new.c <- DBA(x, c,
-                                                                                        norm = norm,
-                                                                                        window.size = window.size,
-                                                                                        max.iter = dba.iter,
-                                                                                        error.check = FALSE)
+                                      indChanged <- lapply(tasks, function(id) {
+                                           indChanged[id]
+                                      })
 
-                                                                           new.c
-                                                                      }))
+                                      include <- c("trace", "norm", "window.size", "dba.iter") # parent env
+                                      exclude <- setdiff(ls(), c("X", "C", "cen"))
 
-                                 } else if (is.list(cen)) {
-                                      new.C[indChanged] <- mapply(X[indChanged],
-                                                                  C[indChanged],
-                                                                  indChanged,
-                                                                  SIMPLIFY = FALSE,
-                                                                  FUN = function(x, c, i) {
-                                                                       if(trace)
-                                                                            cat("\t\tComputing DBA center ",
-                                                                                i,
-                                                                                "...\n",
-                                                                                sep = "")
+                                      sub.C <- foreach(indChanged = indChanged,
+                                                       .combine = ifelse(is.matrix(cen), cbind, c),
+                                                       .multicombine = TRUE,
+                                                       .packages = "dtwclust",
+                                                       .export = include,
+                                                       .noexport = exclude) %dopar% {
+                                                            mapply(X[indChanged],
+                                                                   C[indChanged],
+                                                                   indChanged,
+                                                                   SIMPLIFY = is.matrix(cen),
+                                                                   FUN = function(x, c, i) {
+                                                                        if(trace)
+                                                                             cat("\t\tComputing DBA center ",
+                                                                                 i,
+                                                                                 "...\n",
+                                                                                 sep = "")
 
-                                                                       new.c <- DBA(x, c,
-                                                                                    norm = norm,
-                                                                                    window.size = window.size,
-                                                                                    max.iter = dba.iter,
-                                                                                    error.check = FALSE)
+                                                                        new.c <- DBA(x, c,
+                                                                                     norm = norm,
+                                                                                     window.size = window.size,
+                                                                                     max.iter = dba.iter,
+                                                                                     error.check = FALSE)
 
-                                                                       new.c
-                                                                  })
+                                                                        new.c
+                                                                   })
+                                                       }
+                                 } else {
+                                      # not in parallel
+                                      sub.C <- mapply(X[indChanged],
+                                                      C[indChanged],
+                                                      indChanged,
+                                                      SIMPLIFY = is.matrix(cen),
+                                                      FUN = function(x, c, i) {
+                                                           if(trace)
+                                                                cat("\t\tComputing DBA center ",
+                                                                    i,
+                                                                    "...\n",
+                                                                    sep = "")
+
+                                                           new.c <- DBA(x, c,
+                                                                        norm = norm,
+                                                                        window.size = window.size,
+                                                                        max.iter = dba.iter,
+                                                                        error.check = FALSE)
+
+                                                           new.c
+                                                      })
                                  }
+
+                                 if (is.matrix(cen))
+                                      new.C[unlist(indChanged), ] <- t(sub.C)
+                                 else
+                                      new.C[unlist(indChanged)] <- sub.C
 
                                  new.C
                             }

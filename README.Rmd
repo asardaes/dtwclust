@@ -85,6 +85,21 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
                     trace = TRUE)
 
 plot(kc.tadp, clus = 1:4)
+
+#### Parallel support
+require(doParallel)
+cl <- makeCluster(detectCores())
+registerDoParallel(cl)
+
+# Using the previously registered distance
+kc <- dtwclust(datalist, k = 20,
+               distance = "nDTW", centroid = "dba",
+               trace = TRUE, seed = 9421)
+
+randIndex(kc, CharTrajLabels)
+
+stopCluster(cl)
+registerDoSEQ()
 ```
 
 ## Dependencies
@@ -95,3 +110,4 @@ plot(kc.tadp, clus = 1:4)
 * The core DTW calculations are done by the `dtw` package.
 * Plotting is done with the `ggplot2` package.
 * Parallel computation depends on the `foreach` package.
+* Random streams for repetitions of partitional procedures use the `doRNG` package.

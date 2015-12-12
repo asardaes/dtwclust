@@ -49,7 +49,9 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
 
           } else {
                ## Attempt to calculate in parallel?
-               do_par <- pr_DB$get_entry(distance)$loop && foreach::getDoParRegistered()
+               do_par <- pr_DB$get_entry(distance)$loop &&
+                    foreach::getDoParRegistered() &&
+                    foreach::getDoParWorkers() > 1L
 
                if (do_par) {
 
