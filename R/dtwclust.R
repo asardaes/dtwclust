@@ -605,8 +605,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                      packages = packages,
                                      ...)
 
-               ## TRUE is to calculate whole distance matrix
-               D <- distfun(x, x, whole = TRUE)
+               ## single argument is to calculate whole distance matrix
+               D <- distfun(x)
 
           } else {
                stop("Unspported distance definition")

@@ -107,7 +107,7 @@ DBA <- function(X, center = NULL, max.iter = 20,
      })
 
      ## Attempt parallel?
-     do_par <- foreach::getDoParRegistered() && foreach::getDoParWorkers() > 1L
+     do_par <- check_parallel()
 
      if (do_par) {
           # in parallel

@@ -95,7 +95,7 @@ all_cent <- function(case = NULL,
                                  new.C <- cen # initialize
 
                                  ## recompute centers for the clusters that changed
-                                 if (foreach::getDoParRegistered() && foreach::getDoParWorkers() > 1L) {
+                                 if (check_parallel()) {
                                       # in parallel
                                       tasks <- parallel::splitIndices(length(indChanged),
                                                                       foreach::getDoParWorkers())
@@ -178,7 +178,7 @@ all_cent <- function(case = NULL,
                                  new.C <- cen # initialize
 
                                  ## Recompute centers for those clusters that changed
-                                 if (foreach::getDoParRegistered() && foreach::getDoParWorkers() > 1L) {
+                                 if (check_parallel()) {
                                       # in parallel
                                       tasks <- parallel::splitIndices(length(indChanged),
                                                                       foreach::getDoParWorkers())

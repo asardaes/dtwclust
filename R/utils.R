@@ -117,20 +117,29 @@ consistency_check <- function(obj, case, ...) {
 # ========================================================================================================
 
 # Pre-computing when using PAM. The whole distance matrix is calculated once and then reused
-
 distmat_pam <- function(x, fam) {
      x <- consistency_check(x, "tsmat")
 
-     d <- fam@dist(x, x, whole = TRUE)
+     ## single argumen to calculate whole matrix
+     d <- fam@dist(x)
 
      d
 }
 
 # Create combinations of all possible pairs
-
 call_pairs <- function(n = 2L, byrow = TRUE) {
      if (n < 2)
           stop("I need at least two elements to create pairs.")
 
      .Call("pairs", n, byrow, PACKAGE = "dtwclust")
+}
+
+# Is there a registered parallel backend?
+check_parallel <- function(distance = NULL) {
+     ret <- foreach::getDoParRegistered() && foreach::getDoParWorkers() > 1L
+
+     if (!is.null(distance))
+          ret <- ret && pr_DB$get_entry(distance)$loop
+
+     ret
 }

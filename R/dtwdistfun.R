@@ -20,13 +20,15 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
 
      ## Closures will capture the values of the constants
 
-     dtwdist <- function(x, centers, whole = FALSE, ...) {
+     dtwdist <- function(x, centers = NULL, ...) {
 
           ## Just in case, always empty for now
           dots2 <- c(dots, list(...))
 
           x <- consistency_check(x, "tsmat")
-          centers <- consistency_check(centers, "tsmat")
+
+          if (!is.null(centers))
+               centers <- consistency_check(centers, "tsmat")
 
           if (!is.null(distmat)) {
                ## distmat matrix already calculated, just subset it
@@ -49,9 +51,7 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
 
           } else {
                ## Attempt to calculate in parallel?
-               do_par <- pr_DB$get_entry(distance)$loop &&
-                    foreach::getDoParRegistered() &&
-                    foreach::getDoParWorkers() > 1L
+               do_par <- check_parallel(distance)
 
                if (do_par) {
 
@@ -60,11 +60,11 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
 
                     ## variables from the parent environment that should be exported
                     export <- c("distance", "window.size", "norm",
-                                "dots", "window.type", "consistency_check")
+                                "window.type", "consistency_check")
 
                     tasks <- foreach::getDoParWorkers()
 
-                    if (whole) {
+                    if (is.null(centers)) {
                          ## Whole distmat is calculated
 
                          ## by column so that I can assign it with upper.tri at the end
@@ -86,7 +86,7 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
                                            if (!proxy::pr_DB$entry_exists(dist_entry$names[1]))
                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                                           ## Does the registered function posses '...' in its definition?
+                                           ## Does the registered function possess '...' in its definition?
                                            has_dots <- is.function(dist_entry$FUN) &&
                                                 any(grepl("...", names(as.list(args(dist_entry$FUN))),
                                                           fixed = TRUE))
@@ -94,7 +94,7 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
                                            if (has_dots) {
                                                 dd <- do.call(proxy::dist,
                                                               args = c(list(x = x[pairs[,1]],
-                                                                            y = centers[pairs[,2]],
+                                                                            y = x[pairs[,2]],
                                                                             method = distance,
                                                                             window.type = window.type,
                                                                             window.size = window.size,
@@ -104,7 +104,7 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
 
                                                                        dots2))
                                            } else {
-                                                dd <- proxy::dist(x[pairs[,1]], centers[pairs[,2]],
+                                                dd <- proxy::dist(x[pairs[,1]], x[pairs[,2]],
                                                                   method = distance, pairwise = TRUE)
                                            }
 
@@ -140,7 +140,7 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
                                            if (!proxy::pr_DB$entry_exists(dist_entry$names[1]))
                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                                           ## Does the registered function posses '...' in its definition?
+                                           ## Does the registered function possess '...' in its definition?
                                            has_dots <- is.function(dist_entry$FUN) &&
                                                 any(grepl("...", names(as.list(args(dist_entry$FUN))),
                                                           fixed = TRUE))
@@ -167,7 +167,10 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
                } else {
                     ## NO PARALLEL
 
-                    ## Does the registered function posses '...' in its definition?
+                    if (is.null(centers))
+                         centers <- x
+
+                    ## Does the registered function possess '...' in its definition?
                     has_dots <- is.function(pr_DB$get_entry(distance)$FUN) &&
                          any(grepl("...", names(as.list(args(pr_DB$get_entry(distance)$FUN))),
                                    fixed = TRUE))

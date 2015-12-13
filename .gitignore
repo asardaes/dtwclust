@@ -2,6 +2,8 @@
 .Rproj.user/
 .Rhistory
 manual.txt
+src/*.dll
+src/*.o
 
 # Windows image file caches
 Thumbs.db

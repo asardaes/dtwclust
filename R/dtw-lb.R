@@ -122,8 +122,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = T
                       ...)
 
      ## Attempt parallel computations?
-     do_par <- foreach::getDoParRegistered() &&
-          foreach::getDoParWorkers() > 1L
+     do_par <- check_parallel()
 
      if (do_par)
           workers <- foreach::getDoParWorkers()

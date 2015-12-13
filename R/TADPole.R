@@ -112,7 +112,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
      step.pattern <- get("symmetric1") # so that CHECK doesn't complain
 
      ## Attempt parallel computations?
-     do_par <- foreach::getDoParRegistered() && foreach::getDoParWorkers() > 1L
+     do_par <- check_parallel()
 
      if (do_par)
           workers <- foreach::getDoParWorkers()
