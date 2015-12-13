@@ -120,7 +120,7 @@ consistency_check <- function(obj, case, ...) {
 distmat_pam <- function(x, fam) {
      x <- consistency_check(x, "tsmat")
 
-     ## single argumen to calculate whole matrix
+     ## single argument to calculate whole matrix
      d <- fam@dist(x)
 
      d

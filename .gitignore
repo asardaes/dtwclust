@@ -1,9 +1,11 @@
 # Custom
 .Rproj.user/
 .Rhistory
+*.RData
 manual.txt
 src/*.dll
 src/*.o
+src/*.so
 
 # Windows image file caches
 Thumbs.db
@@ -48,4 +50,3 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
-*.RData
