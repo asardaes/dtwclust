@@ -7,12 +7,27 @@
 Formal S4 class to know how to handle data for plotting.
 }
 \details{
-The class inherits from \code{\link[flexclust]{kccasimple-class}}, so most related slots and
-methods are also supported.
+The class will no longer inherit from \code{\link[flexclust]{kccasimple-class}} in the next release. However,
+it now contains \code{hclust} as superclass.
 }
 \section{Slots}{
 
 \describe{
+\item{\code{k}}{Integer indicating the number of desired clusters.}
+
+\item{\code{cluster}}{Integer vector indicating which cluster a series belongs to.}
+
+\item{\code{iter}}{The number of iterations used.}
+
+\item{\code{converged}}{A logical indicating whether the function converged.}
+
+\item{\code{clusinfo}}{A data frame with two columns: \code{size} indicates the number of series each cluster has, and
+\code{av_dist} indicates the average distance between series for each cluster.}
+
+\item{\code{centers}}{A list with the centroid time series.}
+
+\item{\code{cldist}}{A column vector with the distance between each series in the data and its corresponding centroid.}
+
 \item{\code{type}}{A string indicating one of the supported clustering types of \code{\link{dtwclust}}.}
 
 \item{\code{distance}}{A string indicating the distance used with \code{\link{dtwclust}}.}

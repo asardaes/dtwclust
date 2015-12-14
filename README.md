@@ -30,70 +30,44 @@ data(uciCT)
 ## Reinterpolate data to equal lengths
 datalist <- zscore(CharTraj)
 data <- lapply(CharTraj, reinterpolate, newLength = 180)
-data <- zscore(data)
+# data <- zscore(data)
 
 #### Using DTW with help of lower bounds and PAM centroids
-kc <- dtwclust(data = data, k = 20, distance = "dtw_lb",
-               window.size = 20, centroid = "pam",
-               seed = 3247, trace = TRUE)
-#>      1 Changes / Distsum : 100 / 1179.209 
-#>      2 Changes / Distsum : 13 / 857.7509 
-#>      3 Changes / Distsum : 2 / 857.9886 
-#>      4 Changes / Distsum : 0 / 857.9886 
+kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
+                     window.size = 20, centroid = "pam",
+                     seed = 3247, trace = TRUE)
+#> Iteration 1: Changes / Distsum =100 / 932.183
+#> Iteration 2: Changes / Distsum =18 / 632.6588
+#> Iteration 3: Changes / Distsum =2 / 596.8066
+#> Iteration 4: Changes / Distsum =0 / 596.5887
 #> 
-#>  Elapsed time is 4.219 seconds.
+#> 
+#>  Elapsed time is 4.322 seconds.
 
-plot(kc)
+plot(kc.dtwlb)
 ```
 
 ![](README-examples-1.png)
 
 ``` r
 
-#### Registering a custom distance with proxy and using it (normalized DTW)
-ndtw <- function(x, y, ...) {
-  dtw::dtw(x, y, step.pattern = symmetric2,
-           distance.only = TRUE, ...)$normalizedDistance
-}
-
-# Registering the function with 'proxy'
-proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
-                       loop = TRUE, type = "metric", distance = TRUE,
-                       description = "Normalized DTW with L1 norm")
-
-# Subset of data for speed (but using different lengths)
-kc.ndtw <- dtwclust(datalist[21:40], k = 4, distance = "nDTW",
-                    trace = TRUE, seed = 8319)
-#>      1 Changes / Distsum : 20 / 2.520941 
-#>      2 Changes / Distsum : 6 / 0.8101177 
-#>      3 Changes / Distsum : 0 / 0.7401798 
-#> 
-#>  Elapsed time is 1.541 seconds.
-
-# Modifying some plot parameters
-plot(kc.ndtw, labs.arg = list(title = "nDTW clustering", x = "time", y = "series"))
-```
-
-![](README-examples-2.png)
-
-``` r
-
 #### Hierarchical clustering based on shape-based distance
 hc.sbd <- dtwclust(datalist, type = "hierarchical",
-                   distance = "sbd", trace = TRUE)
+                   k = 20, distance = "sbd", trace = TRUE)
 #> 
 #>  Calculating distance matrix...
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.59 seconds.
-cl.sbd <- cutree(hc.sbd, 20)
-cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\n\n")
+#>  Elapsed time is 0.615 seconds.
+
+require(flexclust)
+cat("Rand index for HC+SBD:", randIndex(hc.sbd@cluster, CharTrajLabels), "\n\n")
 #> Rand index for HC+SBD: 0.512583
 plot(hc.sbd)
 ```
 
-![](README-examples-3.png)
+![](README-examples-2.png)
 
 ``` r
 
@@ -104,14 +78,14 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> Entering TADPole...
 #> 
-#> TADPole completed, pruning percentage = 78.5%
+#> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 6.051 seconds.
+#>  Elapsed time is 3.962 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
 
-![](README-examples-4.png)
+![](README-examples-3.png)
 
 ``` r
 
@@ -120,23 +94,55 @@ require(doParallel)
 #> Loading required package: doParallel
 #> Loading required package: iterators
 #> Loading required package: parallel
-cl <- makeCluster(detectCores())
+cl <- makeCluster(detectCores(), "FORK")
 registerDoParallel(cl)
 
-# Using the previously registered distance
+## Registering a custom distance with proxy and using it (normalized DTW)
+ndtw <- function(x, y, ...) {
+     dtw::dtw(x, y, step.pattern = symmetric2,
+              distance.only = TRUE, ...)$normalizedDistance
+}
+
+# Registering the function with 'proxy'
+proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
+                       loop = TRUE, type = "metric", distance = TRUE,
+                       description = "Normalized DTW with L1 norm")
+
+# Data with different lengths
+kc.ndtw <- dtwclust(datalist, k = 20,
+                    distance = "nDTW", centroid = "pam",
+                    trace = TRUE, seed = 159, reps = 8L)
+#> Consider setting save.data to FALSE if performing several repetitions.
+#> 
+#> Tracing will not be available if parallel computing is used.
+#> 
+#>  Elapsed time is 5.44 seconds.
+
+sapply(kc.ndtw, function(x) randIndex(x@cluster, CharTrajLabels))
+#>       ARI       ARI       ARI       ARI       ARI       ARI       ARI 
+#> 0.5739085 0.5798654 0.4112420 0.5351719 0.6000514 0.4897014 0.5101194 
+#>       ARI 
+#> 0.6715448
+
+# DBA centroids
 kc <- dtwclust(datalist, k = 20,
                distance = "nDTW", centroid = "dba",
                trace = TRUE, seed = 9421)
-#>      1 Changes / Distsum : 100 / 5.162033 
-#>      2 Changes / Distsum : 3 / 3.739462 
-#>      3 Changes / Distsum : 2 / 3.687197 
-#>      4 Changes / Distsum : 0 / 3.631238 
+#> Iteration 1: Changes / Distsum =100 / 5.162033
+#> Iteration 2: Changes / Distsum =3 / 3.739462
+#> Iteration 3: Changes / Distsum =2 / 3.687197
+#> Iteration 4: Changes / Distsum =0 / 3.631238
 #> 
-#>  Elapsed time is 23.85 seconds.
+#> 
+#>  Elapsed time is 22.432 seconds.
 
-randIndex(kc, CharTrajLabels)
-#>       ARI 
-#> 0.4913907
+# Modifying some plot parameters
+plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
+```
+
+![](README-examples-4.png)
+
+``` r
 
 stopCluster(cl)
 registerDoSEQ()
@@ -145,7 +151,7 @@ registerDoSEQ()
 Dependencies
 ------------
 
--   Partitional procedures are implemented by leveraging the `flexclust` package.
+-   Partitional procedures are inspired by the `flexclust` package.
 -   Hierarchical procedures use the native `hclust` function.
 -   Cross-distances make use of the `proxy` package.
 -   The core DTW calculations are done by the `dtw` package.

@@ -12,9 +12,8 @@
 #'
 #' Please see the documentation for \code{\link{dtwclust}}, which serves as the main entry point.
 #'
-#' Other packages that are particularly leveraged here are the \code{flexclust} package for partitional
-#' clustering, the \code{proxy} package for distance matrix calculations, and the \code{dtw} package for the
-#' core DTW calculations.
+#' Other packages that are particularly leveraged here are the \code{proxy} package for distance matrix calculations,
+#' and the \code{dtw} package for the core DTW calculations.
 #'
 #' Five distances are registered via \code{\link[proxy]{pr_DB}}: \code{"LB_Keogh", "LB_Improved", "SBD", "DTW2"}
 #' and \code{"DTW_LB"}. See \code{\link{lb_keogh}}, \code{\link{lb_improved}} and \code{\link{SBD}} for more

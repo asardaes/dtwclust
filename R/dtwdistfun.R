@@ -25,14 +25,14 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
           ## Just in case, always empty for now
           dots2 <- c(dots, list(...))
 
-          x <- consistency_check(x, "tsmat")
+          #x <- consistency_check(x, "tsmat")
 
-          if (!is.null(centers))
-               centers <- consistency_check(centers, "tsmat")
+          #if (!is.null(centers))
+          #     centers <- consistency_check(centers, "tsmat")
 
           if (!is.null(distmat)) {
-               ## distmat matrix already calculated, just subset it
 
+               ## distmat matrix already calculated, just subset it
                indXC <- sapply(centers, FUN = function(i.c) {
                     i.row <- sapply(x, function(i.x) {
                          if (length(i.x) == length(i.c))
@@ -47,10 +47,10 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
                     which(i.row)[1]
                })
 
-               d <- distmat[ , indXC]
+               d <- distmat[ , indXC, drop = FALSE]
 
           } else {
-               ## Attempt to calculate in parallel?
+               ## Attempt to calculate distmat in parallel?
                do_par <- check_parallel(distance)
 
                if (do_par) {
@@ -62,20 +62,13 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
                     export <- c("distance", "window.size", "norm",
                                 "window.type", "consistency_check")
 
-                    tasks <- foreach::getDoParWorkers()
-
                     if (is.null(centers)) {
                          ## Whole distmat is calculated
 
                          ## by column so that I can assign it with upper.tri at the end
                          pairs <- call_pairs(length(x), byrow = FALSE)
 
-                         tasks <- parallel::splitIndices(nrow(pairs), tasks)
-                         tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) != 0]
-
-                         pairs <- lapply(tasks, function(id){
-                              pairs[id,]
-                         })
+                         pairs <- split_parallel(pairs, nrow(pairs), 1L)
 
                          d <- foreach(pairs = pairs,
                                       .combine = c,
@@ -123,13 +116,7 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
 
                     } else {
                          ## Only subset of distmat is calculated
-
-                         tasks <- parallel::splitIndices(length(x), tasks)
-                         tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) != 0]
-
-                         x <- lapply(tasks, function(idx) {
-                              x[idx]
-                         })
+                         x <- split_parallel(x, length(x))
 
                          d <- foreach(x = x,
                                       .combine = rbind,

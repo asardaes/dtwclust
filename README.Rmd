@@ -45,38 +45,21 @@ data(uciCT)
 ## Reinterpolate data to equal lengths
 datalist <- zscore(CharTraj)
 data <- lapply(CharTraj, reinterpolate, newLength = 180)
-data <- zscore(data)
+# data <- zscore(data)
 
 #### Using DTW with help of lower bounds and PAM centroids
-kc <- dtwclust(data = data, k = 20, distance = "dtw_lb",
-               window.size = 20, centroid = "pam",
-               seed = 3247, trace = TRUE)
+kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
+                     window.size = 20, centroid = "pam",
+                     seed = 3247, trace = TRUE)
 
-plot(kc)
-
-#### Registering a custom distance with proxy and using it (normalized DTW)
-ndtw <- function(x, y, ...) {
-  dtw::dtw(x, y, step.pattern = symmetric2,
-           distance.only = TRUE, ...)$normalizedDistance
-}
-
-# Registering the function with 'proxy'
-proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
-                       loop = TRUE, type = "metric", distance = TRUE,
-                       description = "Normalized DTW with L1 norm")
-
-# Subset of data for speed (but using different lengths)
-kc.ndtw <- dtwclust(datalist[21:40], k = 4, distance = "nDTW",
-                    trace = TRUE, seed = 8319)
-
-# Modifying some plot parameters
-plot(kc.ndtw, labs.arg = list(title = "nDTW clustering", x = "time", y = "series"))
+plot(kc.dtwlb)
 
 #### Hierarchical clustering based on shape-based distance
 hc.sbd <- dtwclust(datalist, type = "hierarchical",
-                   distance = "sbd", trace = TRUE)
-cl.sbd <- cutree(hc.sbd, 20)
-cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\n\n")
+                   k = 20, distance = "sbd", trace = TRUE)
+
+require(flexclust)
+cat("Rand index for HC+SBD:", randIndex(hc.sbd@cluster, CharTrajLabels), "\n\n")
 plot(hc.sbd)
 
 #### TADPole clustering
@@ -88,15 +71,34 @@ plot(kc.tadp, clus = 1:4)
 
 #### Parallel support
 require(doParallel)
-cl <- makeCluster(detectCores())
+cl <- makeCluster(detectCores(), "FORK")
 registerDoParallel(cl)
 
-# Using the previously registered distance
+## Registering a custom distance with proxy and using it (normalized DTW)
+ndtw <- function(x, y, ...) {
+     dtw::dtw(x, y, step.pattern = symmetric2,
+              distance.only = TRUE, ...)$normalizedDistance
+}
+
+# Registering the function with 'proxy'
+proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
+                       loop = TRUE, type = "metric", distance = TRUE,
+                       description = "Normalized DTW with L1 norm")
+
+# Data with different lengths
+kc.ndtw <- dtwclust(datalist, k = 20,
+                    distance = "nDTW", centroid = "pam",
+                    trace = TRUE, seed = 159, reps = 8L)
+
+sapply(kc.ndtw, function(x) randIndex(x@cluster, CharTrajLabels))
+
+# DBA centroids
 kc <- dtwclust(datalist, k = 20,
                distance = "nDTW", centroid = "dba",
                trace = TRUE, seed = 9421)
 
-randIndex(kc, CharTrajLabels)
+# Modifying some plot parameters
+plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
 
 stopCluster(cl)
 registerDoSEQ()
@@ -104,7 +106,7 @@ registerDoSEQ()
 
 ## Dependencies
 
-* Partitional procedures are implemented by leveraging the `flexclust` package.
+* Partitional procedures are inspired by the `flexclust` package.
 * Hierarchical procedures use the native `hclust` function.
 * Cross-distances make use of the `proxy` package.
 * The core DTW calculations are done by the `dtw` package.

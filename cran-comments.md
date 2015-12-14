@@ -1,5 +1,5 @@
 ## Update to version 1.3.1
-* Bug fixes, more parallel support and some extended functionality.
+* More parallel support and some extended functionality. This is mostly a small update with a lot of refactoring of code, however the dependency on flexclust will be dropped in the next release, so documentation needs to reflect that.
 
 ## Test environments
 * Local Windows 10, R 3.2.3

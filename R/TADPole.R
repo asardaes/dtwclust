@@ -56,9 +56,6 @@
 #'
 #' # Return to sequential computations
 #' registerDoSEQ()
-#'
-#' # Compute Rand Index
-#' cat("Rand index for TADPole:", randIndex(kc.tadp$cl, CharTrajLabels), "\n\n")
 #' }
 #'
 #' @references
@@ -114,9 +111,6 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
      ## Attempt parallel computations?
      do_par <- check_parallel()
 
-     if (do_par)
-          workers <- foreach::getDoParWorkers()
-
      ## ============================================================================================================================
      ## Pruning during local density calculation
      ## ============================================================================================================================
@@ -160,12 +154,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
 
           ## Attempt parallel calculations?
           if (do_par) {
-               tasks <- parallel::splitIndices(nrow(ind1), workers)
-               tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) != 0]
-
-               ind1 <- lapply(tasks, function(id) {
-                    ind1[id,]
-               })
+               ind1 <- split_parallel(ind1, nrow(ind1), 1L)
 
                exclude <- setdiff(ls(), c("x", "step.pattern", "window.size"))
 
@@ -241,12 +230,8 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
 
      ## Attempt parallel calculations?
      if (do_par) {
-          tasks <- parallel::splitIndices(n-1L, workers)
-          tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) != 0]
-
-          i <- lapply(tasks, function(id) {
-               id + 1 # start at two
-          })
+          # start at two
+          i <- split_parallel(2:n, n-1L)
 
           DNN <- foreach(i = i,
                          .combine = rbind,

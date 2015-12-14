@@ -1,32 +1,34 @@
 #' Time series clustering under DTW
 #'
-#' This function uses the DTW distance and related lower bounds to cluster time series. For now, all series
-#' must be univariate.
+#' This function uses the DTW distance and related lower bounds to cluster time series. It also supports custom
+#' distances, especially through \code{\link[proxy]{dist}}, as well as custom centroid functions.
+#' For now, all series must be univariate.
 #'
-#' Partitional algorithms are implemented via \code{\link[flexclust]{kcca}}. Hierarchical algorithms use the
-#' \code{\link[stats]{hclust}} function. The \code{tadpole} algorithm uses the \code{\link{TADPole}} function.
+#' Partitional algorithms use custom functions inspired by \code{\link[flexclust]{kcca}}. Hierarchical algorithms use
+#' the \code{\link[stats]{hclust}} function. The \code{tadpole} algorithm uses the \code{\link{TADPole}} function.
 #'
-#' The \code{data} may be a matrix or a list, but the matrix will be coerced to a list. A matrix input requires
+#' The \code{data} may be a matrix or a list, but the matrix will be coerced to a list row-wise. A matrix requires
 #' that all time series have equal lengths. If the lengths vary slightly between time series, reinterpolating them to
 #' a common length is most likely an acceptable approach (Ratanamahatana and Keogh, 2004). If this is not the
 #' case, then clustering them directly is probably ill-advised. See the examples.
 #'
 #' @section Distance:
 #'
-#' If a custom distance function is provided, it will receive the data as the first argument.
+#' If a custom distance function is provided and \code{pam.precompute} is \code{TRUE} or \code{type} is
+#' \code{"hierarchical"}, the function will be called with the data as the first argument, followed by \code{...}.
 #'
-#' For partitional
-#' algorithms, the second argument will be the cluster centers (i.e. other time series). If \code{data} is a
-#' matrix, it will be coerced to a list of series, and the centers will also be provided in the form of a list.
+#' If \code{pam.precompute} is \code{FALSE} and \code{type} is \code{"partitional"}, the function will be called
+#' at each iteration with the data as first argument, cluster centers as the second argument, and then \code{...}.
 #'
-#' If hierarchical algorithms are used, the function will also receive the elements of \code{...}.
+#' If \code{data} is a matrix, it will be coerced to a list of series, and the centers will also be provided in the
+#' form of a list.
 #'
 #' The function should return a distance matrix, ideally of class \code{crossdist}. The time series in the
 #' data should be along the rows, and the cluster centers along the columns of the distance matrix.
 #'
 #' The other option is to provide a string. The string can represent a compatible registered distance of
-#' \code{proxy}'s \code{\link[proxy]{dist}}. Extra parameters can be provided in \code{...}. See the examples
-#' but please finish reading this section before that.
+#' \code{proxy}'s \code{\link[proxy]{dist}} and is the preferred method for custom distances.
+#' Extra parameters can be provided in \code{...}. See the examples but please finish reading this section before that.
 #'
 #' Additionally, with either type of algorithm, it can be a string of one of the following custom
 #' implementations (all registered with \code{proxy}):
@@ -46,8 +48,9 @@
 #'
 #' Note that only \code{dtw}, \code{dtw2} and \code{sbd} support series of different lengths.
 #'
-#' If the user wants to create its own distance and register it with \code{proxy}, it should include a \code{...}
-#' in its definition so that it is correctly called. Such functions will always receive the following parameters:
+#' If the user wants to create its own distance and also register it with \code{proxy}, it should include a \code{...}
+#' in its definition so that it is correctly called. Functions in \code{proxy} will always receive the following
+#' parameters:
 #'
 #' \itemize{
 #'   \item \code{window.type}: Either \code{"none"} for a \code{NULL} \code{window.size}, or \code{"slantedband"}
@@ -64,14 +67,15 @@
 #' In the case of partitional algorithms, a suitable function should calculate the cluster centers. In this
 #' case, the centers are themselves time series.
 #'
-#' If a custom function is provided, it will receive different inputs depending on the format of \code{data}:
+#' If a custom function is provided, it will receive three inputs in the following order:
 #'
 #' \itemize{
-#'   \item For matrix input, it will receive a matrix as single input. Each row will be a series that belongs
-#'   to a given cluster. The function should return a numeric vector with the centroid time series.
-#'   \item For a list input, the function will receive three inputs in the following order: the \emph{whole}
-#'   data list; a numeric vector with length equal to the number of series in \code{data}, indicating which
-#'   cluster a series belongs to; the current number of total clusters.
+#'   \item The \emph{whole} data list
+#'   \item A numeric vector with length equal to the number of series in \code{data}, indicating which
+#'   cluster a series belongs to
+#'   \item The current number of total clusters
+#'   \item The current centroids (in order)
+#'   \item The elements of \code{...}
 #' }
 #'
 #' The other option is to provide a character string for the custom implementations. The following options
@@ -110,12 +114,9 @@
 #' It is strongly advised to use z-normalization in case of \code{centroid = "shape"}, because the resulting
 #' series have this normalization (see \code{\link{shape_extraction}}). The user can, however, specify a
 #' custom function that performs any transformation on the data, but the user must make sure that the format
-#' stays consistent, i.e. a matrix where each row is a series or a list of time series. For example,
-#' the z-normalization could be implemented as \code{t(apply(data, 1, zscore))} or \code{lapply(data, zscore)}
-#' respectively.
+#' stays consistent, i.e. a list of time series.
 #'
-#' The function will receive the data as first argument and, in case hierarchical methods are used, the
-#' contents of \code{...} as the second argument.
+#' The function will receive the data as first argument and the contents of \code{...} as the second argument.
 #'
 #' @section Repetitions:
 #'
@@ -169,6 +170,9 @@
 #' Specifying \code{distance = "sbd"} and \code{centroid = "shape"} is equivalent to the k-Shape algorithm
 #' (Papparizos and Gravano, 2015). See \code{\link{SBD}} and \code{\link{shape_extraction}} for more info.
 #'
+#' The \code{randIndex} function included with the \code{flexclust} package will no longer be supported by default
+#' in the following release.
+#'
 #' @references
 #'
 #' Sakoe H and Chiba S (1978). ``Dynamic programming algorithm optimization for spoken word recognition.'' \emph{Acoustics, Speech
@@ -198,13 +202,11 @@
 #' #### Simple partitional clustering with L2 distance and PAM
 #' kc.l2 <- dtwclust(data, k = 4, distance = "L2", centroid = "pam",
 #'                   seed = 3247, trace = TRUE)
-#' cat("Rand index for L2+PAM:", randIndex(kc.l2, labels), "\n\n")
 #'
 #' #### TADPole clustering
 #' kc.tadp <- dtwclust(data, type = "tadpole", k = 4,
 #'                     window.size = 20, dc = 1.5,
 #'                     trace = TRUE)
-#' cat("Rand index for TADPole:", randIndex(kc.tadp, labels), "\n\n")
 #' plot(kc.tadp)
 #'
 #' # Modify plot
@@ -228,15 +230,12 @@
 #' kc.ndtw <- dtwclust(CharTraj[31:40], distance = "nDTW",
 #'                     trace = TRUE, pam.precompute = TRUE,
 #'                     seed = 8319)
-#' cat("Rand index for nDTW (subset):",
-#'     randIndex(kc.ndtw, CharTrajLabels[31:40]), "\n\n")
 #' plot(kc.ndtw)
 #'
 #' #### Hierarchical clustering based on shabe-based distance (different lengths)
 #' hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
-#'                    distance = "sbd", trace = TRUE)
-#' cl.sbd <- cutree(hc.sbd, 20)
-#' cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\n\n")
+#'                    k = 20, distance = "sbd", trace = TRUE)
+#' plot(hc.sbd)
 #'
 #' \dontrun{
 #' #### Saving and modifying the ggplot object with custom time
@@ -277,23 +276,22 @@
 #'
 #' # Return to sequential computations
 #' registerDoSEQ()
-#'
-#' # See Rand Index for each repetition
-#' sapply(kc.ndtw.list, randIndex, y = CharTrajLabels)
 #' }
 #'
 #' @seealso
 #'
 #' Please check the brief description in \code{\link{dtwclust-package}}.
 #'
-#' Additionally: \code{\link{plot-dtwclust}}, \code{\link{dtwclust-class}}.
+#' Additionally: \code{\link{dtwclust-methods}}, \code{\link{dtwclust-class}}.
 #'
 #' @author Alexis Sarda-Espinosa
 #'
-#' @param data A list where each element is a time series, or a numerical matrix where each row is a time
-#' series. All series must have equal lengths in case of \code{type = "tadpole"}.
+#' @param data A list where each element is a time series, or a numerical matrix (it will be coerced to a list
+#' row-wise). All series must have equal lengths in case of \code{type = "tadpole"}.
 #' @param type What type of clustering method to use, \code{partitional}, \code{hierarchical} or \code{tadpole}.
-#' @param k Numer of desired clusters in partitional methods.
+#' @param k Numer of desired clusters in partitional methods. For hierarchical methods, the
+#' \code{\link[stats]{cutree}} function is called with this value of \code{k} and the result is returned in the
+#' \code{cluster} slot of the \code{dtwclust} object.
 #' @param method Which linkage method to use in hierarchical methods. See \code{\link[stats]{hclust}}.
 #' @param distance One of the supported distance definitions (see Distance section). Ignored for
 #' \code{type = "tadpole"}.
@@ -309,8 +307,9 @@
 #' @param dba.iter Maximum number of iterations for \code{\link{DBA}} centroids.
 #' @param pam.precompute Precompute the whole distance matrix once and reuse it at each iteration if using PAM
 #' centroids. Otherwise calculate distances at every iteration.
-#' @param control Parameters for partitional clustering algorithms. See
+#' @param control DEPRECATED. Parameters for partitional clustering algorithms. See
 #' \code{\link[flexclust]{flexclustControl}}.
+#' @param iter.max Maximum number of iterations for partitional algorithms.
 #' @param save.data Return a copy of the data in the returned object? Ignored for hierarchical clustering.
 #' @param seed Random seed for reproducibility of partitional algorithms.
 #' @param trace Boolean flag. If true, more output regarding the progress is printed to screen.
@@ -319,9 +318,8 @@
 #' Parallel Computing section.
 #' @param ... Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function.
 #'
-#' @return An object with formal class \code{\link{dtwclust-class}} if \code{type = "partitional" | "tadpole"}.
-#' Otherwise an object with class \code{hclust} as returned by \code{\link[stats]{hclust}}. If \code{reps > 1}
-#' and a partitional procedure is used, a list of objects is returned.
+#' @return An object with formal class \code{\link{dtwclust-class}}.
+#' If \code{reps > 1} and a partitional procedure is used, a list of objects is returned.
 #'
 #' @export
 #' @import flexclust
@@ -331,12 +329,12 @@
 #' @importFrom parallel splitIndices
 #' @importFrom stats median
 #' @importFrom stats hclust
-#' @importFrom modeltools ModelEnvMatrix
+#' @importFrom stats cutree
 
 dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "average",
                      distance = "dtw", centroid = "pam", preproc = NULL,
                      window.size = NULL, norm = "L1", dc = NULL,
-                     dba.iter = 15L, pam.precompute = TRUE, control = NULL,
+                     dba.iter = 15L, pam.precompute = TRUE, control = NULL, iter.max = 200L,
                      save.data = TRUE, seed = NULL, trace = FALSE,
                      reps = 1L, packages = character(0),
                      ...)
@@ -353,12 +351,38 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      type <- match.arg(type, c("partitional", "hierarchical", "tadpole"))
      norm <- match.arg(norm, c("L1", "L2"))
 
+     data <- consistency_check(data, "tsmat")
+
+     if (!is.null(preproc) && is.function(preproc)) {
+          data <- preproc(data, ...)
+          preproc <- as.character(substitute(preproc))[[1]]
+
+     } else if (type == "partitional" && is.character(centroid) && centroid == "shape") {
+          preproc <- "zscore"
+          data <- zscore(data, ...)
+
+     } else if (is.null(preproc)) {
+          preproc <- "none"
+
+     } else stop("Invalid preprocessing")
+
+     if (save.data)
+          datalist <- data
+     else
+          datalist <- list()
+
+     lengths <- sapply(data, length)
+
+     #MYCALL <- match.call()
+
      if (type == "partitional") {
 
           ## =================================================================================================================
           ## Partitional
           ## =================================================================================================================
 
+          if (!is.null(control))
+               warning("The 'control' parameter is deprecated, it will be ignored and dropped in a future release.")
           if (k < 2L)
                stop("At least two clusters must be defined")
           if (reps < 1L)
@@ -372,11 +396,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           if (is.character(centroid))
                centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
 
-          ## Distance function (cent is unusued, allcent is set appropriately below)
+          ## Distance function
           if (is.function(distance)) {
-               family <- kccaFamily(name = as.character(substitute(distance))[1],
-                                    dist = distance,
-                                    cent = NULL)
+               distfun <- distance
+               distance <- as.character(substitute(distance))[1]
 
           } else if (is.character(distance)) {
                # dtwdistfun.R
@@ -387,150 +410,89 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                      packages = packages,
                                      ...)
 
-               family <- flexclust::kccaFamily(name = distance,
-                                               dist = distfun,
-                                               cent = NULL)
-
           } else {
                stop("Unsupported distance definition")
           }
 
-          ## ----------------------------------------------------------------------------------------------------------
-          ## Replace specific functions if necessary
-          ## ----------------------------------------------------------------------------------------------------------
-
           # precompute distance matrix?
           if (is.character(centroid) && centroid == "pam" && pam.precompute) {
-                    distmat <- distmat_pam(data, family) # utils.R
+               distmat <- distfun(data, ...)
 
-                    ## Redefine dist with new distmat (to update closure)
-                    family@dist <- dtwdistfun(distance = distance,
-                                              window.size = window.size,
-                                              norm = norm,
-                                              distmat = distmat,
-                                              packages = packages,
-                                              ...)
+               ## Redefine dist with new distmat (to update closure)
+               distfun <- dtwdistfun(distance = distance,
+                                     window.size = window.size,
+                                     norm = norm,
+                                     distmat = distmat,
+                                     packages = packages,
+                                     ...)
 
 
           } else {
                distmat <- NULL
           }
 
-          if (!is.null(preproc)) {
-               if (is.function(preproc))
-                    family@preproc <- preproc # highest priority, possibly replaces zscore
-               else
-                    stop("Invalid preprocessing")
-
-          } else if (is.character(centroid) && centroid == "shape") {
-               preproc <- "zscore" # character to indicate what was done
-               family@preproc <- zscore
-
-          } else {
-               preproc <- "none" # character to indicate what was done
-          }
-
           ## Closures, all_cent.R
-          family@allcent <- all_cent(case = centroid,
-                                     distmat = distmat,
-                                     distfun = family@dist,
-                                     dba.iter = dba.iter,
-                                     window.size = window.size,
-                                     norm = norm,
-                                     trace = trace)
+          allcent <- all_cent(case = centroid,
+                              distmat = distmat,
+                              distfun = distfun,
+                              dba.iter = dba.iter,
+                              window.size = window.size,
+                              norm = norm,
+                              trace = trace)
+
+          centroid <- as.character(substitute(centroid))[[1]]
+
+          family <- dtwclust_family(name = distance,
+                                    dist = distfun,
+                                    allcent = allcent)
 
           ## ----------------------------------------------------------------------------------------------------------
           ## Further options
           ## ----------------------------------------------------------------------------------------------------------
 
-          if (is.null(control))
-               ctrl <- new("flexclustControl")
-          else
-               ctrl <- as(control, "flexclustControl")
-
-          if (trace) {
-               if (reps > 1L)
-                    message("Tracing will not be available if parallel computing is used.\n")
-
-               ctrl@verbose <- 1L
-          }
+          if (trace && reps > 1L)
+               message("Tracing will not be available if parallel computing is used.\n")
 
           if (!is.null(seed))
                set.seed(seed)
+
+          if (length(unique(lengths)) > 1) {
+               consistency_check(distance, "dist")
+               consistency_check(centroid, "cent")
+          }
 
           ## ----------------------------------------------------------------------------------------------------------
           ## Cluster
           ## ----------------------------------------------------------------------------------------------------------
 
-          if (is.list(data)) {
-               ## Cluster list
-               lengths <- sapply(data, length)
+          if (reps > 1L) {
+               ## I need to re-register any custom distances in each parallel worker
+               if (is.character(distance))
+                    dist_entry <- proxy::pr_DB$get_entry(distance)
+               else
+                    dist_entry <- NULL
 
-               if (length(unique(lengths)) > 1) {
-                    consistency_check(distance, "dist")
-                    consistency_check(centroid, "cent")
-               }
+               kc.list <- foreach(i = 1:reps,
+                                  .combine = list,
+                                  .multicombine = TRUE,
+                                  .packages = packages,
+                                  .export = "kcca.list") %dorng% {
+                                       if (!is.null(dist_entry) && !proxy::pr_DB$entry_exists(dist_entry$names[1]))
+                                            do.call(proxy::pr_DB$set_entry, dist_entry)
 
-               if (reps > 1L) {
-                    ## I need to re-register any custom distances in each parallel worker
-                    if (is.character(distance))
-                         dist_entry <- proxy::pr_DB$get_entry(distance)
-                    else
-                         dist_entry <- NULL
-
-                    kc.list <- foreach(i = 1:reps,
-                                       .combine = list,
-                                       .multicombine = TRUE,
-                                       .packages = packages) %dorng% {
-                                            if (!is.null(dist_entry) && !proxy::pr_DB$entry_exists(dist_entry$names[1]))
-                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
-
-                                            kcca.list(x = data,
-                                                      k = k,
-                                                      family = family,
-                                                      control = ctrl)
-                                       }
-               } else {
-                    ## Just one repetition
-                    kc.list <- kcca.list(x = data,
+                                       kcca.list(x = data,
+                                                 k = k,
+                                                 family = family,
+                                                 iter.max = iter.max,
+                                                 trace = trace)
+                                  }
+          } else {
+               ## Just one repetition
+               kc.list <- list(kcca.list(x = data,
                                          k = k,
                                          family = family,
-                                         control = ctrl)
-               }
-
-          } else {
-
-               ## Cluster matrix
-               if (reps > 1L) {
-                    ## I need to re-register any custom distances in each parallel worker
-                    if (is.character(distance))
-                         dist_entry <- proxy::pr_DB$get_entry(distance)
-                    else
-                         dist_entry <- NULL
-
-                    kc.list <- foreach(i = 1:reps,
-                                       .combine = list,
-                                       .multicombine = TRUE,
-                                       .packages = packages) %dorng% {
-                                            if (!is.null(dist_entry) && !proxy::pr_DB$entry_exists(dist_entry$names[1]))
-                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
-
-                                            flexclust::kcca(x = data,
-                                                            k = k,
-                                                            family = family,
-                                                            simple = TRUE,
-                                                            control = ctrl,
-                                                            save.data = save.data)
-                                       }
-               } else {
-                    ## Just one repetition
-                    kc.list <- flexclust::kcca(x = data,
-                                               k = k,
-                                               family = family,
-                                               simple = TRUE,
-                                               control = ctrl,
-                                               save.data = save.data)
-               }
+                                         iter.max = iter.max,
+                                         trace = trace))
           }
 
           ## ----------------------------------------------------------------------------------------------------------
@@ -539,38 +501,34 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           toc <- proc.time() - tic
 
-          if (save.data)
-               datalist <- consistency_check(data, "tsmat")
-          else
-               datalist <- list()
+          dtwc <- lapply(kc.list, function(kc) {
+               new("dtwclust",
 
-          if (is.list(kc.list)) {
+                   type = type,
+                   distance = distance,
+                   centroid = centroid,
+                   preproc = preproc,
+                   proctime = toc,
 
-               dtwc <- lapply(kc.list, function(kc) {
-                    new("dtwclust", kc,
-                        type = type,
-                        distance = ifelse(is.function(distance), as.character(substitute(distance))[1], distance),
-                        centroid = ifelse(is.function(centroid), as.character(substitute(centroid))[1], centroid),
-                        preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc),
-                        datalist = datalist,
-                        proctime = toc)
-               })
+                   centers = kc$centers,
+                   k = as.integer(k),
+                   cluster = kc$cluster,
 
-          } else {
+                   clusinfo = kc$clusinfo,
+                   cldist = kc$cldist,
+                   iter = kc$iter,
+                   converged = kc$converged,
 
-               dtwc <- new("dtwclust", kc.list,
-                           type = type,
-                           distance = ifelse(is.function(distance), as.character(substitute(distance))[1], distance),
-                           centroid = ifelse(is.function(centroid), as.character(substitute(centroid))[1], centroid),
-                           preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc),
-                           datalist = datalist,
-                           proctime = toc)
-          }
+                   datalist = datalist)
+          })
 
           if (trace)
                cat("\n\tElapsed time is", toc["elapsed"], "seconds.\n\n")
 
-          dtwc
+          if (reps == 1)
+               dtwc[[1]]
+          else
+               dtwc
 
      } else if (type == "hierarchical") {
 
@@ -581,19 +539,11 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           if (trace)
                cat("\n\tCalculating distance matrix...\n")
 
-          x <- consistency_check(data, "tsmat")
-
-          lengths <- sapply(x, length)
-
           if (length(unique(lengths)) > 1)
                consistency_check(distance, "dist")
 
-          if (!is.null(preproc) && is.function(preproc)) {
-               x <- preproc(x, ...)
-          }
-
           if (is.function(distance)) {
-               D <- distance(x, ...)
+               D <- distance(data, ...)
 
           } else if (is.character(distance)) {
                ## Take advantage of the function I defined for the partitional methods
@@ -606,7 +556,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                      ...)
 
                ## single argument is to calculate whole distance matrix
-               D <- distfun(x)
+               D <- distfun(data)
 
           } else {
                stop("Unspported distance definition")
@@ -619,18 +569,42 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           DD <- D[lower.tri(D)]
 
           ## Needed attribute for 'hclust' (case sensitive)
-          attr(DD, "Size") <- length(x)
+          attr(DD, "Size") <- length(data)
           attr(DD, "method") <- attr(D, "method")
 
+          ## Cluster
           hc <- stats::hclust(DD, method = method)
 
+          ## Some additional cluster information (taken of flexclust's kcca function)
+          cluster <- stats::cutree(hc, k)
+          cldist <- as.matrix(D[cbind(1:length(data), cluster)])
+          size <- as.vector(table(cluster))
+          clusinfo <- data.frame(size = size,
+                                 av_dist = as.vector(tapply(cldist[,1], cluster, sum))/size)
+
           toc <- proc.time() - tic
-          class(toc) <- "numeric"
 
           if (trace)
                cat("\n\tElapsed time is", toc["elapsed"], "seconds.\n\n")
 
-          hc
+          new("dtwclust", hc,
+
+              type = type,
+              distance = ifelse(is.function(distance), as.character(substitute(distance))[[1]], distance),
+              centroid = "",
+              preproc = preproc,
+              proctime = toc,
+
+              centers = list(),
+              k = as.integer(k),
+              cluster = cluster,
+
+              clusinfo = clusinfo,
+              cldist = cldist,
+              iter = 1L,
+              converged = TRUE,
+
+              datalist = datalist)
 
      } else if (type == "tadpole") {
 
@@ -638,7 +612,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## TADPole
           ## =================================================================================================================
 
-          MYCALL <- match.call()
           window.size <- consistency_check(window.size, "window")
 
           if (is.null(dc))
@@ -650,27 +623,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## Adjust inputs
           ## ----------------------------------------------------------------------------------------------------------
 
-          if (!is.null(preproc)) {
-               if (is.function(preproc))
-                    data <- preproc(data, ...)
-               else
-                    stop("Invalid preprocessing")
-
-          } else {
-               preproc <- "none"
-          }
-
-          if (is.list(data)) {
-               consistency_check(data, "tslist")
-               x <- data
-               data <- t(sapply(data, rbind))
-
-          } else if (is.matrix(data)) {
-               x <- consistency_check(data, "tsmat")
-
-          } else {
-               stop("Unsupported format for data")
-          }
+          consistency_check(data, "tslist")
 
           ## ----------------------------------------------------------------------------------------------------------
           ## Cluster
@@ -679,7 +632,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           if (trace)
                cat("\nEntering TADPole...\n")
 
-          R <- TADPole(x, window.size = window.size, k = k, dc = dc, error.check = FALSE)
+          R <- TADPole(data, window.size = window.size, k = k, dc = dc, error.check = FALSE)
 
           if (trace) {
                cat("\nTADPole completed, pruning percentage = ",
@@ -694,33 +647,29 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           toc <- proc.time() - tic
 
-          if (save.data) {
-               tadpc <- new("dtwclust",
-                            type = type,
-                            distance = "DTW2",
-                            centroid = "TADPole (PAM)",
-                            preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc),
-                            proctime = toc,
+          #cldist <- as.matrix(distmat[cbind(1:length(data), R$cl)])
+          #size <- as.vector(table(R$cl))
+          #clusinfo <- data.frame(size = size,
+          #                       av_dist = as.vector(tapply(cldist[,1], R$cl, sum))/size)
 
-                            call = MYCALL,
-                            centers = data[R$centers, , drop = FALSE],
-                            k = as.integer(k),
-                            cluster = as.integer(R$cl),
-                            data = modeltools::ModelEnvMatrix(designMatrix = data),
-                            datalist = x)
-          } else {
-               tadpc <- new("dtwclust",
-                            type = type,
-                            distance = "DTW2",
-                            centroid = "TADPole (PAM)",
-                            preproc = ifelse(is.function(preproc), as.character(substitute(preproc))[1], preproc),
-                            proctime = toc,
+          tadpc <- new("dtwclust",
 
-                            call = MYCALL,
-                            centers = data[R$centers, , drop = FALSE],
-                            k = as.integer(k),
-                            cluster = as.integer(R$cl))
-          }
+                       type = type,
+                       distance = "DTW2",
+                       centroid = "pam (TADPole)",
+                       preproc = preproc,
+                       proctime = toc,
+
+                       centers = data[R$centers],
+                       k = as.integer(k),
+                       cluster = as.integer(R$cl),
+
+                       clusinfo = data.frame(),
+                       cldist = matrix(),
+                       iter = 1L,
+                       converged = TRUE,
+
+                       datalist = datalist)
 
           if (trace)
                cat("\n\tElapsed time is", toc["elapsed"], "seconds.\n\n")

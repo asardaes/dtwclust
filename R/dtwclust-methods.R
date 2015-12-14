@@ -1,18 +1,27 @@
-#' Plot the result of \code{dtwclust}
+#' @title Methods for \code{dtwclust}
 #'
-#' Plots the time series of each cluster along with the obtained centroid. It uses \code{ggplot2} plotting
-#' system.
+#' @description
+#' Methods associated with \code{\link{dtwclust-class}} objects.
+#'
+#' @name dtwclust-methods
+#' @rdname dtwclust-methods
+#'
+#' @seealso \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}}
+#'
+NULL
+
+#' @details
+#' The plot method plots the time series of each cluster along with the obtained centroid.
+#' It uses \code{ggplot2} plotting system (\code{\link[ggplot2]{ggplot}}).
+#'
+#' Note that if \code{type} was \code{"hierarchical"} when \code{\link{dtwclust}} was called, the dendrogram
+#' will be plotted instead, and no object returned.
 #'
 #' The flag \code{save.data} should be set to \code{TRUE} when running \code{\link{dtwclust}} to be able to
 #' use this. Optionally, you can manually provide the data in the \code{data} parameter.
 #'
 #' The function returns the \code{gg} object invisibly, in case you want to modify it to your liking. You
 #' might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
-#'
-#' @name plot-dtwclust
-#' @rdname plot-methods
-#'
-#' @seealso \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}}
 #'
 #' @param x An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.
 #' @param y Ignored.
@@ -28,44 +37,40 @@
 #' \emph{cluster centers}. Default values are: \code{linetype = "dashed"}, \code{size = 1.5},
 #' \code{colour = "black"}, \code{alpha = 0.5}.
 #'
-#' @return A \code{gg} object invisibly.
+#' @return The plot method returns a \code{gg} object (or \code{NULL} for hierarchical methods) invisibly.
+#'
+#' @rdname dtwclust-methods
+#' @aliases plot,dtwclust,missing-method
 #'
 #' @exportMethod plot
+#'
 #' @import ggplot2
 #' @importFrom reshape2 melt
-#' @importFrom modeltools empty
-#'
-NULL
-
-
-#' @rdname plot-methods
-#' @aliases plot,dtwclust,missing-method
 #'
 setMethod("plot", signature(x="dtwclust", y="missing"),
           function(x, y, ..., clus = seq_len(x@k),
                    labs.arg = NULL, data = NULL, time = NULL, plot = TRUE) {
 
+               ## If .Data part is not empty, object has 'hclust' part
+               if(length(x@.Data) > 0) {
+                    x <- S3Part(x, strictS3 = TRUE)
+                    plot(x)
+                    return(invisible(NULL))
+               }
+
                ## Obtain data, the priority is: provided data > included data matrix > included data list
-
                if (!is.null(data)) {
-                    if (is.matrix(data)) {
-                         df <- t(data)
-                         L <- nrow(df)
+                    if (is.matrix(data))
+                         data <- consistency_check(data, "tsmat")
 
-                    } else if (is.list(data)) {
-                         lengths <- sapply(data, length)
-                         L <- max(lengths)
-                         trail <- L - lengths
+                    lengths <- sapply(data, length)
+                    L <- max(lengths)
+                    trail <- L - lengths
 
-                         df <- mapply(data, trail, SIMPLIFY = FALSE,
-                                      FUN = function(series, trail) {
-                                           c(series, rep(NA, trail))
-                                      })
-                    }
-
-               } else if (!modeltools::empty(x@data)) {
-                    df <- t(x@data@get("designMatrix"))
-                    L <- nrow(df)
+                    df <- mapply(data, trail, SIMPLIFY = FALSE,
+                                 FUN = function(series, trail) {
+                                      c(series, rep(NA, trail))
+                                 })
 
                } else if (length(x@datalist) > 0){
                     lengths <- sapply(x@datalist, length)
@@ -82,21 +87,15 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                }
 
                ## Obtain centers (which can be matrix or lists of series)
+               lengths <- sapply(x@centers, length)
+               trail <- L - lengths
 
-               if (is.matrix(x@centers)) {
-                    cen <- as.data.frame(t(x@centers))
+               cen <- mapply(x@centers, trail, SIMPLIFY = FALSE,
+                             FUN = function(series, trail) {
+                                  c(series, rep(NA, trail))
+                             })
 
-               } else if (is.list(x@centers)) {
-                    lengths <- sapply(x@centers, length)
-                    trail <- L - lengths
-
-                    cen <- mapply(x@centers, trail, SIMPLIFY = FALSE,
-                                  FUN = function(series, trail) {
-                                       c(series, rep(NA, trail))
-                                  })
-
-                    cen <- as.data.frame(cen)
-               }
+               cen <- as.data.frame(cen)
 
                ## Check if data was z-normalized
                titleStr <- "Clusters and their members, including cluster center"
@@ -165,4 +164,79 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                     suppressWarnings(print(g))
 
                invisible(g)
+          })
+
+
+#' @details
+#' Show method displays basic information of results.
+#'
+#' @rdname dtwclust-methods
+#' @aliases show,dtwclust-method
+#'
+#' @param object An object of class \code{dtwclust}.
+#'
+setMethod("show", "dtwclust",
+          function(object) {
+               cat(object@type, "clustering with", object@k, "clusters\n")
+               cat("Using", object@distance, "distance\n")
+
+               if (object@type == "partitional")
+                    cat("Using", object@centroid, "centroids\n")
+               if (object@preproc != "none")
+                    cat("Using", object@preproc, "preprocessing\n")
+
+               cat("\nTime required for analysis:\n")
+               print(object@proctime)
+
+               cat("\nCluster sizes with average intra-cluster distance:\n\n")
+               print(object@clusinfo)
+          })
+
+
+#' Compare partitions
+#'
+#' Compute the (adjusted) Rand, Jaccard and Fowlkes-Mallows index for agreement of two partitions.
+#'
+#' This generic is included in the \code{flexclust} package. It will no longer be included with \code{dtwclust}
+#' in the next release.
+#'
+#' @seealso
+#'
+#' \code{\link[flexclust]{randIndex}}
+#'
+#' @name randIndex
+#' @rdname randIndex
+#' @aliases randIndex,dtwclust,ANY-method
+#'
+#' @exportMethod randIndex
+#'
+#' @param x,y,correct,original See \code{\link[flexclust]{randIndex}}.
+#'
+#' @return A vector of indices.
+#'
+setMethod("randIndex", signature(x="dtwclust", y="ANY"),
+          function(x, y, correct = TRUE, original = !correct) {
+               warning("Package 'dtwclust': Support for this generic method will be dropped in the next release.")
+
+               callNextMethod()
+          })
+
+#' @rdname randIndex
+#' @aliases randIndex,ANY,dtwclust-method
+#'
+setMethod("randIndex", signature(x="ANY", y="dtwclust"),
+          function(x, y, correct = TRUE, original = !correct) {
+               warning("Package 'dtwclust': Support for this generic method will be dropped in the next release.")
+
+               callNextMethod()
+          })
+
+#' @rdname randIndex
+#' @aliases randIndex,dtwclust,dtwclust-method
+#'
+setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
+          function(x, y, correct = TRUE, original = !correct) {
+               warning("Package 'dtwclust': Support for this generic method will be dropped in the next release.")
+
+               callNextMethod()
           })

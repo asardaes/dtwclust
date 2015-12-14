@@ -111,16 +111,8 @@ DBA <- function(X, center = NULL, max.iter = 20,
 
      if (do_par) {
           # in parallel
-          tasks <- parallel::splitIndices(n, foreach::getDoParWorkers())
-          tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) != 0]
-
-          X <- lapply(tasks, function(id) {
-               X[id]
-          })
-
-          M <- lapply(tasks, function(id) {
-               M[id]
-          })
+          X <- split_parallel(X, n)
+          M <- split_parallel(M, n)
      }
 
      ## Iterations

@@ -116,16 +116,6 @@ consistency_check <- function(obj, case, ...) {
 # Helper functions
 # ========================================================================================================
 
-# Pre-computing when using PAM. The whole distance matrix is calculated once and then reused
-distmat_pam <- function(x, fam) {
-     x <- consistency_check(x, "tsmat")
-
-     ## single argument to calculate whole matrix
-     d <- fam@dist(x)
-
-     d
-}
-
 # Create combinations of all possible pairs
 call_pairs <- function(n = 2L, byrow = TRUE) {
      if (n < 2)
@@ -142,4 +132,31 @@ check_parallel <- function(distance = NULL) {
           ret <- ret && pr_DB$get_entry(distance)$loop
 
      ret
+}
+
+# Split a given number to tasks into parallel workers
+split_parallel <- function(obj, tasks, margin = NULL) {
+     tasks <- parallel::splitIndices(tasks, foreach::getDoParWorkers())
+     tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) > 0]
+
+     if (is.null(margin))
+          ret <- lapply(tasks, function(id) obj[id])
+     else
+          ret <- switch(EXPR = margin,
+                        lapply(tasks, function(id) obj[id,]),
+                        lapply(tasks, function(id) obj[,id])
+                        )
+
+     ret
+}
+
+dtwclust_family <- function(name, dist, allcent) {
+     cluster <- function (x, centers, distmat = NULL) {
+          if (is.null(distmat))
+               distmat <- dist(x, centers)
+
+          max.col(-distmat, "first")
+     }
+
+     list(name = name, dist = dist, allcent = allcent, cluster = cluster)
 }

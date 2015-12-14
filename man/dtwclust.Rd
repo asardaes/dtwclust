@@ -7,16 +7,19 @@
 dtwclust(data = NULL, type = "partitional", k = 2L, method = "average",
   distance = "dtw", centroid = "pam", preproc = NULL,
   window.size = NULL, norm = "L1", dc = NULL, dba.iter = 15L,
-  pam.precompute = TRUE, control = NULL, save.data = TRUE, seed = NULL,
-  trace = FALSE, reps = 1L, packages = character(0), ...)
+  pam.precompute = TRUE, control = NULL, iter.max = 200L,
+  save.data = TRUE, seed = NULL, trace = FALSE, reps = 1L,
+  packages = character(0), ...)
 }
 \arguments{
-\item{data}{A list where each element is a time series, or a numerical matrix where each row is a time
-series. All series must have equal lengths in case of \code{type = "tadpole"}.}
+\item{data}{A list where each element is a time series, or a numerical matrix (it will be coerced to a list
+row-wise). All series must have equal lengths in case of \code{type = "tadpole"}.}
 
 \item{type}{What type of clustering method to use, \code{partitional}, \code{hierarchical} or \code{tadpole}.}
 
-\item{k}{Numer of desired clusters in partitional methods.}
+\item{k}{Numer of desired clusters in partitional methods. For hierarchical methods, the
+\code{\link[stats]{cutree}} function is called with this value of \code{k} and the result is returned in the
+\code{cluster} slot of the \code{dtwclust} object.}
 
 \item{method}{Which linkage method to use in hierarchical methods. See \code{\link[stats]{hclust}}.}
 
@@ -42,8 +45,10 @@ for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{L1})
 \item{pam.precompute}{Precompute the whole distance matrix once and reuse it at each iteration if using PAM
 centroids. Otherwise calculate distances at every iteration.}
 
-\item{control}{Parameters for partitional clustering algorithms. See
+\item{control}{DEPRECATED. Parameters for partitional clustering algorithms. See
 \code{\link[flexclust]{flexclustControl}}.}
+
+\item{iter.max}{Maximum number of iterations for partitional algorithms.}
 
 \item{save.data}{Return a copy of the data in the returned object? Ignored for hierarchical clustering.}
 
@@ -59,19 +64,19 @@ Parallel Computing section.}
 \item{...}{Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function.}
 }
 \value{
-An object with formal class \code{\link{dtwclust-class}} if \code{type = "partitional" | "tadpole"}.
-Otherwise an object with class \code{hclust} as returned by \code{\link[stats]{hclust}}. If \code{reps > 1}
-and a partitional procedure is used, a list of objects is returned.
+An object with formal class \code{\link{dtwclust-class}}.
+If \code{reps > 1} and a partitional procedure is used, a list of objects is returned.
 }
 \description{
-This function uses the DTW distance and related lower bounds to cluster time series. For now, all series
-must be univariate.
+This function uses the DTW distance and related lower bounds to cluster time series. It also supports custom
+distances, especially through \code{\link[proxy]{dist}}, as well as custom centroid functions.
+For now, all series must be univariate.
 }
 \details{
-Partitional algorithms are implemented via \code{\link[flexclust]{kcca}}. Hierarchical algorithms use the
-\code{\link[stats]{hclust}} function. The \code{tadpole} algorithm uses the \code{\link{TADPole}} function.
+Partitional algorithms use custom functions inspired by \code{\link[flexclust]{kcca}}. Hierarchical algorithms use
+the \code{\link[stats]{hclust}} function. The \code{tadpole} algorithm uses the \code{\link{TADPole}} function.
 
-The \code{data} may be a matrix or a list, but the matrix will be coerced to a list. A matrix input requires
+The \code{data} may be a matrix or a list, but the matrix will be coerced to a list row-wise. A matrix requires
 that all time series have equal lengths. If the lengths vary slightly between time series, reinterpolating them to
 a common length is most likely an acceptable approach (Ratanamahatana and Keogh, 2004). If this is not the
 case, then clustering them directly is probably ill-advised. See the examples.
@@ -79,20 +84,21 @@ case, then clustering them directly is probably ill-advised. See the examples.
 \section{Distance}{
 
 
-If a custom distance function is provided, it will receive the data as the first argument.
+If a custom distance function is provided and \code{pam.precompute} is \code{TRUE} or \code{type} is
+\code{"hierarchical"}, the function will be called with the data as the first argument, followed by \code{...}.
 
-For partitional
-algorithms, the second argument will be the cluster centers (i.e. other time series). If \code{data} is a
-matrix, it will be coerced to a list of series, and the centers will also be provided in the form of a list.
+If \code{pam.precompute} is \code{FALSE} and \code{type} is \code{"partitional"}, the function will be called
+at each iteration with the data as first argument, cluster centers as the second argument, and then \code{...}.
 
-If hierarchical algorithms are used, the function will also receive the elements of \code{...}.
+If \code{data} is a matrix, it will be coerced to a list of series, and the centers will also be provided in the
+form of a list.
 
 The function should return a distance matrix, ideally of class \code{crossdist}. The time series in the
 data should be along the rows, and the cluster centers along the columns of the distance matrix.
 
 The other option is to provide a string. The string can represent a compatible registered distance of
-\code{proxy}'s \code{\link[proxy]{dist}}. Extra parameters can be provided in \code{...}. See the examples
-but please finish reading this section before that.
+\code{proxy}'s \code{\link[proxy]{dist}} and is the preferred method for custom distances.
+Extra parameters can be provided in \code{...}. See the examples but please finish reading this section before that.
 
 Additionally, with either type of algorithm, it can be a string of one of the following custom
 implementations (all registered with \code{proxy}):
@@ -112,8 +118,9 @@ implementations (all registered with \code{proxy}):
 
 Note that only \code{dtw}, \code{dtw2} and \code{sbd} support series of different lengths.
 
-If the user wants to create its own distance and register it with \code{proxy}, it should include a \code{...}
-in its definition so that it is correctly called. Such functions will always receive the following parameters:
+If the user wants to create its own distance and also register it with \code{proxy}, it should include a \code{...}
+in its definition so that it is correctly called. Functions in \code{proxy} will always receive the following
+parameters:
 
 \itemize{
   \item \code{window.type}: Either \code{"none"} for a \code{NULL} \code{window.size}, or \code{"slantedband"}
@@ -132,14 +139,15 @@ Whether the function makes use of them or not, is up to the user.
 In the case of partitional algorithms, a suitable function should calculate the cluster centers. In this
 case, the centers are themselves time series.
 
-If a custom function is provided, it will receive different inputs depending on the format of \code{data}:
+If a custom function is provided, it will receive three inputs in the following order:
 
 \itemize{
-  \item For matrix input, it will receive a matrix as single input. Each row will be a series that belongs
-  to a given cluster. The function should return a numeric vector with the centroid time series.
-  \item For a list input, the function will receive three inputs in the following order: the \emph{whole}
-  data list; a numeric vector with length equal to the number of series in \code{data}, indicating which
-  cluster a series belongs to; the current number of total clusters.
+  \item The \emph{whole} data list
+  \item A numeric vector with length equal to the number of series in \code{data}, indicating which
+  cluster a series belongs to
+  \item The current number of total clusters
+  \item The current centroids (in order)
+  \item The elements of \code{...}
 }
 
 The other option is to provide a character string for the custom implementations. The following options
@@ -182,12 +190,9 @@ different lengths.
 It is strongly advised to use z-normalization in case of \code{centroid = "shape"}, because the resulting
 series have this normalization (see \code{\link{shape_extraction}}). The user can, however, specify a
 custom function that performs any transformation on the data, but the user must make sure that the format
-stays consistent, i.e. a matrix where each row is a series or a list of time series. For example,
-the z-normalization could be implemented as \code{t(apply(data, 1, zscore))} or \code{lapply(data, zscore)}
-respectively.
+stays consistent, i.e. a list of time series.
 
-The function will receive the data as first argument and, in case hierarchical methods are used, the
-contents of \code{...} as the second argument.
+The function will receive the data as first argument and the contents of \code{...} as the second argument.
 }
 
 \section{Repetitions}{
@@ -246,6 +251,9 @@ lengths.
 
 Specifying \code{distance = "sbd"} and \code{centroid = "shape"} is equivalent to the k-Shape algorithm
 (Papparizos and Gravano, 2015). See \code{\link{SBD}} and \code{\link{shape_extraction}} for more info.
+
+The \code{randIndex} function included with the \code{flexclust} package will no longer be supported by default
+in the following release.
 }
 \examples{
 
@@ -262,13 +270,11 @@ labels <- CharTrajLabels[1:20]
 #### Simple partitional clustering with L2 distance and PAM
 kc.l2 <- dtwclust(data, k = 4, distance = "L2", centroid = "pam",
                   seed = 3247, trace = TRUE)
-cat("Rand index for L2+PAM:", randIndex(kc.l2, labels), "\\n\\n")
 
 #### TADPole clustering
 kc.tadp <- dtwclust(data, type = "tadpole", k = 4,
                     window.size = 20, dc = 1.5,
                     trace = TRUE)
-cat("Rand index for TADPole:", randIndex(kc.tadp, labels), "\\n\\n")
 plot(kc.tadp)
 
 # Modify plot
@@ -292,15 +298,12 @@ proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
 kc.ndtw <- dtwclust(CharTraj[31:40], distance = "nDTW",
                     trace = TRUE, pam.precompute = TRUE,
                     seed = 8319)
-cat("Rand index for nDTW (subset):",
-    randIndex(kc.ndtw, CharTrajLabels[31:40]), "\\n\\n")
 plot(kc.ndtw)
 
 #### Hierarchical clustering based on shabe-based distance (different lengths)
 hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
-                   distance = "sbd", trace = TRUE)
-cl.sbd <- cutree(hc.sbd, 20)
-cat("Rand index for HC+SBD:", randIndex(cl.sbd, CharTrajLabels), "\\n\\n")
+                   k = 20, distance = "sbd", trace = TRUE)
+plot(hc.sbd)
 
 \dontrun{
 #### Saving and modifying the ggplot object with custom time
@@ -341,9 +344,6 @@ stopCluster(cl)
 
 # Return to sequential computations
 registerDoSEQ()
-
-# See Rand Index for each repetition
-sapply(kc.ndtw.list, randIndex, y = CharTrajLabels)
 }
 
 }
@@ -366,6 +366,6 @@ http://doi.org/10.1145/2723372.2737793}.
 \seealso{
 Please check the brief description in \code{\link{dtwclust-package}}.
 
-Additionally: \code{\link{plot-dtwclust}}, \code{\link{dtwclust-class}}.
+Additionally: \code{\link{dtwclust-methods}}, \code{\link{dtwclust-class}}.
 }
 
