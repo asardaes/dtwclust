@@ -1,10 +1,47 @@
+#' Class definition for \code{dtwclustFamily}
+#'
+#' Formal S4 class with the family of functions used for partitional and hierarchical procedures in
+#' \code{\link{dtwclust}}.
+#'
+#' The custom implementations also handle parallelization.
+#'
+#' @slot dist The function to calculate the distance matrices.
+#' @slot allcent The function to calculate centroids at each iteration.
+#' @slot cluster The function used to assign a series to a cluster.
+#' @slot preproc The function used to preprocess the data (important for \code{\link[stats]{predict}}).
+#'
+#' @name dtwclustFamily-class
+#' @rdname dtwclustFamily-class
+#' @aliases dtwclustFamily
+#'
+#' @import methods
+#' @exportClass dtwclustFamily
+#'
+setClass("dtwclustFamily",
+
+         slots = c(dist = "function",
+                   allcent = "function",
+                   cluster = "function",
+                   preproc = "function"),
+
+         prototype = prototype(preproc = function(x, ...) x,
+                               cluster = function(x, centers, distmat = NULL) {
+                                    if (is.null(distmat))
+                                         distmat <- dist(x, centers)
+
+                                    max.col(-distmat, "first")
+                               })
+)
+
 #' Class definition for \code{dtwclust}
 #'
 #' Formal S4 class to know how to handle data for plotting.
 #'
-#' The class will no longer inherit from \code{\link[flexclust]{kccasimple-class}} in the next release. However,
-#' it now contains \code{hclust} as superclass.
+#' The class no longer inherits from \code{\link[flexclust]{kccasimple-class}}. However,
+#' it now contains \code{hclust} as superclass, and most slots were ported. Namely, \code{data} slot wasn't.
 #'
+#' @slot call The function call.
+#' @slot family An object of class \code{\link{dtwclustFamily}}.
 #' @slot k Integer indicating the number of desired clusters.
 #' @slot cluster Integer vector indicating which cluster a series belongs to.
 #' @slot iter The number of iterations used.
@@ -36,15 +73,18 @@ setClass("hclust4", contains = "list", slots = c(names = "character"))
 setOldClass("hclust", S4Class = "hclust4")
 removeClass("hclust4")
 
-setClass("dtwclust", contains = c("kccasimple", "hclust"),
-         slots = c(k="integer",
-                   cluster="integer",
-                   iter="integer",
-                   converged="logical",
-                   clusinfo="data.frame",
+setClass("dtwclust", contains = c("hclust"),
+         slots = c(call = "call",
+                   family = "dtwclustFamily",
 
-                   centers="list",
-                   cldist="matrix",
+                   k = "integer",
+                   cluster = "integer",
+                   iter = "integer",
+                   converged = "logical",
+                   clusinfo = "data.frame",
+
+                   centers = "list",
+                   cldist = "matrix",
 
                    type = "character",
                    distance = "character",

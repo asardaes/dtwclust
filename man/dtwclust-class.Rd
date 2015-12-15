@@ -7,12 +7,16 @@
 Formal S4 class to know how to handle data for plotting.
 }
 \details{
-The class will no longer inherit from \code{\link[flexclust]{kccasimple-class}} in the next release. However,
-it now contains \code{hclust} as superclass.
+The class no longer inherits from \code{\link[flexclust]{kccasimple-class}}. However,
+it now contains \code{hclust} as superclass, and most slots were ported. Namely, \code{data} slot wasn't.
 }
 \section{Slots}{
 
 \describe{
+\item{\code{call}}{The function call.}
+
+\item{\code{family}}{An object of class \code{\link{dtwclustFamily}}.}
+
 \item{\code{k}}{Integer indicating the number of desired clusters.}
 
 \item{\code{cluster}}{Integer vector indicating which cluster a series belongs to.}

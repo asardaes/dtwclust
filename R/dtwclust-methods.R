@@ -10,6 +10,25 @@
 #'
 NULL
 
+# ========================================================================================================
+# Custom initialize to avoid infinite recursion
+# See https://bugs.r-project.org/bugzilla/show_bug.cgi?id=16629
+# ========================================================================================================
+
+setMethod("initialize", "dtwclust",
+          function(.Object, ..., call) {
+               .Object <- callNextMethod(.Object = .Object, ...)
+
+               if(!missing(call))
+                    .Object@call <- call
+
+               .Object
+          })
+
+# ========================================================================================================
+# Plot
+# ========================================================================================================
+
 #' @details
 #' The plot method plots the time series of each cluster along with the obtained centroid.
 #' It uses \code{ggplot2} plotting system (\code{\link[ggplot2]{ggplot}}).
@@ -166,6 +185,9 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                invisible(g)
           })
 
+# ========================================================================================================
+# Show
+# ========================================================================================================
 
 #' @details
 #' Show method displays basic information of results.
@@ -192,13 +214,16 @@ setMethod("show", "dtwclust",
                print(object@clusinfo)
           })
 
+# ========================================================================================================
+# Rand Index from flexclust package
+# ========================================================================================================
 
+#' @title
 #' Compare partitions
 #'
+#' @description
 #' Compute the (adjusted) Rand, Jaccard and Fowlkes-Mallows index for agreement of two partitions.
-#'
-#' This generic is included in the \code{flexclust} package. It will no longer be included with \code{dtwclust}
-#' in the next release.
+#' This generic is included in the \code{flexclust} package.
 #'
 #' @seealso
 #'
@@ -206,19 +231,19 @@ setMethod("show", "dtwclust",
 #'
 #' @name randIndex
 #' @rdname randIndex
-#' @aliases randIndex,dtwclust,ANY-method
-#'
-#' @exportMethod randIndex
 #'
 #' @param x,y,correct,original See \code{\link[flexclust]{randIndex}}.
 #'
-#' @return A vector of indices.
+#' @exportMethod randIndex
+#'
+NULL
+
+#' @rdname randIndex
+#' @aliases randIndex,dtwclust,ANY-method
 #'
 setMethod("randIndex", signature(x="dtwclust", y="ANY"),
           function(x, y, correct = TRUE, original = !correct) {
-               warning("Package 'dtwclust': Support for this generic method will be dropped in the next release.")
-
-               callNextMethod()
+               randIndex(x@cluster, y, correct = correct, original = original)
           })
 
 #' @rdname randIndex
@@ -226,9 +251,7 @@ setMethod("randIndex", signature(x="dtwclust", y="ANY"),
 #'
 setMethod("randIndex", signature(x="ANY", y="dtwclust"),
           function(x, y, correct = TRUE, original = !correct) {
-               warning("Package 'dtwclust': Support for this generic method will be dropped in the next release.")
-
-               callNextMethod()
+               randIndex(x, y@cluster, correct = correct, original = original)
           })
 
 #' @rdname randIndex
@@ -236,7 +259,131 @@ setMethod("randIndex", signature(x="ANY", y="dtwclust"),
 #'
 setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
           function(x, y, correct = TRUE, original = !correct) {
-               warning("Package 'dtwclust': Support for this generic method will be dropped in the next release.")
+               randIndex(x@cluster, y@cluster, correct = correct, original = original)
+          })
 
-               callNextMethod()
+# ========================================================================================================
+# info from modeltools
+# ========================================================================================================
+
+setMethod("info", "dtwclust",
+          function(object, which, ...) {
+               ret <- switch(EXPR = which,
+                             help = c("distsum", "size", "av_dist"),
+                             distsum = sum(object@cldist[, 1]),
+                             size = {
+                                  var <- object@clusinfo$size
+                                  names(var) <- rownames(object@clusinfo)
+
+                                  var
+                             },
+                             av_dist = {
+                                  var <- object@clusinfo$av_dist
+                                  names(var) <- rownames(object@clusinfo)
+
+                                  var
+                             },
+
+                             stop("Requested info not available. Use which = 'help'."))
+
+               ret
+          })
+
+# ========================================================================================================
+# predict from stats
+# ========================================================================================================
+
+setMethod("predict", "dtwclust",
+          function(object, newdata = NULL, ...) {
+               if (is.null(newdata)) {
+                    ret <- object@cluster
+
+               } else {
+                    newdata <- consistency_check(newdata, "tsmat")
+                    newdata <- object@family@preproc(newdata)
+                    ret <- object@family@cluster(newdata, object@centers)
+                    names(ret) <- names(newdata)
+               }
+
+               ret
+          })
+
+# ========================================================================================================
+# Cluster Similarity from flexclust
+# ========================================================================================================
+
+#' @title
+#' Cluster Similarity Matrix
+#'
+#' @description
+#' Returns a matrix of cluster similarities. Currently two methods for computing
+#' similarities of clusters are implemented.
+#' This generic is included in the \code{flexclust} package.
+#'
+#' @seealso
+#'
+#' \code{\link[flexclust]{clusterSim}}
+#'
+#' @name clusterSim
+#' @rdname clusterSim
+#'
+#' @param object,data,method,symmetric,... See \code{\link[flexclust]{clusterSim}}.
+#'
+#' @exportMethod clusterSim
+#'
+#' @rdname clusterSim
+#' @aliases clusterSim,dtwclust-method
+#'
+setMethod("clusterSim", "dtwclust",
+          function (object, data = NULL,
+                    method = c("shadow", "centers"),
+                    symmetric = FALSE, ...)
+          {
+               method <- match.arg(method)
+
+               if (object@k == 1)
+                    return(matrix(1))
+
+               if (method == "shadow") {
+                    if (is.null(data))
+                         data <- object@datalist
+                    else
+                         data <- consistency_check(data, "tsmat")
+
+                    distmat <- object@family@dist(data, object@centers)
+
+                    r <- t(matrix(apply(distmat, 1, rank, ties.method = "first"),
+                                  nrow = ncol(distmat)))
+                    cluster <- lapply(1:2, function(k) {
+                         apply(r, 1, function(x) which(x == k))
+                    })
+
+                    K <- max(cluster[[1]])
+                    z <- matrix(0, ncol = K, nrow = K)
+                    for (k in 1:K) {
+                         ok1 <- cluster[[1]] == k
+                         if (any(ok1)) {
+                              for (n in 1:K) {
+                                   if (k != n) {
+                                        ok2 <- ok1 & cluster[[2]] == n
+                                        if (any(ok2)) {
+                                             z[k, n] <- 2 * sum(distmat[ok2, k] / (distmat[ok2, k] + distmat[ok2, n]))
+                                        }
+                                   }
+                              }
+                              z[k, ] <- z[k, ]/sum(ok1)
+                         }
+                    }
+
+                    diag(z) <- 1
+
+                    if (symmetric)
+                         z <- (z + t(z))/2
+
+               } else {
+                    z <- object@family@dist(object@centers, object@centers)
+                    z <- 1 - z/max(z)
+               }
+
+               z
           })

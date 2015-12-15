@@ -45,7 +45,6 @@ data(uciCT)
 ## Reinterpolate data to equal lengths
 datalist <- zscore(CharTraj)
 data <- lapply(CharTraj, reinterpolate, newLength = 180)
-# data <- zscore(data)
 
 #### Using DTW with help of lower bounds and PAM centroids
 kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
@@ -58,8 +57,7 @@ plot(kc.dtwlb)
 hc.sbd <- dtwclust(datalist, type = "hierarchical",
                    k = 20, distance = "sbd", trace = TRUE)
 
-require(flexclust)
-cat("Rand index for HC+SBD:", randIndex(hc.sbd@cluster, CharTrajLabels), "\n\n")
+cat("Rand index for HC+SBD:", randIndex(hc.sbd, CharTrajLabels), "\n\n")
 plot(hc.sbd)
 
 #### TADPole clustering
@@ -90,7 +88,7 @@ kc.ndtw <- dtwclust(datalist, k = 20,
                     distance = "nDTW", centroid = "pam",
                     trace = TRUE, seed = 159, reps = 8L)
 
-sapply(kc.ndtw, function(x) randIndex(x@cluster, CharTrajLabels))
+sapply(kc.ndtw, randIndex, y = CharTrajLabels)
 
 # DBA centroids
 kc <- dtwclust(datalist, k = 20,

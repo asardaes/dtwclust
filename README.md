@@ -30,19 +30,18 @@ data(uciCT)
 ## Reinterpolate data to equal lengths
 datalist <- zscore(CharTraj)
 data <- lapply(CharTraj, reinterpolate, newLength = 180)
-# data <- zscore(data)
 
 #### Using DTW with help of lower bounds and PAM centroids
 kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
                      window.size = 20, centroid = "pam",
                      seed = 3247, trace = TRUE)
-#> Iteration 1: Changes / Distsum =100 / 932.183
-#> Iteration 2: Changes / Distsum =18 / 632.6588
-#> Iteration 3: Changes / Distsum =2 / 596.8066
-#> Iteration 4: Changes / Distsum =0 / 596.5887
+#> Iteration 1: Changes / Distsum = 100 / 932.183
+#> Iteration 2: Changes / Distsum = 18 / 632.6588
+#> Iteration 3: Changes / Distsum = 2 / 596.8066
+#> Iteration 4: Changes / Distsum = 0 / 596.5887
 #> 
 #> 
-#>  Elapsed time is 4.322 seconds.
+#>  Elapsed time is 5.881 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -59,10 +58,9 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.615 seconds.
+#>  Elapsed time is 0.841 seconds.
 
-require(flexclust)
-cat("Rand index for HC+SBD:", randIndex(hc.sbd@cluster, CharTrajLabels), "\n\n")
+cat("Rand index for HC+SBD:", randIndex(hc.sbd, CharTrajLabels), "\n\n")
 #> Rand index for HC+SBD: 0.512583
 plot(hc.sbd)
 ```
@@ -80,7 +78,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 3.962 seconds.
+#>  Elapsed time is 5.206 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -114,11 +112,11 @@ kc.ndtw <- dtwclust(datalist, k = 20,
                     trace = TRUE, seed = 159, reps = 8L)
 #> Consider setting save.data to FALSE if performing several repetitions.
 #> 
-#> Tracing will not be available if parallel computing is used.
+#> Tracing will not be available if parallel repetitions are made.
 #> 
-#>  Elapsed time is 5.44 seconds.
+#>  Elapsed time is 7.205 seconds.
 
-sapply(kc.ndtw, function(x) randIndex(x@cluster, CharTrajLabels))
+sapply(kc.ndtw, randIndex, y = CharTrajLabels)
 #>       ARI       ARI       ARI       ARI       ARI       ARI       ARI 
 #> 0.5739085 0.5798654 0.4112420 0.5351719 0.6000514 0.4897014 0.5101194 
 #>       ARI 
@@ -128,13 +126,13 @@ sapply(kc.ndtw, function(x) randIndex(x@cluster, CharTrajLabels))
 kc <- dtwclust(datalist, k = 20,
                distance = "nDTW", centroid = "dba",
                trace = TRUE, seed = 9421)
-#> Iteration 1: Changes / Distsum =100 / 5.162033
-#> Iteration 2: Changes / Distsum =3 / 3.739462
-#> Iteration 3: Changes / Distsum =2 / 3.687197
-#> Iteration 4: Changes / Distsum =0 / 3.631238
+#> Iteration 1: Changes / Distsum = 100 / 5.162033
+#> Iteration 2: Changes / Distsum = 3 / 3.739462
+#> Iteration 3: Changes / Distsum = 2 / 3.687197
+#> Iteration 4: Changes / Distsum = 0 / 3.631238
 #> 
 #> 
-#>  Elapsed time is 22.432 seconds.
+#>  Elapsed time is 28.153 seconds.
 
 # Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))

@@ -20,15 +20,9 @@
 \arguments{
 \item{x, y, correct, original}{See \code{\link[flexclust]{randIndex}}.}
 }
-\value{
-A vector of indices.
-}
 \description{
 Compute the (adjusted) Rand, Jaccard and Fowlkes-Mallows index for agreement of two partitions.
-}
-\details{
-This generic is included in the \code{flexclust} package. It will no longer be included with \code{dtwclust}
-in the next release.
+This generic is included in the \code{flexclust} package.
 }
 \seealso{
 \code{\link[flexclust]{randIndex}}

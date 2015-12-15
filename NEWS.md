@@ -1,9 +1,8 @@
 # NEWS
 
 ## Version 1.3.1
-* Preparation to drop dependency of `flexclust`
-     + Many slots will be ported
-     + `randIndex` method will no longer be supported by default
+* Dropped inheritance of `flexclust`'s `kccasimple`
+     + Many slots and methods were be ported
 * `shape_extraction` now accepts series with different lengths!
 * More parallel support
      + DBA and Shape centroid calculations 

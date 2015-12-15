@@ -117,11 +117,6 @@ all_cent <- function(case = NULL,
                             ## Closure
                             foo <- function(x, cluster, k, cen, ...) {
 
-                                 # This will be read from parent environment
-                                 #cen <- get("centers", envir=parent.frame())
-                                 #C <- consistency_check(cen, "tsmat")
-                                 #x <- consistency_check(x, "tsmat")
-
                                  cl <- sort(unique(cluster))
 
                                  indXC <- lapply(cl, function(i.cl) which(cluster == i.cl))

@@ -82,11 +82,15 @@ consistency_check <- function(obj, case, ...) {
 
      } else if (case == "tsmat") {
 
-          if (is.matrix(obj))
+          if (is.matrix(obj)) {
+               Names <- rownames(obj)
                obj <- lapply(seq_len(nrow(obj)), function(i) obj[i,])
-          else if (is.numeric(obj))
+               names(obj) <- Names
+
+          } else if (is.numeric(obj)) {
                obj <- list(obj)
-          else if (!is.list(obj))
+
+          } else if (!is.list(obj))
                stop("Unsupported type for data")
 
           return(obj)
@@ -148,15 +152,4 @@ split_parallel <- function(obj, tasks, margin = NULL) {
                         )
 
      ret
-}
-
-dtwclust_family <- function(name, dist, allcent) {
-     cluster <- function (x, centers, distmat = NULL) {
-          if (is.null(distmat))
-               distmat <- dist(x, centers)
-
-          max.col(-distmat, "first")
-     }
-
-     list(name = name, dist = dist, allcent = allcent, cluster = cluster)
 }

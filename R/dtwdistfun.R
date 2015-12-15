@@ -32,22 +32,27 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
 
           if (!is.null(distmat)) {
 
-               ## distmat matrix already calculated, just subset it
-               indXC <- sapply(centers, FUN = function(i.c) {
-                    i.row <- sapply(x, function(i.x) {
-                         if (length(i.x) == length(i.c))
-                              ret <- all(i.x == i.c)
-                         else
-                              ret <- FALSE
+               if (is.null(centers)) {
+                    d <- distmat
 
-                         ret
+               } else {
+                    ## distmat matrix already calculated, just subset it
+                    indXC <- sapply(centers, FUN = function(i.c) {
+                         i.row <- sapply(x, function(i.x) {
+                              if (length(i.x) == length(i.c))
+                                   ret <- all(i.x == i.c)
+                              else
+                                   ret <- FALSE
+
+                              ret
+                         })
+
+                         ## Take the first one in case a series is repeated more than once in the dataset
+                         which(i.row)[1]
                     })
 
-                    ## Take the first one in case a series is repeated more than once in the dataset
-                    which(i.row)[1]
-               })
-
-               d <- distmat[ , indXC, drop = FALSE]
+                    d <- distmat[ , indXC, drop = FALSE]
+               }
 
           } else {
                ## Attempt to calculate distmat in parallel?

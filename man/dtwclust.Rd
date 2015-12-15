@@ -12,7 +12,7 @@ dtwclust(data = NULL, type = "partitional", k = 2L, method = "average",
   packages = character(0), ...)
 }
 \arguments{
-\item{data}{A list where each element is a time series, or a numerical matrix (it will be coerced to a list
+\item{data}{A list where each element is a time series, or a numeric matrix (it will be coerced to a list
 row-wise). All series must have equal lengths in case of \code{type = "tadpole"}.}
 
 \item{type}{What type of clustering method to use, \code{partitional}, \code{hierarchical} or \code{tadpole}.}
@@ -188,11 +188,14 @@ different lengths.
 
 
 It is strongly advised to use z-normalization in case of \code{centroid = "shape"}, because the resulting
-series have this normalization (see \code{\link{shape_extraction}}). The user can, however, specify a
+series have this normalization (see \code{\link{shape_extraction}}). Therefore, \code{\link{zscore}} is the
+default in this case. The user can, however, specify a
 custom function that performs any transformation on the data, but the user must make sure that the format
-stays consistent, i.e. a list of time series.
+stays consistent, i.e. a list of time series. Setting to \code{NULL} means no preprocessing.
 
 The function will receive the data as first argument and the contents of \code{...} as the second argument.
+
+It is convenient to provide this function if you're planning on using the \code{\link[stats]{predict}} generic.
 }
 
 \section{Repetitions}{
@@ -251,9 +254,6 @@ lengths.
 
 Specifying \code{distance = "sbd"} and \code{centroid = "shape"} is equivalent to the k-Shape algorithm
 (Papparizos and Gravano, 2015). See \code{\link{SBD}} and \code{\link{shape_extraction}} for more info.
-
-The \code{randIndex} function included with the \code{flexclust} package will no longer be supported by default
-in the following release.
 }
 \examples{
 
@@ -270,11 +270,13 @@ labels <- CharTrajLabels[1:20]
 #### Simple partitional clustering with L2 distance and PAM
 kc.l2 <- dtwclust(data, k = 4, distance = "L2", centroid = "pam",
                   seed = 3247, trace = TRUE)
+cat("Rand index for L2+PAM:", randIndex(kc.l2, labels), "\\n\\n")
 
 #### TADPole clustering
 kc.tadp <- dtwclust(data, type = "tadpole", k = 4,
                     window.size = 20, dc = 1.5,
                     trace = TRUE)
+cat("Rand index for TADPole:", randIndex(kc.tadp, labels), "\\n\\n")
 plot(kc.tadp)
 
 # Modify plot
@@ -298,11 +300,14 @@ proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
 kc.ndtw <- dtwclust(CharTraj[31:40], distance = "nDTW",
                     trace = TRUE, pam.precompute = TRUE,
                     seed = 8319)
+cat("Rand index for nDTW (subset):",
+    randIndex(kc.ndtw, CharTrajLabels[31:40]), "\\n\\n")
 plot(kc.ndtw)
 
 #### Hierarchical clustering based on shabe-based distance (different lengths)
 hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
                    k = 20, distance = "sbd", trace = TRUE)
+cat("Rand index for HC+SBD:", randIndex(hc.sbd, CharTrajLabels), "\\n\\n")
 plot(hc.sbd)
 
 \dontrun{
@@ -344,6 +349,9 @@ stopCluster(cl)
 
 # Return to sequential computations
 registerDoSEQ()
+
+# See Rand Index for each repetition
+sapply(kc.ndtw.list, randIndex, y = CharTrajLabels)
 }
 
 }

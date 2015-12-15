@@ -4,7 +4,6 @@
 
 kcca.list <- function (x, k, family = NULL, iter.max = 200L, trace = FALSE, ...)
 {
-     #MYCALL <- match.call()
      N <- length(x)
 
      if (N < k)
@@ -16,12 +15,12 @@ kcca.list <- function (x, k, family = NULL, iter.max = 200L, trace = FALSE, ...)
 
      for (iter in 1:iter.max) {
           clustold <- cluster
-          distmat <- family$dist(x, centers, ...)
-          cluster <- family$cluster(x, distmat = distmat)
+          distmat <- family@dist(x, centers, ...)
+          cluster <- family@cluster(x, distmat = distmat)
 
           k <- length(centers)
 
-          centers <- family$allcent(x, cluster = cluster, k = k, centers, ...)
+          centers <- family@allcent(x, cluster = cluster, k = k, centers, ...)
 
           changes <- sum(cluster != clustold)
 
@@ -29,7 +28,7 @@ kcca.list <- function (x, k, family = NULL, iter.max = 200L, trace = FALSE, ...)
                td <- sum(distmat[cbind(1:N, cluster)])
                txt <- paste(changes, format(td), sep = " / ")
                cat("Iteration ", iter, ": ",
-                   "Changes / Distsum =",
+                   "Changes / Distsum = ",
                    formatC(txt, width = 12, format = "f"),
                    "\n", sep = "")
           }
@@ -40,7 +39,7 @@ kcca.list <- function (x, k, family = NULL, iter.max = 200L, trace = FALSE, ...)
           }
      }
 
-     cluster <- as.integer(family$cluster(distmat=distmat))
+     cluster <- as.integer(family@cluster(distmat=distmat))
      cldist <- as.matrix(distmat[cbind(1:N, cluster)])
      size <- as.vector(table(cluster))
      clusinfo <- data.frame(size = size,
