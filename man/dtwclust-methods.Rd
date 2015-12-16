@@ -8,7 +8,8 @@
 \title{Methods for \code{dtwclust}}
 \usage{
 \S4method{plot}{dtwclust,missing}(x, y, ..., clus = seq_len(x@k),
-  labs.arg = NULL, data = NULL, time = NULL, plot = TRUE)
+  labs.arg = NULL, data = NULL, time = NULL, plot = TRUE,
+  type = "series")
 
 \S4method{show}{dtwclust}(object)
 }
@@ -34,6 +35,8 @@ the longest series.}
 \item{plot}{Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot object without
 printing anything to screen}
 
+\item{type}{What to plot. See details.}
+
 \item{object}{An object of class \code{dtwclust}.}
 }
 \value{
@@ -43,17 +46,17 @@ The plot method returns a \code{gg} object (or \code{NULL} for hierarchical meth
 Methods associated with \code{\link{dtwclust-class}} objects.
 }
 \details{
-The plot method plots the time series of each cluster along with the obtained centroid.
+The plot method, by default, plots the time series of each cluster along with the obtained centroid.
 It uses \code{ggplot2} plotting system (\code{\link[ggplot2]{ggplot}}).
-
-Note that if \code{type} was \code{"hierarchical"} when \code{\link{dtwclust}} was called, the dendrogram
-will be plotted instead, and no object returned.
 
 The flag \code{save.data} should be set to \code{TRUE} when running \code{\link{dtwclust}} to be able to
 use this. Optionally, you can manually provide the data in the \code{data} parameter.
 
 The function returns the \code{gg} object invisibly, in case you want to modify it to your liking. You
 might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
+
+If a hierarchical procedure was used, then you can specify \code{type} \code{=} \code{"dendrogram"} to
+plot the corresponding dendrogram.
 
 Show method displays basic information of results.
 }

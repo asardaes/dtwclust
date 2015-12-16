@@ -308,7 +308,7 @@ plot(kc.ndtw)
 hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
                    k = 20, distance = "sbd", trace = TRUE)
 cat("Rand index for HC+SBD:", randIndex(hc.sbd, CharTrajLabels), "\\n\\n")
-plot(hc.sbd)
+plot(hc.sbd, type = "dendrogram")
 
 \dontrun{
 #### Saving and modifying the ggplot object with custom time

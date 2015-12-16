@@ -3,6 +3,7 @@
 ## Version 1.3.1
 * Dropped inheritance of `flexclust`'s `kccasimple`
      + Many slots and methods were be ported
+     + Inheriting from `hclust` class now
 * `shape_extraction` now accepts series with different lengths!
 * More parallel support
      + DBA and Shape centroid calculations 

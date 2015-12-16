@@ -30,11 +30,8 @@ setMethod("initialize", "dtwclust",
 # ========================================================================================================
 
 #' @details
-#' The plot method plots the time series of each cluster along with the obtained centroid.
+#' The plot method, by default, plots the time series of each cluster along with the obtained centroid.
 #' It uses \code{ggplot2} plotting system (\code{\link[ggplot2]{ggplot}}).
-#'
-#' Note that if \code{type} was \code{"hierarchical"} when \code{\link{dtwclust}} was called, the dendrogram
-#' will be plotted instead, and no object returned.
 #'
 #' The flag \code{save.data} should be set to \code{TRUE} when running \code{\link{dtwclust}} to be able to
 #' use this. Optionally, you can manually provide the data in the \code{data} parameter.
@@ -42,8 +39,14 @@ setMethod("initialize", "dtwclust",
 #' The function returns the \code{gg} object invisibly, in case you want to modify it to your liking. You
 #' might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 #'
+#' If a hierarchical procedure was used, then you can specify \code{type} \code{=} \code{"dendrogram"} to
+#' plot the corresponding dendrogram.
+#'
 #' @param x An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.
 #' @param y Ignored.
+#' @param ... Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
+#' \emph{cluster centers}. Default values are: \code{linetype = "dashed"}, \code{size = 1.5},
+#' \code{colour = "black"}, \code{alpha = 0.5}.
 #' @param clus A numeric vector indicating which clusters to plot.
 #' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
 #' information
@@ -52,9 +55,7 @@ setMethod("initialize", "dtwclust",
 #' the longest series.
 #' @param plot Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot object without
 #' printing anything to screen
-#' @param ... Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
-#' \emph{cluster centers}. Default values are: \code{linetype = "dashed"}, \code{size = 1.5},
-#' \code{colour = "black"}, \code{alpha = 0.5}.
+#' @param type What to plot. See details.
 #'
 #' @return The plot method returns a \code{gg} object (or \code{NULL} for hierarchical methods) invisibly.
 #'
@@ -68,10 +69,13 @@ setMethod("initialize", "dtwclust",
 #'
 setMethod("plot", signature(x="dtwclust", y="missing"),
           function(x, y, ..., clus = seq_len(x@k),
-                   labs.arg = NULL, data = NULL, time = NULL, plot = TRUE) {
+                   labs.arg = NULL, data = NULL, time = NULL,
+                   plot = TRUE, type = "series") {
 
-               ## If .Data part is not empty, object has 'hclust' part
-               if(length(x@.Data) > 0) {
+               type <- match.arg(type, c("series", "dendrogram"))
+
+               ## plot dendrogram?
+               if(x@type == "hierarchical" && type == "dendrogram") {
                     x <- S3Part(x, strictS3 = TRUE)
                     plot(x)
                     return(invisible(NULL))

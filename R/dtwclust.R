@@ -240,7 +240,7 @@
 #' hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
 #'                    k = 20, distance = "sbd", trace = TRUE)
 #' cat("Rand index for HC+SBD:", randIndex(hc.sbd, CharTrajLabels), "\n\n")
-#' plot(hc.sbd)
+#' plot(hc.sbd, type = "dendrogram")
 #'
 #' \dontrun{
 #' #### Saving and modifying the ggplot object with custom time
@@ -519,6 +519,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                new("dtwclust",
                    call = MYCALL,
                    family = family,
+                   distmat = distmat,
 
                    type = type,
                    distance = distance,
@@ -593,9 +594,21 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## Cluster
           hc <- stats::hclust(DD, method = method)
 
-          ## Some additional cluster information (taken from flexclust's kcca function)
+          ## cutree and corresponding centers
           cluster <- stats::cutree(hc, k)
-          cldist <- as.matrix(D[cbind(1:length(data), cluster)])
+
+          centers <- sapply(1:k, function(kcent) {
+               id_k <- cluster == kcent
+
+               d_sub <- D[id_k, id_k, drop = FALSE]
+
+               id_center <- which.min(apply(d_sub, 1, sum))
+
+               which(id_k)[id_center]
+          })
+
+          ## Some additional cluster information (taken from flexclust's kcca function)
+          cldist <- as.matrix(D[,centers][cbind(1:length(data), cluster)])
           size <- as.vector(table(cluster))
           clusinfo <- data.frame(size = size,
                                  av_dist = as.vector(tapply(cldist[,1], cluster, sum))/size)
@@ -610,6 +623,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
               family = new("dtwclustFamily",
                            dist = distfun,
                            preproc = preproc),
+              distmat = D,
 
               type = type,
               distance = distance,
@@ -617,7 +631,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
               preproc = preproc_char,
               proctime = toc,
 
-              centers = list(),
+              centers = data[centers],
               k = as.integer(k),
               cluster = cluster,
 
@@ -674,6 +688,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                        family = new("dtwclustFamily",
                                     dist = dtw2,
                                     preproc = preproc),
+                       distmat = NULL,
 
                        type = type,
                        distance = "DTW2",

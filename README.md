@@ -41,7 +41,7 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 4: Changes / Distsum = 0 / 596.5887
 #> 
 #> 
-#>  Elapsed time is 5.881 seconds.
+#>  Elapsed time is 4.744 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -58,11 +58,11 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.841 seconds.
+#>  Elapsed time is 0.694 seconds.
 
 cat("Rand index for HC+SBD:", randIndex(hc.sbd, CharTrajLabels), "\n\n")
 #> Rand index for HC+SBD: 0.512583
-plot(hc.sbd)
+plot(hc.sbd, type = "dendrogram")
 ```
 
 ![](README-examples-2.png)
@@ -78,7 +78,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 5.206 seconds.
+#>  Elapsed time is 4.387 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -114,7 +114,7 @@ kc.ndtw <- dtwclust(datalist, k = 20,
 #> 
 #> Tracing will not be available if parallel repetitions are made.
 #> 
-#>  Elapsed time is 7.205 seconds.
+#>  Elapsed time is 6.545 seconds.
 
 sapply(kc.ndtw, randIndex, y = CharTrajLabels)
 #>       ARI       ARI       ARI       ARI       ARI       ARI       ARI 
@@ -132,7 +132,7 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 4: Changes / Distsum = 0 / 3.631238
 #> 
 #> 
-#>  Elapsed time is 28.153 seconds.
+#>  Elapsed time is 23.993 seconds.
 
 # Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))

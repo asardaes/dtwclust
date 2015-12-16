@@ -58,7 +58,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
                    k = 20, distance = "sbd", trace = TRUE)
 
 cat("Rand index for HC+SBD:", randIndex(hc.sbd, CharTrajLabels), "\n\n")
-plot(hc.sbd)
+plot(hc.sbd, type = "dendrogram")
 
 #### TADPole clustering
 kc.tadp <- dtwclust(data, type = "tadpole", k = 20,

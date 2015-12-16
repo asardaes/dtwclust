@@ -8,7 +8,8 @@ Formal S4 class to know how to handle data for plotting.
 }
 \details{
 The class no longer inherits from \code{\link[flexclust]{kccasimple-class}}. However,
-it now contains \code{hclust} as superclass, and most slots were ported. Namely, \code{data} slot wasn't.
+it now contains \code{\link[stats]{hclust}} as superclass, and most slots were ported.
+Namely, \code{data}, \code{control} and \code{index} were not.
 }
 \section{Slots}{
 
@@ -16,6 +17,8 @@ it now contains \code{hclust} as superclass, and most slots were ported. Namely,
 \item{\code{call}}{The function call.}
 
 \item{\code{family}}{An object of class \code{\link{dtwclustFamily}}.}
+
+\item{\code{distmat}}{If computed, the cross-distance matrix.}
 
 \item{\code{k}}{Integer indicating the number of desired clusters.}
 
