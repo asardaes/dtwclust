@@ -1,6 +1,7 @@
 # NEWS
 
-## Version 1.3.1
+## Version 2.0.0
+* Many formal parameters from the `dtwclust` function were dropped and taken from the formal class `dtwclustControl`. For now, they will still be supported through `...` with a message.
 * Dropped inheritance of `flexclust`'s `kccasimple`
      + Many slots and methods were be ported
      + Inheriting from `hclust` class now

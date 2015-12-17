@@ -78,7 +78,7 @@ consistency_check <- function(obj, case, ...) {
                stop("Window width must be larger than 0")
           }
 
-          return(round(obj))
+          return(as.integer(obj))
 
      } else if (case == "tsmat") {
 

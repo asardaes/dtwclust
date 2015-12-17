@@ -5,11 +5,8 @@
 \title{Time series clustering under DTW}
 \usage{
 dtwclust(data = NULL, type = "partitional", k = 2L, method = "average",
-  distance = "dtw", centroid = "pam", preproc = NULL,
-  window.size = NULL, norm = "L1", dc = NULL, dba.iter = 15L,
-  pam.precompute = TRUE, control = NULL, iter.max = 200L,
-  save.data = TRUE, seed = NULL, trace = FALSE, reps = 1L,
-  packages = character(0), ...)
+  distance = "dtw", centroid = "pam", preproc = NULL, dc = NULL,
+  control = NULL, save.data = TRUE, seed = NULL, distmat = NULL, ...)
 }
 \arguments{
 \item{data}{A list where each element is a time series, or a numeric matrix (it will be coerced to a list
@@ -21,7 +18,7 @@ row-wise). All series must have equal lengths in case of \code{type = "tadpole"}
 \code{\link[stats]{cutree}} function is called with this value of \code{k} and the result is returned in the
 \code{cluster} slot of the \code{dtwclust} object.}
 
-\item{method}{Which linkage method to use in hierarchical methods. See \code{\link[stats]{hclust}}.}
+\item{method}{Which linkage method to use in hierarchical procedures. See \code{\link[stats]{hclust}}.}
 
 \item{distance}{One of the supported distance definitions (see Distance section). Ignored for
 \code{type = "tadpole"}.}
@@ -32,40 +29,24 @@ when using partitional methods (see Centroid section).}
 \item{preproc}{Function to preprocess data. Defaults to \code{zscore} \emph{only} if \code{centroid}
 \code{=} \code{"shape"}, but will be replaced by a custom function if provided. See Preprocessing section.}
 
-\item{window.size}{Window constraint for DTW and LB calculations. See Sakoe-Chiba section.}
+\item{dc}{Cutoff distance for the \code{\link{TADPole}} algorithm.}
 
-\item{norm}{Pointwise distance for DTW, DBA and the LB. Either \code{L1} for Manhattan distance or \code{L2}
-for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{L1}) and
-\code{distance = "DTW2"} (which always uses \code{L2}).}
-
-\item{dc}{Cutoff distance for TADPole algorithm.}
-
-\item{dba.iter}{Maximum number of iterations for \code{\link{DBA}} centroids.}
-
-\item{pam.precompute}{Precompute the whole distance matrix once and reuse it at each iteration if using PAM
-centroids. Otherwise calculate distances at every iteration.}
-
-\item{control}{DEPRECATED. Parameters for partitional clustering algorithms. See
-\code{\link[flexclust]{flexclustControl}}.}
-
-\item{iter.max}{Maximum number of iterations for partitional algorithms.}
+\item{control}{NEW: Named list of parameters for clustering algorithms. See \code{\link{dtwclustControl}}.
+\code{NULL} means defaults.}
 
 \item{save.data}{Return a copy of the data in the returned object? Ignored for hierarchical clustering.}
 
 \item{seed}{Random seed for reproducibility of partitional algorithms.}
 
-\item{trace}{Boolean flag. If true, more output regarding the progress is printed to screen.}
+\item{distmat}{If a cross-distance matrix is already available, it can be provided here so it's re-used. Only relevant if
+\code{centroid} = "pam" or \code{type} = "hierarchical".}
 
-\item{reps}{How many times to repeat partitional clustering with different starting points. See section Repetitions.}
-
-\item{packages}{Character vector with the names of any packages required for custom \code{proxy} functions. See
-Parallel Computing section.}
-
-\item{...}{Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function.}
+\item{...}{Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function. For now, old arguments
+can also be provided here. See \code{\link{dtwclustControl}}.}
 }
 \value{
 An object with formal class \code{\link{dtwclust-class}}.
-If \code{reps > 1} and a partitional procedure is used, a list of objects is returned.
+If \code{control@nrep > 1} and a partitional procedure is used, a list of objects is returned.
 }
 \description{
 This function uses the DTW distance and related lower bounds to cluster time series. It also supports custom
@@ -80,11 +61,14 @@ The \code{data} may be a matrix or a list, but the matrix will be coerced to a l
 that all time series have equal lengths. If the lengths vary slightly between time series, reinterpolating them to
 a common length is most likely an acceptable approach (Ratanamahatana and Keogh, 2004). If this is not the
 case, then clustering them directly is probably ill-advised. See the examples.
+
+Several parameters can be adjusted with the \code{control} argument. See \code{\link{dtwclustControl}}.
 }
 \section{Distance}{
 
 
-If a custom distance function is provided and \code{pam.precompute} is \code{TRUE} or \code{type} is
+If a custom distance function is provided and \code{pam.precompute} is \code{TRUE}
+(see \code{\link{dtwclustControl}}) or \code{type} is
 \code{"hierarchical"}, the function will be called with the data as the first argument, followed by \code{...}.
 
 If \code{pam.precompute} is \code{FALSE} and \code{type} is \code{"partitional"}, the function will be called
@@ -120,7 +104,7 @@ Note that only \code{dtw}, \code{dtw2} and \code{sbd} support series of differen
 
 If the user wants to create its own distance and also register it with \code{proxy}, it should include a \code{...}
 in its definition so that it is correctly called. Functions in \code{proxy} will always receive the following
-parameters:
+parameters (see \code{\link{dtwclustControl}}):
 
 \itemize{
   \item \code{window.type}: Either \code{"none"} for a \code{NULL} \code{window.size}, or \code{"slantedband"}
@@ -146,7 +130,7 @@ If a custom function is provided, it will receive three inputs in the following 
   \item A numeric vector with length equal to the number of series in \code{data}, indicating which
   cluster a series belongs to
   \item The current number of total clusters
-  \item The current centroids (in order)
+  \item The current centroids (in order, in a list)
   \item The elements of \code{...}
 }
 
@@ -171,7 +155,7 @@ Note that only \code{shape}, \code{dba} and \code{pam} support series of differe
 
 
 A global constraint to speed up the DTW calculation is the Sakoe-Chiba band (Sakoe and Chiba, 1978). To
-use it, a window width must be defined via \code{window.size}.
+use it, a window width must be defined via \code{window.size} in \code{control} (see \code{\link{dtwclustControl}}).
 
 The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 that represents the distance between the point considered and one of the edges of the window. Therefore,
@@ -193,7 +177,7 @@ default in this case. The user can, however, specify a
 custom function that performs any transformation on the data, but the user must make sure that the format
 stays consistent, i.e. a list of time series. Setting to \code{NULL} means no preprocessing.
 
-The function will receive the data as first argument and the contents of \code{...} as the second argument.
+The function will receive the data as first argument and only argument.
 
 It is convenient to provide this function if you're planning on using the \code{\link[stats]{predict}} generic.
 }
@@ -208,6 +192,8 @@ The user only needs to provide an initial seed in the corresponding parameter of
 
 Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is precomputed,
 since said matrix is reused for every repetition, and can be comptued in parallel (see next section).
+
+The number of desired repetitions is provided through the \code{control} parameter. See \code{\link{dtwclustControl}}.
 }
 
 \section{Parallel Computing}{
@@ -231,15 +217,15 @@ no parallel backend registration.
 If the user registers a parallel backend, the function will also try to do the calculation of the distance
 matrices in parallel. This should work with any function registered with \code{\link[proxy]{dist}} via
 \code{\link[proxy]{pr_DB}} whose \code{loop} flag is set to \code{TRUE}. If the function requires special packages
-to be loaded, provide their names in the \code{packages} argument. In addition, "dtwclust" is always loaded
-in each parallel worker, so the user doesn't need to include that.
+to be loaded, provide their names in the \code{packages} slot of \code{control} (see \code{\link{dtwclustControl}}).
+In addition, "dtwclust" is always loaded in each parallel worker, so the user doesn't need to include that.
 
 Note that, by default, if a parallel backend is registered, multiple repetitions are to be performed (partitional clustering,
-\code{reps} \code{>=} 1)
+\code{control@nrep} \code{>=} 1)
 AND \code{centroid} \code{!=} \code{"pam"}, each parallel worker will get a repetition task, but any calculations
-within each worker will be done sequentially. Load balance for such a scenario should be fine as long as the \code{reps}
+within each worker will be done sequentially. Load balance for such a scenario should be fine as long as the \code{control@nrep}
 \code{>=} the number of parallel workers. If you believe your task would benefit more from parallelization within each repetition,
-consider registering the parallel backend and calling \code{dtwclust} several times sequentially, with \code{reps = 1} and
+consider registering the parallel backend and calling \code{dtwclust} several times sequentially, with \code{control@nrep = 1} and
 different \code{seeds}.
 }
 
@@ -254,6 +240,8 @@ lengths.
 
 Specifying \code{distance = "sbd"} and \code{centroid = "shape"} is equivalent to the k-Shape algorithm
 (Papparizos and Gravano, 2015). See \code{\link{SBD}} and \code{\link{shape_extraction}} for more info.
+
+Hierarchical (conditional on \code{method}) and TADpole procedures are deterministic.
 }
 \examples{
 
@@ -267,15 +255,17 @@ data <- t(sapply(CharTraj, reinterpolate, newLength = 180))
 data <- data[1:20, ]
 labels <- CharTrajLabels[1:20]
 
+# Controls
+ctrl <- list(trace = TRUE, window.size = 20L)
+
 #### Simple partitional clustering with L2 distance and PAM
 kc.l2 <- dtwclust(data, k = 4, distance = "L2", centroid = "pam",
-                  seed = 3247, trace = TRUE)
+                  seed = 3247, control = ctrl)
 cat("Rand index for L2+PAM:", randIndex(kc.l2, labels), "\\n\\n")
 
 #### TADPole clustering
 kc.tadp <- dtwclust(data, type = "tadpole", k = 4,
-                    window.size = 20, dc = 1.5,
-                    trace = TRUE)
+                    dc = 1.5, control = ctrl)
 cat("Rand index for TADPole:", randIndex(kc.tadp, labels), "\\n\\n")
 plot(kc.tadp)
 
@@ -296,19 +286,21 @@ proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
                        description = "Normalized DTW with L1 norm")
 
 # Subset of (original) data for speed
-# Change pam.precompute to FALSE to see time difference
 kc.ndtw <- dtwclust(CharTraj[31:40], distance = "nDTW",
-                    trace = TRUE, pam.precompute = TRUE,
-                    seed = 8319)
+                    control = ctrl, seed = 8319)
 cat("Rand index for nDTW (subset):",
     randIndex(kc.ndtw, CharTrajLabels[31:40]), "\\n\\n")
 plot(kc.ndtw)
 
 #### Hierarchical clustering based on shabe-based distance (different lengths)
 hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
-                   k = 20, distance = "sbd", trace = TRUE)
+                   k = 20, distance = "sbd", control = ctrl)
 cat("Rand index for HC+SBD:", randIndex(hc.sbd, CharTrajLabels), "\\n\\n")
 plot(hc.sbd, type = "dendrogram")
+
+# Update parameters
+kc.sbd <- update(hc.sbd, type = "partitional", seed = 4892,
+                 distmat = hc.sbd@distmat)
 
 \dontrun{
 #### Saving and modifying the ggplot object with custom time
@@ -328,21 +320,21 @@ cl <- makeCluster(detectCores())
 registerDoParallel(cl)
 
 ## Use full DTW and PAM
-kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, trace = TRUE)
+kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, control = ctrl)
 
 ## Use full DTW with DBA centroids
-kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, trace = TRUE)
+kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, control = ctrl)
 
 ## Use constrained DTW with original series of different lengths
-kc.cdtw <- dtwclust(CharTraj, k = 20, window.size = 20,
-                    seed = 3251, trace = TRUE)
+kc.cdtw <- dtwclust(CharTraj, k = 20,
+                    seed = 3251, control = ctrl)
 
 ## This uses the "nDTW" function registered in another example above
 # For reference, this took around 2.25 minutes with 8 cores (all 8 repetitions).
 kc.ndtw.list <- dtwclust(CharTraj, k = 20, distance = "nDTW",
-                         centroid = "dba", window.size = 10,
+                         centroid = "dba", save.data = FALSE,
                          preproc = zscore, seed = 8319,
-                         save.data = FALSE, reps = 8L)
+                         control = list(window.size = 10L, nrep = 8L))
 
 # Stop parallel workers
 stopCluster(cl)

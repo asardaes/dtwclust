@@ -2,7 +2,7 @@
 # Return a custom distance function that calls registered functions of proxy
 # ========================================================================================================
 
-dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
+dtwdistfun <- function(distance, control, distmat, ...) {
 
      ## If I call this function is because 'distance' was a character
 
@@ -11,9 +11,9 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
      needs_window <- c("dtw_lb", "lbk", "lbi")
 
      if (distance %in% needs_window)
-          window.size <- consistency_check(window.size, "window")
+          control@window.size <- consistency_check(control@window.size, "window")
 
-     if (is.null(window.size))
+     if (is.null(control@window.size))
           window.type <- "none"
      else
           window.type <- "slantedband"
@@ -24,11 +24,6 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
 
           ## Just in case, always empty for now
           dots2 <- c(dots, list(...))
-
-          #x <- consistency_check(x, "tsmat")
-
-          #if (!is.null(centers))
-          #     centers <- consistency_check(centers, "tsmat")
 
           if (!is.null(distmat)) {
 
@@ -64,7 +59,7 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
                     dist_entry <- proxy::pr_DB$get_entry(distance)
 
                     ## variables from the parent environment that should be exported
-                    export <- c("distance", "window.size", "norm",
+                    export <- c("distance", "control",
                                 "window.type", "consistency_check")
 
                     if (is.null(centers)) {
@@ -78,16 +73,14 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
                          d <- foreach(pairs = pairs,
                                       .combine = c,
                                       .multicombine = TRUE,
-                                      .packages = packages,
+                                      .packages = control@packages,
                                       .export = export) %dopar% {
 
                                            if (!proxy::pr_DB$entry_exists(dist_entry$names[1]))
                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                            ## Does the registered function possess '...' in its definition?
-                                           has_dots <- is.function(dist_entry$FUN) &&
-                                                any(grepl("...", names(as.list(args(dist_entry$FUN))),
-                                                          fixed = TRUE))
+                                           has_dots <- is.function(dist_entry$FUN) && !is.null(formals(dist_entry$FUN)$...)
 
                                            if (has_dots) {
                                                 dd <- do.call(proxy::dist,
@@ -95,8 +88,8 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
                                                                             y = x[pairs[,2]],
                                                                             method = distance,
                                                                             window.type = window.type,
-                                                                            window.size = window.size,
-                                                                            norm = norm,
+                                                                            window.size = control@window.size,
+                                                                            norm = control@norm,
                                                                             error.check = FALSE,
                                                                             pairwise = TRUE),
 
@@ -126,24 +119,22 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
                          d <- foreach(x = x,
                                       .combine = rbind,
                                       .multicombine = TRUE,
-                                      .packages = packages,
+                                      .packages = control@packages,
                                       .export = export) %dopar% {
 
                                            if (!proxy::pr_DB$entry_exists(dist_entry$names[1]))
                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                            ## Does the registered function possess '...' in its definition?
-                                           has_dots <- is.function(dist_entry$FUN) &&
-                                                any(grepl("...", names(as.list(args(dist_entry$FUN))),
-                                                          fixed = TRUE))
+                                           has_dots <- is.function(dist_entry$FUN) && !is.null(formals(dist_entry$FUN)$...)
 
                                            if (has_dots) {
                                                 dd <- do.call(proxy::dist,
                                                               args = c(list(x = x, y = centers,
                                                                             method = distance,
                                                                             window.type = window.type,
-                                                                            window.size = window.size,
-                                                                            norm = norm,
+                                                                            window.size = control@window.size,
+                                                                            norm = control@norm,
                                                                             error.check = FALSE),
 
                                                                        dots2))
@@ -163,9 +154,7 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
                          centers <- x
 
                     ## Does the registered function possess '...' in its definition?
-                    has_dots <- is.function(pr_DB$get_entry(distance)$FUN) &&
-                         any(grepl("...", names(as.list(args(pr_DB$get_entry(distance)$FUN))),
-                                   fixed = TRUE))
+                    has_dots <- is.function(pr_DB$get_entry(distance)$FUN) && !is.null(formals(pr_DB$get_entry(distance)$FUN)$...)
 
                     if (has_dots) {
                          ## If it has '...', put everything there and let it use whatever it needs
@@ -174,8 +163,8 @@ dtwdistfun <- function(distance, window.size, norm, distmat, packages, ...) {
                          d <- do.call(proxy::dist,
                                       args = c(list(x = x, y = centers,
                                                     method = distance,
-                                                    window.type = window.type, window.size = window.size,
-                                                    norm = norm, error.check = FALSE),
+                                                    window.type = window.type, window.size = control@window.size,
+                                                    norm = control@norm, error.check = FALSE),
 
                                                dots2))
                     } else {

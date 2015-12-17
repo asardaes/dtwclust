@@ -1,6 +1,7 @@
-## Update to version 1.3.1
+## Update to version 2.0.0
 * More parallel support and some extended functionality. 
-* New class and some new generics.
+* New classes and some new generics.
+* Dropped some formal parameters. Still supporting them via ...
 
 ## Test environments
 * Local Windows 10, R 3.2.3

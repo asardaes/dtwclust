@@ -31,17 +31,20 @@ data(uciCT)
 datalist <- zscore(CharTraj)
 data <- lapply(CharTraj, reinterpolate, newLength = 180)
 
+## Common controls
+ctrl <- list(window.size = 20L, trace = TRUE)
+
 #### Using DTW with help of lower bounds and PAM centroids
 kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
-                     window.size = 20, centroid = "pam",
-                     seed = 3247, trace = TRUE)
+                     centroid = "pam", seed = 3247, 
+                     control = ctrl)
 #> Iteration 1: Changes / Distsum = 100 / 932.183
 #> Iteration 2: Changes / Distsum = 18 / 632.6588
 #> Iteration 3: Changes / Distsum = 2 / 596.8066
 #> Iteration 4: Changes / Distsum = 0 / 596.5887
 #> 
 #> 
-#>  Elapsed time is 4.744 seconds.
+#>  Elapsed time is 5.499 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -52,13 +55,14 @@ plot(kc.dtwlb)
 
 #### Hierarchical clustering based on shape-based distance
 hc.sbd <- dtwclust(datalist, type = "hierarchical",
-                   k = 20, distance = "sbd", trace = TRUE)
+                   k = 20, distance = "sbd", 
+                   control = ctrl)
 #> 
 #>  Calculating distance matrix...
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.694 seconds.
+#>  Elapsed time is 0.78 seconds.
 
 cat("Rand index for HC+SBD:", randIndex(hc.sbd, CharTrajLabels), "\n\n")
 #> Rand index for HC+SBD: 0.512583
@@ -71,14 +75,13 @@ plot(hc.sbd, type = "dendrogram")
 
 #### TADPole clustering
 kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
-                    window.size = 20, dc = 1.5, 
-                    trace = TRUE)
+                    dc = 1.5, control = ctrl)
 #> 
 #> Entering TADPole...
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 4.387 seconds.
+#>  Elapsed time is 4.923 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -101,20 +104,16 @@ ndtw <- function(x, y, ...) {
               distance.only = TRUE, ...)$normalizedDistance
 }
 
-# Registering the function with 'proxy'
+## Registering the function with 'proxy'
 proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
                        loop = TRUE, type = "metric", distance = TRUE,
                        description = "Normalized DTW with L1 norm")
 
-# Data with different lengths
+## Data with different lengths
 kc.ndtw <- dtwclust(datalist, k = 20,
                     distance = "nDTW", centroid = "pam",
-                    trace = TRUE, seed = 159, reps = 8L)
+                    seed = 159, control = new("dtwclustControl", nrep = 8L))
 #> Consider setting save.data to FALSE if performing several repetitions.
-#> 
-#> Tracing will not be available if parallel repetitions are made.
-#> 
-#>  Elapsed time is 6.545 seconds.
 
 sapply(kc.ndtw, randIndex, y = CharTrajLabels)
 #>       ARI       ARI       ARI       ARI       ARI       ARI       ARI 
@@ -122,17 +121,17 @@ sapply(kc.ndtw, randIndex, y = CharTrajLabels)
 #>       ARI 
 #> 0.6715448
 
-# DBA centroids
+## DBA centroids
 kc <- dtwclust(datalist, k = 20,
                distance = "nDTW", centroid = "dba",
-               trace = TRUE, seed = 9421)
+               seed = 9421, control = list(trace = TRUE))
 #> Iteration 1: Changes / Distsum = 100 / 5.162033
 #> Iteration 2: Changes / Distsum = 3 / 3.739462
 #> Iteration 3: Changes / Distsum = 2 / 3.687197
 #> Iteration 4: Changes / Distsum = 0 / 3.631238
 #> 
 #> 
-#>  Elapsed time is 23.993 seconds.
+#>  Elapsed time is 26.989 seconds.
 
 # Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))

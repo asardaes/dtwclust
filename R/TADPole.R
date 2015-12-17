@@ -86,10 +86,12 @@
 
 TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
 
-     if (missing(window.size))
+     if (is.null(window.size))
           stop("Please provide a positive window size")
      if (missing(dc))
           stop("Please provide the 'dc' parameter")
+     if (dc < 0)
+          stop("The cutoff distance 'dc' must be positive")
 
      x <- consistency_check(data, "tsmat")
 

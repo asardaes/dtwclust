@@ -25,12 +25,87 @@ setClass("dtwclustFamily",
                    preproc = "function"),
 
          prototype = prototype(preproc = function(x, ...) x,
-                               cluster = function(x, centers, distmat = NULL) {
+                               cluster = function(distmat = NULL) {
                                     if (is.null(distmat))
-                                         distmat <- dist(x, centers)
+                                         stop("Something is wrong, couldn't calculate distances.")
 
                                     max.col(-distmat, "first")
                                })
+)
+
+#' Class definition for \code{dtwclustControl}
+#'
+#' Formal S4 class with several control parameters used in \code{\link{dtwclust}}.
+#'
+#' The included slots are some of the formal arguments of \code{\link{dtwclust}}.
+#' In the next release, all arguments that correspond to one of the slots here will be removed from the dtwclust function.
+#'
+#' Default values are shown at the end.
+#'
+#' @section Common parameters:
+#'
+#' \itemize{
+#'   \item \code{window.size} = \code{NULL}
+#'   \item \code{norm} = "L1"
+#'   \item \code{trace} = \code{FALSE}
+#'   \item \code{packages} = \code{character(0)}
+#' }
+#'
+#' @slot window.size Integer or \code{NULL}. Window constraint for DTW and LB calculations. See Sakoe-Chiba section in
+#' \code{\link{dtwclust}}.
+#' @slot norm Character. Pointwise distance for DTW, DBA and the LB. Either \code{"L1"} for Manhattan distance or \code{"L2"}
+#' for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{"L1"}) and
+#' \code{distance = "DTW2"} (which always uses \code{"L2"}).
+#' @slot trace Logical flag. If \code{TRUE}, more output regarding the progress is printed to screen.
+#' @slot packages Character vector with the names of any packages required for custom \code{proxy} functions. See
+#' Parallel Computing section in \code{\link{dtwclust}}.
+#'
+#' @section Only for partitional procedures:
+#'
+#' \itemize{
+#'   \item \code{dba.iter} = \code{15L}
+#'   \item \code{pam.precompute} = \code{TRUE}
+#'   \item \code{iter.max} = \code{30L}
+#'   \item \code{nrep} = \code{1L}
+#' }
+#'
+#' @slot dba.iter Integer. Maximum number of iterations for \code{\link{DBA}} centroids.
+#' @slot pam.precompute Logical flag. Precompute the whole distance matrix once and reuse it at each iteration if using PAM
+#' centroids. Otherwise calculate distances at every iteration.
+#' @slot iter.max Integer. Maximum number of iterations.
+#' @slot nrep Integer. How many times to repeat partitional clustering with different starting points. See section Repetitions
+#' in \code{\link{dtwclust}}.
+#'
+#' @name dtwclustControl-class
+#' @rdname dtwclustControl-class
+#' @aliases dtwclustControl
+#'
+#' @import methods
+#' @exportClass dtwclustControl
+#'
+NULL
+
+setClassUnion("intORnull", c("integer", "NULL"))
+
+setClass("dtwclustControl",
+
+         slots = c(window.size = "intORnull",
+                   norm = "character",
+                   dba.iter = "integer",
+                   pam.precompute = "logical",
+                   iter.max = "integer",
+                   trace = "logical",
+                   nrep = "integer",
+                   packages = "character"),
+
+         prototype = prototype(window.size = NULL,
+                               norm = "L1",
+                               dba.iter = 15L,
+                               pam.precompute = TRUE,
+                               iter.max = 30L,
+                               trace = FALSE,
+                               nrep = 1L,
+                               packages = character(0))
 )
 
 #' Class definition for \code{dtwclust}

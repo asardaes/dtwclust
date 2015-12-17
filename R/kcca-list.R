@@ -16,7 +16,7 @@ kcca.list <- function (x, k, family = NULL, iter.max = 200L, trace = FALSE, ...)
      for (iter in 1:iter.max) {
           clustold <- cluster
           distmat <- family@dist(x, centers, ...)
-          cluster <- family@cluster(x, distmat = distmat)
+          cluster <- family@cluster(distmat = distmat)
 
           k <- length(centers)
 
@@ -34,7 +34,7 @@ kcca.list <- function (x, k, family = NULL, iter.max = 200L, trace = FALSE, ...)
           }
 
           if (changes == 0) {
-               cat("\n")
+               if (trace) cat("\n")
                break
           }
      }

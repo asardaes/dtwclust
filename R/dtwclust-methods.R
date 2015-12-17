@@ -26,6 +26,79 @@ setMethod("initialize", "dtwclust",
           })
 
 # ========================================================================================================
+# Validity and coercion methods for control
+# ========================================================================================================
+
+setValidity("dtwclustControl",
+            function(object) {
+
+                 if (!is.null(object@window.size) && object@window.size < 1)
+                      return("Window size must be positive")
+
+                 if (!(object@norm %in% c("L1", "L2")))
+                      return("Norm can only be L1 or L2")
+
+                 if (object@dba.iter < 0L)
+                      return("DBA iterations must be positive")
+
+                 if (object@iter.max < 0L)
+                      return("Maximum iterations must be positive")
+
+                 if (object@nrep < 1L)
+                      return("Number of repetitions must be at least one")
+
+                 TRUE
+            })
+
+setAs("list", "dtwclustControl",
+      function(from, to) {
+           ctrl <- new(to)
+
+           for (arg in names(from)) {
+                val <- from[[arg]]
+                slot(ctrl, arg) <- ifelse(is.numeric(val), as.integer(val), val)
+           }
+
+           validObject(ctrl)
+
+           ctrl
+      })
+
+setAs("NULL", "dtwclustControl",
+      function(from, to) {
+           new(to)
+      })
+
+# ========================================================================================================
+# update from stats
+# ========================================================================================================
+
+setMethod("update", "dtwclust",
+          function(object, ..., evaluate = TRUE) {
+
+               args <- as.pairlist(list(...))
+
+               if (length(args) == 0) {
+                    warning("Nothing to be updated")
+
+                    if (evaluate)
+                         return(object)
+                    else
+                         return(object@call)
+               }
+
+               new_call <- object@call
+               new_call[names(args)] <- args
+
+               if (evaluate)
+                    ret <- eval(new_call)
+               else
+                    ret <- new_call
+
+               ret
+          })
+
+# ========================================================================================================
 # Plot
 # ========================================================================================================
 
@@ -203,6 +276,9 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
 #'
 setMethod("show", "dtwclust",
           function(object) {
+               print(object@call)
+               cat("\n")
+
                cat(object@type, "clustering with", object@k, "clusters\n")
                cat("Using", object@distance, "distance\n")
 
@@ -304,8 +380,10 @@ setMethod("predict", "dtwclust",
 
                } else {
                     newdata <- consistency_check(newdata, "tsmat")
+                    consistency_check(newdata, "vltslist")
                     newdata <- object@family@preproc(newdata)
-                    ret <- object@family@cluster(newdata, object@centers)
+                    distmat <- object@family@dist(newdata, object@centers)
+                    ret <- object@family@cluster(distmat = distmat)
                     names(ret) <- names(newdata)
                }
 

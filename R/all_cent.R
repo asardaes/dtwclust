@@ -2,9 +2,7 @@
 # Custom functions to calculate centroids
 # ========================================================================================================
 
-all_cent <- function(case = NULL,
-                     distmat, distfun,
-                     dba.iter, window.size, norm, trace) {
+all_cent <- function(case = NULL, distmat, distfun, control) {
 
      if (is.function(case))
           return(case)
@@ -146,7 +144,7 @@ all_cent <- function(case = NULL,
                                       # in parallel
                                       indChanged <- split_parallel(indChanged, length(indChanged))
 
-                                      include <- c("trace", "norm", "window.size", "dba.iter") # parent env
+                                      include <- c("control") # parent env
                                       exclude <- setdiff(ls(), c("X", "cen"))
 
                                       sub.C <- foreach(indChanged = indChanged,
@@ -160,16 +158,16 @@ all_cent <- function(case = NULL,
                                                                    indChanged,
                                                                    SIMPLIFY = FALSE,
                                                                    FUN = function(x, c, i) {
-                                                                        if(trace)
+                                                                        if(control@trace)
                                                                              cat("\t\tComputing DBA center ",
                                                                                  i,
                                                                                  "...\n",
                                                                                  sep = "")
 
                                                                         new.c <- DBA(x, c,
-                                                                                     norm = norm,
-                                                                                     window.size = window.size,
-                                                                                     max.iter = dba.iter,
+                                                                                     norm = control@norm,
+                                                                                     window.size = control@window.size,
+                                                                                     max.iter = control@dba.iter,
                                                                                      error.check = FALSE)
 
                                                                         new.c
@@ -182,16 +180,16 @@ all_cent <- function(case = NULL,
                                                       indChanged,
                                                       SIMPLIFY = FALSE,
                                                       FUN = function(x, c, i) {
-                                                           if(trace)
+                                                           if(control@trace)
                                                                 cat("\t\tComputing DBA center ",
                                                                     i,
                                                                     "...\n",
                                                                     sep = "")
 
                                                            new.c <- DBA(x, c,
-                                                                        norm = norm,
-                                                                        window.size = window.size,
-                                                                        max.iter = dba.iter,
+                                                                        norm = control@norm,
+                                                                        window.size = control@window.size,
+                                                                        max.iter = control@dba.iter,
                                                                         error.check = FALSE)
 
                                                            new.c
