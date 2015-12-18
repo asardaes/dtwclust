@@ -8,15 +8,17 @@ Formal S4 class to know how to handle data for plotting.
 }
 \details{
 The class no longer inherits from \code{\link[flexclust]{kccasimple-class}}, but most slots and methods were ported.
-Namely, \code{data}, \code{control} and \code{index} slots were not.
+Namely, \code{data} and \code{index} slots were not.
 
-However, this class now contains \code{\link[stats]{hclust}} as superclass and supports all its methods. Plot is a 
+However, this class now contains \code{\link[stats]{hclust}} as superclass and supports all its methods. Plot is a
 special case (see \code{\link{dtwclust-methods}}).
 }
 \section{Slots}{
 
 \describe{
 \item{\code{call}}{The function call.}
+
+\item{\code{control}}{An object of class \code{\link{dtwclustControl}}.}
 
 \item{\code{family}}{An object of class \code{\link{dtwclustFamily}}.}
 

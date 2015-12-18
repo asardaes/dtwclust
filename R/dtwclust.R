@@ -568,6 +568,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           dtwc <- lapply(kc.list, function(kc) {
                new("dtwclust",
                    call = MYCALL,
+                   control = control,
                    family = family,
                    distmat = distmat,
 
@@ -679,6 +680,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                new("dtwclust", hc,
                    call = MYCALL,
+                   control = control,
                    family = new("dtwclustFamily",
                                 dist = distfun,
                                 preproc = preproc),
@@ -750,6 +752,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           RET <- new("dtwclust",
                      call = MYCALL,
+                     control = control,
                      family = new("dtwclustFamily",
                                   dist = dtw2,
                                   preproc = preproc),

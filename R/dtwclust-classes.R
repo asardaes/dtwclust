@@ -112,12 +112,13 @@ setClass("dtwclustControl",
 #' Formal S4 class to know how to handle data for plotting.
 #'
 #' The class no longer inherits from \code{\link[flexclust]{kccasimple-class}}, but most slots and methods were ported.
-#' Namely, \code{data}, \code{control} and \code{index} slots were not.
-#' 
-#' However, this class now contains \code{\link[stats]{hclust}} as superclass and supports all its methods. Plot is a 
+#' Namely, \code{data} and \code{index} slots were not.
+#'
+#' However, this class now contains \code{\link[stats]{hclust}} as superclass and supports all its methods. Plot is a
 #' special case (see \code{\link{dtwclust-methods}}).
 #'
 #' @slot call The function call.
+#' @slot control An object of class \code{\link{dtwclustControl}}.
 #' @slot family An object of class \code{\link{dtwclustFamily}}.
 #' @slot distmat If computed, the cross-distance matrix.
 #' @slot k Integer indicating the number of desired clusters.
@@ -152,6 +153,7 @@ removeClass("hclust4")
 
 setClass("dtwclust", contains = c("hclust"),
          slots = c(call = "call",
+                   control = "dtwclustControl",
                    family = "dtwclustFamily",
                    distmat = "ANY",
 
