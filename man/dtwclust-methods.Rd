@@ -9,7 +9,7 @@
 \usage{
 \S4method{plot}{dtwclust,missing}(x, y, ..., clus = seq_len(x@k),
   labs.arg = NULL, data = NULL, time = NULL, plot = TRUE,
-  type = "series")
+  type = "dendrogram")
 
 \S4method{show}{dtwclust}(object)
 }
@@ -19,8 +19,7 @@
 \item{y}{Ignored.}
 
 \item{...}{Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
-\emph{cluster centers}. Default values are: \code{linetype = "dashed"}, \code{size = 1.5},
-\code{colour = "black"}, \code{alpha = 0.5}.}
+\emph{cluster centers}, or to \code{\link[stats]{plot.hclust}}. See details.}
 
 \item{clus}{A numeric vector indicating which clusters to plot.}
 
@@ -47,7 +46,9 @@ Methods associated with \code{\link{dtwclust-class}} objects.
 }
 \details{
 The plot method, by default, plots the time series of each cluster along with the obtained centroid.
-It uses \code{ggplot2} plotting system (\code{\link[ggplot2]{ggplot}}).
+It uses \code{ggplot2} plotting system (\code{\link[ggplot2]{ggplot}}). The default values for cluster centers are:
+\code{linetype = "dashed"}, \code{size = 1.5}, \code{colour = "black"}, \code{alpha = 0.5}. You can change this
+by means of \code{...}.
 
 The flag \code{save.data} should be set to \code{TRUE} when running \code{\link{dtwclust}} to be able to
 use this. Optionally, you can manually provide the data in the \code{data} parameter.
@@ -56,7 +57,8 @@ The function returns the \code{gg} object invisibly, in case you want to modify 
 might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 
 If a hierarchical procedure was used, then you can specify \code{type} \code{=} \code{"dendrogram"} to
-plot the corresponding dendrogram.
+plot the corresponding dendrogram (the default in this case), and pass any extra parameters via \code{...}.
+Use \code{type} \code{=} \code{"series"} to plot the time series clusters using the original call's \code{k}.
 
 Show method displays basic information of results.
 }

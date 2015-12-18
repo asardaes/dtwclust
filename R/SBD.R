@@ -48,8 +48,7 @@
 #' }
 #'
 #' @export
-#' @importFrom stats nextn
-#' @importFrom stats fft
+#'
 
 SBD <- function(x, y, znorm = FALSE) {
 

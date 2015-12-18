@@ -15,13 +15,16 @@
 #' Other packages that are particularly leveraged here are the \code{proxy} package for distance matrix calculations,
 #' and the \code{dtw} package for the core DTW calculations.
 #'
-#' Five distances are registered via \code{\link[proxy]{pr_DB}}: \code{"LB_Keogh", "LB_Improved", "SBD", "DTW2"}
-#' and \code{"DTW_LB"}. See \code{\link{lb_keogh}}, \code{\link{lb_improved}} and \code{\link{SBD}} for more
-#' details on the first 3. DTW2 is done with \code{\link[dtw]{dtw}} using \code{L2} norm, but it
-#' differs from the result you would obtain if you specify \code{L2} as \code{dist.method}: with \code{DTW2},
-#' pointwise distances (the local cost matrix) are calculated with \code{L1} norm, \emph{each} element of the
-#' matrix is squared and the result is fed into \code{\link[dtw]{dtw}}, which finds the optimum warping path.
-#' The square root of the resulting distance is \emph{then} computed. See \code{\link{dtw_lb}} for the last one.
+#' Five distances are registered via \code{\link[proxy]{pr_DB}}: "LB_Keogh", "LB_Improved", "SBD", "DTW_LB"
+#' and "DTW2". See \code{\link{lb_keogh}}, \code{\link{lb_improved}}, \code{\link{SBD}} and
+#' \code{\link{dtw_lb}} for more details on the first 4.
+#'
+#' DTW2 is done with \code{\link[dtw]{dtw}} using
+#' \code{L2} norm, but it differs from the result you would obtain if you specify \code{L2} as
+#' \code{dist.method}: with \code{DTW2}, pointwise distances (the local cost matrix) are calculated with
+#' \code{L1} norm, \emph{each} element of the matrix is squared and the result is fed into
+#' \code{\link[dtw]{dtw}}, which finds the optimum warping path. The square root of the resulting
+#' distance is \emph{then} computed.
 #'
 #' Please note that the \code{\link[proxy]{dist}} function in the \code{proxy} package accepts one or two
 #' arguments for data objects. Users should usually use the two-input \strong{list} version, even if there is
@@ -77,6 +80,27 @@
 #' \code{\link[dtw]{dtw}}
 #'
 #' @useDynLib dtwclust
+#'
+#' @import methods
+#' @import flexclust
+#' @import doRNG
+#' @import proxy
+#' @import foreach
+#' @import ggplot2
+#'
+#' @importFrom dtw dtw
+#' @importFrom reshape2 melt
+#' @importFrom parallel splitIndices
+#' @importFrom caTools runmin
+#' @importFrom caTools runmax
+#' @importFrom stats aggregate
+#' @importFrom stats approx
+#' @importFrom stats convolve
+#' @importFrom stats cutree
+#' @importFrom stats fft
+#' @importFrom stats hclust
+#' @importFrom stats median
+#' @importFrom stats nextn
 #'
 NULL
 

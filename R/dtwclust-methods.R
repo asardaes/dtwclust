@@ -91,7 +91,7 @@ setMethod("update", "dtwclust",
                new_call[names(args)] <- args
 
                if (evaluate)
-                    ret <- eval(new_call)
+                    ret <- eval.parent(new_call, n = 2)
                else
                     ret <- new_call
 
@@ -104,7 +104,9 @@ setMethod("update", "dtwclust",
 
 #' @details
 #' The plot method, by default, plots the time series of each cluster along with the obtained centroid.
-#' It uses \code{ggplot2} plotting system (\code{\link[ggplot2]{ggplot}}).
+#' It uses \code{ggplot2} plotting system (\code{\link[ggplot2]{ggplot}}). The default values for cluster centers are:
+#' \code{linetype = "dashed"}, \code{size = 1.5}, \code{colour = "black"}, \code{alpha = 0.5}. You can change this
+#' by means of \code{...}.
 #'
 #' The flag \code{save.data} should be set to \code{TRUE} when running \code{\link{dtwclust}} to be able to
 #' use this. Optionally, you can manually provide the data in the \code{data} parameter.
@@ -113,13 +115,13 @@ setMethod("update", "dtwclust",
 #' might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 #'
 #' If a hierarchical procedure was used, then you can specify \code{type} \code{=} \code{"dendrogram"} to
-#' plot the corresponding dendrogram.
+#' plot the corresponding dendrogram (the default in this case), and pass any extra parameters via \code{...}.
+#' Use \code{type} \code{=} \code{"series"} to plot the time series clusters using the original call's \code{k}.
 #'
 #' @param x An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.
 #' @param y Ignored.
 #' @param ... Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
-#' \emph{cluster centers}. Default values are: \code{linetype = "dashed"}, \code{size = 1.5},
-#' \code{colour = "black"}, \code{alpha = 0.5}.
+#' \emph{cluster centers}, or to \code{\link[stats]{plot.hclust}}. See details.
 #' @param clus A numeric vector indicating which clusters to plot.
 #' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
 #' information
@@ -137,20 +139,17 @@ setMethod("update", "dtwclust",
 #'
 #' @exportMethod plot
 #'
-#' @import ggplot2
-#' @importFrom reshape2 melt
-#'
 setMethod("plot", signature(x="dtwclust", y="missing"),
           function(x, y, ..., clus = seq_len(x@k),
                    labs.arg = NULL, data = NULL, time = NULL,
-                   plot = TRUE, type = "series") {
+                   plot = TRUE, type = "dendrogram") {
 
-               type <- match.arg(type, c("series", "dendrogram"))
+               type <- match.arg(type, c("dendrogram", "series"))
 
                ## plot dendrogram?
                if(x@type == "hierarchical" && type == "dendrogram") {
                     x <- S3Part(x, strictS3 = TRUE)
-                    plot(x)
+                    plot(x, ...)
                     return(invisible(NULL))
                }
 

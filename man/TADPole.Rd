@@ -34,7 +34,8 @@ TADPole clustering adopts a relatively new clustering framework and adapts it to
 with DTW. See the cited article for the details of the algorithm.
 
 Because of the way the algorithm works, it can be considered a kind of Partitioning Around Medoids (PAM).
-This means that the cluster centers are always elements of the data.
+This means that the cluster centers are always elements of the data. However, this algorithm is deterministic,
+depending on the value of \code{dc}.
 
 The algorithm first uses the DTW's upper and lower bounds to find series with many close neighbors (in
 DTW space). Anything below the cutoff distance (\code{dc}) is considered a neighbor. Aided with this

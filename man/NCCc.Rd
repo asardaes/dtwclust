@@ -7,9 +7,7 @@
 NCCc(x, y)
 }
 \arguments{
-\item{x}{A time series.}
-
-\item{y}{Another time series.}
+\item{x, y}{Univariate time series.}
 }
 \value{
 The cross-correlation sequence with length \code{length(x) + length(y) - 1}.

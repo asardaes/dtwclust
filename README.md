@@ -44,7 +44,7 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 4: Changes / Distsum = 0 / 596.5887
 #> 
 #> 
-#>  Elapsed time is 5.499 seconds.
+#>  Elapsed time is 4.166 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -62,11 +62,11 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.78 seconds.
+#>  Elapsed time is 0.543 seconds.
 
 cat("Rand index for HC+SBD:", randIndex(hc.sbd, CharTrajLabels), "\n\n")
 #> Rand index for HC+SBD: 0.512583
-plot(hc.sbd, type = "dendrogram")
+plot(hc.sbd)
 ```
 
 ![](README-examples-2.png)
@@ -81,7 +81,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 4.923 seconds.
+#>  Elapsed time is 3.803 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -131,7 +131,7 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 4: Changes / Distsum = 0 / 3.631238
 #> 
 #> 
-#>  Elapsed time is 26.989 seconds.
+#>  Elapsed time is 21.673 seconds.
 
 # Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))

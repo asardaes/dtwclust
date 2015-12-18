@@ -61,8 +61,7 @@
 #' }
 #'
 #' @export
-#' @importFrom caTools runmax
-#' @importFrom caTools runmin
+#'
 
 lb_keogh <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, upper.env = NULL) {
 
@@ -116,24 +115,10 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, up
 # - About 10 times faster
 # ========================================================================================================
 
-lb_keogh_loop <- function(x, y = NULL, ...) {
+lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
+                          force.symmetry = FALSE, norm = "L1", ...) {
 
-     ARGS <- list(...)
-     window.size <- ARGS$window.size
-     error.check <- ARGS$error.check
-     force.symmetry <- ARGS$force.symmetry
-     norm <- ARGS$norm
-
-
-     if (is.null(error.check))
-          error.check <- TRUE
-     if (is.null(force.symmetry))
-          force.symmetry <- FALSE
-
-     if (is.null(norm))
-          norm <- "L1"
-     else
-          norm <- match.arg(norm, c("L1", "L2"))
+     norm <- match.arg(norm, c("L1", "L2"))
 
      if (error.check)
           window.size <- consistency_check(window.size, "window")

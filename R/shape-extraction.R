@@ -46,6 +46,7 @@
 #' @return Centroid time series.
 #'
 #' @export
+#'
 
 shape_extraction <- function(X, cz = NULL, znorm = FALSE) {
 

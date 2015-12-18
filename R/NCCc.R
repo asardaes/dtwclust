@@ -13,13 +13,12 @@
 #'
 #' \code{\link{SBD}}
 #'
-#' @param x A time series.
-#' @param y Another time series.
+#' @param x,y Univariate time series.
 #'
 #' @return The cross-correlation sequence with length \code{length(x) + length(y) - 1}.
 #'
 #' @export
-#' @importFrom stats convolve
+#'
 
 NCCc <- function(x, y) {
 

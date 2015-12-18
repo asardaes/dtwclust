@@ -1,7 +1,7 @@
 # NEWS
 
 ## Version 2.0.0
-* Many formal parameters from the `dtwclust` function were dropped and taken from the formal class `dtwclustControl`. For now, they will still be supported through `...` with a message.
+* Many formal parameters from the `dtwclust` function were dropped and implemented in the formal class `dtwclustControl`. For now, they will still be supported through `...` with a message.
 * Dropped inheritance of `flexclust`'s `kccasimple`
      + Many slots and methods were be ported
      + Inheriting from `hclust` class now
@@ -9,6 +9,8 @@
 * More parallel support
      + DBA and Shape centroid calculations 
      + DBA itself (probably unnecessary unless you're averaging a lot of series)
+* Several hierarchical procedures can be made in one run.
+* Added `distmat` slot and `update` generic to save some time if possible. See examples of `dtwclust`.
 
 ## Version 1.3.0
 * Added the possibility to run several repetitions for partitional procedures, using different random starts each time by using the doRNG package

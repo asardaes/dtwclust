@@ -72,8 +72,7 @@
 #' @return The average time series.
 #'
 #' @export
-#' @importFrom stats aggregate
-#' @importFrom dtw dtw
+#'
 
 DBA <- function(X, center = NULL, max.iter = 20,
                 norm = "L1", window.size = NULL, delta = 1e-06,

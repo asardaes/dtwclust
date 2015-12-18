@@ -14,7 +14,6 @@
 #' @rdname dtwclustFamily-class
 #' @aliases dtwclustFamily
 #'
-#' @import methods
 #' @exportClass dtwclustFamily
 #'
 setClass("dtwclustFamily",
@@ -37,8 +36,9 @@ setClass("dtwclustFamily",
 #'
 #' Formal S4 class with several control parameters used in \code{\link{dtwclust}}.
 #'
-#' The included slots are some of the formal arguments of \code{\link{dtwclust}}.
-#' In the next release, all arguments that correspond to one of the slots here will be removed from the dtwclust function.
+#' The included slots were some of the formal arguments of \code{\link{dtwclust}}.
+#' In the next release, all arguments that correspond to one of the slots here will not be detected by the dtwclust function
+#' unless specified in the \code{control} parameter.
 #'
 #' Default values are shown at the end.
 #'
@@ -80,7 +80,6 @@ setClass("dtwclustFamily",
 #' @rdname dtwclustControl-class
 #' @aliases dtwclustControl
 #'
-#' @import methods
 #' @exportClass dtwclustControl
 #'
 NULL
@@ -112,9 +111,11 @@ setClass("dtwclustControl",
 #'
 #' Formal S4 class to know how to handle data for plotting.
 #'
-#' The class no longer inherits from \code{\link[flexclust]{kccasimple-class}}. However,
-#' it now contains \code{\link[stats]{hclust}} as superclass, and most slots were ported.
-#' Namely, \code{data}, \code{control} and \code{index} were not.
+#' The class no longer inherits from \code{\link[flexclust]{kccasimple-class}}, but most slots and methods were ported.
+#' Namely, \code{data}, \code{control} and \code{index} slots were not.
+#' 
+#' However, this class now contains \code{\link[stats]{hclust}} as superclass and supports all its methods. Plot is a 
+#' special case (see \code{\link{dtwclust-methods}}).
 #'
 #' @slot call The function call.
 #' @slot family An object of class \code{\link{dtwclustFamily}}.
@@ -137,7 +138,6 @@ setClass("dtwclustControl",
 #' @name dtwclust-class
 #' @rdname dtwclust-class
 #'
-#' @import methods
 #' @exportClass dtwclust
 #'
 NULL

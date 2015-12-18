@@ -8,7 +8,7 @@
 #' @return Reinterpolated time series
 #'
 #' @export
-#' @importFrom stats approx
+#'
 
 reinterpolate <- function(ts, newLength) {
 

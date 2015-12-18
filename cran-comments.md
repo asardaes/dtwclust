@@ -1,7 +1,7 @@
 ## Update to version 2.0.0
 * More parallel support and some extended functionality. 
 * New classes and some new generics.
-* Dropped some formal parameters. Still supporting them via ...
+* Dropped some formal parameters. Still supporting them via ellipsis.
 
 ## Test environments
 * Local Windows 10, R 3.2.3

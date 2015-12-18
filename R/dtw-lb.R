@@ -7,7 +7,7 @@
 #' using Lemire's improved lower bound. Afterwards, it uses the estimate to calculate the true DTW distances
 #' between \emph{only} the nearest neighbors of each series in \code{x} found in \code{y}. If only \code{x}
 #' is provided, the distance matrix is calculated between all its time series. This could be useful in case
-#' one is interested in only the nearest neighbor of one or more series among a dataset.
+#' one is interested in only the nearest neighbor of one or more series within a dataset.
 #'
 #' The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 #' that represents the distance between the point considered and one of the edges of the window. Therefore,
