@@ -19,7 +19,8 @@ row-wise). All series must have equal lengths in case of \code{type = "tadpole"}
 \code{cluster} slot of the \code{dtwclust} object.}
 
 \item{method}{One or more linkage methods to use in hierarchical procedures. See \code{\link[stats]{hclust}}.
-You can provide a character vector to compute different hierarchical cluster structures in one go.}
+You can provide a character vector to compute different hierarchical cluster structures in one go, or
+specify \code{method} = "all" to use all the available ones.}
 
 \item{distance}{One of the supported distance definitions (see Distance section). Ignored for
 \code{type = "tadpole"}.}
@@ -94,7 +95,8 @@ implementations (all registered with \code{proxy}):
   \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint.
   \item \code{"dtw_lb"}: DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some computations
   are avoided by first estimating the distance matrix with Lemire's lower bound and then iteratively
-  refining with DTW. See \code{\link{dtw_lb}}.
+  refining with DTW. See \code{\link{dtw_lb}}. Not suitable for \code{pam.precompute} = \code{TRUE}
+  (see \code{\link{dtwclustControl}}).
   \item \code{"lbk"}: Keogh's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint.
   \item \code{"lbi"}: Lemire's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint.
   \item \code{"sbd"}: Shape-based distance. Each series is z-normalized in this case. As a result,
@@ -311,7 +313,7 @@ hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
                    k = 20, distance = "sbd", control = ctrl)
 plot(hc.sbd[[1]])
 
-# Update parameters
+# Update parameters and re-use distmat
 hc.sbd2 <- update(hc.sbd[[1]], method = "complete", distmat = hc.sbd[[1]]@distmat)
 plot(hc.sbd2, type = "series")
 

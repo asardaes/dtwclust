@@ -149,7 +149,7 @@ split_parallel <- function(obj, tasks, margin = NULL) {
           ret <- switch(EXPR = margin,
                         lapply(tasks, function(id) obj[id,]),
                         lapply(tasks, function(id) obj[,id])
-                        )
+          )
 
      ret
 }

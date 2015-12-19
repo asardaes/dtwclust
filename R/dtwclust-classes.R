@@ -130,9 +130,10 @@ setClass("dtwclustControl",
 #' @slot centers A list with the centroid time series.
 #' @slot cldist A column vector with the distance between each series in the data and its corresponding centroid.
 #' @slot type A string indicating one of the supported clustering types of \code{\link{dtwclust}}.
-#' @slot distance A string indicating the distance used with \code{\link{dtwclust}}.
-#' @slot centroid A string indicating the centroid used with \code{\link{dtwclust}}.
-#' @slot preproc A string indicating the preprocessing used with \code{\link{dtwclust}}.
+#' @slot method A string indicating which hierarchical method was used.
+#' @slot distance A string indicating the distance used.
+#' @slot centroid A string indicating the centroid used.
+#' @slot preproc A string indicating the preprocessing used.
 #' @slot datalist The provided data in the form of a list, where each element is a time series.
 #' @slot proctime Time during function execution, as measured by \code{\link[base]{proc.time}}.
 #'
@@ -167,6 +168,7 @@ setClass("dtwclust", contains = c("hclust"),
                    cldist = "matrix",
 
                    type = "character",
+                   method = "character",
                    distance = "character",
                    centroid = "character",
                    preproc = "character",

@@ -2,11 +2,9 @@
 # Return a custom distance function that calls registered functions of proxy
 # ========================================================================================================
 
-dtwdistfun <- function(distance, control, distmat, ...) {
+dtwdistfun <- function(distance, control, distmat) {
 
      ## If I call this function is because 'distance' was a character
-
-     dots <- list(...)
 
      needs_window <- c("dtw_lb", "lbk", "lbi")
 
@@ -22,8 +20,8 @@ dtwdistfun <- function(distance, control, distmat, ...) {
 
      dtwdist <- function(x, centers = NULL, ...) {
 
-          ## Just in case, always empty for now
-          dots2 <- c(dots, list(...))
+          ## Extra distance parameters
+          dots <- list(...)
 
           if (!is.null(distmat)) {
 
@@ -93,7 +91,7 @@ dtwdistfun <- function(distance, control, distmat, ...) {
                                                                             error.check = FALSE,
                                                                             pairwise = TRUE),
 
-                                                                       dots2))
+                                                                       dots))
                                            } else {
                                                 dd <- proxy::dist(x[pairs[,1]], x[pairs[,2]],
                                                                   method = distance, pairwise = TRUE)
@@ -137,7 +135,7 @@ dtwdistfun <- function(distance, control, distmat, ...) {
                                                                             norm = control@norm,
                                                                             error.check = FALSE),
 
-                                                                       dots2))
+                                                                       dots))
                                            } else {
                                                 dd <- proxy::dist(x, centers, method = distance)
                                            }
@@ -159,14 +157,14 @@ dtwdistfun <- function(distance, control, distmat, ...) {
                     if (has_dots) {
                          ## If it has '...', put everything there and let it use whatever it needs
 
-                         ## do.call to ensure that the 'dots2' argument is passed as '...'
+                         ## do.call to ensure that the 'dots' argument is passed as '...'
                          d <- do.call(proxy::dist,
                                       args = c(list(x = x, y = centers,
                                                     method = distance,
                                                     window.type = window.type, window.size = control@window.size,
                                                     norm = control@norm, error.check = FALSE),
 
-                                               dots2))
+                                               dots))
                     } else {
                          ## Otherwise just call it like this
                          d <- proxy::dist(x, centers, method = distance)

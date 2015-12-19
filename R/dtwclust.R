@@ -41,7 +41,8 @@
 #'   \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint.
 #'   \item \code{"dtw_lb"}: DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some computations
 #'   are avoided by first estimating the distance matrix with Lemire's lower bound and then iteratively
-#'   refining with DTW. See \code{\link{dtw_lb}}.
+#'   refining with DTW. See \code{\link{dtw_lb}}. Not suitable for \code{pam.precompute} = \code{TRUE}
+#'   (see \code{\link{dtwclustControl}}).
 #'   \item \code{"lbk"}: Keogh's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint.
 #'   \item \code{"lbi"}: Lemire's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint.
 #'   \item \code{"sbd"}: Shape-based distance. Each series is z-normalized in this case. As a result,
@@ -260,7 +261,7 @@
 #'                    k = 20, distance = "sbd", control = ctrl)
 #' plot(hc.sbd[[1]])
 #'
-#' # Update parameters
+#' # Update parameters and re-use distmat
 #' hc.sbd2 <- update(hc.sbd[[1]], method = "complete", distmat = hc.sbd[[1]]@distmat)
 #' plot(hc.sbd2, type = "series")
 #'
@@ -323,7 +324,8 @@
 #' \code{\link[stats]{cutree}} function is called with this value of \code{k} and the result is returned in the
 #' \code{cluster} slot of the \code{dtwclust} object.
 #' @param method One or more linkage methods to use in hierarchical procedures. See \code{\link[stats]{hclust}}.
-#' You can provide a character vector to compute different hierarchical cluster structures in one go.
+#' You can provide a character vector to compute different hierarchical cluster structures in one go, or
+#' specify \code{method} = "all" to use all the available ones.
 #' @param distance One of the supported distance definitions (see Distance section). Ignored for
 #' \code{type = "tadpole"}.
 #' @param centroid Either a supported string or an appropriate function to calculate centroids
@@ -363,11 +365,14 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
      type <- match.arg(type, c("partitional", "hierarchical", "tadpole"))
 
+     ## coerce to list if necessary
      data <- consistency_check(data, "tsmat")
 
      MYCALL <- match.call(expand.dots = TRUE)
 
-     dots <- list(...)
+     ## ----------------------------------------------------------------------------------------------------------
+     ## Control parameters
+     ## ----------------------------------------------------------------------------------------------------------
 
      if (is.null(control) || is.list(control)) {
           control <- as(control, "dtwclustControl")
@@ -375,6 +380,12 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      } else if (class(control) != "dtwclustControl" || !validObject(control)) {
           stop("Invalid control argument") # validObject should generate an error anyway
      }
+
+     ## ----------------------------------------------------------------------------------------------------------
+     ## Backwards compatibility, check for old formal arguments in '...'
+     ## ----------------------------------------------------------------------------------------------------------
+
+     dots <- list(...)
 
      args <- names(MYCALL[-1])
      id_oldargs <- which(args %in% c(slotNames("dtwclustControl"), "reps"))
@@ -395,6 +406,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           }
      }
 
+     ## ----------------------------------------------------------------------------------------------------------
+     ## Preprocess
+     ## ----------------------------------------------------------------------------------------------------------
+
      if (!is.null(preproc) && is.function(preproc)) {
           data <- preproc(data)
           preproc_char <- as.character(substitute(preproc))[[1]]
@@ -409,6 +424,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           preproc_char <- "none"
 
      } else stop("Invalid preprocessing")
+
+     ## ----------------------------------------------------------------------------------------------------------
+     ## Further options
+     ## ----------------------------------------------------------------------------------------------------------
 
      if (save.data)
           datalist <- data
@@ -434,21 +453,30 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           if (is.character(centroid))
                centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
 
+          ## ----------------------------------------------------------------------------------------------------------
           ## Distance function
+          ## ----------------------------------------------------------------------------------------------------------
+
           if (is.function(distance)) {
                distfun <- distance
                distance <- as.character(substitute(distance))[1]
 
           } else if (is.character(distance)) {
                # dtwdistfun.R
-               distfun <- do.call("dtwdistfun", c(list(distance = distance,
-                                                       control = control,
-                                                       distmat = distmat),
-                                                  dots))
+               distfun <- dtwdistfun(distance = distance,
+                                     control = control,
+                                     distmat = distmat)
+
+               if (tolower(distance) == "dtw_lb" && control@pam.precompute)
+                    warning("Using dtw_lb with control@pam.precompute = TRUE is not advised.")
 
           } else {
                stop("Unsupported distance definition")
           }
+
+          ## ----------------------------------------------------------------------------------------------------------
+          ## PAM precompute?
+          ## ----------------------------------------------------------------------------------------------------------
 
           ## for a check near the end, changed if appropriate
           distmat_flag <- FALSE
@@ -461,16 +489,22 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     if ( nrow(distmat) != length(data) || ncol(distmat) != length(data) )
                          stop("Dimensions of provided cross-distance matrix don't correspond to length of provided data")
 
+                    ## distmat was provided in call
                     distmat_flag <- TRUE
 
+                    if (control@trace)
+                         cat("\n\tDistance matrix provided...\n\n")
+
                } else if (control@pam.precompute) {
+                    if (control@trace)
+                         cat("\n\tPrecomputing distance matrix...\n\n")
+
                     distmat <- do.call("distfun", c(list(data), dots))
 
                     ## Redefine dist with new distmat (to update closure)
-                    distfun <- do.call("dtwdistfun", c(list(distance = distance,
-                                                            control = control,
-                                                            distmat = distmat),
-                                                       dots))
+                    distfun <- dtwdistfun(distance = distance,
+                                          control = control,
+                                          distmat = distmat)
 
                     gc(FALSE)
                }
@@ -480,6 +514,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                distmat <- NULL
           }
 
+          ## ----------------------------------------------------------------------------------------------------------
+          ## Centroid function
+          ## ----------------------------------------------------------------------------------------------------------
+
           ## Closures, all_cent.R
           allcent <- all_cent(case = centroid,
                               distmat = distmat,
@@ -488,17 +526,17 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           centroid <- as.character(substitute(centroid))[[1]]
 
+          ## ----------------------------------------------------------------------------------------------------------
+          ## Further options
+          ## ----------------------------------------------------------------------------------------------------------
+
           family <- new("dtwclustFamily",
                         dist = distfun,
                         allcent = allcent,
                         preproc = preproc)
 
-          ## ----------------------------------------------------------------------------------------------------------
-          ## Further options
-          ## ----------------------------------------------------------------------------------------------------------
-
           if (control@trace && control@nrep > 1L)
-               message("Tracing will not be available if parallel repetitions are made.\n")
+               message("Tracing of repetitions might not be available if done in parallel.\n")
 
           if (!is.null(seed))
                set.seed(seed)
@@ -511,6 +549,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## ----------------------------------------------------------------------------------------------------------
           ## Cluster
           ## ----------------------------------------------------------------------------------------------------------
+
+          ## do.call is used for now to provide the (possibly) modified 'dots' argument
 
           if (control@nrep > 1L) {
                ## I need to re-register any custom distances in each parallel worker
@@ -527,11 +567,13 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                        if (!is.null(dist_entry) && !proxy::pr_DB$entry_exists(dist_entry$names[1]))
                                             do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                                       kc <- kcca.list(x = data,
-                                                       k = k,
-                                                       family = family,
-                                                       iter.max = control@iter.max,
-                                                       trace = control@trace)
+                                       kc <- do.call("kcca.list",
+                                                     c(list(x = data,
+                                                            k = k,
+                                                            family = family,
+                                                            iter.max = control@iter.max,
+                                                            trace = control@trace),
+                                                       dots))
 
                                        gc(FALSE)
 
@@ -539,11 +581,13 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                   }
           } else {
                ## Just one repetition
-               kc.list <- list(kcca.list(x = data,
-                                         k = k,
-                                         family = family,
-                                         iter.max = control@iter.max,
-                                         trace = control@trace))
+               kc.list <- list(do.call("kcca.list",
+                                       c(list(x = data,
+                                              k = k,
+                                              family = family,
+                                              iter.max = control@iter.max,
+                                              trace = control@trace),
+                                         dots)))
           }
 
           ## ----------------------------------------------------------------------------------------------------------
@@ -565,6 +609,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           toc <- proc.time() - tic
 
+          ## Create objects
           dtwc <- lapply(kc.list, function(kc) {
                new("dtwclust",
                    call = MYCALL,
@@ -573,6 +618,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                    distmat = distmat,
 
                    type = type,
+                   method = "NA",
                    distance = distance,
                    centroid = centroid,
                    preproc = preproc_char,
@@ -603,8 +649,13 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           hclust_methods <- match.arg(method,
                                       c("ward.D", "ward.D2", "single", "complete",
-                                        "average", "mcquitty", "median", "centroid"),
+                                        "average", "mcquitty", "median", "centroid",
+                                        "all"),
                                       several.ok = TRUE)
+
+          if (any(hclust_methods == "all"))
+               hclust_methods <- c("ward.D", "ward.D2", "single", "complete",
+                                   "average", "mcquitty", "median", "centroid")
 
           if (control@trace)
                cat("\n\tCalculating distance matrix...\n")
@@ -629,20 +680,19 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           } else if (is.character(distance)) {
                ## Take advantage of the function I defined for the partitional methods
                ## Which can do calculations in parallel if appropriate
-               distfun <- do.call("dtwdistfun", c(list(distance = distance,
-                                                       control = control,
-                                                       distmat = NULL),
-                                                  dots))
+               distfun <- dtwdistfun(distance = distance,
+                                     control = control,
+                                     distmat = NULL)
 
                ## single argument is to calculate whole distance matrix
-               D <- distfun(data)
+               D <- do.call("distfun", c(list(data), dots))
 
           } else {
                stop("Unspported distance definition")
           }
 
           if (control@trace)
-               cat("\n\tPerforming hierarchical clustering...\n")
+               cat("\n\tPerforming hierarchical clustering...\n\n")
 
           ## Required form for 'hclust'
           DD <- D[lower.tri(D)]
@@ -656,9 +706,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                stats::hclust(DD, method = method)
           })
 
-          toc <- proc.time() - tic
-
-          hc.list <- lapply(hc.list, function(hc) {
+          hc.list <- mapply(hc.list, hclust_methods, SIMPLIFY = FALSE, FUN = function(hc, method) {
                ## cutree and corresponding centers
                cluster <- stats::cutree(hc, k)
 
@@ -687,10 +735,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                    distmat = D,
 
                    type = type,
+                   method = method,
                    distance = distance,
                    centroid = "",
                    preproc = preproc_char,
-                   proctime = toc,
 
                    centers = data[centers],
                    k = as.integer(k),
@@ -704,10 +752,19 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                    datalist = datalist)
           })
 
-          if (length(hc.list) == 1L)
+          toc <- proc.time() - tic
+
+          if (length(hc.list) == 1L) {
                RET <- hc.list[[1]]
-          else
-               RET <- hc.list
+               RET@proctime <- toc
+
+          } else {
+               RET <- lapply(hc.list, function(hc) {
+                    hc@proctime <- toc
+
+                    hc
+               })
+          }
 
      } else if (type == "tadpole") {
 
@@ -740,7 +797,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           if (control@trace) {
                cat("\nTADPole completed, pruning percentage = ",
                    formatC(100-R$distCalcPercentage, digits = 3, width = -1, format = "fg"),
-                   "%\n",
+                   "%\n\n",
                    sep = "")
           }
 
@@ -777,7 +834,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      }
 
      if (control@trace)
-          cat("\n\tElapsed time is", toc["elapsed"], "seconds.\n\n")
+          cat("\tElapsed time is", toc["elapsed"], "seconds.\n\n")
 
      RET
 }

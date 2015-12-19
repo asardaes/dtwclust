@@ -150,9 +150,7 @@ lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
      lower.env <- lapply(y, runmin, k=window.size*2+1, endrule="constant")
 
      DD <- sapply(X=x, U=upper.env, L=lower.env,
-                  FUN = function(x, ...) {
-                       U <- list(...)$U
-                       L <- list(...)$L
+                  FUN = function(x, U, L) {
 
                        ## This will return one column of the distance matrix
                        D <- mapply(U, L, MoreArgs=list(x=x),
@@ -170,9 +168,7 @@ lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
                                                     L2 = sqrt(sum(D^2)))
 
                                         d
-
                                    })
-
                        D
                   })
 

@@ -12,8 +12,8 @@ void pairs_c(const int n, const int nrow, int *out, const int byrow)
 {
      int i, j;
      int p = 0;
-     
-     if(byrow) 
+
+     if(byrow)
      {
           for(i = 1; i < n; i++)
           {
@@ -31,8 +31,8 @@ void pairs_c(const int n, const int nrow, int *out, const int byrow)
           {
                for(i = 1; i < j; i++)
                {
-                    out[p] = j;
-                    out[p+nrow] = i;
+                    out[p] = i;
+                    out[p+nrow] = j;
                     p++;
                }
           }
@@ -44,19 +44,19 @@ SEXP pairs(SEXP L, SEXP byrow)
 {
      int n = asInteger(L);
      int nrow = n * (n+1) / 2 - n;
-     
+
      // allocate output integer vector
      SEXP ret = PROTECT(allocMatrix(INTSXP, nrow, 2));
-     
+
      // get pointers to output objects
      int *out = INTEGER(ret);
-     
+
      // dispatch to C function
      pairs_c(n, nrow, out, asLogical(byrow));
-     
+
      // release protection
      UNPROTECT(1);
-     
+
      // finish
      return ret;
 }

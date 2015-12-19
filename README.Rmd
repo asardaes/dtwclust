@@ -52,17 +52,20 @@ ctrl <- list(window.size = 20L, trace = TRUE)
 #### Using DTW with help of lower bounds and PAM centroids
 kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
                      centroid = "pam", seed = 3247, 
-                     control = ctrl)
+                     control = c(ctrl, list(pam.precompute = FALSE)))
 
 plot(kc.dtwlb)
 
 #### Hierarchical clustering based on shape-based distance
 hc.sbd <- dtwclust(datalist, type = "hierarchical",
-                   k = 20, distance = "sbd", 
+                   k = 20, distance = "sbd",
+                   method = "all",
                    control = ctrl)
 
-cat("Rand index for HC+SBD:", randIndex(hc.sbd, CharTrajLabels), "\n\n")
-plot(hc.sbd)
+cat("Rand index for HC+SBD:\n")
+print(ri <- sapply(hc.sbd, randIndex, y = CharTrajLabels))
+
+plot(hc.sbd[[which.max(ri)]])
 
 #### TADPole clustering
 kc.tadp <- dtwclust(data, type = "tadpole", k = 20,

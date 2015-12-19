@@ -124,11 +124,6 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = T
      ## Attempt parallel computations?
      do_par <- check_parallel()
 
-     if (do_par)
-          workers <- foreach::getDoParWorkers()
-     else
-          workers <- 1L
-
      ## For indexing convenience
      d <- t(d)
      singleIndexing <- seq(from=0, by=nrow(d), length.out=ncol(d))

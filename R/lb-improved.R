@@ -165,10 +165,7 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
      lower.env <- lapply(y, runmin, k=window.size*2+1, endrule="constant")
 
      DD <- sapply(X=x, U=upper.env, L=lower.env, Y=y,
-                  FUN = function(x, ...) {
-                       U <- list(...)$U
-                       L <- list(...)$L
-                       Y <- list(...)$Y
+                  FUN = function(x, U, L, Y) {
 
                        ## This will return one column of the distance matrix
                        D <- mapply(U, L, Y, MoreArgs=list(x=x),
@@ -206,7 +203,6 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
 
                                         d
                                    })
-
                        D
                   })
 
