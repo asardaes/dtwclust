@@ -4,9 +4,12 @@
 #' the k-Shape clustering algorithm.
 #'
 #' This works only if the series are \emph{z-normalized}, since the output will also have this normalization.
-#' The resulting centroid will have the same length as \code{cz} if provided, or the same length as the time
-#' series in \code{X} if \code{cz = NULL}. Therefore, in the latter case, all series of \code{X} must have
-#' equal lengths.
+#'
+#' The resulting centroid will have the same length as \code{cz} if provided. Otherwise, there are two
+#' possibilities. If all series from \code{X} have the same length, all of them
+#' will be used as-is, and the output will have the same length as the series. If series have different
+#' lengths, a series will be chosen at random and used as reference. The output series will then have the
+#' same length as the chosen series.
 #'
 #' This centroid computation is casted as an optimization problem called maximization of Rayleigh Quotient.
 #' See the cited article for more details.
@@ -38,9 +41,8 @@
 #' points(C)
 #'
 #' @param X Numeric matrix where each row is a time series, or a list of time series.
-#' @param cz Center to use as basis. \emph{It will be z-normalized}. Function uses all \code{X}
-#' if \code{cz = NULL}. Must be provided and different than a zero-line if time series in
-#' \code{X} have different lengths.
+#' @param cz Center to use as basis. \emph{It will be z-normalized}. Function uses a random series from
+#' \code{X} if \code{cz = NULL}.
 #' @param znorm Logical flag. Should z-scores be calculated for \code{X} before processing?
 #'
 #' @return Centroid time series.
@@ -52,23 +54,30 @@ shape_extraction <- function(X, cz = NULL, znorm = FALSE) {
 
      X <- consistency_check(X, "tsmat")
 
-     if (is.null(cz))
-          consistency_check(X, "tslist")
-     else
-          consistency_check(X, "vltslist")
+     consistency_check(X, "vltslist")
 
      if (znorm)
           Xz <- zscore(X)
      else
           Xz <- X
 
-     if (!is.null(cz)) {
-          cz <- zscore(cz)
-
-          if (all(cz == 0)) {
-               a <- do.call(rbind, Xz)
+     ## make sure at least one series is not just a flat line at zero
+     if (all(sapply(Xz, sum) == 0)) {
+          if (is.null(cz)) {
+               lengths <- sapply(Xz, length)
+               return(rep(0, sample(lengths,1)))
 
           } else {
+               return(cz)
+          }
+     }
+
+     if (is.null(cz)) {
+          if (length(unique(sapply(Xz, length))) == 1L)
+               a <- do.call(rbind, Xz) # use all
+          else {
+               cz <- Xz[[sample(length(Xz), 1L)]] # random choice as reference
+
                a <- lapply(Xz, function(A) {
                     SBD(cz, A)$yshift
                })
@@ -77,7 +86,13 @@ shape_extraction <- function(X, cz = NULL, znorm = FALSE) {
           }
 
      } else {
-          a <- do.call(rbind, Xz)
+          cz <- zscore(cz) # use given reference
+
+          a <- lapply(Xz, function(A) {
+               SBD(cz, A)$yshift
+          })
+
+          a <- do.call(rbind, a)
      }
 
      Y <- zscore(a)

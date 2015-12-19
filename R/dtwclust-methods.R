@@ -193,7 +193,10 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                cen <- as.data.frame(cen)
 
                ## Check if data was z-normalized
-               titleStr <- "Clusters and their members, including cluster center"
+               if (x@preproc == "zscore")
+                    titleStr <- "Clusters and their members, including cluster center (all z-normalized)"
+               else
+                    titleStr <- "Clusters and their members, including cluster center"
 
                ## transform data
 

@@ -656,9 +656,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           if (control@trace)
                cat("\n\tCalculating distance matrix...\n")
 
-          if (length(unique(lengths)) > 1)
-               consistency_check(distance, "dist")
-
           if (!is.null(distmat)) {
                D <- distmat
                distfun <- function(...) stop("'distmat' provided in call, no distance calculations performed")
@@ -687,6 +684,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                stop("Unspported distance definition")
           }
 
+          if (length(unique(lengths)) > 1)
+               consistency_check(distance, "dist")
+
           if (control@trace)
                cat("\n\tPerforming hierarchical clustering...\n\n")
 
@@ -697,8 +697,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           attr(DD, "Size") <- length(data)
           attr(DD, "method") <- attr(D, "method")
 
+          ## Cluster
           hc.list <- lapply(hclust_methods, function(method) {
-               ## Cluster
                stats::hclust(DD, method = method)
           })
 
