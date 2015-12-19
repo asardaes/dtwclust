@@ -50,5 +50,5 @@ kcca.list <- function (x, k, family = NULL, iter.max = 200L, trace = FALSE, ...)
           clusinfo = clusinfo,
           cldist = cldist,
           iter = iter,
-          converged = (iter < iter.max))
+          converged = (iter <= iter.max))
 }

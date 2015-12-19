@@ -49,12 +49,13 @@ dtwdistfun <- function(distance, control, distmat) {
 
           } else {
                ## Attempt to calculate distmat in parallel?
-               do_par <- check_parallel(distance)
-
-               if (do_par) {
+               if (check_parallel(distance)) {
 
                     ## I need to re-register any custom distances in each parallel worker
                     dist_entry <- proxy::pr_DB$get_entry(distance)
+                    
+                    ## Does the registered function possess '...' in its definition?
+                    has_dots <- is.function(dist_entry$FUN) && !is.null(formals(dist_entry$FUN)$...)
 
                     ## variables from the parent environment that should be exported
                     export <- c("distance", "control",
@@ -76,9 +77,6 @@ dtwdistfun <- function(distance, control, distmat) {
 
                                            if (!proxy::pr_DB$entry_exists(dist_entry$names[1]))
                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
-
-                                           ## Does the registered function possess '...' in its definition?
-                                           has_dots <- is.function(dist_entry$FUN) && !is.null(formals(dist_entry$FUN)$...)
 
                                            if (has_dots) {
                                                 dd <- do.call(proxy::dist,
@@ -122,9 +120,6 @@ dtwdistfun <- function(distance, control, distmat) {
 
                                            if (!proxy::pr_DB$entry_exists(dist_entry$names[1]))
                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
-
-                                           ## Does the registered function possess '...' in its definition?
-                                           has_dots <- is.function(dist_entry$FUN) && !is.null(formals(dist_entry$FUN)$...)
 
                                            if (has_dots) {
                                                 dd <- do.call(proxy::dist,

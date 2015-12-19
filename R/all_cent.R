@@ -209,7 +209,7 @@ all_cent <- function(case = NULL, distmat, distfun, control) {
                                  X <- split(x, cluster)
                                  X <- lapply(X, function(xx) do.call(rbind, xx))
 
-                                 centers <- lapply(X, foo)
+                                 centers <- lapply(X, colMeans)
 
                                  centers
                             }
@@ -224,7 +224,7 @@ all_cent <- function(case = NULL, distmat, distfun, control) {
                                  X <- split(x, cluster)
                                  X <- lapply(X, function(xx) do.call(rbind, xx))
 
-                                 centers <- lapply(X, foo)
+                                 centers <- lapply(X, colMedians)
 
                                  centers
                             }
