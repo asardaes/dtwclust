@@ -6,7 +6,7 @@
 \usage{
 dtwclust(data = NULL, type = "partitional", k = 2L, method = "average",
   distance = "dtw", centroid = "pam", preproc = NULL, dc = NULL,
-  control = NULL, save.data = TRUE, seed = NULL, distmat = NULL, ...)
+  control = NULL, seed = NULL, distmat = NULL, ...)
 }
 \arguments{
 \item{data}{A list where each element is a time series, or a numeric matrix (it will be coerced to a list
@@ -35,8 +35,6 @@ when using partitional methods (see Centroid section).}
 
 \item{control}{NEW: Named list of parameters for clustering algorithms. See \code{\link{dtwclustControl}}.
 \code{NULL} means defaults.}
-
-\item{save.data}{Return a copy of the data in the returned object? Ignored for hierarchical clustering.}
 
 \item{seed}{Random seed for reproducibility of partitional algorithms.}
 
@@ -346,8 +344,7 @@ kc.cdtw <- dtwclust(CharTraj, k = 20,
 
 ## This uses the "nDTW" function registered in another example above
 # For reference, this took around 2.25 minutes with 8 cores (all 8 repetitions).
-kc.ndtw.list <- dtwclust(CharTraj, k = 20, distance = "nDTW",
-                         centroid = "dba", save.data = FALSE,
+kc.ndtw.list <- dtwclust(CharTraj, k = 20, distance = "nDTW", centroid = "dba",
                          preproc = zscore, seed = 8319,
                          control = list(window.size = 10L, nrep = 8L))
 

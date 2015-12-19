@@ -26,6 +26,9 @@ for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{"L1"
 
 \item{\code{trace}}{Logical flag. If \code{TRUE}, more output regarding the progress is printed to screen.}
 
+\item{\code{save.data}}{Return a "copy" of the data in the returned object? Because of the way \code{R} handles
+things internally, all copies should point to the same memory address.}
+
 \item{\code{packages}}{Character vector with the names of any packages required for custom \code{proxy} functions. See
 Parallel Computing section in \code{\link{dtwclust}}.}
 
@@ -46,6 +49,7 @@ in \code{\link{dtwclust}}.}
   \item \code{window.size} = \code{NULL}
   \item \code{norm} = "L1"
   \item \code{trace} = \code{FALSE}
+  \item \code{save.data} = \code{TRUE}
   \item \code{packages} = \code{character(0)}
 }
 }

@@ -48,6 +48,7 @@ setClass("dtwclustFamily",
 #'   \item \code{window.size} = \code{NULL}
 #'   \item \code{norm} = "L1"
 #'   \item \code{trace} = \code{FALSE}
+#'   \item \code{save.data} = \code{TRUE}
 #'   \item \code{packages} = \code{character(0)}
 #' }
 #'
@@ -57,6 +58,8 @@ setClass("dtwclustFamily",
 #' for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{"L1"}) and
 #' \code{distance = "DTW2"} (which always uses \code{"L2"}).
 #' @slot trace Logical flag. If \code{TRUE}, more output regarding the progress is printed to screen.
+#' @slot save.data Return a "copy" of the data in the returned object? Because of the way \code{R} handles
+#' things internally, all copies should point to the same memory address.
 #' @slot packages Character vector with the names of any packages required for custom \code{proxy} functions. See
 #' Parallel Computing section in \code{\link{dtwclust}}.
 #'
@@ -95,6 +98,7 @@ setClass("dtwclustControl",
                    iter.max = "integer",
                    trace = "logical",
                    nrep = "integer",
+                   save.data = "logical",
                    packages = "character"),
 
          prototype = prototype(window.size = NULL,
@@ -104,6 +108,7 @@ setClass("dtwclustControl",
                                iter.max = 30L,
                                trace = FALSE,
                                nrep = 1L,
+                               save.data = TRUE,
                                packages = character(0))
 )
 

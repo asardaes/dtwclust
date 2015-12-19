@@ -294,8 +294,7 @@
 #'
 #' ## This uses the "nDTW" function registered in another example above
 #' # For reference, this took around 2.25 minutes with 8 cores (all 8 repetitions).
-#' kc.ndtw.list <- dtwclust(CharTraj, k = 20, distance = "nDTW",
-#'                          centroid = "dba", save.data = FALSE,
+#' kc.ndtw.list <- dtwclust(CharTraj, k = 20, distance = "nDTW", centroid = "dba",
 #'                          preproc = zscore, seed = 8319,
 #'                          control = list(window.size = 10L, nrep = 8L))
 #'
@@ -335,7 +334,6 @@
 #' @param dc Cutoff distance for the \code{\link{TADPole}} algorithm.
 #' @param control NEW: Named list of parameters for clustering algorithms. See \code{\link{dtwclustControl}}.
 #' \code{NULL} means defaults.
-#' @param save.data Return a copy of the data in the returned object? Ignored for hierarchical clustering.
 #' @param seed Random seed for reproducibility of partitional algorithms.
 #' @param distmat If a cross-distance matrix is already available, it can be provided here so it's re-used. Only relevant if
 #' \code{centroid} = "pam" or \code{type} = "hierarchical". See examples.
@@ -351,7 +349,7 @@
 
 dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "average",
                      distance = "dtw", centroid = "pam", preproc = NULL,
-                     dc = NULL, control = NULL, save.data = TRUE, seed = NULL, distmat = NULL,
+                     dc = NULL, control = NULL, seed = NULL, distmat = NULL,
                      ...)
 {
      ## =================================================================================================================
@@ -429,7 +427,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      ## Further options
      ## ----------------------------------------------------------------------------------------------------------
 
-     if (save.data)
+     if (control@save.data)
           datalist <- data
      else
           datalist <- list()
@@ -444,8 +442,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           if (k < 2L)
                stop("At least two clusters must be defined")
-          if(control@nrep > 1L && save.data)
-               message("Consider setting save.data to FALSE if performing several repetitions.\n")
 
           ## For parallel computation
           control@packages <- c("dtwclust", control@packages)

@@ -33,7 +33,7 @@ setValidity("dtwclustControl",
             function(object) {
 
                  if (!is.null(object@window.size) && object@window.size < 1)
-                      return("Window size must be positive")
+                      return("Window size must be positive if provided")
 
                  if (!(object@norm %in% c("L1", "L2")))
                       return("Norm can only be L1 or L2")

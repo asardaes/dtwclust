@@ -101,6 +101,8 @@ consistency_check <- function(obj, case, ...) {
 
           if (is.character(obj) && (obj %in% included) && !(obj %in% valid))
                stop("Only the following distances are supported for series of different lengths:\n\tdtw\tdtw2\tsbd")
+          else if(!(obj %in% included))
+               message("Series have different lengths. Please corroborate the selected distance supports this.\n")
 
      } else if (case == "cent") {
           included <- c("mean", "median", "shape", "dba", "pam")
