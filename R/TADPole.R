@@ -103,7 +103,8 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
 
      ## Calculate matrices with bounds
      LBM <- proxy::dist(x, x, method = "LBK",
-                        window.size = window.size, force.symmetry = TRUE,
+                        window.size = window.size,
+                        force.symmetry = TRUE,
                         norm = "L2",
                         error.check = error.check)
 
@@ -145,6 +146,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
                     f <- 4L
 
                f
+
           })
      }))
 
@@ -172,16 +174,21 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
                                               window.type = "slantedband", window.size = window.size,
                                               pairwise = TRUE)
                              }
+
+               ind1 <- do.call(rbind, ind1)
+
           } else {
-               d1 <- proxy::dist(x[ind1[, 1]], x[ind1[, 2]], method = "DTW2",
+               d1 <- proxy::dist(x[ind1[, 1]], x[ind1[, 2]],
+                                 method = "DTW2",
                                  step.pattern = step.pattern,
-                                 window.type = "slantedband", window.size = window.size,
+                                 window.type = "slantedband",
+                                 window.size = window.size,
                                  pairwise = TRUE)
           }
 
           ## Fill distance matrix where necessary
-          D[which(Flags==1)] <- d1
-          Flags[which(Flags==1)[d1 <= dc]] <- 0 # For 'Rho' calculation
+          D[ind1] <- d1
+          Flags[ind1[d1 <= dc, ]] <- 0L # For 'Rho' calculation
      }
 
      ## Force symmetry
@@ -261,15 +268,19 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
                                    ## If the distance is not to be pruned nor previously calculated, compute it now
                                    indCompute <- !(indPrune | indPre)
 
-                                   if (sum(indCompute) > 0) {
-                                        d2 <- proxy::dist(x[ii], x[indHDN[indCompute]], method = "DTW2",
+                                   if (any(indCompute)) {
+                                        d2 <- proxy::dist(x[ii], x[indHDN[indCompute]],
+                                                          method = "DTW2",
                                                           step.pattern = step.pattern,
-                                                          window.type = "slantedband", window.size = window.size)
+                                                          window.type = "slantedband",
+                                                          window.size = window.size)
 
                                         delta[indCompute] <- d2
                                    }
 
-                                   c(delta = min(delta), NN = indHDN[which.min(delta)], distCalc = sum(indCompute))
+                                   c(delta = min(delta),
+                                     NN = indHDN[which.min(delta)],
+                                     distCalc = sum(indCompute))
                               }))
                          }
 
@@ -293,16 +304,19 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
                ## If the distance is not to be pruned nor previously calculated, compute it now
                indCompute <- !(indPrune | indPre)
 
-               if (sum(indCompute) > 0) {
-                    ## TODO: parallel support
-                    d2 <- proxy::dist(x[ii], x[indHDN[indCompute]], method = "DTW2",
+               if (any(indCompute)) {
+                    d2 <- proxy::dist(x[ii], x[indHDN[indCompute]],
+                                      method = "DTW2",
                                       step.pattern = step.pattern,
-                                      window.type = "slantedband", window.size = window.size)
+                                      window.type = "slantedband",
+                                      window.size = window.size)
 
                     delta[indCompute] <- d2
                }
 
-               c(delta = min(delta), NN = indHDN[which.min(delta)], distCalc = sum(indCompute))
+               c(delta = min(delta),
+                 NN = indHDN[which.min(delta)],
+                 distCalc = sum(indCompute))
           }))
      }
 
@@ -324,8 +338,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
           zDelta <- (delta - min(delta)) / (max(delta) - min(delta))
 
      ## Those with the most density are the cluster centers (PAM)
-     C <- sort(Rho * zDelta[indOrig], decreasing = TRUE, index.return = TRUE)$ix[1:k]
-     C <- sort(C)
+     C <- sort(sort(Rho * zDelta[indOrig], decreasing = TRUE, index.return = TRUE)$ix[1:k])
 
      ## Assign a unique number to each cluster center
      cl <- rep(-1L, n)
