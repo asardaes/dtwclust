@@ -7,16 +7,14 @@
 SBD(x, y, znorm = FALSE)
 }
 \arguments{
-\item{x}{A time series.}
-
-\item{y}{Another time series.}
+\item{x, y}{A time series.}
 
 \item{znorm}{Should each series be z-normalized before calculating the distance?}
 }
 \value{
 A list with: \itemize{
-  \item \code{dist}: The distance between \code{x} and \code{y}.
-  \item \code{yshift}: A shifted version of \code{y} so that it optimally mathces \code{x}.
+  \item \code{dist}: The shape-based distance between \code{x} and \code{y}.
+  \item \code{yshift}: A shifted version of \code{y} so that it optimally matches \code{x}.
 }
 }
 \description{
@@ -25,7 +23,7 @@ for the k-Shape clustering algorithm.
 }
 \details{
 This function works best if the series are \emph{z-normalized}. If not, at least they should have
-corresponding amplitudes, since the values of the signal \strong{do} affect the outcome.
+corresponding amplitudes, since the values of the signals \strong{do} affect the outcome.
 
 If \code{x} and \code{y} do \strong{not} have the same length, it would be best if the longer sequence is
 provided in \code{y}, because it will be shifted to match \code{x}. Anything before the matching point is

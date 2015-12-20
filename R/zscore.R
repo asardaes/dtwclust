@@ -7,7 +7,7 @@
 #' @param ... Further arguments to pass to \code{\link[base]{scale}}.
 #' @param na.rm Logical flag. Should \code{NA}s be removed? Ignored for matrix input.
 #'
-#' @return Normalized data.
+#' @return Normalized data in the same format as provided.
 #'
 #' @export
 #'

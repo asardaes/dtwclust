@@ -150,14 +150,13 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                ## plot dendrogram?
                if(x@type == "hierarchical" && type == "dendrogram") {
                     x <- S3Part(x, strictS3 = TRUE)
-                    plot(x, ...)
+                    if(plot) plot(x, ...)
                     return(invisible(NULL))
                }
 
                ## Obtain data, the priority is: provided data > included data matrix > included data list
                if (!is.null(data)) {
-                    if (is.matrix(data))
-                         data <- consistency_check(data, "tsmat")
+                    data <- consistency_check(data, "tsmat")
 
                     lengths <- sapply(data, length)
                     L <- max(lengths)
@@ -217,7 +216,7 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                dfm <- reshape2::melt(df, id.vars = "t")
 
                cl <- rep(x@cluster, each = L)
-               color <- sapply(tabulate(x@cluster), function(i) {
+               color <- lapply(tabulate(x@cluster), function(i) {
                     rep(1:i, each = L)
                })
                color <- factor(unlist(color))

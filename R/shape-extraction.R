@@ -6,8 +6,8 @@
 #' This works only if the series are \emph{z-normalized}, since the output will also have this normalization.
 #'
 #' The resulting centroid will have the same length as \code{cz} if provided. Otherwise, there are two
-#' possibilities. If all series from \code{X} have the same length, all of them
-#' will be used as-is, and the output will have the same length as the series. If series have different
+#' possibilities: if all series from \code{X} have the same length, all of them
+#' will be used as-is, and the output will have the same length as the series; if series have different
 #' lengths, a series will be chosen at random and used as reference. The output series will then have the
 #' same length as the chosen series.
 #'
@@ -41,8 +41,7 @@
 #' points(C)
 #'
 #' @param X Numeric matrix where each row is a time series, or a list of time series.
-#' @param cz Center to use as basis. \emph{It will be z-normalized}. Function uses a random series from
-#' \code{X} if \code{cz = NULL}.
+#' @param cz Center to use as basis. \emph{It will be z-normalized}.
 #' @param znorm Logical flag. Should z-scores be calculated for \code{X} before processing?
 #'
 #' @return Centroid time series.

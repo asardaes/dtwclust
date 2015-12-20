@@ -23,7 +23,7 @@ setClass("dtwclustFamily",
                    cluster = "function",
                    preproc = "function"),
 
-         prototype = prototype(preproc = function(x, ...) x,
+         prototype = prototype(preproc = function(x) x,
                                cluster = function(distmat = NULL) {
                                     if (is.null(distmat))
                                          stop("Something is wrong, couldn't calculate distances.")

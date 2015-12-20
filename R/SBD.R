@@ -4,7 +4,7 @@
 #' for the k-Shape clustering algorithm.
 #'
 #' This function works best if the series are \emph{z-normalized}. If not, at least they should have
-#' corresponding amplitudes, since the values of the signal \strong{do} affect the outcome.
+#' corresponding amplitudes, since the values of the signals \strong{do} affect the outcome.
 #'
 #' If \code{x} and \code{y} do \strong{not} have the same length, it would be best if the longer sequence is
 #' provided in \code{y}, because it will be shifted to match \code{x}. Anything before the matching point is
@@ -42,13 +42,12 @@
 #' ACM SIGMOD International Conference on Management of Data}, series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{
 #' http://doi.org/10.1145/2723372.2737793}.
 #'
-#' @param x A time series.
-#' @param y Another time series.
+#' @param x,y A time series.
 #' @param znorm Should each series be z-normalized before calculating the distance?
 #'
 #' @return A list with: \itemize{
-#'   \item \code{dist}: The distance between \code{x} and \code{y}.
-#'   \item \code{yshift}: A shifted version of \code{y} so that it optimally mathces \code{x}.
+#'   \item \code{dist}: The shape-based distance between \code{x} and \code{y}.
+#'   \item \code{yshift}: A shifted version of \code{y} so that it optimally matches \code{x}.
 #' }
 #'
 #' @export

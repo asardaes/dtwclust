@@ -14,7 +14,7 @@ zscore(x, ..., na.rm = FALSE)
 \item{na.rm}{Logical flag. Should \code{NA}s be removed? Ignored for matrix input.}
 }
 \value{
-Normalized data.
+Normalized data in the same format as provided.
 }
 \description{
 Wrapper for function \code{\link[base]{scale}} that returns zeros instead of \code{NaN}. It also

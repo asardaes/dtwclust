@@ -12,7 +12,7 @@ dtwclust(data = NULL, type = "partitional", k = 2L, method = "average",
 \item{data}{A list where each element is a time series, or a numeric matrix (it will be coerced to a list
 row-wise). All series must have equal lengths in case of \code{type = "tadpole"}.}
 
-\item{type}{What type of clustering method to use, \code{partitional}, \code{hierarchical} or \code{tadpole}.}
+\item{type}{What type of clustering method to use: \code{partitional}, \code{hierarchical} or \code{tadpole}.}
 
 \item{k}{Numer of desired clusters in partitional methods. For hierarchical methods, the
 \code{\link[stats]{cutree}} function is called with this value of \code{k} and the result is returned in the
@@ -74,9 +74,6 @@ If a custom distance function is provided and \code{pam.precompute} is \code{TRU
 If \code{pam.precompute} is \code{FALSE} and \code{type} is \code{"partitional"}, the function will be called
 at each iteration with the data as first argument, cluster centers as the second argument, and then \code{...}.
 
-If \code{data} is a matrix, it will be coerced to a list of series, and the centers will also be provided in the
-form of a list.
-
 The function should return a distance matrix, ideally of class \code{dist} or \code{crossdist}.
 The time series in the data should be along the rows, and the cluster centers along the columns of
 the distance matrix.
@@ -104,9 +101,9 @@ implementations (all registered with \code{proxy}):
 
 Note that only \code{dtw}, \code{dtw2} and \code{sbd} support series of different lengths.
 
-If you want to create your own distance and also register it with \code{proxy}, it should include a \code{...}
-in its definition so that it is correctly called. Functions in \code{proxy} will always receive the following
-parameters (see \code{\link{dtwclustControl}}):
+If you want to create your own distance and also register it with \code{proxy}, it should include the ellipsis
+(\code{...}) in its definition so that it is correctly called. Functions in \code{proxy} will always receive
+the following parameters (see \code{\link{dtwclustControl}}):
 
 \itemize{
   \item \code{window.type}: Either \code{"none"} for a \code{NULL} \code{window.size}, or \code{"slantedband"}
@@ -181,10 +178,11 @@ It is strongly advised to use z-normalization in case of \code{centroid = "shape
 series have this normalization (see \code{\link{shape_extraction}}). Therefore, \code{\link{zscore}} is the
 default in this case. The user can, however, specify a
 custom function that performs any transformation on the data, but the user must make sure that the format
-stays consistent, i.e. a list of time series. Setting to \code{NULL} means no preprocessing (except for
-\code{centroid = "shape"}).
+stays consistent, i.e. a list of time series.
 
-The function will receive the data as first and only argument.
+Setting to \code{NULL} means no preprocessing (except for \code{centroid = "shape"}).
+
+A provided function will receive the data as first and only argument.
 
 It is convenient to provide this function if you're planning on using the \code{\link[stats]{predict}} generic.
 }
@@ -214,11 +212,12 @@ package compatible with \code{foreach}'s \code{\%dopar\%} operator) in order to 
 repetitions in parallel, as well as distance and some centroid calculations (see the examples).
 \code{\link{TADPole}} and \code{\link{DBA}} also take advantage of parallel support.
 
-Unless each repetition requires a few seconds, parallel computing probably isn't worth it. As such, I would only
-use this feature with \code{shape} and \code{DBA} centroids, or an expensive distance function like \code{DTW}.
-
 If you do more than 1 repetition sequentially, you can safely ignore the warning given by \code{dopar} about
 no parallel backend registration.
+
+Unless each repetition requires a few seconds, parallel computing probably isn't worth it. As such, I would only
+use this feature with \code{shape} and \code{DBA} centroids, or an expensive distance function like \code{DTW}
+(see the next paragraph).
 
 If you register a parallel backend, the function will also try to do the calculation of the distance
 matrices in parallel. This should work with any function registered with \code{\link[proxy]{dist}} via
@@ -257,7 +256,6 @@ DTW2 is done with \code{\link[dtw]{dtw}},but it differs from the result you woul
 distance is \emph{then} computed.
 }
 \examples{
-
 #### Load data
 data(uciCT)
 
@@ -289,8 +287,8 @@ plot(kc.tadp, clus = 3:4, labs.arg = list(title = "TADPole, clusters 3 and 4",
 #### Registering a custom distance with the 'proxy' package and using it
 # Normalized DTW distance
 ndtw <- function(x, y, ...) {
-  dtw::dtw(x, y, step.pattern = symmetric2,
-           distance.only = TRUE, ...)$normalizedDistance
+     dtw::dtw(x, y, step.pattern = symmetric2,
+              distance.only = TRUE, ...)$normalizedDistance
 }
 
 # Registering the function with 'proxy'
@@ -316,48 +314,47 @@ hc.sbd2 <- update(hc.sbd[[1]], method = "complete", distmat = hc.sbd[[1]]@distma
 plot(hc.sbd2, type = "series")
 
 \dontrun{
-#### Saving and modifying the ggplot object with custom time
-t <- seq(Sys.Date(), len = 180, by = "day")
-gkc <- plot(kc.l2, time = t, plot = FALSE)
+     #### Saving and modifying the ggplot object with custom time
+     t <- seq(Sys.Date(), len = 180, by = "day")
+     gkc <- plot(kc.l2, time = t, plot = FALSE)
 
-require(scales)
-gkc + scale_x_date(labels = date_format("\%b-\%Y"),
-                   breaks = date_breaks("2 months"))
+     require(scales)
+     gkc + scale_x_date(labels = date_format("\%b-\%Y"),
+                        breaks = date_breaks("2 months"))
 
-#### Using parallel computation to optimize several random repetitions
-#### and distance matrix calculation
-require(doParallel)
+     #### Using parallel computation to optimize several random repetitions
+     #### and distance matrix calculation
+     require(doParallel)
 
-# Create parallel workers
-cl <- makeCluster(detectCores())
-registerDoParallel(cl)
+     # Create parallel workers
+     cl <- makeCluster(detectCores())
+     registerDoParallel(cl)
 
-## Use full DTW and PAM
-kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, control = ctrl)
+     ## Use full DTW and PAM
+     kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, control = ctrl)
 
-## Use full DTW with DBA centroids
-kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, control = ctrl)
+     ## Use full DTW with DBA centroids
+     kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, control = ctrl)
 
-## Use constrained DTW with original series of different lengths
-kc.cdtw <- dtwclust(CharTraj, k = 20,
-                    seed = 3251, control = ctrl)
+     ## Use constrained DTW with original series of different lengths
+     kc.cdtw <- dtwclust(CharTraj, k = 20,
+                         seed = 3251, control = ctrl)
 
-## This uses the "nDTW" function registered in another example above
-# For reference, this took around 2.25 minutes with 8 cores (all 8 repetitions).
-kc.ndtw.list <- dtwclust(CharTraj, k = 20, distance = "nDTW", centroid = "dba",
-                         preproc = zscore, seed = 8319,
-                         control = list(window.size = 10L, nrep = 8L))
+     ## This uses the "nDTW" function registered in another example above
+     # For reference, this took around 2.25 minutes with 8 cores (all 8 repetitions).
+     kc.ndtw.list <- dtwclust(CharTraj, k = 20, distance = "nDTW", centroid = "dba",
+                              preproc = zscore, seed = 8319,
+                              control = list(window.size = 10L, nrep = 8L))
 
-# Stop parallel workers
-stopCluster(cl)
+     # Stop parallel workers
+     stopCluster(cl)
 
-# Return to sequential computations
-registerDoSEQ()
+     # Return to sequential computations
+     registerDoSEQ()
 
-# See Rand Index for each repetition
-sapply(kc.ndtw.list, randIndex, y = CharTrajLabels)
+     # See Rand Index for each repetition
+     sapply(kc.ndtw.list, randIndex, y = CharTrajLabels)
 }
-
 }
 \author{
 Alexis Sarda-Espinosa

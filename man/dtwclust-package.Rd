@@ -6,11 +6,12 @@
 \title{Time series clustering under Dynamic Time Warping (DTW) distance.}
 \description{
 Perform time series clustering using different techniques related to the DTW distance and its
-corresponding lower bounds (LB). Additionally, an implementation of k-Shape clustering is available.
+corresponding lower bounds (LB). Additionally, an implementation of k-Shape clustering is available,
+and the package can be easily extended with custom distance measures and centroid definitions.
 }
 \details{
 This package tries to consolidate the different procedures available to perform clustering of time series
-under DTW. Most of the optimizations require time series to have equal lengths. DTW itself doesn't, but
+based on shape. Most of the optimizations require time series to have equal lengths. DTW itself doesn't, but
 it's much slower to compute. The shape-based distance (SBD) can also be used for series of different
 lengths, and it could be faster. If series have different lengths, it is debatable whether it makes sense
 to cluster them directly. If possible, reinterpolating them could be one way of speeding up calculations
@@ -80,7 +81,7 @@ and distance measures for time series data.'' \emph{Data Mining and Knowledge Di
 \url{http://doi.org/10.1007/s10618-012-0250-5}, \url{http://dx.doi.org/10.1007/s10618-012-0250-5}.
 }
 \seealso{
-\code{\link{dtwclust}}, \code{\link[flexclust]{kcca}}, \code{\link[proxy]{dist}},
+\code{\link{dtwclust}}, \code{\link[proxy]{dist}},
 \code{\link[dtw]{dtw}}
 }
 
