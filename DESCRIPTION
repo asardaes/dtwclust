@@ -23,10 +23,31 @@ Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
 Description: Time series clustering using different techniques related to the
     Dynamic Time Warping distance and its corresponding lower bounds. Additionally,
-    an implementation of k-Shape clustering is available, and the package can be easily
-    extended with custom distance measures and centroid definitions.
+    an implementation of k-Shape clustering is available, and the package can be
+    easily extended with custom distance measures and centroid definitions.
 URL: https://github.com/asardaes/dtwclust
 License: GPL-3
 LazyData: TRUE
 NeedsCompilation: yes
 RoxygenNote: 5.0.1
+Collate:
+    'DBA.R'
+    'NCCc.R'
+    'SBD.R'
+    'TADPole.R'
+    'all_cent.R'
+    'dtw-lb.R'
+    'dtw2.R'
+    'dtwclust-classes.R'
+    'dtwclust-methods.R'
+    'dtwclust.R'
+    'dtwdistfun.R'
+    'kcca-list.R'
+    'lb-improved.R'
+    'lb-keogh.R'
+    'pkg.R'
+    'reinterpolate.R'
+    'shape-extraction.R'
+    'uciCT.R'
+    'utils.R'
+    'zscore.R'

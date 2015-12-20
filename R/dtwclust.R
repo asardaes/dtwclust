@@ -538,8 +538,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                set.seed(seed)
 
           if (length(unique(lengths)) > 1) {
-               consistency_check(distance, "dist")
-               consistency_check(centroid, "cent")
+               consistency_check(distance, "dist", trace = control@trace)
+               consistency_check(centroid, "cent", trace = control@trace)
           }
 
           ## ----------------------------------------------------------------------------------------------------------
@@ -653,7 +653,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                hclust_methods <- c("ward.D", "ward.D2", "single", "complete",
                                    "average", "mcquitty", "median", "centroid")
 
-          if (control@trace)
+          if (length(unique(lengths)) > 1)
+               consistency_check(distance, "dist", trace = control@trace)
+
+          if (control@trace && is.null(distmat))
                cat("\n\tCalculating distance matrix...\n")
 
           if (!is.null(distmat)) {
@@ -683,9 +686,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           } else {
                stop("Unspported distance definition")
           }
-
-          if (length(unique(lengths)) > 1)
-               consistency_check(distance, "dist")
 
           if (control@trace)
                cat("\n\tPerforming hierarchical clustering...\n\n")
@@ -768,7 +768,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## TADPole
           ## =================================================================================================================
 
-          window.size <- consistency_check(control@window.size, "window")
+          control@window.size <- consistency_check(control@window.size, "window")
 
           if (is.null(dc))
                stop("Please specify 'dc' for tadpole algorithm")

@@ -2,10 +2,10 @@
 % Please edit documentation in R/dtw-lb.R
 \name{dtw_lb}
 \alias{dtw_lb}
-\title{DTW calculation guided by Lemire's lower bound (LB_Improved)}
+\title{DTW calculation guided by Lemire's lower bounds}
 \usage{
 dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
-  ...)
+  force.pairwise = FALSE, ...)
 }
 \arguments{
 \item{x}{A matrix where rows are time series, or a list of time series.}
@@ -18,21 +18,26 @@ dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
 
 \item{error.check}{Should inconsistencies in the data be checked?}
 
-\item{...}{Further arguments to pass to \code{\link[proxy]{dist}} for the initial estimate.}
+\item{force.pairwise}{Calculate pairwise distances. See the Notes.}
+
+\item{...}{Ignored.}
 }
 \value{
 The distance matrix with class \code{crossdist}.
 }
 \description{
-Calculation of a distance matrix with the Dynamic Time Warping (DTW) distance guided by Lemire's lower bound
-(LB).
+Calculation of a distance matrix with the Dynamic Time Warping (DTW) distance guided Lemire's
+improved lower bound (LB_Improved).
 }
 \details{
 This function first calculates an initial estimate of a distance matrix between two sets of time series
-using Lemire's improved lower bound. Afterwards, it uses the estimate to calculate the true DTW distances
-between \emph{only} the nearest neighbors of each series in \code{x} found in \code{y}. If only \code{x}
-is provided, the distance matrix is calculated between all its time series. This could be useful in case
-one is interested in only the nearest neighbor of one or more series within a dataset.
+using LB_Improved. Afterwards, it uses the estimate to calculate the corresponding true DTW distance
+between \emph{only} the nearest neighbors of each series in \code{x} found in \code{y}.
+
+If only \code{x} is provided, the distance matrix is calculated between all its time series.
+
+This could be useful in case one is interested in only the nearest neighbor of one or more series
+within a dataset.
 
 The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 that represents the distance between the point considered and one of the edges of the window. Therefore,
@@ -45,6 +50,10 @@ This function uses a lower bound that is only defined for time series of equal l
 
 The \code{...} argument is better left alone, however the function definition needs it so that the internal
 functions can call it appropriately if parallel computing is enabled.
+
+If you use the version registered with \code{proxy}, and because of possible bug in its \code{\link[proxy]{dist}}
+function, the latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
+\code{force.pairwise} to get the correct result (which is, effectively, calculating DTW distances only).
 }
 \section{Parallel Computing}{
 
@@ -69,7 +78,7 @@ system.time(d <- dtw_lb(data[1:5], data[6:50], window.size = 20))
 # Nearest neighbors
 NN1 <- apply(d, 1, which.min)
 
-# Calculate the DTW distances between all elements (about seven times slower)
+# Calculate the DTW distances between all elements (about three times slower)
 system.time(d2 <- proxy::dist(data[1:5], data[6:50], method = "DTW",
                               window.type = "slantedband", window.size = 20))
 
@@ -112,6 +121,6 @@ Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower b
 http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
 }
 \seealso{
-\code{\link{lb_improved}}
+\code{\link{lb_keogh}}, \code{\link{lb_improved}}
 }
 

@@ -16,6 +16,10 @@
 #' If you wish to calculate the lower bound between several time series, it would be better to use the version
 #' registered with the 'proxy' package, since it includes some small optimizations. See the examples.
 #'
+#' However, because of said optimizations and a possible bug in \code{proxy}'s \code{\link[proxy]{dist}}, the
+#' latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
+#' \code{force.pairwise} to get the correct result.
+#'
 #' @references
 #'
 #' Keogh E and Ratanamahatana CA (2005). ``Exact indexing of dynamic time warping.'' \emph{Knowledge and information systems}, \strong{7}(3),
@@ -116,7 +120,7 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, up
 # ========================================================================================================
 
 lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
-                          force.symmetry = FALSE, norm = "L1", ...) {
+                          force.symmetry = FALSE, norm = "L1", force.pairwise = FALSE, ...) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 
@@ -149,30 +153,48 @@ lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
      upper.env <- lapply(y, runmax, k=window.size*2+1, endrule="constant")
      lower.env <- lapply(y, runmin, k=window.size*2+1, endrule="constant")
 
-     DD <- sapply(X=x, U=upper.env, L=lower.env,
-                  FUN = function(x, U, L) {
+     if (force.pairwise)
+          DD <- mapply(upper.env, lower.env, x,
+                       FUN = function(u, l, x) {
 
-                       ## This will return one column of the distance matrix
-                       D <- mapply(U, L, MoreArgs=list(x=x),
-                                   FUN = function(u, l, x) {
+                            D <- rep(0, length(x))
 
-                                        D <- rep(0, length(x))
+                            ind1 <- which(x > u)
+                            D[ind1] <- x[ind1] - u[ind1]
+                            ind2 <- which(x < l)
+                            D[ind2] <- l[ind2] - x[ind2]
 
-                                        ind1 <- which(x > u)
-                                        D[ind1] <- x[ind1] - u[ind1]
-                                        ind2 <- which(x < l)
-                                        D[ind2] <- l[ind2] - x[ind2]
+                            d <- switch(EXPR = norm,
+                                        L1 = sum(D),
+                                        L2 = sqrt(sum(D^2)))
 
-                                        d <- switch(EXPR = norm,
-                                                    L1 = sum(D),
-                                                    L2 = sqrt(sum(D^2)))
+                            d
+                       })
+     else
+          DD <- sapply(X=x, U=upper.env, L=lower.env,
+                       FUN = function(x, U, L) {
 
-                                        d
-                                   })
-                       D
-                  })
+                            ## This will return one column of the distance matrix
+                            D <- mapply(U, L, MoreArgs=list(x=x),
+                                        FUN = function(u, l, x) {
 
-     if (force.symmetry) {
+                                             D <- rep(0, length(x))
+
+                                             ind1 <- which(x > u)
+                                             D[ind1] <- x[ind1] - u[ind1]
+                                             ind2 <- which(x < l)
+                                             D[ind2] <- l[ind2] - x[ind2]
+
+                                             d <- switch(EXPR = norm,
+                                                         L1 = sum(D),
+                                                         L2 = sqrt(sum(D^2)))
+
+                                             d
+                                        })
+                            D
+                       })
+
+     if (force.symmetry && !force.pairwise) {
           if (nrow(DD) != ncol(DD)) {
                warning("Unable to force symmetry. Resulting distance matrix is not square.")
           } else {
@@ -188,8 +210,14 @@ lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
           }
      }
 
-     attr(DD, "class") <- "crossdist"
+     if (force.pairwise)
+          attr(DD, "class") <- "pairdist"
+     else {
+          attr(DD, "class") <- "crossdist"
+          DD <- t(DD)
+     }
+
      attr(DD, "method") <- "LB_Keogh"
 
-     t(DD)
+     DD
 }

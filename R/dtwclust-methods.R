@@ -5,6 +5,7 @@
 #'
 #' @name dtwclust-methods
 #' @rdname dtwclust-methods
+#' @include dtwclust-classes.R
 #'
 #' @seealso \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}}
 #'

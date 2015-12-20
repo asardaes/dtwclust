@@ -16,6 +16,10 @@
 #' If you wish to calculate the lower bound between several time series, it would be better to use the version
 #' registered with the 'proxy' package, since it includes some small optimizations. See the examples.
 #'
+#' However, because of said optimizations and a possible bug in \code{proxy}'s \code{\link[proxy]{dist}}, the
+#' latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
+#' \code{force.pairwise} to get the correct result.
+#'
 #' @references
 #'
 #' Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .'' \emph{Pattern Recognition}, \strong{42}(9), pp.
@@ -130,7 +134,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
 # ========================================================================================================
 
 lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
-                             force.symmetry = FALSE, norm = "L1", ...) {
+                             force.symmetry = FALSE, norm = "L1", force.pairwise = FALSE, ...) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 
@@ -164,49 +168,86 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
      upper.env <- lapply(y, runmax, k=window.size*2+1, endrule="constant")
      lower.env <- lapply(y, runmin, k=window.size*2+1, endrule="constant")
 
-     DD <- sapply(X=x, U=upper.env, L=lower.env, Y=y,
-                  FUN = function(x, U, L, Y) {
+     if (force.pairwise)
+          DD <- mapply(upper.env, lower.env, y, x,
+                       FUN = function(u, l, y, x) {
 
-                       ## This will return one column of the distance matrix
-                       D <- mapply(U, L, Y, MoreArgs=list(x=x),
-                                   FUN = function(u, l, y, x) {
+                            ## LB Keogh
+                            ind1 <- which(x > u)
+                            ind2 <- which(x < l)
 
-                                        ## LB Keogh
-                                        ind1 <- which(x > u)
-                                        ind2 <- which(x < l)
+                            H <- x
+                            H[ind1] <- u[ind1]
+                            H[ind2] <- l[ind2]
 
-                                        H <- x
-                                        H[ind1] <- u[ind1]
-                                        H[ind2] <- l[ind2]
+                            d1 <- abs(x-H)
 
-                                        d1 <- abs(x-H)
+                            ## Lemire's improvement
+                            UH <- caTools::runmax(H, window.size*2+1, endrule="constant")
+                            LH <- caTools::runmin(H, window.size*2+1, endrule="constant")
 
-                                        ## Lemire's improvement
-                                        UH <- caTools::runmax(H, window.size*2+1, endrule="constant")
-                                        LH <- caTools::runmin(H, window.size*2+1, endrule="constant")
+                            ind3 <- which(y > UH)
+                            ind4 <- which(y < LH)
 
-                                        ind3 <- which(y > UH)
-                                        ind4 <- which(y < LH)
+                            H2 <- y
+                            H2[ind3] <- UH[ind3]
+                            H2[ind4] <- LH[ind4]
 
-                                        H2 <- y
-                                        H2[ind3] <- UH[ind3]
-                                        H2[ind4] <- LH[ind4]
+                            d2 <- abs(y-H2)
 
-                                        d2 <- abs(y-H2)
+                            ## calculate LB_Improved
 
-                                        ## calculate LB_Improved
+                            d <- switch(EXPR = norm,
+                                        L1 = sum(d1) + sum(d2),
+                                        L2 = sqrt(sum(d1^2) + sum(d2^2))
+                            )
 
-                                        d <- switch(EXPR = norm,
-                                                    L1 = sum(d1) + sum(d2),
-                                                    L2 = sqrt(sum(d1^2) + sum(d2^2))
-                                        )
+                            d
+                       })
+     else
+          DD <- sapply(X=x, U=upper.env, L=lower.env, Y=y,
+                       FUN = function(x, U, L, Y) {
 
-                                        d
-                                   })
-                       D
-                  })
+                            ## This will return one column of the distance matrix
+                            D <- mapply(U, L, Y, MoreArgs=list(x=x),
+                                        FUN = function(u, l, y, x) {
 
-     if (force.symmetry) {
+                                             ## LB Keogh
+                                             ind1 <- which(x > u)
+                                             ind2 <- which(x < l)
+
+                                             H <- x
+                                             H[ind1] <- u[ind1]
+                                             H[ind2] <- l[ind2]
+
+                                             d1 <- abs(x-H)
+
+                                             ## Lemire's improvement
+                                             UH <- caTools::runmax(H, window.size*2+1, endrule="constant")
+                                             LH <- caTools::runmin(H, window.size*2+1, endrule="constant")
+
+                                             ind3 <- which(y > UH)
+                                             ind4 <- which(y < LH)
+
+                                             H2 <- y
+                                             H2[ind3] <- UH[ind3]
+                                             H2[ind4] <- LH[ind4]
+
+                                             d2 <- abs(y-H2)
+
+                                             ## calculate LB_Improved
+
+                                             d <- switch(EXPR = norm,
+                                                         L1 = sum(d1) + sum(d2),
+                                                         L2 = sqrt(sum(d1^2) + sum(d2^2))
+                                             )
+
+                                             d
+                                        })
+                            D
+                       })
+
+     if (force.symmetry && !force.pairwise) {
           if (nrow(DD) != ncol(DD)) {
                warning("Unable to force symmetry. Resulting distance matrix is not square.")
           } else {
@@ -222,8 +263,14 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
           }
      }
 
-     attr(DD, "class") <- "crossdist"
+     if (force.pairwise)
+          attr(DD, "class") <- "pairdist"
+     else {
+          attr(DD, "class") <- "crossdist"
+          DD <- t(DD)
+     }
+
      attr(DD, "method") <- "LB_Improved"
 
-     t(DD)
+     DD
 }

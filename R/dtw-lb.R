@@ -1,13 +1,16 @@
-#' DTW calculation guided by Lemire's lower bound (LB_Improved)
+#' DTW calculation guided by Lemire's lower bounds
 #'
-#' Calculation of a distance matrix with the Dynamic Time Warping (DTW) distance guided by Lemire's lower bound
-#' (LB).
+#' Calculation of a distance matrix with the Dynamic Time Warping (DTW) distance guided Lemire's
+#' improved lower bound (LB_Improved).
 #'
 #' This function first calculates an initial estimate of a distance matrix between two sets of time series
-#' using Lemire's improved lower bound. Afterwards, it uses the estimate to calculate the true DTW distances
-#' between \emph{only} the nearest neighbors of each series in \code{x} found in \code{y}. If only \code{x}
-#' is provided, the distance matrix is calculated between all its time series. This could be useful in case
-#' one is interested in only the nearest neighbor of one or more series within a dataset.
+#' using LB_Improved. Afterwards, it uses the estimate to calculate the corresponding true DTW distance
+#' between \emph{only} the nearest neighbors of each series in \code{x} found in \code{y}.
+#'
+#' If only \code{x} is provided, the distance matrix is calculated between all its time series.
+#'
+#' This could be useful in case one is interested in only the nearest neighbor of one or more series
+#' within a dataset.
 #'
 #' The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 #' that represents the distance between the point considered and one of the edges of the window. Therefore,
@@ -30,9 +33,13 @@
 #' The \code{...} argument is better left alone, however the function definition needs it so that the internal
 #' functions can call it appropriately if parallel computing is enabled.
 #'
+#' If you use the version registered with \code{proxy}, and because of possible bug in its \code{\link[proxy]{dist}}
+#' function, the latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
+#' \code{force.pairwise} to get the correct result (which is, effectively, calculating DTW distances only).
+#'
 #' @seealso
 #'
-#' \code{\link{lb_improved}}
+#' \code{\link{lb_keogh}}, \code{\link{lb_improved}}
 #'
 #' @references
 #'
@@ -54,7 +61,7 @@
 #' # Nearest neighbors
 #' NN1 <- apply(d, 1, which.min)
 #'
-#' # Calculate the DTW distances between all elements (about seven times slower)
+#' # Calculate the DTW distances between all elements (about three times slower)
 #' system.time(d2 <- proxy::dist(data[1:5], data[6:50], method = "DTW",
 #'                               window.type = "slantedband", window.size = 20))
 #'
@@ -94,43 +101,83 @@
 #' @param window.size Window size to use with the LB and DTW calculation. See details.
 #' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
 #' @param error.check Should inconsistencies in the data be checked?
-#' @param ... Further arguments to pass to \code{\link[proxy]{dist}} for the initial estimate.
+#' @param force.pairwise Calculate pairwise distances. See the Notes.
+#' @param ... Ignored.
 #'
 #' @return The distance matrix with class \code{crossdist}.
 #'
 #' @export
 
-dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE, ...) {
+dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
+                   error.check = TRUE, force.pairwise = FALSE, ...) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 
      X <- consistency_check(x, "tsmat")
 
+     if (force.pairwise) {
+          if (is.null(y))
+               Y <- x
+          else
+               Y <- consistency_check(y, "tsmat")
+
+          if (is.null(window.size))
+               window.type <- "none"
+          else
+               window.type <- "slantedband"
+
+          D <- switch(EXPR = norm,
+
+                      L1 = proxy::dist(X, Y,
+                                       pairwise = TRUE,
+                                       method = "DTW",
+                                       dist.method = "L1",
+                                       window.type = window.type,
+                                       window.size = window.size),
+
+                      L2 = proxy::dist(X, Y,
+                                       pairwise = TRUE,
+                                       method = "DTW2",
+                                       window.type = window.type,
+                                       window.size = window.size))
+
+          return(D)
+     }
+
+     ## NOTE: I tried starting with LBK estimate, refining with LBI and then DTW, but overall,
+     ## it was usually slower, almost the whole matrix had to be recomputed for LBI
+
      if (!is.null(y)) {
           Y <- consistency_check(y, "tsmat")
 
+          ## Initial estimate
+          D <- proxy::dist(X, Y, method = "LBI",
+                           window.size = window.size,
+                           norm = norm,
+                           error.check = error.check,
+                           force.symmetry = FALSE)
+
      } else {
           Y <- X
+
+          ## Initial estimate
+          D <- proxy::dist(X, Y, method = "LBI",
+                           window.size = window.size,
+                           norm = norm,
+                           error.check = error.check,
+                           force.symmetry = TRUE)
      }
 
-     ## Initial estimate
-
-     d <- proxy::dist(X, Y, method = "LBI",
-                      window.size = window.size,
-                      norm = norm,
-                      error.check = error.check,
-                      ...)
-
-     ## Attempt parallel computations?
-     do_par <- check_parallel()
-
      ## For indexing convenience
-     d <- t(d)
-     singleIndexing <- seq(from=0, by=nrow(d), length.out=ncol(d))
+     D <- t(D)
+     singleIndexing <- seq(from=0, by=nrow(D), length.out=ncol(D))
 
      ## Update with DTW
 
-     new.indNN <- apply(d, 2, which.min) # index of nearest neighbors
+     # Attempt parallel computations?
+     do_par <- check_parallel()
+
+     new.indNN <- apply(D, 2, which.min) # index of nearest neighbors
      indNN <- new.indNN + 1
 
      while (any(new.indNN != indNN)) {
@@ -180,12 +227,12 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1", error.check = T
           }
 
           indD <- indNN + singleIndexing
-          d[indD[unlist(indNew)]] <- dSub
+          D[indD[unlist(indNew)]] <- dSub
 
-          new.indNN <- apply(d, 2, which.min)
+          new.indNN <- apply(D, 2, which.min)
      }
 
      ## Transpose again for final result
-     attr(d, "method") <- "DTW_LB"
-     t(d)
+     attr(D, "method") <- "DTW_LB"
+     t(D)
 }

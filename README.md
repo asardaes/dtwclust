@@ -44,7 +44,7 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 4: Changes / Distsum = 1 / 1288.069
 #> Iteration 5: Changes / Distsum = 0 / 1288.069
 #> 
-#>  Elapsed time is 14.201 seconds.
+#>  Elapsed time is 14.576 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -63,7 +63,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.628 seconds.
+#>  Elapsed time is 0.632 seconds.
 
 cat("Rand index for HC+SBD:\n")
 #> Rand index for HC+SBD:
@@ -88,7 +88,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 3.626 seconds.
+#>  Elapsed time is 3.66 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -120,7 +120,6 @@ proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
 kc.ndtw <- dtwclust(datalist, k = 20,
                     distance = "nDTW", centroid = "pam",
                     seed = 159, control = new("dtwclustControl", nrep = 8L))
-#> Consider setting save.data to FALSE if performing several repetitions.
 
 sapply(kc.ndtw, randIndex, y = CharTrajLabels)
 #>       ARI       ARI       ARI       ARI       ARI       ARI       ARI 
@@ -132,12 +131,13 @@ sapply(kc.ndtw, randIndex, y = CharTrajLabels)
 kc <- dtwclust(datalist, k = 20,
                distance = "nDTW", centroid = "dba",
                seed = 9421, control = list(trace = TRUE))
+#> Series have different lengths. Please confirm that the provided distance function supports this.
 #> Iteration 1: Changes / Distsum = 100 / 5.162033
 #> Iteration 2: Changes / Distsum = 3 / 3.739462
 #> Iteration 3: Changes / Distsum = 2 / 3.687197
 #> Iteration 4: Changes / Distsum = 0 / 3.631238
 #> 
-#>  Elapsed time is 20.149 seconds.
+#>  Elapsed time is 20.431 seconds.
 
 # Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))

@@ -101,8 +101,8 @@ consistency_check <- function(obj, case, ...) {
 
           if (is.character(obj) && (obj %in% included) && !(obj %in% valid))
                stop("Only the following distances are supported for series of different lengths:\n\tdtw\tdtw2\tsbd")
-          else if(is.character(obj) && !(obj %in% included))
-               message("Series have different lengths. Please confirm that the provided distance supports this.\n")
+          else if(is.character(obj) && !(obj %in% included) && list(...)$trace)
+               message("Series have different lengths. Please confirm that the provided distance function supports this.\n")
 
      } else if (case == "cent") {
           included <- c("mean", "median", "shape", "dba", "pam")
@@ -110,8 +110,8 @@ consistency_check <- function(obj, case, ...) {
 
           if (is.character(obj) && (obj %in% included) && !(obj %in% valid))
                stop("Only the following centroids are supported for series of different lengths:\n\tdba\tpam\tshape")
-          else if(is.character(obj) && !(obj %in% included))
-               message("Series have different lengths. Please confirm that the provided centroid supports this.\n")
+          else if(is.character(obj) && !(obj %in% included) && list(...)$trace)
+               message("Series have different lengths. Please confirm that the provided centroid function supports this.\n")
 
      } else {
           stop("Possibly a typo in function consistency_check")

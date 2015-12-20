@@ -17,6 +17,10 @@
 #' If you wish to calculate the distance between several time series, it would be better to use the version
 #' registered with the 'proxy' package, since it includes some small optimizations. See the examples.
 #'
+#' However, because of said optimizations and a possible bug in \code{proxy}'s \code{\link[proxy]{dist}}, the
+#' latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
+#' \code{force.pairwise} to get the correct result.
+#'
 #' @examples
 #'
 #' # load data
@@ -112,7 +116,7 @@ SBD <- function(x, y, znorm = FALSE) {
 # Wrapper for proxy::dist
 # ========================================================================================================
 
-SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, ...) {
+SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, force.pairwise = FALSE, ...) {
 
      x <- consistency_check(x, "tsmat")
 
@@ -151,28 +155,49 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, ...) {
      })
 
      ## Calculate distance matrix
-     D <- mapply(x, fftx, MoreArgs = list(Y = y, FFTY = ffty),
-                 FUN = function(x, fftx, Y, FFTY) {
+     if (force.pairwise)
+          D <- mapply(y, ffty, x, fftx,
+                      FUN = function(y, ffty, x, fftx) {
 
-                      d <- mapply(Y, FFTY, MoreArgs = list(x = x, fftx = fftx),
-                                  FUN = function(y, ffty, x, fftx) {
+                           CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
+                           ## Truncate to correct length
+                           CCseq <- c(CCseq[(length(ffty)-length(y)+2):length(CCseq)],
+                                      CCseq[1:length(x)])
+                           CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
 
-                                       CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
-                                       ## Truncate to correct length
-                                       CCseq <- c(CCseq[(length(ffty)-length(y)+2):length(CCseq)],
-                                                  CCseq[1:length(x)])
-                                       CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
+                           dd <- 1 - max(CCseq)
 
-                                       dd <- 1 - max(CCseq)
+                           dd
+                      })
+     else
+          D <- mapply(x, fftx, MoreArgs = list(Y = y, FFTY = ffty),
+                      FUN = function(x, fftx, Y, FFTY) {
 
-                                       dd
-                                  })
+                           d <- mapply(Y, FFTY, MoreArgs = list(x = x, fftx = fftx),
+                                       FUN = function(y, ffty, x, fftx) {
 
-                      d
-                 })
+                                            CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
+                                            ## Truncate to correct length
+                                            CCseq <- c(CCseq[(length(ffty)-length(y)+2):length(CCseq)],
+                                                       CCseq[1:length(x)])
+                                            CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
 
-     attr(D, "class") <- "crossdist"
+                                            dd <- 1 - max(CCseq)
+
+                                            dd
+                                       })
+
+                           d
+                      })
+
+     if (force.pairwise)
+          attr(D, "class") <- "pairdist"
+     else {
+          attr(D, "class") <- "crossdist"
+          D <- t(D)
+     }
+
      attr(D, "method") <- "SBD"
 
-     t(D)
+     D
 }
