@@ -81,23 +81,27 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
 
      ## LB Keogh first
 
-     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runmax/min'
-     if (is.null(lower.env)) {
-          lower.env <- caTools::runmin(y, window.size*2+1, endrule="constant")
-     } else {
-          if (length(lower.env) != length(y))
-               stop("Length mismatch between 'y' and its lower envelope")
+     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
+     if (is.null(lower.env) && is.null(upper.env)) {
+          envelopes <- call_runminmax(y, window.size*2+1)
+          lower.env <- envelopes$min
+          upper.env <- envelopes$max
+
+     } else if (is.null(lower.env)) {
+          lower.env <- caTools::runmin(y, window.size*2+1)
+
+     } else if (is.null(upper.env)) {
+          upper.env <- caTools::runmax(y, window.size*2+1)
      }
 
-     if (is.null(upper.env)) {
-          upper.env <- caTools::runmax(y, window.size*2+1, endrule="constant")
-     } else {
-          if (length(upper.env) != length(y))
-               stop("Length mismatch between 'y' and its upper envelope")
-     }
+     if (length(lower.env) != length(y))
+          stop("Length mismatch between 'y' and its lower envelope")
 
-     ind1 <- which(x > upper.env)
-     ind2 <- which(x < lower.env)
+     if (length(upper.env) != length(y))
+          stop("Length mismatch between 'y' and its upper envelope")
+
+     ind1 <- x > upper.env
+     ind2 <- x < lower.env
 
      H <- x
      H[ind1] <- upper.env[ind1]
@@ -106,15 +110,14 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
      d1 <- abs(x-H)
 
      ## From here on is Lemire's improvement
-     UH <- caTools::runmax(H, window.size*2+1, endrule="constant")
-     LH <- caTools::runmin(H, window.size*2+1, endrule="constant")
+     EH <- call_runminmax(H, window.size*2+1)
 
-     ind3 <- which(y > UH)
-     ind4 <- which(y < LH)
+     ind3 <- y > EH$max
+     ind4 <- y < EH$min
 
      H2 <- y
-     H2[ind3] <- UH[ind3]
-     H2[ind4] <- LH[ind4]
+     H2[ind3] <- EH$max[ind3]
+     H2[ind4] <- EH$min[ind4]
 
      d2 <- abs(y-H2)
 
@@ -163,18 +166,21 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
                stop("Window size should not exceed length of the time series")
      }
 
-     ## from 'caTools' package
-     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runmax/min'
-     upper.env <- lapply(y, runmax, k=window.size*2+1, endrule="constant")
-     lower.env <- lapply(y, runmin, k=window.size*2+1, endrule="constant")
+     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
+     envelops <- lapply(y, function(s) {
+          call_runminmax(s, window.size*2+1)
+     })
+
+     lower.env <- lapply(envelops, "[[", "min")
+     upper.env <- lapply(envelops, "[[", "max")
 
      if (force.pairwise)
           DD <- mapply(upper.env, lower.env, y, x,
                        FUN = function(u, l, y, x) {
 
                             ## LB Keogh
-                            ind1 <- which(x > u)
-                            ind2 <- which(x < l)
+                            ind1 <- x > u
+                            ind2 <- x < l
 
                             H <- x
                             H[ind1] <- u[ind1]
@@ -183,15 +189,14 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
                             d1 <- abs(x-H)
 
                             ## Lemire's improvement
-                            UH <- caTools::runmax(H, window.size*2+1, endrule="constant")
-                            LH <- caTools::runmin(H, window.size*2+1, endrule="constant")
+                            EH <- call_runminmax(H, window.size*2+1)
 
-                            ind3 <- which(y > UH)
-                            ind4 <- which(y < LH)
+                            ind3 <- y > EH$max
+                            ind4 <- y < EH$min
 
                             H2 <- y
-                            H2[ind3] <- UH[ind3]
-                            H2[ind4] <- LH[ind4]
+                            H2[ind3] <- EH$max[ind3]
+                            H2[ind4] <- EH$min[ind4]
 
                             d2 <- abs(y-H2)
 
@@ -213,8 +218,8 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
                                         FUN = function(u, l, y, x) {
 
                                              ## LB Keogh
-                                             ind1 <- which(x > u)
-                                             ind2 <- which(x < l)
+                                             ind1 <- x > u
+                                             ind2 <- x < l
 
                                              H <- x
                                              H[ind1] <- u[ind1]
@@ -223,15 +228,14 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
                                              d1 <- abs(x-H)
 
                                              ## Lemire's improvement
-                                             UH <- caTools::runmax(H, window.size*2+1, endrule="constant")
-                                             LH <- caTools::runmin(H, window.size*2+1, endrule="constant")
+                                             EH <- call_runminmax(H, window.size*2+1)
 
-                                             ind3 <- which(y > UH)
-                                             ind4 <- which(y < LH)
+                                             ind3 <- y > EH$max
+                                             ind4 <- y < EH$min
 
                                              H2 <- y
-                                             H2[ind3] <- UH[ind3]
-                                             H2[ind4] <- LH[ind4]
+                                             H2[ind3] <- EH$max[ind3]
+                                             H2[ind4] <- EH$min[ind4]
 
                                              d2 <- abs(y-H2)
 

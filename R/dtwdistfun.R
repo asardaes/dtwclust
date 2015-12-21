@@ -20,7 +20,7 @@ dtwdistfun <- function(distance, control, distmat) {
 
      dtwdist <- function(x, centers = NULL, ...) {
 
-          ## Extra distance parameters
+          ## Extra distance parameters in case of parallel computation
           dots <- list(...)
 
           if (!is.null(distmat)) {
@@ -53,7 +53,7 @@ dtwdistfun <- function(distance, control, distmat) {
 
                     ## I need to re-register any custom distances in each parallel worker
                     dist_entry <- proxy::pr_DB$get_entry(distance)
-                    
+
                     ## Does the registered function possess '...' in its definition?
                     has_dots <- is.function(dist_entry$FUN) && !is.null(formals(dist_entry$FUN)$...)
 
@@ -79,17 +79,16 @@ dtwdistfun <- function(distance, control, distmat) {
                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                            if (has_dots) {
-                                                dd <- do.call(proxy::dist,
-                                                              args = c(list(x = x[pairs[,1]],
-                                                                            y = x[pairs[,2]],
-                                                                            method = distance,
-                                                                            window.type = window.type,
-                                                                            window.size = control@window.size,
-                                                                            norm = control@norm,
-                                                                            error.check = FALSE,
-                                                                            pairwise = TRUE),
+                                                dd <- proxy::dist(x = x[pairs[,1]],
+                                                                  y = x[pairs[,2]],
+                                                                  method = distance,
+                                                                  window.type = window.type,
+                                                                  window.size = control@window.size,
+                                                                  norm = control@norm,
+                                                                  error.check = FALSE,
+                                                                  pairwise = TRUE,
+                                                                  ... = dots)
 
-                                                                       dots))
                                            } else {
                                                 dd <- proxy::dist(x[pairs[,1]], x[pairs[,2]],
                                                                   method = distance, pairwise = TRUE)
@@ -122,15 +121,14 @@ dtwdistfun <- function(distance, control, distmat) {
                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                            if (has_dots) {
-                                                dd <- do.call(proxy::dist,
-                                                              args = c(list(x = x, y = centers,
-                                                                            method = distance,
-                                                                            window.type = window.type,
-                                                                            window.size = control@window.size,
-                                                                            norm = control@norm,
-                                                                            error.check = FALSE),
+                                                dd <- proxy::dist(x = x, y = centers,
+                                                                  method = distance,
+                                                                  window.type = window.type,
+                                                                  window.size = control@window.size,
+                                                                  norm = control@norm,
+                                                                  error.check = FALSE,
+                                                                  ... = dots)
 
-                                                                       dots))
                                            } else {
                                                 dd <- proxy::dist(x, centers, method = distance)
                                            }
@@ -152,14 +150,14 @@ dtwdistfun <- function(distance, control, distmat) {
                     if (has_dots) {
                          ## If it has '...', put everything there and let it use whatever it needs
 
-                         ## do.call to ensure that the 'dots' argument is passed as '...'
-                         d <- do.call(proxy::dist,
-                                      args = c(list(x = x, y = centers,
-                                                    method = distance,
-                                                    window.type = window.type, window.size = control@window.size,
-                                                    norm = control@norm, error.check = FALSE),
+                         d <- proxy::dist(x = x, y = centers,
+                                          method = distance,
+                                          window.type = window.type,
+                                          window.size = control@window.size,
+                                          norm = control@norm,
+                                          error.check = FALSE,
+                                          ... = dots)
 
-                                               dots))
                     } else {
                          ## Otherwise just call it like this
                          d <- proxy::dist(x, centers, method = distance)

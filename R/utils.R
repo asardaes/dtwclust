@@ -124,6 +124,16 @@ consistency_check <- function(obj, case, ...) {
 # Helper functions
 # ========================================================================================================
 
+# Running extremes
+call_runminmax <- function(series, window) {
+     series <- as.numeric(series)
+
+     consistency_check(series, "ts")
+     window <- consistency_check(window, "window")
+
+     .Call("runminmax", series, window, PACKAGE = "dtwclust")
+}
+
 # Create combinations of all possible pairs
 call_pairs <- function(n = 2L, byrow = TRUE) {
      if (n < 2)
@@ -142,7 +152,7 @@ check_parallel <- function(distance = NULL) {
      ret
 }
 
-# Split a given number to tasks into parallel workers
+# Split a given object into tasks for parallel workers
 split_parallel <- function(obj, tasks, margin = NULL) {
      tasks <- parallel::splitIndices(tasks, foreach::getDoParWorkers())
      tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) > 0]

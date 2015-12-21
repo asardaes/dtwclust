@@ -394,7 +394,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     if (control@trace)
                          cat("\n\tPrecomputing distance matrix...\n\n")
 
-                    distmat <- do.call("distfun", c(list(data), dots))
+                    distmat <- distfun(data, ... = dots)
 
                     ## Redefine dist with new distmat (to update closure)
                     distfun <- dtwdistfun(distance = distance,
@@ -445,8 +445,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## Cluster
           ## ----------------------------------------------------------------------------------------------------------
 
-          ## do.call is used for now to provide the (possibly) modified 'dots' argument
-
           if (control@nrep > 1L) {
                ## I need to re-register any custom distances in each parallel worker
                if (is.character(distance))
@@ -462,13 +460,12 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                        if (!is.null(dist_entry) && !proxy::pr_DB$entry_exists(dist_entry$names[1]))
                                             do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                                       kc <- do.call("kcca.list",
-                                                     c(list(x = data,
-                                                            k = k,
-                                                            family = family,
-                                                            iter.max = control@iter.max,
-                                                            trace = control@trace),
-                                                       dots))
+                                       kc <- kcca.list(x = data,
+                                                       k = k,
+                                                       family = family,
+                                                       iter.max = control@iter.max,
+                                                       trace = control@trace,
+                                                       ... = dots)
 
                                        gc(FALSE)
 
@@ -476,13 +473,12 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                   }
           } else {
                ## Just one repetition
-               kc.list <- list(do.call("kcca.list",
-                                       c(list(x = data,
-                                              k = k,
-                                              family = family,
-                                              iter.max = control@iter.max,
-                                              trace = control@trace),
-                                         dots)))
+               kc.list <- list(kcca.list(x = data,
+                                         k = k,
+                                         family = family,
+                                         iter.max = control@iter.max,
+                                         trace = control@trace,
+                                         ... = dots))
           }
 
           ## ----------------------------------------------------------------------------------------------------------
@@ -553,7 +549,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                    "average", "mcquitty", "median", "centroid")
 
           if (length(unique(lengths)) > 1)
-               consistency_check(distance, "dist", trace = control@trace)
+               consistency_check(ifelse(is.character(distance),
+                                        distance,
+                                        as.character(substitute(distance))[1]),
+                                 "dist", trace = control@trace)
 
           if (control@trace && is.null(distmat))
                cat("\n\tCalculating distance matrix...\n")
@@ -569,7 +568,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           } else if (is.function(distance)) {
                distfun <- distance
-               D <- do.call("distfun", c(list(data), dots))
+               D <- distfun(data, ... = dots)
                distance <- as.character(substitute(distance))[[1]]
 
           } else if (is.character(distance)) {
@@ -580,7 +579,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                      distmat = NULL)
 
                ## single argument is to calculate whole distance matrix
-               D <- do.call("distfun", c(list(data), dots))
+               D <- distfun(data, ... = dots)
 
           } else {
                stop("Unspported distance definition")

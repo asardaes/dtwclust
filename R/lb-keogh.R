@@ -83,26 +83,30 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, up
      if (window.size > length(x))
           stop("The width of the window should not exceed the length of the series")
 
-     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runmax/min'
-     if (is.null(lower.env)) {
-          lower.env <- caTools::runmin(y, window.size*2+1, endrule="constant")
-     } else {
-          if (length(lower.env) != length(y))
-               stop("Length mismatch between 'y' and its lower envelope")
+     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
+     if (is.null(lower.env) && is.null(upper.env)) {
+          envelopes <- call_runminmax(y, window.size*2+1)
+          lower.env <- envelopes$min
+          upper.env <- envelopes$max
+
+     } else if (is.null(lower.env)) {
+          lower.env <- caTools::runmin(y, window.size*2+1)
+
+     } else if (is.null(upper.env)) {
+          upper.env <- caTools::runmax(y, window.size*2+1)
      }
 
-     if (is.null(upper.env)) {
-          upper.env <- caTools::runmax(y, window.size*2+1, endrule="constant")
-     } else {
-          if (length(upper.env) != length(y))
-               stop("Length mismatch between 'y' and its upper envelope")
-     }
+     if (length(lower.env) != length(y))
+          stop("Length mismatch between 'y' and its lower envelope")
+
+     if (length(upper.env) != length(y))
+          stop("Length mismatch between 'y' and its upper envelope")
 
      D <- rep(0, length(x))
 
-     ind1 <- which(x > upper.env)
+     ind1 <- x > upper.env
      D[ind1] <- x[ind1] - upper.env[ind1]
-     ind2 <- which(x < lower.env)
+     ind2 <- x < lower.env
      D[ind2] <- lower.env[ind2] - x[ind2]
 
      d <- switch(EXPR = norm,
@@ -148,10 +152,13 @@ lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
                stop("Window size should not exceed length of the time series")
      }
 
-     ## from 'caTools' package
-     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runmax/min'
-     upper.env <- lapply(y, runmax, k=window.size*2+1, endrule="constant")
-     lower.env <- lapply(y, runmin, k=window.size*2+1, endrule="constant")
+     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
+     envelops <- lapply(y, function(s) {
+          call_runminmax(s, window.size*2+1)
+     })
+
+     lower.env <- lapply(envelops, "[[", "min")
+     upper.env <- lapply(envelops, "[[", "max")
 
      if (force.pairwise)
           DD <- mapply(upper.env, lower.env, x,
@@ -159,9 +166,9 @@ lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
 
                             D <- rep(0, length(x))
 
-                            ind1 <- which(x > u)
+                            ind1 <- x > u
                             D[ind1] <- x[ind1] - u[ind1]
-                            ind2 <- which(x < l)
+                            ind2 <- x < l
                             D[ind2] <- l[ind2] - x[ind2]
 
                             d <- switch(EXPR = norm,
@@ -180,9 +187,9 @@ lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
 
                                              D <- rep(0, length(x))
 
-                                             ind1 <- which(x > u)
+                                             ind1 <- x > u
                                              D[ind1] <- x[ind1] - u[ind1]
-                                             ind2 <- which(x < l)
+                                             ind2 <- x < l
                                              D[ind2] <- l[ind2] - x[ind2]
 
                                              d <- switch(EXPR = norm,

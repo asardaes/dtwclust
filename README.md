@@ -39,12 +39,12 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
                      centroid = "pam", seed = 3247, 
                      control = c(ctrl, list(pam.precompute = FALSE)))
 #> Iteration 1: Changes / Distsum = 100 / 1639.01
-#> Iteration 2: Changes / Distsum = 13 / 1311.143
-#> Iteration 3: Changes / Distsum = 4 / 1298.251
-#> Iteration 4: Changes / Distsum = 1 / 1288.069
-#> Iteration 5: Changes / Distsum = 0 / 1288.069
+#> Iteration 2: Changes / Distsum = 13 / 1307.411
+#> Iteration 3: Changes / Distsum = 2 / 1290.775
+#> Iteration 4: Changes / Distsum = 2 / 1287.395
+#> Iteration 5: Changes / Distsum = 0 / 1287.395
 #> 
-#>  Elapsed time is 14.576 seconds.
+#>  Elapsed time is 10.409 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -63,7 +63,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.632 seconds.
+#>  Elapsed time is 0.618 seconds.
 
 cat("Rand index for HC+SBD:\n")
 #> Rand index for HC+SBD:
@@ -88,7 +88,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 3.66 seconds.
+#>  Elapsed time is 4.053 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -137,7 +137,7 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 3: Changes / Distsum = 2 / 3.687197
 #> Iteration 4: Changes / Distsum = 0 / 3.631238
 #> 
-#>  Elapsed time is 20.431 seconds.
+#>  Elapsed time is 20.324 seconds.
 
 # Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))

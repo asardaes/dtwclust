@@ -20,7 +20,7 @@ kcca.list <- function (x, k, family = NULL, iter.max = 200L, trace = FALSE, ...)
 
           k <- length(centers)
 
-          centers <- family@allcent(x, cluster = cluster, k = k, centers, ...)
+          centers <- family@allcent(x, cluster, k, centers, ...)
 
           changes <- sum(cluster != clustold)
 
