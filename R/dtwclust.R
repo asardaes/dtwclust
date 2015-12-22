@@ -702,13 +702,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## Prepare results
           ## ----------------------------------------------------------------------------------------------------------
 
-          distfun <- function(x, y = NULL, ... = dots) {
-               proxy::dist(x, y,
-                           method = "DTW2",
-                           window.type = "slantedband",
-                           window.size = control@window.size,
-                           ...)
-          }
+          distfun <- dtwdistfun("dtw2", control = control, distmat = NULL)
 
           toc <- proc.time() - tic
 
