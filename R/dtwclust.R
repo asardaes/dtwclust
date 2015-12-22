@@ -447,7 +447,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           if (control@nrep > 1L) {
                ## I need to re-register any custom distances in each parallel worker
-               if (is.character(distance))
+               if (is.character(distance) && proxy::pr_DB$entry_exists(distance))
                     dist_entry <- proxy::pr_DB$get_entry(distance)
                else
                     dist_entry <- NULL
@@ -558,6 +558,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                cat("\n\tCalculating distance matrix...\n")
 
           if (!is.null(distmat)) {
+               if ( nrow(distmat) != length(data) || ncol(distmat) != length(data) )
+                    stop("Dimensions of provided cross-distance matrix don't correspond to length of provided data")
+
                D <- distmat
                distfun <- function(...) stop("'distmat' provided in call, no distance calculations performed")
 
@@ -699,13 +702,21 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## Prepare results
           ## ----------------------------------------------------------------------------------------------------------
 
+          distfun <- function(x, y = NULL, ... = dots) {
+               proxy::dist(x, y,
+                           method = "DTW2",
+                           window.type = "slantedband",
+                           window.size = control@window.size,
+                           ...)
+          }
+
           toc <- proc.time() - tic
 
           RET <- new("dtwclust",
                      call = MYCALL,
                      control = control,
                      family = new("dtwclustFamily",
-                                  dist = dtw2,
+                                  dist = distfun,
                                   preproc = preproc),
                      distmat = NULL,
 
