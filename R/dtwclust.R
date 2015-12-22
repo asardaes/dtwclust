@@ -433,13 +433,13 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           if (control@trace && control@nrep > 1L)
                message("Tracing of repetitions might not be available if done in parallel.\n")
 
-          if (!is.null(seed))
-               set.seed(seed)
-
           if (length(unique(lengths)) > 1) {
                consistency_check(distance, "dist", trace = control@trace)
                consistency_check(centroid, "cent", trace = control@trace)
           }
+
+          if (!is.null(seed))
+               set.seed(seed)
 
           ## ----------------------------------------------------------------------------------------------------------
           ## Cluster
@@ -702,6 +702,17 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## Prepare results
           ## ----------------------------------------------------------------------------------------------------------
 
+          ## Some additional cluster information (taken from flexclust)
+          subdistmat <- proxy::dist(data, data[R$centers][R$cl],
+                                    method = "dtw2",
+                                    window.type = "slantedband",
+                                    window.size = control@window.size,
+                                    pairwise = TRUE)
+          cldist <- as.matrix(subdistmat)
+          size <- as.vector(table(R$cl))
+          clusinfo <- data.frame(size = size,
+                                 av_dist = as.vector(tapply(cldist[,1], R$cl, sum))/size)
+
           distfun <- dtwdistfun("dtw2", control = control, distmat = NULL)
 
           toc <- proc.time() - tic
@@ -724,8 +735,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                      k = as.integer(k),
                      cluster = as.integer(R$cl),
 
-                     clusinfo = data.frame(),
-                     cldist = matrix(),
+                     clusinfo = clusinfo,
+                     cldist = cldist,
                      iter = 1L,
                      converged = TRUE,
 
