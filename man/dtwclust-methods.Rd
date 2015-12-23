@@ -4,22 +4,33 @@
 \name{dtwclust-methods}
 \alias{dtwclust-methods}
 \alias{plot,dtwclust,missing-method}
+\alias{predict,dtwclust-method}
 \alias{show,dtwclust-method}
+\alias{update,dtwclust-method}
 \title{Methods for \code{dtwclust}}
 \usage{
+\S4method{show}{dtwclust}(object)
+
+\S4method{update}{dtwclust}(object, ..., evaluate = TRUE)
+
+\S4method{predict}{dtwclust}(object, newdata = NULL, ...)
+
 \S4method{plot}{dtwclust,missing}(x, y, ..., clus = seq_len(x@k),
   labs.arg = NULL, data = NULL, time = NULL, plot = TRUE,
   type = "dendrogram")
-
-\S4method{show}{dtwclust}(object)
 }
 \arguments{
-\item{x}{An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.}
-
-\item{y}{Ignored.}
+\item{object, x}{An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.}
 
 \item{...}{Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
 \emph{cluster centers}, or to \code{\link[stats]{plot.hclust}}. See details.}
+
+\item{evaluate}{Logical. Defaults to \code{TRUE} and evaluates the updated call, which will result in
+a new \code{dtwclust} object. Otherwise, it returns the unevaluated call.}
+
+\item{newdata}{New data to be evaluated. It can take any of the supported formats of \code{\link{dtwclust}}.}
+
+\item{y}{Ignored.}
 
 \item{clus}{A numeric vector indicating which clusters to plot.}
 
@@ -34,9 +45,7 @@ the longest series.}
 \item{plot}{Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot object without
 printing anything to screen}
 
-\item{type}{What to plot. See details.}
-
-\item{object}{An object of class \code{dtwclust}.}
+\item{type}{What to plot. Only relevant for hierarchical procedures. See details.}
 }
 \value{
 The plot method returns a \code{gg} object (or \code{NULL} for hierarchical methods) invisibly.
@@ -45,10 +54,23 @@ The plot method returns a \code{gg} object (or \code{NULL} for hierarchical meth
 Methods associated with \code{\link{dtwclust-class}} objects.
 }
 \details{
+Supported generics from the \code{flexclust} package are: \code{\link[flexclust]{randIndex}} and
+\code{\link[flexclust]{clusterSim}}.
+
+Show method displays basic information from the clustering results.
+
+The \code{update} method takes the original function call, replaces any provided argument and optionally
+evaluates the call again. Use \code{evaluate = FALSE)} if you want to get the
+unevaluated call.
+
+The \code{predict} generic can take the usual \code{newdata} argument and it returns the cluster(s) to which
+the data belongs; if \code{NULL}, it simply returns the obtained cluster indices. It preprocesses
+the data with the corresponding function if available.
+
 The plot method, by default, plots the time series of each cluster along with the obtained centroid.
-It uses \code{ggplot2} plotting system (\code{\link[ggplot2]{ggplot}}). The default values for cluster centers are:
-\code{linetype = "dashed"}, \code{size = 1.5}, \code{colour = "black"}, \code{alpha = 0.5}. You can change this
-by means of \code{...}.
+It uses \code{ggplot2} plotting system (see \code{\link[ggplot2]{ggplot}}). The default values for
+cluster centers are: \code{linetype = "dashed"}, \code{size = 1.5}, \code{colour = "black"},
+\code{alpha = 0.5}. You can change this by means of \code{...}.
 
 The flag \code{save.data} should be set to \code{TRUE} when running \code{\link{dtwclust}} to be able to
 use this. Optionally, you can manually provide the data in the \code{data} parameter.
@@ -59,8 +81,6 @@ might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 If a hierarchical procedure was used, then you can specify \code{type} \code{=} \code{"dendrogram"} to
 plot the corresponding dendrogram (the default in this case), and pass any extra parameters via \code{...}.
 Use \code{type} \code{=} \code{"series"} to plot the time series clusters using the original call's \code{k}.
-
-Show method displays basic information of results.
 }
 \seealso{
 \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}}

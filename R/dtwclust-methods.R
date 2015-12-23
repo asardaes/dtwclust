@@ -3,6 +3,10 @@
 #' @description
 #' Methods associated with \code{\link{dtwclust-class}} objects.
 #'
+#' @details
+#' Supported generics from the \code{flexclust} package are: \code{\link[flexclust]{randIndex}} and
+#' \code{\link[flexclust]{clusterSim}}.
+#'
 #' @name dtwclust-methods
 #' @rdname dtwclust-methods
 #' @include dtwclust-classes.R
@@ -27,53 +31,56 @@ setMethod("initialize", "dtwclust",
           })
 
 # ========================================================================================================
-# Validity and coercion methods for control
+# Show
 # ========================================================================================================
 
-setValidity("dtwclustControl",
-            function(object) {
+#' @details
+#' Show method displays basic information from the clustering results.
+#'
+#' @rdname dtwclust-methods
+#' @aliases show,dtwclust-method
+#'
+#' @param object,x An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.
+#'
+#' @exportMethod show
+#'
+setMethod("show", "dtwclust",
+          function(object) {
+               print(object@call)
+               cat("\n")
 
-                 if (!is.null(object@window.size) && object@window.size < 1)
-                      return("Window size must be positive if provided")
+               cat(object@type, "clustering with", object@k, "clusters\n")
+               cat("Using", object@distance, "distance\n")
 
-                 if (!(object@norm %in% c("L1", "L2")))
-                      return("Norm can only be L1 or L2")
+               if (object@type == "partitional")
+                    cat("Using", object@centroid, "centroids\n")
+               if (object@preproc != "none")
+                    cat("Using", object@preproc, "preprocessing\n")
 
-                 if (object@dba.iter < 0L)
-                      return("DBA iterations must be positive")
+               cat("\nTime required for analysis:\n")
+               print(object@proctime)
 
-                 if (object@iter.max < 0L)
-                      return("Maximum iterations must be positive")
-
-                 if (object@nrep < 1L)
-                      return("Number of repetitions must be at least one")
-
-                 TRUE
-            })
-
-setAs("list", "dtwclustControl",
-      function(from, to) {
-           ctrl <- new(to)
-
-           for (arg in names(from)) {
-                val <- from[[arg]]
-                slot(ctrl, arg) <- ifelse(is.numeric(val), as.integer(val), val)
-           }
-
-           validObject(ctrl)
-
-           ctrl
-      })
-
-setAs("NULL", "dtwclustControl",
-      function(from, to) {
-           new(to)
-      })
+               cat("\nCluster sizes with average intra-cluster distance:\n\n")
+               print(object@clusinfo)
+          })
 
 # ========================================================================================================
 # update from stats
 # ========================================================================================================
 
+#' @details
+#' The \code{update} method takes the original function call, replaces any provided argument and optionally
+#' evaluates the call again. Use \code{evaluate = FALSE)} if you want to get the
+#' unevaluated call.
+#'
+#' @rdname dtwclust-methods
+#' @aliases update,dtwclust-method
+#'
+#' @param evaluate Logical. Defaults to \code{TRUE} and evaluates the updated call, which will result in
+#' a new \code{dtwclust} object. Otherwise, it returns the unevaluated call.
+#'
+#' @exportMethod update
+#'
 setMethod("update", "dtwclust",
           function(object, ..., evaluate = TRUE) {
 
@@ -100,14 +107,47 @@ setMethod("update", "dtwclust",
           })
 
 # ========================================================================================================
+# predict from stats
+# ========================================================================================================
+
+#' @details
+#' The \code{predict} generic can take the usual \code{newdata} argument and it returns the cluster(s) to which
+#' the data belongs; if \code{NULL}, it simply returns the obtained cluster indices. It preprocesses
+#' the data with the corresponding function if available.
+#'
+#' @rdname dtwclust-methods
+#' @aliases predict,dtwclust-method
+#'
+#' @param newdata New data to be evaluated. It can take any of the supported formats of \code{\link{dtwclust}}.
+#'
+#' @exportMethod predict
+#'
+setMethod("predict", "dtwclust",
+          function(object, newdata = NULL, ...) {
+               if (is.null(newdata)) {
+                    ret <- object@cluster
+
+               } else {
+                    newdata <- consistency_check(newdata, "tsmat")
+                    consistency_check(newdata, "vltslist")
+                    newdata <- object@family@preproc(newdata)
+                    distmat <- object@family@dist(newdata, object@centers)
+                    ret <- object@family@cluster(distmat = distmat)
+                    names(ret) <- names(newdata)
+               }
+
+               ret
+          })
+
+# ========================================================================================================
 # Plot
 # ========================================================================================================
 
 #' @details
 #' The plot method, by default, plots the time series of each cluster along with the obtained centroid.
-#' It uses \code{ggplot2} plotting system (\code{\link[ggplot2]{ggplot}}). The default values for cluster centers are:
-#' \code{linetype = "dashed"}, \code{size = 1.5}, \code{colour = "black"}, \code{alpha = 0.5}. You can change this
-#' by means of \code{...}.
+#' It uses \code{ggplot2} plotting system (see \code{\link[ggplot2]{ggplot}}). The default values for
+#' cluster centers are: \code{linetype = "dashed"}, \code{size = 1.5}, \code{colour = "black"},
+#' \code{alpha = 0.5}. You can change this by means of \code{...}.
 #'
 #' The flag \code{save.data} should be set to \code{TRUE} when running \code{\link{dtwclust}} to be able to
 #' use this. Optionally, you can manually provide the data in the \code{data} parameter.
@@ -119,7 +159,6 @@ setMethod("update", "dtwclust",
 #' plot the corresponding dendrogram (the default in this case), and pass any extra parameters via \code{...}.
 #' Use \code{type} \code{=} \code{"series"} to plot the time series clusters using the original call's \code{k}.
 #'
-#' @param x An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.
 #' @param y Ignored.
 #' @param ... Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
 #' \emph{cluster centers}, or to \code{\link[stats]{plot.hclust}}. See details.
@@ -131,7 +170,7 @@ setMethod("update", "dtwclust",
 #' the longest series.
 #' @param plot Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot object without
 #' printing anything to screen
-#' @param type What to plot. See details.
+#' @param type What to plot. Only relevant for hierarchical procedures. See details.
 #'
 #' @return The plot method returns a \code{gg} object (or \code{NULL} for hierarchical methods) invisibly.
 #'
@@ -265,38 +304,6 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
           })
 
 # ========================================================================================================
-# Show
-# ========================================================================================================
-
-#' @details
-#' Show method displays basic information of results.
-#'
-#' @rdname dtwclust-methods
-#' @aliases show,dtwclust-method
-#'
-#' @param object An object of class \code{dtwclust}.
-#'
-setMethod("show", "dtwclust",
-          function(object) {
-               print(object@call)
-               cat("\n")
-
-               cat(object@type, "clustering with", object@k, "clusters\n")
-               cat("Using", object@distance, "distance\n")
-
-               if (object@type == "partitional")
-                    cat("Using", object@centroid, "centroids\n")
-               if (object@preproc != "none")
-                    cat("Using", object@preproc, "preprocessing\n")
-
-               cat("\nTime required for analysis:\n")
-               print(object@proctime)
-
-               cat("\nCluster sizes with average intra-cluster distance:\n\n")
-               print(object@clusinfo)
-          })
-
-# ========================================================================================================
 # Rand Index from flexclust package
 # ========================================================================================================
 
@@ -342,54 +349,6 @@ setMethod("randIndex", signature(x="ANY", y="dtwclust"),
 setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
           function(x, y, correct = TRUE, original = !correct) {
                randIndex(x@cluster, y@cluster, correct = correct, original = original)
-          })
-
-# ========================================================================================================
-# info from modeltools
-# ========================================================================================================
-
-setMethod("info", "dtwclust",
-          function(object, which, ...) {
-               ret <- switch(EXPR = which,
-                             help = c("distsum", "size", "av_dist"),
-                             distsum = sum(object@cldist[, 1]),
-                             size = {
-                                  var <- object@clusinfo$size
-                                  names(var) <- rownames(object@clusinfo)
-
-                                  var
-                             },
-                             av_dist = {
-                                  var <- object@clusinfo$av_dist
-                                  names(var) <- rownames(object@clusinfo)
-
-                                  var
-                             },
-
-                             stop("Requested info not available. Use which = 'help'."))
-
-               ret
-          })
-
-# ========================================================================================================
-# predict from stats
-# ========================================================================================================
-
-setMethod("predict", "dtwclust",
-          function(object, newdata = NULL, ...) {
-               if (is.null(newdata)) {
-                    ret <- object@cluster
-
-               } else {
-                    newdata <- consistency_check(newdata, "tsmat")
-                    consistency_check(newdata, "vltslist")
-                    newdata <- object@family@preproc(newdata)
-                    distmat <- object@family@dist(newdata, object@centers)
-                    ret <- object@family@cluster(distmat = distmat)
-                    names(ret) <- names(newdata)
-               }
-
-               ret
           })
 
 # ========================================================================================================
@@ -471,3 +430,74 @@ setMethod("clusterSim", "dtwclust",
 
                z
           })
+
+# ========================================================================================================
+# info from modeltools (for internal support of some flexclust functions)
+# ========================================================================================================
+
+setMethod("info", "dtwclust",
+          function(object, which, ...) {
+               ret <- switch(EXPR = which,
+                             help = c("distsum", "size", "av_dist"),
+                             distsum = sum(object@cldist[, 1]),
+                             size = {
+                                  var <- object@clusinfo$size
+                                  names(var) <- rownames(object@clusinfo)
+
+                                  var
+                             },
+                             av_dist = {
+                                  var <- object@clusinfo$av_dist
+                                  names(var) <- rownames(object@clusinfo)
+
+                                  var
+                             },
+
+                             stop("Requested info not available. Use which = 'help'."))
+
+               ret
+          })
+
+# ========================================================================================================
+# Validity and coercion methods for control
+# ========================================================================================================
+
+setValidity("dtwclustControl",
+            function(object) {
+
+                 if (!is.null(object@window.size) && object@window.size < 1)
+                      return("Window size must be positive if provided")
+
+                 if (!(object@norm %in% c("L1", "L2")))
+                      return("Norm can only be L1 or L2")
+
+                 if (object@dba.iter < 0L)
+                      return("DBA iterations must be positive")
+
+                 if (object@iter.max < 0L)
+                      return("Maximum iterations must be positive")
+
+                 if (object@nrep < 1L)
+                      return("Number of repetitions must be at least one")
+
+                 TRUE
+            })
+
+setAs("list", "dtwclustControl",
+      function(from, to) {
+           ctrl <- new(to)
+
+           for (arg in names(from)) {
+                val <- from[[arg]]
+                slot(ctrl, arg) <- ifelse(is.numeric(val), as.integer(val), val)
+           }
+
+           validObject(ctrl)
+
+           ctrl
+      })
+
+setAs("NULL", "dtwclustControl",
+      function(from, to) {
+           new(to)
+      })
