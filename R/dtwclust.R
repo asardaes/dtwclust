@@ -15,23 +15,10 @@
 #'
 #' @section Distance:
 #'
-#' If a custom distance function is provided and \code{pam.precompute} is \code{TRUE}
-#' (see \code{\link{dtwclustControl}}) or \code{type} is
-#' \code{"hierarchical"}, the function will be called with the data as the first argument, followed by \code{...}.
+#' The supported option is to provide a string. The string can represent a compatible registered distance of
+#' \code{proxy}'s \code{\link[proxy]{dist}}. Extra parameters can be provided in \code{...}.
 #'
-#' If \code{pam.precompute} is \code{FALSE} and \code{type} is \code{"partitional"}, the function will be called
-#' at each iteration with the data as first argument, cluster centers as the second argument, and then \code{...}.
-#'
-#' The function should return a distance matrix, ideally of class \code{dist} or \code{crossdist}.
-#' The time series in the data should be along the rows, and the cluster centers along the columns of
-#' the distance matrix.
-#'
-#' The other option is to provide a string. The string can represent a compatible registered distance of
-#' \code{proxy}'s \code{\link[proxy]{dist}} and is the preferred method for custom distances.
-#' Extra parameters can be provided in \code{...}. See the examples but please finish reading this section before that.
-#'
-#' Additionally, with either type of algorithm, it can be a string of one of the following custom
-#' implementations (all registered with \code{proxy}):
+#' It can be a string of one of the following custom implementations (all registered with \code{proxy}):
 #'
 #' \itemize{
 #'   \item \code{"dtw"}: DTW with L1 norm and optionally a Sakoe-Chiba/Slanted-band constraint.
@@ -49,9 +36,9 @@
 #'
 #' Note that only \code{dtw}, \code{dtw2} and \code{sbd} support series of different lengths.
 #'
-#' If you want to create your own distance and also register it with \code{proxy}, it could include the ellipsis
-#' (\code{...}) in its definition. Functions in \code{proxy} will receive
-#' the following parameters if appropriate (see \code{\link{dtwclustControl}}):
+#' If you create your own distance and also register it with \code{proxy} (see \code{\link[proxy]{pr_DB}}),
+#' and it includes the ellipsis (\code{...}) in its definition, it will receive
+#' the following parameters (see \code{\link{dtwclustControl}}):
 #'
 #' \itemize{
 #'   \item \code{window.type}: Either \code{"none"} for a \code{NULL} \code{window.size}, or \code{"slantedband"}
@@ -61,7 +48,7 @@
 #'   \item \code{...}: Any additional parameters provided in the original call's ellipsis
 #' }
 #'
-#' Whether the function makes use of them or not, is up to you.
+#' Whether the function makes use of them or not, is up to you. See the examples.
 #'
 #' @section Centroid:
 #'
@@ -353,11 +340,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## Distance function
           ## ----------------------------------------------------------------------------------------------------------
 
-          if (is.function(distance)) {
-               distfun <- distance
-               distance <- as.character(substitute(distance))[1]
-
-          } else if (is.character(distance)) {
+          if (is.character(distance)) {
                # dtwdistfun.R
                distfun <- dtwdistfun(distance = distance,
                                      control = control,
@@ -397,10 +380,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                     distmat <- do.call("distfun", c(list(data), dots))
 
-                    ## Redefine dist with new distmat (to update closure)
-                    distfun <- dtwdistfun(distance = distance,
-                                          control = control,
-                                          distmat = distmat)
+                    ## Redefine new distmat
+                    assign("distmat", distmat, envir = environment(distfun))
 
                     gc(FALSE)
                }
@@ -552,10 +533,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                    "average", "mcquitty", "median", "centroid")
 
           if (length(unique(lengths)) > 1)
-               consistency_check(ifelse(is.character(distance),
-                                        distance,
-                                        as.character(substitute(distance))[1]),
-                                 "dist", trace = control@trace)
+               consistency_check(distance, "dist", trace = control@trace)
 
           if (control@trace && is.null(distmat))
                cat("\n\tCalculating distance matrix...\n")
@@ -571,11 +549,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     distance <- attr(distmat, "method")
                else
                     distance <- "unknown"
-
-          } else if (is.function(distance)) {
-               distfun <- distance
-               D <- do.call("distfun", c(list(data), dots))
-               distance <- as.character(substitute(distance))[[1]]
 
           } else if (is.character(distance)) {
                ## Take advantage of the function I defined for the partitional methods

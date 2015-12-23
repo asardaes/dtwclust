@@ -99,9 +99,12 @@ consistency_check <- function(obj, case, ...) {
           included <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd")
           valid <- c("dtw", "dtw2", "sbd")
 
-          if (is.character(obj) && (obj %in% included) && !(obj %in% valid))
+          if (!is.character(obj))
+               stop("Please register your function with the 'proxy' package.")
+
+          if ((obj %in% included) && !(obj %in% valid))
                stop("Only the following distances are supported for series of different lengths:\n\tdtw\tdtw2\tsbd")
-          else if(is.character(obj) && !(obj %in% included) && list(...)$trace)
+          else if(!(obj %in% included) && list(...)$trace)
                message("Series have different lengths. Please confirm that the provided distance function supports this.\n")
 
      } else if (case == "cent") {
