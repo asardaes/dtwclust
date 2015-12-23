@@ -101,9 +101,9 @@ implementations (all registered with \code{proxy}):
 
 Note that only \code{dtw}, \code{dtw2} and \code{sbd} support series of different lengths.
 
-If you want to create your own distance and also register it with \code{proxy}, it should include the ellipsis
-(\code{...}) in its definition so that it is correctly called. Functions in \code{proxy} will always receive
-the following parameters (see \code{\link{dtwclustControl}}):
+If you want to create your own distance and also register it with \code{proxy}, it could include the ellipsis
+(\code{...}) in its definition. Functions in \code{proxy} will receive
+the following parameters if appropriate (see \code{\link{dtwclustControl}}):
 
 \itemize{
   \item \code{window.type}: Either \code{"none"} for a \code{NULL} \code{window.size}, or \code{"slantedband"}
@@ -224,6 +224,7 @@ matrices in parallel. This should work with any function registered with \code{\
 \code{\link[proxy]{pr_DB}} whose \code{loop} flag is set to \code{TRUE}. If the function requires special packages
 to be loaded, provide their names in the \code{packages} slot of \code{control} (see \code{\link{dtwclustControl}}).
 In addition, "dtwclust" is always loaded in each parallel worker, so that doesn't need to be included.
+Alternatively, you may want to pre-load \code{dtwclust} in each worker with \code{\link[parallel]{clusterEvalQ}}.
 
 Note that, by default, if a parallel backend is registered, multiple repetitions are to be performed (partitional clustering,
 \code{control@nrep} \code{>=} 1)

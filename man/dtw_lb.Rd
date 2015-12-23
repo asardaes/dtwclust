@@ -5,7 +5,7 @@
 \title{DTW calculation guided by Lemire's lower bounds}
 \usage{
 dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
-  force.pairwise = FALSE, ...)
+  force.pairwise = FALSE)
 }
 \arguments{
 \item{x}{A matrix where rows are time series, or a list of time series.}
@@ -19,8 +19,6 @@ dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
 \item{error.check}{Should inconsistencies in the data be checked?}
 
 \item{force.pairwise}{Calculate pairwise distances. See the Notes.}
-
-\item{...}{Ignored.}
 }
 \value{
 The distance matrix with class \code{crossdist}.
@@ -47,9 +45,6 @@ the window.
 }
 \note{
 This function uses a lower bound that is only defined for time series of equal lengths.
-
-The \code{...} argument is better left alone, however the function definition needs it so that the internal
-functions can call it appropriately if parallel computing is enabled.
 
 If you use the version registered with \code{proxy}, and because of possible bug in its \code{\link[proxy]{dist}}
 function, the latter's \code{pairwise} argument will not work with this distance. You can use the custom argument

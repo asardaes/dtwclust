@@ -162,6 +162,7 @@
 #' \code{\link[proxy]{pr_DB}} whose \code{loop} flag is set to \code{TRUE}. If the function requires special packages
 #' to be loaded, provide their names in the \code{packages} slot of \code{control} (see \code{\link{dtwclustControl}}).
 #' In addition, "dtwclust" is always loaded in each parallel worker, so that doesn't need to be included.
+#' Alternatively, you may want to pre-load \code{dtwclust} in each worker with \code{\link[parallel]{clusterEvalQ}}.
 #'
 #' Note that, by default, if a parallel backend is registered, multiple repetitions are to be performed (partitional clustering,
 #' \code{control@nrep} \code{>=} 1)
