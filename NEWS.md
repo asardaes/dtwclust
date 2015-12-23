@@ -3,9 +3,10 @@
 ## Version 2.0.0
 * Major refactor.
 * Many formal parameters from the `dtwclust` function were dropped and implemented in the formal class `dtwclustControl`. For now, they will still be supported through `...` with a message.
+* No longer supporting non-proxy distances, in order to be able to take advantage of the included optimizations.
 * Dropped inheritance of `flexclust`'s `kccasimple`
      + Many slots and methods were ported
-     + Inheriting from `hclust` class now
+     + Inheriting from `hclust` class now, and all its associated methods
 * `shape_extraction` now accepts series with different lengths!
 * More parallel support
      + DBA and Shape centroid calculations 
@@ -14,7 +15,7 @@
 * Added `distmat` slot and `update` generic to save some time if possible. See examples of `dtwclust`.
 * Extra parameters for distance functions should be correctly detected now.
 * Using `dtw_lb` function now correctly warns about `pam.precompute` being `TRUE`.
-* Option to calculate pairwise distances with `SBD`, `LB_Keogh` and `LB_Improved`. See their respective notes.
+* Option to calculate pairwise distances with `SBD`, `LB_Keogh` and `LB_Improved`. See their respective notes. The distance function created for the `dtwclustFamily` slot also supports this.
 
 ## Version 1.3.0
 * Added the possibility to run several repetitions for partitional procedures, using different random starts each time by using the `doRNG` package

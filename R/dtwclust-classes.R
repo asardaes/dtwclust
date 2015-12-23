@@ -5,6 +5,13 @@
 #'
 #' The custom implementations also handle parallelization.
 #'
+#' Since the distance function makes use of \code{proxy}, it also supports any extra \code{\link[proxy]{dist}}
+#' parameters in \code{...}. However, the registered versions of  \code{\link{SBD}}, \code{\link{lb_keogh}},
+#' \code{\link{lb_improved}} and \code{\link{dtw_lb}} don't support the \code{pairwise} argument directly.
+#' See their respective notes to know how to overcome this.
+#'
+#' The prototype includes the \code{cluster} function, as well as a pass-through \code{preproc} function.
+#'
 #' @slot dist The function to calculate the distance matrices.
 #' @slot allcent The function to calculate centroids at each iteration.
 #' @slot cluster The function used to assign a series to a cluster.
@@ -114,7 +121,7 @@ setClass("dtwclustControl",
 
 #' Class definition for \code{dtwclust}
 #'
-#' Formal S4 class to know how to handle data for plotting.
+#' Formal S4 class.
 #'
 #' The class no longer inherits from \code{\link[flexclust]{kccasimple-class}}, but most slots and methods were ported.
 #' Namely, \code{data} and \code{index} slots were not.

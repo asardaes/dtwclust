@@ -4,7 +4,7 @@
 \alias{dtwclust-class}
 \title{Class definition for \code{dtwclust}}
 \description{
-Formal S4 class to know how to handle data for plotting.
+Formal S4 class.
 }
 \details{
 The class no longer inherits from \code{\link[flexclust]{kccasimple-class}}, but most slots and methods were ported.
