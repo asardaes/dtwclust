@@ -115,6 +115,9 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
      X <- consistency_check(x, "tsmat")
 
+     # Attempt parallel computations?
+     do_par <- check_parallel()
+
      if (force.pairwise) {
           if (is.null(y))
                Y <- x
@@ -126,20 +129,45 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
           else
                window.type <- "slantedband"
 
-          D <- switch(EXPR = norm,
+          if (do_par) {
+               X <- split_parallel(X, length(X))
+               Y <- split_parallel(Y, length(Y))
 
-                      L1 = proxy::dist(X, Y,
-                                       pairwise = TRUE,
-                                       method = "DTW",
-                                       dist.method = "L1",
-                                       window.type = window.type,
-                                       window.size = window.size),
+               D <- foreach(X = X, Y = Y,
+                            .combine = c,
+                            .multicombine = TRUE,
+                            .packages = "dtwclust") %dopar% {
+                                 switch(EXPR = norm,
 
-                      L2 = proxy::dist(X, Y,
-                                       pairwise = TRUE,
-                                       method = "DTW2",
-                                       window.type = window.type,
-                                       window.size = window.size))
+                                        L1 = proxy::dist(X, Y,
+                                                         pairwise = TRUE,
+                                                         method = "DTW",
+                                                         dist.method = "L1",
+                                                         window.type = window.type,
+                                                         window.size = window.size),
+
+                                        L2 = proxy::dist(X, Y,
+                                                         pairwise = TRUE,
+                                                         method = "DTW2",
+                                                         window.type = window.type,
+                                                         window.size = window.size))
+                            }
+          } else {
+               D <- switch(EXPR = norm,
+
+                           L1 = proxy::dist(X, Y,
+                                            pairwise = TRUE,
+                                            method = "DTW",
+                                            dist.method = "L1",
+                                            window.type = window.type,
+                                            window.size = window.size),
+
+                           L2 = proxy::dist(X, Y,
+                                            pairwise = TRUE,
+                                            method = "DTW2",
+                                            window.type = window.type,
+                                            window.size = window.size))
+          }
 
           return(D)
      }
@@ -173,9 +201,6 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
      singleIndexing <- seq(from=0, by=nrow(D), length.out=ncol(D))
 
      ## Update with DTW
-
-     # Attempt parallel computations?
-     do_par <- check_parallel()
 
      new.indNN <- apply(D, 2, which.min) # index of nearest neighbors
      indNN <- new.indNN + 1
