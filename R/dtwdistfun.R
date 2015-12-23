@@ -21,7 +21,29 @@ dtwdistfun <- function(distance, control, distmat) {
      dtwdist <- function(x, centers = NULL, ...) {
 
           ## Extra distance parameters in case of parallel computation
+          ## They can be for the function or for proxy::dist
           dots <- list(...)
+
+          dots$window.type <- window.type
+          dots$window.size <- control@window.size
+          dots$norm <- control@norm
+          dots$error.check <- FALSE
+
+          ## I need to re-register any custom distances in each parallel worker
+          dist_entry <- proxy::pr_DB$get_entry(distance)
+
+          ## Does the registered function possess '...' in its definition?
+          has_dots <- is.function(dist_entry$FUN) && !is.null(formals(dist_entry$FUN)$...)
+
+          ## If it doesn't, remove invalid arguments from 'dots'
+          if (!has_dots) {
+               if (is.function(dist_entry$FUN))
+                    valid_args <- union(names(formals(proxy::dist)), names(formals(dist_entry$FUN)))
+               else
+                    valid_args <- names(formals(proxy::dist))
+
+               dots <- dots[intersect(names(dots), valid_args)]
+          }
 
           if (!is.null(distmat)) {
 
@@ -51,18 +73,15 @@ dtwdistfun <- function(distance, control, distmat) {
                ## Attempt to calculate distmat in parallel?
                if (check_parallel(distance)) {
 
-                    ## I need to re-register any custom distances in each parallel worker
-                    dist_entry <- proxy::pr_DB$get_entry(distance)
-
-                    ## Does the registered function possess '...' in its definition?
-                    has_dots <- is.function(dist_entry$FUN) && !is.null(formals(dist_entry$FUN)$...)
-
                     ## variables from the parent environment that should be exported
                     export <- c("distance", "control",
                                 "window.type", "consistency_check")
 
                     if (is.null(centers)) {
                          ## Whole distmat is calculated
+
+                         ## strict pairwise as in proxy::dist doesn't make sense here, but this case needs it
+                         dots$pairwise <- TRUE
 
                          ## by column so that I can assign it with upper.tri at the end
                          pairs <- call_pairs(length(x), byrow = FALSE)
@@ -78,21 +97,12 @@ dtwdistfun <- function(distance, control, distmat) {
                                            if (!proxy::pr_DB$entry_exists(dist_entry$names[1]))
                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                                           if (has_dots) {
-                                                dd <- proxy::dist(x = x[pairs[,1]],
-                                                                  y = x[pairs[,2]],
-                                                                  method = distance,
-                                                                  window.type = window.type,
-                                                                  window.size = control@window.size,
-                                                                  norm = control@norm,
-                                                                  error.check = FALSE,
-                                                                  pairwise = TRUE,
-                                                                  ... = dots)
-
-                                           } else {
-                                                dd <- proxy::dist(x[pairs[,1]], x[pairs[,2]],
-                                                                  method = distance, pairwise = TRUE)
-                                           }
+                                           ## 'dots' has all extra arguments that are valid
+                                           dd <- do.call(proxy::dist,
+                                                         c(dots,
+                                                           list(x = x[pairs[,1]],
+                                                                y = x[pairs[,2]],
+                                                                method = distance)))
 
                                            dd
 
@@ -111,8 +121,16 @@ dtwdistfun <- function(distance, control, distmat) {
                          ## Only subset of distmat is calculated
                          x <- split_parallel(x, length(x))
 
-                         d <- foreach(x = x,
-                                      .combine = rbind,
+                         if (!is.null(dots$pairwise) && dots$pairwise) {
+                              centers <- split_parallel(centers, length(centers))
+                              combine <- c
+                         } else {
+                              centers <- lapply(1:length(x), function(dummy) centers)
+                              combine <- rbind
+                         }
+
+                         d <- foreach(x = x, centers = centers,
+                                      .combine = combine,
                                       .multicombine = TRUE,
                                       .packages = control@packages,
                                       .export = export) %dopar% {
@@ -120,18 +138,12 @@ dtwdistfun <- function(distance, control, distmat) {
                                            if (!proxy::pr_DB$entry_exists(dist_entry$names[1]))
                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                                           if (has_dots) {
-                                                dd <- proxy::dist(x = x, y = centers,
-                                                                  method = distance,
-                                                                  window.type = window.type,
-                                                                  window.size = control@window.size,
-                                                                  norm = control@norm,
-                                                                  error.check = FALSE,
-                                                                  ... = dots)
-
-                                           } else {
-                                                dd <- proxy::dist(x, centers, method = distance)
-                                           }
+                                           ## 'dots' has all extra arguments that are valid
+                                           dd <- do.call(proxy::dist,
+                                                         c(dots,
+                                                           list(x = x,
+                                                                y = centers,
+                                                                method = distance)))
 
                                            dd
 
@@ -141,28 +153,17 @@ dtwdistfun <- function(distance, control, distmat) {
                } else {
                     ## NO PARALLEL
 
-                    if (is.null(centers))
+                    if (is.null(centers)) {
                          centers <- x
-
-                    ## Does the registered function possess '...' in its definition?
-                    has_dots <- is.function(pr_DB$get_entry(distance)$FUN) && !is.null(formals(pr_DB$get_entry(distance)$FUN)$...)
-
-                    if (has_dots) {
-                         ## If it has '...', put everything there and let it use whatever it needs
-
-                         d <- proxy::dist(x = x, y = centers,
-                                          method = distance,
-                                          window.type = window.type,
-                                          window.size = control@window.size,
-                                          norm = control@norm,
-                                          error.check = FALSE,
-                                          ... = dots)
-
-                    } else {
-                         ## Otherwise just call it like this
-                         d <- proxy::dist(x, centers, method = distance)
+                         dots$pairwise <- FALSE # override possible TRUE
                     }
 
+                    ## 'dots' has all extra arguments that are valid
+                    d <- do.call(proxy::dist,
+                                 c(dots,
+                                   list(x = x,
+                                        y = centers,
+                                        method = distance)))
                }
           }
 

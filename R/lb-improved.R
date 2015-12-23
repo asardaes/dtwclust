@@ -137,7 +137,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
 # ========================================================================================================
 
 lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
-                             force.symmetry = FALSE, norm = "L1", force.pairwise = FALSE, ...) {
+                             force.symmetry = FALSE, norm = "L1", force.pairwise = FALSE) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 

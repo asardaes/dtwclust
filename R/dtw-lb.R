@@ -30,9 +30,6 @@
 #'
 #' This function uses a lower bound that is only defined for time series of equal lengths.
 #'
-#' The \code{...} argument is better left alone, however the function definition needs it so that the internal
-#' functions can call it appropriately if parallel computing is enabled.
-#'
 #' If you use the version registered with \code{proxy}, and because of possible bug in its \code{\link[proxy]{dist}}
 #' function, the latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
 #' \code{force.pairwise} to get the correct result (which is, effectively, calculating DTW distances only).
@@ -102,14 +99,13 @@
 #' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
 #' @param error.check Should inconsistencies in the data be checked?
 #' @param force.pairwise Calculate pairwise distances. See the Notes.
-#' @param ... Ignored.
 #'
 #' @return The distance matrix with class \code{crossdist}.
 #'
 #' @export
 
 dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
-                   error.check = TRUE, force.pairwise = FALSE, ...) {
+                   error.check = TRUE, force.pairwise = FALSE) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 

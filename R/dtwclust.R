@@ -49,9 +49,9 @@
 #'
 #' Note that only \code{dtw}, \code{dtw2} and \code{sbd} support series of different lengths.
 #'
-#' If you want to create your own distance and also register it with \code{proxy}, it should include the ellipsis
-#' (\code{...}) in its definition so that it is correctly called. Functions in \code{proxy} will always receive
-#' the following parameters (see \code{\link{dtwclustControl}}):
+#' If you want to create your own distance and also register it with \code{proxy}, it could include the ellipsis
+#' (\code{...}) in its definition. Functions in \code{proxy} will receive
+#' the following parameters if appropriate (see \code{\link{dtwclustControl}}):
 #'
 #' \itemize{
 #'   \item \code{window.type}: Either \code{"none"} for a \code{NULL} \code{window.size}, or \code{"slantedband"}
@@ -362,9 +362,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                      control = control,
                                      distmat = distmat)
 
-               if (tolower(distance) == "dtw_lb" && control@pam.precompute)
-                    warning("Using dtw_lb with control@pam.precompute = TRUE is not advised.")
-
           } else {
                stop("Unsupported distance definition")
           }
@@ -391,10 +388,13 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                          cat("\n\tDistance matrix provided...\n\n")
 
                } else if (control@pam.precompute) {
+                    if (tolower(distance) == "dtw_lb")
+                         warning("Using dtw_lb with control@pam.precompute = TRUE is not advised.")
+
                     if (control@trace)
                          cat("\n\tPrecomputing distance matrix...\n\n")
 
-                    distmat <- distfun(data, ... = dots)
+                    distmat <- do.call("distfun", c(list(data), dots))
 
                     ## Redefine dist with new distmat (to update closure)
                     distfun <- dtwdistfun(distance = distance,
@@ -460,12 +460,13 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                        if (!is.null(dist_entry) && !proxy::pr_DB$entry_exists(dist_entry$names[1]))
                                             do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                                       kc <- kcca.list(x = data,
-                                                       k = k,
-                                                       family = family,
-                                                       iter.max = control@iter.max,
-                                                       trace = control@trace,
-                                                       ... = dots)
+                                       kc <- do.call("kcca.list",
+                                                     c(dots,
+                                                       list(x = data,
+                                                            k = k,
+                                                            family = family,
+                                                            iter.max = control@iter.max,
+                                                            trace = control@trace)))
 
                                        gc(FALSE)
 
@@ -473,12 +474,13 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                   }
           } else {
                ## Just one repetition
-               kc.list <- list(kcca.list(x = data,
-                                         k = k,
-                                         family = family,
-                                         iter.max = control@iter.max,
-                                         trace = control@trace,
-                                         ... = dots))
+               kc.list <- list(do.call("kcca.list",
+                                       c(dots,
+                                         list(x = data,
+                                              k = k,
+                                              family = family,
+                                              iter.max = control@iter.max,
+                                              trace = control@trace))))
           }
 
           ## ----------------------------------------------------------------------------------------------------------
@@ -571,7 +573,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           } else if (is.function(distance)) {
                distfun <- distance
-               D <- distfun(data, ... = dots)
+               D <- do.call("distfun", c(list(data), dots))
                distance <- as.character(substitute(distance))[[1]]
 
           } else if (is.character(distance)) {
@@ -582,7 +584,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                      distmat = NULL)
 
                ## single argument is to calculate whole distance matrix
-               D <- distfun(data, ... = dots)
+               D <- do.call("distfun", c(list(data), dots))
 
           } else {
                stop("Unspported distance definition")
@@ -670,6 +672,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## =================================================================================================================
 
           control@window.size <- consistency_check(control@window.size, "window")
+          control@norm <- "L2"
 
           if (is.null(dc))
                stop("Please specify 'dc' for tadpole algorithm")
@@ -702,18 +705,14 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## Prepare results
           ## ----------------------------------------------------------------------------------------------------------
 
+          distfun <- dtwdistfun("dtw_lb", control = control, distmat = NULL)
+
           ## Some additional cluster information (taken from flexclust)
-          subdistmat <- proxy::dist(data, data[R$centers][R$cl],
-                                    method = "dtw2",
-                                    window.type = "slantedband",
-                                    window.size = control@window.size,
-                                    pairwise = TRUE)
+          subdistmat <- distfun(data, data[R$centers][R$cl], force.pairwise = TRUE)
           cldist <- as.matrix(subdistmat)
           size <- as.vector(table(R$cl))
           clusinfo <- data.frame(size = size,
                                  av_dist = as.vector(tapply(cldist[,1], R$cl, sum))/size)
-
-          distfun <- dtwdistfun("dtw2", control = control, distmat = NULL)
 
           toc <- proc.time() - tic
 
@@ -726,7 +725,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                      distmat = NULL,
 
                      type = type,
-                     distance = "DTW2",
+                     distance = "DTW2_LB",
                      centroid = "pam (TADPole)",
                      preproc = preproc_char,
                      proctime = toc,

@@ -115,7 +115,7 @@ SBD <- function(x, y, znorm = FALSE) {
 # Wrapper for proxy::dist
 # ========================================================================================================
 
-SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, force.pairwise = FALSE, ...) {
+SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, force.pairwise = FALSE) {
 
      x <- consistency_check(x, "tsmat")
 
