@@ -94,7 +94,7 @@ dtwdistfun <- function(distance, control, distmat) {
                                       .packages = control@packages,
                                       .export = export) %dopar% {
 
-                                           if (!proxy::pr_DB$entry_exists(dist_entry$names[1]))
+                                           if (!consistency_check(dist_entry$names[1], "dist", silent = TRUE))
                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                            ## 'dots' has all extra arguments that are valid
@@ -135,7 +135,7 @@ dtwdistfun <- function(distance, control, distmat) {
                                       .packages = control@packages,
                                       .export = export) %dopar% {
 
-                                           if (!proxy::pr_DB$entry_exists(dist_entry$names[1]))
+                                           if (!consistency_check(dist_entry$names[1], "dist", silent = TRUE))
                                                 do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                            ## 'dots' has all extra arguments that are valid

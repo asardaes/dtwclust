@@ -2,7 +2,7 @@ Package: dtwclust
 Type: Package
 Title: Time Series Clustering with Dynamic Time Warping Distance
 Version: 2.0.0.9000
-Date: 2015-12-23
+Date: 2015-12-25
 Depends:
     flexclust,
     proxy,
@@ -45,9 +45,9 @@ Collate:
     'kcca-list.R'
     'lb-improved.R'
     'lb-keogh.R'
+    'utils.R'
     'pkg.R'
     'reinterpolate.R'
     'shape-extraction.R'
     'uciCT.R'
-    'utils.R'
     'zscore.R'

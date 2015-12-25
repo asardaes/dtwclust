@@ -80,6 +80,8 @@
 #' @seealso \code{\link{dtwclust}}, \code{\link[proxy]{dist}},
 #' \code{\link[dtw]{dtw}}
 #'
+#' @include utils.R
+#'
 #' @useDynLib dtwclust
 #'
 #' @import methods
@@ -109,49 +111,39 @@ NULL
 
      ## Register DTW2
 
-     if (proxy::pr_DB$entry_exists("DTW2"))
-          proxy::pr_DB$delete_entry("DTW2")
-
-     proxy::pr_DB$set_entry(FUN = dtw2, names=c("DTW2", "dtw2"),
-                            loop = TRUE, type = "metric", distance = TRUE,
-                            description = "DTW with L2 as pointwise norm")
+     if (!consistency_check("DTW2", "dist", silent = TRUE))
+          proxy::pr_DB$set_entry(FUN = dtw2, names=c("DTW2", "dtw2"),
+                                 loop = TRUE, type = "metric", distance = TRUE,
+                                 description = "DTW with L2 as pointwise norm")
 
      ## Register LB_Keogh with the 'proxy' package for distance matrix calculation
 
-     if (proxy::pr_DB$entry_exists("LB_Keogh"))
-          proxy::pr_DB$delete_entry("LB_keogh")
-
-     proxy::pr_DB$set_entry(FUN = lb_keogh_loop, names=c("LBK", "LB_Keogh", "lbk"),
-                            loop = FALSE, type = "metric", distance = TRUE,
-                            description = "Keogh's DTW lower bound but using L1 norm")
+     if (!consistency_check("LB_Keogh", "dist", silent = TRUE))
+          proxy::pr_DB$set_entry(FUN = lb_keogh_loop, names=c("LBK", "LB_Keogh", "lbk"),
+                                 loop = FALSE, type = "metric", distance = TRUE,
+                                 description = "Keogh's DTW lower bound but using L1 norm")
 
 
      ## Register LB_Improved with the 'proxy' package for distance matrix calculation
 
-     if (proxy::pr_DB$entry_exists("LB_Improved"))
-          proxy::pr_DB$delete_entry("LB_Improved")
-
-     proxy::pr_DB$set_entry(FUN = lb_improved_loop, names=c("LBI", "LB_Improved", "lbi"),
-                            loop = FALSE, type = "metric", distance = TRUE,
-                            description = "Lemire's improved DTW lower bound using L1 norm")
+     if (!consistency_check("LB_Improved", "dist", silent = TRUE))
+          proxy::pr_DB$set_entry(FUN = lb_improved_loop, names=c("LBI", "LB_Improved", "lbi"),
+                                 loop = FALSE, type = "metric", distance = TRUE,
+                                 description = "Lemire's improved DTW lower bound using L1 norm")
 
      ## Register SBD
 
-     if (proxy::pr_DB$entry_exists("SBD"))
-          proxy::pr_DB$delete_entry("SBD")
-
-     proxy::pr_DB$set_entry(FUN = SBD.proxy, names=c("SBD", "sbd"),
-                            loop = FALSE, type = "metric", distance = TRUE,
-                            description = "Paparrizos' shape-based distance for time series")
+     if (!consistency_check("SBD", "dist", silent = TRUE))
+          proxy::pr_DB$set_entry(FUN = SBD.proxy, names=c("SBD", "sbd"),
+                                 loop = FALSE, type = "metric", distance = TRUE,
+                                 description = "Paparrizos' shape-based distance for time series")
 
      ## Register DTW_LB
 
-     if (proxy::pr_DB$entry_exists("DTW_LB"))
-          proxy::pr_DB$delete_entry("DTW_LB")
-
-     proxy::pr_DB$set_entry(FUN = dtw_lb, names=c("DTW_LB", "dtw_lb"),
-                            loop = FALSE, type = "metric", distance = TRUE,
-                            description = "DTW distance aided with Lemire's lower bound")
+     if (!consistency_check("DTW_LB", "dist", silent = TRUE))
+          proxy::pr_DB$set_entry(FUN = dtw_lb, names=c("DTW_LB", "dtw_lb"),
+                                 loop = FALSE, type = "metric", distance = TRUE,
+                                 description = "DTW distance aided with Lemire's lower bound")
 }
 
 .onUnload <- function(libpath) {

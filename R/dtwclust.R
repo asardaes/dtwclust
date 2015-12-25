@@ -416,8 +416,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                message("Tracing of repetitions might not be available if done in parallel.\n")
 
           if (length(unique(lengths)) > 1) {
-               consistency_check(distance, "dist", trace = control@trace)
+               consistency_check(distance, "dist", trace = control@trace, lengths = TRUE)
                consistency_check(centroid, "cent", trace = control@trace)
+          } else {
+               consistency_check(distance, "dist", trace = control@trace)
           }
 
           if (!is.null(seed))
@@ -429,17 +431,16 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           if (control@nrep > 1L) {
                ## I need to re-register any custom distances in each parallel worker
-               if (is.character(distance) && proxy::pr_DB$entry_exists(distance))
-                    dist_entry <- proxy::pr_DB$get_entry(distance)
-               else
-                    dist_entry <- NULL
+               dist_entry <- proxy::pr_DB$get_entry(distance)
+
+               export <- c("kcca.list", "consistency_check")
 
                kc.list <- foreach(i = 1:control@nrep,
                                   .combine = list,
                                   .multicombine = TRUE,
                                   .packages = control@packages,
-                                  .export = "kcca.list") %dorng% {
-                                       if (!is.null(dist_entry) && !proxy::pr_DB$entry_exists(dist_entry$names[1]))
+                                  .export = export) %dorng% {
+                                       if (!consistency_check(dist_entry$names[1], "dist", silent = TRUE))
                                             do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                        kc <- do.call("kcca.list",

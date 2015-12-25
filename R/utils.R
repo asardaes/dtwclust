@@ -12,8 +12,8 @@ consistency_check <- function(obj, case, ...) {
           if (!is.numeric(obj)) {
                stop("The series must be numeric")
           }
-          if (!is.null(dim(obj)) && min(dim(obj)) != 1) {
-               stop("The series must be univariate vectors")
+          if (!is.null(dim(obj))) {
+               stop("The series must be univariate vectors (provided object has non-NULL dim)")
           }
           if (length(obj) < 1) {
                stop("The series must have at least one point")
@@ -23,60 +23,58 @@ consistency_check <- function(obj, case, ...) {
           }
 
      } else if (case == "tslist") {
+          Lengths <- sapply(obj, length)
+
           if (class(obj) != "list")
-               stop("Series must be provided in the form of a list")
+               stop("Series must be provided in a list")
 
           if (length(obj) < 1)
                stop("Data is empty")
 
-          if (any(sapply(obj, function(obj) {
-               ifelse(!is.null(dim(obj)) && min(dim(obj)) != 1, TRUE, FALSE)
-          })))
-               stop("Each element of the list must be a univariate vector")
+          if (any(sapply(obj, function(obj) !is.null(dim(obj)) )))
+               stop("Each element of the list must be a univariate vector (at least one has non-NULL dim)")
 
           if (any(!sapply(obj, is.numeric)))
                stop("Each element of the list must be a numeric vector")
 
-          if (length(unique(sapply(obj, length))) > 1)
+          if (length(unique(Lengths)) > 1)
                stop("All series must have the same length")
 
-          if (any(sapply(obj, length) < 1))
+          if (any(Lengths < 1))
                stop("All series must have at least one element")
 
           if (any( sapply(obj, function(ts) {any(is.na(ts))}) ))
                stop("Time series cannot have missing elements")
 
      } else if (case == "vltslist") {
+          Lengths <- sapply(obj, length)
 
           ## list of variable-length time series
 
           if (class(obj) != "list")
-               stop("Series must be provided in the form of a list")
+               stop("Series must be provided in a list")
 
           if (length(obj) < 1)
                stop("Data is empty")
 
-          if (any(sapply(obj, function(obj) {
-               ifelse(!is.null(dim(obj)) && min(dim(obj)) != 1, TRUE, FALSE)
-          })))
-               stop("Each element of the list must be a univariate vector")
+          if (any(sapply(obj, function(obj) !is.null(dim(obj)) )))
+               stop("Each element of the list must be a univariate vector (at least one has non-NULL dim)")
 
           if (any(!sapply(obj, is.numeric)))
                stop("Each element of the list must be a numeric vector")
 
-          if (any(sapply(obj, length) < 1))
+          if (any(Lengths < 1))
                stop("All series must have at least one element")
 
           if (any( sapply(obj, function(ts) {any(is.na(ts))}) ))
                stop("Time series cannot have missing elements")
 
      } else if (case == "window") {
-          if (is.null(obj)) {
+          if (is.null(obj))
                stop("Please provide the 'window.size' parameter")
-          }
-          if (obj <= 0) {
+
+          if (obj <= 0)
                stop("Window width must be larger than 0")
-          }
 
           return(as.integer(obj))
 
@@ -96,16 +94,27 @@ consistency_check <- function(obj, case, ...) {
           return(obj)
 
      } else if (case == "dist") {
-          included <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd")
-          valid <- c("dtw", "dtw2", "sbd")
+          .local <- function(obj, trace = FALSE, lengths = FALSE, silent = FALSE, ...) {
+               included <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd")
+               valid <- c("dtw", "dtw2", "sbd")
 
-          if (!is.character(obj))
-               stop("Please register your function with the 'proxy' package.")
+               ## pr_DB$entry_exists is acting weird
+               if (!is.character(obj) || class(try(pr_DB[[obj]], TRUE)) == "try-error") {
+                    if (silent)
+                         return(FALSE)
+                    else
+                         stop("Please provide a valid distance function registered with the proxy package.")
+               }
 
-          if ((obj %in% included) && !(obj %in% valid))
-               stop("Only the following distances are supported for series of different lengths:\n\tdtw\tdtw2\tsbd")
-          else if(!(obj %in% included) && list(...)$trace)
-               message("Series have different lengths. Please confirm that the provided distance function supports this.\n")
+               if ((obj %in% included) && !(obj %in% valid) && lengths)
+                    stop("Only the following distances are supported for series of different lengths:\n\tdtw\tdtw2\tsbd")
+               else if(!(obj %in% included) && trace && lengths)
+                    message("Series have different lengths. Please confirm that the provided distance function supports this.\n")
+
+               TRUE # valid distance
+          }
+
+          return(.local(obj, ...))
 
      } else if (case == "cent") {
           included <- c("mean", "median", "shape", "dba", "pam")
@@ -140,7 +149,7 @@ call_runminmax <- function(series, window) {
 # Create combinations of all possible pairs
 call_pairs <- function(n = 2L, byrow = TRUE) {
      if (n < 2)
-          stop("I need at least two elements to create pairs.")
+          stop("At least two elements are needed to create pairs.")
 
      .Call("pairs", n, byrow, PACKAGE = "dtwclust")
 }
