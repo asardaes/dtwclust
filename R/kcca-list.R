@@ -2,7 +2,7 @@
 # Modified version of kcca to use lists of time series (to support different lengths)
 # ========================================================================================================
 
-kcca.list <- function (x, k, family = NULL, iter.max = 30L, trace = FALSE, ...)
+kcca.list <- function (x, k, family, iter.max = 30L, trace = FALSE, ...)
 {
      N <- length(x)
 
@@ -55,7 +55,8 @@ kcca.list <- function (x, k, family = NULL, iter.max = 30L, trace = FALSE, ...)
                             av_dist = as.vector(tapply(cldist[,1], cluster, sum))/size)
 
      names(centers) <- NULL
-     attributes(centers) <- NULL
+     attr(centers, "id_cent") <- NULL
+     centers <- lapply(centers, "attr<-", which = "id_cent", value = NULL)
 
      list(cluster = cluster,
           centers = centers,

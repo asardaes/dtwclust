@@ -121,6 +121,9 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
           else
                Y <- consistency_check(y, "tsmat")
 
+          if (length(X) != length(Y))
+               stop("Pairwise distances require the same amount of series in x and y")
+
           if (is.null(window.size))
                window.type <- "none"
           else
@@ -193,14 +196,9 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                            force.symmetry = TRUE)
      }
 
-     ## For indexing convenience
-     D <- t(D)
-     singleIndexing <- seq(from=0, by=nrow(D), length.out=ncol(D))
-
      ## Update with DTW
-
-     new.indNN <- apply(D, 2, which.min) # index of nearest neighbors
-     indNN <- new.indNN + 1
+     new.indNN <- apply(D, 1, which.min) # index of nearest neighbors
+     indNN <- new.indNN + 1 # initialize all different
 
      while (any(new.indNN != indNN)) {
           indNew <- which(new.indNN != indNN)
@@ -248,13 +246,12 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                                                window.size = window.size))
           }
 
-          indD <- indNN + singleIndexing
-          D[indD[unlist(indNew)]] <- dSub
+          D[cbind(1:length(X), indNN)[unlist(indNew), , drop = FALSE]] <- dSub
 
-          new.indNN <- apply(D, 2, which.min)
+          new.indNN <- apply(D, 1, which.min)
      }
 
-     ## Transpose again for final result
      attr(D, "method") <- "DTW_LB"
-     t(D)
+
+     D
 }

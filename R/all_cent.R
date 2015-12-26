@@ -189,7 +189,8 @@ all_cent <- function(case = NULL, distmat, distfun, control) {
                               ret
                          }))
 
-                         attr(extra_cent[[id_extra]], "id_cent") <- id_cent_extra[id_extra]
+                         if (case == "pam")
+                              attr(extra_cent[[id_extra]], "id_cent") <- id_cent_extra[id_extra]
                     }
 
                     if (all(!any_rep))

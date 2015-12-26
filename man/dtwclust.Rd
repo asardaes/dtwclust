@@ -10,7 +10,7 @@ dtwclust(data = NULL, type = "partitional", k = 2L, method = "average",
 }
 \arguments{
 \item{data}{A list where each element is a time series, or a numeric matrix (it will be coerced to a list
-row-wise). All series must have equal lengths in case of \code{type = "tadpole"}.}
+row-wise).}
 
 \item{type}{What type of clustering method to use: \code{partitional}, \code{hierarchical} or \code{tadpole}.}
 
@@ -22,7 +22,7 @@ row-wise). All series must have equal lengths in case of \code{type = "tadpole"}
 You can provide a character vector to compute different hierarchical cluster structures in one go, or
 specify \code{method} = "all" to use all the available ones.}
 
-\item{distance}{One of the supported distance definitions (see Distance section). Ignored for
+\item{distance}{A supported distance from \code{\link[proxy]{pr_DB}} (see Distance section). Ignored for
 \code{type = "tadpole"}.}
 
 \item{centroid}{Either a supported string or an appropriate function to calculate centroids
@@ -41,7 +41,7 @@ when using partitional methods (see Centroid section).}
 \item{distmat}{If a cross-distance matrix is already available, it can be provided here so it's re-used. Only relevant if
 \code{centroid} = "pam" or \code{type} = "hierarchical". See examples.}
 
-\item{...}{Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function. For now, old arguments
+\item{...}{Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function. For now, old parameters
 can also be provided here. See \code{\link{dtwclustControl}}.}
 }
 \value{
@@ -86,7 +86,8 @@ It can be a string of one of the following custom implementations (all registere
   details.
 }
 
-Note that only \code{dtw}, \code{dtw2} and \code{sbd} support series of different lengths.
+Note that only \code{dtw}, \code{dtw2} and \code{sbd} support series of different lengths. The lower bounds
+are probably unsuitable for direct clustering unless series are very easily distinguishable.
 
 If you create your own distance and also register it with \code{proxy} (see \code{\link[proxy]{pr_DB}}),
 and it includes the ellipsis (\code{...}) in its definition, it will receive
@@ -113,14 +114,16 @@ If a custom function is provided, it will receive the following inputs in the sh
 shown in parenthesis):
 
 \itemize{
-  \item The \emph{whole} data list (\code{list(ts1, ts2)})
+  \item The \emph{whole} data list (\code{list(ts1, ts2, ts3)})
   \item A numeric vector with length equal to the number of series in \code{data}, indicating which
-  cluster a series belongs to (\code{c(1L, 2L)})
+  cluster a series belongs to (\code{c(1L, 2L, 2L)})
   \item The desired number of total clusters (\code{2L})
   \item The current centers in order, in a list (\code{list(center1, center2)})
-  \item The membership vector of the \emph{previous} iteration (\code{c(2L, 1L)})
+  \item The membership vector of the \emph{previous} iteration (\code{c(1L, 1L, 2L)})
   \item The elements of \code{...}
 }
+
+Therefore, the function should always include the ellipsis \code{...} in its definition.
 
 The other option is to provide a character string for the custom implementations. The following options
 are available:

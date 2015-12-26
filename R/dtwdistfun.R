@@ -76,9 +76,8 @@ dtwdistfun <- function(distance, control, distmat) {
                ## Attempt to calculate distmat in parallel?
                if (check_parallel(distance)) {
 
-                    ## variables from the parent environment that should be exported
-                    export <- c("distance", "control",
-                                "window.type", "consistency_check")
+                    ## variables/functions from the parent environment that should be exported
+                    export <- c("distance", "consistency_check")
 
                     if (is.null(centers)) {
                          ## Whole distmat is calculated

@@ -432,7 +432,7 @@ setMethod("clusterSim", "dtwclust",
           })
 
 # ========================================================================================================
-# info from modeltools (for internal support of some flexclust functions)
+# info from modeltools (perhaps for internal support of some flexclust functions)
 # ========================================================================================================
 
 setMethod("info", "dtwclust",

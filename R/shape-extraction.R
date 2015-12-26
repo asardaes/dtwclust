@@ -5,7 +5,7 @@
 #'
 #' This works only if the series are \emph{z-normalized}, since the output will also have this normalization.
 #'
-#' The resulting centroid will have the same length as \code{cz} if provided. Otherwise, there are two
+#' The resulting centroid will have the same length as \code{center} if provided. Otherwise, there are two
 #' possibilities: if all series from \code{X} have the same length, all of them
 #' will be used as-is, and the output will have the same length as the series; if series have different
 #' lengths, a series will be chosen at random and used as reference. The output series will then have the
@@ -41,7 +41,7 @@
 #' points(C)
 #'
 #' @param X Numeric matrix where each row is a time series, or a list of time series.
-#' @param cz Center to use as basis. \emph{It will be z-normalized}.
+#' @param center Center to use as basis. \emph{It will be z-normalized}.
 #' @param znorm Logical flag. Should z-scores be calculated for \code{X} before processing?
 #'
 #' @return Centroid time series.
@@ -49,7 +49,7 @@
 #' @export
 #'
 
-shape_extraction <- function(X, cz = NULL, znorm = FALSE) {
+shape_extraction <- function(X, center = NULL, znorm = FALSE) {
 
      X <- consistency_check(X, "tsmat")
 
@@ -62,53 +62,53 @@ shape_extraction <- function(X, cz = NULL, znorm = FALSE) {
 
      ## make sure at least one series is not just a flat line at zero
      if (all(sapply(Xz, sum) == 0)) {
-          if (is.null(cz)) {
+          if (is.null(center)) {
                lengths <- sapply(Xz, length)
                return(rep(0, sample(lengths,1)))
 
           } else {
-               return(cz)
+               return(center)
           }
      }
 
-     if (is.null(cz)) {
+     if (is.null(center)) {
           if (length(unique(sapply(Xz, length))) == 1L)
-               a <- do.call(rbind, Xz) # use all
+               A <- do.call(rbind, Xz) # use all
           else {
-               cz <- Xz[[sample(length(Xz), 1L)]] # random choice as reference
+               center <- Xz[[sample(length(Xz), 1L)]] # random choice as reference
 
-               a <- lapply(Xz, function(A) {
-                    SBD(cz, A)$yshift
+               A <- lapply(Xz, function(a) {
+                    SBD(center, a)$yshift
                })
 
-               a <- do.call(rbind, a)
+               A <- do.call(rbind, A)
           }
 
      } else {
-          cz <- zscore(cz) # use given reference
+          center <- zscore(center) # use given reference
 
-          a <- lapply(Xz, function(A) {
-               SBD(cz, A)$yshift
+          A <- lapply(Xz, function(a) {
+               SBD(center, a)$yshift
           })
 
-          a <- do.call(rbind, a)
+          A <- do.call(rbind, A)
      }
 
-     Y <- zscore(a)
+     Y <- zscore(A)
 
      if (is.matrix(Y))
           S <- t(Y) %*% Y
      else
           S <- Y %*% t(Y)
 
-     nc <- ncol(a)
+     nc <- ncol(A)
      P <- diag(nc) - 1 / nc * matrix(1, nc, nc)
      M <- P %*% S %*% P
 
      ksc <- eigen(M)$vectors[,1]
 
-     d1 <- sqrt(crossprod(a[1,] - ksc))
-     d2 <- sqrt(crossprod(a[1,] + ksc))
+     d1 <- sqrt(crossprod(A[1,] - ksc))
+     d2 <- sqrt(crossprod(A[1,] + ksc))
 
      if (d1 >= d2)
           ksc <- -ksc

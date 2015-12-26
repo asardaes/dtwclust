@@ -4,12 +4,12 @@
 \alias{shape_extraction}
 \title{Shape average of several time series}
 \usage{
-shape_extraction(X, cz = NULL, znorm = FALSE)
+shape_extraction(X, center = NULL, znorm = FALSE)
 }
 \arguments{
 \item{X}{Numeric matrix where each row is a time series, or a list of time series.}
 
-\item{cz}{Center to use as basis. \emph{It will be z-normalized}.}
+\item{center}{Center to use as basis. \emph{It will be z-normalized}.}
 
 \item{znorm}{Logical flag. Should z-scores be calculated for \code{X} before processing?}
 }
@@ -23,7 +23,7 @@ the k-Shape clustering algorithm.
 \details{
 This works only if the series are \emph{z-normalized}, since the output will also have this normalization.
 
-The resulting centroid will have the same length as \code{cz} if provided. Otherwise, there are two
+The resulting centroid will have the same length as \code{center} if provided. Otherwise, there are two
 possibilities: if all series from \code{X} have the same length, all of them
 will be used as-is, and the output will have the same length as the series; if series have different
 lengths, a series will be chosen at random and used as reference. The output series will then have the

@@ -34,7 +34,8 @@
 #'   details.
 #' }
 #'
-#' Note that only \code{dtw}, \code{dtw2} and \code{sbd} support series of different lengths.
+#' Note that only \code{dtw}, \code{dtw2} and \code{sbd} support series of different lengths. The lower bounds
+#' are probably unsuitable for direct clustering unless series are very easily distinguishable.
 #'
 #' If you create your own distance and also register it with \code{proxy} (see \code{\link[proxy]{pr_DB}}),
 #' and it includes the ellipsis (\code{...}) in its definition, it will receive
@@ -59,14 +60,16 @@
 #' shown in parenthesis):
 #'
 #' \itemize{
-#'   \item The \emph{whole} data list (\code{list(ts1, ts2)})
+#'   \item The \emph{whole} data list (\code{list(ts1, ts2, ts3)})
 #'   \item A numeric vector with length equal to the number of series in \code{data}, indicating which
-#'   cluster a series belongs to (\code{c(1L, 2L)})
+#'   cluster a series belongs to (\code{c(1L, 2L, 2L)})
 #'   \item The desired number of total clusters (\code{2L})
 #'   \item The current centers in order, in a list (\code{list(center1, center2)})
-#'   \item The membership vector of the \emph{previous} iteration (\code{c(2L, 1L)})
+#'   \item The membership vector of the \emph{previous} iteration (\code{c(1L, 1L, 2L)})
 #'   \item The elements of \code{...}
 #' }
+#'
+#' Therefore, the function should always include the ellipsis \code{...} in its definition.
 #'
 #' The other option is to provide a character string for the custom implementations. The following options
 #' are available:
@@ -211,7 +214,7 @@
 #' @author Alexis Sarda-Espinosa
 #'
 #' @param data A list where each element is a time series, or a numeric matrix (it will be coerced to a list
-#' row-wise). All series must have equal lengths in case of \code{type = "tadpole"}.
+#' row-wise).
 #' @param type What type of clustering method to use: \code{partitional}, \code{hierarchical} or \code{tadpole}.
 #' @param k Numer of desired clusters in partitional methods. For hierarchical methods, the
 #' \code{\link[stats]{cutree}} function is called with this value of \code{k} and the result is returned in the
@@ -219,7 +222,7 @@
 #' @param method One or more linkage methods to use in hierarchical procedures. See \code{\link[stats]{hclust}}.
 #' You can provide a character vector to compute different hierarchical cluster structures in one go, or
 #' specify \code{method} = "all" to use all the available ones.
-#' @param distance One of the supported distance definitions (see Distance section). Ignored for
+#' @param distance A supported distance from \code{\link[proxy]{pr_DB}} (see Distance section). Ignored for
 #' \code{type = "tadpole"}.
 #' @param centroid Either a supported string or an appropriate function to calculate centroids
 #' when using partitional methods (see Centroid section).
@@ -231,7 +234,7 @@
 #' @param seed Random seed for reproducibility of partitional algorithms.
 #' @param distmat If a cross-distance matrix is already available, it can be provided here so it's re-used. Only relevant if
 #' \code{centroid} = "pam" or \code{type} = "hierarchical". See examples.
-#' @param ... Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function. For now, old arguments
+#' @param ... Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function. For now, old parameters
 #' can also be provided here. See \code{\link{dtwclustControl}}.
 #'
 #' @return An object with formal class \code{\link{dtwclust-class}}.
@@ -485,8 +488,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     distance <- "unknown"
           }
 
-          toc <- proc.time() - tic
-
           ## Create objects
           dtwc <- lapply(kc.list, function(kc) {
                new("dtwclust",
@@ -500,7 +501,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                    distance = distance,
                    centroid = centroid,
                    preproc = preproc_char,
-                   proctime = toc,
 
                    centers = kc$centers,
                    k = as.integer(k),
@@ -581,9 +581,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                cat("\n\tPerforming hierarchical clustering...\n\n")
 
           ## Cluster
-          hc.list <- lapply(hclust_methods, function(method) stats::hclust(Dist, method))
+          hc.list <- lapply(hclust_methods, function(method) {
+               hc <- stats::hclust(Dist, method)
 
-          hc.list <- mapply(hc.list, hclust_methods, SIMPLIFY = FALSE, FUN = function(hc, method) {
                ## cutree and corresponding centers
                cluster <- stats::cutree(hc, k)
 
@@ -629,19 +629,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                    datalist = datalist)
           })
 
-          toc <- proc.time() - tic
-
-          if (length(hc.list) == 1L) {
+          if (length(hc.list) == 1L)
                RET <- hc.list[[1]]
-               RET@proctime <- toc
-
-          } else {
-               RET <- lapply(hc.list, function(hc) {
-                    hc@proctime <- toc
-
-                    hc
-               })
-          }
+          else
+               RET <- hc.list
 
      } else if (type == "tadpole") {
 
@@ -693,8 +684,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           clusinfo <- data.frame(size = size,
                                  av_dist = as.vector(tapply(cldist[,1], R$cl, sum))/size)
 
-          toc <- proc.time() - tic
-
           RET <- new("dtwclust",
                      call = MYCALL,
                      control = control,
@@ -707,7 +696,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                      distance = "DTW2_LB",
                      centroid = "pam (TADPole)",
                      preproc = preproc_char,
-                     proctime = toc,
 
                      centers = data[R$centers],
                      k = as.integer(k),
@@ -720,6 +708,17 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                      datalist = datalist)
      }
+
+     toc <- proc.time() - tic
+
+     if (class(RET) == "dtwclust")
+          RET@proctime <- toc
+     else
+          RET <- lapply(RET, function(ret) {
+               ret@proctime <- toc
+
+               ret
+          })
 
      if (control@trace)
           cat("\tElapsed time is", toc["elapsed"], "seconds.\n\n")

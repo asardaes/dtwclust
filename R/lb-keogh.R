@@ -159,71 +159,71 @@ lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
      lower.env <- lapply(envelops, "[[", "min")
      upper.env <- lapply(envelops, "[[", "max")
 
-     if (force.pairwise)
-          DD <- mapply(upper.env, lower.env, x,
-                       FUN = function(u, l, x) {
+     if (force.pairwise) {
+          D <- mapply(upper.env, lower.env, x,
+                      FUN = function(u, l, x) {
 
-                            D <- rep(0, length(x))
+                           D <- rep(0, length(x))
 
-                            ind1 <- x > u
-                            D[ind1] <- x[ind1] - u[ind1]
-                            ind2 <- x < l
-                            D[ind2] <- l[ind2] - x[ind2]
+                           ind1 <- x > u
+                           D[ind1] <- x[ind1] - u[ind1]
+                           ind2 <- x < l
+                           D[ind2] <- l[ind2] - x[ind2]
 
-                            d <- switch(EXPR = norm,
-                                        L1 = sum(D),
-                                        L2 = sqrt(sum(D^2)))
+                           d <- switch(EXPR = norm,
+                                       L1 = sum(D),
+                                       L2 = sqrt(sum(D^2)))
 
-                            d
-                       })
-     else
-          DD <- sapply(X=x, U=upper.env, L=lower.env,
-                       FUN = function(x, U, L) {
+                           d
+                      })
 
-                            ## This will return one column of the distance matrix
-                            D <- mapply(U, L, MoreArgs=list(x=x),
-                                        FUN = function(u, l, x) {
+          attr(D, "class") <- "pairdist"
 
-                                             D <- rep(0, length(x))
+     } else {
+          D <- sapply(X=x, U=upper.env, L=lower.env,
+                      FUN = function(x, U, L) {
 
-                                             ind1 <- x > u
-                                             D[ind1] <- x[ind1] - u[ind1]
-                                             ind2 <- x < l
-                                             D[ind2] <- l[ind2] - x[ind2]
+                           ## This will return one column of the distance matrix
+                           D <- mapply(U, L, MoreArgs=list(x=x),
+                                       FUN = function(u, l, x) {
 
-                                             d <- switch(EXPR = norm,
-                                                         L1 = sum(D),
-                                                         L2 = sqrt(sum(D^2)))
+                                            D <- rep(0, length(x))
 
-                                             d
-                                        })
-                            D
-                       })
+                                            ind1 <- x > u
+                                            D[ind1] <- x[ind1] - u[ind1]
+                                            ind2 <- x < l
+                                            D[ind2] <- l[ind2] - x[ind2]
+
+                                            d <- switch(EXPR = norm,
+                                                        L1 = sum(D),
+                                                        L2 = sqrt(sum(D^2)))
+
+                                            d
+                                       })
+                           D
+                      })
+
+          attr(D, "class") <- "crossdist"
+          D <- t(D)
+     }
 
      if (force.symmetry && !force.pairwise) {
-          if (nrow(DD) != ncol(DD)) {
+          if (nrow(D) != ncol(D)) {
                warning("Unable to force symmetry. Resulting distance matrix is not square.")
           } else {
-               ind.tri <- lower.tri(DD)
+               ind.tri <- lower.tri(D)
 
-               new.low.tri.vals <- t(DD)[ind.tri]
-               indCorrect <- DD[ind.tri] > new.low.tri.vals
-               new.low.tri.vals[indCorrect] <- DD[ind.tri][indCorrect]
+               new.low.tri.vals <- t(D)[ind.tri]
+               indCorrect <- D[ind.tri] > new.low.tri.vals
+               new.low.tri.vals[indCorrect] <- D[ind.tri][indCorrect]
 
-               DD[ind.tri] <- new.low.tri.vals
-               DD <- t(DD)
-               DD[ind.tri] <- new.low.tri.vals
+               D[ind.tri] <- new.low.tri.vals
+               D <- t(D)
+               D[ind.tri] <- new.low.tri.vals
           }
      }
 
-     if (force.pairwise)
-          attr(DD, "class") <- "pairdist"
-     else {
-          attr(DD, "class") <- "crossdist"
-          DD <- t(DD)
-     }
+     attr(D, "method") <- "LB_Keogh"
 
-     attr(DD, "method") <- "LB_Keogh"
-
-     DD
+     D
 }
