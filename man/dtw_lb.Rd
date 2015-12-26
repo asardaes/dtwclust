@@ -90,6 +90,7 @@ require(doParallel)
 
 # Create parallel workers
 cl <- makeCluster(detectCores())
+invisible(clusterEvalQ(cl, library(dtwclust)))
 registerDoParallel(cl)
 
 # Distance matrix

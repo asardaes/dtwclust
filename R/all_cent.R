@@ -19,7 +19,10 @@ all_cent <- function(case = NULL, distmat, distfun, control) {
 
                     d <- apply(distmat, 1, sum)
 
-                    xsub[[which.min(d)]]
+                    i_cent <- xsub[[which.min(d)]]
+                    attr(i_cent, "id_cent") <- pmatch(names(xsub[which.min(d)]), names(x))
+
+                    i_cent
                })
 
           } else {
@@ -28,7 +31,10 @@ all_cent <- function(case = NULL, distmat, distfun, control) {
                new_cent <- lapply(id_x, function(i_x) {
                     d <- apply(distmat[i_x, i_x, drop=FALSE], 1L, sum)
 
-                    x[[i_x[which.min(d)]]]
+                    i_cent <- x[[i_x[which.min(d)]]]
+                    attr(i_cent, "id_cent") <- i_x[which.min(d)]
+
+                    i_cent
                })
           }
 
@@ -170,7 +176,8 @@ all_cent <- function(case = NULL, distmat, distfun, control) {
                any_rep <- logical(num_empty)
 
                while(TRUE) {
-                    extra_cent <- x[sample(length(x), num_empty)]
+                    id_cent_extra <- sample(length(x), num_empty)
+                    extra_cent <- x[id_cent_extra]
 
                     for (id_extra in 1L:num_empty) {
                          any_rep[id_extra] <- any(sapply(cent, function(i.center) {
@@ -181,6 +188,8 @@ all_cent <- function(case = NULL, distmat, distfun, control) {
 
                               ret
                          }))
+
+                         attr(extra_cent[[id_extra]], "id_cent") <- id_cent_extra[id_extra]
                     }
 
                     if (all(!any_rep))
@@ -189,6 +198,9 @@ all_cent <- function(case = NULL, distmat, distfun, control) {
 
                cent[empty_clusters] <- extra_cent
           }
+
+          if (case == "pam")
+               attr(cent, "id_cent") <- sapply(cent, attr, which = "id_cent")
 
           cent
      }

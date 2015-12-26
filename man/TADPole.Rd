@@ -74,6 +74,7 @@ data <- t(sapply(CharTraj, reinterpolate, newLength = 180))
 
 # Create parallel workers
 cl <- makeCluster(detectCores())
+invisible(clusterEvalQ(cl, library(dtwclust)))
 registerDoParallel(cl)
 
 # Cluster

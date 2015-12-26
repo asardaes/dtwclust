@@ -154,7 +154,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, force.pair
      })
 
      ## Calculate distance matrix
-     if (force.pairwise)
+     if (force.pairwise) {
           D <- mapply(y, ffty, x, fftx,
                       FUN = function(y, ffty, x, fftx) {
 
@@ -168,7 +168,10 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, force.pair
 
                            dd
                       })
-     else
+
+          attr(D, "class") <- "pairdist"
+
+     } else {
           D <- mapply(x, fftx, MoreArgs = list(Y = y, FFTY = ffty),
                       FUN = function(x, fftx, Y, FFTY) {
 
@@ -189,9 +192,6 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, force.pair
                            d
                       })
 
-     if (force.pairwise)
-          attr(D, "class") <- "pairdist"
-     else {
           attr(D, "class") <- "crossdist"
           D <- t(D)
      }

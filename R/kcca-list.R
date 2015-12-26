@@ -9,9 +9,12 @@ kcca.list <- function (x, k, family = NULL, iter.max = 30L, trace = FALSE, ...)
      if (N < k)
           stop("Number of clusters cannot be greater than number of observations in the data")
 
-     id_cen <- sample(N,k)
-     centers <- x[id_cen]
-     #attr(centers, "id") <- id_cen
+     if (is.null(names(x)))
+          names(x) <- paste0("series_", 1:N) # used by custom PAM centers
+
+     id_cent <- sample(N,k)
+     centers <- x[id_cent]
+     attr(centers, "id_cent") <- id_cent
      cluster <- integer(N)
      k <- as.integer(k)
      iter <- 1L
@@ -42,11 +45,17 @@ kcca.list <- function (x, k, family = NULL, iter.max = 30L, trace = FALSE, ...)
           iter <- iter + 1L
      }
 
+     if (iter > iter.max)
+          warning("Partitional clustering did not converge within the allowed iterations.")
+
      cluster <- as.integer(family@cluster(distmat=distmat))
      cldist <- as.matrix(distmat[cbind(1:N, cluster)])
      size <- as.vector(table(cluster))
      clusinfo <- data.frame(size = size,
                             av_dist = as.vector(tapply(cldist[,1], cluster, sum))/size)
+
+     names(centers) <- NULL
+     attributes(centers) <- NULL
 
      list(cluster = cluster,
           centers = centers,

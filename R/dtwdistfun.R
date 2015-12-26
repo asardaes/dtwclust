@@ -18,29 +18,31 @@ dtwdistfun <- function(distance, control, distmat) {
 
      dtwdist <- function(x, centers = NULL, ...) {
 
-          ## Extra distance parameters in case of parallel computation
-          ## They can be for the function or for proxy::dist
-          dots <- list(...)
+          if (is.null(distmat)) {
+               ## Extra distance parameters in case of parallel computation
+               ## They can be for the function or for proxy::dist
+               dots <- list(...)
 
-          dots$window.type <- window.type
-          dots$window.size <- control@window.size
-          dots$norm <- control@norm
-          dots$error.check <- FALSE
+               dots$window.type <- window.type
+               dots$window.size <- control@window.size
+               dots$norm <- control@norm
+               dots$error.check <- FALSE
 
-          ## I need to re-register any custom distances in each parallel worker
-          dist_entry <- proxy::pr_DB$get_entry(distance)
+               ## I need to re-register any custom distances in each parallel worker
+               dist_entry <- proxy::pr_DB$get_entry(distance)
 
-          ## Does the registered function possess '...' in its definition?
-          has_dots <- is.function(dist_entry$FUN) && !is.null(formals(dist_entry$FUN)$...)
+               ## Does the registered function possess '...' in its definition?
+               has_dots <- is.function(dist_entry$FUN) && !is.null(formals(dist_entry$FUN)$...)
 
-          ## If it doesn't, remove invalid arguments from 'dots'
-          if (!has_dots) {
-               if (is.function(dist_entry$FUN))
-                    valid_args <- union(names(formals(proxy::dist)), names(formals(dist_entry$FUN)))
-               else
-                    valid_args <- names(formals(proxy::dist))
+               ## If it doesn't, remove invalid arguments from 'dots'
+               if (!has_dots) {
+                    if (is.function(dist_entry$FUN))
+                         valid_args <- union(names(formals(proxy::dist)), names(formals(dist_entry$FUN)))
+                    else
+                         valid_args <- names(formals(proxy::dist))
 
-               dots <- dots[intersect(names(dots), valid_args)]
+                    dots <- dots[intersect(names(dots), valid_args)]
+               }
           }
 
           if (!is.null(distmat)) {
@@ -50,21 +52,24 @@ dtwdistfun <- function(distance, control, distmat) {
 
                } else {
                     ## distmat matrix already calculated, just subset it
-                    indXC <- sapply(centers, FUN = function(i.c) {
-                         i.row <- sapply(x, function(i.x) {
-                              if (length(i.x) == length(i.c))
-                                   ret <- all(i.x == i.c)
-                              else
-                                   ret <- FALSE
+                    id_XC <- attr(centers, "id_cent")
 
-                              ret
+                    if (is.null(id_XC) || any(is.na(id_XC)))
+                         id_XC <- sapply(centers, FUN = function(i.c) {
+                              i.row <- sapply(x, function(i.x) {
+                                   if (length(i.x) == length(i.c))
+                                        ret <- all(i.x == i.c)
+                                   else
+                                        ret <- FALSE
+
+                                   ret
+                              })
+
+                              ## Take the first one in case a series is repeated more than once in the dataset
+                              which(i.row)[1]
                          })
 
-                         ## Take the first one in case a series is repeated more than once in the dataset
-                         which(i.row)[1]
-                    })
-
-                    d <- distmat[ , indXC, drop = FALSE]
+                    d <- distmat[ , id_XC, drop = FALSE]
                }
 
           } else {

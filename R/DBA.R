@@ -45,6 +45,7 @@
 #'
 #' # Create parallel workers
 #' cl <- makeCluster(detectCores())
+#' invisible(clusterEvalQ(cl, library(dtwclust)))
 #' registerDoParallel(cl)
 #'
 #' # DTW Average
@@ -120,7 +121,7 @@ DBA <- function(X, center = NULL, max.iter = 20,
      C.old <- center
      cprox <- cbind(rep(1, L))
 
-     while(iter<=max.iter) {
+     while(iter <= max.iter) {
 
           CM <- cprox %*% center
 

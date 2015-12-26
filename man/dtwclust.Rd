@@ -324,6 +324,7 @@ plot(hc.sbd2, type = "series")
 
      # Create parallel workers
      cl <- makeCluster(detectCores())
+     invisible(clusterEvalQ(cl, library(dtwclust)))
      registerDoParallel(cl)
 
      ctrl <- new("dtwclustControl")
