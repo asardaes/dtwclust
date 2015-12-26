@@ -435,28 +435,28 @@ setMethod("clusterSim", "dtwclust",
 # info from modeltools (perhaps for internal support of some flexclust functions)
 # ========================================================================================================
 
-setMethod("info", "dtwclust",
-          function(object, which, ...) {
-               ret <- switch(EXPR = which,
-                             help = c("distsum", "size", "av_dist"),
-                             distsum = sum(object@cldist[, 1]),
-                             size = {
-                                  var <- object@clusinfo$size
-                                  names(var) <- rownames(object@clusinfo)
-
-                                  var
-                             },
-                             av_dist = {
-                                  var <- object@clusinfo$av_dist
-                                  names(var) <- rownames(object@clusinfo)
-
-                                  var
-                             },
-
-                             stop("Requested info not available. Use which = 'help'."))
-
-               ret
-          })
+# setMethod("info", "dtwclust",
+#           function(object, which, ...) {
+#                ret <- switch(EXPR = which,
+#                              help = c("distsum", "size", "av_dist"),
+#                              distsum = sum(object@cldist[, 1]),
+#                              size = {
+#                                   var <- object@clusinfo$size
+#                                   names(var) <- rownames(object@clusinfo)
+#
+#                                   var
+#                              },
+#                              av_dist = {
+#                                   var <- object@clusinfo$av_dist
+#                                   names(var) <- rownames(object@clusinfo)
+#
+#                                   var
+#                              },
+#
+#                              stop("Requested info not available. Use which = 'help'."))
+#
+#                ret
+#           })
 
 # ========================================================================================================
 # Validity and coercion methods for control

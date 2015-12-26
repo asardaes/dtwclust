@@ -104,6 +104,7 @@
 #' @importFrom stats hclust
 #' @importFrom stats median
 #' @importFrom stats nextn
+#' @importFrom stats update
 #'
 NULL
 
