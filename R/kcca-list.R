@@ -14,8 +14,9 @@ kcca.list <- function (x, k, family = NULL, iter.max = 30L, trace = FALSE, ...)
      #attr(centers, "id") <- id_cen
      cluster <- integer(N)
      k <- as.integer(k)
+     iter <- 1L
 
-     for (iter in 1:iter.max) {
+     while (iter <= iter.max) {
           clustold <- cluster
           distmat <- family@dist(x, centers, ...)
           cluster <- family@cluster(distmat = distmat)
@@ -37,6 +38,8 @@ kcca.list <- function (x, k, family = NULL, iter.max = 30L, trace = FALSE, ...)
                if (trace) cat("\n")
                break
           }
+
+          iter <- iter + 1L
      }
 
      cluster <- as.integer(family@cluster(distmat=distmat))

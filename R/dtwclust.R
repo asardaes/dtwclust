@@ -82,8 +82,13 @@
 #'   time series in the data and then re-used at each iteration. It usually saves overhead overall.
 #' }
 #'
-#' These check for the special cases where parallelization is desired. If a cluster is left empty, the functions
-#' reinitialize a new cluster randomly.
+#' These check for the special cases where parallelization is desired.
+#'
+#' If a cluster becomes empty, the functions reinitialize a new cluster randomly. However, if you see
+#' that the algorithm doesn't converge or the overall distance sum increases, this probably means that
+#' the chosen value of \code{k} is too large, or the chosen distance function is not able to assess
+#' similarity effectively. The random reinitialization attempts to enforce a certain number of clusters,
+#' but can result in instability in the aforementioned cases.
 #'
 #' Note that only \code{shape}, \code{dba} and \code{pam} support series of different lengths.
 #'

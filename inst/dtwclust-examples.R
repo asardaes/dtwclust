@@ -73,6 +73,9 @@ plot(hc.sbd2, type = "series")
      cl <- makeCluster(detectCores())
      registerDoParallel(cl)
 
+     ctrl <- new("dtwclustControl")
+     ctrl@trace <- TRUE
+
      ## Use full DTW and PAM
      kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, control = ctrl)
 
@@ -80,8 +83,8 @@ plot(hc.sbd2, type = "series")
      kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, control = ctrl)
 
      ## Use constrained DTW with original series of different lengths
-     kc.cdtw <- dtwclust(CharTraj, k = 20,
-                         seed = 3251, control = ctrl)
+     ctrl@window.size <- 20L
+     kc.cdtw <- dtwclust(CharTraj, k = 20, seed = 3251, control = ctrl)
 
      ## This uses the "nDTW" function registered in another example above
      # For reference, this took around 2.25 minutes with 8 cores (all 8 repetitions).

@@ -44,7 +44,7 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 4: Changes / Distsum = 2 / 1287.395
 #> Iteration 5: Changes / Distsum = 0 / 1287.395
 #> 
-#>  Elapsed time is 11.073 seconds.
+#>  Elapsed time is 8.817 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -88,7 +88,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 4.21 seconds.
+#>  Elapsed time is 4.213 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -137,7 +137,7 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 3: Changes / Distsum = 2 / 3.687197
 #> Iteration 4: Changes / Distsum = 0 / 3.631238
 #> 
-#>  Elapsed time is 21.693 seconds.
+#>  Elapsed time is 20.356 seconds.
 
 # Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
