@@ -2,14 +2,16 @@
 # Modified version of kcca to use lists of time series (to support different lengths)
 # ========================================================================================================
 
-kcca.list <- function (x, k, family = NULL, iter.max = 200L, trace = FALSE, ...)
+kcca.list <- function (x, k, family = NULL, iter.max = 30L, trace = FALSE, ...)
 {
      N <- length(x)
 
      if (N < k)
           stop("Number of clusters cannot be greater than number of observations in the data")
 
-     centers <- x[sample(N,k)]
+     id_cen <- sample(N,k)
+     centers <- x[id_cen]
+     #attr(centers, "id") <- id_cen
      cluster <- integer(N)
      k <- as.integer(k)
 
@@ -18,9 +20,7 @@ kcca.list <- function (x, k, family = NULL, iter.max = 200L, trace = FALSE, ...)
           distmat <- family@dist(x, centers, ...)
           cluster <- family@cluster(distmat = distmat)
 
-          k <- length(centers)
-
-          centers <- family@allcent(x, cluster, k, centers, ...)
+          centers <- family@allcent(x, cluster, k, centers, clustold, ...)
 
           changes <- sum(cluster != clustold)
 

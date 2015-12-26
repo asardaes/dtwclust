@@ -7,233 +7,226 @@ all_cent <- function(case = NULL, distmat, distfun, control) {
      if (is.function(case))
           return(case)
      else if (!is.character(case))
-          stop("Centroid definition must be either a function or a supported string")
+          stop("Centroid definition must be either a function or a character")
 
-     allcent <- switch(EXPR = case,
+     case <- match.arg(case, c("mean", "median", "shape", "dba", "pam"))
 
-                       pam = {
-                            foo <- function(x, cluster, k, cen, ...) {
+     pam_cent <- function(x, cluster, cl, Xsplit, ...) {
 
-                                 indX <- lapply(sort(unique(cluster)), function(i) {
-                                      which(cluster == i)
-                                 })
+          if(is.null(distmat)) {
+               C <- sapply(Xsplit, function(xsub) {
+                    distmat <- distfun(xsub, xsub)
 
-                                 if(is.null(distmat)) {
-                                      C <- sapply(indX, function(i.x) {
-                                           xsub <- x[i.x]
-                                           distmat <- distfun(xsub, xsub)
+                    d <- apply(distmat, 1, sum)
 
-                                           d <- apply(distmat, 1, sum)
+                    xsub[which.min(d)]
+               })
 
-                                           x[i.x[which.min(d)]]
-                                      })
+          } else {
+               indX <- lapply(cl, function(id.cl) which(cluster == id.cl))
 
-                                 } else {
-                                      C <- sapply(indX, function(i.x) {
-                                           d <- apply(distmat[i.x, i.x, drop=FALSE], 1, sum)
+               C <- sapply(indX, function(i.x) {
+                    d <- apply(distmat[i.x, i.x, drop=FALSE], 1L, sum)
 
-                                           x[i.x[which.min(d)]]
-                                      })
-                                 }
+                    x[i.x[which.min(d)]]
+               })
+          }
 
-                                 C
-                            }
+          C
+     }
 
-                            foo
-                       },
+     shape_cent <- function(Xsplit, cluster, cen, cl, clustold, ...) {
 
-                       shape = {
-                            cluster.old <- NULL
+          ## Check which clusters changed
+          if (all(clustold == 0L)) {
+               indChanged <- cl
 
-                            foo <- function(x, cluster, k, cen, ...) {
+          } else {
+               idchng <- cluster != clustold
+               indChanged <- union(cluster[idchng], clustold[idchng])
+          }
 
-                                 X <- split(x, cluster)
+          if(length(indChanged) == 0) {
+               return(cen)
+          }
 
-                                 cl <- sort(unique(cluster))
+          new.C <- cen # initialize
 
-                                 ## Check which clusters changed
-                                 if (is.null(cluster.old)) {
-                                      indChanged <- cl
+          ## recompute centers for the clusters that changed
+          if (check_parallel()) {
+               # in parallel
+               indChanged <- split_parallel(indChanged, length(indChanged))
 
-                                 } else {
-                                      idchng <- cluster != cluster.old
-                                      indChanged <- which( cl %in%
-                                                                sort(unique(c( cluster[idchng],
-                                                                               cluster.old[idchng] ))) )
-                                 }
+               exclude <- setdiff(ls(), c("Xsplit", "cen"))
 
-                                 if(length(indChanged) == 0) {
-                                      return(cen)
-                                 }
+               sub.C <- foreach(indChanged = indChanged,
+                                .combine = c,
+                                .multicombine = TRUE,
+                                .packages = "dtwclust",
+                                .noexport = exclude) %dopar% {
+                                     mapply(Xsplit[indChanged], cen[indChanged],
+                                            SIMPLIFY = FALSE,
+                                            FUN = function(x, c) {
+                                                 new.c <- shape_extraction(x, c)
 
-                                 cluster.old <<- cluster # update
+                                                 new.c
+                                            })
+                                }
+          } else {
+               # not in parallel
+               sub.C <- mapply(Xsplit[indChanged], cen[indChanged],
+                               SIMPLIFY = FALSE,
+                               FUN = function(x, c) {
+                                    new.c <- shape_extraction(x, c)
 
-                                 new.C <- cen # initialize
+                                    new.c
+                               })
+          }
 
-                                 ## recompute centers for the clusters that changed
-                                 if (check_parallel()) {
-                                      # in parallel
-                                      indChanged <- split_parallel(indChanged, length(indChanged))
+          new.C[unlist(indChanged)] <- sub.C
 
-                                      exclude <- setdiff(ls(), c("X", "cen"))
+          new.C
+     }
 
-                                      sub.C <- foreach(indChanged = indChanged,
-                                                       .combine = c,
-                                                       .multicombine = TRUE,
-                                                       .packages = "dtwclust",
-                                                       .noexport = exclude) %dopar% {
-                                                            mapply(X[indChanged], cen[indChanged],
-                                                                   SIMPLIFY = FALSE,
-                                                                   FUN = function(x, c) {
-                                                                        new.c <- shape_extraction(x, c)
+     dba_cent <- function(Xsplit, cluster, cen, cl, clustold, ...) {
 
-                                                                        new.c
-                                                                   })
-                                                       }
-                                 } else {
-                                      # not in parallel
-                                      sub.C <- mapply(X[indChanged], cen[indChanged],
-                                                      SIMPLIFY = FALSE,
-                                                      FUN = function(x, c) {
-                                                           new.c <- shape_extraction(x, c)
+          ## Check which clusters changed
+          if (all(clustold == 0)) {
+               indChanged <- cl
 
-                                                           new.c
-                                                      })
-                                 }
+          } else {
+               idchng <- cluster != clustold
+               indChanged <- union(cluster[idchng], clustold[idchng])
+          }
 
-                                 new.C[unlist(indChanged)] <- sub.C
+          if(length(indChanged) == 0) {
+               return(cen)
+          }
 
-                                 new.C
-                            }
+          new.C <- cen # initialize
 
-                            foo
-                       },
+          ## Recompute centers for those clusters that changed
+          if (check_parallel()) {
+               # in parallel
+               indChanged <- split_parallel(indChanged, length(indChanged))
 
-                       dba = {
-                            cluster.old <- NULL
+               include <- c("control") # parent env
+               exclude <- setdiff(ls(), c("Xsplit", "cen"))
 
-                            ## Closure
-                            foo <- function(x, cluster, k, cen, ...) {
+               sub.C <- foreach(indChanged = indChanged,
+                                .combine = c,
+                                .multicombine = TRUE,
+                                .packages = "dtwclust",
+                                .export = include,
+                                .noexport = exclude) %dopar% {
+                                     mapply(Xsplit[indChanged],
+                                            cen[indChanged],
+                                            indChanged,
+                                            SIMPLIFY = FALSE,
+                                            FUN = function(x, c, i) {
+                                                 if(control@trace)
+                                                      cat("\t\tComputing DBA center ",
+                                                          i,
+                                                          "...\n",
+                                                          sep = "")
 
-                                 cl <- sort(unique(cluster))
+                                                 new.c <- DBA(x, c,
+                                                              norm = control@norm,
+                                                              window.size = control@window.size,
+                                                              max.iter = control@dba.iter,
+                                                              error.check = FALSE)
 
-                                 indXC <- lapply(cl, function(i.cl) which(cluster == i.cl))
-                                 X <- lapply(indXC, function(ii) x[ii])
+                                                 new.c
+                                            })
+                                }
+          } else {
+               # not in parallel
+               sub.C <- mapply(Xsplit[indChanged],
+                               cen[indChanged],
+                               indChanged,
+                               SIMPLIFY = FALSE,
+                               FUN = function(x, c, i) {
+                                    if(control@trace)
+                                         cat("\t\tComputing DBA center ",
+                                             i,
+                                             "...\n",
+                                             sep = "")
 
-                                 ## Check which clusters changed
-                                 if (is.null(cluster.old)) {
-                                      indChanged <- cl
+                                    new.c <- DBA(x, c,
+                                                 norm = control@norm,
+                                                 window.size = control@window.size,
+                                                 max.iter = control@dba.iter,
+                                                 error.check = FALSE)
 
-                                 } else {
-                                      idchng <- cluster != cluster.old
-                                      indChanged <- which( cl %in%
-                                                                sort(unique(c( cluster[idchng],
-                                                                               cluster.old[idchng] ))) )
-                                 }
+                                    new.c
+                               })
+          }
 
-                                 if(length(indChanged) == 0) {
-                                      return(cen)
-                                 }
+          new.C[unlist(indChanged)] <- sub.C
 
-                                 cluster.old <<- cluster # update
+          new.C
+     }
 
-                                 new.C <- cen # initialize
+     mean_cent <- function(Xsplit, ...) {
+          Xsplit <- lapply(Xsplit, function(xx) do.call(rbind, xx))
 
-                                 ## Recompute centers for those clusters that changed
-                                 if (check_parallel()) {
-                                      # in parallel
-                                      indChanged <- split_parallel(indChanged, length(indChanged))
+          centers <- lapply(Xsplit, colMeans)
 
-                                      include <- c("control") # parent env
-                                      exclude <- setdiff(ls(), c("X", "cen"))
+          centers
+     }
 
-                                      sub.C <- foreach(indChanged = indChanged,
-                                                       .combine = c,
-                                                       .multicombine = TRUE,
-                                                       .packages = "dtwclust",
-                                                       .export = include,
-                                                       .noexport = exclude) %dopar% {
-                                                            mapply(X[indChanged],
-                                                                   cen[indChanged],
-                                                                   indChanged,
-                                                                   SIMPLIFY = FALSE,
-                                                                   FUN = function(x, c, i) {
-                                                                        if(control@trace)
-                                                                             cat("\t\tComputing DBA center ",
-                                                                                 i,
-                                                                                 "...\n",
-                                                                                 sep = "")
+     median_cent <- function(Xsplit, ...) {
+          Xsplit <- lapply(Xsplit, function(xx) do.call(rbind, xx))
 
-                                                                        new.c <- DBA(x, c,
-                                                                                     norm = control@norm,
-                                                                                     window.size = control@window.size,
-                                                                                     max.iter = control@dba.iter,
-                                                                                     error.check = FALSE)
+          centers <- lapply(Xsplit, colMedians)
 
-                                                                        new.c
-                                                                   })
-                                                       }
-                                 } else {
-                                      # not in parallel
-                                      sub.C <- mapply(X[indChanged],
-                                                      cen[indChanged],
-                                                      indChanged,
-                                                      SIMPLIFY = FALSE,
-                                                      FUN = function(x, c, i) {
-                                                           if(control@trace)
-                                                                cat("\t\tComputing DBA center ",
-                                                                    i,
-                                                                    "...\n",
-                                                                    sep = "")
+          centers
+     }
 
-                                                           new.c <- DBA(x, c,
-                                                                        norm = control@norm,
-                                                                        window.size = control@window.size,
-                                                                        max.iter = control@dba.iter,
-                                                                        error.check = FALSE)
+     allcent <- function(x, cluster, k, cen, clustold, ...) {
+          Xsplit <- split(x, cluster)
 
-                                                           new.c
-                                                      })
-                                 }
+          cl <- sort(unique(cluster))
 
-                                 new.C[unlist(indChanged)] <- sub.C
+          centfun <- paste0(case, "_cent")
 
-                                 new.C
-                            }
+          cen <- do.call(centfun,
+                         c(list(x = x, cluster = cluster,
+                                k = k, cen = cen,
+                                Xsplit = Xsplit, cl = cl,
+                                clustold = clustold),
+                           list(...)))
 
-                            foo
-                       },
+          ## Any empty clusters?
+          empty_cluster <- k - length(cen)
 
-                       mean = {
-                            foo <- function(x, cluster, k, cen, ...) {
-                                 X <- split(x, cluster)
-                                 X <- lapply(X, function(xx) do.call(rbind, xx))
+          ## If so, initialize new clusters
+          if (empty_cluster) {
+               any_rep <- logical(empty_cluster)
 
-                                 centers <- lapply(X, colMeans)
+               while(TRUE) {
+                    extra_cen <- x[sample(length(x), empty_cluster)]
 
-                                 centers
-                            }
+                    for (id_extra in 1L:empty_cluster) {
+                         any_rep[id_extra] <- any(sapply(cen, function(i.center) {
+                              if (length(i.center) != length(extra_cen[[id_extra]]))
+                                   ret <- FALSE
+                              else
+                                   ret <- all(i.center == extra_cen[[id_extra]])
 
-                            foo
-                       },
+                              ret
+                         }))
+                    }
 
-                       median = {
-                            colMedians <- function(mat) { apply(mat, 2, stats::median) }
+                    if (all(!any_rep))
+                         break
+               }
 
-                            foo <- function(x, cluster, k, cen, ...) {
-                                 X <- split(x, cluster)
-                                 X <- lapply(X, function(xx) do.call(rbind, xx))
+               cen <- c(cen, extra_cen)
+          }
 
-                                 centers <- lapply(X, colMedians)
-
-                                 centers
-                            }
-
-                            foo
-                       },
-
-                       ## Otherwise
-                       stop("Invalid centroid definition"))
+          cen
+     }
 
      allcent
 }

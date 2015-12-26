@@ -106,8 +106,8 @@ Whether the function makes use of them or not, is up to you. See the examples.
 \section{Centroid}{
 
 
-In the case of partitional algorithms, a suitable function should calculate the cluster centers. In this
-case, the centers are themselves time series.
+In the case of partitional algorithms, a suitable function should calculate the cluster centers at
+every iteration. In this case, the centers are themselves time series.
 
 If a custom function is provided, it will receive the following inputs in the shown order (examples
 shown in parenthesis):
@@ -116,8 +116,9 @@ shown in parenthesis):
   \item The \emph{whole} data list (\code{list(ts1, ts2)})
   \item A numeric vector with length equal to the number of series in \code{data}, indicating which
   cluster a series belongs to (\code{c(1L, 2L)})
-  \item The current number of total clusters (\code{2L})
-  \item The current centroids in order, in a list (\code{list(center1, center2)})
+  \item The desired number of total clusters (\code{2L})
+  \item The current centers in order, in a list (\code{list(center1, center2)})
+  \item The membership vector of the \emph{previous} iteration (\code{c(2L, 1L)})
   \item The elements of \code{...}
 }
 
@@ -135,7 +136,8 @@ are available:
   time series in the data and then re-used at each iteration. It usually saves overhead overall.
 }
 
-These check for the special cases where parallelization is desired.
+These check for the special cases where parallelization is desired. If a cluster is left empty, the functions
+reinitialize a new cluster randomly.
 
 Note that only \code{shape}, \code{dba} and \code{pam} support series of different lengths.
 }
@@ -280,9 +282,10 @@ ndtw <- function(x, y, ...) {
 }
 
 # Registering the function with 'proxy'
-proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
-                       loop = TRUE, type = "metric", distance = TRUE,
-                       description = "Normalized DTW with L1 norm")
+if (!pr_DB$entry_exists("nDTW"))
+     proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
+                            loop = TRUE, type = "metric", distance = TRUE,
+                            description = "Normalized DTW with L1 norm")
 
 # Subset of (original) data for speed
 kc.ndtw <- dtwclust(CharTraj[31:40], distance = "nDTW",

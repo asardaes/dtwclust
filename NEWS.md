@@ -16,6 +16,7 @@
 * Extra parameters for distance functions should be correctly detected now.
 * Using `dtw_lb` function now correctly warns about `pam.precompute` being `TRUE`.
 * Option to calculate pairwise distances with `SBD`, `LB_Keogh` and `LB_Improved`. See their respective notes. The distance function created for the `dtwclustFamily` slot also supports this.
+* Clusters are randomly re-initialized if they become empty at some iteration.
 
 ## Version 1.3.0
 * Added the possibility to run several repetitions for partitional procedures, using different random starts each time by using the `doRNG` package

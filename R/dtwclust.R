@@ -52,8 +52,8 @@
 #'
 #' @section Centroid:
 #'
-#' In the case of partitional algorithms, a suitable function should calculate the cluster centers. In this
-#' case, the centers are themselves time series.
+#' In the case of partitional algorithms, a suitable function should calculate the cluster centers at
+#' every iteration. In this case, the centers are themselves time series.
 #'
 #' If a custom function is provided, it will receive the following inputs in the shown order (examples
 #' shown in parenthesis):
@@ -62,8 +62,9 @@
 #'   \item The \emph{whole} data list (\code{list(ts1, ts2)})
 #'   \item A numeric vector with length equal to the number of series in \code{data}, indicating which
 #'   cluster a series belongs to (\code{c(1L, 2L)})
-#'   \item The current number of total clusters (\code{2L})
-#'   \item The current centroids in order, in a list (\code{list(center1, center2)})
+#'   \item The desired number of total clusters (\code{2L})
+#'   \item The current centers in order, in a list (\code{list(center1, center2)})
+#'   \item The membership vector of the \emph{previous} iteration (\code{c(2L, 1L)})
 #'   \item The elements of \code{...}
 #' }
 #'
@@ -81,7 +82,8 @@
 #'   time series in the data and then re-used at each iteration. It usually saves overhead overall.
 #' }
 #'
-#' These check for the special cases where parallelization is desired.
+#' These check for the special cases where parallelization is desired. If a cluster is left empty, the functions
+#' reinitialize a new cluster randomly.
 #'
 #' Note that only \code{shape}, \code{dba} and \code{pam} support series of different lengths.
 #'
@@ -336,19 +338,21 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           if (is.character(centroid))
                centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
 
+          if (length(unique(lengths)) > 1) {
+               consistency_check(distance, "dist", trace = control@trace, lengths = TRUE)
+               consistency_check(centroid, "cent", trace = control@trace)
+          } else {
+               consistency_check(distance, "dist", trace = control@trace)
+          }
+
           ## ----------------------------------------------------------------------------------------------------------
           ## Distance function
           ## ----------------------------------------------------------------------------------------------------------
 
-          if (is.character(distance)) {
-               # dtwdistfun.R
-               distfun <- dtwdistfun(distance = distance,
-                                     control = control,
-                                     distmat = distmat)
-
-          } else {
-               stop("Unsupported distance definition")
-          }
+          # dtwdistfun.R
+          distfun <- dtwdistfun(distance = distance,
+                                control = control,
+                                distmat = distmat)
 
           ## ----------------------------------------------------------------------------------------------------------
           ## PAM precompute?
@@ -414,13 +418,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           if (control@trace && control@nrep > 1L)
                message("Tracing of repetitions might not be available if done in parallel.\n")
-
-          if (length(unique(lengths)) > 1) {
-               consistency_check(distance, "dist", trace = control@trace, lengths = TRUE)
-               consistency_check(centroid, "cent", trace = control@trace)
-          } else {
-               consistency_check(distance, "dist", trace = control@trace)
-          }
 
           if (!is.null(seed))
                set.seed(seed)
@@ -534,14 +531,16 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                    "average", "mcquitty", "median", "centroid")
 
           if (length(unique(lengths)) > 1)
+               consistency_check(distance, "dist", trace = control@trace, lengths = TRUE)
+          else
                consistency_check(distance, "dist", trace = control@trace)
-
-          if (control@trace && is.null(distmat))
-               cat("\n\tCalculating distance matrix...\n")
 
           if (!is.null(distmat)) {
                if ( nrow(distmat) != length(data) || ncol(distmat) != length(data) )
                     stop("Dimensions of provided cross-distance matrix don't correspond to length of provided data")
+
+               if (control@trace)
+                    cat("\n\tDistance matrix provided...\n\n")
 
                D <- distmat
                distfun <- function(...) stop("'distmat' provided in call, no distance calculations performed")
@@ -551,34 +550,33 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                else
                     distance <- "unknown"
 
-          } else if (is.character(distance)) {
+          } else {
                ## Take advantage of the function I defined for the partitional methods
                ## Which can do calculations in parallel if appropriate
                distfun <- dtwdistfun(distance = distance,
                                      control = control,
                                      distmat = NULL)
 
+               if (control@trace)
+                    cat("\n\tCalculating distance matrix...\n")
+
                ## single argument is to calculate whole distance matrix
                D <- do.call("distfun", c(list(data), dots))
 
-          } else {
-               stop("Unspported distance definition")
           }
+
+          ## Required form for 'hclust'
+          Dist <- D[lower.tri(D)]
+
+          ## Needed attribute for 'hclust' (case sensitive)
+          attr(Dist, "Size") <- length(data)
+          attr(Dist, "method") <- attr(D, "method")
 
           if (control@trace)
                cat("\n\tPerforming hierarchical clustering...\n\n")
 
-          ## Required form for 'hclust'
-          DD <- D[lower.tri(D)]
-
-          ## Needed attribute for 'hclust' (case sensitive)
-          attr(DD, "Size") <- length(data)
-          attr(DD, "method") <- attr(D, "method")
-
           ## Cluster
-          hc.list <- lapply(hclust_methods, function(method) {
-               stats::hclust(DD, method = method)
-          })
+          hc.list <- lapply(hclust_methods, function(method) stats::hclust(Dist, method))
 
           hc.list <- mapply(hc.list, hclust_methods, SIMPLIFY = FALSE, FUN = function(hc, method) {
                ## cutree and corresponding centers
@@ -611,7 +609,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                    type = type,
                    method = method,
                    distance = distance,
-                   centroid = "",
+                   centroid = "NA",
                    preproc = preproc_char,
 
                    centers = data[centers],
@@ -680,6 +678,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## Prepare results
           ## ----------------------------------------------------------------------------------------------------------
 
+          ## mainly for predict generic
           distfun <- dtwdistfun("dtw_lb", control = control, distmat = NULL)
 
           ## Some additional cluster information (taken from flexclust)

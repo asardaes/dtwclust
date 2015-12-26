@@ -1,6 +1,6 @@
 ## Update to version 2.0.0
 * Dropped some formal parameters. Still supporting them via ellipsis.
-* More parallel support and some extended functionality. 
+* More parallel support and extended functionality. 
 * New classes and some new generics.
 * Bug fixes.
 

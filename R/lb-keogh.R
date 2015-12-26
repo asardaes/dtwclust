@@ -14,9 +14,9 @@
 #' @note
 #'
 #' If you wish to calculate the lower bound between several time series, it would be better to use the version
-#' registered with the 'proxy' package, since it includes some small optimizations. See the examples.
+#' registered with the \code{proxy} package, since it includes some small optimizations. See the examples.
 #'
-#' However, because of said optimizations and a possible bug in \code{proxy}'s \code{\link[proxy]{dist}}, the
+#' However, because of said optimizations and a bug in \code{proxy}'s \code{\link[proxy]{dist}}, the
 #' latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
 #' \code{force.pairwise} to get the correct result.
 #'
@@ -120,7 +120,6 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, up
 
 # ========================================================================================================
 # Loop without using native 'proxy' looping (to avoid multiple calculations of the envelope)
-# - About 10 times faster
 # ========================================================================================================
 
 lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,

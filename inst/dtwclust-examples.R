@@ -34,9 +34,10 @@ ndtw <- function(x, y, ...) {
 }
 
 # Registering the function with 'proxy'
-proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
-                       loop = TRUE, type = "metric", distance = TRUE,
-                       description = "Normalized DTW with L1 norm")
+if (!pr_DB$entry_exists("nDTW"))
+     proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
+                            loop = TRUE, type = "metric", distance = TRUE,
+                            description = "Normalized DTW with L1 norm")
 
 # Subset of (original) data for speed
 kc.ndtw <- dtwclust(CharTraj[31:40], distance = "nDTW",

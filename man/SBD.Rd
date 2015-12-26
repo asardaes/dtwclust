@@ -33,9 +33,9 @@ The output values lie between 0 and 2, with 0 indicating perfect similarity.
 }
 \note{
 If you wish to calculate the distance between several time series, it would be better to use the version
-registered with the 'proxy' package, since it includes some small optimizations. See the examples.
+registered with the \code{proxy} package, since it includes some small optimizations. See the examples.
 
-However, because of said optimizations and a possible bug in \code{proxy}'s \code{\link[proxy]{dist}}, the
+However, because of said optimizations and a bug in \code{proxy}'s \code{\link[proxy]{dist}}, the
 latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
 \code{force.pairwise} to get the correct result.
 }

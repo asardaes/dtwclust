@@ -4,8 +4,6 @@
 
 dtwdistfun <- function(distance, control, distmat) {
 
-     ## If I call this function is because 'distance' was a character
-
      needs_window <- c("dtw_lb", "lbk", "lbi")
 
      if (distance %in% needs_window)
@@ -105,7 +103,6 @@ dtwdistfun <- function(distance, control, distmat) {
                                                                 method = distance)))
 
                                            dd
-
                                       }
 
                          D <- matrix(0, nrow = length(x), ncol = length(x))

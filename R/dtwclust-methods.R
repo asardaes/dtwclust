@@ -87,7 +87,7 @@ setMethod("update", "dtwclust",
                args <- as.pairlist(list(...))
 
                if (length(args) == 0) {
-                    warning("Nothing to be updated")
+                    message("Nothing to be updated")
 
                     if (evaluate)
                          return(object)
@@ -468,8 +468,7 @@ setValidity("dtwclustControl",
                  if (!is.null(object@window.size) && object@window.size < 1)
                       return("Window size must be positive if provided")
 
-                 if (!(object@norm %in% c("L1", "L2")))
-                      return("Norm can only be L1 or L2")
+                 object@norm <- match.arg(object@norm, c("L1", "L2"))
 
                  if (object@dba.iter < 0L)
                       return("DBA iterations must be positive")

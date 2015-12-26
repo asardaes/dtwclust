@@ -110,36 +110,31 @@ NULL
 .onAttach <- function(lib, pkg) {
 
      ## Register DTW2
-
      if (!consistency_check("DTW2", "dist", silent = TRUE))
           proxy::pr_DB$set_entry(FUN = dtw2, names=c("DTW2", "dtw2"),
                                  loop = TRUE, type = "metric", distance = TRUE,
-                                 description = "DTW with L2 as pointwise norm")
+                                 description = "DTW with L2 norm")
 
      ## Register LB_Keogh with the 'proxy' package for distance matrix calculation
-
      if (!consistency_check("LB_Keogh", "dist", silent = TRUE))
           proxy::pr_DB$set_entry(FUN = lb_keogh_loop, names=c("LBK", "LB_Keogh", "lbk"),
                                  loop = FALSE, type = "metric", distance = TRUE,
-                                 description = "Keogh's DTW lower bound but using L1 norm")
+                                 description = "Keogh's DTW lower bound for the Sakoe-Chiba band")
 
 
      ## Register LB_Improved with the 'proxy' package for distance matrix calculation
-
      if (!consistency_check("LB_Improved", "dist", silent = TRUE))
           proxy::pr_DB$set_entry(FUN = lb_improved_loop, names=c("LBI", "LB_Improved", "lbi"),
                                  loop = FALSE, type = "metric", distance = TRUE,
-                                 description = "Lemire's improved DTW lower bound using L1 norm")
+                                 description = "Lemire's improved DTW lower bound for the Sakoe-Chiba band")
 
      ## Register SBD
-
      if (!consistency_check("SBD", "dist", silent = TRUE))
           proxy::pr_DB$set_entry(FUN = SBD.proxy, names=c("SBD", "sbd"),
                                  loop = FALSE, type = "metric", distance = TRUE,
                                  description = "Paparrizos' shape-based distance for time series")
 
      ## Register DTW_LB
-
      if (!consistency_check("DTW_LB", "dist", silent = TRUE))
           proxy::pr_DB$set_entry(FUN = dtw_lb, names=c("DTW_LB", "dtw_lb"),
                                  loop = FALSE, type = "metric", distance = TRUE,
