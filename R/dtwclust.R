@@ -330,6 +330,14 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           datalist <- list()
 
      lengths <- sapply(data, length)
+     diff_lengths <- length(unique(lengths)) > 1L
+
+     included_distances <- c("lbk", "lbi", "dtw", "dtw2", "sbd", "dtw_lb")
+
+     if (diff_lengths && distance %in% c("dtw", "dtw2"))
+          control@symmetric <- FALSE
+     else if (distance %in% included_distances)
+          control@symmetric <- TRUE
 
      if (type == "partitional") {
 
@@ -346,7 +354,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           if (is.character(centroid))
                centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
 
-          if (length(unique(lengths)) > 1) {
+          if (diff_lengths) {
                consistency_check(distance, "dist", trace = control@trace, lengths = TRUE)
                consistency_check(centroid, "cent", trace = control@trace)
           } else {
@@ -535,10 +543,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                hclust_methods <- c("ward.D", "ward.D2", "single", "complete",
                                    "average", "mcquitty", "median", "centroid")
 
-          if (length(unique(lengths)) > 1)
-               consistency_check(distance, "dist", trace = control@trace, lengths = TRUE)
-          else
-               consistency_check(distance, "dist", trace = control@trace)
+          consistency_check(distance, "dist", trace = control@trace, lengths = diff_lengths)
 
           if (!is.null(distmat)) {
                if ( nrow(distmat) != length(data) || ncol(distmat) != length(data) )

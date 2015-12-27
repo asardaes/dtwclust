@@ -85,8 +85,7 @@ dtwdistfun <- function(distance, control, distmat) {
                          ## strict pairwise as in proxy::dist doesn't make sense here, but this case needs it
                          dots$pairwise <- TRUE
 
-                         ## by column so that I can assign it with upper.tri at the end
-                         pairs <- call_pairs(length(x), byrow = FALSE)
+                         pairs <- call_pairs(length(x), lower = FALSE)
 
                          pairs <- split_parallel(pairs, nrow(pairs), 1L)
 
@@ -111,12 +110,42 @@ dtwdistfun <- function(distance, control, distmat) {
 
                          D <- matrix(0, nrow = length(x), ncol = length(x))
                          D[upper.tri(D)] <- d
-                         D <- t(D)
-                         D[upper.tri(D)] <- d
+
+                         if (!control@symmetric) {
+                              pairs <- call_pairs(length(x), lower = TRUE)
+
+                              pairs <- split_parallel(pairs, nrow(pairs), 1L)
+
+                              d <- foreach(pairs = pairs,
+                                           .combine = c,
+                                           .multicombine = TRUE,
+                                           .packages = control@packages,
+                                           .export = export) %dopar% {
+
+                                                if (!consistency_check(dist_entry$names[1], "dist", silent = TRUE))
+                                                     do.call(proxy::pr_DB$set_entry, dist_entry)
+
+                                                ## 'dots' has all extra arguments that are valid
+                                                dd <- do.call(proxy::dist,
+                                                              c(dots,
+                                                                list(x = x[pairs[,1]],
+                                                                     y = x[pairs[,2]],
+                                                                     method = distance)))
+
+                                                dd
+                                           }
+
+                              D[lower.tri(D)] <- d
+
+                         } else {
+                              D <- t(D)
+                              D[upper.tri(D)] <- d
+                         }
 
                          d <- D
                          attr(d, "class") <- "crossdist"
-                         attr(d, "method") <- distance
+                         attr(d, "method") <- toupper(distance)
+                         attr(d, "dimnames") <- list(names(x), names(x))
 
                     } else {
                          ## Only subset of distmat is calculated
@@ -149,6 +178,16 @@ dtwdistfun <- function(distance, control, distmat) {
                                            dd
 
                                       }
+
+                         if (!is.null(dots$pairwise) && dots$pairwise) {
+                              attr(d, "class") <- "pairdist"
+                              attr(d, "method") <- toupper(distance)
+
+                         } else {
+                              attr(d, "class") <- "crossdist"
+                              attr(d, "method") <- toupper(distance)
+                              attr(d, "dimnames") <- list(names(x), names(centers))
+                         }
                     }
 
                } else {
@@ -167,6 +206,8 @@ dtwdistfun <- function(distance, control, distmat) {
                                         method = distance)))
                }
           }
+
+          attr(d, "call") <- NULL
 
           d
      }

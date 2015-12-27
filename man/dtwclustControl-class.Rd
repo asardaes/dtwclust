@@ -29,6 +29,9 @@ for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{"L1"
 \item{\code{save.data}}{Return a "copy" of the data in the returned object? Because of the way \code{R} handles
 things internally, all copies should point to the same memory address.}
 
+\item{\code{symmetric}}{Is the distance function symmetric? In other words, is \code{dist(x,y)} == \code{dist(y,x)}?
+If \code{TRUE}, half the distance matrix can be computed and some time saved.}
+
 \item{\code{packages}}{Character vector with the names of any packages required for custom \code{proxy} functions. See
 Parallel Computing section in \code{\link{dtwclust}}.}
 
@@ -50,6 +53,7 @@ in \code{\link{dtwclust}}.}
   \item \code{norm} = "L1"
   \item \code{trace} = \code{FALSE}
   \item \code{save.data} = \code{TRUE}
+  \item \code{symmetric} = \code{FALSE}
   \item \code{packages} = \code{character(0)}
 }
 }

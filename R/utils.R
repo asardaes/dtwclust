@@ -147,16 +147,19 @@ call_runminmax <- function(series, window) {
 }
 
 # Create combinations of all possible pairs
-call_pairs <- function(n = 2L, byrow = TRUE) {
+call_pairs <- function(n = 2L, lower = TRUE) {
      if (n < 2)
           stop("At least two elements are needed to create pairs.")
 
-     .Call("pairs", n, byrow, PACKAGE = "dtwclust")
+     .Call("pairs", n, lower, PACKAGE = "dtwclust")
 }
 
 # Is there a registered parallel backend?
 check_parallel <- function(distance = NULL) {
-     ret <- foreach::getDoParRegistered() && foreach::getDoParWorkers() > 1L
+     if (is.null(foreach::getDoParName()))
+          registerDoSEQ()
+
+     ret <- foreach::getDoParWorkers() > 1L
 
      if (!is.null(distance))
           ret <- ret && pr_DB$get_entry(distance)$loop

@@ -56,6 +56,7 @@ setClass("dtwclustFamily",
 #'   \item \code{norm} = "L1"
 #'   \item \code{trace} = \code{FALSE}
 #'   \item \code{save.data} = \code{TRUE}
+#'   \item \code{symmetric} = \code{FALSE}
 #'   \item \code{packages} = \code{character(0)}
 #' }
 #'
@@ -67,6 +68,8 @@ setClass("dtwclustFamily",
 #' @slot trace Logical flag. If \code{TRUE}, more output regarding the progress is printed to screen.
 #' @slot save.data Return a "copy" of the data in the returned object? Because of the way \code{R} handles
 #' things internally, all copies should point to the same memory address.
+#' @slot symmetric Is the distance function symmetric? In other words, is \code{dist(x,y)} == \code{dist(y,x)}?
+#' If \code{TRUE}, half the distance matrix can be computed and some time saved.
 #' @slot packages Character vector with the names of any packages required for custom \code{proxy} functions. See
 #' Parallel Computing section in \code{\link{dtwclust}}.
 #'
@@ -106,6 +109,7 @@ setClass("dtwclustControl",
                    trace = "logical",
                    nrep = "integer",
                    save.data = "logical",
+                   symmetric = "logical",
                    packages = "character"),
 
          prototype = prototype(window.size = NULL,
@@ -116,6 +120,7 @@ setClass("dtwclustControl",
                                trace = FALSE,
                                nrep = 1L,
                                save.data = TRUE,
+                               symmetric = FALSE,
                                packages = character(0))
 )
 
