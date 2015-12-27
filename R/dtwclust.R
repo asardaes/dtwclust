@@ -51,6 +51,10 @@
 #'
 #' Whether the function makes use of them or not, is up to you. See the examples.
 #'
+#' If you know that the distance function is symmetric, consider setting the corresponding slot in
+#' \code{\link{dtwclustControl}} to \code{TRUE} to save some time in case of \code{pam.precompute}
+#' = \code{TRUE} or hierarchical procedures.
+#'
 #' @section Centroid:
 #'
 #' In the case of partitional algorithms, a suitable function should calculate the cluster centers at

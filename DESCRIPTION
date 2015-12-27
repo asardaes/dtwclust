@@ -2,7 +2,7 @@ Package: dtwclust
 Type: Package
 Title: Time Series Clustering with Dynamic Time Warping Distance
 Version: 2.0.0
-Date: 2015-12-26
+Date: 2015-12-27
 Depends:
     flexclust,
     proxy,
@@ -18,7 +18,8 @@ Imports:
     parallel
 Suggests:
     TSdist,
-    doParallel
+    doParallel,
+    testthat
 Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
 Description: Time series clustering using different techniques related to the

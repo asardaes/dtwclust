@@ -1,0 +1,23 @@
+context("Test TADPole")
+
+ctrl@window.size <- 18L
+
+# =================================================================================================
+# Valid input
+# =================================================================================================
+
+pc_tadp <- dtwclust(data_list[1:50], type = "tadpole", k = 10, dc = 1.5, control = ctrl)
+
+pc_tadp <- reset_nondeterministic(pc_tadp)
+
+test_that("TADPole clustering gives the same result as reference",
+          expect_equal_to_reference(pc_tadp, "pc_tadp.rds"))
+
+# =================================================================================================
+# Invalid input
+# =================================================================================================
+
+test_that("TADPole clustering doesn't allow series with different lengths",
+          expect_error(dtwclust(data, type = "tadpole", k = 20, dc = 1.5, control = ctrl)))
+
+ctrl@window.size <- NULL

@@ -144,7 +144,6 @@ dtwdistfun <- function(distance, control, distmat) {
 
                          d <- D
                          attr(d, "class") <- "crossdist"
-                         attr(d, "method") <- toupper(distance)
                          attr(d, "dimnames") <- list(names(x), names(x))
 
                     } else {
@@ -181,11 +180,9 @@ dtwdistfun <- function(distance, control, distmat) {
 
                          if (!is.null(dots$pairwise) && dots$pairwise) {
                               attr(d, "class") <- "pairdist"
-                              attr(d, "method") <- toupper(distance)
 
                          } else {
                               attr(d, "class") <- "crossdist"
-                              attr(d, "method") <- toupper(distance)
                               attr(d, "dimnames") <- list(names(x), names(centers))
                          }
                     }
@@ -207,6 +204,7 @@ dtwdistfun <- function(distance, control, distmat) {
                }
           }
 
+          attr(d, "method") <- toupper(distance)
           attr(d, "call") <- NULL
 
           d
