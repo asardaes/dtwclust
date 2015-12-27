@@ -74,7 +74,7 @@ dtwdistfun <- function(distance, control, distmat) {
 
           } else {
                ## Attempt to calculate distmat in parallel?
-               if (check_parallel(distance)) {
+               if (check_parallel(distance = distance, strict = !control@symmetric)) {
 
                     ## variables/functions from the parent environment that should be exported
                     export <- c("distance", "consistency_check")

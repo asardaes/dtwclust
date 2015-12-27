@@ -155,11 +155,14 @@ call_pairs <- function(n = 2L, lower = TRUE) {
 }
 
 # Is there a registered parallel backend?
-check_parallel <- function(distance = NULL) {
+check_parallel <- function(distance = NULL, strict = TRUE) {
      if (is.null(foreach::getDoParName()))
           registerDoSEQ()
 
-     ret <- foreach::getDoParWorkers() > 0L
+     if (strict)
+          ret <- foreach::getDoParWorkers() > 1L
+     else
+          ret <- foreach::getDoParWorkers() > 0L
 
      if (!is.null(distance))
           ret <- ret && pr_DB$get_entry(distance)$loop
@@ -169,7 +172,9 @@ check_parallel <- function(distance = NULL) {
 
 # Split a given object into tasks for parallel workers
 split_parallel <- function(obj, tasks, margin = NULL) {
-     tasks <- parallel::splitIndices(tasks, foreach::getDoParWorkers())
+     num_workers <- foreach::getDoParWorkers()
+
+     tasks <- parallel::splitIndices(tasks, num_workers)
      tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) > 0]
 
      if (is.null(margin))
