@@ -159,7 +159,7 @@ check_parallel <- function(distance = NULL) {
      if (is.null(foreach::getDoParName()))
           registerDoSEQ()
 
-     ret <- foreach::getDoParWorkers() > 1L
+     ret <- foreach::getDoParWorkers() > 0L
 
      if (!is.null(distance))
           ret <- ret && pr_DB$get_entry(distance)$loop

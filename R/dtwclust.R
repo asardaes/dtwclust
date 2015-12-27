@@ -332,12 +332,15 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      lengths <- sapply(data, length)
      diff_lengths <- length(unique(lengths)) > 1L
 
-     included_distances <- c("lbk", "lbi", "dtw", "dtw2", "sbd", "dtw_lb")
-
      if (diff_lengths && distance %in% c("dtw", "dtw2"))
           control@symmetric <- FALSE
-     else if (distance %in% included_distances)
+     else if (distance %in% c("lbk", "lbi"))
+          control@symmetric <- FALSE
+     else if (distance %in% c("sbd", "dtw", "dtw2"))
           control@symmetric <- TRUE
+
+     ## For parallel computation
+     control@packages <- c("dtwclust", control@packages)
 
      if (type == "partitional") {
 
@@ -347,9 +350,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           if (k < 2L)
                stop("At least two clusters must be defined")
-
-          ## For parallel computation
-          control@packages <- c("dtwclust", control@packages)
 
           if (is.character(centroid))
                centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
