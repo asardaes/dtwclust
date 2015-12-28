@@ -11,7 +11,7 @@ pc_tadp <- dtwclust(data_list[1:50], type = "tadpole", k = 10, dc = 1.5, control
 pc_tadp <- reset_nondeterministic(pc_tadp)
 
 test_that("TADPole clustering gives the same result as reference",
-          expect_equal_to_reference(pc_tadp, "pc_tadp.rds"))
+          my_expect_equal_to_reference(pc_tadp))
 
 # =================================================================================================
 # Invalid input

@@ -10,7 +10,7 @@ hc_all <- dtwclust(data, type = "hierarchical", k = 20,
 hc_all <- lapply(hc_all, reset_nondeterministic)
 
 test_that("hierarchical clustering gives the same result as reference",
-          expect_equal_to_reference(hc_all, "hc_all.rds"))
+          my_expect_equal_to_reference(hc_all))
 
 # =================================================================================================
 # non-symmetric distance
@@ -23,7 +23,7 @@ hc_lbi <- dtwclust(data_list, type = "hierarchical", k = 20,
 hc_lbi <- lapply(hc_lbi, reset_nondeterministic)
 
 test_that("hierarchical clustering with non-symmetric distance gives the same result as reference",
-          expect_equal_to_reference(hc_lbi, "hc_lbi.rds"))
+          my_expect_equal_to_reference(hc_lbi))
 
 # =================================================================================================
 # distance function

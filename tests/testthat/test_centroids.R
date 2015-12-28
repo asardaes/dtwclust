@@ -14,7 +14,7 @@ suppressWarnings(
 pc_mean <- reset_nondeterministic(pc_mean)
 
 test_that("mean centroid gives the same result as reference",
-          expect_equal_to_reference(pc_mean, "pc_mean.rds"))
+          my_expect_equal_to_reference(pc_mean))
 
 # =================================================================================================
 # median
@@ -27,7 +27,7 @@ pc_median <- dtwclust(data_matrix, type = "partitional", k = 20,
 pc_median <- reset_nondeterministic(pc_median)
 
 test_that("median centroid gives the same result as reference",
-          expect_equal_to_reference(pc_median, "pc_median.rds"))
+          my_expect_equal_to_reference(pc_median))
 
 # =================================================================================================
 # shape
@@ -40,7 +40,7 @@ pc_shape <- dtwclust(data, type = "partitional", k = 20,
 pc_shape <- reset_nondeterministic(pc_shape)
 
 test_that("shape centroid gives the same result as reference",
-          expect_equal_to_reference(pc_shape, "pc_shape.rds"))
+          my_expect_equal_to_reference(pc_shape))
 
 # =================================================================================================
 # pam
@@ -53,7 +53,7 @@ pc_pam <- dtwclust(data, type = "partitional", k = 20,
 pc_pam <- reset_nondeterministic(pc_pam)
 
 test_that("pam centroid gives the same result as reference",
-          expect_equal_to_reference(pc_pam, "pc_pam.rds"))
+          my_expect_equal_to_reference(pc_pam))
 
 # =================================================================================================
 # dba
@@ -69,7 +69,7 @@ suppressWarnings(
 pc_dba <- reset_nondeterministic(pc_dba)
 
 test_that("dba centroid gives the same result as reference",
-          expect_equal_to_reference(pc_dba, "pc_dba.rds"))
+          my_expect_equal_to_reference(pc_dba))
 
 # =================================================================================================
 # colMeans
@@ -95,7 +95,7 @@ suppressWarnings(
 pc_colMeans <- reset_nondeterministic(pc_colMeans)
 
 test_that("custom centroid function gives the same result as reference",
-          expect_equal_to_reference(pc_colMeans, "pc_colMeans.rds"))
+          my_expect_equal_to_reference(pc_colMeans))
 
 # =================================================================================================
 # invalid centroid

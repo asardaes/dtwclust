@@ -11,3 +11,4 @@
 
 ## R CMD check results
 * There were no ERRORs, WARNINGs or NOTEs
+* The testthat package has its own definition of 'proc_time' class, which results in several messages being displayed when the tests are run. This only happens during tests.

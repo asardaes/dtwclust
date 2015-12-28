@@ -11,7 +11,7 @@ pc_matrix <- dtwclust(data_matrix, type = "partitional", k = 20,
 pc_matrix <- reset_nondeterministic(pc_matrix)
 
 test_that("matrix input gives the same result as reference",
-          expect_equal_to_reference(pc_matrix, "pc_matrix.rds"))
+          my_expect_equal_to_reference(pc_matrix))
 
 # =================================================================================================
 # list
@@ -24,7 +24,7 @@ pc_list <- dtwclust(data_list, type = "partitional", k = 20,
 pc_list <- reset_nondeterministic(pc_list)
 
 test_that("list input gives the same result as reference",
-          expect_equal_to_reference(pc_list, "pc_list.rds"))
+          my_expect_equal_to_reference(pc_list))
 
 # =================================================================================================
 # data.frame

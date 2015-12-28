@@ -19,3 +19,14 @@ reset_nondeterministic <- function(obj) {
 
      obj
 }
+
+## problems between accuracy of architectures
+
+my_expect_equal_to_reference <- function(object) {
+     if (grepl("i386", Sys.getenv("R_ARCH")))
+          file_name <- paste0("i386/", as.character(substitute(object)), ".rds")
+     else
+          file_name <- paste0(as.character(substitute(object)), ".rds")
+
+     expect_equal_to_reference(object, file_name)
+}

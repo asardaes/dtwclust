@@ -11,7 +11,7 @@ pc_l2 <- dtwclust(data_matrix, type = "partitional", k = 20,
 pc_l2 <- reset_nondeterministic(pc_l2)
 
 test_that("L2 distance gives the same result as reference",
-          expect_equal_to_reference(pc_l2, "pc_l2.rds"))
+          my_expect_equal_to_reference(pc_l2))
 
 # =================================================================================================
 # lbk
@@ -24,7 +24,7 @@ pc_lbk <- dtwclust(data_matrix, type = "partitional", k = 20,
 pc_lbk <- reset_nondeterministic(pc_lbk)
 
 test_that("lbk distance gives the same result as reference",
-          expect_equal_to_reference(pc_lbk, "pc_lbk.rds"))
+          my_expect_equal_to_reference(pc_lbk))
 
 # =================================================================================================
 # lbi
@@ -37,7 +37,7 @@ pc_lbi <- dtwclust(data_matrix, type = "partitional", k = 20,
 pc_lbi <- reset_nondeterministic(pc_lbi)
 
 test_that("lbi distance gives the same result as reference",
-          expect_equal_to_reference(pc_lbi, "pc_lbi.rds"))
+          my_expect_equal_to_reference(pc_lbi))
 
 # =================================================================================================
 # sbd
@@ -50,7 +50,7 @@ pc_sbd <- dtwclust(data_matrix, type = "partitional", k = 20,
 pc_sbd <- reset_nondeterministic(pc_sbd)
 
 test_that("sbd distance gives the same result as reference",
-          expect_equal_to_reference(pc_sbd, "pc_sbd.rds"))
+          my_expect_equal_to_reference(pc_sbd))
 
 # =================================================================================================
 # dtw_lb
@@ -65,7 +65,7 @@ pc_dtw_lb <- dtwclust(data_matrix[1:20, ], type = "partitional", k = 4,
 pc_dtw_lb <- reset_nondeterministic(pc_dtw_lb)
 
 test_that("dtw_lb distance gives the same result as reference",
-          expect_equal_to_reference(pc_dtw_lb, "pc_dtw_lb.rds"))
+          my_expect_equal_to_reference(pc_dtw_lb))
 
 ctrl@pam.precompute <- TRUE
 
@@ -80,7 +80,7 @@ pc_dtw <- dtwclust(data_subset, type = "partitional", k = 4,
 pc_dtw <- reset_nondeterministic(pc_dtw)
 
 test_that("dtw distance gives the same result as reference",
-          expect_equal_to_reference(pc_dtw, "pc_dtw.rds"))
+          my_expect_equal_to_reference(pc_dtw))
 
 # =================================================================================================
 # dtw2
@@ -93,7 +93,7 @@ pc_dtw2 <- dtwclust(data_subset, type = "partitional", k = 4,
 pc_dtw2 <- reset_nondeterministic(pc_dtw2)
 
 test_that("dtw2 distance gives the same result as reference",
-          expect_equal_to_reference(pc_dtw2, "pc_dtw2.rds"))
+          my_expect_equal_to_reference(pc_dtw2))
 
 # =================================================================================================
 # distance function
