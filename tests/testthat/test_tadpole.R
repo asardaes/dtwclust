@@ -1,7 +1,5 @@
 context("Test TADPole")
 
-ctrl@window.size <- 18L
-
 # =================================================================================================
 # Valid input
 # =================================================================================================
@@ -19,5 +17,3 @@ test_that("TADPole clustering gives the same result as reference",
 
 test_that("TADPole clustering doesn't allow series with different lengths",
           expect_error(dtwclust(data, type = "tadpole", k = 20, dc = 1.5, control = ctrl)))
-
-ctrl@window.size <- NULL

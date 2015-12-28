@@ -8,7 +8,7 @@ data_subset <- data[1:20]
 labels <- CharTrajLabels
 labels_subset <- labels[1:20]
 
-ctrl <- new("dtwclustControl", window.size = 18L)
+ctrl <- new("dtwclustControl", window.size = 18L, save.data = FALSE)
 
 ## family and proctime will vary from run to run, that's unavoidable
 reset_nondeterministic <- function(obj) {
@@ -21,7 +21,6 @@ reset_nondeterministic <- function(obj) {
 }
 
 ## problems between accuracy of architectures
-
 my_expect_equal_to_reference <- function(object) {
      if (grepl("i386", Sys.getenv("R_ARCH")))
           file_name <- paste0("i386/", as.character(substitute(object)), ".rds")

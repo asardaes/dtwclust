@@ -5,7 +5,8 @@ context("Test hierarchical")
 # =================================================================================================
 
 hc_all <- dtwclust(data, type = "hierarchical", k = 20,
-                   distance = "sbd", method = "all")
+                   distance = "sbd", method = "all",
+                   control = ctrl)
 
 hc_all <- lapply(hc_all, reset_nondeterministic)
 
@@ -18,7 +19,7 @@ test_that("hierarchical clustering gives the same result as reference",
 
 hc_lbi <- dtwclust(data_list, type = "hierarchical", k = 20,
                    distance = "lbi", method = "all",
-                   control = list(window.size = 18L))
+                   control = ctrl)
 
 hc_lbi <- lapply(hc_lbi, reset_nondeterministic)
 

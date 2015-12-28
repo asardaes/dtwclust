@@ -6,7 +6,8 @@ context("Test data types")
 
 pc_matrix <- dtwclust(data_matrix, type = "partitional", k = 20,
                       distance = "L2", centroid = "pam",
-                      preproc = NULL, seed = 123)
+                      preproc = NULL, seed = 123,
+                      control = ctrl)
 
 pc_matrix <- reset_nondeterministic(pc_matrix)
 
@@ -18,8 +19,9 @@ test_that("matrix input gives the same result as reference",
 # =================================================================================================
 
 pc_list <- dtwclust(data_list, type = "partitional", k = 20,
-                    distance = "L2", centroid = "pam",
-                    preproc = NULL, seed = 123)
+                    distance = "L1", centroid = "pam",
+                    preproc = NULL, seed = 123,
+                    conrol = ctrl)
 
 pc_list <- reset_nondeterministic(pc_list)
 

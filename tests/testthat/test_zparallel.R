@@ -19,8 +19,6 @@ test_that("Parallel computation gives the same results as sequential", {
 
      registerDoParallel(cl)
 
-     ## The 'distmat' slot in a couple of experiments changes because the parallel version forces
-     ## symmetry by only calculating the upper triangular...
      test_dir("./", filter = "^(?!.*parallel).*$", perl = TRUE)
 
      stopCluster(cl)
