@@ -161,7 +161,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
 
           ## Attempt parallel calculations?
           if (do_par) {
-               ind1 <- split_parallel(ind1, nrow(ind1), 1L)
+               ind1 <- split_parallel(ind1, 1L)
 
                exclude <- setdiff(ls(), c("x", "step.pattern", "window.size"))
 
@@ -243,7 +243,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
      ## Attempt parallel calculations?
      if (do_par) {
           # start at two
-          i <- split_parallel(2:n, n-1L)
+          i <- split_parallel(2:n)
 
           DNN <- foreach(i = i,
                          .combine = rbind,

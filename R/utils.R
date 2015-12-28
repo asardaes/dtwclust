@@ -171,18 +171,26 @@ check_parallel <- function(distance = NULL, strict = TRUE) {
 }
 
 # Split a given object into tasks for parallel workers
-split_parallel <- function(obj, tasks, margin = NULL) {
+split_parallel <- function(obj, margin = NULL) {
      num_workers <- foreach::getDoParWorkers()
 
-     tasks <- parallel::splitIndices(tasks, num_workers)
-     tasks <- tasks[sapply(tasks, length, USE.NAMES = FALSE) > 0]
+     if (is.null(margin))
+          num_tasks <- length(obj)
+     else
+          num_tasks <- dim(obj)[margin]
+
+     if (is.na(num_tasks))
+          stop("Attempted to split an invalid object into parallel tasks.")
+
+     num_tasks <- parallel::splitIndices(num_tasks, num_workers)
+     num_tasks <- num_tasks[sapply(num_tasks, length, USE.NAMES = FALSE) > 0]
 
      if (is.null(margin))
-          ret <- lapply(tasks, function(id) obj[id])
+          ret <- lapply(num_tasks, function(id) obj[id])
      else
           ret <- switch(EXPR = margin,
-                        lapply(tasks, function(id) obj[id,]),
-                        lapply(tasks, function(id) obj[,id])
+                        lapply(num_tasks, function(id) obj[id, , drop = FALSE]),
+                        lapply(num_tasks, function(id) obj[ ,id, drop = FALSE])
           )
 
      ret

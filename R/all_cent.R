@@ -45,8 +45,8 @@ all_cent <- function(case = NULL, distmat, distfun, control) {
 
           if (check_parallel()) {
                # in parallel
-               x_split <- split_parallel(x_split, length(x_split))
-               cent <- split_parallel(cent, length(cent))
+               x_split <- split_parallel(x_split)
+               cent <- split_parallel(cent)
 
                new_cent <- foreach(x_split = x_split,
                                    cent = cent,
@@ -79,8 +79,8 @@ all_cent <- function(case = NULL, distmat, distfun, control) {
 
           if (check_parallel()) {
 
-               x_split <- split_parallel(x_split, length(x_split))
-               cent <- split_parallel(cent, length(cent))
+               x_split <- split_parallel(x_split)
+               cent <- split_parallel(cent)
 
                new_cent <- foreach(x_split = x_split,
                                    cent = cent,

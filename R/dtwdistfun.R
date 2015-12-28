@@ -87,7 +87,7 @@ dtwdistfun <- function(distance, control, distmat) {
 
                          pairs <- call_pairs(length(x), lower = FALSE)
 
-                         pairs <- split_parallel(pairs, nrow(pairs), 1L)
+                         pairs <- split_parallel(pairs, 1L)
 
                          d <- foreach(pairs = pairs,
                                       .combine = c,
@@ -114,7 +114,7 @@ dtwdistfun <- function(distance, control, distmat) {
                          if (!control@symmetric) {
                               pairs <- call_pairs(length(x), lower = TRUE)
 
-                              pairs <- split_parallel(pairs, nrow(pairs), 1L)
+                              pairs <- split_parallel(pairs, 1L)
 
                               d <- foreach(pairs = pairs,
                                            .combine = c,
@@ -148,10 +148,10 @@ dtwdistfun <- function(distance, control, distmat) {
 
                     } else {
                          ## Only subset of distmat is calculated
-                         x <- split_parallel(x, length(x))
+                         x <- split_parallel(x)
 
                          if (!is.null(dots$pairwise) && dots$pairwise) {
-                              centers <- split_parallel(centers, length(centers))
+                              centers <- split_parallel(centers)
                               combine <- c
                          } else {
                               centers <- lapply(1:length(x), function(dummy) centers)

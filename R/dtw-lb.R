@@ -130,8 +130,8 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                window.type <- "slantedband"
 
           if (do_par) {
-               X <- split_parallel(X, length(X))
-               Y <- split_parallel(Y, length(Y))
+               X <- split_parallel(X)
+               Y <- split_parallel(Y)
 
                D <- foreach(X = X, Y = Y,
                             .combine = c,
@@ -205,7 +205,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
           indNN <- new.indNN
 
           if (do_par) {
-               indNew <- split_parallel(indNew, length(indNew))
+               indNew <- split_parallel(indNew)
 
                exclude <- setdiff(ls(), c("X", "Y", "norm", "indNN", "window.size"))
 

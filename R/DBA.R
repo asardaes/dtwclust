@@ -111,8 +111,8 @@ DBA <- function(X, center = NULL, max.iter = 20,
 
      if (do_par) {
           # in parallel
-          X <- split_parallel(X, n)
-          M <- split_parallel(M, n)
+          X <- split_parallel(X)
+          M <- split_parallel(M)
      }
 
      ## Iterations
