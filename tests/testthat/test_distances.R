@@ -100,14 +100,16 @@ test_that("dtw2 distance gives the same result as reference",
 # =================================================================================================
 
 test_that("distance function gives error",
-          expect_error(dtwclust(data_matrix, k = 20, distance = mean)))
+          expect_error(dtwclust(data_matrix, k = 20, distance = mean),
+                       "proxy"))
 
 # =================================================================================================
 # unregistered distance
 # =================================================================================================
 
 test_that("unregistered distance gives error",
-          expect_error(dtwclust(data_matrix, k = 20, distance = "dummy")))
+          expect_error(dtwclust(data_matrix, k = 20, distance = "dummy"),
+                       "proxy"))
 
 # =================================================================================================
 # invalid distance
@@ -115,4 +117,5 @@ test_that("unregistered distance gives error",
 
 test_that("invalid distance for series with different lengths gives error",
           expect_error(dtwclust(data, k = 20, distance = "lbi",
-                                control = list(window.size = 18L))))
+                                control = list(window.size = 18L)),
+                       "different lengths"))

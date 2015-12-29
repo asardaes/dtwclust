@@ -31,11 +31,13 @@ test_that("hierarchical clustering with non-symmetric distance gives the same re
 # =================================================================================================
 
 test_that("distance function gives error",
-          expect_error(dtwclust(data_matrix, k = 20, type = "hierarchical", distance = mean)))
+          expect_error(dtwclust(data_matrix, k = 20, type = "hierarchical", distance = mean),
+                       "proxy"))
 
 # =================================================================================================
 # unregistered distance
 # =================================================================================================
 
 test_that("unregistered distance gives error",
-          expect_error(dtwclust(data_matrix, k = 20, type = "hierarchical", distance = "dummy")))
+          expect_error(dtwclust(data_matrix, k = 20, type = "hierarchical", distance = "dummy"),
+                       "proxy"))

@@ -15,7 +15,7 @@
 * Added `distmat` slot and `update` generic to save some time if possible. See examples of `dtwclust`.
 * Extra parameters for distance functions should be correctly detected now.
 * Using `dtw_lb` function now correctly warns about `pam.precompute` being `TRUE`.
-* Option to calculate pairwise distances with `SBD`, `LB_Keogh` and `LB_Improved`. See their respective notes. The distance function created for the `dtwclustFamily` slot also supports this.
+* Option to calculate pairwise distances with `DTW_LB`, `SBD`, `LB_Keogh` and `LB_Improved`. See their respective notes. The distance function created for the `dtwclustFamily` slot also supports this.
 * Clusters are randomly re-initialized if they become empty at some iteration.
 * Now all included centroid functions recompute centers only if necessary.
 

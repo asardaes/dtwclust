@@ -32,5 +32,6 @@ test_that("list input gives the same result as reference",
 # data.frame
 # =================================================================================================
 
-test_that("data.frame input gives data type error",
-          expect_error(dtwclust(as.data.frame(data_matrix), k = 20, distance = "L2")))
+test_that("logical input gives data type error",
+          expect_error(dtwclust(as.logical(data_matrix), k = 20, distance = "L2"),
+                       "type"))

@@ -88,6 +88,9 @@ consistency_check <- function(obj, case, ...) {
           } else if (is.numeric(obj)) {
                obj <- list(obj)
 
+          } else if (is.data.frame(obj)) {
+               obj <- as.list(obj)
+
           } else if (!is.list(obj))
                stop("Unsupported type for data")
 
@@ -198,3 +201,14 @@ split_parallel <- function(obj, margin = NULL) {
 
 # column-wise medians
 colMedians <- function(mat) { apply(mat, 2, stats::median) }
+
+# PREFUN for some of my proxy distances so that they support 'pairwise' direclty
+# Currently results in warnings because proxy does !is.na(reg_entry$PREFUN)
+proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
+     params$pairwise <- pairwise
+
+     list(x = x, y = y,
+          pairwise = pairwise,
+          p = params,
+          reg_entry = reg_entry)
+}

@@ -16,4 +16,5 @@ test_that("TADPole clustering gives the same result as reference",
 # =================================================================================================
 
 test_that("TADPole clustering doesn't allow series with different lengths",
-          expect_error(dtwclust(data, type = "tadpole", k = 20, dc = 1.5, control = ctrl)))
+          expect_error(dtwclust(data, type = "tadpole", k = 20, dc = 1.5, control = ctrl),
+                       "same length"))
