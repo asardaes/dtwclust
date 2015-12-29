@@ -18,33 +18,6 @@ dtwdistfun <- function(distance, control, distmat) {
 
      dtwdist <- function(x, centers = NULL, ...) {
 
-          if (is.null(distmat)) {
-               ## Extra distance parameters in case of parallel computation
-               ## They can be for the function or for proxy::dist
-               dots <- list(...)
-
-               dots$window.type <- window.type
-               dots$window.size <- control@window.size
-               dots$norm <- control@norm
-               dots$error.check <- FALSE
-
-               ## I need to re-register any custom distances in each parallel worker
-               dist_entry <- proxy::pr_DB$get_entry(distance)
-
-               ## Does the registered function possess '...' in its definition?
-               has_dots <- is.function(dist_entry$FUN) && !is.null(formals(dist_entry$FUN)$...)
-
-               ## If it doesn't, remove invalid arguments from 'dots'
-               if (!has_dots) {
-                    if (is.function(dist_entry$FUN))
-                         valid_args <- union(names(formals(proxy::dist)), names(formals(dist_entry$FUN)))
-                    else
-                         valid_args <- names(formals(proxy::dist))
-
-                    dots <- dots[intersect(names(dots), valid_args)]
-               }
-          }
-
           if (!is.null(distmat)) {
 
                if (is.null(centers)) {
@@ -73,134 +46,131 @@ dtwdistfun <- function(distance, control, distmat) {
                }
 
           } else {
-               ## Attempt to calculate distmat in parallel?
-               if (check_parallel(distance = distance, strict = !control@symmetric)) {
+               ## Extra distance parameters in case of parallel computation
+               ## They can be for the function or for proxy::dist
+               dots <- list(...)
 
-                    ## variables/functions from the parent environment that should be exported
-                    export <- c("distance", "consistency_check")
+               dots$window.type <- window.type
+               dots$window.size <- control@window.size
+               dots$norm <- control@norm
+               dots$error.check <- FALSE
 
-                    if (is.null(centers)) {
-                         ## Whole distmat is calculated
+               ## I need to re-register any custom distances in each parallel worker
+               dist_entry <- proxy::pr_DB$get_entry(distance)
 
-                         ## strict pairwise as in proxy::dist doesn't make sense here, but this case needs it
-                         dots$pairwise <- TRUE
+               ## Does the registered function possess '...' in its definition?
+               has_dots <- is.function(dist_entry$FUN) && !is.null(formals(dist_entry$FUN)$...)
 
-                         pairs <- call_pairs(length(x), lower = FALSE)
+               ## If it doesn't, remove invalid arguments from 'dots'
+               if (!has_dots) {
+                    if (is.function(dist_entry$FUN))
+                         valid_args <- union(names(formals(proxy::dist)), names(formals(dist_entry$FUN)))
+                    else
+                         valid_args <- names(formals(proxy::dist))
 
-                         pairs <- split_parallel(pairs, 1L)
+                    dots <- dots[intersect(names(dots), valid_args)]
+               }
 
-                         d <- foreach(pairs = pairs,
-                                      .combine = c,
-                                      .multicombine = TRUE,
-                                      .packages = control@packages,
-                                      .export = export) %dopar% {
+               ## Register doSEQ if necessary
+               check_parallel()
 
-                                           if (!consistency_check(dist_entry$names[1], "dist", silent = TRUE))
-                                                do.call(proxy::pr_DB$set_entry, dist_entry)
+               ## variables/functions from the parent environment that should be exported
+               export <- c("distance", "consistency_check")
 
-                                           ## 'dots' has all extra arguments that are valid
-                                           dd <- do.call(proxy::dist,
-                                                         c(dots,
-                                                           list(x = x[pairs[,1]],
-                                                                y = x[pairs[,2]],
-                                                                method = distance)))
+               if (is.null(centers) && control@symmetric && dist_entry$loop) {
+                    ## WHOLE SYMMETRIC DISTMAT
 
-                                           dd
-                                      }
+                    ## strict pairwise as in proxy::dist doesn't make sense here, but this case needs it
+                    dots$pairwise <- TRUE
+                    dots$force.pairwise <- TRUE # in case it's one of my own
 
-                         D <- matrix(0, nrow = length(x), ncol = length(x))
-                         D[upper.tri(D)] <- d
+                    pairs <- call_pairs(length(x), lower = FALSE)
 
-                         if (!control@symmetric) {
-                              pairs <- call_pairs(length(x), lower = TRUE)
+                    pairs <- split_parallel(pairs, 1L)
 
-                              pairs <- split_parallel(pairs, 1L)
+                    d <- foreach(pairs = pairs,
+                                 .combine = c,
+                                 .multicombine = TRUE,
+                                 .packages = control@packages,
+                                 .export = export) %dopar% {
 
-                              d <- foreach(pairs = pairs,
-                                           .combine = c,
-                                           .multicombine = TRUE,
-                                           .packages = control@packages,
-                                           .export = export) %dopar% {
+                                      if (!consistency_check(dist_entry$names[1], "dist", silent = TRUE))
+                                           do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                                                if (!consistency_check(dist_entry$names[1], "dist", silent = TRUE))
-                                                     do.call(proxy::pr_DB$set_entry, dist_entry)
+                                      ## 'dots' has all extra arguments that are valid
+                                      dd <- do.call(proxy::dist,
+                                                    c(dots,
+                                                      list(x = x[pairs[,1]],
+                                                           y = x[pairs[,2]],
+                                                           method = distance)))
 
-                                                ## 'dots' has all extra arguments that are valid
-                                                dd <- do.call(proxy::dist,
-                                                              c(dots,
-                                                                list(x = x[pairs[,1]],
-                                                                     y = x[pairs[,2]],
-                                                                     method = distance)))
+                                      dd
+                                 }
 
-                                                dd
-                                           }
+                    rm("pairs")
 
-                              D[lower.tri(D)] <- d
+                    D <- matrix(0, nrow = length(x), ncol = length(x))
+                    D[upper.tri(D)] <- d
+                    D <- t(D)
+                    D[upper.tri(D)] <- d
 
-                         } else {
-                              D <- t(D)
-                              D[upper.tri(D)] <- d
-                         }
-
-                         d <- D
-                         attr(d, "class") <- "crossdist"
-                         attr(d, "dimnames") <- list(names(x), names(x))
-
-                    } else {
-                         ## Only subset of distmat is calculated
-                         x <- split_parallel(x)
-
-                         if (!is.null(dots$pairwise) && dots$pairwise) {
-                              centers <- split_parallel(centers)
-                              combine <- c
-                         } else {
-                              centers <- lapply(1:length(x), function(dummy) centers)
-                              combine <- rbind
-                         }
-
-                         d <- foreach(x = x, centers = centers,
-                                      .combine = combine,
-                                      .multicombine = TRUE,
-                                      .packages = control@packages,
-                                      .export = export) %dopar% {
-
-                                           if (!consistency_check(dist_entry$names[1], "dist", silent = TRUE))
-                                                do.call(proxy::pr_DB$set_entry, dist_entry)
-
-                                           ## 'dots' has all extra arguments that are valid
-                                           dd <- do.call(proxy::dist,
-                                                         c(dots,
-                                                           list(x = x,
-                                                                y = centers,
-                                                                method = distance)))
-
-                                           dd
-
-                                      }
-
-                         if (!is.null(dots$pairwise) && dots$pairwise) {
-                              attr(d, "class") <- "pairdist"
-
-                         } else {
-                              attr(d, "class") <- "crossdist"
-                              attr(d, "dimnames") <- list(names(x), names(centers))
-                         }
-                    }
+                    d <- D
+                    attr(d, "class") <- "crossdist"
+                    attr(d, "dimnames") <- list(names(x), names(x))
 
                } else {
-                    ## NO PARALLEL
+                    ## WHOLE OR SUBDISTMAT, NOT SYMMETRIC OR loop FALSE
 
-                    if (is.null(centers)) {
+                    if (is.null(centers))
                          centers <- x
-                         dots$pairwise <- FALSE # override possible TRUE
+
+                    dim_names <- list(names(x), names(centers))
+
+                    if ((!is.null(dots$pairwise) && dots$pairwise) ||
+                        (!is.null(dots$force.pairwise) && dots$force.pairwise)){
+                         if (length(x) != length(centers))
+                              stop("Both sets of data must have the same amount of series for pairwise calculation")
+
+                         centers <- split_parallel(centers)
+                         combine <- c
+
+                         dots$pairwise <- TRUE # in case force.pairwise was provided
+                         dots$force.pairwise <- TRUE # in case it's one of my own
+
+                    } else {
+                         centers <- lapply(1:length(x), function(dummy) centers)
+                         combine <- rbind
                     }
 
-                    ## 'dots' has all extra arguments that are valid
-                    d <- do.call(proxy::dist,
-                                 c(dots,
-                                   list(x = x,
-                                        y = centers,
-                                        method = distance)))
+                    x <- split_parallel(x)
+
+                    d <- foreach(x = x, centers = centers,
+                                 .combine = combine,
+                                 .multicombine = TRUE,
+                                 .packages = control@packages,
+                                 .export = export) %dopar% {
+
+                                      if (!consistency_check(dist_entry$names[1], "dist", silent = TRUE))
+                                           do.call(proxy::pr_DB$set_entry, dist_entry)
+
+                                      ## 'dots' has all extra arguments that are valid
+                                      dd <- do.call(proxy::dist,
+                                                    c(dots,
+                                                      list(x = x,
+                                                           y = centers,
+                                                           method = distance)))
+
+                                      dd
+
+                                 }
+
+                    if (!is.null(dots$pairwise) && dots$pairwise) {
+                         attr(d, "class") <- "pairdist"
+
+                    } else {
+                         attr(d, "class") <- "crossdist"
+                         attr(d, "dimnames") <- dim_names
+                    }
                }
           }
 

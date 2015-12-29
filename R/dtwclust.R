@@ -682,7 +682,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           distfun <- dtwdistfun("dtw_lb", control = control, distmat = NULL)
 
           ## Some additional cluster information (taken from flexclust)
-          subdistmat <- distfun(data, data[R$centers][R$cl], force.pairwise = TRUE)
+          subdistmat <- distfun(data, data[R$centers][R$cl], pairwise = TRUE)
           cldist <- as.matrix(subdistmat)
           size <- as.vector(table(R$cl))
           clusinfo <- data.frame(size = size,
