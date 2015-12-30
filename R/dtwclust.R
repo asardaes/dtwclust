@@ -350,6 +350,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
      ## For parallel computation
      control@packages <- c("dtwclust", control@packages)
+     check_parallel() # register doSEQ if necessary
 
      if (type == "partitional") {
 

@@ -18,6 +18,7 @@
 * Option to calculate pairwise distances with `DTW_LB`, `SBD`, `LB_Keogh` and `LB_Improved`. See their respective notes. The distance function created for the `dtwclustFamily` slot also supports this.
 * Clusters are randomly re-initialized if they become empty at some iteration.
 * Now all included centroid functions recompute centers only if necessary.
+* Option to optimize distmat calculation if the distance function is symmetric.
 
 ## Version 1.3.0
 * Added the possibility to run several repetitions for partitional procedures, using different random starts each time by using the `doRNG` package

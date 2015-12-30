@@ -35,16 +35,18 @@ data <- lapply(CharTraj, reinterpolate, newLength = 180)
 ctrl <- list(window.size = 20L, trace = TRUE)
 
 #### Using DTW with help of lower bounds and PAM centroids
+ctrl$pam.precompute <- FALSE
+
 kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
                      centroid = "pam", seed = 3247, 
-                     control = c(ctrl, list(pam.precompute = FALSE)))
+                     control = ctrl)
 #> Iteration 1: Changes / Distsum = 100 / 1639.01
 #> Iteration 2: Changes / Distsum = 13 / 1307.411
 #> Iteration 3: Changes / Distsum = 2 / 1290.775
 #> Iteration 4: Changes / Distsum = 2 / 1287.395
 #> Iteration 5: Changes / Distsum = 0 / 1287.395
 #> 
-#>  Elapsed time is 9.439 seconds.
+#>  Elapsed time is 8.562 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -52,6 +54,8 @@ plot(kc.dtwlb)
 ![](README-examples-1.png)
 
 ``` r
+
+ctrl$pam.precompute <- TRUE
 
 #### Hierarchical clustering based on shape-based distance
 hc.sbd <- dtwclust(datalist, type = "hierarchical",
@@ -63,7 +67,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.639 seconds.
+#>  Elapsed time is 0.652 seconds.
 
 cat("Rand index for HC+SBD:\n")
 #> Rand index for HC+SBD:
@@ -88,7 +92,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 4.74 seconds.
+#>  Elapsed time is 4.689 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -103,6 +107,7 @@ require(doParallel)
 #> Loading required package: iterators
 #> Loading required package: parallel
 cl <- makeCluster(detectCores(), "FORK")
+invisible(clusterEvalQ(cl, library(dtwclust)))
 registerDoParallel(cl)
 
 ## Registering a custom distance with proxy and using it (normalized DTW)
@@ -137,7 +142,7 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 3: Changes / Distsum = 2 / 3.687197
 #> Iteration 4: Changes / Distsum = 0 / 3.631238
 #> 
-#>  Elapsed time is 22.612 seconds.
+#>  Elapsed time is 23.03 seconds.
 
 # Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
