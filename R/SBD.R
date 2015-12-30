@@ -153,23 +153,14 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, force.pair
           stats::fft(c(v, rep(0L, fftlen-length(v))))
      })
 
-     if (check_parallel()) {
-          x <- split_parallel(x)
-          fftx <- split_parallel(fftx)
+     check_parallel()
 
-          if (force.pairwise) {
-               y <- split_parallel(y)
-               ffty <- split_parallel(ffty)
-          }
+     x <- split_parallel(x)
+     fftx <- split_parallel(fftx)
 
-     } else {
-          x <- list(x)
-          fftx <- list(fftx)
-
-          if (force.pairwise) {
-               y <- list(y)
-               ffty <- list(ffty)
-          }
+     if (force.pairwise) {
+          y <- split_parallel(y)
+          ffty <- split_parallel(ffty)
      }
 
      ## Calculate distance matrix

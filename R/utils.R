@@ -171,6 +171,9 @@ check_parallel <- function() {
 split_parallel <- function(obj, margin = NULL) {
      num_workers <- foreach::getDoParWorkers()
 
+     if (num_workers == 1)
+          return(list(obj))
+
      if (is.null(margin))
           num_tasks <- length(obj)
      else

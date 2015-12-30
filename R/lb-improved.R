@@ -156,7 +156,6 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
           y <- x
 
      } else {
-
           y <- consistency_check(y, "tsmat")
 
           if (error.check)
@@ -174,85 +173,105 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
      lower.env <- lapply(envelops, "[[", "min")
      upper.env <- lapply(envelops, "[[", "max")
 
+     check_parallel()
+
+     x <- split_parallel(x)
+
      if (force.pairwise) {
-          D <- mapply(upper.env, lower.env, y, x,
-                      FUN = function(u, l, y, x) {
+          y <- split_parallel(y)
+          lower.env <- split_parallel(lower.env)
+          upper.env <- split_parallel(upper.env)
+     }
 
-                           ## LB Keogh
-                           ind1 <- x > u
-                           ind2 <- x < l
+     if (force.pairwise) {
+          D <- foreach(x = x, y = y, lower.env = lower.env, upper.env = upper.env,
+                       .combine = c,
+                       .multicombine = TRUE,
+                       .packages = "dtwclust") %dopar% {
+                            mapply(upper.env, lower.env, y, x,
+                                   FUN = function(u, l, y, x) {
 
-                           H <- x
-                           H[ind1] <- u[ind1]
-                           H[ind2] <- l[ind2]
+                                        ## LB Keogh
+                                        ind1 <- x > u
+                                        ind2 <- x < l
 
-                           d1 <- abs(x-H)
+                                        H <- x
+                                        H[ind1] <- u[ind1]
+                                        H[ind2] <- l[ind2]
 
-                           ## Lemire's improvement
-                           EH <- call_runminmax(H, window.size*2+1)
+                                        d1 <- abs(x-H)
 
-                           ind3 <- y > EH$max
-                           ind4 <- y < EH$min
+                                        ## Lemire's improvement
+                                        EH <- call_runminmax(H, window.size*2+1)
 
-                           H2 <- y
-                           H2[ind3] <- EH$max[ind3]
-                           H2[ind4] <- EH$min[ind4]
+                                        ind3 <- y > EH$max
+                                        ind4 <- y < EH$min
 
-                           d2 <- abs(y-H2)
+                                        H2 <- y
+                                        H2[ind3] <- EH$max[ind3]
+                                        H2[ind4] <- EH$min[ind4]
 
-                           ## calculate LB_Improved
+                                        d2 <- abs(y-H2)
 
-                           d <- switch(EXPR = norm,
-                                       L1 = sum(d1) + sum(d2),
-                                       L2 = sqrt(sum(d1^2) + sum(d2^2))
-                           )
+                                        ## calculate LB_Improved
 
-                           d
-                      })
+                                        d <- switch(EXPR = norm,
+                                                    L1 = sum(d1) + sum(d2),
+                                                    L2 = sqrt(sum(d1^2) + sum(d2^2))
+                                        )
+
+                                        d
+                                   })
+                       }
 
           attr(D, "class") <- "pairdist"
 
      } else {
-          D <- sapply(X=x, U=upper.env, L=lower.env, Y=y,
-                      FUN = function(x, U, L, Y) {
+          D <- foreach(x = x,
+                       .combine = cbind,
+                       .multicombine = TRUE,
+                       .packages = "dtwclust") %dopar% {
+                            sapply(X=x, U=upper.env, L=lower.env, Y=y,
+                                   FUN = function(x, U, L, Y) {
 
-                           ## This will return one column of the distance matrix
-                           D <- mapply(U, L, Y, MoreArgs=list(x=x),
-                                       FUN = function(u, l, y, x) {
+                                        ## This will return one column of the distance matrix
+                                        D <- mapply(U, L, Y, MoreArgs=list(x=x),
+                                                    FUN = function(u, l, y, x) {
 
-                                            ## LB Keogh
-                                            ind1 <- x > u
-                                            ind2 <- x < l
+                                                         ## LB Keogh
+                                                         ind1 <- x > u
+                                                         ind2 <- x < l
 
-                                            H <- x
-                                            H[ind1] <- u[ind1]
-                                            H[ind2] <- l[ind2]
+                                                         H <- x
+                                                         H[ind1] <- u[ind1]
+                                                         H[ind2] <- l[ind2]
 
-                                            d1 <- abs(x-H)
+                                                         d1 <- abs(x-H)
 
-                                            ## Lemire's improvement
-                                            EH <- call_runminmax(H, window.size*2+1)
+                                                         ## Lemire's improvement
+                                                         EH <- call_runminmax(H, window.size*2+1)
 
-                                            ind3 <- y > EH$max
-                                            ind4 <- y < EH$min
+                                                         ind3 <- y > EH$max
+                                                         ind4 <- y < EH$min
 
-                                            H2 <- y
-                                            H2[ind3] <- EH$max[ind3]
-                                            H2[ind4] <- EH$min[ind4]
+                                                         H2 <- y
+                                                         H2[ind3] <- EH$max[ind3]
+                                                         H2[ind4] <- EH$min[ind4]
 
-                                            d2 <- abs(y-H2)
+                                                         d2 <- abs(y-H2)
 
-                                            ## calculate LB_Improved
+                                                         ## calculate LB_Improved
 
-                                            d <- switch(EXPR = norm,
-                                                        L1 = sum(d1) + sum(d2),
-                                                        L2 = sqrt(sum(d1^2) + sum(d2^2))
-                                            )
+                                                         d <- switch(EXPR = norm,
+                                                                     L1 = sum(d1) + sum(d2),
+                                                                     L2 = sqrt(sum(d1^2) + sum(d2^2))
+                                                         )
 
-                                            d
-                                       })
-                           D
-                      })
+                                                         d
+                                                    })
+                                        D
+                                   })
+                       }
 
           attr(D, "class") <- "crossdist"
           D <- t(D)

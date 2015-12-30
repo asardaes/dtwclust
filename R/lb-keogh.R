@@ -159,49 +159,66 @@ lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
      lower.env <- lapply(envelops, "[[", "min")
      upper.env <- lapply(envelops, "[[", "max")
 
+     check_parallel()
+
+     x <- split_parallel(x)
+
      if (force.pairwise) {
-          D <- mapply(upper.env, lower.env, x,
-                      FUN = function(u, l, x) {
+          lower.env <- split_parallel(lower.env)
+          upper.env <- split_parallel(upper.env)
+     }
 
-                           D <- rep(0, length(x))
+     if (force.pairwise) {
+          D <- foreach(x = x, lower.env = lower.env, upper.env = upper.env,
+                       .combine = c,
+                       .multicombine = TRUE) %dopar% {
+                            mapply(upper.env, lower.env, x,
+                                   FUN = function(u, l, x) {
 
-                           ind1 <- x > u
-                           D[ind1] <- x[ind1] - u[ind1]
-                           ind2 <- x < l
-                           D[ind2] <- l[ind2] - x[ind2]
+                                        D <- rep(0, length(x))
 
-                           d <- switch(EXPR = norm,
-                                       L1 = sum(D),
-                                       L2 = sqrt(sum(D^2)))
+                                        ind1 <- x > u
+                                        D[ind1] <- x[ind1] - u[ind1]
+                                        ind2 <- x < l
+                                        D[ind2] <- l[ind2] - x[ind2]
 
-                           d
-                      })
+                                        d <- switch(EXPR = norm,
+                                                    L1 = sum(D),
+                                                    L2 = sqrt(sum(D^2)))
+
+                                        d
+                                   })
+                       }
 
           attr(D, "class") <- "pairdist"
 
      } else {
-          D <- sapply(X=x, U=upper.env, L=lower.env,
-                      FUN = function(x, U, L) {
+          D <- foreach(x = x,
+                       .combine = cbind,
+                       .multicombine = TRUE) %dopar% {
+                            sapply(X=x, U=upper.env, L=lower.env,
+                                   FUN = function(x, U, L) {
 
-                           ## This will return one column of the distance matrix
-                           D <- mapply(U, L, MoreArgs=list(x=x),
-                                       FUN = function(u, l, x) {
+                                        ## This will return one column of the distance matrix
+                                        D <- mapply(U, L, MoreArgs=list(x=x),
+                                                    FUN = function(u, l, x) {
 
-                                            D <- rep(0, length(x))
+                                                         D <- rep(0, length(x))
 
-                                            ind1 <- x > u
-                                            D[ind1] <- x[ind1] - u[ind1]
-                                            ind2 <- x < l
-                                            D[ind2] <- l[ind2] - x[ind2]
+                                                         ind1 <- x > u
+                                                         D[ind1] <- x[ind1] - u[ind1]
+                                                         ind2 <- x < l
+                                                         D[ind2] <- l[ind2] - x[ind2]
 
-                                            d <- switch(EXPR = norm,
-                                                        L1 = sum(D),
-                                                        L2 = sqrt(sum(D^2)))
+                                                         d <- switch(EXPR = norm,
+                                                                     L1 = sum(D),
+                                                                     L2 = sqrt(sum(D^2)))
 
-                                            d
-                                       })
-                           D
-                      })
+                                                         d
+                                                    })
+                                        D
+                                   })
+                       }
 
           attr(D, "class") <- "crossdist"
           D <- t(D)
@@ -210,6 +227,7 @@ lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
      if (force.symmetry && !force.pairwise) {
           if (nrow(D) != ncol(D)) {
                warning("Unable to force symmetry. Resulting distance matrix is not square.")
+
           } else {
                ind.tri <- lower.tri(D)
 
