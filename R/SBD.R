@@ -153,44 +153,75 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, force.pair
           stats::fft(c(v, rep(0L, fftlen-length(v))))
      })
 
+     if (check_parallel()) {
+          x <- split_parallel(x)
+          fftx <- split_parallel(fftx)
+
+          if (force.pairwise) {
+               y <- split_parallel(y)
+               ffty <- split_parallel(ffty)
+          }
+
+     } else {
+          x <- list(x)
+          fftx <- list(fftx)
+
+          if (force.pairwise) {
+               y <- list(y)
+               ffty <- list(ffty)
+          }
+     }
+
      ## Calculate distance matrix
      if (force.pairwise) {
-          D <- mapply(y, ffty, x, fftx,
-                      FUN = function(y, ffty, x, fftx) {
+          D <- foreach(x = x, fftx = fftx, y = y, ffty = ffty,
+                       .combine = c,
+                       .multicombine = TRUE,
+                       .packages = "stats") %dopar% {
+                            mapply(y, ffty, x, fftx,
+                                   FUN = function(y, ffty, x, fftx) {
 
-                           CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
-                           ## Truncate to correct length
-                           CCseq <- c(CCseq[(length(ffty)-length(y)+2):length(CCseq)],
-                                      CCseq[1:length(x)])
-                           CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
+                                        CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
 
-                           dd <- 1 - max(CCseq)
+                                        ## Truncate to correct length
+                                        CCseq <- c(CCseq[(length(ffty)-length(y)+2):length(CCseq)],
+                                                   CCseq[1:length(x)])
+                                        CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
 
-                           dd
-                      })
+                                        dd <- 1 - max(CCseq)
+
+                                        dd
+                                   })
+                       }
 
           attr(D, "class") <- "pairdist"
 
      } else {
-          D <- mapply(x, fftx, MoreArgs = list(Y = y, FFTY = ffty),
-                      FUN = function(x, fftx, Y, FFTY) {
+          D <- foreach(x = x, fftx = fftx,
+                       .combine = cbind,
+                       .multicombine = TRUE,
+                       .packages = "stats") %dopar% {
+                            mapply(x, fftx, MoreArgs = list(Y = y, FFTY = ffty),
+                                   FUN = function(x, fftx, Y, FFTY) {
 
-                           d <- mapply(Y, FFTY, MoreArgs = list(x = x, fftx = fftx),
-                                       FUN = function(y, ffty, x, fftx) {
+                                        d <- mapply(Y, FFTY, MoreArgs = list(x = x, fftx = fftx),
+                                                    FUN = function(y, ffty, x, fftx) {
 
-                                            CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
-                                            ## Truncate to correct length
-                                            CCseq <- c(CCseq[(length(ffty)-length(y)+2):length(CCseq)],
-                                                       CCseq[1:length(x)])
-                                            CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
+                                                         CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
 
-                                            dd <- 1 - max(CCseq)
+                                                         ## Truncate to correct length
+                                                         CCseq <- c(CCseq[(length(ffty)-length(y)+2):length(CCseq)],
+                                                                    CCseq[1:length(x)])
+                                                         CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
 
-                                            dd
-                                       })
+                                                         dd <- 1 - max(CCseq)
 
-                           d
-                      })
+                                                         dd
+                                                    })
+
+                                        d
+                                   })
+                       }
 
           attr(D, "class") <- "crossdist"
           D <- t(D)
