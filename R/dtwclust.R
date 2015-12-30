@@ -336,7 +336,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      lengths <- sapply(data, length)
      diff_lengths <- length(unique(lengths)) > 1L
 
-     consistency_check(distance, "dist", trace = control@trace, lengths = diff_lengths)
+     consistency_check(distance, "dist", trace = control@trace, lengths = diff_lengths, silent = FALSE)
+
      if(type == "partitional" && diff_lengths)
           consistency_check(centroid, "cent", trace = control@trace)
 
@@ -454,7 +455,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                   .multicombine = TRUE,
                                   .packages = control@packages,
                                   .export = export) %dorng% {
-                                       if (!consistency_check(dist_entry$names[1], "dist", silent = TRUE))
+                                       if (!consistency_check(dist_entry$names[1], "dist"))
                                             do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                        kc <- do.call("kcca.list",

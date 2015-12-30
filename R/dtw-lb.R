@@ -30,8 +30,8 @@
 #'
 #' This function uses a lower bound that is only defined for time series of equal lengths.
 #'
-#' If you use the version registered with \code{proxy}, and because of a bug in its \code{\link[proxy]{dist}}
-#' function, the latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
+#' If you use the version registered with \code{proxy}, and because of how \code{\link[proxy]{dist}}
+#' works, the latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
 #' \code{force.pairwise} to get the correct result (which is, effectively, calculating DTW distances only).
 #'
 #' @seealso

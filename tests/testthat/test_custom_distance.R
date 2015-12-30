@@ -23,7 +23,7 @@ test_that("custom distance gives the same result as reference",
           my_expect_equal_to_reference(pc_ndtw))
 
 # =================================================================================================
-# A symmetric computation of the above
+# A symmetric computation of the above (since lengths are equal)
 # =================================================================================================
 
 ctrl@symmetric <- TRUE
@@ -59,5 +59,5 @@ pc_ndtw2 <- dtwclust(data_subset, k = 4, distance = "nDTW2",
 
 pc_ndtw2 <- reset_nondeterministic(pc_ndtw2)
 
-test_that("custom asymmetric distance gives the same result as reference",
+test_that("custom distance with custom arguments gives the same result as reference",
           my_expect_equal_to_reference(pc_ndtw2))

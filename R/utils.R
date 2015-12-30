@@ -97,7 +97,7 @@ consistency_check <- function(obj, case, ...) {
           return(obj)
 
      } else if (case == "dist") {
-          .local <- function(obj, trace = FALSE, lengths = FALSE, silent = FALSE, ...) {
+          .local <- function(obj, trace = FALSE, lengths = FALSE, silent = TRUE, ...) {
                included <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd")
                valid <- c("dtw", "dtw2", "sbd")
 
@@ -109,12 +109,14 @@ consistency_check <- function(obj, case, ...) {
                          stop("Please provide a valid distance function registered with the proxy package.")
                }
 
-               if ((obj %in% included) && !(obj %in% valid) && lengths)
-                    stop("Only the following distances are supported for series with different lengths:\n\tdtw\tdtw2\tsbd")
-               else if(!(obj %in% included) && trace && lengths)
-                    message("Series have different lengths. Please confirm that the provided distance function supports this.")
+               if (lengths) {
+                    if ((obj %in% included) && !(obj %in% valid))
+                         stop("Only the following distances are supported for series with different lengths:\n\tdtw\tdtw2\tsbd")
+                    else if(!(obj %in% included) && trace)
+                         message("Series have different lengths. Please confirm that the provided distance function supports this.")
+               }
 
-               TRUE # valid distance
+               TRUE # valid registered distance
           }
 
           return(.local(obj, ...))
@@ -175,7 +177,7 @@ split_parallel <- function(obj, margin = NULL) {
           num_tasks <- dim(obj)[margin]
 
      if (is.na(num_tasks))
-          stop("Attempted to split an invalid object into parallel tasks.")
+          stop("Invalid attempt to split an object into parallel tasks")
 
      num_tasks <- parallel::splitIndices(num_tasks, num_workers)
      num_tasks <- num_tasks[sapply(num_tasks, length, USE.NAMES = FALSE) > 0]

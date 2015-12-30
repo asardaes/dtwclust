@@ -79,6 +79,7 @@ dtwdistfun <- function(distance, control, distmat) {
 
                if (is.null(centers) && control@symmetric && dist_entry$loop) {
                     ## WHOLE SYMMETRIC DISTMAT
+                    ## Only half of it is computed
 
                     ## strict pairwise as in proxy::dist doesn't make sense here, but this case needs it
                     dots$pairwise <- TRUE
@@ -94,7 +95,7 @@ dtwdistfun <- function(distance, control, distmat) {
                                  .packages = control@packages,
                                  .export = export) %dopar% {
 
-                                      if (!consistency_check(dist_entry$names[1], "dist", silent = TRUE))
+                                      if (!consistency_check(dist_entry$names[1], "dist"))
                                            do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                       ## 'dots' has all extra arguments that are valid
@@ -150,7 +151,7 @@ dtwdistfun <- function(distance, control, distmat) {
                                  .packages = control@packages,
                                  .export = export) %dopar% {
 
-                                      if (!consistency_check(dist_entry$names[1], "dist", silent = TRUE))
+                                      if (!consistency_check(dist_entry$names[1], "dist"))
                                            do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                       ## 'dots' has all extra arguments that are valid
