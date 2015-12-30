@@ -11,7 +11,7 @@ hc_all <- dtwclust(data, type = "hierarchical", k = 20,
 hc_all <- lapply(hc_all, reset_nondeterministic)
 
 test_that("hierarchical clustering gives the same result as reference",
-          my_expect_equal_to_reference(hc_all))
+          my_expect_equal_to_reference(hc_all, TRUE))
 
 # =================================================================================================
 # non-symmetric distance

@@ -53,7 +53,7 @@ pc_pam <- dtwclust(data, type = "partitional", k = 20,
 pc_pam <- reset_nondeterministic(pc_pam)
 
 test_that("pam centroid gives the same result as reference",
-          my_expect_equal_to_reference(pc_pam))
+          my_expect_equal_to_reference(pc_pam, TRUE))
 
 # =================================================================================================
 # dba

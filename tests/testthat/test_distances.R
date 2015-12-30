@@ -50,7 +50,7 @@ pc_sbd <- dtwclust(data_matrix, type = "partitional", k = 20,
 pc_sbd <- reset_nondeterministic(pc_sbd)
 
 test_that("sbd distance gives the same result as reference",
-          my_expect_equal_to_reference(pc_sbd))
+          my_expect_equal_to_reference(pc_sbd, TRUE))
 
 # =================================================================================================
 # dtw_lb
