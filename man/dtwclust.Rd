@@ -382,6 +382,9 @@ http://doi.org/10.1145/2723372.2737793}.
 \seealso{
 Please check the brief description in \code{\link{dtwclust-package}}.
 
-Additionally: \code{\link{dtwclust-methods}}, \code{\link{dtwclust-class}}.
+Type \code{news(package = "dtwclust")} to see what changed.
+
+Additionally: \code{\link{dtwclust-methods}}, \code{\link{dtwclust-class}}, \code{\link{dtwclustControl}},
+\code{\link{dtwclustFamily}}.
 }
 

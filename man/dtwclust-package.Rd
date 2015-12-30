@@ -81,7 +81,8 @@ and distance measures for time series data.'' \emph{Data Mining and Knowledge Di
 \url{http://doi.org/10.1007/s10618-012-0250-5}, \url{http://dx.doi.org/10.1007/s10618-012-0250-5}.
 }
 \seealso{
-\code{\link{dtwclust}}, \code{\link[proxy]{dist}},
-\code{\link[dtw]{dtw}}
+Type \code{news(package = "dtwclust")} to see what changed.
+
+\code{\link{dtwclust}}, \code{\link[proxy]{dist}}, \code{\link[dtw]{dtw}}
 }
 
