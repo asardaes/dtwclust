@@ -187,6 +187,7 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
           D <- foreach(x = x, y = y, lower.env = lower.env, upper.env = upper.env,
                        .combine = c,
                        .multicombine = TRUE,
+                       .export = "call_runminmax",
                        .packages = "dtwclust") %dopar% {
                             mapply(upper.env, lower.env, y, x,
                                    FUN = function(u, l, y, x) {
@@ -230,6 +231,7 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
           D <- foreach(x = x,
                        .combine = cbind,
                        .multicombine = TRUE,
+                       .export = "call_runminmax",
                        .packages = "dtwclust") %dopar% {
                             sapply(X=x, U=upper.env, L=lower.env, Y=y,
                                    FUN = function(x, U, L, Y) {
