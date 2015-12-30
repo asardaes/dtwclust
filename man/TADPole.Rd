@@ -4,7 +4,7 @@
 \alias{TADPole}
 \title{TADPole clustering}
 \usage{
-TADPole(data, window.size = NULL, k = 2, dc, error.check = TRUE)
+TADPole(data, window.size, k = 2, dc, error.check = TRUE)
 }
 \arguments{
 \item{data}{The data matrix where each row is a time series. Optionally a list with each time series.}

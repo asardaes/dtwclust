@@ -112,8 +112,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
      X <- consistency_check(x, "tsmat")
 
-     # Attempt parallel computations?
-     do_par <- check_parallel()
+     check_parallel()
 
      if (force.pairwise) {
           if (is.null(y))
@@ -129,45 +128,28 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
           else
                window.type <- "slantedband"
 
-          if (do_par) {
-               X <- split_parallel(X)
-               Y <- split_parallel(Y)
+          X <- split_parallel(X)
+          Y <- split_parallel(Y)
 
-               D <- foreach(X = X, Y = Y,
-                            .combine = c,
-                            .multicombine = TRUE,
-                            .packages = "dtwclust") %dopar% {
-                                 switch(EXPR = norm,
+          D <- foreach(X = X, Y = Y,
+                       .combine = c,
+                       .multicombine = TRUE,
+                       .packages = "dtwclust") %dopar% {
+                            switch(EXPR = norm,
 
-                                        L1 = proxy::dist(X, Y,
-                                                         pairwise = TRUE,
-                                                         method = "DTW",
-                                                         dist.method = "L1",
-                                                         window.type = window.type,
-                                                         window.size = window.size),
+                                   L1 = proxy::dist(X, Y,
+                                                    pairwise = TRUE,
+                                                    method = "DTW",
+                                                    dist.method = "L1",
+                                                    window.type = window.type,
+                                                    window.size = window.size),
 
-                                        L2 = proxy::dist(X, Y,
-                                                         pairwise = TRUE,
-                                                         method = "DTW2",
-                                                         window.type = window.type,
-                                                         window.size = window.size))
-                            }
-          } else {
-               D <- switch(EXPR = norm,
-
-                           L1 = proxy::dist(X, Y,
-                                            pairwise = TRUE,
-                                            method = "DTW",
-                                            dist.method = "L1",
-                                            window.type = window.type,
-                                            window.size = window.size),
-
-                           L2 = proxy::dist(X, Y,
-                                            pairwise = TRUE,
-                                            method = "DTW2",
-                                            window.type = window.type,
-                                            window.size = window.size))
-          }
+                                   L2 = proxy::dist(X, Y,
+                                                    pairwise = TRUE,
+                                                    method = "DTW2",
+                                                    window.type = window.type,
+                                                    window.size = window.size))
+                       }
 
           return(D)
      }
@@ -204,47 +186,30 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
           indNew <- which(new.indNN != indNN)
           indNN <- new.indNN
 
-          if (do_par) {
-               indNew <- split_parallel(indNew)
+          indNew <- split_parallel(indNew)
 
-               exclude <- setdiff(ls(), c("X", "Y", "norm", "indNN", "window.size"))
+          exclude <- setdiff(ls(), c("X", "Y", "norm", "indNN", "window.size"))
 
-               dSub <- foreach(indNew = indNew,
-                               .combine = c,
-                               .multicombine = TRUE,
-                               .packages = "dtwclust",
-                               .noexport = exclude) %dopar% {
-                                    switch(EXPR = norm,
+          dSub <- foreach(indNew = indNew,
+                          .combine = c,
+                          .multicombine = TRUE,
+                          .packages = "dtwclust",
+                          .noexport = exclude) %dopar% {
+                               switch(EXPR = norm,
 
-                                           L1 = proxy::dist(X[indNew], Y[indNN[indNew]],
-                                                            pairwise = TRUE,
-                                                            method = "DTW",
-                                                            dist.method = "L1",
-                                                            window.type = "slantedband",
-                                                            window.size = window.size),
+                                      L1 = proxy::dist(X[indNew], Y[indNN[indNew]],
+                                                       pairwise = TRUE,
+                                                       method = "DTW",
+                                                       dist.method = "L1",
+                                                       window.type = "slantedband",
+                                                       window.size = window.size),
 
-                                           L2 = proxy::dist(X[indNew], Y[indNN[indNew]],
-                                                            pairwise = TRUE,
-                                                            method = "DTW2",
-                                                            window.type = "slantedband",
-                                                            window.size = window.size))
-                               }
-          } else {
-               dSub <- switch(EXPR = norm,
-
-                              L1 = proxy::dist(X[indNew], Y[indNN[indNew]],
-                                               pairwise = TRUE,
-                                               method = "DTW",
-                                               dist.method = "L1",
-                                               window.type = "slantedband",
-                                               window.size = window.size),
-
-                              L2 = proxy::dist(X[indNew], Y[indNN[indNew]],
-                                               pairwise = TRUE,
-                                               method = "DTW2",
-                                               window.type = "slantedband",
-                                               window.size = window.size))
-          }
+                                      L2 = proxy::dist(X[indNew], Y[indNN[indNew]],
+                                                       pairwise = TRUE,
+                                                       method = "DTW2",
+                                                       window.type = "slantedband",
+                                                       window.size = window.size))
+                          }
 
           D[cbind(1:length(X), indNN)[unlist(indNew), , drop = FALSE]] <- dSub
 

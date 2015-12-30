@@ -20,6 +20,7 @@ test_that("Parallel computation gives the same results as sequential", {
 
      registerDoParallel(cl)
 
+     ## Filter excludes files that have "parallel" in them, otherwise it would be recursive
      test_dir("./", filter = "^(?!.*parallel).*$", perl = TRUE)
 
      stopCluster(cl)

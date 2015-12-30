@@ -84,9 +84,9 @@
 #' @export
 #'
 
-TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
+TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
 
-     if (is.null(window.size))
+     if (missing(window.size))
           stop("Please provide a positive window size")
      if (missing(dc))
           stop("Please provide the 'dc' parameter")
@@ -115,7 +115,7 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
      step.pattern <- get("symmetric1") # so that CHECK doesn't complain
 
      ## Attempt parallel computations?
-     do_par <- check_parallel()
+     check_parallel()
 
      ## ============================================================================================================================
      ## Pruning during local density calculation
@@ -159,33 +159,23 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
 
      if (nrow(ind1) > 0) {
 
-          ## Attempt parallel calculations?
-          if (do_par) {
-               ind1 <- split_parallel(ind1, 1L)
+          ind1 <- split_parallel(ind1, 1L)
 
-               exclude <- setdiff(ls(), c("x", "step.pattern", "window.size"))
+          exclude <- setdiff(ls(), c("x", "step.pattern", "window.size"))
 
-               d1 <- foreach(ind1 = ind1,
-                             .combine = c,
-                             .multicombine = TRUE,
-                             .packages = "dtwclust",
-                             .noexport = exclude) %dopar% {
-                                  proxy::dist(x[ind1[, 1]], x[ind1[, 2]], method = "DTW2",
-                                              step.pattern = step.pattern,
-                                              window.type = "slantedband", window.size = window.size,
-                                              pairwise = TRUE)
-                             }
+          d1 <- foreach(ind1 = ind1,
+                        .combine = c,
+                        .multicombine = TRUE,
+                        .packages = "dtwclust",
+                        .noexport = exclude) %dopar% {
+                             proxy::dist(x[ind1[, 1]], x[ind1[, 2]], method = "DTW2",
+                                         step.pattern = step.pattern,
+                                         window.type = "slantedband", window.size = window.size,
+                                         pairwise = TRUE)
+                        }
 
+          if (is.list(ind1))
                ind1 <- do.call(rbind, ind1)
-
-          } else {
-               d1 <- proxy::dist(x[ind1[, 1]], x[ind1[, 2]],
-                                 method = "DTW2",
-                                 step.pattern = step.pattern,
-                                 window.type = "slantedband",
-                                 window.size = window.size,
-                                 pairwise = TRUE)
-          }
 
           ## Fill distance matrix where necessary
           D[ind1] <- d1
@@ -240,86 +230,48 @@ TADPole <- function(data, window.size = NULL, k = 2, dc, error.check = TRUE) {
      ## Pruning during NN distance calculation from higher density list (phase 2)
      ## ============================================================================================================================
 
-     ## Attempt parallel calculations?
-     if (do_par) {
-          # start at two
-          i <- split_parallel(2:n)
+     # start at two
+     i <- split_parallel(2:n)
 
-          DNN <- foreach(i = i,
-                         .combine = rbind,
-                         .multicombine = TRUE,
-                         .packages = "dtwclust") %dopar% {
+     DNN <- foreach(i = i,
+                    .combine = rbind,
+                    .multicombine = TRUE,
+                    .packages = "dtwclust") %dopar% {
 
-                              t(sapply(i, function (i) {
-                                   ## Index of higher density neighbors
-                                   indHDN <- TADPorder$ix[1:(i-1)]
-                                   ## Index of current object
-                                   ii <- TADPorder$ix[i]
+                         t(sapply(i, function (i) {
+                              ## Index of higher density neighbors
+                              indHDN <- TADPorder$ix[1:(i-1)]
+                              ## Index of current object
+                              ii <- TADPorder$ix[i]
 
-                                   ## If this is true, prune the calculation of the true distance
-                                   indPrune <- LBM[ii, indHDN] > deltaUB[ii]
-                                   ## If the distance was already computed before, don't do it again
-                                   indPre <- Flags[ii, indHDN] == 0 | Flags[ii, indHDN] == 1
+                              ## If this is true, prune the calculation of the true distance
+                              indPrune <- LBM[ii, indHDN] > deltaUB[ii]
+                              ## If the distance was already computed before, don't do it again
+                              indPre <- Flags[ii, indHDN] == 0 | Flags[ii, indHDN] == 1
 
-                                   ## 'delta' will have the distances to neighbors with higher densities. Initially filled with upper bound
-                                   delta <- UBM[ii, indHDN]
-                                   ## If some distances were already computed, put them here
-                                   delta[indPre] <- D[ii, indHDN[indPre]]
+                              ## 'delta' will have the distances to neighbors with higher densities. Initially filled with upper bound
+                              delta <- UBM[ii, indHDN]
+                              ## If some distances were already computed, put them here
+                              delta[indPre] <- D[ii, indHDN[indPre]]
 
-                                   ## If the distance is not to be pruned nor previously calculated, compute it now
-                                   indCompute <- !(indPrune | indPre)
+                              ## If the distance is not to be pruned nor previously calculated, compute it now
+                              indCompute <- !(indPrune | indPre)
 
-                                   if (any(indCompute)) {
-                                        d2 <- proxy::dist(x[ii], x[indHDN[indCompute]],
-                                                          method = "DTW2",
-                                                          step.pattern = step.pattern,
-                                                          window.type = "slantedband",
-                                                          window.size = window.size)
+                              if (any(indCompute)) {
+                                   d2 <- proxy::dist(x[ii], x[indHDN[indCompute]],
+                                                     method = "DTW2",
+                                                     step.pattern = step.pattern,
+                                                     window.type = "slantedband",
+                                                     window.size = window.size)
 
-                                        delta[indCompute] <- d2
-                                   }
+                                   delta[indCompute] <- d2
+                              }
 
-                                   c(delta = min(delta),
-                                     NN = indHDN[which.min(delta)],
-                                     distCalc = sum(indCompute))
-                              }))
-                         }
-
-     } else {
-          DNN <- t(sapply(2:n, function (i) {
-               ## Index of higher density neighbors
-               indHDN <- TADPorder$ix[1:(i-1)]
-               ## Index of current object
-               ii <- TADPorder$ix[i]
-
-               ## If this is true, prune the calculation of the true distance
-               indPrune <- LBM[ii, indHDN] > deltaUB[ii]
-               ## If the distance was already computed before, don't do it again
-               indPre <- Flags[ii, indHDN] == 0 | Flags[ii, indHDN] == 1
-
-               ## 'delta' will have the distances to neighbors with higher densities. Initially filled with upper bound
-               delta <- UBM[ii, indHDN]
-               ## If some distances were already computed, put them here
-               delta[indPre] <- D[ii, indHDN[indPre]]
-
-               ## If the distance is not to be pruned nor previously calculated, compute it now
-               indCompute <- !(indPrune | indPre)
-
-               if (any(indCompute)) {
-                    d2 <- proxy::dist(x[ii], x[indHDN[indCompute]],
-                                      method = "DTW2",
-                                      step.pattern = step.pattern,
-                                      window.type = "slantedband",
-                                      window.size = window.size)
-
-                    delta[indCompute] <- d2
-               }
-
-               c(delta = min(delta),
-                 NN = indHDN[which.min(delta)],
-                 distCalc = sum(indCompute))
-          }))
-     }
+                              c(delta = min(delta),
+                                NN = indHDN[which.min(delta)],
+                                distCalc = sum(indCompute))
+                         }))
+                    }
 
      ## To order according to default order
      indOrig <- sort(TADPorder$ix, index.return = TRUE)$ix

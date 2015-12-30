@@ -120,7 +120,7 @@ dtwdistfun <- function(distance, control, distmat) {
                     attr(d, "dimnames") <- list(names(x), names(x))
 
                } else {
-                    ## WHOLE OR SUBDISTMAT, NOT SYMMETRIC OR loop FALSE
+                    ## WHOLE OR SUBDISTMAT, NOT SYMMETRIC OR loop = FALSE
 
                     if (is.null(centers))
                          centers <- x

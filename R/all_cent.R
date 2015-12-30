@@ -43,77 +43,53 @@ all_cent <- function(case = NULL, distmat, distfun, control) {
 
      shape_cent <- function(x_split, cent, id_changed, cl_id, cl_old, ...) {
 
-          if (check_parallel()) {
-               # in parallel
-               x_split <- split_parallel(x_split)
-               cent <- split_parallel(cent)
+          check_parallel()
 
-               new_cent <- foreach(x_split = x_split,
-                                   cent = cent,
-                                   .combine = c,
-                                   .multicombine = TRUE,
-                                   .packages = "dtwclust") %dopar% {
-                                        mapply(x_split, cent,
-                                               SIMPLIFY = FALSE,
-                                               FUN = function(x, c) {
-                                                    new_c <- shape_extraction(x, c)
+          x_split <- split_parallel(x_split)
+          cent <- split_parallel(cent)
 
-                                                    new_c
-                                               })
-                                   }
-          } else {
-               # not in parallel
-               new_cent <- mapply(x_split, cent,
-                                  SIMPLIFY = FALSE,
-                                  FUN = function(x, c) {
-                                       new_c <- shape_extraction(x, c)
+          new_cent <- foreach(x_split = x_split,
+                              cent = cent,
+                              .combine = c,
+                              .multicombine = TRUE,
+                              .packages = "dtwclust") %dopar% {
+                                   mapply(x_split, cent,
+                                          SIMPLIFY = FALSE,
+                                          FUN = function(x, c) {
+                                               new_c <- shape_extraction(x, c)
 
-                                       new_c
-                                  })
-          }
+                                               new_c
+                                          })
+                              }
 
           new_cent
      }
 
      dba_cent <- function(x_split, cent, id_changed, cl_id, cl_old, ...) {
 
-          if (check_parallel()) {
+          check_parallel()
 
-               x_split <- split_parallel(x_split)
-               cent <- split_parallel(cent)
+          x_split <- split_parallel(x_split)
+          cent <- split_parallel(cent)
 
-               new_cent <- foreach(x_split = x_split,
-                                   cent = cent,
-                                   .combine = c,
-                                   .multicombine = TRUE,
-                                   .packages = "dtwclust",
-                                   .export = "control") %dopar% {
-                                        mapply(x_split, cent,
-                                               SIMPLIFY = FALSE,
-                                               FUN = function(x, c) {
-                                                    new_c <- DBA(x, c,
-                                                                 norm = control@norm,
-                                                                 window.size = control@window.size,
-                                                                 max.iter = control@dba.iter,
-                                                                 error.check = FALSE)
+          new_cent <- foreach(x_split = x_split,
+                              cent = cent,
+                              .combine = c,
+                              .multicombine = TRUE,
+                              .packages = "dtwclust",
+                              .export = "control") %dopar% {
+                                   mapply(x_split, cent,
+                                          SIMPLIFY = FALSE,
+                                          FUN = function(x, c) {
+                                               new_c <- DBA(x, c,
+                                                            norm = control@norm,
+                                                            window.size = control@window.size,
+                                                            max.iter = control@dba.iter,
+                                                            error.check = FALSE)
 
-                                                    new_c
-                                               })
-                                   }
-          } else {
-               # not in parallel
-               new_cent <- mapply(x_split, cent,
-                                  SIMPLIFY = FALSE,
-                                  FUN = function(x, c) {
-                                       new_c <- DBA(x, c,
-                                                    norm = control@norm,
-                                                    window.size = control@window.size,
-                                                    max.iter = control@dba.iter,
-                                                    error.check = FALSE)
-
-                                       new_c
-                                  })
-          }
+                                               new_c
+                                          })
+                              }
 
           new_cent
      }
