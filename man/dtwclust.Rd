@@ -194,7 +194,10 @@ It is convenient to provide this function if you're planning on using the \code{
 Due to their stochastic nature, partitional clustering is usually repeated several times with different random
 seeds to allow for different starting points. This function can now run several repetitions by using the
 \code{doRNG} package. This package ensures that each repetition uses a statistically independent random sequence.
-The user only needs to provide an initial seed in the corresponding parameter of this function.
+
+If more than one repetition is made, the \code{\link[doRNG]{\%dorng\%}} operator is used. If provided, the
+\code{seed} parameter is used to initialize it. The different seed sequences used are returned in the
+\code{rng} attribute in such cases.
 
 Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is precomputed,
 since said matrix is reused for every repetition, and can be comptued in parallel (see next section).
@@ -212,9 +215,6 @@ The user can register a parallel backend with the \code{doParallel} package (and
 package compatible with \code{foreach}'s \code{\%dopar\%} operator) in order to do the
 repetitions in parallel, as well as distance and some centroid calculations (see the examples).
 \code{\link{TADPole}} and \code{\link{DBA}} also take advantage of parallel support.
-
-If you do more than 1 repetition sequentially, you can safely ignore the warning given by \code{dopar} about
-no parallel backend registration.
 
 Unless each repetition requires a few seconds, parallel computing probably isn't worth it. As such, I would only
 use this feature with \code{shape} and \code{DBA} centroids, or an expensive distance function like \code{DTW}
