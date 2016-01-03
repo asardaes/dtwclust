@@ -22,6 +22,8 @@ reset_nondeterministic <- function(obj) {
 
 ## problems between accuracy of architectures
 my_expect_equal_to_reference <- function(object, x32 = FALSE) {
+     if (x32) skip_on_cran()
+
      if (x32 && grepl("i386", Sys.getenv("R_ARCH")))
           file_name <- paste0("i386/", as.character(substitute(object)), ".rds")
      else
