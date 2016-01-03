@@ -1,7 +1,6 @@
 # Custom
 .Rhistory
 *.RData
-manual.txt
 src/*.dll
 src/*.o
 src/*.so

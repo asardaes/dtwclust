@@ -23,7 +23,7 @@ You can provide a character vector to compute different hierarchical cluster str
 specify \code{method} = "all" to use all the available ones.}
 
 \item{distance}{A supported distance from \code{\link[proxy]{pr_DB}} (see Distance section). Ignored for
-\code{type = "tadpole"}.}
+\code{type} = \code{"tadpole"}.}
 
 \item{centroid}{Either a supported string or an appropriate function to calculate centroids
 when using partitional methods (see Centroid section).}

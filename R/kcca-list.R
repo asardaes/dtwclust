@@ -45,8 +45,14 @@ kcca.list <- function (x, k, family, iter.max = 30L, trace = FALSE, ...)
           iter <- iter + 1L
      }
 
-     if (iter > iter.max)
+     if (iter > iter.max) {
           warning("Partitional clustering did not converge within the allowed iterations.")
+          converged <- FALSE
+          iter <- iter.max
+
+     } else {
+          converged <- TRUE
+     }
 
      cluster <- as.integer(family@cluster(distmat=distmat))
      cldist <- as.matrix(distmat[cbind(1:N, cluster)])
@@ -63,5 +69,5 @@ kcca.list <- function (x, k, family, iter.max = 30L, trace = FALSE, ...)
           clusinfo = clusinfo,
           cldist = cldist,
           iter = iter,
-          converged = (iter <= iter.max))
+          converged = converged)
 }

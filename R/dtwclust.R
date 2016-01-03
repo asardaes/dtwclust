@@ -230,7 +230,7 @@
 #' You can provide a character vector to compute different hierarchical cluster structures in one go, or
 #' specify \code{method} = "all" to use all the available ones.
 #' @param distance A supported distance from \code{\link[proxy]{pr_DB}} (see Distance section). Ignored for
-#' \code{type = "tadpole"}.
+#' \code{type} = \code{"tadpole"}.
 #' @param centroid Either a supported string or an appropriate function to calculate centroids
 #' when using partitional methods (see Centroid section).
 #' @param preproc Function to preprocess data. Defaults to \code{zscore} \emph{only} if \code{centroid}
@@ -285,6 +285,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
      ## ----------------------------------------------------------------------------------------------------------
      ## Backwards compatibility, check for old formal arguments in '...'
+     ## I might leave this here to prevent duplicate matching anyway
      ## ----------------------------------------------------------------------------------------------------------
 
      dots <- list(...)
@@ -292,13 +293,13 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      args <- names(MYCALL[-1])
      id_oldargs <- which(args %in% c(slotNames("dtwclustControl"), "reps"))
      if (length(id_oldargs) > 0) {
-          message("The 'control' argument replaced many parameters that will be dropped from this function in a future release.")
+          message("The 'control' argument replaced many parameters that were dropped from this function.")
           message("Please type ?dtwclustControl for more information.\n")
 
           for (i in id_oldargs) {
                if (args[i] != "reps") {
                     var <- MYCALL[-1][[args[i]]]
-                    slot(control, args[i]) <- ifelse(is.numeric(var), as.integer(var), var)
+                    slot(control, args[i]) <- if (is.numeric(var)) as.integer(var) else var
 
                } else
                     control@nrep <- as.integer(MYCALL$reps)
@@ -554,7 +555,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     stop("Dimensions of provided cross-distance matrix don't correspond to length of provided data")
 
                if (control@trace)
-                    cat("\n\tDistance matrix provided...\n\n")
+                    cat("\n\tDistance matrix provided...\n")
 
                D <- distmat
                distfun <- function(...) stop("'distmat' provided in call, no distance calculations performed")

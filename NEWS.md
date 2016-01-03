@@ -11,7 +11,7 @@
 * More parallel support
      + DBA and Shape centroid calculations 
      + DBA itself (probably unnecessary unless you're averaging a lot of series)
-	+ Custom `proxy` distances directly (except `DTW2`)
+     + Custom `proxy` distances directly (except `DTW2`)
 * Several hierarchical procedures can be made in one run.
 * Added `distmat` slot and `update` generic to save some time if possible. See examples of `dtwclust`.
 * Extra parameters for distance functions should be correctly detected now.
