@@ -60,7 +60,7 @@ Supported generics from the \code{flexclust} package are: \code{\link[flexclust]
 Show method displays basic information from the clustering results.
 
 The \code{update} method takes the original function call, replaces any provided argument and optionally
-evaluates the call again. Use \code{evaluate = FALSE)} if you want to get the
+evaluates the call again. Use \code{evaluate = FALSE} if you want to get the
 unevaluated call.
 
 The \code{predict} generic can take the usual \code{newdata} argument and it returns the cluster(s) to which

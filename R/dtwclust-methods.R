@@ -70,7 +70,7 @@ setMethod("show", "dtwclust",
 
 #' @details
 #' The \code{update} method takes the original function call, replaces any provided argument and optionally
-#' evaluates the call again. Use \code{evaluate = FALSE)} if you want to get the
+#' evaluates the call again. Use \code{evaluate = FALSE} if you want to get the
 #' unevaluated call.
 #'
 #' @rdname dtwclust-methods

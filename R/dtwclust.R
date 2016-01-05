@@ -1,7 +1,7 @@
 #' Time series clustering
 #'
 #' This function uses the DTW distance and related techniques to cluster time series. It also supports custom
-#' distances, especially through \code{\link[proxy]{dist}}, as well as custom centroid functions.
+#' distances through \code{\link[proxy]{dist}}, as well as custom centroid functions.
 #' For now, all series must be univariate.
 #'
 #' Partitional algorithms use custom functions inspired by \code{\link[flexclust]{kcca}}. Hierarchical algorithms use
