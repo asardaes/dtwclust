@@ -1,6 +1,6 @@
 # NEWS
 
-## Version 2.0.0
+## Version 2.0.x
 * Major refactor.
 * Many formal parameters from the `dtwclust` function were dropped and implemented in the formal class `dtwclustControl`. For now, they will still be supported through `...` with a message.
 * No longer supporting non-proxy distances, in order to be able to take advantage of the included optimizations.

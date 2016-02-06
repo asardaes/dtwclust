@@ -3,15 +3,17 @@
 #' This function calculates a lower bound (LB) on the Dynamic Time Warp (DTW) distance between two time
 #' series. It uses a Sakoe-Chiba constraint.
 #'
-#' The lower bound is defined for time series of equal length only.
-#'
 #' The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 #' that represents the distance between the point considered and one of the edges of the window. Therefore,
 #' if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
 #' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
 #' the window.
 #'
+#' The reference time series should go in \code{x}, whereas the query time series should go in \code{y}.
+#'
 #' @note
+#'
+#' The lower bound is defined for time series of equal length only and is \strong{not} symmetrical.
 #'
 #' If you wish to calculate the lower bound between several time series, it would be better to use the version
 #' registered with the \code{proxy} package, since it includes some small optimizations. See the examples.
@@ -51,8 +53,8 @@
 #'
 #' D.lbk <= D.dtw
 #'
-#' @param x A time series.
-#' @param y A time series with the same length as \code{x}.
+#' @param x A time series (reference).
+#' @param y A time series with the same length as \code{x} (query).
 #' @param window.size Window size for envelope calculation. See details.
 #' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
 #' @param lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided.

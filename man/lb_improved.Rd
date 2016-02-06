@@ -8,9 +8,9 @@ lb_improved(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
   upper.env = NULL)
 }
 \arguments{
-\item{x}{A time series.}
+\item{x}{A time series (reference).}
 
-\item{y}{A time series with the same length as \code{x}.}
+\item{y}{A time series with the same length as \code{x} (query).}
 
 \item{window.size}{Window size for envelope calculation. See details.}
 
@@ -28,15 +28,17 @@ This function calculates a lower bound (LB) on the Dynamic Time Warp (DTW) dista
 series. It uses a Sakoe-Chiba constraint.
 }
 \details{
-The lower bound is defined for time series of equal length only.
-
 The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 that represents the distance between the point considered and one of the edges of the window. Therefore,
 if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
 between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
 the window.
+
+The reference time series should go in \code{x}, whereas the query time series should go in \code{y}.
 }
 \note{
+The lower bound is defined for time series of equal length only and is \strong{not} symmetrical.
+
 If you wish to calculate the lower bound between several time series, it would be better to use the version
 registered with the \code{proxy} package, since it includes some small optimizations. See the examples.
 

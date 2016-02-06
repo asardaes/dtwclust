@@ -2,7 +2,7 @@ Package: dtwclust
 Type: Package
 Title: Time Series Clustering with Dynamic Time Warping Distance
 Version: 2.0.1.9000
-Date: 2016-01-05
+Date: 2016-02-06
 Depends:
     flexclust,
     proxy,

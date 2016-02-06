@@ -22,7 +22,7 @@
 #'
 #' \itemize{
 #'   \item \code{"dtw"}: DTW with L1 norm and optionally a Sakoe-Chiba/Slanted-band constraint.
-#'   \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint.
+#'   \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint (see Notes).
 #'   \item \code{"dtw_lb"}: DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some computations
 #'   are avoided by first estimating the distance matrix with Lemire's lower bound and then iteratively
 #'   refining with DTW. See \code{\link{dtw_lb}}. Not suitable for \code{pam.precompute} = \code{TRUE}
@@ -84,7 +84,7 @@
 #'   \item "median": The median along each dimension. Similar to mean.
 #'   \item "shape": Shape averaging. See \code{\link{shape_extraction}} for more details.
 #'   \item "dba": DTW Barycenter Averaging. See \code{\link{DBA}} for more details.
-#'   \item: "pam": Partition around medoids. This basically means that the cluster centers are always
+#'   \item "pam": Partition around medoids. This basically means that the cluster centers are always
 #'   one of the time series in the data. In this case, the distance matrix can be pre-computed once using all
 #'   time series in the data and then re-used at each iteration. It usually saves overhead overall.
 #' }
@@ -179,7 +179,7 @@
 #' The lower bounds are defined only for time series of equal lengths. \code{DTW} and \code{DTW2}
 #' don't require this, but they are much slower to compute.
 #'
-#' The lower bounds are \strong{not} symmetrical, and \code{DTW} is only symmetrical if series are of equal
+#' The lower bounds are \strong{not} symmetrical, and \code{DTW} is only symmetrical if series have equal
 #' lengths.
 #'
 #' Specifying \code{distance = "sbd"} and \code{centroid = "shape"} is equivalent to the k-Shape algorithm
@@ -187,7 +187,7 @@
 #'
 #' Hierarchical (conditional on \code{method}) and TADpole (conditional on \code{dc}) procedures are deterministic.
 #'
-#' DTW2 is done with \code{\link[dtw]{dtw}},but it differs from the result you would obtain if you specify
+#' DTW2 is done with \code{\link[dtw]{dtw}}, but it differs from the result you would obtain if you specify
 #' \code{L2} as \code{dist.method}: with \code{DTW2}, pointwise distances (the local cost matrix) are calculated with
 #' \code{L1} norm, \emph{each} element of the matrix is squared and the result is fed into
 #' \code{\link[dtw]{dtw}}, which finds the optimum warping path. The square root of the resulting
@@ -236,7 +236,7 @@
 #' @param preproc Function to preprocess data. Defaults to \code{zscore} \emph{only} if \code{centroid}
 #' \code{=} \code{"shape"}, but will be replaced by a custom function if provided. See Preprocessing section.
 #' @param dc Cutoff distance for the \code{\link{TADPole}} algorithm.
-#' @param control NEW: Named list of parameters for clustering algorithms. See \code{\link{dtwclustControl}}.
+#' @param control Named list of parameters for clustering algorithms. See \code{\link{dtwclustControl}}.
 #' \code{NULL} means defaults.
 #' @param seed Random seed for reproducibility of partitional algorithms.
 #' @param distmat If a cross-distance matrix is already available, it can be provided here so it's re-used. Only relevant if
@@ -293,7 +293,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      args <- names(MYCALL[-1])
      id_oldargs <- which(args %in% c(slotNames("dtwclustControl"), "reps"))
      if (length(id_oldargs) > 0) {
-          message("The 'control' argument replaced many parameters that were dropped from this function.")
+          message("Control arguments should not be provided in ... to prevent duplicate matches.")
           message("Please type ?dtwclustControl for more information.\n")
 
           for (i in id_oldargs) {

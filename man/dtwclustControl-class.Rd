@@ -8,10 +8,6 @@
 Formal S4 class with several control parameters used in \code{\link{dtwclust}}.
 }
 \details{
-The included slots were some of the formal arguments of \code{\link{dtwclust}}.
-In the next release, all arguments that correspond to one of the slots here will not be detected by the dtwclust function
-unless specified in the \code{control} parameter.
-
 Default values are shown at the end.
 }
 \section{Slots}{
