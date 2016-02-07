@@ -69,6 +69,8 @@
 #' convergence is assumed.
 #' @param error.check Should inconsistencies in the data be checked?
 #' @param trace If \code{TRUE}, the current iteration is printed to screen.
+#' @param ... Further arguments for \code{\link[dtw]{dtw}}, e.g. \code{step.pattern}. Do not provide
+#' \code{window.type} here, just set \code{window.size} to the desired value.
 #'
 #' @return The average time series.
 #'
@@ -77,14 +79,23 @@
 
 DBA <- function(X, center = NULL, max.iter = 20,
                 norm = "L1", window.size = NULL, delta = 1e-06,
-                error.check = TRUE, trace = FALSE) {
+                error.check = TRUE, trace = FALSE, ...) {
 
      X <- consistency_check(X, "tsmat")
 
-     if (!is.null(window.size))
+     if (!is.null(window.size)) {
           w <- consistency_check(window.size, "window")
+          window.type = "slantedband"
+
+     } else {
+          w <- NULL
+          window.type = "none"
+     }
 
      norm <- match.arg(norm, c("L1", "L2"))
+
+     ## for C function
+     square <- ifelse(norm == "L1", FALSE, TRUE)
 
      n <- length(X)
 
@@ -96,89 +107,50 @@ DBA <- function(X, center = NULL, max.iter = 20,
           consistency_check(center, "ts")
      }
 
+     ## pre-allocate local cost matrices
+     LCM <- lapply(X, function(x) { matrix(0, length(x), length(center)) })
+
      ## maximum length of considered series
-     L <- max(sapply(X, length))
+     L <- max(lengths(X))
 
-     ## pre-allocate matrices for the calculation of the local costs matrices (saves a couple of seconds)
-     rprox <- rbind(rep(1, length(center)))
+     ## Register doSEQ if necessary
+     check_parallel()
 
-     M <- lapply(X, function(x) {
-          x %*% rprox
-     })
+     Xs <- split_parallel(X)
+     LCMs <- split_parallel(LCM)
 
-     ## Attempt parallel?
-     do_par <- check_parallel()
-
-     if (do_par) {
-          # in parallel
-          X <- split_parallel(X)
-          M <- split_parallel(M)
-     }
+     dots <- list(...)
 
      ## Iterations
-
      iter <- 1
-     C.old <- center
-     cprox <- cbind(rep(1, L))
+     center_old <- center
 
      while(iter <= max.iter) {
-
-          CM <- cprox %*% center
-
           ## Return the coordinates of each series in X grouped by the coordinate they match to in the center time series
           ## Also return the number of coordinates used in each case (for averaging below)
-          if (do_par) {
-               # in parallel
-               xg <- foreach(X = X, M = M,
-                             .combine = c,
-                             .multicombine = TRUE,
-                             .packages = "dtwclust") %dopar% {
-                                  mapply(X, M, SIMPLIFY = FALSE, FUN = function(x, xm) {
-                                       lcm <- switch(EXPR = norm,
-                                                     L1 = abs(xm - CM[1:nrow(xm), , drop = FALSE]),
-                                                     L2 = (xm - CM[1:nrow(xm), , drop = FALSE])^2
-                                       )
+          xg <- foreach(X = Xs, LCM = LCMs,
+                        .combine = c,
+                        .multicombine = TRUE,
+                        .packages = c("dtwclust", "stats")) %dopar% {
+                             mapply(X, LCM, SIMPLIFY = FALSE, FUN = function(x, lcm) {
+                                  .Call("update_lcm", lcm, x, center, square, PACKAGE = "dtwclust")
 
-                                       if (is.null(window.size)) {
-                                            d <- dtw::dtw(lcm)
-                                       } else {
-                                            d <- dtw::dtw(lcm,
-                                                          window.type = "slantedband",
-                                                          window.size = w)
-                                       }
+                                  d <- do.call(dtw::dtw, c(list(x = lcm,
+                                                                window.type = window.type,
+                                                                window.size = w),
+                                                           dots))
 
-                                       x.sub <- stats::aggregate(x[d$index1],
-                                                                 by=list(ind = d$index2),
-                                                                 sum)
+                                  x.sub <- stats::aggregate(x[d$index1],
+                                                            by = list(ind = d$index2),
+                                                            sum)
 
-                                       n.sub <- stats::aggregate(x[d$index1],
-                                                                 by=list(ind = d$index2),
-                                                                 length)
+                                  n.sub <- stats::aggregate(x[d$index1],
+                                                            by = list(ind = d$index2),
+                                                            length)
 
-                                       cbind(sum = x.sub$x, n = n.sub$x)
-                                  })
-                             }
-          } else {
-               # not in parallel
-               xg <- mapply(X, M, SIMPLIFY = FALSE, FUN = function(x, xm) {
-                    lcm <- switch(EXPR = norm,
-                                  L1 = abs(xm - CM[1:nrow(xm), , drop = FALSE]),
-                                  L2 = (xm - CM[1:nrow(xm), , drop = FALSE])^2
-                    )
-
-                    if (is.null(window.size)) {
-                         d <- dtw::dtw(lcm)
-                    } else {
-                         d <- dtw::dtw(lcm, window.type = "slantedband", window.size = w)
-                    }
-
-                    x.sub <- stats::aggregate(x[d$index1], by=list(ind = d$index2), sum)
-
-                    n.sub <- stats::aggregate(x[d$index1], by=list(ind = d$index2), length)
-
-                    cbind(sum = x.sub$x, n = n.sub$x)
-               })
-          }
+                                  cbind(sum = x.sub$x, n = n.sub$x)
+                             })
+                        }
 
           ## Put everything in one big data frame
           xg <- reshape2::melt(xg)
@@ -189,14 +161,14 @@ DBA <- function(X, center = NULL, max.iter = 20,
           ## Average
           center <- xg$x[xg$Group.2 == "sum"] / xg$x[xg$Group.2 == "n"]
 
-          if (all(abs(center - C.old) < delta)) {
+          if (all(abs(center - center_old) < delta)) {
                if (trace)
                     cat("DBA: Iteration", iter ,"- Converged!\n\n")
 
                break
 
           } else {
-               C.old <- center
+               center_old <- center
 
                if (trace)
                     cat("DBA: Iteration", iter, "\n")

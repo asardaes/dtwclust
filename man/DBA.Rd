@@ -5,7 +5,7 @@
 \title{DTW Barycenter Averaging}
 \usage{
 DBA(X, center = NULL, max.iter = 20, norm = "L1", window.size = NULL,
-  delta = 1e-06, error.check = TRUE, trace = FALSE)
+  delta = 1e-06, error.check = TRUE, trace = FALSE, ...)
 }
 \arguments{
 \item{X}{A data matrix where each row is a time series. Optionally, a list where each element is a time series.}
@@ -26,6 +26,9 @@ convergence is assumed.}
 \item{error.check}{Should inconsistencies in the data be checked?}
 
 \item{trace}{If \code{TRUE}, the current iteration is printed to screen.}
+
+\item{...}{Further arguments for \code{\link[dtw]{dtw}}, e.g. \code{step.pattern}. Do not provide
+\code{window.type} here, just set \code{window.size} to the desired value.}
 }
 \value{
 The average time series.

@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <stdio.h>
+#include <math.h>
 #include <R.h>
 #include <Rdefines.h>
 #include <float.h>
