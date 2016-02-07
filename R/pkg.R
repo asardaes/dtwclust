@@ -87,7 +87,6 @@
 #' @useDynLib dtwclust
 #'
 #' @import methods
-#' @import flexclust
 #' @import doRNG
 #' @import proxy
 #' @import foreach
@@ -107,6 +106,10 @@
 #' @importFrom stats median
 #' @importFrom stats nextn
 #' @importFrom stats update
+#' @importFrom stats predict
+#' @importFrom flexclust randIndex
+#' @importFrom flexclust clusterSim
+#' @importFrom graphics plot
 #'
 NULL
 

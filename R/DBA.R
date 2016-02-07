@@ -94,8 +94,8 @@ DBA <- function(X, center = NULL, max.iter = 20,
 
      norm <- match.arg(norm, c("L1", "L2"))
 
-     ## for C function
-     square <- ifelse(norm == "L1", FALSE, TRUE)
+     ## for C helper
+     square <- norm == "L2"
 
      n <- length(X)
 

@@ -4,7 +4,6 @@ Title: Time Series Clustering with Dynamic Time Warping Distance
 Version: 2.0.1.9000
 Date: 2016-02-07
 Depends:
-    flexclust,
     proxy,
     dtw,
     ggplot2,
@@ -12,6 +11,7 @@ Depends:
 Imports:
     stats,
     methods,
+    flexclust,
     caTools,
     reshape2,
     foreach,
