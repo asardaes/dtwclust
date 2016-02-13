@@ -97,7 +97,7 @@ consistency_check <- function(obj, case, ...) {
           return(obj)
 
      } else if (case == "dist") {
-          .local <- function(obj, trace = FALSE, lengths = FALSE, silent = TRUE, ...) {
+          .local <- function(obj, trace = FALSE, Lengths = FALSE, silent = TRUE, ...) {
                included <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd")
                valid <- c("dtw", "dtw2", "sbd")
 
@@ -109,7 +109,7 @@ consistency_check <- function(obj, case, ...) {
                          stop("Please provide a valid distance function registered with the proxy package.")
                }
 
-               if (lengths) {
+               if (Lengths) {
                     if ((obj %in% included) && !(obj %in% valid))
                          stop("Only the following distances are supported for series with different lengths:\n\tdtw\tdtw2\tsbd")
                     else if(!(obj %in% included) && trace)
@@ -122,7 +122,7 @@ consistency_check <- function(obj, case, ...) {
           return(.local(obj, ...))
 
      } else if (case == "cent") {
-          included <- c("mean", "median", "shape", "dba", "pam")
+          included <- c("mean", "median", "shape", "dba", "pam", "fcm")
           valid <- c("dba", "pam", "shape")
 
           if (is.character(obj) && (obj %in% included) && !(obj %in% valid))
@@ -135,6 +135,18 @@ consistency_check <- function(obj, case, ...) {
      }
 
      invisible(NULL)
+}
+
+# ========================================================================================================
+# Membership update for fuzzy c-means clustering
+# ========================================================================================================
+
+fcm_cluster <- function(distmat, m) {
+     cprime <- apply(distmat, 1, function(dist_row) { sum( (1 / dist_row) ^ (1 / (m - 1)) ) })
+
+     u <- 1 / apply(distmat, 2, function(dist_col) { cprime * dist_col ^ (1 / (m - 1)) })
+
+     u
 }
 
 # ========================================================================================================

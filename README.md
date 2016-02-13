@@ -34,7 +34,10 @@ data <- lapply(CharTraj, reinterpolate, newLength = 180)
 ## Common controls
 ctrl <- list(window.size = 20L, trace = TRUE)
 
-#### Using DTW with help of lower bounds and PAM centroids
+## =============================================================================================
+## Using DTW with help of lower bounds and PAM centroids
+## =============================================================================================
+
 ctrl$pam.precompute <- FALSE
 
 kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
@@ -46,7 +49,7 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 4: Changes / Distsum = 2 / 1287.395
 #> Iteration 5: Changes / Distsum = 0 / 1287.395
 #> 
-#>  Elapsed time is 9.263 seconds.
+#>  Elapsed time is 8.926 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -57,7 +60,10 @@ plot(kc.dtwlb)
 
 ctrl$pam.precompute <- TRUE
 
-#### Hierarchical clustering based on shape-based distance
+## =============================================================================================
+## Hierarchical clustering based on shape-based distance
+## =============================================================================================
+
 hc.sbd <- dtwclust(datalist, type = "hierarchical",
                    k = 20, distance = "sbd",
                    method = "all",
@@ -67,7 +73,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.673 seconds.
+#>  Elapsed time is 0.648 seconds.
 
 cat("Rand index for HC+SBD:\n")
 #> Rand index for HC+SBD:
@@ -84,7 +90,10 @@ plot(hc.sbd[[which.max(ri)]])
 
 ``` r
 
-#### TADPole clustering
+## =============================================================================================
+## TADPole clustering
+## =============================================================================================
+
 kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
                     dc = 1.5, control = ctrl)
 #> 
@@ -92,7 +101,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 4.552 seconds.
+#>  Elapsed time is 4.47 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -101,7 +110,10 @@ plot(kc.tadp, clus = 1:4)
 
 ``` r
 
-#### Parallel support
+## =============================================================================================
+## Parallel support
+## =============================================================================================
+
 require(doParallel)
 #> Loading required package: doParallel
 #> Loading required package: iterators
@@ -138,11 +150,11 @@ kc <- dtwclust(datalist, k = 20,
                seed = 9421, control = list(trace = TRUE))
 #> Series have different lengths. Please confirm that the provided distance function supports this.
 #> Iteration 1: Changes / Distsum = 100 / 5.162033
-#> Iteration 2: Changes / Distsum = 3 / 3.739462
-#> Iteration 3: Changes / Distsum = 2 / 3.687197
-#> Iteration 4: Changes / Distsum = 0 / 3.631238
+#> Iteration 2: Changes / Distsum = 3 / 3.739439
+#> Iteration 3: Changes / Distsum = 2 / 3.687196
+#> Iteration 4: Changes / Distsum = 0 / 3.631237
 #> 
-#>  Elapsed time is 21.683 seconds.
+#>  Elapsed time is 20.951 seconds.
 
 # Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
@@ -154,6 +166,37 @@ plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
 
 stopCluster(cl)
 registerDoSEQ()
+
+## =============================================================================================
+## Fuzzy clustering (autocorrelation-based)
+## =============================================================================================
+
+# Calculate autocorrelation up to 50th lag, considering a list of time series as input
+acf_fun <- function(dat) {
+     lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
+}
+
+# Fuzzy distance to be used (squared Euclidean)
+fdist <- function(x, y, ...) { sum((x - y)^2) }
+
+# Register it with proxy
+if (!pr_DB$entry_exists("SquaredL2"))
+     pr_DB$set_entry(FUN = fdist, names = "SquaredL2",
+                     loop = TRUE, type = "metric", distance = TRUE)
+
+# Fuzzy c-means
+fc <- dtwclust(CharTraj[1:25], type = "fuzzy", k = 5,
+               preproc = acf_fun, distance = "SquaredL2",
+               seed = 123)
+
+head(fc@fcluster)
+#>            [,1]       [,2]       [,3]       [,4]       [,5]
+#> [1,] 0.11196672 0.73358253 0.05360118 0.02056206 0.08028750
+#> [2,] 0.06055146 0.84230720 0.03417022 0.01086908 0.05210203
+#> [3,] 0.02365218 0.92695052 0.02184287 0.00493589 0.02261855
+#> [4,] 0.87736555 0.05551485 0.01392395 0.03236539 0.02083025
+#> [5,] 0.69435078 0.14645760 0.03514496 0.06713317 0.05691349
+#> [6,] 0.07075930 0.14825338 0.51859734 0.03272393 0.22966604
 ```
 
 Dependencies

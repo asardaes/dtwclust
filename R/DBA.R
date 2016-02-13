@@ -78,7 +78,7 @@
 #'
 
 DBA <- function(X, center = NULL, max.iter = 20,
-                norm = "L1", window.size = NULL, delta = 1e-06,
+                norm = "L1", window.size = NULL, delta = 1e-3,
                 error.check = TRUE, trace = FALSE, ...) {
 
      X <- consistency_check(X, "tsmat")

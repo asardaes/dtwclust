@@ -77,6 +77,10 @@
 #' and distance measures for time series data.'' \emph{Data Mining and Knowledge Discovery}, \strong{26}(2), pp. 275-309. ISSN 1384-5810,
 #' \url{http://doi.org/10.1007/s10618-012-0250-5}, \url{http://dx.doi.org/10.1007/s10618-012-0250-5}.
 #'
+#' Bedzek, J.C. (1981). Pattern recognition with fuzzy objective function algorithms.
+#'
+#' D'Urso, P., & Maharaj, E. A. (2009). Autocorrelation-based fuzzy clustering of time series. Fuzzy Sets and Systems, 160(24), 3565-3589.
+#'
 #' @seealso
 #' Type \code{news(package = "dtwclust")} to see what changed.
 #'
@@ -150,10 +154,6 @@ NULL
                                  loop = FALSE, type = "metric", distance = TRUE,
                                  description = "DTW distance aided with Lemire's lower bound",
                                  PACKAGE = "dtwclust") #, PREFUN = proxy_prefun)
-
-     packageStartupMessage("Type news(package = ",
-                           dQuote("dtwclust"),
-                           ") to see what changed")
 }
 
 .onUnload <- function(libpath) {

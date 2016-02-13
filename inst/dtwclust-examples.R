@@ -1,4 +1,4 @@
-#### Load data
+# Load data
 data(uciCT)
 
 # Reinterpolate to same length and coerce as matrix
@@ -11,12 +11,18 @@ labels <- CharTrajLabels[1:20]
 # Controls
 ctrl <- list(trace = TRUE, window.size = 20L)
 
-#### Simple partitional clustering with L2 distance and PAM
+# ===============================================================================================
+# Simple partitional clustering with L2 distance and PAM
+# ===============================================================================================
+
 kc.l2 <- dtwclust(data, k = 4, distance = "L2", centroid = "pam",
                   seed = 3247, control = ctrl)
 cat("Rand index for L2+PAM:", randIndex(kc.l2, labels), "\n\n")
 
-#### TADPole clustering
+# ===============================================================================================
+# TADPole clustering
+# ===============================================================================================
+
 kc.tadp <- dtwclust(data, type = "tadpole", k = 4,
                     dc = 1.5, control = ctrl)
 cat("Rand index for TADPole:", randIndex(kc.tadp, labels), "\n\n")
@@ -26,7 +32,10 @@ plot(kc.tadp)
 plot(kc.tadp, clus = 3:4, labs.arg = list(title = "TADPole, clusters 3 and 4",
                                           x = "time", y = "series"))
 
-#### Registering a custom distance with the 'proxy' package and using it
+# ===============================================================================================
+# Registering a custom distance with the 'proxy' package and using it
+# ===============================================================================================
+
 # Normalized DTW distance
 ndtw <- function(x, y, ...) {
      dtw::dtw(x, y, step.pattern = symmetric2,
@@ -42,11 +51,15 @@ if (!pr_DB$entry_exists("nDTW"))
 # Subset of (original) data for speed
 kc.ndtw <- dtwclust(CharTraj[31:40], distance = "nDTW",
                     control = ctrl, seed = 8319)
+
 cat("Rand index for nDTW (subset):",
     randIndex(kc.ndtw, CharTrajLabels[31:40]), "\n\n")
+
 plot(kc.ndtw)
 
-#### Hierarchical clustering based on shabe-based distance (different lengths)
+# ===============================================================================================
+# Hierarchical clustering based on shabe-based distance (different lengths)
+# ===============================================================================================
 hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
                    method = c("average", "single"),
                    k = 20, distance = "sbd", control = ctrl)
@@ -56,8 +69,36 @@ plot(hc.sbd[[1]])
 hc.sbd2 <- update(hc.sbd[[1]], method = "complete", distmat = hc.sbd[[1]]@distmat)
 plot(hc.sbd2, type = "series")
 
+# ==========================================================================================
+# Autocorrelation based fuzzy clustering (see D'Urso and Maharaj 2009)
+# ==========================================================================================
+
+# Calculate autocorrelation up to 50th lag, considering a list of time series as input
+acf_fun <- function(dat) {
+     lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
+}
+
+# Fuzzy distance to be used (squared Euclidean)
+fdist <- function(x, y, ...) { sum((x - y)^2) }
+
+# Register it with proxy
+if (!pr_DB$entry_exists("SquaredL2"))
+     pr_DB$set_entry(FUN = fdist, names = "SquaredL2",
+                     loop = TRUE, type = "metric", distance = TRUE)
+
+# Fuzzy c-means
+fc <- dtwclust(CharTraj, type = "fuzzy", k = 20,
+               preproc = acf_fun, distance = "SquaredL2",
+               seed = 123, control = list(trace = TRUE))
+
+# Fuzzy memberships
+#View(fc@fcluster)
+
 \dontrun{
-     #### Saving and modifying the ggplot object with custom time
+     # ==========================================================================================
+     # Saving and modifying the ggplot object with custom time
+     # ==========================================================================================
+
      t <- seq(Sys.Date(), len = 180, by = "day")
      gkc <- plot(kc.l2, time = t, plot = FALSE)
 
@@ -65,8 +106,10 @@ plot(hc.sbd2, type = "series")
      gkc + scale_x_date(labels = date_format("%b-%Y"),
                         breaks = date_breaks("2 months"))
 
-     #### Using parallel computation to optimize several random repetitions
-     #### and distance matrix calculation
+     # ==========================================================================================
+     # Using parallel computation to optimize several random repetitions
+     # and distance matrix calculation
+     # ==========================================================================================
      require(doParallel)
 
      # Create parallel workers

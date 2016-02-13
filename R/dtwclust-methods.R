@@ -486,9 +486,15 @@ setAs("list", "dtwclustControl",
       function(from, to) {
            ctrl <- new(to)
 
+           num <- c("delta", "fuzziness")
+
            for (arg in names(from)) {
                 val <- from[[arg]]
-                slot(ctrl, arg) <- ifelse(is.numeric(val), as.integer(val), val)
+
+                if (is.numeric(val) && !(arg %in% num))
+                     val <- as.integer(val)
+
+                slot(ctrl, arg) <- val
            }
 
            validObject(ctrl)

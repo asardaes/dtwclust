@@ -6,6 +6,7 @@
 #'
 #' Partitional algorithms use custom functions inspired by \code{\link[flexclust]{kcca}}. Hierarchical algorithms use
 #' the \code{\link[stats]{hclust}} function. The \code{tadpole} algorithm uses the \code{\link{TADPole}} function.
+#' Fuzzy clustering can potentially be done with any distance, and by default uses fuzzy c-means centroids.
 #'
 #' The \code{data} may be a matrix or a list, but the matrix will be coerced to a list row-wise. A matrix requires
 #' that all time series have equal lengths. If the lengths vary slightly between time series, reinterpolating them to
@@ -55,13 +56,21 @@
 #' \code{\link{dtwclustControl}} to \code{TRUE} to save some time in case of \code{pam.precompute}
 #' = \code{TRUE} or hierarchical procedures.
 #'
+#' In case of fuzzy clustering, the fuzzy c-means algorithm can use different distances, but please note that
+#' the definition of the objective function usually uses a squared distance, so the function chosen should already
+#' return the squared value. See the examples.
+#'
 #' @section Centroid:
 #'
 #' In the case of partitional algorithms, a suitable function should calculate the cluster centers at
 #' every iteration. In this case, the centers are themselves time series.
 #'
+#' Fuzzy clustering uses the standard fuzzy c-means centroid by default, but a custom function can also
+#' be used. The fuzziness exponent can be provided in the \code{control} parameter and defaults to 2.
+#' All elements in the data must have equal lengths.
+#'
 #' If a custom function is provided, it will receive the following inputs in the shown order (examples
-#' shown in parenthesis):
+#' for partitional case are shown in parenthesis):
 #'
 #' \itemize{
 #'   \item The \emph{whole} data list (\code{list(ts1, ts2, ts3)})
@@ -73,7 +82,10 @@
 #'   \item The elements of \code{...}
 #' }
 #'
-#' Therefore, the function should always include the ellipsis \code{...} in its definition.
+#' Therefore, the function should always include the ellipsis \code{...} in its definition. In case of fuzzy
+#' clustering, the membership vectors (2nd and 5th elements above) are matrices with number of rows equal to
+#' amount of elements in the data, and number of columns equal to the number of desired clusters. Each row
+#' must sum to 1.
 #'
 #' The other option is to provide a character string for the custom implementations. The following options
 #' are available:
@@ -87,15 +99,17 @@
 #'   \item "pam": Partition around medoids. This basically means that the cluster centers are always
 #'   one of the time series in the data. In this case, the distance matrix can be pre-computed once using all
 #'   time series in the data and then re-used at each iteration. It usually saves overhead overall.
+#'   \item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and always used for that type of clustering
+#'   if a string is provided.
 #' }
 #'
 #' These check for the special cases where parallelization is desired.
 #'
-#' If a cluster becomes empty, the functions reinitialize a new cluster randomly. However, if you see
-#' that the algorithm doesn't converge or the overall distance sum increases, this probably means that
-#' the chosen value of \code{k} is too large, or the chosen distance function is not able to assess
-#' similarity effectively. The random reinitialization attempts to enforce a certain number of clusters,
-#' but can result in instability in the aforementioned cases.
+#' If a cluster becomes empty (non-fuzzy clustering), the functions reinitialize a new cluster randomly.
+#' However, if you see that the algorithm doesn't converge or the overall distance sum increases, this
+#' probably means that the chosen value of \code{k} is too large, or the chosen distance function is not
+#' able to assess similarity effectively. The random reinitialization attempts to enforce a certain number
+#' of clusters, but can result in instability in the aforementioned cases.
 #'
 #' Note that only \code{shape}, \code{dba} and \code{pam} support series of different lengths.
 #'
@@ -131,9 +145,9 @@
 #'
 #' @section Repetitions:
 #'
-#' Due to their stochastic nature, partitional clustering is usually repeated several times with different random
-#' seeds to allow for different starting points. This function can now run several repetitions by using the
-#' \code{doRNG} package. This package ensures that each repetition uses a statistically independent random sequence.
+#' Due to their stochastic nature, partitional/fuzzy clustering is usually repeated several times with different random
+#' seeds to allow for different starting points. This function can perform several repetitions by using the
+#' \code{doRNG} package.
 #'
 #' If more than one repetition is made, the \code{\link[doRNG]{\%dorng\%}} operator is used. If provided, the
 #' \code{seed} parameter is used to initialize it. The different seed sequences used are returned in the
@@ -203,6 +217,10 @@
 #' Temporal and Sequential Data, in conjunction with 10th ACM SIGKDD Int. Conf. Knowledge Discovery and Data Mining (KDD-2004),
 #' Seattle, WA}.
 #'
+#' Bedzek, J.C. (1981). Pattern recognition with fuzzy objective function algorithms.
+#'
+#' D'Urso, P., & Maharaj, E. A. (2009). Autocorrelation-based fuzzy clustering of time series. Fuzzy Sets and Systems, 160(24), 3565-3589.
+#'
 #' Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.'' In \emph{Proceedings of the 2015
 #' ACM SIGMOD International Conference on Management of Data}, series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{
 #' http://doi.org/10.1145/2723372.2737793}.
@@ -265,7 +283,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      if (is.null(data))
           stop("No data provided")
 
-     type <- match.arg(type, c("partitional", "hierarchical", "tadpole"))
+     type <- match.arg(type, c("partitional", "hierarchical", "tadpole", "fuzzy"))
 
      ## coerce to list if necessary
      data <- consistency_check(data, "tsmat")
@@ -337,13 +355,22 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      else
           datalist <- list()
 
-     lengths <- sapply(data, length)
-     diff_lengths <- length(unique(lengths)) > 1L
+     Lengths <- lengths(data)
+     diff_lengths <- length(unique(Lengths)) > 1L
 
-     consistency_check(distance, "dist", trace = control@trace, lengths = diff_lengths, silent = FALSE)
+     consistency_check(distance, "dist", trace = control@trace, Lengths = diff_lengths, silent = FALSE)
 
-     if(type == "partitional" && diff_lengths)
-          consistency_check(centroid, "cent", trace = control@trace)
+     if(type %in% c("partitional", "fuzzy")) {
+          if (is.character(centroid)) {
+               if (type == "fuzzy")
+                    centroid <- "fcm"
+               else
+                    centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
+          }
+
+          if (diff_lengths)
+               consistency_check(centroid, "cent", trace = control@trace)
+     }
 
      if (diff_lengths && distance %in% c("dtw", "dtw2"))
           control@symmetric <- FALSE
@@ -356,17 +383,14 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      control@packages <- c("dtwclust", control@packages)
      check_parallel() # register doSEQ if necessary
 
-     if (type == "partitional") {
+     if (type %in% c("partitional", "fuzzy")) {
 
           ## =================================================================================================================
-          ## Partitional
+          ## Partitional or fuzzy
           ## =================================================================================================================
 
           if (k < 2L)
                stop("At least two clusters must be defined")
-
-          if (is.character(centroid))
-               centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
 
           ## ----------------------------------------------------------------------------------------------------------
           ## Distance function
@@ -426,7 +450,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           allcent <- all_cent(case = centroid,
                               distmat = distmat,
                               distfun = distfun,
-                              control = control)
+                              control = control,
+                              fuzzy = isTRUE(type == "fuzzy"))
 
           centroid <- as.character(substitute(centroid))[[1]]
 
@@ -438,6 +463,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                         dist = distfun,
                         allcent = allcent,
                         preproc = preproc)
+
+          if (type == "fuzzy")
+               family@cluster <- fcm_cluster # utils.R
 
           if (control@trace && control@nrep > 1L)
                message("Tracing of repetitions might not be available if done in parallel.\n")
@@ -468,8 +496,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                                        list(x = data,
                                                             k = k,
                                                             family = family,
-                                                            iter.max = control@iter.max,
-                                                            trace = control@trace)))
+                                                            control = control,
+                                                            fuzzy = isTRUE(type == "fuzzy"))))
 
                                        gc(FALSE)
 
@@ -482,8 +510,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                          list(x = data,
                                               k = k,
                                               family = family,
-                                              iter.max = control@iter.max,
-                                              trace = control@trace))))
+                                              control = control,
+                                              fuzzy = isTRUE(type == "fuzzy")))))
           }
 
           ## ----------------------------------------------------------------------------------------------------------
@@ -520,6 +548,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                    centers = kc$centers,
                    k = as.integer(k),
                    cluster = kc$cluster,
+                   fcluster = kc$fcluster,
 
                    clusinfo = kc$clusinfo,
                    cldist = kc$cldist,
@@ -730,7 +759,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                ret
           })
 
-     if (type == "partitional" && control@nrep > 1L)
+     if (type %in% c("partitional", "fuzzy") && control@nrep > 1L)
           attr(RET, "rng") <- attr(kc.list, "rng")
 
      if (control@trace)

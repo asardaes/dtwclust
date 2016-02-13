@@ -7,11 +7,12 @@
 Formal S4 class.
 }
 \details{
-The class no longer inherits from \code{\link[flexclust]{kccasimple-class}}, but most slots and methods were ported.
-Namely, \code{data} and \code{index} slots were not.
-
-However, this class now contains \code{\link[stats]{hclust}} as superclass and supports all its methods. Plot is a
+This class contains \code{\link[stats]{hclust}} as superclass and supports all its methods. Plot is a
 special case (see \code{\link{dtwclust-methods}}).
+
+Please note that not all slots will contain valid information for all clustering types. In other cases,
+for example for fuzzy and hierarchical clustering, some results are computed assuming a hard partition
+is created based on the fuzzy membership or dendrogram tree.
 }
 \section{Slots}{
 
@@ -27,6 +28,9 @@ special case (see \code{\link{dtwclust-methods}}).
 \item{\code{k}}{Integer indicating the number of desired clusters.}
 
 \item{\code{cluster}}{Integer vector indicating which cluster a series belongs to.}
+
+\item{\code{fcluster}}{Numeric matrix that contains membership of fuzzy clusters. It has row for each
+series and one column for each cluster.}
 
 \item{\code{iter}}{The number of iterations used.}
 

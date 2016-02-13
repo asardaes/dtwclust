@@ -2,9 +2,10 @@
 # Modified version of kcca to use lists of time series (to support different lengths)
 # ========================================================================================================
 
-kcca.list <- function (x, k, family, iter.max = 30L, trace = FALSE, ...)
+kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
 {
      N <- length(x)
+     k <- as.integer(k)
 
      if (N < k)
           stop("Number of clusters cannot be greater than number of observations in the data")
@@ -12,49 +13,88 @@ kcca.list <- function (x, k, family, iter.max = 30L, trace = FALSE, ...)
      if (is.null(names(x)))
           names(x) <- paste0("series_", 1:N) # used by custom PAM centers
 
-     id_cent <- sample(N,k)
-     centers <- x[id_cent]
-     attr(centers, "id_cent") <- id_cent
-     cluster <- integer(N)
-     k <- as.integer(k)
+     if (fuzzy) {
+          x <- do.call(rbind, x)
+
+          cluster <- matrix(0, N, k)
+          cluster[ , -1] <- runif(N *(k - 1L)) / (k - 1)
+          cluster[ , 1] <- 1 - apply(cluster[ , -1], 1, sum)
+          centers <- family@allcent(x, cluster, k, ...)
+
+     } else {
+          id_cent <- sample(N,k)
+          centers <- x[id_cent]
+          attr(centers, "id_cent") <- id_cent
+          cluster <- integer(N)
+     }
+
      iter <- 1L
 
-     while (iter <= iter.max) {
+     while (iter <= control@iter.max) {
           clustold <- cluster
+
           distmat <- family@dist(x, centers, ...)
-          cluster <- family@cluster(distmat = distmat)
+
+          cluster <- family@cluster(distmat = distmat, m = control@fuzziness)
 
           centers <- family@allcent(x, cluster, k, centers, clustold, ...)
 
-          changes <- sum(cluster != clustold)
+          if (fuzzy) {
+               change <- abs(norm(cluster, "2") - norm(clustold, "2"))
 
-          if (trace) {
-               td <- sum(distmat[cbind(1:N, cluster)])
-               txt <- paste(changes, format(td), sep = " / ")
-               cat("Iteration ", iter, ": ",
-                   "Changes / Distsum = ",
-                   formatC(txt, width = 12, format = "f"),
-                   "\n", sep = "")
-          }
+               if (control@trace) {
+                    cat("Iteration ", iter, ": ",
+                        "Change = ",
+                        formatC(change, width = 6, format = "f"),
+                        "\n", sep = "")
+               }
 
-          if (changes == 0) {
-               if (trace) cat("\n")
-               break
+               if (change < control@delta) {
+                    if (control@trace) cat("\n")
+                    break
+               }
+
+          } else {
+               changes <- sum(cluster != clustold)
+
+               if (control@trace) {
+                    td <- sum(distmat[cbind(1:N, cluster)])
+                    txt <- paste(changes, format(td), sep = " / ")
+                    cat("Iteration ", iter, ": ",
+                        "Changes / Distsum = ",
+                        formatC(txt, width = 12, format = "f"),
+                        "\n", sep = "")
+               }
+
+               if (changes == 0) {
+                    if (control@trace) cat("\n")
+                    break
+               }
           }
 
           iter <- iter + 1L
      }
 
-     if (iter > iter.max) {
-          warning("Partitional clustering did not converge within the allowed iterations.")
+     if (iter > control@iter.max) {
+          warning("Clustering did not converge within the allowed iterations.")
           converged <- FALSE
-          iter <- iter.max
+          iter <- control@iter.max
 
      } else {
           converged <- TRUE
      }
 
-     cluster <- as.integer(family@cluster(distmat=distmat))
+     cluster <- family@cluster(distmat = distmat, m = control@fuzziness)
+
+     if (fuzzy) {
+          fcluster <- cluster
+          cluster <- max.col(-distmat, "first")
+          centers <- consistency_check(centers, "tsmat")
+
+     } else {
+          fcluster <- matrix(NA_real_)
+     }
+
      cldist <- as.matrix(distmat[cbind(1:N, cluster)])
      size <- as.vector(table(cluster))
      clusinfo <- data.frame(size = size,
@@ -65,6 +105,7 @@ kcca.list <- function (x, k, family, iter.max = 30L, trace = FALSE, ...)
      centers <- lapply(centers, "attr<-", which = "id_cent", value = NULL)
 
      list(cluster = cluster,
+          fcluster = fcluster,
           centers = centers,
           clusinfo = clusinfo,
           cldist = cldist,

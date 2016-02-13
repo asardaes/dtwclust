@@ -79,6 +79,10 @@ http://doi.org/10.1109/TASSP.1978.1163055}.
 Wang X, Mueen A, Ding H, Trajcevski G, Scheuermann P and Keogh E (2013). ``Experimental comparison of representation methods
 and distance measures for time series data.'' \emph{Data Mining and Knowledge Discovery}, \strong{26}(2), pp. 275-309. ISSN 1384-5810,
 \url{http://doi.org/10.1007/s10618-012-0250-5}, \url{http://dx.doi.org/10.1007/s10618-012-0250-5}.
+
+Bedzek, J.C. (1981). Pattern recognition with fuzzy objective function algorithms.
+
+D'Urso, P., & Maharaj, E. A. (2009). Autocorrelation-based fuzzy clustering of time series. Fuzzy Sets and Systems, 160(24), 3565-3589.
 }
 \seealso{
 Type \code{news(package = "dtwclust")} to see what changed.

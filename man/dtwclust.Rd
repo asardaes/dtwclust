@@ -57,6 +57,7 @@ For now, all series must be univariate.
 \details{
 Partitional algorithms use custom functions inspired by \code{\link[flexclust]{kcca}}. Hierarchical algorithms use
 the \code{\link[stats]{hclust}} function. The \code{tadpole} algorithm uses the \code{\link{TADPole}} function.
+Fuzzy clustering can potentially be done with any distance, and by default uses fuzzy c-means centroids.
 
 The \code{data} may be a matrix or a list, but the matrix will be coerced to a list row-wise. A matrix requires
 that all time series have equal lengths. If the lengths vary slightly between time series, reinterpolating them to
@@ -106,6 +107,10 @@ Whether the function makes use of them or not, is up to you. See the examples.
 If you know that the distance function is symmetric, consider setting the corresponding slot in
 \code{\link{dtwclustControl}} to \code{TRUE} to save some time in case of \code{pam.precompute}
 = \code{TRUE} or hierarchical procedures.
+
+In case of fuzzy clustering, the fuzzy c-means algorithm can use different distances, but please note that
+the definition of the objective function usually uses a squared distance, so the function chosen should already
+return the squared value. See the examples.
 }
 
 \section{Centroid}{
@@ -114,8 +119,12 @@ If you know that the distance function is symmetric, consider setting the corres
 In the case of partitional algorithms, a suitable function should calculate the cluster centers at
 every iteration. In this case, the centers are themselves time series.
 
+Fuzzy clustering uses the standard fuzzy c-means centroid by default, but a custom function can also
+be used. The fuzziness exponent can be provided in the \code{control} parameter and defaults to 2.
+All elements in the data must have equal lengths.
+
 If a custom function is provided, it will receive the following inputs in the shown order (examples
-shown in parenthesis):
+for partitional case are shown in parenthesis):
 
 \itemize{
   \item The \emph{whole} data list (\code{list(ts1, ts2, ts3)})
@@ -127,7 +136,10 @@ shown in parenthesis):
   \item The elements of \code{...}
 }
 
-Therefore, the function should always include the ellipsis \code{...} in its definition.
+Therefore, the function should always include the ellipsis \code{...} in its definition. In case of fuzzy
+clustering, the membership vectors (2nd and 5th elements above) are matrices with number of rows equal to
+amount of elements in the data, and number of columns equal to the number of desired clusters. Each row
+must sum to 1.
 
 The other option is to provide a character string for the custom implementations. The following options
 are available:
@@ -141,15 +153,17 @@ are available:
   \item "pam": Partition around medoids. This basically means that the cluster centers are always
   one of the time series in the data. In this case, the distance matrix can be pre-computed once using all
   time series in the data and then re-used at each iteration. It usually saves overhead overall.
+  \item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and always used for that type of clustering
+  if a string is provided.
 }
 
 These check for the special cases where parallelization is desired.
 
-If a cluster becomes empty, the functions reinitialize a new cluster randomly. However, if you see
-that the algorithm doesn't converge or the overall distance sum increases, this probably means that
-the chosen value of \code{k} is too large, or the chosen distance function is not able to assess
-similarity effectively. The random reinitialization attempts to enforce a certain number of clusters,
-but can result in instability in the aforementioned cases.
+If a cluster becomes empty (non-fuzzy clustering), the functions reinitialize a new cluster randomly.
+However, if you see that the algorithm doesn't converge or the overall distance sum increases, this
+probably means that the chosen value of \code{k} is too large, or the chosen distance function is not
+able to assess similarity effectively. The random reinitialization attempts to enforce a certain number
+of clusters, but can result in instability in the aforementioned cases.
 
 Note that only \code{shape}, \code{dba} and \code{pam} support series of different lengths.
 }
@@ -191,9 +205,9 @@ It is convenient to provide this function if you're planning on using the \code{
 \section{Repetitions}{
 
 
-Due to their stochastic nature, partitional clustering is usually repeated several times with different random
-seeds to allow for different starting points. This function can now run several repetitions by using the
-\code{doRNG} package. This package ensures that each repetition uses a statistically independent random sequence.
+Due to their stochastic nature, partitional/fuzzy clustering is usually repeated several times with different random
+seeds to allow for different starting points. This function can perform several repetitions by using the
+\code{doRNG} package.
 
 If more than one repetition is made, the \code{\link[doRNG]{\%dorng\%}} operator is used. If provided, the
 \code{seed} parameter is used to initialize it. The different seed sequences used are returned in the
@@ -258,7 +272,7 @@ DTW2 is done with \code{\link[dtw]{dtw}}, but it differs from the result you wou
 distance is \emph{then} computed.
 }
 \examples{
-#### Load data
+# Load data
 data(uciCT)
 
 # Reinterpolate to same length and coerce as matrix
@@ -271,12 +285,18 @@ labels <- CharTrajLabels[1:20]
 # Controls
 ctrl <- list(trace = TRUE, window.size = 20L)
 
-#### Simple partitional clustering with L2 distance and PAM
+# ===============================================================================================
+# Simple partitional clustering with L2 distance and PAM
+# ===============================================================================================
+
 kc.l2 <- dtwclust(data, k = 4, distance = "L2", centroid = "pam",
                   seed = 3247, control = ctrl)
 cat("Rand index for L2+PAM:", randIndex(kc.l2, labels), "\\n\\n")
 
-#### TADPole clustering
+# ===============================================================================================
+# TADPole clustering
+# ===============================================================================================
+
 kc.tadp <- dtwclust(data, type = "tadpole", k = 4,
                     dc = 1.5, control = ctrl)
 cat("Rand index for TADPole:", randIndex(kc.tadp, labels), "\\n\\n")
@@ -286,7 +306,10 @@ plot(kc.tadp)
 plot(kc.tadp, clus = 3:4, labs.arg = list(title = "TADPole, clusters 3 and 4",
                                           x = "time", y = "series"))
 
-#### Registering a custom distance with the 'proxy' package and using it
+# ===============================================================================================
+# Registering a custom distance with the 'proxy' package and using it
+# ===============================================================================================
+
 # Normalized DTW distance
 ndtw <- function(x, y, ...) {
      dtw::dtw(x, y, step.pattern = symmetric2,
@@ -302,11 +325,15 @@ if (!pr_DB$entry_exists("nDTW"))
 # Subset of (original) data for speed
 kc.ndtw <- dtwclust(CharTraj[31:40], distance = "nDTW",
                     control = ctrl, seed = 8319)
+
 cat("Rand index for nDTW (subset):",
     randIndex(kc.ndtw, CharTrajLabels[31:40]), "\\n\\n")
+
 plot(kc.ndtw)
 
-#### Hierarchical clustering based on shabe-based distance (different lengths)
+# ===============================================================================================
+# Hierarchical clustering based on shabe-based distance (different lengths)
+# ===============================================================================================
 hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
                    method = c("average", "single"),
                    k = 20, distance = "sbd", control = ctrl)
@@ -316,8 +343,36 @@ plot(hc.sbd[[1]])
 hc.sbd2 <- update(hc.sbd[[1]], method = "complete", distmat = hc.sbd[[1]]@distmat)
 plot(hc.sbd2, type = "series")
 
+# ==========================================================================================
+# Autocorrelation based fuzzy clustering (see D'Urso and Maharaj 2009)
+# ==========================================================================================
+
+# Calculate autocorrelation up to 50th lag, considering a list of time series as input
+acf_fun <- function(dat) {
+     lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
+}
+
+# Fuzzy distance to be used (squared Euclidean)
+fdist <- function(x, y, ...) { sum((x - y)^2) }
+
+# Register it with proxy
+if (!pr_DB$entry_exists("SquaredL2"))
+     pr_DB$set_entry(FUN = fdist, names = "SquaredL2",
+                     loop = TRUE, type = "metric", distance = TRUE)
+
+# Fuzzy c-means
+fc <- dtwclust(CharTraj, type = "fuzzy", k = 20,
+               preproc = acf_fun, distance = "SquaredL2",
+               seed = 123, control = list(trace = TRUE))
+
+# Fuzzy memberships
+#View(fc@fcluster)
+
 \dontrun{
-     #### Saving and modifying the ggplot object with custom time
+     # ==========================================================================================
+     # Saving and modifying the ggplot object with custom time
+     # ==========================================================================================
+
      t <- seq(Sys.Date(), len = 180, by = "day")
      gkc <- plot(kc.l2, time = t, plot = FALSE)
 
@@ -325,8 +380,10 @@ plot(hc.sbd2, type = "series")
      gkc + scale_x_date(labels = date_format("\%b-\%Y"),
                         breaks = date_breaks("2 months"))
 
-     #### Using parallel computation to optimize several random repetitions
-     #### and distance matrix calculation
+     # ==========================================================================================
+     # Using parallel computation to optimize several random repetitions
+     # and distance matrix calculation
+     # ==========================================================================================
      require(doParallel)
 
      # Create parallel workers
@@ -374,6 +431,10 @@ Signal Processing, IEEE Transactions on}, \strong{26}(1), pp. 43-49. ISSN 0096-3
 Ratanamahatana A and Keogh E (2004). ``Everything you know about dynamic time warping is wrong.'' In \emph{3rd Workshop on Mining
 Temporal and Sequential Data, in conjunction with 10th ACM SIGKDD Int. Conf. Knowledge Discovery and Data Mining (KDD-2004),
 Seattle, WA}.
+
+Bedzek, J.C. (1981). Pattern recognition with fuzzy objective function algorithms.
+
+D'Urso, P., & Maharaj, E. A. (2009). Autocorrelation-based fuzzy clustering of time series. Fuzzy Sets and Systems, 160(24), 3565-3589.
 
 Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.'' In \emph{Proceedings of the 2015
 ACM SIGMOD International Conference on Management of Data}, series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{

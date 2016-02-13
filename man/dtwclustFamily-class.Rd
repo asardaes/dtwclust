@@ -15,7 +15,8 @@ The custom implementations also handle parallelization.
 Since the distance function makes use of \code{proxy}, it also supports any extra \code{\link[proxy]{dist}}
 parameters in \code{...}.
 
-The prototype includes the \code{cluster} function, as well as a pass-through \code{preproc} function.
+The prototype includes the \code{cluster} function for partitional methods, as well as a
+pass-through \code{preproc} function.
 }
 \section{Slots}{
 
