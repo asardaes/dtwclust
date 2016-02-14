@@ -176,7 +176,7 @@ check_parallel <- function() {
      if (is.null(foreach::getDoParName()))
           foreach::registerDoSEQ()
 
-     ret <- foreach::getDoParWorkers() > 1L
+     foreach::getDoParWorkers() > 1L
 }
 
 # Split a given object into tasks for parallel workers

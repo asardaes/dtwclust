@@ -145,13 +145,16 @@
 #'
 #' @section Repetitions:
 #'
-#' Due to their stochastic nature, partitional/fuzzy clustering is usually repeated several times with different random
-#' seeds to allow for different starting points. This function can perform several repetitions by using the
-#' \code{doRNG} package.
+#' Due to their stochastic nature, partitional clustering is usually repeated several times with different random
+#' seeds to allow for different starting points. This function uses \code{\link[rngtools]{RNGseq}} to obtain different
+#' seed streams for each repetition, utilizing the \code{seed} parameter (if provided) to initialize it. If more than
+#' one repetition is made, the streams are returned in an attribute called \code{rng}.
 #'
-#' If more than one repetition is made, the \code{\link[doRNG]{\%dorng\%}} operator is used. If provided, the
-#' \code{seed} parameter is used to initialize it. The different seed sequences used are returned in the
-#' \code{rng} attribute in such cases.
+#' Technically, you can also perform random repetitions for fuzzy clustering, although it might be difficult evaluating
+#' the results, since they are usually evaluated relative to each other and not in an absolute way. Ideally, the groups
+#' wouldn't change too much once the algorithm converges.
+#'
+#' Multiple values of \code{k} can also be provided to get different partitions using any \code{type} of clustering.
 #'
 #' Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is precomputed,
 #' since said matrix is reused for every repetition, and can be comptued in parallel (see next section).
@@ -243,7 +246,7 @@
 #' @param type What type of clustering method to use: \code{partitional}, \code{hierarchical} or \code{tadpole}.
 #' @param k Numer of desired clusters in partitional methods. For hierarchical methods, the
 #' \code{\link[stats]{cutree}} function is called with this value of \code{k} and the result is returned in the
-#' \code{cluster} slot of the \code{dtwclust} object.
+#' \code{cluster} slot of the \code{dtwclust} object. It may be a numeric vector with several cluster sizes.
 #' @param method One or more linkage methods to use in hierarchical procedures. See \code{\link[stats]{hclust}}.
 #' You can provide a character vector to compute different hierarchical cluster structures in one go, or
 #' specify \code{method} = "all" to use all the available ones.
@@ -264,7 +267,7 @@
 #'
 #' @return An object with formal class \code{\link{dtwclust-class}}.
 #' If \code{control@nrep > 1} and a partitional procedure is used, or \code{length(method)} \code{> 1} and hierarchical
-#' procedures are used, a list of objects is returned.
+#' procedures are used, or \code{length(k)} \code{> 1}, a list of objects is returned.
 #'
 #' @export
 #'
@@ -383,23 +386,25 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      control@packages <- c("dtwclust", control@packages)
      check_parallel() # register doSEQ if necessary
 
+     if (any(k < 2L))
+          stop("At least two clusters must be defined")
+     if (any(k > length(data)))
+          stop("Cannot have more clusters than series in the data")
+
      if (type %in% c("partitional", "fuzzy")) {
 
           ## =================================================================================================================
           ## Partitional or fuzzy
           ## =================================================================================================================
 
-          if (k < 2L)
-               stop("At least two clusters must be defined")
-
           ## ----------------------------------------------------------------------------------------------------------
           ## Distance function
           ## ----------------------------------------------------------------------------------------------------------
 
-          # dtwdistfun.R
-          distfun <- dtwdistfun(distance = distance,
-                                control = control,
-                                distmat = distmat)
+          # ddist.R
+          distfun <- ddist(distance = distance,
+                           control = control,
+                           distmat = distmat)
 
           ## ----------------------------------------------------------------------------------------------------------
           ## PAM precompute?
@@ -470,40 +475,13 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           if (control@trace && control@nrep > 1L)
                message("Tracing of repetitions might not be available if done in parallel.\n")
 
-          if (!is.null(seed))
-               set.seed(seed)
-
           ## ----------------------------------------------------------------------------------------------------------
           ## Cluster
           ## ----------------------------------------------------------------------------------------------------------
 
-          if (control@nrep > 1L) {
-               ## I need to re-register any custom distances in each parallel worker
-               dist_entry <- proxy::pr_DB$get_entry(distance)
+          if (length(k) == 1L && control@nrep == 1L) {
+               rngtools::setRNG(rngtools::RNGseq(1L, seed = seed, simplify = TRUE))
 
-               export <- c("kcca.list", "consistency_check")
-
-               kc.list <- foreach(i = 1:control@nrep,
-                                  .combine = list,
-                                  .multicombine = TRUE,
-                                  .packages = control@packages,
-                                  .export = export) %dorng% {
-                                       if (!consistency_check(dist_entry$names[1], "dist"))
-                                            do.call(proxy::pr_DB$set_entry, dist_entry)
-
-                                       kc <- do.call("kcca.list",
-                                                     c(dots,
-                                                       list(x = data,
-                                                            k = k,
-                                                            family = family,
-                                                            control = control,
-                                                            fuzzy = isTRUE(type == "fuzzy"))))
-
-                                       gc(FALSE)
-
-                                       kc
-                                  }
-          } else {
                ## Just one repetition
                kc.list <- list(do.call("kcca.list",
                                        c(dots,
@@ -512,6 +490,42 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                               family = family,
                                               control = control,
                                               fuzzy = isTRUE(type == "fuzzy")))))
+
+          } else {
+               ## I need to re-register any custom distances in each parallel worker
+               dist_entry <- proxy::pr_DB$get_entry(distance)
+
+               export <- c("kcca.list", "consistency_check")
+
+               rng <- rngtools::RNGseq(length(k) * control@nrep, seed = seed, simplify = FALSE)
+               rng <- lapply(parallel::splitIndices(length(rng), length(k)), function(i) rng[i])
+
+               comb0 <- if(control@nrep > 1L) c else list
+
+               k0 <- k
+               rng0 <- rng
+
+               kc.list <- foreach(k = k0, rng = rng0, .combine = comb0, .multicombine = TRUE,
+                                  .packages = control@packages, .export = export) %:%
+                    foreach(i = 1:control@nrep, .combine = list, .multicombine = TRUE,
+                            .packages = control@packages, .export = export) %dopar% {
+                                 rngtools::setRNG(rng[[i]])
+
+                                 if (!consistency_check(dist_entry$names[1], "dist"))
+                                      do.call(proxy::pr_DB$set_entry, dist_entry)
+
+                                 kc <- do.call("kcca.list",
+                                               c(dots,
+                                                 list(x = data,
+                                                      k = k,
+                                                      family = family,
+                                                      control = control,
+                                                      fuzzy = isTRUE(type == "fuzzy"))))
+
+                                 gc(FALSE)
+
+                                 kc
+                            }
           }
 
           ## ----------------------------------------------------------------------------------------------------------
@@ -532,7 +546,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           }
 
           ## Create objects
-          dtwc <- lapply(kc.list, function(kc) {
+          RET <- lapply(kc.list, function(kc) {
                new("dtwclust",
                    call = MYCALL,
                    control = control,
@@ -546,7 +560,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                    preproc = preproc_char,
 
                    centers = kc$centers,
-                   k = as.integer(k),
+                   k = kc$k,
                    cluster = kc$cluster,
                    fcluster = kc$fcluster,
 
@@ -558,10 +572,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                    datalist = datalist)
           })
 
-          if (control@nrep == 1L)
-               RET <- dtwc[[1]]
-          else
-               RET <- dtwc
+          if (length(RET) == 1L) RET <- RET[[1]]
 
      } else if (type == "hierarchical") {
 
@@ -597,9 +608,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           } else {
                ## Take advantage of the function I defined for the partitional methods
                ## Which can do calculations in parallel if appropriate
-               distfun <- dtwdistfun(distance = distance,
-                                     control = control,
-                                     distmat = NULL)
+               distfun <- ddist(distance = distance,
+                                control = control,
+                                distmat = NULL)
 
                if (control@trace)
                     cat("\n\tCalculating distance matrix...\n")
@@ -620,58 +631,59 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                cat("\n\tPerforming hierarchical clustering...\n\n")
 
           ## Cluster
-          hc.list <- lapply(hclust_methods, function(method) {
-               hc <- stats::hclust(Dist, method)
+          hc <- lapply(hclust_methods, function(method) stats::hclust(Dist, method))
 
-               ## cutree and corresponding centers
-               cluster <- stats::cutree(hc, k)
+          RET <- lapply(k, function(k) {
+               lapply(hc, function(hc) {
+                    ## cutree and corresponding centers
+                    cluster <- stats::cutree(hc, k)
 
-               centers <- sapply(1:k, function(kcent) {
-                    id_k <- cluster == kcent
+                    centers <- sapply(1:k, function(kcent) {
+                         id_k <- cluster == kcent
 
-                    d_sub <- D[id_k, id_k, drop = FALSE]
+                         d_sub <- D[id_k, id_k, drop = FALSE]
 
-                    id_center <- which.min(apply(d_sub, 1, sum))
+                         id_center <- which.min(apply(d_sub, 1, sum))
 
-                    which(id_k)[id_center]
+                         which(id_k)[id_center]
+                    })
+
+                    ## Some additional cluster information (taken from flexclust)
+                    cldist <- as.matrix(D[,centers][cbind(1:length(data), cluster)])
+                    size <- as.vector(table(cluster))
+                    clusinfo <- data.frame(size = size,
+                                           av_dist = as.vector(tapply(cldist[,1], cluster, sum))/size)
+
+                    new("dtwclust", hc,
+                        call = MYCALL,
+                        control = control,
+                        family = new("dtwclustFamily",
+                                     dist = distfun,
+                                     preproc = preproc),
+                        distmat = D,
+
+                        type = type,
+                        method = hc$method,
+                        distance = distance,
+                        centroid = "NA",
+                        preproc = preproc_char,
+
+                        centers = data[centers],
+                        k = as.integer(k),
+                        cluster = cluster,
+
+                        clusinfo = clusinfo,
+                        cldist = cldist,
+                        iter = 1L,
+                        converged = TRUE,
+
+                        datalist = datalist)
                })
-
-               ## Some additional cluster information (taken from flexclust)
-               cldist <- as.matrix(D[,centers][cbind(1:length(data), cluster)])
-               size <- as.vector(table(cluster))
-               clusinfo <- data.frame(size = size,
-                                      av_dist = as.vector(tapply(cldist[,1], cluster, sum))/size)
-
-               new("dtwclust", hc,
-                   call = MYCALL,
-                   control = control,
-                   family = new("dtwclustFamily",
-                                dist = distfun,
-                                preproc = preproc),
-                   distmat = D,
-
-                   type = type,
-                   method = method,
-                   distance = distance,
-                   centroid = "NA",
-                   preproc = preproc_char,
-
-                   centers = data[centers],
-                   k = as.integer(k),
-                   cluster = cluster,
-
-                   clusinfo = clusinfo,
-                   cldist = cldist,
-                   iter = 1L,
-                   converged = TRUE,
-
-                   datalist = datalist)
           })
 
-          if (length(hc.list) == 1L)
-               RET <- hc.list[[1]]
-          else
-               RET <- hc.list
+          RET <- unlist(RET, recursive = FALSE)
+
+          if (length(RET) == 1L) RET <- RET[[1]]
 
      } else if (type == "tadpole") {
 
@@ -700,52 +712,54 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           if (control@trace)
                cat("\nEntering TADPole...\n")
 
-          R <- TADPole(data, window.size = control@window.size, k = k, dc = dc, error.check = FALSE)
-
-          if (control@trace) {
-               cat("\nTADPole completed, pruning percentage = ",
-                   formatC(100-R$distCalcPercentage, digits = 3, width = -1, format = "fg"),
-                   "%\n\n",
-                   sep = "")
-          }
-
-          ## ----------------------------------------------------------------------------------------------------------
-          ## Prepare results
-          ## ----------------------------------------------------------------------------------------------------------
-
           ## mainly for predict generic
-          distfun <- dtwdistfun("dtw_lb", control = control, distmat = NULL)
+          distfun <- ddist("dtw_lb", control = control, distmat = NULL)
 
-          ## Some additional cluster information (taken from flexclust)
-          subdistmat <- distfun(data, data[R$centers][R$cl], pairwise = TRUE)
-          cldist <- as.matrix(subdistmat)
-          size <- as.vector(table(R$cl))
-          clusinfo <- data.frame(size = size,
-                                 av_dist = as.vector(tapply(cldist[,1], R$cl, sum))/size)
+          RET <- foreach(k = k, .combine = list, .multicombine = TRUE, .packages = "dtwclust") %dopar% {
+               R <- TADPole(data, window.size = control@window.size, k = k, dc = dc, error.check = FALSE)
 
-          RET <- new("dtwclust",
-                     call = MYCALL,
-                     control = control,
-                     family = new("dtwclustFamily",
-                                  dist = distfun,
-                                  preproc = preproc),
-                     distmat = NULL,
+               if (control@trace) {
+                    cat("\nTADPole completed, pruning percentage = ",
+                        formatC(100-R$distCalcPercentage, digits = 3, width = -1, format = "fg"),
+                        "%\n\n",
+                        sep = "")
+               }
 
-                     type = type,
-                     distance = "DTW2_LB",
-                     centroid = "pam (TADPole)",
-                     preproc = preproc_char,
+               ## ----------------------------------------------------------------------------------------------------------
+               ## Prepare results
+               ## ----------------------------------------------------------------------------------------------------------
 
-                     centers = data[R$centers],
-                     k = as.integer(k),
-                     cluster = as.integer(R$cl),
+               ## Some additional cluster information (taken from flexclust)
+               subdistmat <- distfun(data, data[R$centers][R$cl], pairwise = TRUE)
+               cldist <- as.matrix(subdistmat)
+               size <- as.vector(table(R$cl))
+               clusinfo <- data.frame(size = size,
+                                      av_dist = as.vector(tapply(cldist[,1], R$cl, sum))/size)
 
-                     clusinfo = clusinfo,
-                     cldist = cldist,
-                     iter = 1L,
-                     converged = TRUE,
+               new("dtwclust",
+                   call = MYCALL,
+                   control = control,
+                   family = new("dtwclustFamily",
+                                dist = distfun,
+                                preproc = preproc),
+                   distmat = NULL,
 
-                     datalist = datalist)
+                   type = type,
+                   distance = "DTW2_LB",
+                   centroid = "pam (TADPole)",
+                   preproc = preproc_char,
+
+                   centers = data[R$centers],
+                   k = as.integer(k),
+                   cluster = as.integer(R$cl),
+
+                   clusinfo = clusinfo,
+                   cldist = cldist,
+                   iter = 1L,
+                   converged = TRUE,
+
+                   datalist = datalist)
+          }
      }
 
      toc <- proc.time() - tic
@@ -759,8 +773,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                ret
           })
 
-     if (type %in% c("partitional", "fuzzy") && control@nrep > 1L)
-          attr(RET, "rng") <- attr(kc.list, "rng")
+     if (type %in% c("partitional", "fuzzy") && (control@nrep > 1L || length(k) > 1L))
+          attr(RET, "rng") <- unlist(rng0, recursive = FALSE, use.names = FALSE)
 
      if (control@trace)
           cat("\tElapsed time is", toc["elapsed"], "seconds.\n\n")

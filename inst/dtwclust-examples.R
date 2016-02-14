@@ -87,7 +87,7 @@ if (!pr_DB$entry_exists("SquaredL2"))
                      loop = TRUE, type = "metric", distance = TRUE)
 
 # Fuzzy c-means
-fc <- dtwclust(CharTraj, type = "fuzzy", k = 20,
+fc <- dtwclust(CharTraj[1:25], type = "fuzzy", k = 5,
                preproc = acf_fun, distance = "SquaredL2",
                seed = 123, control = list(trace = TRUE))
 
@@ -117,11 +117,10 @@ fc <- dtwclust(CharTraj, type = "fuzzy", k = 20,
      invisible(clusterEvalQ(cl, library(dtwclust)))
      registerDoParallel(cl)
 
-     ctrl <- new("dtwclustControl")
-     ctrl@trace <- TRUE
+     ctrl <- new("dtwclustControl", trace = TRUE)
 
-     ## Use full DTW and PAM
-     kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, control = ctrl)
+     ## Use full DTW and PAM and test different number of clusters
+     kc.dtw <- dtwclust(CharTraj, k = 19:21, seed = 3251, control = ctrl)
 
      ## Use full DTW with DBA centroids
      kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, control = ctrl)

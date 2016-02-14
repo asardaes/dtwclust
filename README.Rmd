@@ -72,7 +72,7 @@ ctrl$pam.precompute <- TRUE
 ## =============================================================================================
 
 hc.sbd <- dtwclust(datalist, type = "hierarchical",
-                   k = 20, distance = "sbd",
+                   k = 19:21, distance = "sbd",
                    method = "all",
                    control = ctrl)
 

@@ -4,7 +4,7 @@ context("Test hierarchical")
 # all
 # =================================================================================================
 
-hc_all <- dtwclust(data, type = "hierarchical", k = 20,
+hc_all <- dtwclust(data, type = "hierarchical", k = 20:21,
                    distance = "sbd", method = "all",
                    control = ctrl)
 
@@ -17,7 +17,7 @@ test_that("hierarchical clustering gives the same result as reference",
 # non-symmetric distance
 # =================================================================================================
 
-hc_lbi <- dtwclust(data_list, type = "hierarchical", k = 20,
+hc_lbi <- dtwclust(data_list, type = "hierarchical", k = 19:20,
                    distance = "lbi", method = "all",
                    control = ctrl)
 

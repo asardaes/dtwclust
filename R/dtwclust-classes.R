@@ -92,7 +92,7 @@ setClass("dtwclustFamily",
 #' @section For both partitional and fuzzy:
 #'
 #' \itemize{
-#'   \item \code{iter.max} = \code{30L}
+#'   \item \code{iter.max} = \code{100L}
 #'   \item \code{nrep} = \code{1L}
 #' }
 #'
@@ -131,7 +131,7 @@ setClass("dtwclustControl",
                                fuzziness = 2,
                                delta = 1e-3,
                                pam.precompute = TRUE,
-                               iter.max = 30L,
+                               iter.max = 100L,
                                trace = FALSE,
                                nrep = 1L,
                                save.data = TRUE,

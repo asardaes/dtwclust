@@ -16,7 +16,7 @@ row-wise).}
 
 \item{k}{Numer of desired clusters in partitional methods. For hierarchical methods, the
 \code{\link[stats]{cutree}} function is called with this value of \code{k} and the result is returned in the
-\code{cluster} slot of the \code{dtwclust} object.}
+\code{cluster} slot of the \code{dtwclust} object. It may be a numeric vector with several cluster sizes.}
 
 \item{method}{One or more linkage methods to use in hierarchical procedures. See \code{\link[stats]{hclust}}.
 You can provide a character vector to compute different hierarchical cluster structures in one go, or
@@ -47,7 +47,7 @@ can also be provided here. See \code{\link{dtwclustControl}}.}
 \value{
 An object with formal class \code{\link{dtwclust-class}}.
 If \code{control@nrep > 1} and a partitional procedure is used, or \code{length(method)} \code{> 1} and hierarchical
-procedures are used, a list of objects is returned.
+procedures are used, or \code{length(k)} \code{> 1}, a list of objects is returned.
 }
 \description{
 This function uses the DTW distance and related techniques to cluster time series. It also supports custom
@@ -205,13 +205,16 @@ It is convenient to provide this function if you're planning on using the \code{
 \section{Repetitions}{
 
 
-Due to their stochastic nature, partitional/fuzzy clustering is usually repeated several times with different random
-seeds to allow for different starting points. This function can perform several repetitions by using the
-\code{doRNG} package.
+Due to their stochastic nature, partitional clustering is usually repeated several times with different random
+seeds to allow for different starting points. This function uses \code{\link[rngtools]{RNGseq}} to obtain different
+seed streams for each repetition, utilizing the \code{seed} parameter (if provided) to initialize it. If more than
+one repetition is made, the streams are returned in an attribute called \code{rng}.
 
-If more than one repetition is made, the \code{\link[doRNG]{\%dorng\%}} operator is used. If provided, the
-\code{seed} parameter is used to initialize it. The different seed sequences used are returned in the
-\code{rng} attribute in such cases.
+Technically, you can also perform random repetitions for fuzzy clustering, although it might be difficult evaluating
+the results, since they are usually evaluated relative to each other and not in an absolute way. Ideally, the groups
+wouldn't change too much once the algorithm converges.
+
+Multiple values of \code{k} can also be provided to get different partitions using any \code{type} of clustering.
 
 Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is precomputed,
 since said matrix is reused for every repetition, and can be comptued in parallel (see next section).
@@ -361,7 +364,7 @@ if (!pr_DB$entry_exists("SquaredL2"))
                      loop = TRUE, type = "metric", distance = TRUE)
 
 # Fuzzy c-means
-fc <- dtwclust(CharTraj, type = "fuzzy", k = 20,
+fc <- dtwclust(CharTraj[1:25], type = "fuzzy", k = 5,
                preproc = acf_fun, distance = "SquaredL2",
                seed = 123, control = list(trace = TRUE))
 
@@ -391,11 +394,10 @@ fc <- dtwclust(CharTraj, type = "fuzzy", k = 20,
      invisible(clusterEvalQ(cl, library(dtwclust)))
      registerDoParallel(cl)
 
-     ctrl <- new("dtwclustControl")
-     ctrl@trace <- TRUE
+     ctrl <- new("dtwclustControl", trace = TRUE)
 
-     ## Use full DTW and PAM
-     kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, control = ctrl)
+     ## Use full DTW and PAM and test different number of clusters
+     kc.dtw <- dtwclust(CharTraj, k = 19:21, seed = 3251, control = ctrl)
 
      ## Use full DTW with DBA centroids
      kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, control = ctrl)

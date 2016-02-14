@@ -46,13 +46,12 @@ ctrl$pam.precompute <- FALSE
 kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
                      centroid = "pam", seed = 3247, 
                      control = ctrl)
-#> Iteration 1: Changes / Distsum = 100 / 1639.01
-#> Iteration 2: Changes / Distsum = 13 / 1307.411
-#> Iteration 3: Changes / Distsum = 2 / 1290.775
-#> Iteration 4: Changes / Distsum = 2 / 1287.395
-#> Iteration 5: Changes / Distsum = 0 / 1287.395
+#> Iteration 1: Changes / Distsum = 100 / 1728.288
+#> Iteration 2: Changes / Distsum = 18 / 1445.394
+#> Iteration 3: Changes / Distsum = 6 / 1360.645
+#> Iteration 4: Changes / Distsum = 0 / 1353.769
 #> 
-#>  Elapsed time is 10.486 seconds.
+#>  Elapsed time is 9.401 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -68,7 +67,7 @@ ctrl$pam.precompute <- TRUE
 ## =============================================================================================
 
 hc.sbd <- dtwclust(datalist, type = "hierarchical",
-                   k = 20, distance = "sbd",
+                   k = 19:21, distance = "sbd",
                    method = "all",
                    control = ctrl)
 #> 
@@ -76,15 +75,19 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.659 seconds.
+#>  Elapsed time is 0.65 seconds.
 
 cat("Rand index for HC+SBD:\n")
 #> Rand index for HC+SBD:
 print(ri <- sapply(hc.sbd, randIndex, y = CharTrajLabels))
 #>       ARI       ARI       ARI       ARI       ARI       ARI       ARI 
-#> 0.7405012 0.7034438 0.3428238 0.5302644 0.5125830 0.5746408 0.4182468 
-#>       ARI 
-#> 0.4196458
+#> 0.7497894 0.6880051 0.3099641 0.5202854 0.4496453 0.5472890 0.3737120 
+#>       ARI       ARI       ARI       ARI       ARI       ARI       ARI 
+#> 0.4252906 0.7405012 0.7034438 0.3428238 0.5302644 0.5125830 0.5746408 
+#>       ARI       ARI       ARI       ARI       ARI       ARI       ARI 
+#> 0.4182468 0.4196458 0.7442112 0.7050215 0.3501627 0.5223116 0.5073598 
+#>       ARI       ARI       ARI 
+#> 0.5698466 0.4517139 0.4462202
 
 plot(hc.sbd[[which.max(ri)]])
 ```
@@ -104,7 +107,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 4.997 seconds.
+#>  Elapsed time is 4.588 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -119,8 +122,8 @@ plot(kc.tadp, clus = 1:4)
 
 require(doParallel)
 #> Loading required package: doParallel
+#> Loading required package: foreach
 #> Loading required package: iterators
-#> Loading required package: parallel
 cl <- makeCluster(detectCores(), "FORK")
 invisible(clusterEvalQ(cl, library(dtwclust)))
 registerDoParallel(cl)
@@ -143,21 +146,21 @@ kc.ndtw <- dtwclust(datalist, k = 20,
 
 sapply(kc.ndtw, randIndex, y = CharTrajLabels)
 #>       ARI       ARI       ARI       ARI       ARI       ARI       ARI 
-#> 0.5739085 0.5798654 0.4112420 0.5351719 0.6000514 0.4897014 0.5101194 
+#> 0.6441685 0.5214422 0.4195909 0.4817210 0.5203554 0.5008337 0.5191187 
 #>       ARI 
-#> 0.6715448
+#> 0.5285412
 
 ## DBA centroids
 kc <- dtwclust(datalist, k = 20,
                distance = "nDTW", centroid = "dba",
                seed = 9421, control = list(trace = TRUE))
 #> Series have different lengths. Please confirm that the provided distance function supports this.
-#> Iteration 1: Changes / Distsum = 100 / 5.162033
-#> Iteration 2: Changes / Distsum = 3 / 3.739439
-#> Iteration 3: Changes / Distsum = 2 / 3.687196
-#> Iteration 4: Changes / Distsum = 0 / 3.631237
+#> Iteration 1: Changes / Distsum = 100 / 5.057696
+#> Iteration 2: Changes / Distsum = 2 / 3.594286
+#> Iteration 3: Changes / Distsum = 1 / 3.550964
+#> Iteration 4: Changes / Distsum = 0 / 3.531171
 #> 
-#>  Elapsed time is 23.855 seconds.
+#>  Elapsed time is 20.315 seconds.
 
 # Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
@@ -202,17 +205,17 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.228   0.004   0.232 
+#>   0.235   0.000   0.235 
 #> 
 #> Head of fuzzy memberships:
 #> 
-#>       cluster_1  cluster_2  cluster_3  cluster_4  cluster_5
-#> A.V1 0.11196672 0.73358253 0.05360118 0.02056206 0.08028750
-#> A.V2 0.06055146 0.84230720 0.03417022 0.01086908 0.05210203
-#> A.V3 0.02365218 0.92695052 0.02184287 0.00493589 0.02261855
-#> A.V4 0.87736555 0.05551485 0.01392395 0.03236539 0.02083025
-#> A.V5 0.69435078 0.14645760 0.03514496 0.06713317 0.05691349
-#> B.V1 0.07075930 0.14825338 0.51859734 0.03272393 0.22966604
+#>       cluster_1   cluster_2  cluster_3  cluster_4 cluster_5
+#> A.V1 0.04466135 0.015281712 0.06143803 0.02852775 0.8500912
+#> A.V2 0.02639208 0.007424337 0.03720070 0.01505663 0.9139263
+#> A.V3 0.03875895 0.007279209 0.03754466 0.01380372 0.9026135
+#> A.V4 0.09141695 0.193520982 0.10580764 0.19876731 0.4104871
+#> A.V5 0.09256185 0.162738110 0.11853618 0.17478274 0.4513811
+#> B.V1 0.40060488 0.034563465 0.34977154 0.07884391 0.1362162
 ```
 
 Dependencies

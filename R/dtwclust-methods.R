@@ -54,6 +54,8 @@ setMethod("show", "dtwclust",
 
                if (object@type == "partitional")
                     cat("Using", object@centroid, "centroids\n")
+               if (object@type == "hierarchical")
+                    cat("Using", object@method, "linkage\n")
                if (object@preproc != "none")
                     cat("Using", object@preproc, "preprocessing\n")
 

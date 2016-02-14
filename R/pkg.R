@@ -33,6 +33,9 @@
 #' detect a whole time series as a single object and, instead, calculates distances between each observation
 #' of each time series.
 #'
+#' This package sets the random number generator to L'Ecuyer-CMRG when it is attached in an attempt to
+#' preserve reproducibility. You are free to change this afterwards if you wish. See \code{\link[base]{RNGkind}}.
+#'
 #' @docType package
 #' @name dtwclust-package
 #'
@@ -91,7 +94,6 @@
 #' @useDynLib dtwclust
 #'
 #' @import methods
-#' @import doRNG
 #' @import proxy
 #' @import foreach
 #' @import ggplot2
@@ -114,6 +116,8 @@
 #' @importFrom flexclust randIndex
 #' @importFrom flexclust clusterSim
 #' @importFrom graphics plot
+#' @importFrom rngtools RNGseq
+#' @importFrom rngtools setRNG
 #'
 NULL
 
@@ -154,6 +158,10 @@ NULL
                                  loop = FALSE, type = "metric", distance = TRUE,
                                  description = "DTW distance aided with Lemire's lower bound",
                                  PACKAGE = "dtwclust") #, PREFUN = proxy_prefun)
+
+     RNGkind("L'Ecuyer")
+
+     packageStartupMessage("Setting random number generator to L'Ecuyer-CMRG")
 }
 
 .onUnload <- function(libpath) {

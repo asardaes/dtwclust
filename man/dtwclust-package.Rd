@@ -38,6 +38,9 @@ arguments for data objects. Users should usually use the two-input \strong{list}
 just one dataset (i.e. \code{proxy::dist(x=data, y=data, ...)}), because otherwise it sometimes fails to
 detect a whole time series as a single object and, instead, calculates distances between each observation
 of each time series.
+
+This package sets the random number generator to L'Ecuyer-CMRG when it is attached in an attempt to
+preserve reproducibility. You are free to change this afterwards if you wish. See \code{\link[base]{RNGkind}}.
 }
 \author{
 Alexis Sarda-Espinosa

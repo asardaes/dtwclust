@@ -113,10 +113,10 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
           allcent <- function(x, cl_id, k, cent, cl_old, ...) {
                u <- cl_id ^ control@fuzziness
 
-               cent <- t(u) %*% x
+               cent <- t(u) %*% do.call(rbind, x)
                cent <- apply(cent, 2, "/", e2 = colSums(u))
 
-               cent
+               consistency_check(cent, "tsmat")
           }
      } else {
           allcent <- function(x, cl_id, k, cent, cl_old, ...) {

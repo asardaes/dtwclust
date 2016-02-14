@@ -1,13 +1,13 @@
 Package: dtwclust
 Type: Package
-Title: Time Series Clustering with Dynamic Time Warping Distance and Others
+Title: Time Series Clustering with Optimizations for the Dynamic Time Warping Distance
 Version: 2.1.0.9000
 Date: 2016-02-14
 Depends:
     proxy,
     dtw,
     ggplot2,
-    doRNG
+    rngtools
 Imports:
     stats,
     methods,
@@ -23,11 +23,13 @@ Suggests:
     testthat
 Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
-Description: Time series clustering using different techniques related to the
-    Dynamic Time Warping distance and its corresponding lower bounds. Additionally,
-    an implementation of k-Shape clustering is available, and the package can be
-    easily extended with custom distance measures and centroid definitions.
+Description: Time series clustering with optimized techniques related to the
+    Dynamic Time Warping distance and its corresponding lower bounds.
+    Implementations of k-Shape, TADPole and fuzzy clustering are available,
+    and the functionality can be easily extended with custom distance measures
+    and centroid definitions.
 URL: https://github.com/asardaes/dtwclust
+BugReports: https://github.com/asardaes/dtwclust/issues
 License: GPL-3
 LazyData: TRUE
 NeedsCompilation: yes
@@ -38,12 +40,12 @@ Collate:
     'SBD.R'
     'TADPole.R'
     'all_cent.R'
+    'ddist.R'
     'dtw-lb.R'
     'dtw2.R'
     'dtwclust-classes.R'
     'dtwclust-methods.R'
     'dtwclust.R'
-    'dtwdistfun.R'
     'kcca-list.R'
     'lb-improved.R'
     'lb-keogh.R'

@@ -80,7 +80,7 @@ in \code{\link{dtwclust}}.}
 
 
 \itemize{
-  \item \code{iter.max} = \code{30L}
+  \item \code{iter.max} = \code{100L}
   \item \code{nrep} = \code{1L}
 }
 }

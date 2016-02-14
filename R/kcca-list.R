@@ -14,8 +14,6 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
           names(x) <- paste0("series_", 1:N) # used by custom PAM centers
 
      if (fuzzy) {
-          x <- do.call(rbind, x)
-
           cluster <- matrix(0, N, k)
           cluster[ , -1] <- runif(N *(k - 1L)) / (k - 1)
           cluster[ , 1] <- 1 - apply(cluster[ , -1], 1, sum)
@@ -40,7 +38,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
           centers <- family@allcent(x, cluster, k, centers, clustold, ...)
 
           if (fuzzy) {
-               change <- abs(norm(cluster, "2") - norm(clustold, "2"))
+               change <- norm(abs(cluster - clustold))
 
                if (control@trace) {
                     cat("Iteration ", iter, ": ",
@@ -88,7 +86,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
 
      if (fuzzy) {
           fcluster <- cluster
-          rownames(fcluster) <- rownames(x)
+          rownames(fcluster) <- names(x)
           colnames(fcluster) <- paste0("cluster_", 1:k)
 
           cluster <- max.col(-distmat, "first")
@@ -108,7 +106,8 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
      attr(centers, "id_cent") <- NULL
      centers <- lapply(centers, "attr<-", which = "id_cent", value = NULL)
 
-     list(cluster = cluster,
+     list(k = k,
+          cluster = cluster,
           fcluster = fcluster,
           centers = centers,
           clusinfo = clusinfo,

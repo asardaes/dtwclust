@@ -2,7 +2,7 @@
 # Return a custom distance function that calls registered functions of proxy
 # ========================================================================================================
 
-dtwdistfun <- function(distance, control, distmat) {
+ddist <- function(distance, control, distmat) {
 
      needs_window <- c("dtw_lb", "lbk", "lbi")
 
@@ -16,7 +16,7 @@ dtwdistfun <- function(distance, control, distmat) {
 
      ## Closures will capture the values of the constants
 
-     dtwdist <- function(x, centers = NULL, ...) {
+     distfun <- function(x, centers = NULL, ...) {
 
           if (!is.null(distmat)) {
 
@@ -181,5 +181,5 @@ dtwdistfun <- function(distance, control, distmat) {
           d
      }
 
-     dtwdist
+     distfun
 }
