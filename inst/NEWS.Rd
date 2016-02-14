@@ -7,5 +7,6 @@
 \itemize{
      \item Added fuzzy c-means for clustering.
      \item Memory optimizations for DBA.
+     \item Support for several k values for multiple runs.
 }
 }

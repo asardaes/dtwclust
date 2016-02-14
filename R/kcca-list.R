@@ -15,7 +15,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
 
      if (fuzzy) {
           cluster <- matrix(0, N, k)
-          cluster[ , -1] <- runif(N *(k - 1L)) / (k - 1)
+          cluster[ , -1] <- stats::runif(N *(k - 1L)) / (k - 1)
           cluster[ , 1] <- 1 - apply(cluster[ , -1], 1, sum)
           centers <- family@allcent(x, cluster, k, ...)
 

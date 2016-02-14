@@ -113,11 +113,13 @@
 #' @importFrom stats nextn
 #' @importFrom stats update
 #' @importFrom stats predict
+#' @importFrom stats runif
 #' @importFrom flexclust randIndex
 #' @importFrom flexclust clusterSim
 #' @importFrom graphics plot
 #' @importFrom rngtools RNGseq
 #' @importFrom rngtools setRNG
+#' @importFrom utils head
 #'
 NULL
 

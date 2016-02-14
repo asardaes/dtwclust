@@ -3,6 +3,7 @@
 ## Version 2.1.0
 * Added fuzzy c-means clustering
 * Memory optimizations for DBA
+* Support for several k values for multiple runs
 
 ## Version 2.0.0
 * Major refactor.

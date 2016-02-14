@@ -10,6 +10,7 @@ Depends:
     rngtools
 Imports:
     stats,
+    utils,
     methods,
     flexclust,
     caTools,
