@@ -1,4 +1,6 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/dtwclust)](http://cran.r-project.org/web/packages/dtwclust) [![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](http://cran.rstudio.com/package=dtwclust)
+
 Time Series Clustering With Dynamic Time Warping Distance (DTW)
 ===============================================================
 
@@ -19,6 +21,7 @@ Implementations
 -   DTW Barycenter Averaging
 -   k-Shape clustering
 -   TADPole clustering
+-   Fuzzy c-means
 
 Examples
 --------
@@ -49,7 +52,7 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 4: Changes / Distsum = 2 / 1287.395
 #> Iteration 5: Changes / Distsum = 0 / 1287.395
 #> 
-#>  Elapsed time is 8.926 seconds.
+#>  Elapsed time is 10.486 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -73,7 +76,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.648 seconds.
+#>  Elapsed time is 0.659 seconds.
 
 cat("Rand index for HC+SBD:\n")
 #> Rand index for HC+SBD:
@@ -101,7 +104,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 4.47 seconds.
+#>  Elapsed time is 4.997 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -154,7 +157,7 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 3: Changes / Distsum = 2 / 3.687196
 #> Iteration 4: Changes / Distsum = 0 / 3.631237
 #> 
-#>  Elapsed time is 20.951 seconds.
+#>  Elapsed time is 23.855 seconds.
 
 # Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
@@ -185,18 +188,31 @@ if (!pr_DB$entry_exists("SquaredL2"))
                      loop = TRUE, type = "metric", distance = TRUE)
 
 # Fuzzy c-means
-fc <- dtwclust(CharTraj[1:25], type = "fuzzy", k = 5,
+fc <- dtwclust(datalist[1:25], type = "fuzzy", k = 5,
                preproc = acf_fun, distance = "SquaredL2",
                seed = 123)
 
-head(fc@fcluster)
-#>            [,1]       [,2]       [,3]       [,4]       [,5]
-#> [1,] 0.11196672 0.73358253 0.05360118 0.02056206 0.08028750
-#> [2,] 0.06055146 0.84230720 0.03417022 0.01086908 0.05210203
-#> [3,] 0.02365218 0.92695052 0.02184287 0.00493589 0.02261855
-#> [4,] 0.87736555 0.05551485 0.01392395 0.03236539 0.02083025
-#> [5,] 0.69435078 0.14645760 0.03514496 0.06713317 0.05691349
-#> [6,] 0.07075930 0.14825338 0.51859734 0.03272393 0.22966604
+fc
+#> dtwclust(data = datalist[1:25], type = "fuzzy", k = 5, distance = "SquaredL2", 
+#>     preproc = acf_fun, seed = 123)
+#> 
+#> fuzzy clustering with 5 clusters
+#> Using SquaredL2 distance
+#> Using acf_fun preprocessing
+#> 
+#> Time required for analysis:
+#>    user  system elapsed 
+#>   0.228   0.004   0.232 
+#> 
+#> Head of fuzzy memberships:
+#> 
+#>       cluster_1  cluster_2  cluster_3  cluster_4  cluster_5
+#> A.V1 0.11196672 0.73358253 0.05360118 0.02056206 0.08028750
+#> A.V2 0.06055146 0.84230720 0.03417022 0.01086908 0.05210203
+#> A.V3 0.02365218 0.92695052 0.02184287 0.00493589 0.02261855
+#> A.V4 0.87736555 0.05551485 0.01392395 0.03236539 0.02083025
+#> A.V5 0.69435078 0.14645760 0.03514496 0.06713317 0.05691349
+#> B.V1 0.07075930 0.14825338 0.51859734 0.03272393 0.22966604
 ```
 
 Dependencies

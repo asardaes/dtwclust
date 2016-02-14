@@ -109,7 +109,7 @@ If you know that the distance function is symmetric, consider setting the corres
 = \code{TRUE} or hierarchical procedures.
 
 In case of fuzzy clustering, the fuzzy c-means algorithm can use different distances, but please note that
-the definition of the objective function usually uses a squared distance, so the function chosen should already
+the definition of the objective function usually uses a squared distance, so the chosen function should already
 return the squared value. See the examples.
 }
 

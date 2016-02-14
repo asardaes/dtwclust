@@ -60,8 +60,14 @@ setMethod("show", "dtwclust",
                cat("\nTime required for analysis:\n")
                print(object@proctime)
 
-               cat("\nCluster sizes with average intra-cluster distance:\n\n")
-               print(object@clusinfo)
+               if (object@type == "fuzzy") {
+                    cat("\nHead of fuzzy memberships:\n\n")
+                    print(head(object@fcluster))
+
+               } else {
+                    cat("\nCluster sizes with average intra-cluster distance:\n\n")
+                    print(object@clusinfo)
+               }
           })
 
 # ========================================================================================================

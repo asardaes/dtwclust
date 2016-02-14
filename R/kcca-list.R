@@ -88,7 +88,11 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
 
      if (fuzzy) {
           fcluster <- cluster
+          rownames(fcluster) <- rownames(x)
+          colnames(fcluster) <- paste0("cluster_", 1:k)
+
           cluster <- max.col(-distmat, "first")
+
           centers <- consistency_check(centers, "tsmat")
 
      } else {

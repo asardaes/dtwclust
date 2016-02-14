@@ -146,7 +146,7 @@ setClass("dtwclustControl",
 #' This class contains \code{\link[stats]{hclust}} as superclass and supports all its methods. Plot is a
 #' special case (see \code{\link{dtwclust-methods}}).
 #'
-#' Please note that not all slots will contain valid information for all clustering types. In other cases,
+#' Please note that not all slots will contain valid information for all clustering types. In some cases,
 #' for example for fuzzy and hierarchical clustering, some results are computed assuming a hard partition
 #' is created based on the fuzzy membership or dendrogram tree.
 #'
@@ -156,8 +156,8 @@ setClass("dtwclustControl",
 #' @slot distmat If computed, the cross-distance matrix.
 #' @slot k Integer indicating the number of desired clusters.
 #' @slot cluster Integer vector indicating which cluster a series belongs to.
-#' @slot fcluster Numeric matrix that contains membership of fuzzy clusters. It has row for each
-#' series and one column for each cluster.
+#' @slot fcluster Numeric matrix that contains membership of fuzzy clusters. It has one row for each
+#' series and one column for each cluster. The rows must sum to 1.
 #' @slot iter The number of iterations used.
 #' @slot converged A logical indicating whether the function converged.
 #' @slot clusinfo A data frame with two columns: \code{size} indicates the number of series each cluster has, and
