@@ -487,6 +487,12 @@ setValidity("dtwclustControl",
                  if (object@nrep < 1L)
                       return("Number of repetitions must be at least one")
 
+                 if (object@fuzziness <= 1)
+                      return("Fuzziness exponent should be greater than one")
+
+                 if (object@delta < 0)
+                      return("Delta should be positive")
+
                  TRUE
             })
 

@@ -27,6 +27,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
      }
 
      iter <- 1L
+     objective_old <- Inf
 
      while (iter <= control@iter.max) {
           clustold <- cluster
@@ -38,19 +39,22 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
           centers <- family@allcent(x, cluster, k, centers, clustold, ...)
 
           if (fuzzy) {
-               change <- norm(abs(cluster - clustold))
+               # utils.R
+               objective <- fuzzy_objective(cluster, distmat = distmat, m = control@fuzziness)
 
                if (control@trace) {
                     cat("Iteration ", iter, ": ",
-                        "Change = ",
-                        formatC(change, width = 6, format = "f"),
+                        "Objective = ",
+                        formatC(objective, width = 6, format = "f"),
                         "\n", sep = "")
                }
 
-               if (change < control@delta) {
+               if (abs(objective - objective_old) < control@delta) {
                     if (control@trace) cat("\n")
                     break
                }
+
+               objective_old <- objective
 
           } else {
                changes <- sum(cluster != clustold)

@@ -108,9 +108,9 @@ If you know that the distance function is symmetric, consider setting the corres
 \code{\link{dtwclustControl}} to \code{TRUE} to save some time in case of \code{pam.precompute}
 = \code{TRUE} or hierarchical procedures.
 
-In case of fuzzy clustering, the fuzzy c-means algorithm can use different distances, but please note that
-the definition of the objective function usually uses a squared distance, so the chosen function should already
-return the squared value. See the examples.
+In case of fuzzy clustering, the fuzzy c-means algorithm can use different distances, although it
+usually uses the Euclidean distance. If you cluster time series directly, they must have the same
+length. See the examples.
 }
 
 \section{Centroid}{
@@ -355,17 +355,9 @@ acf_fun <- function(dat) {
      lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
 }
 
-# Fuzzy distance to be used (squared Euclidean)
-fdist <- function(x, y, ...) { sum((x - y)^2) }
-
-# Register it with proxy
-if (!pr_DB$entry_exists("SquaredL2"))
-     pr_DB$set_entry(FUN = fdist, names = "SquaredL2",
-                     loop = TRUE, type = "metric", distance = TRUE)
-
 # Fuzzy c-means
 fc <- dtwclust(CharTraj[1:25], type = "fuzzy", k = 5,
-               preproc = acf_fun, distance = "SquaredL2",
+               preproc = acf_fun, distance = "L2",
                seed = 123, control = list(trace = TRUE))
 
 # Fuzzy memberships

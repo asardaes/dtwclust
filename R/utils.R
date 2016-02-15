@@ -142,11 +142,19 @@ consistency_check <- function(obj, case, ...) {
 # ========================================================================================================
 
 fcm_cluster <- function(distmat, m) {
-     cprime <- apply(distmat, 1, function(dist_row) { sum( (1 / dist_row) ^ (1 / (m - 1)) ) })
+     cprime <- apply(distmat, 1, function(dist_row) { sum( (1 / dist_row) ^ (2 / (m - 1)) ) })
 
-     u <- 1 / apply(distmat, 2, function(dist_col) { cprime * dist_col ^ (1 / (m - 1)) })
+     u <- 1 / apply(distmat, 2, function(dist_col) { cprime * dist_col ^ (2 / (m - 1)) })
 
      u
+}
+
+# ========================================================================================================
+# Fuzzy objective function
+# ========================================================================================================
+
+fuzzy_objective <- function(u, distmat, m) {
+     sum(u^m * distmat^2)
 }
 
 # ========================================================================================================

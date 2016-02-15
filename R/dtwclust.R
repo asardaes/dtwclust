@@ -56,9 +56,9 @@
 #' \code{\link{dtwclustControl}} to \code{TRUE} to save some time in case of \code{pam.precompute}
 #' = \code{TRUE} or hierarchical procedures.
 #'
-#' In case of fuzzy clustering, the fuzzy c-means algorithm can use different distances, but please note that
-#' the definition of the objective function usually uses a squared distance, so the chosen function should already
-#' return the squared value. See the examples.
+#' In case of fuzzy clustering, the fuzzy c-means algorithm can use different distances, although it
+#' usually uses the Euclidean distance. If you cluster time series directly, they must have the same
+#' length. See the examples.
 #'
 #' @section Centroid:
 #'
