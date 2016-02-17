@@ -46,12 +46,13 @@ ctrl$pam.precompute <- FALSE
 kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
                      centroid = "pam", seed = 3247, 
                      control = ctrl)
-#> Iteration 1: Changes / Distsum = 100 / 1728.288
-#> Iteration 2: Changes / Distsum = 18 / 1445.394
-#> Iteration 3: Changes / Distsum = 6 / 1360.645
-#> Iteration 4: Changes / Distsum = 0 / 1353.769
+#> Iteration 1: Changes / Distsum = 100 / 1747.417
+#> Iteration 2: Changes / Distsum = 18 / 1417.733
+#> Iteration 3: Changes / Distsum = 13 / 1349.521
+#> Iteration 4: Changes / Distsum = 2 / 1311.201
+#> Iteration 5: Changes / Distsum = 0 / 1311.201
 #> 
-#>  Elapsed time is 9.401 seconds.
+#>  Elapsed time is 10.332 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -75,7 +76,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.65 seconds.
+#>  Elapsed time is 0.631 seconds.
 
 cat("Rand index for HC+SBD:\n")
 #> Rand index for HC+SBD:
@@ -107,7 +108,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 4.588 seconds.
+#>  Elapsed time is 4.45 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -160,7 +161,7 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 3: Changes / Distsum = 1 / 3.550964
 #> Iteration 4: Changes / Distsum = 0 / 3.531171
 #> 
-#>  Elapsed time is 20.315 seconds.
+#>  Elapsed time is 19.163 seconds.
 
 # Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
@@ -182,40 +183,32 @@ acf_fun <- function(dat) {
      lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
 }
 
-# Fuzzy distance to be used (squared Euclidean)
-fdist <- function(x, y, ...) { sum((x - y)^2) }
-
-# Register it with proxy
-if (!pr_DB$entry_exists("SquaredL2"))
-     pr_DB$set_entry(FUN = fdist, names = "SquaredL2",
-                     loop = TRUE, type = "metric", distance = TRUE)
-
 # Fuzzy c-means
 fc <- dtwclust(datalist[1:25], type = "fuzzy", k = 5,
-               preproc = acf_fun, distance = "SquaredL2",
+               preproc = acf_fun, distance = "L2",
                seed = 123)
 
 fc
-#> dtwclust(data = datalist[1:25], type = "fuzzy", k = 5, distance = "SquaredL2", 
+#> dtwclust(data = datalist[1:25], type = "fuzzy", k = 5, distance = "L2", 
 #>     preproc = acf_fun, seed = 123)
 #> 
 #> fuzzy clustering with 5 clusters
-#> Using SquaredL2 distance
+#> Using L2 distance
 #> Using acf_fun preprocessing
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.235   0.000   0.235 
+#>    0.14    0.00    0.14 
 #> 
 #> Head of fuzzy memberships:
 #> 
 #>       cluster_1   cluster_2  cluster_3  cluster_4 cluster_5
-#> A.V1 0.04466135 0.015281712 0.06143803 0.02852775 0.8500912
-#> A.V2 0.02639208 0.007424337 0.03720070 0.01505663 0.9139263
-#> A.V3 0.03875895 0.007279209 0.03754466 0.01380372 0.9026135
-#> A.V4 0.09141695 0.193520982 0.10580764 0.19876731 0.4104871
-#> A.V5 0.09256185 0.162738110 0.11853618 0.17478274 0.4513811
-#> B.V1 0.40060488 0.034563465 0.34977154 0.07884391 0.1362162
+#> A.V1 0.04550608 0.015278671 0.06017278 0.02854909 0.8504934
+#> A.V2 0.02649930 0.007304681 0.03576385 0.01482575 0.9156064
+#> A.V3 0.03891669 0.007107856 0.03584082 0.01348798 0.9046467
+#> A.V4 0.09316283 0.194096301 0.10463724 0.20029868 0.4078050
+#> A.V5 0.09423895 0.163296699 0.11727901 0.17605511 0.4491302
+#> B.V1 0.39131228 0.034768969 0.35717141 0.07915848 0.1375889
 ```
 
 Dependencies
@@ -227,4 +220,4 @@ Dependencies
 -   The core DTW calculations are done by the `dtw` package.
 -   Plotting is done with the `ggplot2` package.
 -   Parallel computation depends on the `foreach` package.
--   Random streams for repetitions of partitional procedures use the `doRNG` package.
+-   Random streams for repetitions of partitional procedures use the `rngtools` package.

@@ -671,6 +671,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                         centers = data[centers],
                         k = as.integer(k),
                         cluster = cluster,
+                        fcluster = matrix(NA_real_),
 
                         clusinfo = clusinfo,
                         cldist = cldist,
@@ -752,6 +753,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                    centers = data[R$centers],
                    k = as.integer(k),
                    cluster = as.integer(R$cl),
+                   fcluster = matrix(NA_real_),
 
                    clusinfo = clusinfo,
                    cldist = cldist,
