@@ -103,4 +103,4 @@ test_that("custom centroid function gives the same result as reference",
 
 test_that("invalid centroid for series with different lengths gives error",
           expect_error(dtwclust(data, k = 20, distance = "sbd", centroid = "mean"),
-                       "different lengths"))
+                       "different length"))

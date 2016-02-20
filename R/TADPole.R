@@ -17,7 +17,7 @@
 #' the clustering procedure. The series that lie in dense areas (i.e. that have lots of neighbors) are taken
 #' as cluster centers.
 #'
-#' The algorithm relies on the DTW bounds, which are only defined for time series of equal lengths.
+#' The algorithm relies on the DTW bounds, which are only defined for time series of equal length.
 #'
 #' The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 #' that represents the distance between the point considered and one of the edges of the window. Therefore,

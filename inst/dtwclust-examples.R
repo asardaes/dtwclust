@@ -1,5 +1,14 @@
+## NOTE: All examples should work, some are simply set to not run automatically
+
 # Load data
 data(uciCT)
+
+# Controls
+ctrl <- new("dtwclustControl", trace = TRUE)
+
+# ===============================================================================================
+# Simple partitional clustering with Euclidean distance and PAM centroids
+# ===============================================================================================
 
 # Reinterpolate to same length and coerce as matrix
 data <- t(sapply(CharTraj, reinterpolate, newLength = 180))
@@ -8,29 +17,27 @@ data <- t(sapply(CharTraj, reinterpolate, newLength = 180))
 data <- data[1:20, ]
 labels <- CharTrajLabels[1:20]
 
-# Controls
-ctrl <- list(trace = TRUE, window.size = 20L)
-
-# ===============================================================================================
-# Simple partitional clustering with L2 distance and PAM
-# ===============================================================================================
-
-kc.l2 <- dtwclust(data, k = 4, distance = "L2", centroid = "pam",
+# Testing several values of k
+kc.l2 <- dtwclust(data, k = 2:4,
+                  distance = "L2", centroid = "pam",
                   seed = 3247, control = ctrl)
-cat("Rand index for L2+PAM:", randIndex(kc.l2, labels), "\n\n")
+
+cat("Rand indices for L2+PAM:\n")
+sapply(kc.l2, randIndex, y = labels)
+
+plot(kc.l2[[3L]])
 
 # ===============================================================================================
-# TADPole clustering
+# Hierarchical clustering with Euclidean distance
 # ===============================================================================================
 
-kc.tadp <- dtwclust(data, type = "tadpole", k = 4,
-                    dc = 1.5, control = ctrl)
-cat("Rand index for TADPole:", randIndex(kc.tadp, labels), "\n\n")
-plot(kc.tadp)
+# Re-use the distance matrix from the previous example
+hc.l2 <- update(kc.l2[[3L]], k = 4L,
+                type = "hierarchical", method = "all",
+                distmat = kc.l2[[3L]]@distmat)
 
-# Modify plot
-plot(kc.tadp, clus = 3:4, labs.arg = list(title = "TADPole, clusters 3 and 4",
-                                          x = "time", y = "series"))
+cat("Rand indices for L2+HC:\n")
+sapply(hc.l2, randIndex, y = labels)
 
 # ===============================================================================================
 # Registering a custom distance with the 'proxy' package and using it
@@ -49,29 +56,26 @@ if (!pr_DB$entry_exists("nDTW"))
                             description = "Normalized DTW with L1 norm")
 
 # Subset of (original) data for speed
-kc.ndtw <- dtwclust(CharTraj[31:40], distance = "nDTW",
+kc.ndtw <- dtwclust(CharTraj[31:40], k = 2L,
+                    distance = "nDTW",
                     control = ctrl, seed = 8319)
-
-cat("Rand index for nDTW (subset):",
-    randIndex(kc.ndtw, CharTrajLabels[31:40]), "\n\n")
 
 plot(kc.ndtw)
 
 # ===============================================================================================
-# Hierarchical clustering based on shabe-based distance (different lengths)
+# Hierarchical clustering based on shabe-based distance
 # ===============================================================================================
+
+# Original data
 hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
-                   method = c("average", "single"),
-                   k = 20, distance = "sbd", control = ctrl)
-plot(hc.sbd[[1]])
+                   k = 20, method = "all",
+                   distance = "sbd", control = ctrl)
 
-# Update parameters and re-use distmat
-hc.sbd2 <- update(hc.sbd[[1]], method = "complete", distmat = hc.sbd[[1]]@distmat)
-plot(hc.sbd2, type = "series")
+plot(hc.sbd[[ which.max(sapply(hc.sbd, randIndex, y = CharTrajLabels)) ]])
 
-# ==========================================================================================
-# Autocorrelation based fuzzy clustering (see D'Urso and Maharaj 2009)
-# ==========================================================================================
+# ===============================================================================================
+# Autocorrelation-based fuzzy clustering (see D'Urso and Maharaj 2009)
+# ===============================================================================================
 
 # Calculate autocorrelation up to 50th lag, considering a list of time series as input
 acf_fun <- function(dat) {
@@ -81,58 +85,68 @@ acf_fun <- function(dat) {
 # Fuzzy c-means
 fc <- dtwclust(CharTraj[1:25], type = "fuzzy", k = 5,
                preproc = acf_fun, distance = "L2",
-               seed = 123, control = list(trace = TRUE))
+               seed = 123, control = ctrl)
 
 # Fuzzy memberships
-#View(fc@fcluster)
+print(fc@fcluster)
 
 \dontrun{
-     # ==========================================================================================
-     # Saving and modifying the ggplot object with custom time
-     # ==========================================================================================
+# ===============================================================================================
+# TADPole clustering
+# ===============================================================================================
 
-     t <- seq(Sys.Date(), len = 180, by = "day")
-     gkc <- plot(kc.l2, time = t, plot = FALSE)
+ctrl@window.size <- 20L
 
-     require(scales)
-     gkc + scale_x_date(labels = date_format("%b-%Y"),
-                        breaks = date_breaks("2 months"))
+kc.tadp <- dtwclust(data, type = "tadpole", k = 4,
+                    dc = 1.5, control = ctrl)
 
-     # ==========================================================================================
-     # Using parallel computation to optimize several random repetitions
-     # and distance matrix calculation
-     # ==========================================================================================
-     require(doParallel)
+cat("Rand index for TADPole:", randIndex(kc.tadp, labels), "\n\n")
 
-     # Create parallel workers
-     cl <- makeCluster(detectCores())
-     invisible(clusterEvalQ(cl, library(dtwclust)))
-     registerDoParallel(cl)
+# Modify plot
+plot(kc.tadp, clus = 3:4,
+     labs.arg = list(title = "TADPole, clusters 3 and 4",
+                     x = "time", y = "series"))
 
-     ctrl <- new("dtwclustControl", trace = TRUE)
+# ===============================================================================================
+# Saving and modifying the ggplot object with custom time labels
+# ===============================================================================================
 
-     ## Use full DTW and PAM and test different number of clusters
-     kc.dtw <- dtwclust(CharTraj, k = 19:21, seed = 3251, control = ctrl)
+t <- seq(Sys.Date(), len = 180, by = "day")
+gkc <- plot(kc.tadp, time = t, plot = FALSE)
 
-     ## Use full DTW with DBA centroids
-     kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, control = ctrl)
+require(scales)
+gkc + scale_x_date(labels = date_format("%b-%Y"),
+                   breaks = date_breaks("2 months"))
 
-     ## Use constrained DTW with original series of different lengths
-     ctrl@window.size <- 20L
-     kc.cdtw <- dtwclust(CharTraj, k = 20, seed = 3251, control = ctrl)
+# ===============================================================================================
+# Using parallel computation to optimize several random repetitions
+# and distance matrix calculation
+# ===============================================================================================
+require(doParallel)
 
-     ## This uses the "nDTW" function registered in another example above
-     # For reference, this took around 2.25 minutes with 8 cores (all 8 repetitions).
-     kc.ndtw.list <- dtwclust(CharTraj, k = 20, distance = "nDTW", centroid = "dba",
-                              preproc = zscore, seed = 8319,
-                              control = list(window.size = 10L, nrep = 8L))
+# Create parallel workers
+cl <- makeCluster(detectCores())
+invisible(clusterEvalQ(cl, library(dtwclust)))
+registerDoParallel(cl)
 
-     # Stop parallel workers
-     stopCluster(cl)
+## Use constrained DTW and PAM (~20 seconds)
+kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, control = ctrl)
 
-     # Return to sequential computations
-     registerDoSEQ()
+## Use constrained DTW with DBA centroids (~20 seconds)
+kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, control = ctrl)
 
-     # See Rand Index for each repetition
-     sapply(kc.ndtw.list, randIndex, y = CharTrajLabels)
+## This uses the "nDTW" function registered in another example above
+# For reference, this took around 2.25 minutes with 8 cores (all 8 repetitions).
+kc.ndtw.reps <- dtwclust(CharTraj, k = 20, distance = "nDTW", centroid = "dba",
+                         preproc = zscore, seed = 8319,
+                         control = list(window.size = 10L, nrep = 8L))
+
+# See Rand index for each repetition
+sapply(kc.ndtw.reps, randIndex, y = CharTrajLabels)
+
+# Stop parallel workers
+stopCluster(cl)
+
+# Return to sequential computations
+registerDoSEQ()
 }

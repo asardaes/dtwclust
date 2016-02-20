@@ -118,4 +118,4 @@ test_that("unregistered distance gives error",
 test_that("invalid distance for series with different lengths gives error",
           expect_error(dtwclust(data, k = 20, distance = "lbi",
                                 control = list(window.size = 18L)),
-                       "different lengths"))
+                       "different length"))

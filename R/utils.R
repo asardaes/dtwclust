@@ -111,9 +111,9 @@ consistency_check <- function(obj, case, ...) {
 
                if (Lengths) {
                     if ((obj %in% included) && !(obj %in% valid))
-                         stop("Only the following distances are supported for series with different lengths:\n\tdtw\tdtw2\tsbd")
+                         stop("Only the following distances are supported for series with different length:\n\tdtw\tdtw2\tsbd")
                     else if(!(obj %in% included) && trace)
-                         message("Series have different lengths. Please confirm that the provided distance function supports this.")
+                         message("Series have different length. Please confirm that the provided distance function supports this.")
                }
 
                TRUE # valid registered distance
@@ -126,9 +126,9 @@ consistency_check <- function(obj, case, ...) {
           valid <- c("dba", "pam", "shape")
 
           if (is.character(obj) && (obj %in% included) && !(obj %in% valid))
-               stop("Only the following centroids are supported for series with different lengths:\n\tdba\tpam\tshape")
+               stop("Only the following centroids are supported for series with different length:\n\tdba\tpam\tshape")
           else if(is.character(obj) && !(obj %in% included) && list(...)$trace)
-               message("Series have different lengths. Please confirm that the provided centroid function supports this.")
+               message("Series have different length. Please confirm that the provided centroid function supports this.")
 
      } else {
           stop("Possibly a typo in function consistency_check")
