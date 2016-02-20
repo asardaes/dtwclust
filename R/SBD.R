@@ -3,7 +3,7 @@
 #' Distance based on coefficient-normalized cross-correlation as proposed by Papparizos and Gravano, 2015,
 #' for the k-Shape clustering algorithm.
 #'
-#' This function works best if the series are \emph{z-normalized}. If not, at least they should have
+#' This distance works best if the series are \emph{z-normalized}. If not, at least they should have
 #' corresponding amplitudes, since the values of the signals \strong{do} affect the outcome.
 #'
 #' If \code{x} and \code{y} do \strong{not} have the same length, it would be best if the longer sequence is
@@ -43,7 +43,7 @@
 #' http://doi.org/10.1145/2723372.2737793}.
 #'
 #' @param x,y A time series.
-#' @param znorm Should each series be z-normalized before calculating the distance?
+#' @param znorm Logical. Should each series be z-normalized before calculating the distance?
 #'
 #' @return A list with: \itemize{
 #'   \item \code{dist}: The shape-based distance between \code{x} and \code{y}.
@@ -80,9 +80,7 @@ SBD <- function(x, y, znorm = FALSE) {
           CCseq <- NCCc(x,y)
 
      m <- max(CCseq)
-     d <- which.max(CCseq)
-
-     shift <- d - max(nx, ny)
+     shift <- which.max(CCseq) - max(nx, ny)
 
      if (is.null(flip)) {
           if (shift < 0)
@@ -105,10 +103,7 @@ SBD <- function(x, y, znorm = FALSE) {
      else
           yshift <- yshift[1:nx]
 
-     dist <- 1 - m
-
-     list(dist = dist,
-          yshift = yshift)
+     list(dist = 1 - m, yshift = yshift)
 }
 
 # ========================================================================================================
@@ -123,10 +118,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, force.pair
           consistency_check(x, "vltslist")
 
      if (is.null(y)) {
-          if(znorm) {
-               x <- lapply(x, function(xx) as.numeric(zscore(xx)))
-          }
-
+          if(znorm) x <- zscore(x)
           y <- x
 
      } else {
@@ -136,23 +128,20 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, force.pair
                consistency_check(y, "vltslist")
 
           if(znorm) {
-               x <- lapply(x, function(xx) as.numeric(zscore(xx)))
-               y <- lapply(y, function(yy) as.numeric(zscore(yy)))
+               x <- zscore(x)
+               y <- zscore(y)
           }
      }
 
      ## Precompute FFTs, padding with zeros as necessary, which will be compensated later
-     L <- max(sapply(x, length)) + max(sapply(y, length)) - 1
-     fftlen <- stats::nextn(L, 2)
+     L <- max(lengths(x)) + max(lengths(y)) - 1L
+     fftlen <- stats::nextn(L, 2L)
 
-     fftx <- lapply(x, function(u) {
-          stats::fft(c(u, rep(0L, fftlen-length(u))))
-     })
+     fftx <- lapply(x, function(u) { stats::fft(c(u, rep(0, fftlen-length(u)))) })
 
-     ffty <- lapply(y, function(v) {
-          stats::fft(c(v, rep(0L, fftlen-length(v))))
-     })
+     ffty <- lapply(y, function(v) { stats::fft(c(v, rep(0, fftlen-length(v)))) })
 
+     ## Register doSEQ if necessary
      check_parallel()
 
      x <- split_parallel(x)
@@ -172,11 +161,13 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, force.pair
                             mapply(y, ffty, x, fftx,
                                    FUN = function(y, ffty, x, fftx) {
 
+                                        ## Manually normalize by length
                                         CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
 
                                         ## Truncate to correct length
                                         CCseq <- c(CCseq[(length(ffty)-length(y)+2):length(CCseq)],
                                                    CCseq[1:length(x)])
+
                                         CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
 
                                         dd <- 1 - max(CCseq)
@@ -198,11 +189,13 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, force.pair
                                         d <- mapply(Y, FFTY, MoreArgs = list(x = x, fftx = fftx),
                                                     FUN = function(y, ffty, x, fftx) {
 
+                                                         ## Manually normalize by length
                                                          CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
 
                                                          ## Truncate to correct length
                                                          CCseq <- c(CCseq[(length(ffty)-length(y)+2):length(CCseq)],
                                                                     CCseq[1:length(x)])
+
                                                          CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
 
                                                          dd <- 1 - max(CCseq)

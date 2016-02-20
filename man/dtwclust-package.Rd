@@ -22,7 +22,7 @@ series. Over the years, several variations have appeared in order to make the pr
 more efficient. Please refer to the included references for more information, especially Giorgino
 (2009), which is a good practical introduction.
 
-Most optimizations require equal dimensionality, which means time series should have equal lengths.
+Most optimizations require equal dimensionality, which means time series should have equal length.
 DTW itself does not require this, but it is relatively slow to compute. Other distance definitions
 may be used, or series could be reinterpolated to a matching length (Ratanamahatana and Keogh,
 2004).

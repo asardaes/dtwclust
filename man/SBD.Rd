@@ -9,7 +9,7 @@ SBD(x, y, znorm = FALSE)
 \arguments{
 \item{x, y}{A time series.}
 
-\item{znorm}{Should each series be z-normalized before calculating the distance?}
+\item{znorm}{Logical. Should each series be z-normalized before calculating the distance?}
 }
 \value{
 A list with: \itemize{
@@ -22,7 +22,7 @@ Distance based on coefficient-normalized cross-correlation as proposed by Pappar
 for the k-Shape clustering algorithm.
 }
 \details{
-This function works best if the series are \emph{z-normalized}. If not, at least they should have
+This distance works best if the series are \emph{z-normalized}. If not, at least they should have
 corresponding amplitudes, since the values of the signals \strong{do} affect the outcome.
 
 If \code{x} and \code{y} do \strong{not} have the same length, it would be best if the longer sequence is
