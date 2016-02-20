@@ -16,8 +16,8 @@
 \S4method{predict}{dtwclust}(object, newdata = NULL, ...)
 
 \S4method{plot}{dtwclust,missing}(x, y, ..., clus = seq_len(x@k),
-  labs.arg = NULL, data = NULL, time = NULL, plot = TRUE,
-  type = "dendrogram")
+  labs.arg = NULL, show.centers = TRUE, data = NULL, time = NULL,
+  plot = TRUE, type = "dendrogram")
 }
 \arguments{
 \item{object, x}{An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.}
@@ -36,6 +36,8 @@ a new \code{dtwclust} object. Otherwise, it returns the unevaluated call.}
 
 \item{labs.arg}{Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
 information}
+
+\item{show.centers}{Logical flag. Should cluster centers be included in the plots?}
 
 \item{data}{The data in the same format as it was provided to \code{\link{dtwclust}}.}
 

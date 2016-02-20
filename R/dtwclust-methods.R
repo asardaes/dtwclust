@@ -94,7 +94,7 @@ setMethod("update", "dtwclust",
 
                args <- as.pairlist(list(...))
 
-               if (length(args) == 0) {
+               if (length(args) == 0L) {
                     message("Nothing to be updated")
 
                     if (evaluate)
@@ -107,7 +107,7 @@ setMethod("update", "dtwclust",
                new_call[names(args)] <- args
 
                if (evaluate)
-                    ret <- eval.parent(new_call, n = 2)
+                    ret <- eval.parent(new_call, n = 2L)
                else
                     ret <- new_call
 
@@ -173,6 +173,7 @@ setMethod("predict", "dtwclust",
 #' @param clus A numeric vector indicating which clusters to plot.
 #' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
 #' information
+#' @param show.centers Logical flag. Should cluster centers be included in the plots?
 #' @param data The data in the same format as it was provided to \code{\link{dtwclust}}.
 #' @param time Optional values for the time axis. If series have different lengths, provide the time values of
 #' the longest series.
@@ -189,7 +190,8 @@ setMethod("predict", "dtwclust",
 #'
 setMethod("plot", signature(x="dtwclust", y="missing"),
           function(x, y, ..., clus = seq_len(x@k),
-                   labs.arg = NULL, data = NULL, time = NULL,
+                   labs.arg = NULL, show.centers = TRUE,
+                   data = NULL, time = NULL,
                    plot = TRUE, type = "dendrogram") {
 
                type <- match.arg(type, c("dendrogram", "series"))
@@ -197,17 +199,17 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                ## plot dendrogram?
                if(x@type == "hierarchical" && type == "dendrogram") {
                     x <- S3Part(x, strictS3 = TRUE)
-                    if(plot) plot(x, ...)
+                    if (plot) plot(x, ...)
                     return(invisible(NULL))
                }
 
-               ## Obtain data, the priority is: provided data > included data matrix > included data list
+               ## Obtain data, the priority is: provided data > included data list
                if (!is.null(data)) {
                     data <- consistency_check(data, "tsmat")
 
-                    lengths <- sapply(data, length)
-                    L <- max(lengths)
-                    trail <- L - lengths
+                    Lengths <- lengths(data)
+                    L <- max(Lengths)
+                    trail <- L - Lengths
 
                     df <- mapply(data, trail, SIMPLIFY = FALSE,
                                  FUN = function(series, trail) {
@@ -215,9 +217,9 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                                  })
 
                } else if (length(x@datalist) > 0){
-                    lengths <- sapply(x@datalist, length)
-                    L <- max(lengths)
-                    trail <- L - lengths
+                    Lengths <- lengths(x@datalist)
+                    L <- max(Lengths)
+                    trail <- L - Lengths
 
                     df <- mapply(x@datalist, trail, SIMPLIFY = FALSE,
                                  FUN = function(series, trail) {
@@ -229,8 +231,8 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                }
 
                ## Obtain centers (which can be matrix or lists of series)
-               lengths <- sapply(x@centers, length)
-               trail <- L - lengths
+               Lengths <- lengths(x@centers)
+               trail <- L - Lengths
 
                cen <- mapply(x@centers, trail, SIMPLIFY = FALSE,
                              FUN = function(series, trail) {
@@ -264,51 +266,51 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
 
                cl <- rep(x@cluster, each = L)
                color <- lapply(tabulate(x@cluster), function(i) {
-                    rep(1:i, each = L)
+                    rep(1L:i, each = L)
                })
                color <- factor(unlist(color))
 
                dfm <- cbind(dfm, cl, color)
 
-               ## tarnsform centers
+               ## transform centers
 
                cen <- cbind(t, cen)
                cenm <- reshape2::melt(cen, id.vars = "t")
-               cl <- rep(1:x@k, each = L)
+               cl <- rep(1L:x@k, each = L)
                cenm <- cbind(cenm, cl)
 
                ## create gg object
 
-               if (length(list(...)) == 0) {
-                    g <- ggplot(dfm[dfm$cl %in% clus, ], aes_string(x="t", y="value", group="variable")) +
-                         geom_line(data = cenm[cenm$cl %in% clus, ], linetype = "dashed", size = 1.5,
-                                   colour = "black", alpha = 0.5) +
-                         geom_line(aes(colour = color)) +
-                         facet_wrap(~cl, scales = "free_y") +
-                         guides(colour=FALSE) +
-                         theme_bw()
+               gg <- ggplot(dfm[dfm$cl %in% clus, ], aes_string(x = "t", y = "value", group = "variable"))
 
-               } else {
-                    g <- ggplot(dfm[dfm$cl %in% clus, ], aes_string(x="t", y="value", group="variable")) +
-                         geom_line(data = cenm[cenm$cl %in% clus, ], ...) +
-                         geom_line(aes(colour = color)) +
-                         facet_wrap(~cl, scales = "free_y") +
-                         guides(colour=FALSE) +
-                         theme_bw()
-
+               if (show.centers) {
+                    if(length(list(...)) == 0L)
+                         gg <- gg + geom_line(data = cenm[cenm$cl %in% clus, ],
+                                              linetype = "dashed",
+                                              size = 1.5,
+                                              colour = "black",
+                                              alpha = 0.5)
+                    else
+                         gg <- gg + geom_line(data = cenm[cenm$cl %in% clus, ], ...)
                }
 
+               gg <- gg +
+                    geom_line(data = cenm[cenm$cl %in% clus, ], ...) +
+                    geom_line(aes(colour = color)) +
+                    facet_wrap(~cl, scales = "free_y") +
+                    guides(colour = FALSE) +
+                    theme_bw()
+
                if (!is.null(labs.arg))
-                    g <- g + labs(labs.arg)
+                    gg <- gg + labs(labs.arg)
                else
-                    g <- g + labs(title = titleStr)
+                    gg <- gg + labs(title = titleStr)
 
                ## If NAs were introduced by me (for length consistency), I want them to be removed
                ## automatically, and I don't want a warning
-               if (plot)
-                    suppressWarnings(print(g))
+               if (plot) suppressWarnings(print(gg))
 
-               invisible(g)
+               invisible(gg)
           })
 
 # ========================================================================================================
