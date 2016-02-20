@@ -20,9 +20,9 @@
 #'
 #' @references
 #'
-#' Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.'' In \emph{Proceedings of the 2015
-#' ACM SIGMOD International Conference on Management of Data}, series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{
-#' http://doi.org/10.1145/2723372.2737793}.
+#' Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.''
+#' In \emph{Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data},
+#' series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{http://doi.org/10.1145/2723372.2737793}.
 #'
 #' @examples
 #'
@@ -64,7 +64,7 @@ shape_extraction <- function(X, center = NULL, znorm = FALSE) {
      if (all(sapply(Xz, sum) == 0)) {
           if (is.null(center)) {
                lengths <- sapply(Xz, length)
-               return(rep(0, sample(lengths,1)))
+               return(rep(0, sample(lengths, 1)))
 
           } else {
                return(center)
@@ -77,9 +77,7 @@ shape_extraction <- function(X, center = NULL, znorm = FALSE) {
           else {
                center <- Xz[[sample(length(Xz), 1L)]] # random choice as reference
 
-               A <- lapply(Xz, function(a) {
-                    SBD(center, a)$yshift
-               })
+               A <- lapply(Xz, function(a) { SBD(center, a)$yshift })
 
                A <- do.call(rbind, A)
           }
@@ -87,9 +85,7 @@ shape_extraction <- function(X, center = NULL, znorm = FALSE) {
      } else {
           center <- zscore(center) # use given reference
 
-          A <- lapply(Xz, function(a) {
-               SBD(center, a)$yshift
-          })
+          A <- lapply(Xz, function(a) { SBD(center, a)$yshift })
 
           A <- do.call(rbind, A)
      }
@@ -105,10 +101,10 @@ shape_extraction <- function(X, center = NULL, znorm = FALSE) {
      P <- diag(nc) - 1 / nc * matrix(1, nc, nc)
      M <- P %*% S %*% P
 
-     ksc <- eigen(M)$vectors[,1]
+     ksc <- eigen(M)$vectors[ , 1L]
 
-     d1 <- sqrt(crossprod(A[1,] - ksc))
-     d2 <- sqrt(crossprod(A[1,] + ksc))
+     d1 <- sqrt(crossprod(A[1L, ] - ksc))
+     d2 <- sqrt(crossprod(A[1L, ] + ksc))
 
      if (d1 >= d2)
           ksc <- -ksc

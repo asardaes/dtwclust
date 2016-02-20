@@ -15,12 +15,12 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
 
      if (fuzzy) {
           cluster <- matrix(0, N, k)
-          cluster[ , -1] <- stats::runif(N *(k - 1L)) / (k - 1)
-          cluster[ , 1] <- 1 - apply(cluster[ , -1], 1, sum)
+          cluster[ , -1L] <- stats::runif(N *(k - 1L)) / (k - 1)
+          cluster[ , 1L] <- 1 - apply(cluster[ , -1L], 1L, sum)
           centers <- family@allcent(x, cluster, k, ...)
 
      } else {
-          id_cent <- sample(N,k)
+          id_cent <- sample(N, k)
           centers <- x[id_cent]
           attr(centers, "id_cent") <- id_cent
           cluster <- integer(N)
@@ -60,7 +60,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
                changes <- sum(cluster != clustold)
 
                if (control@trace) {
-                    td <- sum(distmat[cbind(1:N, cluster)])
+                    td <- sum(distmat[cbind(1L:N, cluster)])
                     txt <- paste(changes, format(td), sep = " / ")
                     cat("Iteration ", iter, ": ",
                         "Changes / Distsum = ",
@@ -68,7 +68,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
                         "\n", sep = "")
                }
 
-               if (changes == 0) {
+               if (changes == 0L) {
                     if (control@trace) cat("\n")
                     break
                }
@@ -101,10 +101,10 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
           fcluster <- matrix(NA_real_)
      }
 
-     cldist <- as.matrix(distmat[cbind(1:N, cluster)])
+     cldist <- as.matrix(distmat[cbind(1L:N, cluster)])
      size <- as.vector(table(cluster))
      clusinfo <- data.frame(size = size,
-                            av_dist = as.vector(tapply(cldist[,1], cluster, sum))/size)
+                            av_dist = as.vector(tapply(cldist[ , 1L], cluster, sum))/size)
 
      names(centers) <- NULL
      attr(centers, "id_cent") <- NULL

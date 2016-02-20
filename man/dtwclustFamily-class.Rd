@@ -6,8 +6,7 @@
 \alias{dtwclustFamily-class}
 \title{Class definition for \code{dtwclustFamily}}
 \description{
-Formal S4 class with the family of functions used for partitional and hierarchical procedures in
-\code{\link{dtwclust}}.
+Formal S4 class with a family of functions used in \code{\link{dtwclust}}.
 }
 \details{
 The custom implementations also handle parallelization.
@@ -27,6 +26,6 @@ pass-through \code{preproc} function.
 
 \item{\code{cluster}}{The function used to assign a series to a cluster.}
 
-\item{\code{preproc}}{The function used to preprocess the data (important for \code{\link[stats]{predict}}).}
+\item{\code{preproc}}{The function used to preprocess the data (relevant for \code{\link[stats]{predict}}).}
 }}
 

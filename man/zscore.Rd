@@ -7,7 +7,8 @@
 zscore(x, ..., na.rm = FALSE)
 }
 \arguments{
-\item{x}{Data to normalize. Either a vector, a matrix where each row is to be normalized, or a list of vectors.}
+\item{x}{Data to normalize. Either a vector, a matrix where each row is to be normalized, or a list of
+vectors.}
 
 \item{...}{Further arguments to pass to \code{\link[base]{scale}}.}
 

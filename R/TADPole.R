@@ -97,7 +97,7 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
 
      n <- length(x)
 
-     if (n < 2)
+     if (n < 2L)
           stop("data should have more than one time series")
      if (k > n)
           stop("Number of clusters should be less than the number of time series")
@@ -129,13 +129,13 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
      # 4 - identical series
 
      ## Initialize matrices
-     D <- matrix(NA, n, n)
+     D <- matrix(NA_real_, n, n)
      Flags <- matrix(-1L, n, n)
 
      ## Calculate values for the upper triangular part of the flag matrix (column-wise)
-     utv <- unlist(lapply(2:n, function(j) {
+     utv <- unlist(lapply(2L:n, function(j) {
 
-          sapply(1:(j-1), function(i) {
+          sapply(1L:(j-1L), function(i) {
 
                if (LBM[i,j]<=dc && UBM[i,j]>dc)
                     f <- 1L
@@ -147,7 +147,6 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
                     f <- 4L
 
                f
-
           })
      }))
 
@@ -155,9 +154,9 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
      Flags[upper.tri(Flags)] <- utv
 
      ## Calculate full DTW for those entries whose lower bounds lie around 'dc'
-     ind1 <- which(Flags == 1, arr.ind = TRUE)
+     ind1 <- which(Flags == 1L, arr.ind = TRUE)
 
-     if (nrow(ind1) > 0) {
+     if (nrow(ind1) > 0L) {
 
           ind1 <- split_parallel(ind1, 1L)
 
@@ -168,7 +167,7 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
                         .multicombine = TRUE,
                         .packages = "dtwclust",
                         .noexport = exclude) %dopar% {
-                             proxy::dist(x[ind1[, 1]], x[ind1[, 2]], method = "DTW2",
+                             proxy::dist(x[ind1[ , 1L]], x[ind1[ , 2L]], method = "DTW2",
                                          step.pattern = step.pattern,
                                          window.type = "slantedband", window.size = window.size,
                                          pairwise = TRUE)
@@ -187,9 +186,9 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
      Flags[lower.tri(Flags)] <- t(Flags)[lower.tri(Flags)]
 
      ## Calculate local density vector
-     Rho <- apply(Flags, 1, function(i) sum(i==0 | i==2))
+     Rho <- apply(Flags, 1L, function(i) sum(i == 0L | i == 2L))
 
-     if (all(Rho==0))
+     if (all(Rho == 0L))
           stop("No density peaks detected, choose a different value for cutoff distance 'dc'")
 
      if (max(Rho) == min(Rho))
@@ -203,9 +202,9 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
 
      RhoSorted <- sort(Rho, decreasing = TRUE, index.return = TRUE)
 
-     deltaUB <- t(sapply(2:n, function (i) {
+     deltaUB <- t(sapply(2L:n, function (i) {
           ## Index of higher density neighbors
-          indHDN <- RhoSorted$ix[1:(i-1)]
+          indHDN <- RhoSorted$ix[1L:(i-1L)]
           ## Index of current object
           ii <- RhoSorted$ix[i]
 
@@ -231,7 +230,7 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
      ## ============================================================================================================================
 
      # start at two
-     i <- split_parallel(2:n)
+     i <- split_parallel(2L:n)
 
      DNN <- foreach(i = i,
                     .combine = rbind,
@@ -240,14 +239,14 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
 
                          t(sapply(i, function (i) {
                               ## Index of higher density neighbors
-                              indHDN <- TADPorder$ix[1:(i-1)]
+                              indHDN <- TADPorder$ix[1L:(i-1L)]
                               ## Index of current object
                               ii <- TADPorder$ix[i]
 
                               ## If this is true, prune the calculation of the true distance
                               indPrune <- LBM[ii, indHDN] > deltaUB[ii]
                               ## If the distance was already computed before, don't do it again
-                              indPre <- Flags[ii, indHDN] == 0 | Flags[ii, indHDN] == 1
+                              indPre <- Flags[ii, indHDN] == 0L | Flags[ii, indHDN] == 1L
 
                               ## 'delta' will have the distances to neighbors with higher densities. Initially filled with upper bound
                               delta <- UBM[ii, indHDN]
@@ -276,9 +275,9 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
      ## To order according to default order
      indOrig <- sort(TADPorder$ix, index.return = TRUE)$ix
 
-     delta <- c(max(DNN[, 1]), DNN[, 1])
+     delta <- c(max(DNN[ , 1L]), DNN[ , 1L])
 
-     NN <- c(-1, DNN[, 2])
+     NN <- c(-1L, DNN[ , 2L])
 
      ## ============================================================================================================================
      ## Cluster assignment
@@ -291,7 +290,7 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
           zDelta <- (delta - min(delta)) / (max(delta) - min(delta))
 
      ## Those with the most density are the cluster centers (PAM)
-     C <- sort(sort(Rho * zDelta[indOrig], decreasing = TRUE, index.return = TRUE)$ix[1:k])
+     C <- sort(sort(Rho * zDelta[indOrig], decreasing = TRUE, index.return = TRUE)$ix[1L:k])
 
      ## Assign a unique number to each cluster center
      cl <- rep(-1L, n)
@@ -303,12 +302,12 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
 
      ## Do the assignment (must be a loop)
      for (i in seq_along(indCl)) {
-          if (cl[indCl[i]] == -1)
+          if (cl[indCl[i]] == -1L)
                cl[indCl[i]] <- cl[NN[i]]
      }
 
      ## How many calculations were actually performed
-     distCalc <-  sum(utv == 1) + sum(DNN[,3])
+     distCalc <-  sum(utv == 1L) + sum(DNN[ , 3L])
 
      if(any(cl == -1))
           warning(c("At least one series wasn't assigned to a cluster. ",

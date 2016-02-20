@@ -6,22 +6,22 @@
 #' the cited article for specific details on the algorithm.
 #'
 #' If a given series reference is provided in \code{center}, the algorithm should always converge to the same
-#' result provided the rows of \code{X} keep the same values, although their order may change.
+#' result provided the elements of \code{X} keep the same values, although their order may change.
 #'
 #' @section Parallel Computing:
 #'
 #' Please note that running tasks in parallel does \strong{not} guarantee faster computations.
 #' The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 #'
-#' The user can register a parallel backend with the \code{doParallel} package in order to attempt to
+#' The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to attempt to
 #' speed up the calculations (see the examples).
 #'
 #' @references
 #'
-#' Petitjean F, Ketterlin A and Gancarski P (2011). ``A global averaging method for dynamic time warping, with applications to
-#' clustering.'' \emph{Pattern Recognition}, \strong{44}(3), pp. 678 - 693. ISSN 0031-3203, \url{
-#' http://dx.doi.org/10.1016/j.patcog.2010.09.013}, \url{
-#' http://www.sciencedirect.com/science/article/pii/S003132031000453X}.
+#' Petitjean F, Ketterlin A and Gancarski P (2011). ``A global averaging method for dynamic time
+#' warping, with applications to clustering.'' \emph{Pattern Recognition}, \strong{44}(3), pp. 678 -
+#' 693. ISSN 0031-3203, \url{http://dx.doi.org/10.1016/j.patcog.2010.09.013},
+#' \url{http://www.sciencedirect.com/science/article/pii/S003132031000453X}.
 #'
 #' @examples
 #'
@@ -58,7 +58,7 @@
 #' registerDoSEQ()
 #' }
 #'
-#' @param X A data matrix where each row is a time series. Optionally, a list where each element is a time series.
+#' @param X A data matrix where each row is a time series, or a list where each element is a time series.
 #' @param center Optionally, a time series to use as reference. It must be a numeric vector. Defaults to a
 #' random series of \code{X} if \code{NULL}.
 #' @param max.iter Maximum number of iterations allowed.
@@ -77,7 +77,7 @@
 #' @export
 #'
 
-DBA <- function(X, center = NULL, max.iter = 20,
+DBA <- function(X, center = NULL, max.iter = 20L,
                 norm = "L1", window.size = NULL, delta = 1e-3,
                 error.check = TRUE, trace = FALSE, ...) {
 
@@ -100,7 +100,7 @@ DBA <- function(X, center = NULL, max.iter = 20,
      n <- length(X)
 
      if (is.null(center))
-          center <- X[[sample(n, 1)]] # Random choice
+          center <- X[[sample(n, 1L)]] # Random choice
 
      if (error.check) {
           consistency_check(X, "vltslist")
@@ -122,7 +122,7 @@ DBA <- function(X, center = NULL, max.iter = 20,
      dots <- list(...)
 
      ## Iterations
-     iter <- 1
+     iter <- 1L
      center_old <- center
 
      while(iter <= max.iter) {
@@ -173,7 +173,7 @@ DBA <- function(X, center = NULL, max.iter = 20,
                if (trace)
                     cat("DBA: Iteration", iter, "\n")
 
-               iter <- iter+1
+               iter <- iter + 1L
           }
      }
 

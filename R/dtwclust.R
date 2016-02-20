@@ -122,7 +122,7 @@
 #' The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 #' that represents the distance between the point considered and one of the edges of the window. Therefore,
 #' if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
-#' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
+#' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21} observations falling within
 #' the window.
 #'
 #' The computations actually use a \code{slantedband} window, which is equivalent to the Sakoe-Chiba one
@@ -212,38 +212,36 @@
 #'
 #' @references
 #'
-#' Sakoe H and Chiba S (1978). ``Dynamic programming algorithm optimization for spoken word recognition.'' \emph{Acoustics, Speech
-#' and
-#' Signal Processing, IEEE Transactions on}, \strong{26}(1), pp. 43-49. ISSN 0096-3518, \url{http://doi.org/10.1109/TASSP.1978.1163055}.
+#' Sakoe H and Chiba S (1978). ``Dynamic programming algorithm optimization for spoken word
+#' recognition.'' \emph{Acoustics, Speech and Signal Processing, IEEE Transactions on},
+#' \strong{26}(1), pp. 43-49. ISSN 0096-3518, \url{http://doi.org/10.1109/TASSP.1978.1163055}.
 #'
-#' Ratanamahatana A and Keogh E (2004). ``Everything you know about dynamic time warping is wrong.'' In \emph{3rd Workshop on Mining
-#' Temporal and Sequential Data, in conjunction with 10th ACM SIGKDD Int. Conf. Knowledge Discovery and Data Mining (KDD-2004),
-#' Seattle, WA}.
+#' Ratanamahatana A and Keogh E (2004). ``Everything you know about dynamic time warping is wrong.''
+#' In \emph{3rd Workshop on Mining Temporal and Sequential Data, in conjunction with 10th ACM SIGKDD
+#' Int. Conf. Knowledge Discovery and Data Mining (KDD-2004), Seattle, WA}.
 #'
 #' Bedzek, J.C. (1981). Pattern recognition with fuzzy objective function algorithms.
 #'
-#' D'Urso, P., & Maharaj, E. A. (2009). Autocorrelation-based fuzzy clustering of time series. Fuzzy Sets and Systems, 160(24), 3565-3589.
+#' D'Urso, P., & Maharaj, E. A. (2009). Autocorrelation-based fuzzy clustering of time series.
+#' Fuzzy Sets and Systems, 160(24), 3565-3589.
 #'
-#' Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.'' In \emph{Proceedings of the 2015
-#' ACM SIGMOD International Conference on Management of Data}, series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{
-#' http://doi.org/10.1145/2723372.2737793}.
+#' Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.''
+#' In \emph{Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data},
+#' series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{http://doi.org/10.1145/2723372.2737793}.
 #'
 #' @example inst/dtwclust-examples.R
 #'
 #' @seealso
 #'
-#' Please check the brief description in \code{\link{dtwclust-package}}.
-#'
-#' Type \code{news(package = "dtwclust")} to see what changed.
-#'
-#' Additionally: \code{\link{dtwclust-methods}}, \code{\link{dtwclust-class}}, \code{\link{dtwclustControl}},
+#' \code{\link{dtwclust-methods}}, \code{\link{dtwclust-class}}, \code{\link{dtwclustControl}},
 #' \code{\link{dtwclustFamily}}.
 #'
 #' @author Alexis Sarda-Espinosa
 #'
 #' @param data A list where each element is a time series, or a numeric matrix (it will be coerced to a list
 #' row-wise).
-#' @param type What type of clustering method to use: \code{partitional}, \code{hierarchical} or \code{tadpole}.
+#' @param type What type of clustering method to use: \code{partitional}, \code{hierarchical}, \code{tadpole}
+#' or \code{fuzzy}.
 #' @param k Numer of desired clusters in partitional methods. For hierarchical methods, the
 #' \code{\link[stats]{cutree}} function is called with this value of \code{k} and the result is returned in the
 #' \code{cluster} slot of the \code{dtwclust} object. It may be a numeric vector with several cluster sizes.
@@ -311,19 +309,15 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
      dots <- list(...)
 
-     args <- names(MYCALL[-1])
+     args <- names(MYCALL[-1L])
      id_oldargs <- which(args %in% c(slotNames("dtwclustControl"), "reps"))
-     if (length(id_oldargs) > 0) {
+     if (length(id_oldargs) > 0L) {
           message("Control arguments should not be provided in ... to prevent duplicate matches.")
           message("Please type ?dtwclustControl for more information.\n")
 
           for (i in id_oldargs) {
-               if (args[i] != "reps") {
-                    var <- MYCALL[-1][[args[i]]]
-                    slot(control, args[i]) <- if (is.numeric(var)) as.integer(var) else var
-
-               } else
-                    control@nrep <- as.integer(MYCALL$reps)
+               var <- MYCALL[-1L][[args[i]]]
+               slot(control, args[i]) <- if (is.numeric(var)) as.integer(var) else var
 
                ## remove from dots to avoid duplicate matches
                dots[[args[i]]] <- NULL
@@ -458,7 +452,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                               control = control,
                               fuzzy = isTRUE(type == "fuzzy"))
 
-          centroid <- as.character(substitute(centroid))[[1]]
+          centroid <- as.character(substitute(centroid))[[1L]]
 
           ## ----------------------------------------------------------------------------------------------------------
           ## Further options
@@ -507,7 +501,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                kc.list <- foreach(k = k0, rng = rng0, .combine = comb0, .multicombine = TRUE,
                                   .packages = control@packages, .export = export) %:%
-                    foreach(i = 1:control@nrep, .combine = list, .multicombine = TRUE,
+                    foreach(i = 1L:control@nrep, .combine = list, .multicombine = TRUE,
                             .packages = control@packages, .export = export) %dopar% {
                                  rngtools::setRNG(rng[[i]])
 
@@ -572,7 +566,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                    datalist = datalist)
           })
 
-          if (length(RET) == 1L) RET <- RET[[1]]
+          if (length(RET) == 1L) RET <- RET[[1L]]
 
      } else if (type == "hierarchical") {
 
@@ -638,18 +632,18 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     ## cutree and corresponding centers
                     cluster <- stats::cutree(hc, k)
 
-                    centers <- sapply(1:k, function(kcent) {
+                    centers <- sapply(1L:k, function(kcent) {
                          id_k <- cluster == kcent
 
                          d_sub <- D[id_k, id_k, drop = FALSE]
 
-                         id_center <- which.min(apply(d_sub, 1, sum))
+                         id_center <- which.min(apply(d_sub, 1L, sum))
 
                          which(id_k)[id_center]
                     })
 
                     ## Some additional cluster information (taken from flexclust)
-                    cldist <- as.matrix(D[,centers][cbind(1:length(data), cluster)])
+                    cldist <- as.matrix(D[,centers][cbind(1L:length(data), cluster)])
                     size <- as.vector(table(cluster))
                     clusinfo <- data.frame(size = size,
                                            av_dist = as.vector(tapply(cldist[,1], cluster, sum))/size)
@@ -684,7 +678,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           RET <- unlist(RET, recursive = FALSE)
 
-          if (length(RET) == 1L) RET <- RET[[1]]
+          if (length(RET) == 1L) RET <- RET[[1L]]
 
      } else if (type == "tadpole") {
 
@@ -721,7 +715,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                if (control@trace) {
                     cat("\nTADPole completed, pruning percentage = ",
-                        formatC(100-R$distCalcPercentage, digits = 3, width = -1, format = "fg"),
+                        formatC(100 - R$distCalcPercentage, digits = 3L, width = -1L, format = "fg"),
                         "%\n\n",
                         sep = "")
                }
@@ -735,7 +729,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                cldist <- as.matrix(subdistmat)
                size <- as.vector(table(R$cl))
                clusinfo <- data.frame(size = size,
-                                      av_dist = as.vector(tapply(cldist[,1], R$cl, sum))/size)
+                                      av_dist = as.vector(tapply(cldist[ , 1L], R$cl, sum))/size)
 
                new("dtwclust",
                    call = MYCALL,

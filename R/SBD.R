@@ -38,9 +38,9 @@
 #'
 #' @references
 #'
-#' Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.'' In \emph{Proceedings of the 2015
-#' ACM SIGMOD International Conference on Management of Data}, series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{
-#' http://doi.org/10.1145/2723372.2737793}.
+#' Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.''
+#' In \emph{Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data},
+#' series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{http://doi.org/10.1145/2723372.2737793}.
 #'
 #' @param x,y A time series.
 #' @param znorm Logical. Should each series be z-normalized before calculating the distance?

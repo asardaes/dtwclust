@@ -101,8 +101,8 @@ ddist <- function(distance, control, distmat) {
                                       ## 'dots' has all extra arguments that are valid
                                       dd <- do.call(proxy::dist,
                                                     c(dots,
-                                                      list(x = x[pairs[,1]],
-                                                           y = x[pairs[,2]],
+                                                      list(x = x[pairs[ , 1L]],
+                                                           y = x[pairs[ , 2L]],
                                                            method = distance)))
 
                                       dd
@@ -151,7 +151,7 @@ ddist <- function(distance, control, distmat) {
                                  .packages = control@packages,
                                  .export = export) %dopar% {
 
-                                      if (!consistency_check(dist_entry$names[1], "dist"))
+                                      if (!consistency_check(dist_entry$names[1L], "dist"))
                                            do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                       ## 'dots' has all extra arguments that are valid

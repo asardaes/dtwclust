@@ -15,7 +15,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                new_cent <- lapply(x_split, function(xsub) {
                     distmat <- distfun(xsub, xsub)
 
-                    d <- apply(distmat, 1, sum)
+                    d <- apply(distmat, 1L, sum)
 
                     i_cent <- xsub[[which.min(d)]]
                     attr(i_cent, "id_cent") <- pmatch(names(xsub[which.min(d)]), names(x))
@@ -114,7 +114,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                u <- cl_id ^ control@fuzziness
 
                cent <- t(u) %*% do.call(rbind, x)
-               cent <- apply(cent, 2, "/", e2 = colSums(u))
+               cent <- apply(cent, 2L, "/", e2 = colSums(u))
 
                consistency_check(cent, "tsmat")
           }
@@ -129,12 +129,12 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                     id_changed <- union(cl_id[id_changed], cl_old[id_changed])
                }
 
-               if(length(id_changed) == 0) {
+               if(length(id_changed) == 0L) {
                     return(cent)
                }
 
                ## Split data according to cluster memebership
-               x_split <- split(x, factor(cl_id, levels = 1:k))
+               x_split <- split(x, factor(cl_id, levels = 1L:k))
 
                ## In case of empty new clusters
                empty_clusters <- which(sapply(x_split, length) == 0L)

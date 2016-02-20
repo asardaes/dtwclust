@@ -8,9 +8,7 @@ dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
   force.pairwise = FALSE)
 }
 \arguments{
-\item{x}{A matrix where rows are time series, or a list of time series.}
-
-\item{y}{An object similar to \code{x}.}
+\item{x, y}{A matrix where rows are time series, or a list of time series.}
 
 \item{window.size}{Window size to use with the LB and DTW calculation. See details.}
 
@@ -18,7 +16,7 @@ dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
 
 \item{error.check}{Should inconsistencies in the data be checked?}
 
-\item{force.pairwise}{Calculate pairwise distances. See the Notes.}
+\item{force.pairwise}{Calculate pairwise distances. See the notes.}
 }
 \value{
 The distance matrix with class \code{crossdist}.
@@ -40,15 +38,15 @@ within a dataset.
 The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 that represents the distance between the point considered and one of the edges of the window. Therefore,
 if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
-between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
+between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21} observations falling within
 the window.
 }
 \note{
-This function uses a lower bound that is only defined for time series of equal lengths.
+This function uses a lower bound that is only defined for time series of equal length.
 
 If you use the version registered with \code{proxy}, and because of how \code{\link[proxy]{dist}}
 works, the latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
-\code{force.pairwise} to get the correct result (which is, effectively, calculating DTW distances only).
+\code{force.pairwise} to get the correct result (which is, effectively, calculating only DTW distances).
 }
 \section{Parallel Computing}{
 
@@ -56,7 +54,7 @@ works, the latter's \code{pairwise} argument will not work with this distance. Y
 Please note that running tasks in parallel does \strong{not} guarantee faster computations.
 The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 
-The user can register a parallel backend with the \code{doParallel} package in order to attempt to
+The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to attempt to
 speed up the calculations (see the examples).
 }
 \examples{

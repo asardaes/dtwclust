@@ -15,7 +15,7 @@
 #' The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 #' that represents the distance between the point considered and one of the edges of the window. Therefore,
 #' if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
-#' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
+#' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21} observations falling within
 #' the window.
 #'
 #' @section Parallel Computing:
@@ -23,16 +23,16 @@
 #' Please note that running tasks in parallel does \strong{not} guarantee faster computations.
 #' The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 #'
-#' The user can register a parallel backend with the \code{doParallel} package in order to attempt to
+#' The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to attempt to
 #' speed up the calculations (see the examples).
 #'
 #' @note
 #'
-#' This function uses a lower bound that is only defined for time series of equal lengths.
+#' This function uses a lower bound that is only defined for time series of equal length.
 #'
 #' If you use the version registered with \code{proxy}, and because of how \code{\link[proxy]{dist}}
 #' works, the latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
-#' \code{force.pairwise} to get the correct result (which is, effectively, calculating DTW distances only).
+#' \code{force.pairwise} to get the correct result (which is, effectively, calculating only DTW distances).
 #'
 #' @seealso
 #'
@@ -94,12 +94,11 @@
 #'
 #' @author Alexis Sarda-Espinosa
 #'
-#' @param x A matrix where rows are time series, or a list of time series.
-#' @param y An object similar to \code{x}.
+#' @param x,y A matrix where rows are time series, or a list of time series.
 #' @param window.size Window size to use with the LB and DTW calculation. See details.
 #' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
 #' @param error.check Should inconsistencies in the data be checked?
-#' @param force.pairwise Calculate pairwise distances. See the Notes.
+#' @param force.pairwise Calculate pairwise distances. See the notes.
 #'
 #' @return The distance matrix with class \code{crossdist}.
 #'
@@ -121,7 +120,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                Y <- consistency_check(y, "tsmat")
 
           if (length(X) != length(Y))
-               stop("Pairwise distances require the same amount of series in x and y")
+               stop("Pairwise distances require the same amount of series in 'x' and 'y'")
 
           if (is.null(window.size))
                window.type <- "none"
@@ -179,8 +178,8 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
      }
 
      ## Update with DTW
-     new.indNN <- apply(D, 1, which.min) # index of nearest neighbors
-     indNN <- new.indNN + 1 # initialize all different
+     new.indNN <- apply(D, 1L, which.min) # index of nearest neighbors
+     indNN <- new.indNN + 1L # initialize all different
 
      while (any(new.indNN != indNN)) {
           indNew <- which(new.indNN != indNN)

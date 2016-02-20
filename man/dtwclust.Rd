@@ -12,7 +12,8 @@ dtwclust(data = NULL, type = "partitional", k = 2L, method = "average",
 \item{data}{A list where each element is a time series, or a numeric matrix (it will be coerced to a list
 row-wise).}
 
-\item{type}{What type of clustering method to use: \code{partitional}, \code{hierarchical} or \code{tadpole}.}
+\item{type}{What type of clustering method to use: \code{partitional}, \code{hierarchical}, \code{tadpole}
+or \code{fuzzy}.}
 
 \item{k}{Numer of desired clusters in partitional methods. For hierarchical methods, the
 \code{\link[stats]{cutree}} function is called with this value of \code{k} and the result is returned in the
@@ -178,7 +179,7 @@ use it, a window width must be defined via the \code{window.size} slot in \code{
 The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 that represents the distance between the point considered and one of the edges of the window. Therefore,
 if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
-between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
+between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21} observations falling within
 the window.
 
 The computations actually use a \code{slantedband} window, which is equivalent to the Sakoe-Chiba one
@@ -418,28 +419,25 @@ fc <- dtwclust(CharTraj[1:25], type = "fuzzy", k = 5,
 Alexis Sarda-Espinosa
 }
 \references{
-Sakoe H and Chiba S (1978). ``Dynamic programming algorithm optimization for spoken word recognition.'' \emph{Acoustics, Speech
-and
-Signal Processing, IEEE Transactions on}, \strong{26}(1), pp. 43-49. ISSN 0096-3518, \url{http://doi.org/10.1109/TASSP.1978.1163055}.
+Sakoe H and Chiba S (1978). ``Dynamic programming algorithm optimization for spoken word
+recognition.'' \emph{Acoustics, Speech and Signal Processing, IEEE Transactions on},
+\strong{26}(1), pp. 43-49. ISSN 0096-3518, \url{http://doi.org/10.1109/TASSP.1978.1163055}.
 
-Ratanamahatana A and Keogh E (2004). ``Everything you know about dynamic time warping is wrong.'' In \emph{3rd Workshop on Mining
-Temporal and Sequential Data, in conjunction with 10th ACM SIGKDD Int. Conf. Knowledge Discovery and Data Mining (KDD-2004),
-Seattle, WA}.
+Ratanamahatana A and Keogh E (2004). ``Everything you know about dynamic time warping is wrong.''
+In \emph{3rd Workshop on Mining Temporal and Sequential Data, in conjunction with 10th ACM SIGKDD
+Int. Conf. Knowledge Discovery and Data Mining (KDD-2004), Seattle, WA}.
 
 Bedzek, J.C. (1981). Pattern recognition with fuzzy objective function algorithms.
 
-D'Urso, P., & Maharaj, E. A. (2009). Autocorrelation-based fuzzy clustering of time series. Fuzzy Sets and Systems, 160(24), 3565-3589.
+D'Urso, P., & Maharaj, E. A. (2009). Autocorrelation-based fuzzy clustering of time series.
+Fuzzy Sets and Systems, 160(24), 3565-3589.
 
-Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.'' In \emph{Proceedings of the 2015
-ACM SIGMOD International Conference on Management of Data}, series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{
-http://doi.org/10.1145/2723372.2737793}.
+Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.''
+In \emph{Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data},
+series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{http://doi.org/10.1145/2723372.2737793}.
 }
 \seealso{
-Please check the brief description in \code{\link{dtwclust-package}}.
-
-Type \code{news(package = "dtwclust")} to see what changed.
-
-Additionally: \code{\link{dtwclust-methods}}, \code{\link{dtwclust-class}}, \code{\link{dtwclustControl}},
+\code{\link{dtwclust-methods}}, \code{\link{dtwclust-class}}, \code{\link{dtwclustControl}},
 \code{\link{dtwclustFamily}}.
 }
 

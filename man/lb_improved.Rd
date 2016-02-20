@@ -24,20 +24,20 @@ lb_improved(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
 The improved lower bound for the DTW distance.
 }
 \description{
-This function calculates a lower bound (LB) on the Dynamic Time Warp (DTW) distance between two time
-series. It uses a Sakoe-Chiba constraint.
+This function calculates an improved lower bound (LB) on the Dynamic Time Warp (DTW) distance between two
+time series. It uses a Sakoe-Chiba constraint.
 }
 \details{
 The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 that represents the distance between the point considered and one of the edges of the window. Therefore,
 if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
-between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
+between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21} observations falling within
 the window.
 
 The reference time series should go in \code{x}, whereas the query time series should go in \code{y}.
 }
 \note{
-The lower bound is defined for time series of equal length only and is \strong{not} symmetrical.
+The lower bound is defined for time series of equal length only and is \strong{not} symmetric.
 
 If you wish to calculate the lower bound between several time series, it would be better to use the version
 registered with the \code{proxy} package, since it includes some small optimizations. See the examples.
@@ -74,8 +74,9 @@ D.lbi <= D.dtw
 
 }
 \references{
-Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .'' \emph{Pattern Recognition}, \strong{42}(9), pp.
-2169 - 2180. ISSN 0031-3203, \url{http://dx.doi.org/10.1016/j.patcog.2008.11.030}, \url{
-http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
+Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .''
+\emph{Pattern Recognition}, \strong{42}(9), pp. 2169 - 2180. ISSN 0031-3203,
+\url{http://dx.doi.org/10.1016/j.patcog.2008.11.030},
+\url{http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
 }
 

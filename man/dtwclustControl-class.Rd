@@ -13,11 +13,10 @@ Default values are shown at the end.
 \section{Slots}{
 
 \describe{
-\item{\code{window.size}}{Integer or \code{NULL}. Window constraint for DTW and LB calculations. See Sakoe-Chiba section in
-\code{\link{dtwclust}}.}
+\item{\code{window.size}}{Integer or \code{NULL}. Window constraint for DTW and LB calculations.}
 
-\item{\code{norm}}{Character. Pointwise distance for DTW, DBA and the LB. Either \code{"L1"} for Manhattan distance or \code{"L2"}
-for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{"L1"}) and
+\item{\code{norm}}{Character. Pointwise distance for DTW, DBA and the LBs. Either \code{"L1"} for Manhattan distance
+or \code{"L2"} for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{"L1"}) and
 \code{distance = "DTW2"} (which always uses \code{"L2"}).}
 
 \item{\code{delta}}{Numeric. Stopping criterion for \code{\link{DBA}} centroids and in the case of fuzzy clustering.}
@@ -27,23 +26,23 @@ for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{"L1"
 \item{\code{save.data}}{Return a "copy" of the data in the returned object? Because of the way \code{R} handles
 things internally, all copies should point to the same memory address.}
 
-\item{\code{symmetric}}{Logical flag. Is the distance function symmetric? In other words, is \code{dist(x,y)} == \code{dist(y,x)}?
-If \code{TRUE}, half the distance matrix can be computed and some time saved.}
+\item{\code{symmetric}}{Logical flag. Is the distance function symmetric? In other words, is \code{dist(x,y)} ==
+\code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be computed.}
 
-\item{\code{packages}}{Character vector with the names of any packages required for custom \code{proxy} functions. See
-Parallel Computing section in \code{\link{dtwclust}}.}
+\item{\code{packages}}{Character vector with the names of any packages required for custom \code{proxy} functions.
+See Parallel Computing section in \code{\link{dtwclust}}.}
 
 \item{\code{dba.iter}}{Integer. Maximum number of iterations for \code{\link{DBA}} centroids.}
 
-\item{\code{pam.precompute}}{Logical flag. Precompute the whole distance matrix once and reuse it at each iteration if using PAM
-centroids. Otherwise calculate distances at every iteration.}
+\item{\code{pam.precompute}}{Logical flag. Precompute the whole distance matrix once and reuse it at each iteration
+if using PAM centroids. Otherwise calculate distances at every iteration.}
 
 \item{\code{fuzziness}}{Numeric. Exponent used for fuzzy clustering. Commonly termed \code{m} in the literature.}
 
 \item{\code{iter.max}}{Integer. Maximum number of iterations.}
 
-\item{\code{nrep}}{Integer. How many times to repeat clustering with different starting points. See section Repetitions
-in \code{\link{dtwclust}}.}
+\item{\code{nrep}}{Integer. How many times to repeat clustering with different starting points. See section
+Repetitions in \code{\link{dtwclust}}.}
 }}
 \section{Common parameters}{
 

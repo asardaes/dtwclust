@@ -15,6 +15,7 @@ reinterpolate(ts, newLength)
 Reinterpolated time series
 }
 \description{
-This function is just a wrapper for the native function \code{\link[stats]{approx}} to do simple linear reinterpolation.
+This function is just a wrapper for the native function \code{\link[stats]{approx}} to do simple linear
+reinterpolation.
 }
 
