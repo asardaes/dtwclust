@@ -9,6 +9,8 @@ context("Test parallel")
 test_that("Parallel computation gives the same results as sequential", {
      skip_on_cran()
 
+     cat("\n")
+
      require(doParallel)
 
      if (.Platform$OS.type == "windows")

@@ -1,6 +1,7 @@
 ## Update to version 2.1.0
 * Added fuzzy c-means algorithm
-* Bug fixes
+* Update documentation
+* Bug fixes and optimizations
 
 ## Test environments
 * Local Linux Mint 17.3, R 3.2.3

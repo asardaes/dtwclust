@@ -1,18 +1,16 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/dtwclust)](http://cran.r-project.org/web/packages/dtwclust) [![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](http://cran.rstudio.com/package=dtwclust)
 
-Time Series Clustering With Dynamic Time Warping Distance (DTW)
-===============================================================
+Time Series Clustering With Optimizations for the Dynamic Time Warping Distance (DTW)
+=====================================================================================
 
-This package attempts to consolidate some of the recent techniques related to time series clustering under DTW and implement them in `R`. Most of these algorithms make use of traditional clustering techniques (partitional and hierarchical clustering) but change the distance definition. In this case, the distance between time series is measured with DTW.
+Time series clustering with a wide variety of strategies and a series of optimizations specific to the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs). There are implementations of both traditional clustering algorithms, and more recent procedures such as k-Shape and TADPole clustering. The functionality can be easily extended with custom distance measures and centroid definitions.
 
-DTW is, however, computationally expensive, so several optimization techniques exist. They mostly deal with bounding the DTW distance. These bounds are only defined for time series of equal lengths. Nevertheless, if the length of the time series of interest vary only slightly, reinterpolating them to a common length is probably appropriate.
+Many of the algorithms implemented in this package are specifically tailored to time series and DTW, hence its name. However, the main clustering function is flexible so that one can test many different clustering approaches, using either the time series directly, or by applying suitable transformations and then clustering in the resulting space.
 
-Additionally, a recently proposed algorithm called k-Shape could serve as an alternative. k-Shape clustering relies on custom distance and centroid definitions, which are unrelated to DTW. The shape extraction algorithm proposed therein is particularly interesting if time series can be z-normalized.
+DTW is a dynamic programming algorithm that tries to find the optimum warping path between two series. Over the years, several variations have appeared in order to make the procedure faster or more efficient. Please refer to the included references for more information, especially Giorgino (2009), which is a good practical introduction.
 
-Many of the algorithms and optimizations require that all series have the same length. The ones that don't are usually slow but can still be used.
-
-Please see the included references for more information.
+Most optimizations require equal dimensionality, which means time series should have equal lengths. DTW itself does not require this, but it is relatively slow to compute. Other distance definitions may be used, or series could be reinterpolated to a matching length (Ratanamahatana and Keogh, 2004).
 
 Implementations
 ---------------
@@ -30,18 +28,20 @@ Examples
 ## Load data
 data(uciCT)
 
-## Reinterpolate data to equal lengths
+## Reinterpolate data to equal length
 datalist <- zscore(CharTraj)
 data <- lapply(CharTraj, reinterpolate, newLength = 180)
 
 ## Common controls
-ctrl <- list(window.size = 20L, trace = TRUE)
+ctrl <- new("dtwclustControl", window.size = 20L, trace = TRUE)
+```
 
+``` r
 ## =============================================================================================
 ## Using DTW with help of lower bounds and PAM centroids
 ## =============================================================================================
 
-ctrl$pam.precompute <- FALSE
+ctrl@pam.precompute <- FALSE
 
 kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
                      centroid = "pam", seed = 3247, 
@@ -52,17 +52,19 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 4: Changes / Distsum = 2 / 1311.201
 #> Iteration 5: Changes / Distsum = 0 / 1311.201
 #> 
-#>  Elapsed time is 10.332 seconds.
+#>  Elapsed time is 10.463 seconds.
 
 plot(kc.dtwlb)
 ```
 
-![](README-examples-1.png)<!-- -->
+![](README-partitional-1.png)<!-- -->
 
 ``` r
 
-ctrl$pam.precompute <- TRUE
+ctrl@pam.precompute <- TRUE
+```
 
+``` r
 ## =============================================================================================
 ## Hierarchical clustering based on shape-based distance
 ## =============================================================================================
@@ -76,7 +78,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.631 seconds.
+#>  Elapsed time is 0.681 seconds.
 
 cat("Rand index for HC+SBD:\n")
 #> Rand index for HC+SBD:
@@ -93,10 +95,9 @@ print(ri <- sapply(hc.sbd, randIndex, y = CharTrajLabels))
 plot(hc.sbd[[which.max(ri)]])
 ```
 
-![](README-examples-2.png)<!-- -->
+![](README-hierarchical-1.png)<!-- -->
 
 ``` r
-
 ## =============================================================================================
 ## TADPole clustering
 ## =============================================================================================
@@ -108,15 +109,14 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 4.45 seconds.
+#>  Elapsed time is 4.232 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
 
-![](README-examples-3.png)<!-- -->
+![](README-tadpole-1.png)<!-- -->
 
 ``` r
-
 ## =============================================================================================
 ## Parallel support
 ## =============================================================================================
@@ -161,19 +161,21 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 3: Changes / Distsum = 1 / 3.550964
 #> Iteration 4: Changes / Distsum = 0 / 3.531171
 #> 
-#>  Elapsed time is 19.163 seconds.
+#>  Elapsed time is 18.523 seconds.
 
 # Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
 ```
 
-![](README-examples-4.png)<!-- -->
+![](README-parallel-1.png)<!-- -->
 
 ``` r
 
 stopCluster(cl)
 registerDoSEQ()
+```
 
+``` r
 ## =============================================================================================
 ## Fuzzy clustering (autocorrelation-based)
 ## =============================================================================================
@@ -198,7 +200,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>    0.14    0.00    0.14 
+#>   0.148   0.000   0.148 
 #> 
 #> Head of fuzzy memberships:
 #> 

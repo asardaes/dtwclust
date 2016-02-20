@@ -1,8 +1,8 @@
 Package: dtwclust
 Type: Package
 Title: Time Series Clustering with Optimizations for the Dynamic Time Warping Distance
-Version: 2.1.0.9000
-Date: 2016-02-17
+Version: 2.1.0
+Date: 2016-02-20
 Depends:
     proxy,
     dtw,
@@ -26,8 +26,8 @@ Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
 Description: Time series clustering with optimized techniques related to the
     Dynamic Time Warping distance and its corresponding lower bounds.
-    Implementations of k-Shape, TADPole and fuzzy clustering are available,
-    and the functionality can be easily extended with custom distance measures
+    Implementations of k-Shape, TADPole and fuzzy clustering are available.
+    The functionality can be easily extended with custom distance measures
     and centroid definitions.
 URL: https://github.com/asardaes/dtwclust
 BugReports: https://github.com/asardaes/dtwclust/issues

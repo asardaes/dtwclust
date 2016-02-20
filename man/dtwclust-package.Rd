@@ -3,93 +3,97 @@
 \docType{package}
 \name{dtwclust-package}
 \alias{dtwclust-package}
-\title{Time series clustering under Dynamic Time Warping (DTW) distance.}
+\title{Time series clustering with optimizations for the Dynamic Time Warping distance}
 \description{
-Perform time series clustering using different techniques related to the DTW distance and its
-corresponding lower bounds (LB). Additionally, an implementation of k-Shape clustering is available,
-and the package can be easily extended with custom distance measures and centroid definitions.
+Time series clustering with a wide variety of strategies and a series of optimizations specific to
+the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs). There are
+implementations of both traditional clustering algorithms, and more recent procedures such as
+k-Shape and TADPole clustering. The functionality can be easily extended with custom distance
+measures and centroid definitions.
 }
 \details{
-This package tries to consolidate the different procedures available to perform clustering of time series
-based on shape. Most of the optimizations require time series to have equal lengths. DTW itself doesn't, but
-it's much slower to compute. The shape-based distance (SBD) can also be used for series of different
-lengths, and it could be faster. If series have different lengths, it is debatable whether it makes sense
-to cluster them directly. If possible, reinterpolating them could be one way of speeding up calculations
-(see Ratanamahatana and Keogh, 2004; also \code{\link{reinterpolate}}).
+Many of the algorithms implemented in this package are specifically tailored to time series and
+DTW, hence its name. However, the main clustering function is flexible so that one can test many
+different clustering approaches, using either the time series directly, or by applying suitable
+transformations and then clustering in the resulting space.
 
-Please see the documentation for \code{\link{dtwclust}}, which serves as the main entry point.
+DTW is a dynamic programming algorithm that tries to find the optimum warping path between two
+series. Over the years, several variations have appeared in order to make the procedure faster or
+more efficient. Please refer to the included references for more information, especially Giorgino
+(2009), which is a good practical introduction.
 
-Other packages that are particularly leveraged here are the \code{proxy} package for distance matrix calculations,
-and the \code{dtw} package for the core DTW calculations.
+Most optimizations require equal dimensionality, which means time series should have equal lengths.
+DTW itself does not require this, but it is relatively slow to compute. Other distance definitions
+may be used, or series could be reinterpolated to a matching length (Ratanamahatana and Keogh,
+2004).
 
-Five distances are registered via \code{\link[proxy]{pr_DB}}: "LB_Keogh", "LB_Improved", "SBD", "DTW_LB"
-and "DTW2". See \code{\link{lb_keogh}}, \code{\link{lb_improved}}, \code{\link{SBD}} and
-\code{\link{dtw_lb}} for more details on the first 4.
+Other packages that are particularly leveraged here are the \code{proxy} package for distance
+matrix calculations, and the \code{dtw} package for the core DTW calculations. The main clustering
+function and entry point for this package is \code{\link{dtwclust}}. There are a couple of things
+to bear in mind while using this package:
 
-DTW2 is done with \code{\link[dtw]{dtw}} using
-\code{L2} norm, but it differs from the result you would obtain if you specify \code{L2} as
-\code{dist.method}: with \code{DTW2}, pointwise distances (the local cost matrix) are calculated with
-\code{L1} norm, \emph{each} element of the matrix is squared and the result is fed into
-\code{\link[dtw]{dtw}}, which finds the optimum warping path. The square root of the resulting
-distance is \emph{then} computed.
-
-Please note that the \code{\link[proxy]{dist}} function in the \code{proxy} package accepts one or two
-arguments for data objects. Users should usually use the two-input \strong{list} version, even if there is
-just one dataset (i.e. \code{proxy::dist(x=data, y=data, ...)}), because otherwise it sometimes fails to
+Most distance calculations make use of the \code{\link[proxy]{dist}} function in the \code{proxy}
+package, which accepts one or two arguments for data objects (\code{x} and \code{y})). Users should
+use the two-input \strong{list} version, even if there is just one dataset (i.e.
+\code{proxy::dist(x = dataset, y = dataset, ...)}), because otherwise it sometimes fails to
 detect a whole time series as a single object and, instead, calculates distances between each observation
 of each time series.
 
-This package sets the random number generator to L'Ecuyer-CMRG when it is attached in an attempt to
-preserve reproducibility. You are free to change this afterwards if you wish. See \code{\link[base]{RNGkind}}.
+Additionally, please note the random number generator is set to L'Ecuyer-CMRG when \code{dtwclust}
+is attached in an attempt to preserve reproducibility. You are free to change this afterwards if
+you wish. See \code{\link[base]{RNGkind}}.
 }
 \author{
 Alexis Sarda-Espinosa
 }
 \references{
-Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering with a Novel Admissible Pruning
-Strategy.'' In \emph{Conference on Knowledge Discovery and Data Mining}, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{
-http://dx.doi.org/10.1145/2783258.2783286}.
+Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering with
+a Novel Admissible Pruning Strategy.'' In \emph{Conference on Knowledge Discovery and Data Mining},
+series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{http://dx.doi.org/10.1145/2783258.2783286}.
 
-Giorgino T (2009). ``Computing and Visualizing Dynamic Time Warping Alignments in \code{R}: The 'dtw' Package.'' \emph{Journal
-of Statistical Software}, \strong{31}(7), pp. 1-24. \url{http://www.jstatsoft.org/v31/i07/}.
+Giorgino T (2009). ``Computing and Visualizing Dynamic Time Warping Alignments in \code{R}: The
+'dtw' Package.'' \emph{Journal of Statistical Software}, \strong{31}(7), pp. 1-24.
+\url{http://www.jstatsoft.org/v31/i07/}.
 
-Ratanamahatana A and Keogh E (2004). ``Everything you know about dynamic time warping is wrong.'' In \emph{3rd Workshop on Mining
-Temporal and Sequential Data, in conjunction with 10th ACM SIGKDD Int. Conf. Knowledge Discovery and Data Mining (KDD-2004),
-Seattle, WA}.
+Ratanamahatana A and Keogh E (2004). ``Everything you know about dynamic time warping is wrong.''
+In \emph{3rd Workshop on Mining Temporal and Sequential Data, in conjunction with 10th ACM SIGKDD
+Int. Conf. Knowledge Discovery and Data Mining (KDD-2004), Seattle, WA}.
 
-Keogh E and Ratanamahatana CA (2005). ``Exact indexing of dynamic time warping.'' \emph{Knowledge and information systems}, \strong{7}(3),
-pp. 358-386.
+Keogh E and Ratanamahatana CA (2005). ``Exact indexing of dynamic time warping.'' \emph{Knowledge
+and information systems}, \strong{7}(3), pp. 358-386.
 
-Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .'' \emph{Pattern Recognition}, \strong{42}(9), pp.
-2169 - 2180. ISSN 0031-3203, \url{http://dx.doi.org/10.1016/j.patcog.2008.11.030}, \url{
-http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
+Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .''
+\emph{Pattern Recognition}, \strong{42}(9), pp. 2169 - 2180. ISSN 0031-3203,
+\url{http://dx.doi.org/10.1016/j.patcog.2008.11.030},
+\url{http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
 
-Liao TW (2005). ``Clustering of time series data - a survey.'' \emph{Pattern recognition}, \strong{38}(11), pp. 1857-1874.
+Liao TW (2005). ``Clustering of time series data - a survey.'' \emph{Pattern recognition},
+\strong{38}(11), pp. 1857-1874.
 
-Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.'' In \emph{Proceedings of the 2015
-ACM SIGMOD International Conference on Management of Data}, series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{
-http://doi.org/10.1145/2723372.2737793}.
+Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.''
+In \emph{Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data},
+series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{http://doi.org/10.1145/2723372.2737793}.
 
-Petitjean F, Ketterlin A and Gancarski P (2011). ``A global averaging method for dynamic time warping, with applications to
-clustering.'' \emph{Pattern Recognition}, \strong{44}(3), pp. 678 - 693. ISSN 0031-3203, \url{
-http://dx.doi.org/10.1016/j.patcog.2010.09.013}, \url{
-http://www.sciencedirect.com/science/article/pii/S003132031000453X}.
+Petitjean F, Ketterlin A and Gancarski P (2011). ``A global averaging method for dynamic time
+warping, with applications to clustering.'' \emph{Pattern Recognition}, \strong{44}(3), pp. 678 -
+693. ISSN 0031-3203, \url{http://dx.doi.org/10.1016/j.patcog.2010.09.013},
+\url{http://www.sciencedirect.com/science/article/pii/S003132031000453X}.
 
-Sakoe H and Chiba S (1978). ``Dynamic programming algorithm optimization for spoken word recognition.'' \emph{Acoustics, Speech and
-Signal Processing, IEEE Transactions on}, \strong{26}(1), pp. 43-49. ISSN 0096-3518, \url{
-http://doi.org/10.1109/TASSP.1978.1163055}.
+Sakoe H and Chiba S (1978). ``Dynamic programming algorithm optimization for spoken word
+recognition.'' \emph{Acoustics, Speech and Signal Processing, IEEE Transactions on},
+\strong{26}(1), pp. 43-49. ISSN 0096-3518, \url{http://doi.org/10.1109/TASSP.1978.1163055}.
 
-Wang X, Mueen A, Ding H, Trajcevski G, Scheuermann P and Keogh E (2013). ``Experimental comparison of representation methods
-and distance measures for time series data.'' \emph{Data Mining and Knowledge Discovery}, \strong{26}(2), pp. 275-309. ISSN 1384-5810,
+Wang X, Mueen A, Ding H, Trajcevski G, Scheuermann P and Keogh E (2013). ``Experimental comparison
+of representation methods and distance measures for time series data.'' \emph{Data Mining and
+Knowledge Discovery}, \strong{26}(2), pp. 275-309. ISSN 1384-5810,
 \url{http://doi.org/10.1007/s10618-012-0250-5}, \url{http://dx.doi.org/10.1007/s10618-012-0250-5}.
 
 Bedzek, J.C. (1981). Pattern recognition with fuzzy objective function algorithms.
 
-D'Urso, P., & Maharaj, E. A. (2009). Autocorrelation-based fuzzy clustering of time series. Fuzzy Sets and Systems, 160(24), 3565-3589.
+D'Urso, P., & Maharaj, E. A. (2009). Autocorrelation-based fuzzy clustering of time series.
+Fuzzy Sets and Systems, 160(24), 3565-3589.
 }
 \seealso{
-Type \code{news(package = "dtwclust")} to see what changed.
-
 \code{\link{dtwclust}}, \code{\link[proxy]{dist}}, \code{\link[dtw]{dtw}}
 }
 
