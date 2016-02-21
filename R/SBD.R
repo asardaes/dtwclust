@@ -1,6 +1,6 @@
 #' Shape-based distance
 #'
-#' Distance based on coefficient-normalized cross-correlation as proposed by Papparizos and Gravano, 2015,
+#' Distance based on coefficient-normalized cross-correlation as proposed by Paparrizos and Gravano, 2015,
 #' for the k-Shape clustering algorithm.
 #'
 #' This distance works best if the series are \emph{z-normalized}. If not, at least they should have

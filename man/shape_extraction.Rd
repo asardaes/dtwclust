@@ -17,7 +17,7 @@ shape_extraction(X, center = NULL, znorm = FALSE)
 Centroid time series.
 }
 \description{
-Time-series shape extraction based on optimal alignments as proposed by Papparizos and Gravano, 2015, for
+Time-series shape extraction based on optimal alignments as proposed by Paparrizos and Gravano, 2015, for
 the k-Shape clustering algorithm.
 }
 \details{

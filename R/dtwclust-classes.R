@@ -55,11 +55,11 @@ setClass("dtwclustFamily",
 #'   \item \code{packages} = \code{character(0)}
 #' }
 #'
-#' @slot window.size Integer or \code{NULL}. Window constraint for DTW and LB calculations.
+#' @slot window.size Integer or \code{NULL}. Window constraint for DTW, DBA and LB calculations.
 #' @slot norm Character. Pointwise distance for DTW, DBA and the LBs. Either \code{"L1"} for Manhattan distance
 #' or \code{"L2"} for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{"L1"}) and
 #' \code{distance = "DTW2"} (which always uses \code{"L2"}).
-#' @slot delta Numeric. Stopping criterion for \code{\link{DBA}} centroids and in the case of fuzzy clustering.
+#' @slot delta Numeric. Stopping criterion for \code{\link{DBA}} centroids and fuzzy clustering.
 #' @slot trace Logical flag. If \code{TRUE}, more output regarding the progress is printed to screen.
 #' @slot save.data Return a "copy" of the data in the returned object? Because of the way \code{R} handles
 #' things internally, all copies should point to the same memory address.
@@ -146,7 +146,7 @@ setClass("dtwclustControl",
 #'
 #' Please note that not all slots will contain valid information for all clustering types. In some cases,
 #' for example for fuzzy and hierarchical clustering, some results are computed assuming a hard partition
-#' is created based on the fuzzy memberships or dendrogram tree.
+#' is created based on the fuzzy memberships or dendrogram tree, and the provided value of \code{k}.
 #'
 #' @slot call The function call.
 #' @slot control An object of class \code{\link{dtwclustControl}}.
@@ -169,7 +169,7 @@ setClass("dtwclustControl",
 #' @slot centroid A string indicating the centroid used.
 #' @slot preproc A string indicating the preprocessing used.
 #' @slot datalist The provided data in the form of a list, where each element is a time series.
-#' @slot proctime Time during function execution, as measured by \code{\link[base]{proc.time}}.
+#' @slot proctime Time during function execution, as measured with \code{\link[base]{proc.time}}.
 #'
 #' @name dtwclust-class
 #' @rdname dtwclust-class

@@ -66,7 +66,7 @@ D.lbi <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "LB_Improved",
                      window.size = 20, norm = "L2")
 
 # Corresponding true DTW distance
-# (see dtwclust-package description for an explanation of DTW2)
+# (see dtwclust documentation for an explanation of DTW2)
 D.dtw <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "DTW2",
                      window.type = "slantedband", window.size = 20)
 

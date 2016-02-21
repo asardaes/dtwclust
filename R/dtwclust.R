@@ -6,7 +6,7 @@
 #' Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering is done
 #' with \code{\link[stats]{hclust}}. TADPole clustering uses the \code{\link{TADPole}} function. Specifying
 #' \code{type} = \code{"partitional"}, \code{distance} = \code{"sbd"} and \code{centroid} = \code{"shape"} is
-#' equivalent to the k-Shape algorithm (Papparizos and Gravano, 2015).
+#' equivalent to the k-Shape algorithm (Paparrizos and Gravano, 2015).
 #'
 #' The \code{data} may be a matrix, a data frame or a list. Matrices and data frames are coerced to a list,
 #' the former row-wise and the latter column-wise. Only lists can have series with different lengths. Most of
@@ -22,7 +22,7 @@
 #' Stochastic algorithm that creates a hard partition of the data into \code{k} clusters, where each cluster
 #' has a center/centroid. In case of time series clustering, the centroids are also time series.
 #'
-#' The cluster centroids are first randomly initialized by selecting one of the series in the data. The
+#' The cluster centroids are first randomly initialized by selecting some of the series in the data. The
 #' distance between each series and each centroid is calculated, and the series are assigned to the cluster
 #' whose centroid is closest. The centroids are then updated by using a given rule, and the procedure is
 #' repeated until no series changes from one cluster to another, or until the maximum number of iterations*
@@ -57,7 +57,8 @@
 #'
 #' This is a deterministic algorithm that creates a hierarchy of groups by using different linkage methods
 #' (see \code{\link[stats]{hclust}}). The linkage method is controlled through the \code{method} parameter
-#' of this function. The distance to be used can be controlled with the \code{distance} parameter.
+#' of this function, with the additional option "all" that uses all of the available methods. The distance
+#' to be used can be controlled with the \code{distance} parameter.
 #'
 #' The hierarchy does not imply a specific number of clusters, but one can be induced by cutting the resulting
 #' dendrogram (see \code{\link[stats]{cutree}}). As with fuzzy clustering, this results in a crisp partition,
@@ -107,7 +108,8 @@
 #'   \item "mean": The average along each dimension. In other words, the average of all \eqn{x^j_i}
 #'   among the \eqn{j} series that belong to the same cluster for all time points \eqn{t_i}.
 #'   \item "median": The median along each dimension. Similar to mean.
-#'   \item "shape": Shape averaging. See \code{\link{shape_extraction}} for more details.
+#'   \item "shape": Shape averaging. By default, all series are z-normalized in this case, since the resulting
+#'   centroids will also have this normalization. See \code{\link{shape_extraction}} for more details.
 #'   \item "dba": DTW Barycenter Averaging. See \code{\link{DBA}} for more details.
 #'   \item "pam": Partition around medoids (PAM). This basically means that the cluster centers are always
 #'   one of the time series in the data. In this case, the distance matrix can be pre-computed once using all
@@ -117,7 +119,11 @@
 #' }
 #'
 #' These check for the special cases where parallelization might be desired. Note that only \code{shape},
-#' \code{dba} and \code{pam} support series of different length.
+#' \code{dba} and \code{pam} support series of different length. Also note that, for \code{shape} and
+#' \code{dba}, this support has a caveat: the final centroids' length will depend on the length of those
+#' series that were randomly chosen at the beginning of the clustering algorithm. For example, if the series
+#' in the dataset have a length of either 10 or 15, 2 clusters are desired, and the initial choice selects
+#' two series with length of 10, the final centroids will have this same length.
 #'
 #' @section Distance Measures:
 #'
@@ -130,17 +136,15 @@
 #' one of the following custom implementations (all registered with \code{proxy}):
 #'
 #' \itemize{
-#'   \item \code{"dtw"}: DTW with L1 norm and optionally a Sakoe-Chiba/Slanted-band constraint.
-#'   \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint.
+#'   \item \code{"dtw"}: DTW with L1 norm and optionally a Sakoe-Chiba/Slanted-band constraint*.
+#'   \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint*.
 #'   \item \code{"dtw_lb"}: DTW with L1 or L2 norm* and optionally a Sakoe-Chiba constraint*. Some
 #'   computations are avoided by first estimating the distance matrix with Lemire's lower bound and then
-#'   iteratively refining with DTW. See \code{\link{dtw_lb}}. Not suitable for \code{pam.precompute} =
-#'   \code{TRUE}*.
+#'   iteratively refining with DTW. See \code{\link{dtw_lb}}. Not suitable for \code{pam.precompute}* =
+#'   \code{TRUE}.
 #'   \item \code{"lbk"}: Keogh's lower bound with either L1 or L2 norm* for the Sakoe-Chiba constraint*.
 #'   \item \code{"lbi"}: Lemire's lower bound with either L1 or L2 norm* for the Sakoe-Chiba constraint*.
-#'   \item \code{"sbd"}: Shape-based distance. Each series is z-normalized in this case. As a result,
-#'   the cluster centers (for partitional methods) are also z-normalized. See \code{\link{SBD}} for more
-#'   details.
+#'   \item \code{"sbd"}: Shape-based distance. See \code{\link{SBD}} for more details.
 #' }
 #'
 #' DTW2 is done with \code{\link[dtw]{dtw}}, but it differs from the result you would obtain if you specify
@@ -244,7 +248,7 @@
 #' The lower bounds are defined only for time series of equal length. \code{DTW} and \code{DTW2}
 #' don't require this, but they are much slower to compute.
 #'
-#' The lower bounds are \strong{not} symmetrical, and \code{DTW} is only symmetrical if series have equal
+#' The lower bounds are \strong{not} symmetric, and \code{DTW} is only symmetric if series have equal
 #' lengths.
 #'
 #' @references

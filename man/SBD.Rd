@@ -18,7 +18,7 @@ A list with: \itemize{
 }
 }
 \description{
-Distance based on coefficient-normalized cross-correlation as proposed by Papparizos and Gravano, 2015,
+Distance based on coefficient-normalized cross-correlation as proposed by Paparrizos and Gravano, 2015,
 for the k-Shape clustering algorithm.
 }
 \details{

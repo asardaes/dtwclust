@@ -27,7 +27,7 @@
 #' to bear in mind while using this package:
 #'
 #' Most distance calculations make use of the \code{\link[proxy]{dist}} function in the \code{proxy}
-#' package, which accepts one or two arguments for data objects (\code{x} and \code{y})). Users should
+#' package, which accepts one or two arguments for data objects (\code{x} and \code{y}). Users should
 #' use the two-input \strong{list} version, even if there is just one dataset (i.e.
 #' \code{proxy::dist(x = dataset, y = dataset, ...)}), because otherwise it sometimes fails to
 #' detect a whole time series as a single object and, instead, calculates distances between each observation
@@ -156,7 +156,7 @@ NULL
      if (!consistency_check("SBD", "dist", silent = TRUE))
           proxy::pr_DB$set_entry(FUN = SBD.proxy, names=c("SBD", "sbd"),
                                  loop = FALSE, type = "metric", distance = TRUE,
-                                 description = "Paparrizos' shape-based distance for time series",
+                                 description = "Paparrizos and Gravanos' shape-based distance for time series",
                                  PACKAGE = "dtwclust") #, PREFUN = proxy_prefun)
 
      ## Register DTW_LB

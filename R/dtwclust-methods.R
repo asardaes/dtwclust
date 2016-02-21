@@ -173,7 +173,7 @@ setMethod("predict", "dtwclust",
 #' @param clus A numeric vector indicating which clusters to plot.
 #' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
 #' information
-#' @param show.centers Logical flag. Should cluster centers be included in the plots?
+#' @param show.centroids Logical flag. Should cluster centroids be included in the plots?
 #' @param data The data in the same format as it was provided to \code{\link{dtwclust}}.
 #' @param time Optional values for the time axis. If series have different lengths, provide the time values of
 #' the longest series.
@@ -190,7 +190,7 @@ setMethod("predict", "dtwclust",
 #'
 setMethod("plot", signature(x="dtwclust", y="missing"),
           function(x, y, ..., clus = seq_len(x@k),
-                   labs.arg = NULL, show.centers = TRUE,
+                   labs.arg = NULL, show.centroids = TRUE,
                    data = NULL, time = NULL,
                    plot = TRUE, type = "dendrogram") {
 
@@ -240,6 +240,7 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                              })
 
                cen <- as.data.frame(cen)
+               colnames(cen) <- NULL
 
                ## Check if data was z-normalized
                if (x@preproc == "zscore")
@@ -261,7 +262,7 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                     t <- time
                }
 
-               df <- cbind(t, df)
+               df <- data.frame(t = t, df)
                dfm <- reshape2::melt(df, id.vars = "t")
 
                cl <- rep(x@cluster, each = L)
@@ -270,20 +271,20 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                })
                color <- factor(unlist(color))
 
-               dfm <- cbind(dfm, cl, color)
+               dfm <- data.frame(dfm, cl = cl, color = color)
 
                ## transform centers
 
-               cen <- cbind(t, cen)
+               cen <- data.frame(t = t, cen)
                cenm <- reshape2::melt(cen, id.vars = "t")
                cl <- rep(1L:x@k, each = L)
-               cenm <- cbind(cenm, cl)
+               cenm <- data.frame(cenm, cl = cl)
 
                ## create gg object
 
                gg <- ggplot(dfm[dfm$cl %in% clus, ], aes_string(x = "t", y = "value", group = "variable"))
 
-               if (show.centers) {
+               if (show.centroids) {
                     if(length(list(...)) == 0L)
                          gg <- gg + geom_line(data = cenm[cenm$cl %in% clus, ],
                                               linetype = "dashed",
@@ -295,7 +296,6 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                }
 
                gg <- gg +
-                    geom_line(data = cenm[cenm$cl %in% clus, ], ...) +
                     geom_line(aes(colour = color)) +
                     facet_wrap(~cl, scales = "free_y") +
                     guides(colour = FALSE) +
@@ -308,7 +308,7 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
 
                ## If NAs were introduced by me (for length consistency), I want them to be removed
                ## automatically, and I don't want a warning
-               if (plot) suppressWarnings(print(gg))
+               if (plot) suppressWarnings(plot(gg))
 
                invisible(gg)
           })

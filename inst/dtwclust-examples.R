@@ -6,9 +6,9 @@ data(uciCT)
 # Controls
 ctrl <- new("dtwclustControl", trace = TRUE)
 
-# ===============================================================================================
+# ====================================================================================
 # Simple partitional clustering with Euclidean distance and PAM centroids
-# ===============================================================================================
+# ====================================================================================
 
 # Reinterpolate to same length and coerce as matrix
 data <- t(sapply(CharTraj, reinterpolate, newLength = 180))
@@ -27,9 +27,9 @@ sapply(kc.l2, randIndex, y = labels)
 
 plot(kc.l2[[3L]])
 
-# ===============================================================================================
+# ====================================================================================
 # Hierarchical clustering with Euclidean distance
-# ===============================================================================================
+# ====================================================================================
 
 # Re-use the distance matrix from the previous example
 hc.l2 <- update(kc.l2[[3L]], k = 4L,
@@ -39,9 +39,9 @@ hc.l2 <- update(kc.l2[[3L]], k = 4L,
 cat("Rand indices for L2+HC:\n")
 sapply(hc.l2, randIndex, y = labels)
 
-# ===============================================================================================
+# ====================================================================================
 # Registering a custom distance with the 'proxy' package and using it
-# ===============================================================================================
+# ====================================================================================
 
 # Normalized DTW distance
 ndtw <- function(x, y, ...) {
@@ -53,7 +53,7 @@ ndtw <- function(x, y, ...) {
 if (!pr_DB$entry_exists("nDTW"))
      proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
                             loop = TRUE, type = "metric", distance = TRUE,
-                            description = "Normalized DTW with L1 norm")
+                            description = "Normalized DTW")
 
 # Subset of (original) data for speed
 kc.ndtw <- dtwclust(CharTraj[31:40], k = 2L,
@@ -62,9 +62,9 @@ kc.ndtw <- dtwclust(CharTraj[31:40], k = 2L,
 
 plot(kc.ndtw)
 
-# ===============================================================================================
+# ====================================================================================
 # Hierarchical clustering based on shabe-based distance
-# ===============================================================================================
+# ====================================================================================
 
 # Original data
 hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
@@ -73,9 +73,9 @@ hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
 
 plot(hc.sbd[[ which.max(sapply(hc.sbd, randIndex, y = CharTrajLabels)) ]])
 
-# ===============================================================================================
+# ====================================================================================
 # Autocorrelation-based fuzzy clustering (see D'Urso and Maharaj 2009)
-# ===============================================================================================
+# ====================================================================================
 
 # Calculate autocorrelation up to 50th lag, considering a list of time series as input
 acf_fun <- function(dat) {
@@ -90,10 +90,13 @@ fc <- dtwclust(CharTraj[1:25], type = "fuzzy", k = 5,
 # Fuzzy memberships
 print(fc@fcluster)
 
+# Plot crisp partition in the original space
+plot(fc, data = CharTraj[1:25], show.centroids = FALSE)
+
 \dontrun{
-# ===============================================================================================
+# ====================================================================================
 # TADPole clustering
-# ===============================================================================================
+# ====================================================================================
 
 ctrl@window.size <- 20L
 
@@ -107,9 +110,9 @@ plot(kc.tadp, clus = 3:4,
      labs.arg = list(title = "TADPole, clusters 3 and 4",
                      x = "time", y = "series"))
 
-# ===============================================================================================
+# ====================================================================================
 # Saving and modifying the ggplot object with custom time labels
-# ===============================================================================================
+# ====================================================================================
 
 t <- seq(Sys.Date(), len = 180, by = "day")
 gkc <- plot(kc.tadp, time = t, plot = FALSE)
@@ -118,10 +121,10 @@ require(scales)
 gkc + scale_x_date(labels = date_format("%b-%Y"),
                    breaks = date_breaks("2 months"))
 
-# ===============================================================================================
+# ====================================================================================
 # Using parallel computation to optimize several random repetitions
 # and distance matrix calculation
-# ===============================================================================================
+# ====================================================================================
 require(doParallel)
 
 # Create parallel workers

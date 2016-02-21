@@ -33,7 +33,7 @@ function and entry point for this package is \code{\link{dtwclust}}. There are a
 to bear in mind while using this package:
 
 Most distance calculations make use of the \code{\link[proxy]{dist}} function in the \code{proxy}
-package, which accepts one or two arguments for data objects (\code{x} and \code{y})). Users should
+package, which accepts one or two arguments for data objects (\code{x} and \code{y}). Users should
 use the two-input \strong{list} version, even if there is just one dataset (i.e.
 \code{proxy::dist(x = dataset, y = dataset, ...)}), because otherwise it sometimes fails to
 detect a whole time series as a single object and, instead, calculates distances between each observation

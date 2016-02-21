@@ -13,13 +13,13 @@ Default values are shown at the end.
 \section{Slots}{
 
 \describe{
-\item{\code{window.size}}{Integer or \code{NULL}. Window constraint for DTW and LB calculations.}
+\item{\code{window.size}}{Integer or \code{NULL}. Window constraint for DTW, DBA and LB calculations.}
 
 \item{\code{norm}}{Character. Pointwise distance for DTW, DBA and the LBs. Either \code{"L1"} for Manhattan distance
 or \code{"L2"} for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{"L1"}) and
 \code{distance = "DTW2"} (which always uses \code{"L2"}).}
 
-\item{\code{delta}}{Numeric. Stopping criterion for \code{\link{DBA}} centroids and in the case of fuzzy clustering.}
+\item{\code{delta}}{Numeric. Stopping criterion for \code{\link{DBA}} centroids and fuzzy clustering.}
 
 \item{\code{trace}}{Logical flag. If \code{TRUE}, more output regarding the progress is printed to screen.}
 

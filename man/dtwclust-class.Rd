@@ -12,7 +12,7 @@ special case (see \code{\link{dtwclust-methods}}).
 
 Please note that not all slots will contain valid information for all clustering types. In some cases,
 for example for fuzzy and hierarchical clustering, some results are computed assuming a hard partition
-is created based on the fuzzy memberships or dendrogram tree.
+is created based on the fuzzy memberships or dendrogram tree, and the provided value of \code{k}.
 }
 \section{Slots}{
 
@@ -56,6 +56,6 @@ centroid.}
 
 \item{\code{datalist}}{The provided data in the form of a list, where each element is a time series.}
 
-\item{\code{proctime}}{Time during function execution, as measured by \code{\link[base]{proc.time}}.}
+\item{\code{proctime}}{Time during function execution, as measured with \code{\link[base]{proc.time}}.}
 }}
 

@@ -1,6 +1,6 @@
 #' Shape average of several time series
 #'
-#' Time-series shape extraction based on optimal alignments as proposed by Papparizos and Gravano, 2015, for
+#' Time-series shape extraction based on optimal alignments as proposed by Paparrizos and Gravano, 2015, for
 #' the k-Shape clustering algorithm.
 #'
 #' This works only if the series are \emph{z-normalized}, since the output will also have this normalization.

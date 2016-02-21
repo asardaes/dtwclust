@@ -56,7 +56,7 @@ and TADPole clustering. See the details and the examples for more information.
 Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering is done
 with \code{\link[stats]{hclust}}. TADPole clustering uses the \code{\link{TADPole}} function. Specifying
 \code{type} = \code{"partitional"}, \code{distance} = \code{"sbd"} and \code{centroid} = \code{"shape"} is
-equivalent to the k-Shape algorithm (Papparizos and Gravano, 2015).
+equivalent to the k-Shape algorithm (Paparrizos and Gravano, 2015).
 
 The \code{data} may be a matrix, a data frame or a list. Matrices and data frames are coerced to a list,
 the former row-wise and the latter column-wise. Only lists can have series with different lengths. Most of
@@ -73,7 +73,7 @@ argument.
 Stochastic algorithm that creates a hard partition of the data into \code{k} clusters, where each cluster
 has a center/centroid. In case of time series clustering, the centroids are also time series.
 
-The cluster centroids are first randomly initialized by selecting one of the series in the data. The
+The cluster centroids are first randomly initialized by selecting some of the series in the data. The
 distance between each series and each centroid is calculated, and the series are assigned to the cluster
 whose centroid is closest. The centroids are then updated by using a given rule, and the procedure is
 repeated until no series changes from one cluster to another, or until the maximum number of iterations*
@@ -112,7 +112,8 @@ interpretation (see \code{\link{dtwclust-class}}).
 
 This is a deterministic algorithm that creates a hierarchy of groups by using different linkage methods
 (see \code{\link[stats]{hclust}}). The linkage method is controlled through the \code{method} parameter
-of this function. The distance to be used can be controlled with the \code{distance} parameter.
+of this function, with the additional option "all" that uses all of the available methods. The distance
+to be used can be controlled with the \code{distance} parameter.
 
 The hierarchy does not imply a specific number of clusters, but one can be induced by cutting the resulting
 dendrogram (see \code{\link[stats]{cutree}}). As with fuzzy clustering, this results in a crisp partition,
@@ -166,7 +167,8 @@ are available:
   \item "mean": The average along each dimension. In other words, the average of all \eqn{x^j_i}
   among the \eqn{j} series that belong to the same cluster for all time points \eqn{t_i}.
   \item "median": The median along each dimension. Similar to mean.
-  \item "shape": Shape averaging. See \code{\link{shape_extraction}} for more details.
+  \item "shape": Shape averaging. By default, all series are z-normalized in this case, since the resulting
+  centroids will also have this normalization. See \code{\link{shape_extraction}} for more details.
   \item "dba": DTW Barycenter Averaging. See \code{\link{DBA}} for more details.
   \item "pam": Partition around medoids (PAM). This basically means that the cluster centers are always
   one of the time series in the data. In this case, the distance matrix can be pre-computed once using all
@@ -176,7 +178,11 @@ are available:
 }
 
 These check for the special cases where parallelization might be desired. Note that only \code{shape},
-\code{dba} and \code{pam} support series of different length.
+\code{dba} and \code{pam} support series of different length. Also note that, for \code{shape} and
+\code{dba}, this support has a caveat: the final centroids' length will depend on the length of those
+series that were randomly chosen at the beginning of the clustering algorithm. For example, if the series
+in the dataset have a length of either 10 or 15, 2 clusters are desired, and the initial choice selects
+two series with length of 10, the final centroids will have this same length.
 }
 
 \section{Distance Measures}{
@@ -191,17 +197,15 @@ Note that you are free to create your own distance functions and register them. 
 one of the following custom implementations (all registered with \code{proxy}):
 
 \itemize{
-  \item \code{"dtw"}: DTW with L1 norm and optionally a Sakoe-Chiba/Slanted-band constraint.
-  \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint.
+  \item \code{"dtw"}: DTW with L1 norm and optionally a Sakoe-Chiba/Slanted-band constraint*.
+  \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint*.
   \item \code{"dtw_lb"}: DTW with L1 or L2 norm* and optionally a Sakoe-Chiba constraint*. Some
   computations are avoided by first estimating the distance matrix with Lemire's lower bound and then
-  iteratively refining with DTW. See \code{\link{dtw_lb}}. Not suitable for \code{pam.precompute} =
-  \code{TRUE}*.
+  iteratively refining with DTW. See \code{\link{dtw_lb}}. Not suitable for \code{pam.precompute}* =
+  \code{TRUE}.
   \item \code{"lbk"}: Keogh's lower bound with either L1 or L2 norm* for the Sakoe-Chiba constraint*.
   \item \code{"lbi"}: Lemire's lower bound with either L1 or L2 norm* for the Sakoe-Chiba constraint*.
-  \item \code{"sbd"}: Shape-based distance. Each series is z-normalized in this case. As a result,
-  the cluster centers (for partitional methods) are also z-normalized. See \code{\link{SBD}} for more
-  details.
+  \item \code{"sbd"}: Shape-based distance. See \code{\link{SBD}} for more details.
 }
 
 DTW2 is done with \code{\link[dtw]{dtw}}, but it differs from the result you would obtain if you specify
@@ -315,7 +319,7 @@ workers available.
 The lower bounds are defined only for time series of equal length. \code{DTW} and \code{DTW2}
 don't require this, but they are much slower to compute.
 
-The lower bounds are \strong{not} symmetrical, and \code{DTW} is only symmetrical if series have equal
+The lower bounds are \strong{not} symmetric, and \code{DTW} is only symmetric if series have equal
 lengths.
 }
 \examples{
@@ -327,9 +331,9 @@ data(uciCT)
 # Controls
 ctrl <- new("dtwclustControl", trace = TRUE)
 
-# ===============================================================================================
+# ====================================================================================
 # Simple partitional clustering with Euclidean distance and PAM centroids
-# ===============================================================================================
+# ====================================================================================
 
 # Reinterpolate to same length and coerce as matrix
 data <- t(sapply(CharTraj, reinterpolate, newLength = 180))
@@ -348,9 +352,9 @@ sapply(kc.l2, randIndex, y = labels)
 
 plot(kc.l2[[3L]])
 
-# ===============================================================================================
+# ====================================================================================
 # Hierarchical clustering with Euclidean distance
-# ===============================================================================================
+# ====================================================================================
 
 # Re-use the distance matrix from the previous example
 hc.l2 <- update(kc.l2[[3L]], k = 4L,
@@ -360,9 +364,9 @@ hc.l2 <- update(kc.l2[[3L]], k = 4L,
 cat("Rand indices for L2+HC:\\n")
 sapply(hc.l2, randIndex, y = labels)
 
-# ===============================================================================================
+# ====================================================================================
 # Registering a custom distance with the 'proxy' package and using it
-# ===============================================================================================
+# ====================================================================================
 
 # Normalized DTW distance
 ndtw <- function(x, y, ...) {
@@ -374,7 +378,7 @@ ndtw <- function(x, y, ...) {
 if (!pr_DB$entry_exists("nDTW"))
      proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
                             loop = TRUE, type = "metric", distance = TRUE,
-                            description = "Normalized DTW with L1 norm")
+                            description = "Normalized DTW")
 
 # Subset of (original) data for speed
 kc.ndtw <- dtwclust(CharTraj[31:40], k = 2L,
@@ -383,9 +387,9 @@ kc.ndtw <- dtwclust(CharTraj[31:40], k = 2L,
 
 plot(kc.ndtw)
 
-# ===============================================================================================
+# ====================================================================================
 # Hierarchical clustering based on shabe-based distance
-# ===============================================================================================
+# ====================================================================================
 
 # Original data
 hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
@@ -394,9 +398,9 @@ hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
 
 plot(hc.sbd[[ which.max(sapply(hc.sbd, randIndex, y = CharTrajLabels)) ]])
 
-# ===============================================================================================
+# ====================================================================================
 # Autocorrelation-based fuzzy clustering (see D'Urso and Maharaj 2009)
-# ===============================================================================================
+# ====================================================================================
 
 # Calculate autocorrelation up to 50th lag, considering a list of time series as input
 acf_fun <- function(dat) {
@@ -411,10 +415,13 @@ fc <- dtwclust(CharTraj[1:25], type = "fuzzy", k = 5,
 # Fuzzy memberships
 print(fc@fcluster)
 
+# Plot crisp partition in the original space
+plot(fc, data = CharTraj[1:25], show.centroids = FALSE)
+
 \dontrun{
-# ===============================================================================================
+# ====================================================================================
 # TADPole clustering
-# ===============================================================================================
+# ====================================================================================
 
 ctrl@window.size <- 20L
 
@@ -428,9 +435,9 @@ plot(kc.tadp, clus = 3:4,
      labs.arg = list(title = "TADPole, clusters 3 and 4",
                      x = "time", y = "series"))
 
-# ===============================================================================================
+# ====================================================================================
 # Saving and modifying the ggplot object with custom time labels
-# ===============================================================================================
+# ====================================================================================
 
 t <- seq(Sys.Date(), len = 180, by = "day")
 gkc <- plot(kc.tadp, time = t, plot = FALSE)
@@ -439,10 +446,10 @@ require(scales)
 gkc + scale_x_date(labels = date_format("\%b-\%Y"),
                    breaks = date_breaks("2 months"))
 
-# ===============================================================================================
+# ====================================================================================
 # Using parallel computation to optimize several random repetitions
 # and distance matrix calculation
-# ===============================================================================================
+# ====================================================================================
 require(doParallel)
 
 # Create parallel workers
