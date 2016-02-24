@@ -137,11 +137,16 @@ setMethod("predict", "dtwclust",
 
                } else {
                     newdata <- consistency_check(newdata, "tsmat")
+                    nm <- names(newdata)
                     consistency_check(newdata, "vltslist")
                     newdata <- object@family@preproc(newdata)
-                    distmat <- object@family@dist(newdata, object@centers)
-                    ret <- object@family@cluster(distmat = distmat)
-                    names(ret) <- names(newdata)
+                    distmat <- object@family@dist(newdata, object@centers, ...)
+                    ret <- object@family@cluster(distmat = distmat, m = object@control@fuzziness)
+
+                    if (object@type != "fuzzy")
+                         names(ret) <- nm
+                    else
+                         dimnames(ret) <- list(nm, paste0("cluster_", 1:ncol(ret)))
                }
 
                ret

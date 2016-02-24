@@ -146,6 +146,8 @@ fcm_cluster <- function(distmat, m) {
 
      u <- 1 / apply(distmat, 2L, function(dist_col) { cprime * dist_col ^ (2 / (m - 1)) })
 
+     if (is.null(dim(u))) u <- rbind(u) # for predict generic
+
      u
 }
 
