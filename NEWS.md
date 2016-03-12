@@ -1,5 +1,8 @@
 # NEWS
 
+## Version 2.1.1
+* Bug fixes
+
 ## Version 2.1.0
 * Added fuzzy c-means clustering
 * Memory optimizations for DBA

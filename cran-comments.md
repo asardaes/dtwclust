@@ -1,10 +1,7 @@
-## Update to version 2.1.0
-* Added fuzzy c-means algorithm
-* Update documentation
-* Bug fixes and optimizations
+## Update to version 2.1.1
 
 ## Test environments
-* Local Linux Mint 17.3, R 3.2.3
+* Local Linux Mint 17.3, R 3.2.4
 * Local Windows 10, R 3.2.3
 * win-builder (devel and release)
 
