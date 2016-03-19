@@ -3,7 +3,7 @@
 \docType{package}
 \name{dtwclust-package}
 \alias{dtwclust-package}
-\title{Time series clustering with optimizations for the Dynamic Time Warping distance}
+\title{Time series clustering along with optimizations for the Dynamic Time Warping distance}
 \description{
 Time series clustering with a wide variety of strategies and a series of optimizations specific to
 the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs). There are

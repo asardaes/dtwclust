@@ -137,7 +137,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                x_split <- split(x, factor(cl_id, levels = 1L:k))
 
                ## In case of empty new clusters
-               empty_clusters <- which(sapply(x_split, length) == 0L)
+               empty_clusters <- which(lengths(x_split) == 0L)
                id_changed <- setdiff(id_changed, empty_clusters)
 
                ## Calculate new centers

@@ -2,7 +2,7 @@
 
 ## Test environments
 * Local Linux Mint 17.3, R 3.2.4
-* Local Windows 10, R 3.2.3
+* Local Windows 10, R 3.2.4
 * win-builder (devel and release)
 
 ## R CMD check results

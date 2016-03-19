@@ -63,8 +63,7 @@ shape_extraction <- function(X, center = NULL, znorm = FALSE) {
      ## make sure at least one series is not just a flat line at zero
      if (all(sapply(Xz, sum) == 0)) {
           if (is.null(center)) {
-               lengths <- sapply(Xz, length)
-               return(rep(0, sample(lengths, 1)))
+               return(rep(0, sample(lengths(Xz), 1)))
 
           } else {
                return(center)
@@ -72,7 +71,7 @@ shape_extraction <- function(X, center = NULL, znorm = FALSE) {
      }
 
      if (is.null(center)) {
-          if (length(unique(sapply(Xz, length))) == 1L)
+          if (length(unique(lengths(Xz))) == 1L)
                A <- do.call(rbind, Xz) # use all
           else {
                center <- Xz[[sample(length(Xz), 1L)]] # random choice as reference

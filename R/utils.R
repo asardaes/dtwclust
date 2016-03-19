@@ -23,7 +23,7 @@ consistency_check <- function(obj, case, ...) {
           }
 
      } else if (case == "tslist") {
-          Lengths <- sapply(obj, length)
+          Lengths <- lengths(obj)
 
           if (class(obj) != "list")
                stop("Series must be provided in a list")
@@ -47,7 +47,7 @@ consistency_check <- function(obj, case, ...) {
                stop("Time series cannot have missing elements")
 
      } else if (case == "vltslist") {
-          Lengths <- sapply(obj, length)
+          Lengths <- lengths(obj)
 
           ## list of variable-length time series
 
@@ -205,7 +205,7 @@ split_parallel <- function(obj, margin = NULL) {
           stop("Invalid attempt to split an object into parallel tasks")
 
      num_tasks <- parallel::splitIndices(num_tasks, num_workers)
-     num_tasks <- num_tasks[sapply(num_tasks, length, USE.NAMES = FALSE) > 0L]
+     num_tasks <- num_tasks[lengths(num_tasks, use.names = FALSE) > 0L]
 
      if (is.null(margin))
           ret <- lapply(num_tasks, function(id) obj[id])
