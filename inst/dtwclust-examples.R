@@ -60,8 +60,6 @@ kc.ndtw <- dtwclust(CharTraj[31:39], k = 2L,
                     distance = "nDTW",
                     control = ctrl, seed = 8319)
 
-plot(kc.ndtw)
-
 # Where would series 40 go?
 predict(kc.ndtw, newdata = CharTraj[40])
 
@@ -77,9 +75,9 @@ hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
 # Plot dendrogram
 plot(hc.sbd[[ which.max(sapply(hc.sbd, randIndex, y = CharTrajLabels)) ]])
 
-# Plot crisp partition with k = 20
+# Plot subset of crisp partition with k = 20
 plot(hc.sbd[[ which.max(sapply(hc.sbd, randIndex, y = CharTrajLabels)) ]],
-     type = "series")
+     clus = 1, type = "series")
 
 # ====================================================================================
 # Autocorrelation-based fuzzy clustering (see D'Urso and Maharaj 2009)
@@ -101,8 +99,9 @@ print(fc@fcluster)
 # Plot crisp partition in the original space
 plot(fc, data = CharTraj[1:25], show.centroids = FALSE)
 
-# Membership for new series (it's important that 'preproc' was specified in the original call)
-predict(fc, newdata = CharTraj[26:30])
+# Membership for new series
+# (It's important that 'preproc' was specified in the original call)
+predict(fc, newdata = CharTraj[26:28])
 
 \dontrun{
 # ====================================================================================
