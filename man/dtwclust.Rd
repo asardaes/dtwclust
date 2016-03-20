@@ -381,11 +381,14 @@ if (!pr_DB$entry_exists("nDTW"))
                             description = "Normalized DTW")
 
 # Subset of (original) data for speed
-kc.ndtw <- dtwclust(CharTraj[31:40], k = 2L,
+kc.ndtw <- dtwclust(CharTraj[31:39], k = 2L,
                     distance = "nDTW",
                     control = ctrl, seed = 8319)
 
 plot(kc.ndtw)
+
+# Where would series 40 go?
+predict(kc.ndtw, newdata = CharTraj[40])
 
 # ====================================================================================
 # Hierarchical clustering based on shabe-based distance
@@ -396,7 +399,12 @@ hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
                    k = 20, method = "all",
                    distance = "sbd", control = ctrl)
 
+# Plot dendrogram
 plot(hc.sbd[[ which.max(sapply(hc.sbd, randIndex, y = CharTrajLabels)) ]])
+
+# Plot crisp partition with k = 20
+plot(hc.sbd[[ which.max(sapply(hc.sbd, randIndex, y = CharTrajLabels)) ]],
+     type = "series")
 
 # ====================================================================================
 # Autocorrelation-based fuzzy clustering (see D'Urso and Maharaj 2009)
@@ -417,6 +425,9 @@ print(fc@fcluster)
 
 # Plot crisp partition in the original space
 plot(fc, data = CharTraj[1:25], show.centroids = FALSE)
+
+# Membership for new series (it's important that 'preproc' was specified in the original call)
+predict(fc, newdata = CharTraj[26:30])
 
 \dontrun{
 # ====================================================================================
@@ -457,10 +468,10 @@ cl <- makeCluster(detectCores())
 invisible(clusterEvalQ(cl, library(dtwclust)))
 registerDoParallel(cl)
 
-## Use constrained DTW and PAM (~20 seconds)
+## Use constrained DTW and PAM (~20 seconds with 8 cores)
 kc.dtw <- dtwclust(CharTraj, k = 20, seed = 3251, control = ctrl)
 
-## Use constrained DTW with DBA centroids (~20 seconds)
+## Use constrained DTW with DBA centroids (~20 seconds with 8 cores)
 kc.dba <- dtwclust(CharTraj, k = 20, centroid = "dba", seed = 3251, control = ctrl)
 
 ## This uses the "nDTW" function registered in another example above

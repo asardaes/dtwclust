@@ -1,4 +1,5 @@
 ## Update to version 2.1.1
+* Minor bug fixes
 
 ## Test environments
 * Local Linux Mint 17.3, R 3.2.4

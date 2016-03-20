@@ -349,14 +349,14 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      dots <- list(...)
 
      args <- names(MYCALL[-1L])
-     id_oldargs <- which(args %in% c(slotNames("dtwclustControl"), "reps"))
+     id_oldargs <- which(args %in% slotNames("dtwclustControl"))
      if (length(id_oldargs) > 0L) {
           message("Control arguments should not be provided in ... to prevent duplicate matches.")
           message("Please type ?dtwclustControl for more information.\n")
 
           for (i in id_oldargs) {
                var <- MYCALL[-1L][[args[i]]]
-               slot(control, args[i]) <- if (is.numeric(var)) as.integer(var) else var
+               slot(control, args[i]) <- var
 
                ## remove from dots to avoid duplicate matches
                dots[[args[i]]] <- NULL

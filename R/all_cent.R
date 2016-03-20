@@ -116,6 +116,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                cent <- t(u) %*% do.call(rbind, x)
                cent <- apply(cent, 2L, "/", e2 = colSums(u))
 
+               # Coerce back to list
                consistency_check(cent, "tsmat")
           }
      } else {

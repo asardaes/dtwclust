@@ -1,12 +1,15 @@
 # NEWS
 
 ## Version 2.1.1
-* Bug fixes
+* Minor bug fixes for fuzzy clustering
+     + Fixed the `predict` generic.
+     + The final values returned in the `fcluster` slot needed one final update during clustering. It should be correct now, but it will vary slightly with respect to what was previously given in v2.1.0.
+* Some more examples
 
 ## Version 2.1.0
 * Added fuzzy c-means clustering
 * Memory optimizations for DBA
-* Support for several k values for multiple runs
+* Support for several `k` values for multiple runs
 * Update documentation
 
 ## Version 2.0.0

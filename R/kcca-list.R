@@ -86,6 +86,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
           converged <- TRUE
      }
 
+     distmat <- family@dist(x, centers, ...)
      cluster <- family@cluster(distmat = distmat, m = control@fuzziness)
 
      if (fuzzy) {
@@ -94,8 +95,6 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
           colnames(fcluster) <- paste0("cluster_", 1:k)
 
           cluster <- max.col(-distmat, "first")
-
-          centers <- consistency_check(centers, "tsmat")
 
      } else {
           fcluster <- matrix(NA_real_)
