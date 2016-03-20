@@ -10,7 +10,7 @@ Many of the algorithms implemented in this package are specifically tailored to 
 
 DTW is a dynamic programming algorithm that tries to find the optimum warping path between two series. Over the years, several variations have appeared in order to make the procedure faster or more efficient. Please refer to the included references for more information, especially Giorgino (2009), which is a good practical introduction.
 
-Most optimizations require equal dimensionality, which means time series should have equal lengths. DTW itself does not require this, but it is relatively slow to compute. Other distance definitions may be used, or series could be reinterpolated to a matching length (Ratanamahatana and Keogh, 2004).
+Most optimizations require equal dimensionality, which means time series should have equal lengths. DTW itself does not require this, but it is relatively expensive to compute. Other distance definitions may be used, or series could be reinterpolated to a matching length (Ratanamahatana and Keogh, 2004).
 
 Implementations
 ---------------
@@ -52,7 +52,7 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 4: Changes / Distsum = 2 / 1311.201
 #> Iteration 5: Changes / Distsum = 0 / 1311.201
 #> 
-#>  Elapsed time is 11.757 seconds.
+#>  Elapsed time is 12.081 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -73,7 +73,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.635 seconds.
+#>  Elapsed time is 0.646 seconds.
 
 cat("Rand index for HC+SBD:\n")
 #> Rand index for HC+SBD:
@@ -104,7 +104,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 4.005 seconds.
+#>  Elapsed time is 4.077 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -156,7 +156,7 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 3: Changes / Distsum = 1 / 3.550964
 #> Iteration 4: Changes / Distsum = 0 / 3.531171
 #> 
-#>  Elapsed time is 17.875 seconds.
+#>  Elapsed time is 21.436 seconds.
 
 # Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
@@ -195,17 +195,17 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.164   0.000   0.163 
+#>   0.156   0.000   0.157 
 #> 
 #> Head of fuzzy memberships:
 #> 
 #>       cluster_1   cluster_2  cluster_3  cluster_4 cluster_5
-#> A.V1 0.04550608 0.015278671 0.06017278 0.02854909 0.8504934
-#> A.V2 0.02649930 0.007304681 0.03576385 0.01482575 0.9156064
-#> A.V3 0.03891669 0.007107856 0.03584082 0.01348798 0.9046467
-#> A.V4 0.09316283 0.194096301 0.10463724 0.20029868 0.4078050
-#> A.V5 0.09423895 0.163296699 0.11727901 0.17605511 0.4491302
-#> B.V1 0.39131228 0.034768969 0.35717141 0.07915848 0.1375889
+#> A.V1 0.04517433 0.015248385 0.06048626 0.02847461 0.8506164
+#> A.V2 0.02648172 0.007341668 0.03623648 0.01489308 0.9150471
+#> A.V3 0.03920172 0.007216578 0.03668630 0.01368817 0.9032072
+#> A.V4 0.09258928 0.193779128 0.10495491 0.19932425 0.4093524
+#> A.V5 0.09366124 0.162965470 0.11758524 0.17523731 0.4505507
+#> B.V1 0.39400450 0.034717343 0.35507763 0.07914583 0.1370547
 ```
 
 Dependencies
