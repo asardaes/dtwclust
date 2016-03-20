@@ -1,4 +1,5 @@
 ## Update to version 2.1.1
+* I will keep most tests local to avoid including all the rds in the binary file
 * Minor bug fixes
 
 ## Test environments

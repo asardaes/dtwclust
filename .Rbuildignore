@@ -1,5 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^.*\.rds$
 manual.txt
 NEWS.md
 cran-comments.md
