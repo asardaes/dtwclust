@@ -153,16 +153,16 @@ setClass("dtwclustControl",
 #' @slot family An object of class \code{\link{dtwclustFamily}}.
 #' @slot distmat If computed, the cross-distance matrix.
 #' @slot k Integer indicating the number of desired clusters.
-#' @slot cluster Integer vector indicating which cluster a series belongs to.
+#' @slot cluster Integer vector indicating which cluster a series belongs to (crisp partition).
 #' @slot fcluster Numeric matrix that contains membership of fuzzy clusters. It has one row for each
 #' series and one column for each cluster. The rows must sum to 1. Only relevant for fuzzy clustering.
 #' @slot iter The number of iterations used.
 #' @slot converged A logical indicating whether the function converged.
 #' @slot clusinfo A data frame with two columns: \code{size} indicates the number of series each cluster has,
-#' and \code{av_dist} indicates the average distance between series of each cluster.
+#' and \code{av_dist} indicates the average distance between series of each cluster (crisp partition).
 #' @slot centers A list with the centroid time series.
 #' @slot cldist A column vector with the distance between each series in the data and its corresponding
-#' centroid.
+#' centroid (crisp partition).
 #' @slot type A string indicating one of the supported clustering types of \code{\link{dtwclust}}.
 #' @slot method A string indicating which hierarchical method was used.
 #' @slot distance A string indicating the distance used.

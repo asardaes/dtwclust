@@ -1,10 +1,8 @@
-## Update to version 2.1.1
-* I will keep most tests local to avoid including all the rds in the binary file
-* Minor bug fixes
+## Update to version 2.1.2
 
 ## Test environments
-* Local Linux Mint 17.3, R 3.2.4
-* Local Windows 10, R 3.2.4
+* Local Linux Mint 17.3, R 3.2.5
+* Local Windows 10, R 3.2.5
 * win-builder (devel and release)
 
 ## R CMD check results

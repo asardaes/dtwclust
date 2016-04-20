@@ -27,7 +27,7 @@ is created based on the fuzzy memberships or dendrogram tree, and the provided v
 
 \item{\code{k}}{Integer indicating the number of desired clusters.}
 
-\item{\code{cluster}}{Integer vector indicating which cluster a series belongs to.}
+\item{\code{cluster}}{Integer vector indicating which cluster a series belongs to (crisp partition).}
 
 \item{\code{fcluster}}{Numeric matrix that contains membership of fuzzy clusters. It has one row for each
 series and one column for each cluster. The rows must sum to 1. Only relevant for fuzzy clustering.}
@@ -37,12 +37,12 @@ series and one column for each cluster. The rows must sum to 1. Only relevant fo
 \item{\code{converged}}{A logical indicating whether the function converged.}
 
 \item{\code{clusinfo}}{A data frame with two columns: \code{size} indicates the number of series each cluster has,
-and \code{av_dist} indicates the average distance between series of each cluster.}
+and \code{av_dist} indicates the average distance between series of each cluster (crisp partition).}
 
 \item{\code{centers}}{A list with the centroid time series.}
 
 \item{\code{cldist}}{A column vector with the distance between each series in the data and its corresponding
-centroid.}
+centroid (crisp partition).}
 
 \item{\code{type}}{A string indicating one of the supported clustering types of \code{\link{dtwclust}}.}
 

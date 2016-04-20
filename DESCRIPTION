@@ -27,7 +27,7 @@ Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
 Description: Time series clustering along with optimized techniques related
     to the Dynamic Time Warping distance and its corresponding lower bounds.
-    Implementations partitional, hierarchical, fuzzy, k-Shape and TADPole
+    Implementations of partitional, hierarchical, fuzzy, k-Shape and TADPole
     clustering are available. Functionality can be easily extended with
     custom distance measures and centroid definitions.
 URL: https://github.com/asardaes/dtwclust

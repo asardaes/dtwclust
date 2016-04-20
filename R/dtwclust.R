@@ -1,7 +1,7 @@
 #' Time series clustering
 #'
-#' This is the main function to perform time series clustering. It supports partitional, hierarchical, fuzzy
-#' and TADPole clustering. See the details and the examples for more information.
+#' This is the main function to perform time series clustering. It supports partitional, hierarchical, fuzzy,
+#' k-Shape and TADPole clustering. See the details and the examples for more information.
 #'
 #' Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering is done
 #' with \code{\link[stats]{hclust}}. TADPole clustering uses the \code{\link{TADPole}} function. Specifying
@@ -169,7 +169,7 @@
 #'
 #' Whether your function makes use of them or not, is up to you.
 #'
-#' If you know that the distance function is symmetric, and you use a hierarchical algorithm or a partitional
+#' If you know that the distance function is symmetric, and you use a hierarchical algorithm, or a partitional
 #' algorithm with PAM centroids and \code{pam.precompute}* = \code{TRUE}, some time can be saved by
 #' calculating only half the distance matrix. Therefore, consider setting the symmetric* control parameter
 #' to \code{TRUE} if this is the case.
@@ -279,10 +279,10 @@
 #'
 #' @author Alexis Sarda-Espinosa
 #'
-#' @param data A list where each element is a time series, or a numeric matrix (it will be coerced to a list
-#' row-wise).
-#' @param type What type of clustering method to use: \code{partitional}, \code{hierarchical}, \code{tadpole}
-#' or \code{fuzzy}.
+#' @param data A list of series, a numeric matrix or a data frame. Matrices are coerced row-wise and data frames
+#' column-wise.
+#' @param type What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"}, \code{"tadpole"}
+#' or \code{"fuzzy"}.
 #' @param k Numer of desired clusters. It may be a numeric vector with different values.
 #' @param method One or more linkage methods to use in hierarchical procedures. See \code{\link[stats]{hclust}}.
 #' You can provide a character vector to compute different hierarchical cluster structures in one go, or
@@ -342,8 +342,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      }
 
      ## ----------------------------------------------------------------------------------------------------------
-     ## Backwards compatibility, check for old formal arguments in '...'
-     ## I might leave this here to prevent duplicate matching anyway
+     ## Prevent duplicate matching
      ## ----------------------------------------------------------------------------------------------------------
 
      dots <- list(...)
