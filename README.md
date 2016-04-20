@@ -15,11 +15,11 @@ Most optimizations require equal dimensionality, which means time series should 
 Implementations
 ---------------
 
+-   Partitional, hierarchical and fuzzy clustering
 -   Keogh's and Lemire's lower bounds
 -   DTW Barycenter Averaging
 -   k-Shape clustering
 -   TADPole clustering
--   Fuzzy c-means
 
 Examples
 --------
@@ -38,7 +38,7 @@ ctrl <- new("dtwclustControl", window.size = 20L, trace = TRUE)
 
 ``` r
 ## =============================================================================================
-## Using DTW with help of lower bounds and PAM centroids
+## Partitional clustering using DTW with help of lower bounds and PAM centroids
 ## =============================================================================================
 
 ctrl@pam.precompute <- FALSE
@@ -52,7 +52,7 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 4: Changes / Distsum = 2 / 1311.201
 #> Iteration 5: Changes / Distsum = 0 / 1311.201
 #> 
-#>  Elapsed time is 12.081 seconds.
+#>  Elapsed time is 12.026 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -73,7 +73,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.646 seconds.
+#>  Elapsed time is 0.657 seconds.
 
 cat("Rand index for HC+SBD:\n")
 #> Rand index for HC+SBD:
@@ -104,7 +104,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 4.077 seconds.
+#>  Elapsed time is 4.213 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -124,7 +124,7 @@ cl <- makeCluster(detectCores(), "FORK")
 invisible(clusterEvalQ(cl, library(dtwclust)))
 registerDoParallel(cl)
 
-## Registering a custom distance with proxy and using it (normalized DTW)
+## Creating a custom distance (normalized DTW)
 ndtw <- function(x, y, ...) {
      dtw::dtw(x, y, step.pattern = symmetric2,
               distance.only = TRUE, ...)$normalizedDistance
@@ -156,9 +156,9 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 3: Changes / Distsum = 1 / 3.550964
 #> Iteration 4: Changes / Distsum = 0 / 3.531171
 #> 
-#>  Elapsed time is 21.436 seconds.
+#>  Elapsed time is 20.657 seconds.
 
-# Modifying some plot parameters
+## Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
 ```
 
@@ -166,6 +166,7 @@ plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
 
 ``` r
 
+## Returning to sequential calculations
 stopCluster(cl)
 registerDoSEQ()
 ```
@@ -195,7 +196,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.156   0.000   0.157 
+#>   0.160   0.000   0.161 
 #> 
 #> Head of fuzzy memberships:
 #> 

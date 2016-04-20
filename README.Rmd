@@ -33,11 +33,11 @@ Most optimizations require equal dimensionality, which means time series should 
 
 ## Implementations
 
+* Partitional, hierarchical and fuzzy clustering
 * Keogh's and Lemire's lower bounds
 * DTW Barycenter Averaging
 * k-Shape clustering
 * TADPole clustering
-* Fuzzy c-means
 
 ## Examples
 
@@ -55,7 +55,7 @@ ctrl <- new("dtwclustControl", window.size = 20L, trace = TRUE)
 
 ```{r partitional}
 ## =============================================================================================
-## Using DTW with help of lower bounds and PAM centroids
+## Partitional clustering using DTW with help of lower bounds and PAM centroids
 ## =============================================================================================
 
 ctrl@pam.precompute <- FALSE
@@ -104,7 +104,7 @@ cl <- makeCluster(detectCores(), "FORK")
 invisible(clusterEvalQ(cl, library(dtwclust)))
 registerDoParallel(cl)
 
-## Registering a custom distance with proxy and using it (normalized DTW)
+## Creating a custom distance (normalized DTW)
 ndtw <- function(x, y, ...) {
      dtw::dtw(x, y, step.pattern = symmetric2,
               distance.only = TRUE, ...)$normalizedDistance
@@ -127,9 +127,10 @@ kc <- dtwclust(datalist, k = 20,
                distance = "nDTW", centroid = "dba",
                seed = 9421, control = list(trace = TRUE))
 
-# Modifying some plot parameters
+## Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
 
+## Returning to sequential calculations
 stopCluster(cl)
 registerDoSEQ()
 ```
