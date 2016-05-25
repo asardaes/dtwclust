@@ -25,7 +25,7 @@ specify \code{method} \code{=} \code{"all"} to use all the available ones.}
 Ignored for \code{type} = \code{"tadpole"}.}
 
 \item{centroid}{Either a supported string or an appropriate function to calculate centroids
-when using partitional methods. See Centroid section.}
+when using partitional or prototypes for hierarchical/tadpole methods. See Centroid section.}
 
 \item{preproc}{Function to preprocess data. Defaults to \code{zscore} \emph{only} if \code{centroid}
 \code{=} \code{"shape"}, but will be replaced by a custom function if provided. See Preprocessing section.}
@@ -183,6 +183,10 @@ These check for the special cases where parallelization might be desired. Note t
 series that were randomly chosen at the beginning of the clustering algorithm. For example, if the series
 in the dataset have a length of either 10 or 15, 2 clusters are desired, and the initial choice selects
 two series with length of 10, the final centroids will have this same length.
+
+As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid function that
+takes a list of series as only input and returns a single centroid series. These centroids are returned in
+the \code{centers} slot. By default, a type of PAM centroid function is used.
 }
 
 \section{Distance Measures}{
@@ -455,6 +459,18 @@ gkc <- plot(kc.tadp, time = t, plot = FALSE)
 require(scales)
 gkc + scale_x_date(labels = date_format("\%b-\%Y"),
                    breaks = date_breaks("2 months"))
+
+# ====================================================================================
+# Specifying a centroid function for prototype extraction in hierarchical clustering
+# ====================================================================================
+
+# Seed is due to possible randomness in shape_extraction when selecting a basis series
+hc <- dtwclust(CharTraj, type = "hierarchical",
+               k = 20, distance = "sbd",
+               preproc = zscore, centroid = shape_extraction,
+               seed = 320)
+
+plot(hc, type = "series")
 
 # ====================================================================================
 # Using parallel computation to optimize several random repetitions

@@ -132,6 +132,18 @@ gkc + scale_x_date(labels = date_format("%b-%Y"),
                    breaks = date_breaks("2 months"))
 
 # ====================================================================================
+# Specifying a centroid function for prototype extraction in hierarchical clustering
+# ====================================================================================
+
+# Seed is due to possible randomness in shape_extraction when selecting a basis series
+hc <- dtwclust(CharTraj, type = "hierarchical",
+               k = 20, distance = "sbd",
+               preproc = zscore, centroid = shape_extraction,
+               seed = 320)
+
+plot(hc, type = "series")
+
+# ====================================================================================
 # Using parallel computation to optimize several random repetitions
 # and distance matrix calculation
 # ====================================================================================

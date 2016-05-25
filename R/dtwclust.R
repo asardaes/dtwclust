@@ -125,6 +125,10 @@
 #' in the dataset have a length of either 10 or 15, 2 clusters are desired, and the initial choice selects
 #' two series with length of 10, the final centroids will have this same length.
 #'
+#' As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid function that
+#' takes a list of series as only input and returns a single centroid series. These centroids are returned in
+#' the \code{centers} slot. By default, a type of PAM centroid function is used.
+#'
 #' @section Distance Measures:
 #'
 #' The distance measure to be used with partitional, hierarchical and fuzzy clustering can be modified with
@@ -290,7 +294,7 @@
 #' @param distance A supported distance from \code{proxy}'s \code{\link[proxy]{dist}} (see Distance section).
 #' Ignored for \code{type} = \code{"tadpole"}.
 #' @param centroid Either a supported string or an appropriate function to calculate centroids
-#' when using partitional methods. See Centroid section.
+#' when using partitional or prototypes for hierarchical/tadpole methods. See Centroid section.
 #' @param preproc Function to preprocess data. Defaults to \code{zscore} \emph{only} if \code{centroid}
 #' \code{=} \code{"shape"}, but will be replaced by a custom function if provided. See Preprocessing section.
 #' @param dc Cutoff distance for the \code{\link{TADPole}} algorithm.
@@ -665,6 +669,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## Cluster
           hc <- lapply(hclust_methods, function(method) stats::hclust(Dist, method))
 
+          ## Invalid centroid specifier provided?
+          if(!is.function(centroid)) centroid <- NA
+
           RET <- lapply(k, function(k) {
                lapply(hc, function(hc) {
                     ## cutree and corresponding centers
@@ -686,6 +693,11 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     clusinfo <- data.frame(size = size,
                                            av_dist = as.vector(tapply(cldist[,1], cluster, sum))/size)
 
+                    if (is.function(centroid))
+                         centers <- lapply(1L:k, function(kcent) centroid(data[cluster == kcent]))
+                    else
+                         centers <- data[centers]
+
                     new("dtwclust", hc,
                         call = MYCALL,
                         control = control,
@@ -697,10 +709,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                         type = type,
                         method = hc$method,
                         distance = distance,
-                        centroid = "NA",
+                        centroid = as.character(substitute(centroid)),
                         preproc = preproc_char,
 
-                        centers = data[centers],
+                        centers = centers,
                         k = as.integer(k),
                         cluster = cluster,
                         fcluster = matrix(NA_real_),
@@ -748,6 +760,12 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## mainly for predict generic
           distfun <- ddist("dtw_lb", control = control, distmat = NULL)
 
+          ## Invalid centroid specifier provided?
+          if(is.function(centroid))
+               centchar <- as.character(substitute(centroid))
+          else
+               centchar <- "PAM (TADPole)"
+
           RET <- foreach(k = k, .combine = list, .multicombine = TRUE, .packages = "dtwclust") %dopar% {
                R <- TADPole(data, window.size = control@window.size, k = k, dc = dc, error.check = FALSE)
 
@@ -769,6 +787,12 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                clusinfo <- data.frame(size = size,
                                       av_dist = as.vector(tapply(cldist[ , 1L], R$cl, sum))/size)
 
+               if (is.function(centroid)) {
+                    centers <- lapply(1L:k, function(kcent) centroid(data[R$cl == kcent]))
+               } else {
+                    centers <- data[R$centers]
+               }
+
                new("dtwclust",
                    call = MYCALL,
                    control = control,
@@ -779,10 +803,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                    type = type,
                    distance = "DTW2_LB",
-                   centroid = "pam (TADPole)",
+                   centroid = centchar,
                    preproc = preproc_char,
 
-                   centers = data[R$centers],
+                   centers = centers,
                    k = as.integer(k),
                    cluster = as.integer(R$cl),
                    fcluster = matrix(NA_real_),

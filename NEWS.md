@@ -1,5 +1,8 @@
 # NEWS
 
+## Version 2.1.2
+* Added option to specify a function to extract prototypes in hierarchical and TADPole clustering
+
 ## Version 2.1.1
 * Minor bug fixes for fuzzy clustering
      + Fixed the `predict` generic.

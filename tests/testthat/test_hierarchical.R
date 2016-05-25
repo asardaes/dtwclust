@@ -27,6 +27,20 @@ test_that("hierarchical clustering with non-symmetric distance gives the same re
           my_expect_equal_to_reference(hc_lbi))
 
 # =================================================================================================
+# custom centroid function
+# =================================================================================================
+
+hc_cent <- dtwclust(data_list, type = "hierarchical",
+                    k = 20, distance = "sbd",
+                    preproc = zscore, centroid = shape_extraction,
+                    seed = 320)
+
+hc_cent <- reset_nondeterministic(hc_cent)
+
+test_that("hierarchical clustering with custom centroid gives the same result as reference",
+          my_expect_equal_to_reference(hc_cent))
+
+# =================================================================================================
 # distance function
 # =================================================================================================
 

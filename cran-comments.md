@@ -1,8 +1,9 @@
 ## Update to version 2.1.2
+* Documentation fixes and added functionality
 
 ## Test environments
-* Local Linux Mint 17.3, R 3.2.5
-* Local Windows 10, R 3.2.5
+* Local GNU/Linux, R 3.3.0
+* Local Windows 10, R 3.3.0
 * win-builder (devel and release)
 
 ## R CMD check results
