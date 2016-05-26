@@ -626,6 +626,12 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                hclust_methods <- c("ward.D", "ward.D2", "single", "complete",
                                    "average", "mcquitty", "median", "centroid")
 
+          ## Take advantage of the function I defined for the partitional methods
+          ## Which can do calculations in parallel if appropriate
+          distfun <- ddist(distance = distance,
+                           control = control,
+                           distmat = NULL)
+
           if (!is.null(distmat)) {
                if ( nrow(distmat) != length(data) || ncol(distmat) != length(data) )
                     stop("Dimensions of provided cross-distance matrix don't correspond to length of provided data")
@@ -634,7 +640,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     cat("\n\tDistance matrix provided...\n")
 
                D <- distmat
-               distfun <- function(...) stop("'distmat' provided in call, no distance calculations performed")
 
                if (!is.null(attr(distmat, "method")))
                     distance <- attr(distmat, "method")
@@ -642,18 +647,11 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     distance <- "unknown"
 
           } else {
-               ## Take advantage of the function I defined for the partitional methods
-               ## Which can do calculations in parallel if appropriate
-               distfun <- ddist(distance = distance,
-                                control = control,
-                                distmat = NULL)
-
                if (control@trace)
                     cat("\n\tCalculating distance matrix...\n")
 
                ## single argument is to calculate whole distance matrix
                D <- do.call("distfun", c(list(data), dots))
-
           }
 
           ## Required form for 'hclust'
@@ -670,33 +668,45 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           hc <- lapply(hclust_methods, function(method) stats::hclust(Dist, method))
 
           ## Invalid centroid specifier provided?
-          if(!is.function(centroid)) centroid <- NA
+          if (!missing(centroid) && !is.function(centroid))
+               warning("The 'centroid' argument was provided but it wasn't a function, so it was ignored.")
+          if (!is.function(centroid))
+               centroid <- NA
 
           RET <- lapply(k, function(k) {
                lapply(hc, function(hc) {
                     ## cutree and corresponding centers
                     cluster <- stats::cutree(hc, k)
 
-                    centers <- sapply(1L:k, function(kcent) {
-                         id_k <- cluster == kcent
+                    if (is.function(centroid)) {
+                         centers <- lapply(1L:k, function(kcent) centroid(data[cluster == kcent]))
 
-                         d_sub <- D[id_k, id_k, drop = FALSE]
+                         cldist <- do.call("distfun", c(list(x = data,
+                                                             centers = centers[cluster],
+                                                             pairwise = TRUE),
+                                                        dots))
 
-                         id_center <- which.min(apply(d_sub, 1L, sum))
+                         cldist <- as.matrix(cldist)
 
-                         which(id_k)[id_center]
-                    })
+                    } else {
+                         centers <- sapply(1L:k, function(kcent) {
+                              id_k <- cluster == kcent
+
+                              d_sub <- D[id_k, id_k, drop = FALSE]
+
+                              id_center <- which.min(apply(d_sub, 1L, sum))
+
+                              which(id_k)[id_center]
+                         })
+
+                         cldist <- as.matrix(D[,centers][cbind(1L:length(data), cluster)])
+                         centers <- data[centers]
+                    }
 
                     ## Some additional cluster information (taken from flexclust)
-                    cldist <- as.matrix(D[,centers][cbind(1L:length(data), cluster)])
                     size <- as.vector(table(cluster))
                     clusinfo <- data.frame(size = size,
                                            av_dist = as.vector(tapply(cldist[,1], cluster, sum))/size)
-
-                    if (is.function(centroid))
-                         centers <- lapply(1L:k, function(kcent) centroid(data[cluster == kcent]))
-                    else
-                         centers <- data[centers]
 
                     new("dtwclust", hc,
                         call = MYCALL,
@@ -761,6 +771,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           distfun <- ddist("dtw_lb", control = control, distmat = NULL)
 
           ## Invalid centroid specifier provided?
+          if (!missing(centroid) && !is.function(centroid))
+               warning("The 'centroid' argument was provided but it wasn't a function, so it was ignored.")
+
           if(is.function(centroid))
                centchar <- as.character(substitute(centroid))
           else
@@ -780,18 +793,22 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                ## Prepare results
                ## ----------------------------------------------------------------------------------------------------------
 
-               ## Some additional cluster information (taken from flexclust)
-               subdistmat <- distfun(data, data[R$centers][R$cl], pairwise = TRUE)
-               cldist <- as.matrix(subdistmat)
-               size <- as.vector(table(R$cl))
-               clusinfo <- data.frame(size = size,
-                                      av_dist = as.vector(tapply(cldist[ , 1L], R$cl, sum))/size)
-
                if (is.function(centroid)) {
                     centers <- lapply(1L:k, function(kcent) centroid(data[R$cl == kcent]))
                } else {
                     centers <- data[R$centers]
                }
+
+               ## Some additional cluster information (taken from flexclust)
+               cldist <- do.call("distfun", c(list(x = data,
+                                                   centers = centers[R$cl],
+                                                   pairwise = TRUE),
+                                              dots))
+
+               cldist <- as.matrix(cldist)
+               size <- as.vector(table(R$cl))
+               clusinfo <- data.frame(size = size,
+                                      av_dist = as.vector(tapply(cldist[ , 1L], R$cl, sum))/size)
 
                new("dtwclust",
                    call = MYCALL,
