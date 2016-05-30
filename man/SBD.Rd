@@ -38,6 +38,9 @@ registered with the \code{proxy} package, since it includes some small optimizat
 However, because of said optimizations and the way \code{proxy}'s \code{\link[proxy]{dist}} works, the
 latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
 \code{force.pairwise} to get the correct result.
+
+This distance is calculated with help of the Fast Fourier Transform, so it can be sensitive to numerical
+precision. Results could vary slightly between 32 and 64 bit architectures.
 }
 \examples{
 

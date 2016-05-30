@@ -21,6 +21,9 @@
 #' latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
 #' \code{force.pairwise} to get the correct result.
 #'
+#' This distance is calculated with help of the Fast Fourier Transform, so it can be sensitive to numerical
+#' precision. Results could vary slightly between 32 and 64 bit architectures.
+#'
 #' @examples
 #'
 #' # load data
