@@ -160,20 +160,29 @@ setMethod("predict", "dtwclust",
 # ========================================================================================================
 
 #' @details
-#' The plot method, by default, plots the time series of each cluster along with the obtained centroid.
-#' It uses \code{ggplot2} plotting system (see \code{\link[ggplot2]{ggplot}}). The default values for
-#' cluster centers are: \code{linetype = "dashed"}, \code{size = 1.5}, \code{colour = "black"},
-#' \code{alpha = 0.5}. You can change this by means of \code{...}.
+#' The plot method uses the \code{ggplot2} plotting system (see \code{\link[ggplot2]{ggplot}}).
+#'
+#' The default depends on whether a hierarchical method was used or not. In those cases, the dendrogram is
+#' plotted by default; you can pass any extra parameters to \code{\link[stats]{plot.hclust}} via \code{...}.
+#'
+#' Otherwise, the function plots the time series of each cluster along with the obtained centroid.
+#' The default values for cluster centroids are: \code{linetype = "dashed"}, \code{size = 1.5},
+#' \code{colour = "black"}, \code{alpha = 0.5}. You can change this by means of \code{...}.
+#'
+#' You can choose what to plot with the \code{type} parameter. Possible options are:
+#'
+#' \itemize{
+#'   \item \code{"dendrogram"}: Only available for hierarchical clustering.
+#'   \item \code{"series"}: Plot the time series divided into clusters without including centroids.
+#'   \item \code{"centroids"}: Plot the obtained centroids only.
+#'   \item \code{"sc"}: Plot both series and centroids
+#' }
 #'
 #' The flag \code{save.data} should be set to \code{TRUE} when running \code{\link{dtwclust}} to be able to
 #' use this. Optionally, you can manually provide the data in the \code{data} parameter.
 #'
-#' The function returns the \code{gg} object invisibly, in case you want to modify it to your liking. You
-#' might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
-#'
-#' If a hierarchical procedure was used, then you can specify \code{type} \code{=} \code{"dendrogram"} to
-#' plot the corresponding dendrogram (the default in this case), and pass any extra parameters via \code{...}.
-#' Use \code{type} \code{=} \code{"series"} to plot the time series clusters using the original call's \code{k}.
+#' If created, the function returns the \code{gg} object invisibly, in case you want to modify it to your
+#' liking. You might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 #'
 #' @param y Ignored.
 #' @param ... Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
@@ -181,34 +190,48 @@ setMethod("predict", "dtwclust",
 #' @param clus A numeric vector indicating which clusters to plot.
 #' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
 #' information
-#' @param show.centroids Logical flag. Should cluster centroids be included in the plots?
 #' @param data The data in the same format as it was provided to \code{\link{dtwclust}}.
 #' @param time Optional values for the time axis. If series have different lengths, provide the time values of
 #' the longest series.
 #' @param plot Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot object without
 #' printing anything to screen
-#' @param type What to plot. Only relevant for hierarchical procedures. See details.
+#' @param type What to plot. \code{NULL} means default. See details.
+#' @param show.centroids Deprecated.
 #'
-#' @return The plot method returns a \code{gg} object (or \code{NULL} for hierarchical methods) invisibly.
+#' @return The plot method returns a \code{gg} object (or \code{NULL} for dendrogram plot) invisibly.
 #'
 #' @rdname dtwclust-methods
 #' @aliases plot,dtwclust,missing-method
 #'
 #' @exportMethod plot
 #'
-setMethod("plot", signature(x="dtwclust", y="missing"),
-          function(x, y, ..., clus = seq_len(x@k),
-                   labs.arg = NULL, show.centroids = TRUE,
+setMethod("plot", signature(x = "dtwclust", y = "missing"),
+          function(x, y, ...,
+                   clus = seq_len(x@k), labs.arg = NULL,
                    data = NULL, time = NULL,
-                   plot = TRUE, type = "dendrogram") {
+                   plot = TRUE, type = NULL,
+                   show.centroids = TRUE) {
 
-               type <- match.arg(type, c("dendrogram", "series"))
+               if (!missing(show.centroids))
+                    warning("The 'show.centroids' argument has been deprecated. Use 'type' instead.")
+
+               ## set default type if none was provided
+               if (!is.null(type))
+                    type <- match.arg(type, c("dendrogram", "series", "centroids", "sc"))
+               else if (x@type == "hierarchical")
+                    type <- "dendrogram"
+               else
+                    type <- "sc"
 
                ## plot dendrogram?
                if(x@type == "hierarchical" && type == "dendrogram") {
                     x <- S3Part(x, strictS3 = TRUE)
                     if (plot) plot(x, ...)
                     return(invisible(NULL))
+
+               } else if (x@type != "hierarchical" && type == "dendrogram") {
+                    ## dendrogram for non-hierarchical is not possible
+                    type <- "sc"
                }
 
                ## Obtain data, the priority is: provided data > included data list
@@ -252,9 +275,9 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
 
                ## Check if data was z-normalized
                if (x@preproc == "zscore")
-                    titleStr <- "Clusters and their members, including cluster center (all z-normalized)"
+                    titleStr <- "Clusters members (z-normalized)"
                else
-                    titleStr <- "Clusters and their members, including cluster center"
+                    titleStr <- "Clusters members"
 
                ## transform data
 
@@ -289,9 +312,20 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                cenm <- data.frame(cenm, cl = cl)
 
                ## create gg object
-               gg <- ggplot(dfm[dfm$cl %in% clus, ], aes_string(x = "t", y = "value", group = "variable"))
+               gg <- ggplot(data.frame(t = integer(),
+                                       variable = factor(),
+                                       value = numeric(),
+                                       cl = factor(),
+                                       color = factor()),
+                            aes_string(x = "t",
+                                       y = "value",
+                                       group = "variable"))
 
-               if (show.centroids) {
+               if (type %in% c("sc", "series")) {
+                    gg <- gg + geom_line(data = dfm[dfm$cl %in% clus, ], aes(colour = color))
+               }
+
+               if (type %in% c("sc", "centroids")) {
                     if(length(list(...)) == 0L)
                          gg <- gg + geom_line(data = cenm[cenm$cl %in% clus, ],
                                               linetype = "dashed",
@@ -303,7 +337,6 @@ setMethod("plot", signature(x="dtwclust", y="missing"),
                }
 
                gg <- gg +
-                    geom_line(aes(colour = color)) +
                     facet_wrap(~cl, scales = "free_y") +
                     guides(colour = FALSE) +
                     theme_bw()

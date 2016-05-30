@@ -16,8 +16,8 @@
 \S4method{predict}{dtwclust}(object, newdata = NULL, ...)
 
 \S4method{plot}{dtwclust,missing}(x, y, ..., clus = seq_len(x@k),
-  labs.arg = NULL, show.centroids = TRUE, data = NULL, time = NULL,
-  plot = TRUE, type = "dendrogram")
+  labs.arg = NULL, data = NULL, time = NULL, plot = TRUE, type = NULL,
+  show.centroids = TRUE)
 }
 \arguments{
 \item{object, x}{An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.}
@@ -37,8 +37,6 @@ a new \code{dtwclust} object. Otherwise, it returns the unevaluated call.}
 \item{labs.arg}{Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
 information}
 
-\item{show.centroids}{Logical flag. Should cluster centroids be included in the plots?}
-
 \item{data}{The data in the same format as it was provided to \code{\link{dtwclust}}.}
 
 \item{time}{Optional values for the time axis. If series have different lengths, provide the time values of
@@ -47,10 +45,12 @@ the longest series.}
 \item{plot}{Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot object without
 printing anything to screen}
 
-\item{type}{What to plot. Only relevant for hierarchical procedures. See details.}
+\item{type}{What to plot. \code{NULL} means default. See details.}
+
+\item{show.centroids}{Deprecated.}
 }
 \value{
-The plot method returns a \code{gg} object (or \code{NULL} for hierarchical methods) invisibly.
+The plot method returns a \code{gg} object (or \code{NULL} for dendrogram plot) invisibly.
 }
 \description{
 Methods associated with \code{\link{dtwclust-class}} objects.
@@ -69,20 +69,29 @@ The \code{predict} generic can take the usual \code{newdata} argument and it ret
 the data belongs; if \code{NULL}, it simply returns the obtained cluster indices. It preprocesses
 the data with the corresponding function if available.
 
-The plot method, by default, plots the time series of each cluster along with the obtained centroid.
-It uses \code{ggplot2} plotting system (see \code{\link[ggplot2]{ggplot}}). The default values for
-cluster centers are: \code{linetype = "dashed"}, \code{size = 1.5}, \code{colour = "black"},
-\code{alpha = 0.5}. You can change this by means of \code{...}.
+The plot method uses the \code{ggplot2} plotting system (see \code{\link[ggplot2]{ggplot}}).
+
+The default depends on whether a hierarchical method was used or not. In those cases, the dendrogram is
+plotted by default; you can pass any extra parameters to \code{\link[stats]{plot.hclust}} via \code{...}.
+
+Otherwise, the function plots the time series of each cluster along with the obtained centroid.
+The default values for cluster centroids are: \code{linetype = "dashed"}, \code{size = 1.5},
+\code{colour = "black"}, \code{alpha = 0.5}. You can change this by means of \code{...}.
+
+You can choose what to plot with the \code{type} parameter. Possible options are:
+
+\itemize{
+  \item \code{"dendrogram"}: Only available for hierarchical clustering.
+  \item \code{"series"}: Plot the time series divided into clusters without including centroids.
+  \item \code{"centroids"}: Plot the obtained centroids only.
+  \item \code{"sc"}: Plot both series and centroids
+}
 
 The flag \code{save.data} should be set to \code{TRUE} when running \code{\link{dtwclust}} to be able to
 use this. Optionally, you can manually provide the data in the \code{data} parameter.
 
-The function returns the \code{gg} object invisibly, in case you want to modify it to your liking. You
-might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
-
-If a hierarchical procedure was used, then you can specify \code{type} \code{=} \code{"dendrogram"} to
-plot the corresponding dendrogram (the default in this case), and pass any extra parameters via \code{...}.
-Use \code{type} \code{=} \code{"series"} to plot the time series clusters using the original call's \code{k}.
+If created, the function returns the \code{gg} object invisibly, in case you want to modify it to your
+liking. You might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 }
 \seealso{
 \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}}

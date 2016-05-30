@@ -77,7 +77,7 @@ plot(hc.sbd[[ which.max(sapply(hc.sbd, randIndex, y = CharTrajLabels)) ]])
 
 # Plot subset of crisp partition with k = 20
 plot(hc.sbd[[ which.max(sapply(hc.sbd, randIndex, y = CharTrajLabels)) ]],
-     clus = 1, type = "series")
+     clus = 1, type = "sc")
 
 # ====================================================================================
 # Autocorrelation-based fuzzy clustering (see D'Urso and Maharaj 2009)
@@ -97,7 +97,7 @@ fc <- dtwclust(CharTraj[1:25], type = "fuzzy", k = 5,
 print(fc@fcluster)
 
 # Plot crisp partition in the original space
-plot(fc, data = CharTraj[1:25], show.centroids = FALSE)
+plot(fc, data = CharTraj[1:25], type = "series")
 
 # Membership for new series
 # (It's important that 'preproc' was specified in the original call)
@@ -110,7 +110,7 @@ predict(fc, newdata = CharTraj[26:28])
 
 ctrl@window.size <- 20L
 
-kc.tadp <- dtwclust(data, type = "tadpole", k = 4,
+kc.tadp <- dtwclust(data, type = "tadpole", k = 4L,
                     dc = 1.5, control = ctrl)
 
 cat("Rand index for TADPole:", randIndex(kc.tadp, labels), "\n\n")
@@ -141,7 +141,7 @@ hc <- dtwclust(CharTraj, type = "hierarchical",
                preproc = zscore, centroid = shape_extraction,
                seed = 320)
 
-plot(hc, type = "series")
+plot(hc, type = "sc")
 
 # ====================================================================================
 # Using parallel computation to optimize several random repetitions
