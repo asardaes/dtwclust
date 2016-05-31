@@ -2,6 +2,7 @@
 
 ## Version 2.1.2
 * Added option to specify a function to extract prototypes in hierarchical and TADPole clustering
+* Switched algorithm to calculate envelops to Lemire's, which should be slightly faster
 
 ## Version 2.1.1
 * Minor bug fixes for fuzzy clustering
