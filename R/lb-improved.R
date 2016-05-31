@@ -85,7 +85,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
 
      ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
      if (is.null(lower.env) && is.null(upper.env)) {
-          envelopes <- call_runminmax(y, window.size*2L + 1L)
+          envelopes <- call_envelop(y, window.size*2L + 1L)
           lower.env <- envelopes$min
           upper.env <- envelopes$max
 
@@ -112,7 +112,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
      d1 <- abs(x-H)
 
      ## From here on is Lemire's improvement
-     EH <- call_runminmax(H, window.size*2+1)
+     EH <- call_envelop(H, window.size*2+1)
 
      ind3 <- y > EH$max
      ind4 <- y < EH$min
@@ -167,7 +167,7 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
      }
 
      ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
-     envelops <- lapply(y, function(s) { call_runminmax(s, window.size*2L + 1L) })
+     envelops <- lapply(y, function(s) { call_envelop(s, window.size*2L + 1L) })
 
      lower.env <- lapply(envelops, "[[", "min")
      upper.env <- lapply(envelops, "[[", "max")
@@ -186,7 +186,7 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
           D <- foreach(x = x, y = y, lower.env = lower.env, upper.env = upper.env,
                        .combine = c,
                        .multicombine = TRUE,
-                       .export = "call_runminmax",
+                       .export = "call_envelop",
                        .packages = "dtwclust") %dopar% {
                             mapply(upper.env, lower.env, y, x,
                                    FUN = function(u, l, y, x) {
@@ -202,7 +202,7 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
                                         d1 <- abs(x-H)
 
                                         ## Lemire's improvement
-                                        EH <- call_runminmax(H, window.size*2L + 1L)
+                                        EH <- call_envelop(H, window.size*2L + 1L)
 
                                         ind3 <- y > EH$max
                                         ind4 <- y < EH$min
@@ -230,7 +230,7 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
           D <- foreach(x = x,
                        .combine = cbind,
                        .multicombine = TRUE,
-                       .export = "call_runminmax",
+                       .export = "call_envelop",
                        .packages = "dtwclust") %dopar% {
                             sapply(X=x, U=upper.env, L=lower.env, Y=y,
                                    FUN = function(x, U, L, Y) {
@@ -250,7 +250,7 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
                                                          d1 <- abs(x-H)
 
                                                          ## Lemire's improvement
-                                                         EH <- call_runminmax(H, window.size*2L + 1L)
+                                                         EH <- call_envelop(H, window.size*2L + 1L)
 
                                                          ind3 <- y > EH$max
                                                          ind4 <- y < EH$min

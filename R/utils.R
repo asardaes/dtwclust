@@ -163,14 +163,17 @@ fuzzy_objective <- function(u, distmat, m) {
 # Helper functions
 # ========================================================================================================
 
-# Running extremes
-call_runminmax <- function(series, window) {
+# Envelop calculation
+call_envelop <- function(series, window) {
      series <- as.numeric(series)
 
      consistency_check(series, "ts")
      window <- consistency_check(window, "window")
 
-     .Call("runminmax", series, window, PACKAGE = "dtwclust")
+     if (window > length(series))
+          stop("Window cannot be longer than series.")
+
+     .Call("envelop", series, window, PACKAGE = "dtwclust")
 }
 
 # Create combinations of all possible pairs

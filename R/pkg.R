@@ -125,6 +125,7 @@
 #' @importFrom rngtools RNGseq
 #' @importFrom rngtools setRNG
 #' @importFrom utils head
+#' @importFrom Rcpp evalCpp
 #'
 NULL
 
