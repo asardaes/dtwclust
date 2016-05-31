@@ -15,7 +15,7 @@ column-wise.}
 \item{type}{What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"}, \code{"tadpole"}
 or \code{"fuzzy"}.}
 
-\item{k}{Numer of desired clusters. It may be a numeric vector with different values.}
+\item{k}{Number of desired clusters. It may be a numeric vector with different values.}
 
 \item{method}{One or more linkage methods to use in hierarchical procedures. See \code{\link[stats]{hclust}}.
 You can provide a character vector to compute different hierarchical cluster structures in one go, or

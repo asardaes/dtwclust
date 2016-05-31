@@ -287,7 +287,7 @@
 #' column-wise.
 #' @param type What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"}, \code{"tadpole"}
 #' or \code{"fuzzy"}.
-#' @param k Numer of desired clusters. It may be a numeric vector with different values.
+#' @param k Number of desired clusters. It may be a numeric vector with different values.
 #' @param method One or more linkage methods to use in hierarchical procedures. See \code{\link[stats]{hclust}}.
 #' You can provide a character vector to compute different hierarchical cluster structures in one go, or
 #' specify \code{method} \code{=} \code{"all"} to use all the available ones.
