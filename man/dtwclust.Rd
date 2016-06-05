@@ -132,7 +132,7 @@ corresponding parameter of this function.
 
 The algorithm relies on the DTW lower bounds, which are only defined for time series of equal length.
 Additionally, it requires a window constraint* for DTW. See the Sakoe-Chiba constraint section below.
-Unlike the other algorithms, TADPole always uses DTW2 as a distance (with a symmetric1 step pattern).
+Unlike the other algorithms, TADPole always uses DTW2 as distance (with a symmetric1 step pattern).
 }
 
 \section{Centroid Calculation}{
@@ -201,8 +201,9 @@ Note that you are free to create your own distance functions and register them. 
 one of the following custom implementations (all registered with \code{proxy}):
 
 \itemize{
-  \item \code{"dtw"}: DTW with L1 norm and optionally a Sakoe-Chiba/Slanted-band constraint*.
-  \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint*.
+  \item \code{"dtw"}: DTW, optionally with a Sakoe-Chiba/Slanted-band constraint*.
+  \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint*. Read
+  details below.
   \item \code{"dtw_lb"}: DTW with L1 or L2 norm* and optionally a Sakoe-Chiba constraint*. Some
   computations are avoided by first estimating the distance matrix with Lemire's lower bound and then
   iteratively refining with DTW. See \code{\link{dtw_lb}}. Not suitable for \code{pam.precompute}* =
