@@ -231,7 +231,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 
                } else if (x@type != "hierarchical" && type == "dendrogram") {
                     ## dendrogram for non-hierarchical is not possible
-                    type <- "sc"
+                    stop("Dendrogram plot only applies to hierarchical clustering.")
                }
 
                ## Obtain data, the priority is: provided data > included data list
@@ -321,10 +321,6 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
                                        y = "value",
                                        group = "variable"))
 
-               if (type %in% c("sc", "series")) {
-                    gg <- gg + geom_line(data = dfm[dfm$cl %in% clus, ], aes(colour = color))
-               }
-
                if (type %in% c("sc", "centroids")) {
                     if(length(list(...)) == 0L)
                          gg <- gg + geom_line(data = cenm[cenm$cl %in% clus, ],
@@ -334,6 +330,10 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
                                               alpha = 0.5)
                     else
                          gg <- gg + geom_line(data = cenm[cenm$cl %in% clus, ], ...)
+               }
+
+               if (type %in% c("sc", "series")) {
+                    gg <- gg + geom_line(data = dfm[dfm$cl %in% clus, ], aes(colour = color))
                }
 
                gg <- gg +
