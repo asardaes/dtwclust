@@ -1,7 +1,4 @@
-## Update to version 2.1.2
-* Documentation fixes
-* Added functionality
-* Minor improvements
+## Update to version 2.1.3
 
 ## Test environments
 * Local GNU/Linux, R 3.3.0

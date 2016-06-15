@@ -1,8 +1,12 @@
 # NEWS
 
+## Version 2.1.3
+* TBA
+
 ## Version 2.1.2
 * Added option to specify a function to extract prototypes in hierarchical and TADPole clustering
 * Switched algorithm to calculate envelops to Lemire's, which should be slightly faster
+* More plot types
 * Documentation fixes
 
 ## Version 2.1.1

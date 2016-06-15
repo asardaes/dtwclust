@@ -1,5 +1,5 @@
 # ========================================================================================================
-# Modified version of kcca to use lists of time series (to support different lengths)
+# Modified version of flexclust::kcca to use lists of time series
 # ========================================================================================================
 
 kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
