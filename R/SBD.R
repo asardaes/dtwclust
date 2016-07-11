@@ -17,10 +17,6 @@
 #' If you wish to calculate the distance between several time series, it would be better to use the version
 #' registered with the \code{proxy} package, since it includes some small optimizations. See the examples.
 #'
-#' However, because of said optimizations and the way \code{proxy}'s \code{\link[proxy]{dist}} works, the
-#' latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
-#' \code{force.pairwise} to get the correct result.
-#'
 #' This distance is calculated with help of the Fast Fourier Transform, so it can be sensitive to numerical
 #' precision. Results could vary slightly between 32 and 64 bit architectures.
 #'
@@ -113,7 +109,7 @@ SBD <- function(x, y, znorm = FALSE) {
 # Wrapper for proxy::dist
 # ========================================================================================================
 
-SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, force.pairwise = FALSE) {
+SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise = FALSE) {
 
      x <- consistency_check(x, "tsmat")
 
@@ -150,13 +146,13 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, force.pair
      x <- split_parallel(x)
      fftx <- split_parallel(fftx)
 
-     if (force.pairwise) {
+     if (pairwise) {
           y <- split_parallel(y)
           ffty <- split_parallel(ffty)
      }
 
      ## Calculate distance matrix
-     if (force.pairwise) {
+     if (pairwise) {
           D <- foreach(x = x, fftx = fftx, y = y, ffty = ffty,
                        .combine = c,
                        .multicombine = TRUE,

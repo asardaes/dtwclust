@@ -1,7 +1,8 @@
 ## Update to version 2.1.3
+* Updates related to new version of dependency "proxy"
 
 ## Test environments
-* Local GNU/Linux, R 3.3.0
+* Local GNU/Linux, R 3.3.1
 * Local Windows 10, R 3.3.0
 * win-builder (devel and release)
 

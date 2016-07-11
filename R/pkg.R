@@ -143,7 +143,7 @@ NULL
           proxy::pr_DB$set_entry(FUN = lb_keogh_loop, names=c("LBK", "LB_Keogh", "lbk"),
                                  loop = FALSE, type = "metric", distance = TRUE,
                                  description = "Keogh's DTW lower bound for the Sakoe-Chiba band",
-                                 PACKAGE = "dtwclust") #, PREFUN = proxy_prefun)
+                                 PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
 
      ## Register LB_Improved with the 'proxy' package for distance matrix calculation
@@ -151,21 +151,21 @@ NULL
           proxy::pr_DB$set_entry(FUN = lb_improved_loop, names=c("LBI", "LB_Improved", "lbi"),
                                  loop = FALSE, type = "metric", distance = TRUE,
                                  description = "Lemire's improved DTW lower bound for the Sakoe-Chiba band",
-                                 PACKAGE = "dtwclust") #, PREFUN = proxy_prefun)
+                                 PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
      ## Register SBD
      if (!consistency_check("SBD", "dist", silent = TRUE))
           proxy::pr_DB$set_entry(FUN = SBD.proxy, names=c("SBD", "sbd"),
                                  loop = FALSE, type = "metric", distance = TRUE,
                                  description = "Paparrizos and Gravanos' shape-based distance for time series",
-                                 PACKAGE = "dtwclust") #, PREFUN = proxy_prefun)
+                                 PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
      ## Register DTW_LB
      if (!consistency_check("DTW_LB", "dist", silent = TRUE))
           proxy::pr_DB$set_entry(FUN = dtw_lb, names=c("DTW_LB", "dtw_lb"),
                                  loop = FALSE, type = "metric", distance = TRUE,
                                  description = "DTW distance aided with Lemire's lower bound",
-                                 PACKAGE = "dtwclust") #, PREFUN = proxy_prefun)
+                                 PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
      RNGkind("L'Ecuyer")
 

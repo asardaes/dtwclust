@@ -30,10 +30,6 @@
 #'
 #' This function uses a lower bound that is only defined for time series of equal length.
 #'
-#' If you use the version registered with \code{proxy}, and because of how \code{\link[proxy]{dist}}
-#' works, the latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
-#' \code{force.pairwise} to get the correct result (which is, effectively, calculating only DTW distances).
-#'
 #' @seealso
 #'
 #' \code{\link{lb_keogh}}, \code{\link{lb_improved}}
@@ -96,16 +92,16 @@
 #'
 #' @param x,y A matrix where rows are time series, or a list of time series.
 #' @param window.size Window size to use with the LB and DTW calculation. See details.
-#' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
+#' @param norm Pointwise distance. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.
 #' @param error.check Should inconsistencies in the data be checked?
-#' @param force.pairwise Calculate pairwise distances. See the notes.
+#' @param pairwise Calculate pairwise distances?
 #'
 #' @return The distance matrix with class \code{crossdist}.
 #'
 #' @export
 
 dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
-                   error.check = TRUE, force.pairwise = FALSE) {
+                   error.check = TRUE, pairwise = FALSE) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 
@@ -113,7 +109,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
      check_parallel()
 
-     if (force.pairwise) {
+     if (pairwise) {
           if (is.null(y))
                Y <- x
           else

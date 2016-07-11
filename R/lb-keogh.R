@@ -18,10 +18,6 @@
 #' If you wish to calculate the lower bound between several time series, it would be better to use the version
 #' registered with the \code{proxy} package, since it includes some small optimizations. See the examples.
 #'
-#' However, because of said optimizations and the way \code{proxy}'s \code{\link[proxy]{dist}} works, the
-#' latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
-#' \code{force.pairwise} to get the correct result.
-#'
 #' @references
 #'
 #' Keogh E and Ratanamahatana CA (2005). ``Exact indexing of dynamic time warping.'' \emph{Knowledge
@@ -124,7 +120,7 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, up
 # ========================================================================================================
 
 lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
-                          force.symmetry = FALSE, norm = "L1", force.pairwise = FALSE) {
+                          force.symmetry = FALSE, norm = "L1", pairwise = FALSE) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 
@@ -162,12 +158,12 @@ lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
 
      x <- split_parallel(x)
 
-     if (force.pairwise) {
+     if (pairwise) {
           lower.env <- split_parallel(lower.env)
           upper.env <- split_parallel(upper.env)
      }
 
-     if (force.pairwise) {
+     if (pairwise) {
           D <- foreach(x = x, lower.env = lower.env, upper.env = upper.env,
                        .combine = c,
                        .multicombine = TRUE) %dopar% {
@@ -223,7 +219,7 @@ lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
           D <- t(D)
      }
 
-     if (force.symmetry && !force.pairwise) {
+     if (force.symmetry && !pairwise) {
           if (nrow(D) != ncol(D)) {
                warning("Unable to force symmetry. Resulting distance matrix is not square.")
 

@@ -83,7 +83,6 @@ ddist <- function(distance, control, distmat) {
 
                     ## strict pairwise as in proxy::dist doesn't make sense here, but this case needs it
                     dots$pairwise <- TRUE
-                    dots$force.pairwise <- TRUE # in case it's one of my own
 
                     pairs <- call_pairs(length(x), lower = FALSE)
 
@@ -127,16 +126,12 @@ ddist <- function(distance, control, distmat) {
 
                     dim_names <- list(names(x), names(centers))
 
-                    if ((!is.null(dots$pairwise) && dots$pairwise) ||
-                        (!is.null(dots$force.pairwise) && dots$force.pairwise)){
+                    if (!is.null(dots$pairwise) && dots$pairwise) {
                          if (length(x) != length(centers))
                               stop("Both sets of data must have the same amount of series for pairwise calculation")
 
                          centers <- split_parallel(centers)
                          combine <- c
-
-                         dots$pairwise <- TRUE # in case force.pairwise was provided
-                         dots$force.pairwise <- TRUE # in case it's one of my own
 
                     } else {
                          centers <- lapply(1:length(x), function(dummy) centers)

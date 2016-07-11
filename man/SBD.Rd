@@ -35,10 +35,6 @@ The output values lie between 0 and 2, with 0 indicating perfect similarity.
 If you wish to calculate the distance between several time series, it would be better to use the version
 registered with the \code{proxy} package, since it includes some small optimizations. See the examples.
 
-However, because of said optimizations and the way \code{proxy}'s \code{\link[proxy]{dist}} works, the
-latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
-\code{force.pairwise} to get the correct result.
-
 This distance is calculated with help of the Fast Fourier Transform, so it can be sensitive to numerical
 precision. Results could vary slightly between 32 and 64 bit architectures.
 }

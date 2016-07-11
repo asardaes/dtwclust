@@ -5,18 +5,18 @@
 \title{DTW calculation guided by Lemire's lower bounds}
 \usage{
 dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
-  force.pairwise = FALSE)
+  pairwise = FALSE)
 }
 \arguments{
 \item{x, y}{A matrix where rows are time series, or a list of time series.}
 
 \item{window.size}{Window size to use with the LB and DTW calculation. See details.}
 
-\item{norm}{Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.}
+\item{norm}{Pointwise distance. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.}
 
 \item{error.check}{Should inconsistencies in the data be checked?}
 
-\item{force.pairwise}{Calculate pairwise distances. See the notes.}
+\item{pairwise}{Calculate pairwise distances?}
 }
 \value{
 The distance matrix with class \code{crossdist}.
@@ -43,10 +43,6 @@ the window.
 }
 \note{
 This function uses a lower bound that is only defined for time series of equal length.
-
-If you use the version registered with \code{proxy}, and because of how \code{\link[proxy]{dist}}
-works, the latter's \code{pairwise} argument will not work with this distance. You can use the custom argument
-\code{force.pairwise} to get the correct result (which is, effectively, calculating only DTW distances).
 }
 \section{Parallel Computing}{
 
