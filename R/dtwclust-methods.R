@@ -275,9 +275,9 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 
                ## Check if data was z-normalized
                if (x@preproc == "zscore")
-                    titleStr <- "Clusters members (z-normalized)"
+                    titleStr <- "Clusters' members (z-normalized)"
                else
-                    titleStr <- "Clusters members"
+                    titleStr <- "Clusters' members"
 
                ## transform data
 

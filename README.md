@@ -10,7 +10,7 @@ Many of the algorithms implemented in this package are specifically tailored to 
 
 DTW is a dynamic programming algorithm that tries to find the optimum warping path between two series. Over the years, several variations have appeared in order to make the procedure faster or more efficient. Please refer to the included references for more information, especially Giorgino (2009), which is a good practical introduction.
 
-Most optimizations require equal dimensionality, which means time series should have equal lengths. DTW itself does not require this, but it is relatively expensive to compute. Other distance definitions may be used, or series could be reinterpolated to a matching length (Ratanamahatana and Keogh, 2004).
+Most optimizations require equal dimensionality, which means time series should have equal length. DTW itself does not require this, but it is relatively expensive to compute. Other distance definitions may be used, or series could be reinterpolated to a matching length (Ratanamahatana and Keogh, 2004).
 
 Implementations
 ---------------
@@ -52,12 +52,12 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 4: Changes / Distsum = 2 / 1311.201
 #> Iteration 5: Changes / Distsum = 0 / 1311.201
 #> 
-#>  Elapsed time is 12.026 seconds.
+#>  Elapsed time is 10.961 seconds.
 
 plot(kc.dtwlb)
 ```
 
-![](README-partitional-1.png)<!-- -->
+![](README-partitional-1.png)
 
 ``` r
 ## =============================================================================================
@@ -73,7 +73,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.657 seconds.
+#>  Elapsed time is 0.662 seconds.
 
 cat("Rand index for HC+SBD:\n")
 #> Rand index for HC+SBD:
@@ -90,7 +90,7 @@ print(ri <- sapply(hc.sbd, randIndex, y = CharTrajLabels))
 plot(hc.sbd[[which.max(ri)]])
 ```
 
-![](README-hierarchical-1.png)<!-- -->
+![](README-hierarchical-1.png)
 
 ``` r
 ## =============================================================================================
@@ -104,12 +104,12 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 4.213 seconds.
+#>  Elapsed time is 3.205 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
 
-![](README-tadpole-1.png)<!-- -->
+![](README-tadpole-1.png)
 
 ``` r
 ## =============================================================================================
@@ -135,7 +135,7 @@ proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
                        loop = TRUE, type = "metric", distance = TRUE,
                        description = "Normalized DTW with L1 norm")
 
-## Data with different lengths
+## Data with different length
 kc.ndtw <- dtwclust(datalist, k = 20,
                     distance = "nDTW", centroid = "pam",
                     seed = 159, control = new("dtwclustControl", nrep = 8L))
@@ -156,13 +156,13 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 3: Changes / Distsum = 1 / 3.550964
 #> Iteration 4: Changes / Distsum = 0 / 3.531171
 #> 
-#>  Elapsed time is 20.657 seconds.
+#>  Elapsed time is 17.075 seconds.
 
 ## Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
 ```
 
-![](README-parallel-1.png)<!-- -->
+![](README-parallel-1.png)
 
 ``` r
 
@@ -196,7 +196,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.160   0.000   0.161 
+#>   0.148   0.000   0.151 
 #> 
 #> Head of fuzzy memberships:
 #> 
