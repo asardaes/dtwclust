@@ -766,7 +766,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## ----------------------------------------------------------------------------------------------------------
 
           if (control@trace)
-               cat("\nEntering TADPole...\n")
+               cat("\nEntering TADPole...\n\n")
 
           ## mainly for predict generic
           distfun <- ddist("dtw_lb", control = control, distmat = NULL)
@@ -784,7 +784,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                R <- TADPole(data, window.size = control@window.size, k = k, dc = dc, error.check = FALSE)
 
                if (control@trace) {
-                    cat("\nTADPole completed, pruning percentage = ",
+                    cat("TADPole completed, pruning percentage = ",
                         formatC(100 - R$distCalcPercentage, digits = 3L, width = -1L, format = "fg"),
                         "%\n\n",
                         sep = "")
