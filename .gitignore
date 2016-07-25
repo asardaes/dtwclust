@@ -5,6 +5,13 @@ src/*.dll
 src/*.o
 src/*.so
 
+# Vignette
+vignettes/*.gz
+vignettes/*.pdf
+vignettes/*.bbl
+vignettes/*.log
+vignettes/*.tex
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db

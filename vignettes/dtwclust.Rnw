@@ -1,0 +1,83 @@
+\documentclass[article,shortnames,nojss]{jss}
+
+% Maths
+\usepackage{amsmath}
+
+% Captions in floating environments
+%\usepackage[labelsep=colon,tableposition=top,font=small,margin=5pt,format=hang]{caption}
+
+% For subcaptions in figures
+\usepackage{subcaption}
+
+% For sidewaysfigure
+%\usepackage{rotfloat}
+
+% For professional looking tables
+\usepackage{booktabs}
+
+%\usepackage{multirow}
+%\usepackage{multicol}
+%\usepackage{longtable}
+%\usepackage{tabularx}
+
+% For \FloatBarrier
+\usepackage[section,below]{placeins}
+
+% Linebreaks in tables
+\usepackage{makecell}
+
+% References
+\usepackage[capitalise]{cleveref}
+
+% Used for knitr images from Rnw files
+\newcommand{\subfloat}[2][default for first parameter: need a sub-caption]{\subcaptionbox{#1}{#2}}
+
+% Typesetting commands
+\newcommand{\R}{\proglang{R}}
+\newcommand{\dtwclust}{\pkg{dtwclust}}
+
+% Vignette options
+%\VignetteIndexEntry{Comparing Time Series Clustering Algorithms in R Using the dtwclust Package}
+%\VignetteEngine{knitr::knitr}
+%\VignetteEncoding{UTF-8}
+%\VignettePackage{dtwclust}
+
+% ===========================================================================================================
+% Cover
+% ===========================================================================================================
+
+\title{Comparing Time Series Clustering Algorithms in \R{} Using the \dtwclust{} Package}
+\Plaintitle{Comparing Time Series Clustering Algorithms in R Using the dtwclust Package}
+
+\author{Alexis~Sard\'a-Espinosa}
+\date{\today}
+
+\Address{
+Alexis Sard\'a-Espinosa\\
+\email{alexis.sarda@gmail.com}
+}
+
+\Abstract{
+Abstract
+}
+
+\Keywords{time series, clustering}
+
+% ===========================================================================================================
+% Main matter
+% ===========================================================================================================
+
+\begin{document}
+
+\section{Introduction}
+\label{sec:introduction}
+
+% ===========================================================================================================
+% Bibliography
+% ===========================================================================================================
+
+%\bibliographystyle{}
+\nocite{*}
+\bibliography{REFERENCES}
+
+\end{document}
