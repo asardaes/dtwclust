@@ -3,7 +3,7 @@
 
 ## Test environments
 * Local GNU/Linux, R 3.3.1
-* Local Windows 10, R 3.3.0
+* Local Windows 10, R 3.3.1
 * win-builder (devel and release)
 
 ## R CMD check results
