@@ -1,9 +1,13 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^.*\.rds$
-manual.txt
+
 NEWS.md
 cran-comments.md
+
+vignettes/.*\.gz
+vignettes/.*\.bbl
+vignettes/.*\.log
 
 ^revdep$
 ^README\.Rmd$
