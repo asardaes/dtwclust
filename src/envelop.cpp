@@ -14,12 +14,13 @@ void envelop_cpp(const NumericVector& array, unsigned int width,
                  NumericVector& minvalues, NumericVector& maxvalues) {
 
      unsigned int constraint = (width - 1) / 2;
+     unsigned int array_size = static_cast<unsigned int>(array.size());
      deque<int> maxfifo, minfifo;
 
      maxfifo.push_back(0);
      minfifo.push_back(0);
 
-     for(unsigned int i = 1; i < array.size(); ++i) {
+     for(unsigned int i = 1; i < array_size; ++i) {
           if(i >= constraint + 1) {
                maxvalues[i - constraint - 1] = array[maxfifo.front()];
                minvalues[i - constraint - 1] = array[minfifo.front()];
@@ -51,7 +52,7 @@ void envelop_cpp(const NumericVector& array, unsigned int width,
                minfifo.pop_front();
      }
 
-     for(unsigned int i = array.size(); i <= array.size() + constraint; ++i) {
+     for(unsigned int i = array.size(); i <= array_size + constraint; ++i) {
           maxvalues[i - constraint - 1] = array[maxfifo.front()];
           minvalues[i - constraint - 1] = array[minfifo.front()];
 
