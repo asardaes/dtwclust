@@ -840,14 +840,18 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
      toc <- proc.time() - tic
 
-     if (class(RET) == "dtwclust")
+     if (class(RET) == "dtwclust") {
           RET@proctime <- toc
-     else
+          RET@dots <- dots
+
+     } else {
           RET <- lapply(RET, function(ret) {
                ret@proctime <- toc
+               ret@dots <- dots
 
                ret
           })
+     }
 
      if (type %in% c("partitional", "fuzzy") && (control@nrep > 1L || length(k) > 1L))
           attr(RET, "rng") <- unlist(rng0, recursive = FALSE, use.names = FALSE)

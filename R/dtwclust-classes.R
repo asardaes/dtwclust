@@ -170,6 +170,7 @@ setClass("dtwclustControl",
 #' @slot preproc A string indicating the preprocessing used.
 #' @slot datalist The provided data in the form of a list, where each element is a time series.
 #' @slot proctime Time during function execution, as measured with \code{\link[base]{proc.time}}.
+#' @slot dots The contents of the original call's ellipsis (...).
 #'
 #' @name dtwclust-class
 #' @rdname dtwclust-class
@@ -208,4 +209,5 @@ setClass("dtwclust", contains = c("hclust"),
                    centroid = "character",
                    preproc = "character",
                    datalist = "list",
-                   proctime = "proc_time"))
+                   proctime = "proc_time",
+                   dots = "list"))

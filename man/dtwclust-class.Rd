@@ -57,5 +57,7 @@ centroid (crisp partition).}
 \item{\code{datalist}}{The provided data in the form of a list, where each element is a time series.}
 
 \item{\code{proctime}}{Time during function execution, as measured with \code{\link[base]{proc.time}}.}
+
+\item{\code{dots}}{The contents of the original call's ellipsis (...).}
 }}
 
