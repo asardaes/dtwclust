@@ -27,4 +27,8 @@ This index essentially calculates (or re-uses, if available) the whole distance 
 chosen distance measure, so if you were trying to avoid that in the first place, this may not be the
 best CVI for your application.
 }
+\references{
+Arbelaitz, O., Gurrutxaga, I., Muguerza, J., Perez, J. M., & Perona, I. (2013). An extensive
+comparative study of cluster validity indices. Pattern Recognition, 46(1), 243-256.
+}
 

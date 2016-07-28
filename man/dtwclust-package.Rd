@@ -47,6 +47,9 @@ you wish. See \code{\link[base]{RNGkind}}.
 Alexis Sarda-Espinosa
 }
 \references{
+Arbelaitz, O., Gurrutxaga, I., Muguerza, J., Perez, J. M., & Perona, I. (2013). An extensive
+comparative study of cluster validity indices. Pattern Recognition, 46(1), 243-256.
+
 Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering with
 a Novel Admissible Pruning Strategy.'' In \emph{Conference on Knowledge Discovery and Data Mining},
 series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{http://dx.doi.org/10.1145/2783258.2783286}.

@@ -426,6 +426,11 @@ setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
 #'
 #' @return The Sil index, which is to be maximized across different values of \code{k}.
 #'
+#' @references
+#'
+#' Arbelaitz, O., Gurrutxaga, I., Muguerza, J., Perez, J. M., & Perona, I. (2013). An extensive
+#' comparative study of cluster validity indices. Pattern Recognition, 46(1), 243-256.
+#'
 #' @exportMethod silIndex
 #'
 setGeneric("silIndex", def = function(x) standardGeneric("silIndex"))
