@@ -4,13 +4,10 @@
 \usepackage{amsmath}
 
 % Captions in floating environments
-%\usepackage[labelsep=colon,tableposition=top,font=small,margin=5pt,format=hang]{caption}
+\usepackage[labelsep=colon,font=small,margin=5pt,format=hang]{caption}
 
 % For subcaptions in figures
 \usepackage{subcaption}
-
-% For sidewaysfigure
-%\usepackage{rotfloat}
 
 % For professional looking tables
 \usepackage{booktabs}
@@ -61,7 +58,8 @@ Alexis Sard\'a-Espinosa\\
 Abstract
 }
 
-\Keywords{time series, clustering}
+\Keywords{time series, clustering, \R{}}
+\Plainkeywords{time series, clustering, R}
 
 % ===========================================================================================================
 % Main matter
@@ -71,6 +69,8 @@ Abstract
 
 \section{Introduction}
 \label{sec:introduction}
+
+\Cref{sec:introduction} has a dummy citation: \citet{begum2015}.
 
 % ===========================================================================================================
 % Bibliography
