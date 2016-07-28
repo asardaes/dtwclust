@@ -1,7 +1,8 @@
 # NEWS
 
 ## Version 2.1.3
-* The custom argument `force.pairwise` used in some of the `proxy` distances is not necessary anymore.
+* The custom argument `force.pairwise` used in some of the `proxy` distances is not necessary anymore
+* Added Silhouette Cluster Validity Index
 
 ## Version 2.1.2
 * Added option to specify a function to extract prototypes in hierarchical and TADPole clustering

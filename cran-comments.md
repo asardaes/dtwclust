@@ -1,5 +1,6 @@
 ## Update to version 2.1.3
 * Updates related to new version of dependency "proxy"
+* Added functionality
 
 ## Test environments
 * Local GNU/Linux, R 3.3.1
