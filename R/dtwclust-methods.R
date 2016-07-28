@@ -402,6 +402,73 @@ setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
           })
 
 # ========================================================================================================
+# Silhouette Index
+# ========================================================================================================
+
+#' @title
+#' Silhouette cluster validity index
+#'
+#' @description
+#' Compute the Silhouette (Sil) cluster validity index (CVI) of a given cluster partition using the
+#' chosen distance measure.
+#'
+#' @details
+#' A normalized summation-type index based on intracluster distance and the distance to nearest neighbors.
+#'
+#' This index essentially calculates (or re-uses, if available) the whole distance matrix using the
+#' chosen distance measure, so if you were trying to avoid that in the first place, this may not be the
+#' best CVI for your application.
+#'
+#' @name silIndex
+#' @rdname silIndex
+#'
+#' @param x An object returned by the \code{\link{dtwclust}} function.
+#'
+#' @return The Sil index, which is to be maximized across different values of \code{k}.
+#'
+#' @exportMethod silIndex
+#'
+setGeneric("silIndex", def = function(x) standardGeneric("silIndex"))
+
+#' @rdname silIndex
+#' @aliases silIndex,dtwclust-method
+#'
+setMethod("silIndex", signature(x = "dtwclust"),
+          function(x) {
+               if (x@type == "fuzzy")
+                    stop("Silhouette index is only valid for crisp (non-fuzzy) partitions.")
+
+               if (is.null(x@distmat)) {
+                    distmat <- do.call(x@family@dist,
+                                       args = c(list(x = x@datalist, centers = NULL), x@dots))
+               } else {
+                    distmat <- x@distmat
+               }
+
+               c_k <- as.numeric(table(x@cluster)[x@cluster])
+
+               ab <- lapply(unique(x@cluster), function(k) {
+                    idx <- x@cluster == k
+
+                    a <- rowSums(distmat[idx, idx, drop = FALSE]) / c_k[idx]
+
+                    b <- apply(distmat[idx, !idx, drop = FALSE], 1L, function(row) {
+                         ret <- row / c_k[!idx]
+                         ret <- min(tapply(ret, x@cluster[!idx], sum))
+                         ret
+                    })
+
+                    data.frame(a = a, b = b)
+               })
+
+               ab <- do.call(rbind, ab)
+
+               Sil <- sum((ab$b - ab$a) / apply(ab, 1L, max)) / length(x@datalist)
+
+               Sil
+          })
+
+# ========================================================================================================
 # Cluster Similarity from flexclust
 # ========================================================================================================
 
