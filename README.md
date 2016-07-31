@@ -218,4 +218,3 @@ Dependencies
 -   The core DTW calculations are done by the `dtw` package.
 -   Plotting is done with the `ggplot2` package.
 -   Parallel computation depends on the `foreach` package.
--   Random streams for repetitions of partitional procedures use the `rngtools` package.
