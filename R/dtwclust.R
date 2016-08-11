@@ -627,6 +627,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                hclust_methods <- c("ward.D", "ward.D2", "single", "complete",
                                    "average", "mcquitty", "median", "centroid")
 
+          if (tolower(distance) == "dtw_lb")
+               warning("Using dtw_lb with hierarchical clustering is not advised.")
+
           ## Take advantage of the function I defined for the partitional methods
           ## Which can do calculations in parallel if appropriate
           distfun <- ddist(distance = distance,
