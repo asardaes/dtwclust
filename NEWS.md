@@ -3,6 +3,7 @@
 ## Version 2.1.3
 * The custom argument `force.pairwise` used in some of the `proxy` distances is not necessary anymore
 * Added Silhouette Cluster Validity Index
+* No longer enforcing `NULL` dimensions for each series (in case multivariate series are to be used)
 
 ## Version 2.1.2
 * Added option to specify a function to extract prototypes in hierarchical and TADPole clustering

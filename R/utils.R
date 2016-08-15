@@ -31,9 +31,6 @@ consistency_check <- function(obj, case, ...) {
           if (length(obj) < 1L)
                stop("Data is empty")
 
-          if (any(sapply(obj, function(obj) !is.null(dim(obj)) )))
-               stop("Each element of the list must be a univariate vector (at least one has non-NULL dim)")
-
           if (any(!sapply(obj, is.numeric)))
                stop("Each element of the list must be a numeric vector")
 
@@ -56,9 +53,6 @@ consistency_check <- function(obj, case, ...) {
 
           if (length(obj) < 1L)
                stop("Data is empty")
-
-          if (any(sapply(obj, function(obj) !is.null(dim(obj)) )))
-               stop("Each element of the list must be a univariate vector (at least one has non-NULL dim)")
 
           if (any(!sapply(obj, is.numeric)))
                stop("Each element of the list must be a numeric vector")
