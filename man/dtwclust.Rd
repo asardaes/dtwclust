@@ -67,7 +67,7 @@ No missing values are allowed.
 In the case of multivariate time series, they should be provided as a list of matrices, where time spans
 the rows of each matrix and the dimensions span the columns. At the moment, only \code{DTW} and \code{DTW2}
 suppport such series, which means only partitional and hierarchical procedures using those distances will
-work.
+work. Note that the \code{plot} method will simply append all dimensions (columns) one after the other.
 
 Several parameters can be adjusted with the \code{control} argument. See \code{\link{dtwclustControl}}. In
 the following sections, elements marked with an asterisk (*) are those that can be adjutsed with this
@@ -478,6 +478,20 @@ hc <- dtwclust(CharTraj, type = "hierarchical",
                seed = 320)
 
 plot(hc, type = "sc")
+
+# ====================================================================================
+# Multivariate time series
+# ====================================================================================
+
+# Dummy multivariate series
+mv <- lapply(seq(1L, 100L, 5L), function(x) cbind(CharTraj[[x]], CharTraj[[x+1L]]))
+
+# "dist.method" is for the dtw function, and it affects the values of the local
+# cost matrix in the case of multivariate series
+mvc <- dtwclust(mv, k = 4L, dist.method = "L1", seed = 390)
+
+# Note how the "dimensions" of each series are appended one after the other in the plot
+plot(mvc)
 
 # ====================================================================================
 # Using parallel computation to optimize several random repetitions

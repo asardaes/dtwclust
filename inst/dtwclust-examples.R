@@ -144,6 +144,20 @@ hc <- dtwclust(CharTraj, type = "hierarchical",
 plot(hc, type = "sc")
 
 # ====================================================================================
+# Multivariate time series
+# ====================================================================================
+
+# Dummy multivariate series
+mv <- lapply(seq(1L, 100L, 5L), function(x) cbind(CharTraj[[x]], CharTraj[[x+1L]]))
+
+# "dist.method" is for the dtw function, and it affects the values of the local
+# cost matrix in the case of multivariate series
+mvc <- dtwclust(mv, k = 4L, dist.method = "L1", seed = 390)
+
+# Note how the "dimensions" of each series are appended one after the other in the plot
+plot(mvc)
+
+# ====================================================================================
 # Using parallel computation to optimize several random repetitions
 # and distance matrix calculation
 # ====================================================================================
