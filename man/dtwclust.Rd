@@ -59,9 +59,15 @@ with \code{\link[stats]{hclust}}. TADPole clustering uses the \code{\link{TADPol
 equivalent to the k-Shape algorithm (Paparrizos and Gravano, 2015).
 
 The \code{data} may be a matrix, a data frame or a list. Matrices and data frames are coerced to a list,
-the former row-wise and the latter column-wise. Only lists can have series with different lengths. Most of
-the optimizations require series to have the same length, so consider reinterpolating them to save some
-time (see Ratanamahatana and Keogh, 2004; \code{\link{reinterpolate}}). No missing values are allowed.
+the former row-wise and the latter column-wise. Only lists can have series with different lengths or
+multiple dimensions. Most of the optimizations require series to have the same length, so consider
+reinterpolating them to save some time (see Ratanamahatana and Keogh, 2004; \code{\link{reinterpolate}}).
+No missing values are allowed.
+
+In the case of multivariate time series, they should be provided as a list of matrices, where time spans
+the rows of each matrix and the dimensions span the columns. At the moment, only \code{DTW} and \code{DTW2}
+suppport such series, which means only partitional and hierarchical procedures using those distances will
+work.
 
 Several parameters can be adjusted with the \code{control} argument. See \code{\link{dtwclustControl}}. In
 the following sections, elements marked with an asterisk (*) are those that can be adjutsed with this

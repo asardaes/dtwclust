@@ -95,7 +95,6 @@ consistency_check <- function(obj, case, ...) {
                included <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd")
                valid <- c("dtw", "dtw2", "sbd")
 
-               ## pr_DB$entry_exists is acting weird
                if (!is.character(obj) || !pr_DB$entry_exists(obj)) {
                     if (silent)
                          return(FALSE)
