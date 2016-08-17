@@ -104,3 +104,73 @@ test_that("custom centroid function gives the same result as reference",
 test_that("invalid centroid for series with different lengths gives error",
           expect_error(dtwclust(data, k = 20, distance = "sbd", centroid = "mean"),
                        "different length"))
+# =================================================================================================
+# mean multivariate
+# =================================================================================================
+
+mv_mean <- dtwclust(data_multivariate, type = "partitional", k = 4,
+                    distance = "dtw", centroid = "mean",
+                    preproc = NULL, control = ctrl, seed = 123,
+                    dist.method = "L1")
+
+mv_mean <- reset_nondeterministic(mv_mean)
+
+test_that("multivariate mean centroid gives the same result as reference",
+          my_expect_equal_to_reference(mv_mean))
+
+# =================================================================================================
+# median multivariate
+# =================================================================================================
+
+mv_median <- dtwclust(data_multivariate, type = "partitional", k = 4,
+                      distance = "dtw2", centroid = "median",
+                      preproc = NULL, control = ctrl, seed = 123)
+
+mv_median <- reset_nondeterministic(mv_median)
+
+test_that("multivariate median centroid gives the same result as reference",
+          my_expect_equal_to_reference(mv_median))
+
+# =================================================================================================
+# shape multivariate
+# =================================================================================================
+
+mv_shape <- dtwclust(data_multivariate, type = "partitional", k = 4,
+                     distance = "dtw", centroid = "shape",
+                     preproc = NULL, control = ctrl, seed = 123,
+                     dist.method = "L1")
+
+mv_shape <- reset_nondeterministic(mv_shape)
+
+test_that("multivariate shape centroid gives the same result as reference",
+          my_expect_equal_to_reference(mv_shape))
+
+# =================================================================================================
+# pam multivariate
+# =================================================================================================
+
+mv_pam <- dtwclust(data_multivariate, type = "partitional", k = 4,
+                   distance = "dtw2", centroid = "pam",
+                   preproc = NULL, control = ctrl, seed = 123)
+
+mv_pam <- reset_nondeterministic(mv_pam)
+
+test_that("multivariate pam centroid gives the same result as reference",
+          my_expect_equal_to_reference(mv_pam, TRUE))
+
+# =================================================================================================
+# dba multivariate
+# =================================================================================================
+
+## Will not converge
+suppressWarnings(
+     mv_dba <- dtwclust(data_multivariate, type = "partitional", k = 4,
+                        distance = "dtw", centroid = "dba",
+                        preproc = NULL, control = ctrl, seed = 123,
+                        dist.method = "L1")
+)
+
+mv_dba <- reset_nondeterministic(mv_dba)
+
+test_that("multivariate dba centroid gives the same result as reference",
+          my_expect_equal_to_reference(mv_dba))

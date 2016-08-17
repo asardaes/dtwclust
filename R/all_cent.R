@@ -36,6 +36,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                })
           }
 
+          ## return
           new_cent
      }
 
@@ -54,12 +55,41 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                                    mapply(x_split, cent,
                                           SIMPLIFY = FALSE,
                                           FUN = function(x, c) {
-                                               new_c <- shape_extraction(x, c)
+                                               dims <- sapply(x, function(x) is.null(dim(x)))
 
+                                               if (length(unique(dims)) != 1L)
+                                                    stop("Inconsistent dimensions across series.")
+
+                                               if (any(dims)) {
+                                                    ## univariate
+                                                    new_c <- shape_extraction(x, c)
+
+                                               } else {
+                                                    ## multivariate
+                                                    ncols <- ncol(x[[1L]])
+                                                    ncols <- rep(1L:ncols, length(x))
+
+                                                    x <- do.call(cbind, x)
+                                                    x <- split.data.frame(t(x), ncols)
+
+                                                    c <- lapply(1L:ncol(c), function(idc) {
+                                                         c[ , idc, drop = TRUE]
+                                                    })
+
+                                                    new_c <- mapply(x, c, SIMPLIFY = FALSE,
+                                                                    FUN = function(xx, cc) {
+                                                                         new_c <- shape_extraction(xx, cc)
+                                                                    })
+
+                                                    new_c <- do.call(cbind, new_c)
+                                               }
+
+                                               ## return
                                                new_c
                                           })
                               }
 
+          ## return
           new_cent
      }
 
@@ -79,33 +109,105 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                                    mapply(x_split, cent,
                                           SIMPLIFY = FALSE,
                                           FUN = function(x, c) {
-                                               new_c <- DBA(x, c,
-                                                            norm = control@norm,
-                                                            window.size = control@window.size,
-                                                            max.iter = control@dba.iter,
-                                                            delta = control@delta,
-                                                            error.check = FALSE)
+                                               dims <- sapply(x, function(x) is.null(dim(x)))
 
+                                               if (length(unique(dims)) != 1L)
+                                                    stop("Inconsistent dimensions across series.")
+
+                                               if (any(dims)) {
+                                                    ## univariate
+                                                    new_c <- DBA(x, c,
+                                                                 norm = control@norm,
+                                                                 window.size = control@window.size,
+                                                                 max.iter = control@dba.iter,
+                                                                 delta = control@delta,
+                                                                 error.check = FALSE)
+
+                                               } else {
+                                                    ## multivariate
+                                                    ncols <- ncol(x[[1L]])
+                                                    ncols <- rep(1L:ncols, length(x))
+
+                                                    x <- do.call(cbind, x)
+                                                    x <- split.data.frame(t(x), ncols)
+
+                                                    c <- lapply(1L:ncol(c), function(idc) {
+                                                         c[ , idc, drop = TRUE]
+                                                    })
+
+                                                    new_c <- mapply(x, c, SIMPLIFY = FALSE,
+                                                                    FUN = function(xx, cc) {
+                                                                         DBA(xx, cc,
+                                                                             norm = control@norm,
+                                                                             window.size = control@window.size,
+                                                                             max.iter = control@dba.iter,
+                                                                             delta = control@delta,
+                                                                             error.check = FALSE)
+                                                                    })
+
+                                                    new_c <- do.call(cbind, new_c)
+                                               }
+
+                                               ## return
                                                new_c
                                           })
                               }
 
+          ## return
           new_cent
      }
 
      mean_cent <- function(x_split, ...) {
-          x_split <- lapply(x_split, function(xx) do.call(rbind, xx))
+          new_cent <- lapply(x_split, function(xx) {
+               dims <- sapply(xx, function(x) is.null(dim(x)))
 
-          new_cent <- lapply(x_split, colMeans)
+               if (length(unique(dims)) != 1L)
+                    stop("Inconsistent dimensions across series.")
 
+               if (any(dims)) {
+                    ## univariate
+                    xx <- do.call(rbind, xx)
+                    colMeans(xx)
+
+               } else {
+                    ## multivariate
+                    ncols <- ncol(xx[[1L]]) # number of dimensions should be equal
+                    ncols <- rep(1L:ncols, length(xx))
+
+                    xx <- do.call(cbind, xx)
+                    xx <- split.data.frame(t(xx), ncols)
+                    do.call(cbind, lapply(xx, colMeans))
+               }
+          })
+
+          ## return
           new_cent
      }
 
      median_cent <- function(x_split, ...) {
-          x_split <- lapply(x_split, function(xx) do.call(rbind, xx))
+          new_cent <- lapply(x_split, function(xx) {
+               dims <- sapply(xx, function(x) is.null(dim(x)))
 
-          new_cent <- lapply(x_split, colMedians)
+               if (length(unique(dims)) != 1L)
+                    stop("Inconsistent dimensions across series.")
 
+               if (any(dims)) {
+                    ## univariate
+                    xx <- do.call(rbind, xx)
+                    colMedians(xx)
+
+               } else {
+                    ## multivariate
+                    ncols <- ncol(xx[[1L]]) # number of dimensions should be equal
+                    ncols <- rep(1L:ncols, length(xx))
+
+                    xx <- do.call(cbind, xx)
+                    xx <- split.data.frame(t(xx), ncols)
+                    do.call(cbind, lapply(xx, colMedians))
+               }
+          })
+
+          ## return
           new_cent
      }
 
