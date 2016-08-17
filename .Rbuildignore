@@ -1,6 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^.*\.rds$
+tests/.*\.rds$
 
 NEWS.md
 cran-comments.md
@@ -8,6 +8,7 @@ cran-comments.md
 vignettes/.*\.gz
 vignettes/.*\.bbl
 vignettes/.*\.log
+vignettes/.build.timestamp
 
 ^revdep$
 ^README\.Rmd$

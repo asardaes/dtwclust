@@ -1,5 +1,11 @@
 \documentclass[article,shortnames,nojss]{jss}
 
+% Vignette options
+%\VignetteEngine{knitr::knitr}
+%\VignettePackage{dtwclust}
+%\VignetteIndexEntry{Comparing Time Series Clustering Algorithms in R Using the dtwclust Package}
+%\VignetteEncoding{UTF-8}
+
 % Maths
 \usepackage{amsmath}
 
@@ -33,12 +39,6 @@
 \newcommand{\R}{\proglang{R}}
 \newcommand{\dtwclust}{\pkg{dtwclust}}
 
-% Vignette options
-%\VignetteIndexEntry{Comparing Time Series Clustering Algorithms in R Using the dtwclust Package}
-%\VignetteEngine{knitr::knitr}
-%\VignetteEncoding{UTF-8}
-%\VignettePackage{dtwclust}
-
 % ===========================================================================================================
 % Cover
 % ===========================================================================================================
@@ -66,6 +66,11 @@ Abstract
 % ===========================================================================================================
 
 \begin{document}
+
+<<setup, include = FALSE, cache = FALSE>>=
+library(dtwclust)
+@
+
 
 \section{Introduction}
 \label{sec:introduction}
