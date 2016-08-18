@@ -634,3 +634,25 @@ setAs("NULL", "dtwclustControl",
       function(from, to) {
            new(to)
       })
+
+# ========================================================================================================
+# Coercion methods for cross/pair-dist
+# ========================================================================================================
+
+as.matrix.crossdist <- function(x, ...) {
+     class(x) <- NULL
+     as.matrix(x, ...)
+}
+
+as.matrix.pairdist <- function(x, ...) {
+     class(x) <- NULL
+     as.matrix(x, ...)
+}
+
+as.data.frame.crossdist <- function(x, ...) {
+     as.data.frame(as.matrix(x, ...), ...)
+}
+
+as.data.frame.pairdist <- function(x, ...) {
+     as.data.frame(as.matrix(x, ...), ...)
+}
