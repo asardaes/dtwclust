@@ -17,7 +17,6 @@
 
 % For professional looking tables
 \usepackage{booktabs}
-
 %\usepackage{multirow}
 %\usepackage{multicol}
 %\usepackage{longtable}
@@ -35,7 +34,7 @@
 % Used for knitr images from Rnw files
 \newcommand{\subfloat}[2][default for first parameter: need a sub-caption]{\subcaptionbox{#1}{#2}}
 
-% Typesetting commands
+% Shortcuts
 \newcommand{\R}{\proglang{R}}
 \newcommand{\dtwclust}{\pkg{dtwclust}}
 
@@ -58,8 +57,8 @@ Alexis Sard\'a-Espinosa\\
 Abstract
 }
 
-\Keywords{time series, clustering, \R{}}
-\Plainkeywords{time series, clustering, R}
+\Keywords{time series, clustering, \R{}, dynamic time warping}
+\Plainkeywords{time series, clustering, R, dynamic time warping}
 
 % ===========================================================================================================
 % Main matter
@@ -68,14 +67,35 @@ Abstract
 \begin{document}
 
 <<setup, include = FALSE, cache = FALSE>>=
+library(knitr)
 library(dtwclust)
+
+# knitr defaults
+opts_chunk$set(fig.width = 12, fig.asp = 0.5625,
+               out.width = "\\linewidth",
+               fig.align = "center", fig.pos = "hbp",
+               cache = TRUE, echo = FALSE, autodep = TRUE)
 @
 
 
 \section{Introduction}
 \label{sec:introduction}
 
-\Cref{sec:introduction} has a dummy citation: \citet{begum2015}.
+Cluster analysis is a general task which concerns itself with the creation of groups of objects, where each group is called a cluster. Ideally, all members of the same cluster are similar to each other, but are as dissilimar as possible from objects in a different cluster. There is no single definition of a cluster, and the characteristics of the objects to be clustered varies. Thus, there are several algorithms to perform clustering. Each one defines specific ways of defining what a cluster is, how to measure similarities, how to find groups efficiently, etc. Additionally, each application might have different goals, so a certain clustering algorithm may be preferred depending on the type of clusters sought \citep{kaufman1990}.
+
+Clustering algorithms can be organized differently depending on how they handle the data and how the groups are created. When it comes to static data, i.e. if the values do not change with time \citep{liao2005}, clustering methods are usually divided into five major categories: \textbf{partitioning (or partitional)}, \textbf{hierarchical}, \textbf{density-based}, \textbf{grid-based} and \textbf{model-based} methods \citep{liao2005, rani2012}. They may be used as the main algorithm, or as a preprocessing step \citep{aghabozorgi2015}.
+
+Time-series are a common type of dynamic data that naturally arises in many different scenarios, such as stock data, medical data, machine monitoring, just to name a few \citep{aghabozorgi2015, aggarwal2013}. Time-series clustering is then a type of clustering algorithm made to handle these data. It has many applications, but it poses some challenging issues due to the large size and high dimensionality associated with time-series \citep{aghabozorgi2015}. In this context, the dimension of a series is related to time, and it can be understood as the length of the series. Additionally, a single time-series object may be constituted of several values that change on the same time scale, in which case they are identified as multivariate time series.
+
+\citet{aghabozorgi2015} classifies time-series clustering algorithms based on the way they treat the data and how the underlying grouping is performed. One classification depends on whether the \textbf{whole} series, a \textbf{subsequence}, or individual \textbf{time points} are to be clustered. On the other hand, the clustering itself may be \textbf{shape-based}, \textbf{feature-based} or \textbf{model-based}. \citet{aggarwal2013} makes an additional distinction between online and offline approaches, where the former usually deals with grouping incoming data on-the-go, while the latter deals with data that no longer change.
+
+In most cases, algorithms developed for time-series clustering take static clustering algorithms and either modify the similarity definition by an appropriate one, or apply a transformation to the series so that static information is obtained \citep{liao2005}. Therefore, the underlying basis for the different clustering procedures remains approximately the same across clustering methods.
+
+In this context, it is common to change the distance measure for the \textbf{Dynamic Time Warping} (DTW) distance. The calculation of the DTW distance involves a dynamic programming algorithm that tries to find the optimum warping path between two series under certain constraints \citep{berndt1994}. However, the DTW algorithm is computationally expensive, both in time and memory utilization. Over the years, several variations and optimizations have been developed in an attempt to accelerate or optimize the calculation. Some of the most common techniques will be discussed in more detail in the next sections.
+
+Small variations in the clustering procedure could have a big impact in performance with respecto to cluster quality and execution time. As such, it is desirable to have a common platform on which clustering algorithms can be tested and compared against each other. The \dtwclust{} package, developed in the \R{} programming language \citep{rcore}, provides such functionality, and includes implementations of recently developed time-series clustering algorithms and optimizations. In the following, an introduction to the common clustering algorithms will be provided. The variations related to DTW will be explored, and more details about the functions included in the package will be given. For a more comprehensive overview of the state of the art in time series clustering, the reader is referred to the included references, especially \citet{liao2005}, \citet{rani2012} and \citet{aghabozorgi2015}.
+
+The rest of this paper is organized as follows.
 
 % ===========================================================================================================
 % Bibliography
