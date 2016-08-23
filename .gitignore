@@ -12,6 +12,7 @@ vignettes/*.bbl
 vignettes/*.log
 vignettes/*.tex
 vignettes/.build.timestamp
+vignettes/**/
 
 # Windows image file caches
 Thumbs.db

@@ -34,9 +34,18 @@
 % Used for knitr images from Rnw files
 \newcommand{\subfloat}[2][default for first parameter: need a sub-caption]{\subcaptionbox{#1}{#2}}
 
+% Allowed percentages of page a float can use
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.95}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{totalnumber}{5}
+
 % Shortcuts
 \newcommand{\R}{\proglang{R}}
 \newcommand{\dtwclust}{\pkg{dtwclust}}
+\newcommand{\dtwp}{\text{DTW}_p}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 
 % ===========================================================================================================
 % Cover
@@ -70,6 +79,8 @@ Abstract
 library(knitr)
 library(dtwclust)
 
+data(uciCT)
+
 # knitr defaults
 opts_chunk$set(fig.width = 12, fig.asp = 0.5625,
                out.width = "\\linewidth",
@@ -87,30 +98,112 @@ Clustering algorithms can be organized differently depending on how they handle 
 
 Time-series are a common type of dynamic data that naturally arises in many different scenarios, such as stock data, medical data, and machine monitoring, just to name a few \citep{aghabozorgi2015, aggarwal2013}. They pose some challenging issues due to the large size and high dimensionality commonly associated with time-series \citep{aghabozorgi2015}. In this context, dimensionality of a series is related to time, and it can be understood as the length of the series. Additionally, a single time-series object may be constituted of several values that change on the same time scale, in which case they are identified as multivariate time series.
 
-There are many techniques to modify time series in order to reduce dimensionality, and they mostly deal with the way time-series are represented. Changing representation can be an important step, not only in time-series clustering, and it constitutes a wide research area on its own (cf. Table 2 in \citep{aghabozorgi2015}). While choice of representation can directly affect clustering, it can be considered as a different step, and as such it will not be discussed further in this paper.
+There are many techniques to modify time series in order to reduce dimensionality, and they mostly deal with the way time-series are represented. Changing representation can be an important step, not only in time-series clustering, and it constitutes a wide research area on its own (cf. Table 2 in \citet{aghabozorgi2015}). While choice of representation can directly affect clustering, it can be considered as a different step, and as such it will not be discussed further in this paper.
 
-Time-series clustering is a type of clustering algorithm made to handle dynamic data. The most important elements to consider are the \textbf{similarity or distance measure}, the \textbf{prototype extraction function} (if applicable), the \textbf{clustering algorithm itself}, and \textbf{cluster evaluation} \citep{aghabozorgi2015}. In most cases, algorithms developed for time-series clustering take static clustering algorithms and either modify the similarity definition or the prototype extraction function by an appropriate one, or apply a transformation to the series so that static features are obtained \citep{liao2005}. Therefore, the underlying basis for the different clustering procedures remains approximately the same across clustering methods. The most common approaches are hierarchcial and partitional clustering (cf. Table 4 in \citep{aghabozorgi2015}), the latter of which includes fuzzy clustering.
+Time-series clustering is a type of clustering algorithm made to handle dynamic data. The most important elements to consider are the \textbf{similarity or distance measure}, the \textbf{prototype extraction function} (if applicable), the \textbf{clustering algorithm itself}, and \textbf{cluster evaluation} \citep{aghabozorgi2015}. In most cases, algorithms developed for time-series clustering take static clustering algorithms and either modify the similarity definition or the prototype extraction function by an appropriate one, or apply a transformation to the series so that static features are obtained \citep{liao2005}. Therefore, the underlying basis for the different clustering procedures remains approximately the same across clustering methods. The most common approaches are hierarchcial and partitional clustering (cf. Table 4 in \citet{aghabozorgi2015}), the latter of which includes fuzzy clustering.
 
 \citet{aghabozorgi2015} classify time-series clustering algorithms based on the way they treat the data and how the underlying grouping is performed. One classification depends on whether the \textbf{whole} series, a \textbf{subsequence}, or individual \textbf{time points} are to be clustered. On the other hand, the clustering itself may be \textbf{shape-based}, \textbf{feature-based} or \textbf{model-based}. \citet{aggarwal2013} makes an additional distinction between online and offline approaches, where the former usually deals with grouping incoming data on-the-go, while the latter deals with data that no longer change.
 
-In this context, it is common to change the distance measure for the \textbf{Dynamic Time Warping} (DTW) distance \citep{aghabozorgi2015}. The calculation of the DTW distance involves a dynamic programming algorithm that tries to find the optimum warping path between two series under certain constraints \citep{berndt1994}. However, the DTW algorithm is computationally expensive, both in time and memory utilization. Over the years, several variations and optimizations have been developed in an attempt to accelerate or optimize the calculation. Some of the most common techniques will be discussed in more detail in the next sections.
+In this context, it is common to change the distance measure for the \textbf{Dynamic Time Warping} (DTW) distance \citep{aghabozorgi2015}. The calculation of the DTW distance involves a dynamic programming algorithm that tries to find the optimum warping path between two series under certain constraints. However, the DTW algorithm is computationally expensive, both in time and memory utilization. Over the years, several variations and optimizations have been developed in an attempt to accelerate or optimize the calculation. Some of the most common techniques will be discussed in more detail in \cref{sec:dtw}.
 
 Due to its nature, clustering procedures lend themselves for parallelization, since a lot of similar calculations are performed independently of each other. This can make a very significant difference, especially if the data complexity increases (which can happen really quickly in case of time-series), or some of the more computationally expensive algorithms are used.
 
-Variations in the clustering procedure could have a big impact in performance with respecto to cluster quality and execution time. As such, it is desirable to have a common platform on which clustering algorithms can be tested and compared against each other. The \dtwclust{} package, developed in the \R{} programming language \citep{rcore}, provides such functionality, and includes implementations of recently developed time-series clustering algorithms and optimizations. Instead of providing a detailed explanation of the existing algorithms, we will concern ourselves with describing which ones are available in \dtwclust{}, mentioning the most important characteristics of each and showing how the package can be used to evaluate them. Additionally, some variations related to DTW and other common distances will be explored, and the parallelization strategies and optimizations will be described. For a more comprehensive overview of the state of the art in time series clustering, the reader is referred to the included references and the articles mentioned therein.
+Variations in the clustering procedure could have a big impact in performance with respecto to cluster quality and execution time. As such, it is desirable to have a common platform on which clustering algorithms can be tested and compared against each other. The \dtwclust{} package, developed for the \R{} statistical software \citep{rcore}, provides such functionality, and includes implementations of recently developed time-series clustering algorithms and optimizations. Instead of providing a detailed explanation of the existing algorithms, we will concern ourselves with describing which ones are available in \dtwclust{}, mentioning the most important characteristics of each and showing how the package can be used to evaluate them. Additionally, some variations related to DTW and other common distances will be explored, and the parallelization strategies and optimizations will be described. For a more comprehensive overview of the state of the art in time series clustering, the reader is referred to the included references and the articles mentioned therein.
 
 The rest of this paper is organized as follows. The relevant information to the distance measures will be presented in \cref{sec:distances}. Supported algorithms for prototype extraction will be discussed in \cref{sec:prototypes}. The main clustering algorithms will be described in \cref{sec:clustering}. Some basic information with respect to cluster evaluation will be provided in \cref{sec:evaluation}, and the final remarks will be given in \cref{sec:conclusion}.
 
-\section{Distance Measures}
+\section{Distance measures}
 \label{sec:distances}
 
-\section{Time-Series Prototypes}
+Calculating distances, as well as cross-distance matrices, between time-series objects is one of the cornerstones of any clustering algorithm. It is a task that is repeated very often and loops across all objects applying a suitable distance function. The \pkg{proxy} package \citep{proxy}, also developed for \R{}, provides a highly optimized and extensible framework for these calculations, and is used extensively by \dtwclust{}. It includes several common metrics, which are saved in a database object called \code{pr_DB}. Additionally, users can register custom functions in the database via \code{pr_DB$set_entry}. This has the advantage that all registered functions can be used with the \code{proxy::dist} function, which results in a high level of consistency. Unless otherwise noted, all the distances discussed here are registered with \pkg{proxy} when \dtwclust{} is attached.
+
+It is important to note that the \code{proxy::dist} function parses all matrix-like objects \textbf{row-wise}, meaning that, in the context of time-series clustering, it would consider the rows of a \textit{matrix} or \textit{data frame} as the time-series. Matrices and data frames cannot contain series with different length, something that can be circumvented by encapsulating the series in a \textit{list}, each element of the list being a single series. Internally, \dtwclust{} coerces all provided data to a list, however, it parses \textbf{matrices row-wise} and \textbf{data frames column-wise}. Moreover, a single multivariate time series should be provided as a matrix where time spans the rows and the variables span the columns. Thus, several multivariate time series should be provided as a \textit{list of matrices} to ensure that they are correctly detected, although not all distance functions support multivariate series.
+
+The $l_1$ and $l_2$ vector norms, also known as Manhattan and Euclidean distances respectively, are the most commonly used distance measures, and are arguably the only competitive distances when measuring dissimilarity \citep{aggarwal2001, lemire2009}. They can be efficiently computed, but are only defined for series of equal length and are sensitive to noise and time shifts.
+
+To facilitate notation, define a time-series as a vector (or set of vectors in case of multivariate series) $x$. Each vector has length $n$. In general, $x^v_i$ represents the $i$-th element of the $v$-th variable of the (possibly multivariate) time-series $x$. We will assume that all elements are equally spaced in time in order to avoid the time index explicitly.
+
+\subsection{Dynamic time warping distance}
+\label{sec:dtw}
+
+At the core, DTW is a dynamic programming algorithm that compares two series and tries to find the optimum warping curve between them under certain constraints, such as monotonicity. It started being used by the data mining community to overcome some of the limitations associated with the Euclidean distance \citep{keogh2004, berndt1994}. In \dtwclust{}, all DTW calculations are performed by the \pkg{dtw} package \citep{giorgino2009}, which comprehensively aggregates most of the related variations and optimizations.
+
+The easiest way to get an intuition of what DTW does is graphically. \Cref{fig:dtw-intuition} shows the alignment between two sample time-series $x$ and $y$. In this instance, the initial and final points of the series must match, but other points may be warped in time in order to find better matches.
+
+<<dtw-intuition, out.width = "0.75\\linewidth", fig.cap = "Sample alignment performed by the DTW algorithm between two series. The dashed gray lines indicate which points are mapped to each other, which shows how they can be warped in time. Note the vertical position of each series was artificially altered for visualization.">>=
+dtw_example <- dtw(CharTraj[[1L]], CharTraj[[2L]], keep.internals = TRUE)
+plot(dtw_example, type = "two", offset = 1, match.indices = 30,
+     xlab = "Time", ylab = "Series")
+@
+
+DTW is computationally expensive. If $x$ has lengh $n$ and $y$ has length $m$, the DTW distance between them can be computed in $O(nm)$ time, which is almost quadratic if $m$ and $n$ are similar. Additionally, DTW is prone to implementation bias since its calculations are not easily vectorized and tend to be very slow in non-compiled programming languages. The \pkg{dtw} package includes a C implementation of the dynamic programming step of the algorithm, which should be very fast; its level of generality may sacrifice some performance, but in most situations it will be negligible. DTW is considered a more robust distance measure for time-series \citep{wang2013}, and can potentially deal with series of different length directly. This is not necessarily an advantage, as it has been shown before that performing linear reinterpolation to obtain equal length may be appropriate if $m$ and $n$ do not vary significantly \citep{keogh2004}. For a more detailed explanation of the DTW algorithm, see e.g. \citet{giorgino2009}. However, there are some aspects that are worth discussing here.
+
+The first step in DTW involves creating a \textbf{local cost matrix} (LCM  or $lcm$), which has $n \times m$ dimensions. Such matrix must be created for every pair of distances compared, meaning that memory requirements may grow quickly as the dataset size grows. Considering $x$ and $y$ as the input series, for each element $(i,j)$ of the LCM, the $l_p$ norm between $x_i$ and $y_j$ must be computed. This is defined as $\left( \sum_v \lvert x^v_i - y^v_j \rvert ^ p \right) ^ {1/p}$, explicitly denoting that multivariate series are supported as long as they have the same number of variables (note that for univariate series, the LCM will be identical regardless of the norm used). Thus, it makes sense to speak of a $\dtwp{}$ distance, where $p$ corresponds to the $l_p$ norm that was used to construct the LCM. However, this norm also plays an important role in the next step of DTW.
+
+In the seconds step, the DTW algorithm finds the path that minimizes the alignment between $x$ and $y$ by iteratively stepping through the LCM, starting at $lcm(1,1)$ and finishing at $lcm(n,m)$, and aggregating the cost. At each step, the algorithm finds the direction in which the cost increases the least under the chosen constraints; see \cref{fig:dtw-path} for a visual representation of the path corresponding to \cref{fig:dtw-intuition}. If we define $\phi = \left\{ (1,1), \ldots, (n,m) \right\}$ as the set containing all the points that fall on the optimum path, then the final distance would be computed as $\dtwp{}(x,y) = \left[ \sum lcm(k) ^ p \right] ^ {1/p}, \; \forall k \in \phi$.
+
+It is clear that the choice of $l_p$ norm comes into play twice during the DTW the algorithm, but why is this crucial? The \pkg{dtw} package also makes internal use of \pkg{proxy} to calculate the LCM, and it allows changing the norm by means of its \code{dist.method} argument. However, as previously mentioned, this only affects the LCM if multivariate series are used, and it is \textbf{not} considered by \pkg{dtw} during the final calculation in step two of the algorithm. For this reason, a special version of $\text{DTW}_2$ is registered with \pkg{proxy} by \dtwclust{} (called simply \code{"DTW2"}), which also uses \pkg{dtw} for the core calculations, but appropriately uses the $l_2$ norm in the second step.
+
+<<dtw-path, fig.cap = "Visual representation of the optimum path found. The big square in the center represents the LCM created for these specific series.">>=
+plot(dtw_example, type = "three")
+@
+
+The way in which the algorithm traverses through the LCM is primarily dictated by the chosen \textit{step pattern}. The step pattern is a local constraint that determines which directions are allowed when moving ahead in the LCM as the cost is being aggregated. \Cref{fig:step-patterns} depicts two common step patterns and their names in the \pkg{dtw} package. Unfortunately, very few articles from the data mining community specify which pattern they use, although in the author's experience, the \code{symmetric1} pattern seems to be standard. By contrast, the \code{dtw} function uses the \code{symmetric2} pattern by default, but it is simple to modify this by providing the appropriate value in the \code{step.pattern} argument. The choice of step pattern also determines whether the corresponding DTW distance can be normalized or not (which may be important for series with different length). See \citet{giorgino2009} for a complete list of step patterns and which ones can be normalized.
+
+<<step-patterns, out.width = "0.45\\linewidth", fig.width = 4, fig.asp = 1, fig.cap = "Two common step patterns used by DTW when traversing the LCM. At each step, the lines denote the allowed directions that can be taken, as well as the weight associated with each one.", fig.subcap = c("\\code{symmetric1} step pattern", "\\code{symmetric2} step pattern")>>=
+plot(symmetric1)
+plot(symmetric2)
+@
+
+As final comments, it should be noted that the DTW distance does \textbf{not} satisfy the \textit{triangle inequality}, and it is \textbf{not} symmetric unless both series have the same length, i.e. $\dtwp{}(x,y) \neq \dtwp{}(y,x)$ for $n \neq m$. Currently, only distance measures based on DTW support multivariate series.
+
+\FloatBarrier
+\subsubsection{Global DTW constraints}
+\label{sec:dtw-window}
+
+\subsubsection{Lower bounds for DTW}
+\label{sec:lbs}
+
+\subsection{Shape-based distance}
+\label{sec:sbd}
+
+\section{Time-series prototypes}
 \label{sec:prototypes}
 
-\section{Time-Series Clustering Algorithms}
+\subsection{Mean and median}
+\label{sec:mean-median}
+
+\subsection{Partition around medoids}
+\label{sec:pam}
+
+\subsection{DTW barycenter averaging}
+\label{sec:dba}
+
+\subsection{Shape extraction}
+\label{sec:shape}
+
+\subsection{Fuzzy c-means}
+\label{sec:fcm}
+
+\section{Time-series clustering algorithms}
 \label{sec:clustering}
 
-\section{Cluster Evaluation}
+\subsection{Hierarchical clustering}
+\label{sec:hc}
+
+\subsection{Partitional clustering}
+\label{sec:pc}
+
+\subsubsection{TADPole clustering}
+\label{sec:tadpole}
+
+\subsubsection{k-Shape clustering}
+\label{sec:kshape}
+
+\subsection{Fuzzy clustering}
+\label{sec:fuzzy}
+
+\section{Cluster evaluation}
 \label{sec:evaluation}
 
 \section{Conclusion}
@@ -120,7 +213,6 @@ The rest of this paper is organized as follows. The relevant information to the 
 % Bibliography
 % ===========================================================================================================
 
-%\bibliographystyle{}
 \nocite{*}
 \bibliography{REFERENCES}
 
