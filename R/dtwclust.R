@@ -515,7 +515,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                         preproc = preproc)
 
           if (type == "fuzzy")
-               family@cluster <- fcm_cluster # utils.R
+               family@cluster <- fcm_cluster # fuzzy.R
 
           if (control@trace && control@nrep > 1L)
                message("Tracing of repetitions might not be available if done in parallel.\n")

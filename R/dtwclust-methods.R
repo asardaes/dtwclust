@@ -127,6 +127,8 @@ setMethod("update", "dtwclust",
 #' @aliases predict,dtwclust-method
 #'
 #' @param newdata New data to be evaluated. It can take any of the supported formats of \code{\link{dtwclust}}.
+#' Note that for multivariate series, this means that it \strong{must} be a list of matrices, even if the list
+#' has only one element.
 #'
 #' @exportMethod predict
 #'

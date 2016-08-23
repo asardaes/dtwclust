@@ -39,7 +39,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
           centers <- family@allcent(x, cluster, k, centers, clustold, ...)
 
           if (fuzzy) {
-               # utils.R
+               # fuzzy.R
                objective <- fuzzy_objective(cluster, distmat = distmat, m = control@fuzziness)
 
                if (control@trace) {

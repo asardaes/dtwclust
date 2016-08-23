@@ -28,7 +28,9 @@
 \item{evaluate}{Logical. Defaults to \code{TRUE} and evaluates the updated call, which will result in
 a new \code{dtwclust} object. Otherwise, it returns the unevaluated call.}
 
-\item{newdata}{New data to be evaluated. It can take any of the supported formats of \code{\link{dtwclust}}.}
+\item{newdata}{New data to be evaluated. It can take any of the supported formats of \code{\link{dtwclust}}.
+Note that for multivariate series, this means that it \strong{must} be a list of matrices, even if the list
+has only one element.}
 
 \item{y}{Ignored.}
 
