@@ -46,7 +46,7 @@
 \newcommand{\R}{\proglang{R}}
 \newcommand{\dtwclust}{\pkg{dtwclust}}
 \newcommand{\dtwp}{\text{DTW}_p}
-\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\kshape}{\textit{k}-Shape}
 
 % ===========================================================================================================
 % Cover
@@ -199,6 +199,10 @@ Finally, it must be noted that the LBs are \textbf{only} defined for series of e
 \subsection{Shape-based distance}
 \label{sec:sbd}
 
+The shape-based distance (SBD) was recently proposed as part of the \kshape{} clustering algorithm \citep{paparrizos2015}; this algorithm will be further discussed in \cref{sec:shape} and \cref{sec:kshape}. SBD is based on \textit{cross-correlation} with coefficient normalization (NCCc), and it is thus sensitive to scale, which is why \citet{paparrizos2015} recommend \textit{z}-normalization.
+
+This distance can be efficiently computed by utilizing the Fast Fourier Transform (FFT), although that might make it sensitive to numerical precision, which can produce discrepancies between systems with 32 and 64-bit architectures. Nevertheless, it can be very fast, it was very competitive in the experiments performed in \citet{paparrizos2015}, and it supports series with different length directly. Additionally, some FFTs can be reused when computing the SBD between several series. This optimization is also included in the SBD function registered with \pkg{proxy}.
+
 \section{Time-series prototypes}
 \label{sec:prototypes}
 
@@ -213,6 +217,18 @@ Finally, it must be noted that the LBs are \textbf{only} defined for series of e
 
 \subsection{Shape extraction}
 \label{sec:shape}
+
+<<sbd-alignment, out.width = "0.45\\linewidth", fig.width = 6, fig.cap = "Visualization of the NCCc-based alignment performed on two sample series. After alignment, the second (red) series is either truncated and/or prepended/appended with zeros so that its length matches the first(black) series.", fig.subcap = c("Series before alignment", "Series after alignment")>>=
+matplot(cbind(CharTraj[[61L]], CharTraj[[65L]]),
+        type = "l", lty = 1L,
+        xlab = "Time", ylab = "Series")
+
+sbd_align <- SBD(CharTraj[[61L]], CharTraj[[65L]])
+
+matplot(cbind(CharTraj[[61L]], sbd_align$yshift),
+        type = "l", lty = 1L,
+        xlab = "Time", ylab = "Series")
+@
 
 \subsection{Fuzzy c-means}
 \label{sec:fcm}
@@ -229,7 +245,7 @@ Finally, it must be noted that the LBs are \textbf{only} defined for series of e
 \subsubsection{TADPole clustering}
 \label{sec:tadpole}
 
-\subsubsection{k-Shape clustering}
+\subsubsection[k-Shape]{\kshape{} clustering}
 \label{sec:kshape}
 
 \subsection{Fuzzy clustering}
@@ -263,7 +279,7 @@ proxy::pr_DB$set_entry(FUN = diss.ACF, names=c("ACFD"),
                        description = "Autocorrelation-based distance")
 
 # Taking just a subset of the data
-# Note that subsetting with a single brackets preserves the list format
+# Note that subsetting with single brackets preserves the list format
 proxy::dist(CharTraj[3:8], method = "ACFD", upper = TRUE)
 @
 
