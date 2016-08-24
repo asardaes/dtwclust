@@ -4,7 +4,7 @@
 %\VignetteEngine{knitr::knitr}
 %\VignettePackage{dtwclust}
 %\VignetteDepends{TSclust}
-%\VignetteIndexEntry{Comparing Time Series Clustering Algorithms in R Using the dtwclust Package}
+%\VignetteIndexEntry{Comparing Time-Series Clustering Algorithms in R Using the dtwclust Package}
 %\VignetteEncoding{UTF-8}
 
 % Maths
@@ -52,8 +52,8 @@
 % Cover
 % ===========================================================================================================
 
-\title{Comparing Time Series Clustering Algorithms in \R{} Using the \dtwclust{} Package}
-\Plaintitle{Comparing Time Series Clustering Algorithms in R Using the dtwclust Package}
+\title{Comparing Time-Series Clustering Algorithms in \R{} Using the \dtwclust{} Package}
+\Plaintitle{Comparing Time-Series Clustering Algorithms in R Using the dtwclust Package}
 
 \author{Alexis~Sard\'a-Espinosa}
 \date{\today}
@@ -67,8 +67,8 @@ Alexis Sard\'a-Espinosa\\
 Abstract
 }
 
-\Keywords{time series, clustering, \R{}, dynamic time warping}
-\Plainkeywords{time series, clustering, R, dynamic time warping}
+\Keywords{time-series, clustering, \R{}, dynamic time warping}
+\Plainkeywords{time-series, clustering, R, dynamic time warping}
 
 % ===========================================================================================================
 % Main matter
@@ -97,9 +97,9 @@ Cluster analysis is a general task which concerns itself with the creation of gr
 
 Clustering algorithms can be organized differently depending on how they handle the data and how the groups are created. When it comes to static data, i.e. if the values do not change with time \citep{liao2005}, clustering methods are usually divided into five major categories: \textbf{partitioning (or partitional)}, \textbf{hierarchical}, \textbf{density-based}, \textbf{grid-based} and \textbf{model-based} methods \citep{liao2005, rani2012}. They may be used as the main algorithm, as an intermediate step, or as a preprocessing step \citep{aghabozorgi2015}.
 
-Time-series are a common type of dynamic data that naturally arises in many different scenarios, such as stock data, medical data, and machine monitoring, just to name a few \citep{aghabozorgi2015, aggarwal2013}. They pose some challenging issues due to the large size and high dimensionality commonly associated with time-series \citep{aghabozorgi2015}. In this context, dimensionality of a series is related to time, and it can be understood as the length of the series. Additionally, a single time-series object may be constituted of several values that change on the same time scale, in which case they are identified as multivariate time series.
+Time-series are a common type of dynamic data that naturally arises in many different scenarios, such as stock data, medical data, and machine monitoring, just to name a few \citep{aghabozorgi2015, aggarwal2013}. They pose some challenging issues due to the large size and high dimensionality commonly associated with time-series \citep{aghabozorgi2015}. In this context, dimensionality of a series is related to time, and it can be understood as the length of the series. Additionally, a single time-series object may be constituted of several values that change on the same time scale, in which case they are identified as multivariate time-series.
 
-There are many techniques to modify time series in order to reduce dimensionality, and they mostly deal with the way time-series are represented. Changing representation can be an important step, not only in time-series clustering, and it constitutes a wide research area on its own (cf. Table 2 in \citet{aghabozorgi2015}). While choice of representation can directly affect clustering, it can be considered as a different step, and as such it will not be discussed further in this paper.
+There are many techniques to modify time-series in order to reduce dimensionality, and they mostly deal with the way time-series are represented. Changing representation can be an important step, not only in time-series clustering, and it constitutes a wide research area on its own (cf. Table 2 in \citet{aghabozorgi2015}). While choice of representation can directly affect clustering, it can be considered as a different step, and as such it will not be discussed further in this paper.
 
 Time-series clustering is a type of clustering algorithm made to handle dynamic data. The most important elements to consider are the \textbf{similarity or distance measure}, the \textbf{prototype extraction function} (if applicable), the \textbf{clustering algorithm itself}, and \textbf{cluster evaluation} \citep{aghabozorgi2015}. In most cases, algorithms developed for time-series clustering take static clustering algorithms and either modify the similarity definition or the prototype extraction function by an appropriate one, or apply a transformation to the series so that static features are obtained \citep{liao2005}. Therefore, the underlying basis for the different clustering procedures remains approximately the same across clustering methods. The most common approaches are hierarchcial and partitional clustering (cf. Table 4 in \citet{aghabozorgi2015}), the latter of which includes fuzzy clustering.
 
@@ -109,7 +109,7 @@ In this context, it is common to change the distance measure for the \textbf{Dyn
 
 Due to its nature, clustering procedures lend themselves for parallelization, since a lot of similar calculations are performed independently of each other. This can make a very significant difference, especially if the data complexity increases (which can happen really quickly in case of time-series), or some of the more computationally expensive algorithms are used.
 
-Variations in the clustering procedure could have a big impact in performance with respecto to cluster quality and execution time. As such, it is desirable to have a common platform on which clustering algorithms can be tested and compared against each other. The \dtwclust{} package, developed for the \R{} statistical software \citep{rcore}, provides such functionality, and includes implementations of recently developed time-series clustering algorithms and optimizations. Instead of providing a detailed explanation of the existing algorithms, we will concern ourselves with describing which ones are available in \dtwclust{}, mentioning the most important characteristics of each and showing how the package can be used to evaluate them. Additionally, some variations related to DTW and other common distances will be explored, and the parallelization strategies and optimizations will be described. For a more comprehensive overview of the state of the art in time series clustering, the reader is referred to the included references and the articles mentioned therein.
+Variations in the clustering procedure could have a big impact in performance with respecto to cluster quality and execution time. As such, it is desirable to have a common platform on which clustering algorithms can be tested and compared against each other. The \dtwclust{} package, developed for the \R{} statistical software \citep{rcore}, provides such functionality, and includes implementations of recently developed time-series clustering algorithms and optimizations. Instead of providing a detailed explanation of the existing algorithms, we will concern ourselves with describing which ones are available in \dtwclust{}, mentioning the most important characteristics of each and showing how the package can be used to evaluate them. Additionally, some variations related to DTW and other common distances will be explored, and the parallelization strategies and optimizations will be described. For a more comprehensive overview of the state of the art in time-series clustering, the reader is referred to the included references and the articles mentioned therein.
 
 The rest of this paper is organized as follows. The relevant information to the distance measures will be presented in \cref{sec:distances}. Supported algorithms for prototype extraction will be discussed in \cref{sec:prototypes}. The main clustering algorithms will be described in \cref{sec:clustering}. Some basic information with respect to cluster evaluation will be provided in \cref{sec:evaluation}, and the final remarks will be given in \cref{sec:conclusion}. Code examples will be given in the appendices. The data used throughout this paper is included in the package (saved in a list called \code{CharTraj}), and is a subset of the character trajectories dataset found in \citet{lichman2013}; they are pen tip trajectories recorded for individual characters, and the subset contains 5 examples of the $X$ velocity for each considered character.
 
@@ -118,7 +118,7 @@ The rest of this paper is organized as follows. The relevant information to the 
 
 Calculating distances, as well as cross-distance matrices, between time-series objects is one of the cornerstones of any clustering algorithm. It is a task that is repeated very often and loops across all objects applying a suitable distance function. The \pkg{proxy} package \citep{proxy}, also developed for \R{}, provides a highly optimized and extensible framework for these calculations, and is used extensively by \dtwclust{}. It includes several common metrics, which are saved in a database object called \code{pr_DB}. Additionally, users can register custom functions in the database via \code{pr_DB$set_entry}. This has the advantage that all registered functions can be used with the \code{proxy::dist} function, which results in a high level of consistency. Refer to \cref{app:custom-dist} for an example. Unless otherwise noted, all the distances discussed here are registered with \pkg{proxy} when \dtwclust{} is attached.
 
-It is important to note that the \code{proxy::dist} function parses all matrix-like objects \textbf{row-wise}, meaning that, in the context of time-series clustering, it would consider the rows of a \textit{matrix} or \textit{data frame} as the time-series. Matrices and data frames cannot contain series with different length, something that can be circumvented by encapsulating the series in a \textit{list}, each element of the list being a single series. Internally, \dtwclust{} coerces all provided data to a list, however, it parses \textbf{matrices row-wise} and \textbf{data frames column-wise}. Moreover, a single multivariate time series should be provided as a matrix where time spans the rows and the variables span the columns. Thus, several multivariate time series should be provided as a \textit{list of matrices} to ensure that they are correctly detected, although not all distance functions support multivariate series.
+It is important to note that the \code{proxy::dist} function parses all matrix-like objects \textbf{row-wise}, meaning that, in the context of time-series clustering, it would consider the rows of a \textit{matrix} or \textit{data frame} as the time-series. Matrices and data frames cannot contain series with different length, something that can be circumvented by encapsulating the series in a \textit{list}, each element of the list being a single series. Internally, \dtwclust{} coerces all provided data to a list, however, it parses \textbf{matrices row-wise} and \textbf{data frames column-wise}. Moreover, a single multivariate time-series should be provided as a matrix where time spans the rows and the variables span the columns. Thus, several multivariate time-series should be provided as a \textit{list of matrices} to ensure that they are correctly detected, although not all distance functions support multivariate series.
 
 The $l_1$ and $l_2$ vector norms, also known as Manhattan and Euclidean distances respectively, are the most commonly used distance measures, and are arguably the only competitive distances when measuring dissimilarity \citep{aggarwal2001, lemire2009}. They can be efficiently computed, but are only defined for series of equal length and are sensitive to noise and time shifts.
 
@@ -180,9 +180,9 @@ It should be noted that, when reported, window sizes are always integers greater
 
 Due to the fact that DTW itself is expensive to compute, \textit{lower bounds} (LBs) for the DTW distance have been developed. These lower bounds guarantee being less than or equal to the corresponding DTW distance. They have been exploited when indexing time-series databases, classification of time-series, clustering, etc. \citep{keogh2005, begum2015}. Out of the existing DTW LBs, the two most effective are termed \code{LB_Keogh} \citep{keogh2005} and \code{LB_Improved} \citep{lemire2009}. The reader is referred to the respective articles for a detailed definition and proof of the LBs, however some important considerations will be further discussed here.
 
-One crucial step when calculating the LBs is the computation of the so-called \textit{envelops}. These envelops \textbf{require} a window constraint, and thus are dependant on both the type and size of the window. Based on these, a \textit{running} minimum and maximum are computed and, respectively, a lower and upper envelop are generated. \Cref{fig:envelop-plot} depicts a sample time series with its corresponding envelops for a Sakoe-Chiba window of size 15.
+One crucial step when calculating the LBs is the computation of the so-called \textit{envelops}. These envelops \textbf{require} a window constraint, and thus are dependant on both the type and size of the window. Based on these, a \textit{running} minimum and maximum are computed and, respectively, a lower and upper envelop are generated. \Cref{fig:envelop-plot} depicts a sample time-series with its corresponding envelops for a Sakoe-Chiba window of size 15.
 
-<<envelop-plot, out.width = "0.75\\linewidth", fig.cap = "Visual representation of a time series (shown as a solid black line) and its corresponding envelops based on the Sakoe-Chiba window. The green dashed line represents the upper envelop, while the red dashed line represents the lower envelop.">>=
+<<envelop-plot, out.width = "0.75\\linewidth", fig.cap = "Visual representation of a time-series (shown as a solid black line) and its corresponding envelops based on the Sakoe-Chiba window. The green dashed line represents the upper envelop, while the red dashed line represents the lower envelop.">>=
 lbk <- lb_keogh(CharTraj[[1L]], CharTraj[[2L]], window.size = 15)
 matplot(cbind(lbk$lower.env, lbk$upper.env),
         type = "l", lty = 2, col = 2:3,
