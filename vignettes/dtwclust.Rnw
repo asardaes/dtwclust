@@ -3,6 +3,7 @@
 % Vignette options
 %\VignetteEngine{knitr::knitr}
 %\VignettePackage{dtwclust}
+%\VignetteDepends{TSclust}
 %\VignetteIndexEntry{Comparing Time Series Clustering Algorithms in R Using the dtwclust Package}
 %\VignetteEncoding{UTF-8}
 
@@ -82,9 +83,9 @@ library(dtwclust)
 data(uciCT)
 
 # knitr defaults
-opts_chunk$set(fig.width = 12, fig.asp = 0.5625,
+opts_chunk$set(fig.width = 8, fig.asp = 0.5625,
                out.width = "\\linewidth",
-               fig.align = "center", fig.pos = "hbp",
+               fig.align = "center", fig.pos = "htbp",
                cache = TRUE, echo = FALSE, autodep = TRUE)
 @
 
@@ -110,12 +111,12 @@ Due to its nature, clustering procedures lend themselves for parallelization, si
 
 Variations in the clustering procedure could have a big impact in performance with respecto to cluster quality and execution time. As such, it is desirable to have a common platform on which clustering algorithms can be tested and compared against each other. The \dtwclust{} package, developed for the \R{} statistical software \citep{rcore}, provides such functionality, and includes implementations of recently developed time-series clustering algorithms and optimizations. Instead of providing a detailed explanation of the existing algorithms, we will concern ourselves with describing which ones are available in \dtwclust{}, mentioning the most important characteristics of each and showing how the package can be used to evaluate them. Additionally, some variations related to DTW and other common distances will be explored, and the parallelization strategies and optimizations will be described. For a more comprehensive overview of the state of the art in time series clustering, the reader is referred to the included references and the articles mentioned therein.
 
-The rest of this paper is organized as follows. The relevant information to the distance measures will be presented in \cref{sec:distances}. Supported algorithms for prototype extraction will be discussed in \cref{sec:prototypes}. The main clustering algorithms will be described in \cref{sec:clustering}. Some basic information with respect to cluster evaluation will be provided in \cref{sec:evaluation}, and the final remarks will be given in \cref{sec:conclusion}.
+The rest of this paper is organized as follows. The relevant information to the distance measures will be presented in \cref{sec:distances}. Supported algorithms for prototype extraction will be discussed in \cref{sec:prototypes}. The main clustering algorithms will be described in \cref{sec:clustering}. Some basic information with respect to cluster evaluation will be provided in \cref{sec:evaluation}, and the final remarks will be given in \cref{sec:conclusion}. Code examples will be given in the appendices. The data used throughout this paper is included in the package (saved in a list called \code{CharTraj}), and is a subset of the character trajectories dataset found in \citet{lichman2013}; they are pen tip trajectories recorded for individual characters, and the subset contains 5 examples of the $X$ velocity for each considered character.
 
 \section{Distance measures}
 \label{sec:distances}
 
-Calculating distances, as well as cross-distance matrices, between time-series objects is one of the cornerstones of any clustering algorithm. It is a task that is repeated very often and loops across all objects applying a suitable distance function. The \pkg{proxy} package \citep{proxy}, also developed for \R{}, provides a highly optimized and extensible framework for these calculations, and is used extensively by \dtwclust{}. It includes several common metrics, which are saved in a database object called \code{pr_DB}. Additionally, users can register custom functions in the database via \code{pr_DB$set_entry}. This has the advantage that all registered functions can be used with the \code{proxy::dist} function, which results in a high level of consistency. Unless otherwise noted, all the distances discussed here are registered with \pkg{proxy} when \dtwclust{} is attached.
+Calculating distances, as well as cross-distance matrices, between time-series objects is one of the cornerstones of any clustering algorithm. It is a task that is repeated very often and loops across all objects applying a suitable distance function. The \pkg{proxy} package \citep{proxy}, also developed for \R{}, provides a highly optimized and extensible framework for these calculations, and is used extensively by \dtwclust{}. It includes several common metrics, which are saved in a database object called \code{pr_DB}. Additionally, users can register custom functions in the database via \code{pr_DB$set_entry}. This has the advantage that all registered functions can be used with the \code{proxy::dist} function, which results in a high level of consistency. Refer to \cref{app:custom-dist} for an example. Unless otherwise noted, all the distances discussed here are registered with \pkg{proxy} when \dtwclust{} is attached.
 
 It is important to note that the \code{proxy::dist} function parses all matrix-like objects \textbf{row-wise}, meaning that, in the context of time-series clustering, it would consider the rows of a \textit{matrix} or \textit{data frame} as the time-series. Matrices and data frames cannot contain series with different length, something that can be circumvented by encapsulating the series in a \textit{list}, each element of the list being a single series. Internally, \dtwclust{} coerces all provided data to a list, however, it parses \textbf{matrices row-wise} and \textbf{data frames column-wise}. Moreover, a single multivariate time series should be provided as a matrix where time spans the rows and the variables span the columns. Thus, several multivariate time series should be provided as a \textit{list of matrices} to ensure that they are correctly detected, although not all distance functions support multivariate series.
 
@@ -155,14 +156,45 @@ plot(symmetric1)
 plot(symmetric2)
 @
 
-As final comments, it should be noted that the DTW distance does \textbf{not} satisfy the \textit{triangle inequality}, and it is \textbf{not} symmetric unless both series have the same length, i.e. $\dtwp{}(x,y) \neq \dtwp{}(y,x)$ for $n \neq m$. Currently, only distance measures based on DTW support multivariate series.
+As final comments, it should be noted that the DTW distance does \textbf{not} satisfy the \textit{triangle inequality}, and it is \textbf{not} symmetric unless both series have the same length, i.e. $\dtwp{}(x,y) \neq \dtwp{}(y,x)$ for $n \neq m$. Currently, out of the included distances in \dtwclust{}, only those based on DTW support multivariate series.
 
 \FloatBarrier
 \subsubsection{Global DTW constraints}
 \label{sec:dtw-window}
 
+One of the possible modifications of DTW is to use global constraints, also known as window constraints. Such constraints limit the area of the LCM that can be reached by the algorithm. There are many types of windows (see e.g. \citet{giorgino2009}), but one of the most common ones is the Sakoe-Chiba window \citep{sakoe1978}, with which an allowed region is created along the diagonal of the LCM (see \cref{fig:dtw-window-plot}). These constraints can marginally speed up the DTW calculation, but they are mainly used to avoid pathological warping. It is common to use a window whose size 10\% of the series' length, although sometimes smaller windows produce even better results \citep{keogh2004}.
+
+<<dtw-window-plot, out.width = "0.6\\linewidth", fig.asp = 1, fig.cap = "Visual representation of the Sakoe-Chiba constraint for DTW. The red elements will not be considered by the algorithm when traversing the LCM.">>=
+dtwWindow.plot(sakoeChibaWindow, window.size = 2, reference = 10, query = 10)
+@
+
+Strictly speaking, if the series being compared have different length, a constrained path may not exist, since the Sakoe-Chiba band may prevent the end point of the LCM to be reached \citep{giorgino2009}. In these cases, a \textit{slanted band window} may be preferred, since it stays along the diagonal for series with different length and is equivalent to the Sakoe-Chiba window for series with equal length. If a window constraint is used with \dtwclust{}, a slanted band is employed.
+
+It is not possible to know \textit{a priori} what window size, if any, will be best for a specific application, although it is usually agreed that no constraint is a poor choice. For this reason, it is better to perform tests with the data one wants to work with, perhaps taking a subset to avoid excessive running times.
+
+It should be noted that, when reported, window sizes are always integers greater than zero. If we denote this number with $w$, and for the specific case of the slanted band window, the valid region of the LCM will be constituted by all valid $lcm(i,j \pm w)$ for all $(i,j)$ along the diagonal. Thus, $2w + 1$ elements will fall within the window for a given window size $w$. This is the convention followed by \dtwclust{}.
+
+\FloatBarrier
 \subsubsection{Lower bounds for DTW}
 \label{sec:lbs}
+
+Due to the fact that DTW itself is expensive to compute, \textit{lower bounds} (LBs) for the DTW distance have been developed. These lower bounds guarantee being less than or equal to the corresponding DTW distance. They have been exploited when indexing time-series databases, classification of time-series, clustering, etc. \citep{keogh2005, begum2015}. Out of the existing DTW LBs, the two most effective are termed \code{LB_Keogh} \citep{keogh2005} and \code{LB_Improved} \citep{lemire2009}. The reader is referred to the respective articles for a detailed definition and proof of the LBs, however some important considerations will be further discussed here.
+
+One crucial step when calculating the LBs is the computation of the so-called \textit{envelops}. These envelops \textbf{require} a window constraint, and thus are dependant on both the type and size of the window. Based on these, a \textit{running} minimum and maximum are computed and, respectively, a lower and upper envelop are generated. \Cref{fig:envelop-plot} depicts a sample time series with its corresponding envelops for a Sakoe-Chiba window of size 15.
+
+<<envelop-plot, out.width = "0.75\\linewidth", fig.cap = "Visual representation of a time series (shown as a solid black line) and its corresponding envelops based on the Sakoe-Chiba window. The green dashed line represents the upper envelop, while the red dashed line represents the lower envelop.">>=
+lbk <- lb_keogh(CharTraj[[1L]], CharTraj[[2L]], window.size = 15)
+matplot(cbind(lbk$lower.env, lbk$upper.env),
+        type = "l", lty = 2, col = 2:3,
+        xlab = "Time", ylab = "Series")
+lines(CharTraj[[2L]])
+@
+
+In order for the LBs to be worth it, they must be computed in significantly less time than it takes to calculate the DTW distance. \citet{lemire2009} developed a streaming algorithm to calculate the envelops using no more than $3n$ comparisons when using a Sakoe-Chiba window. This algorithm is implemented in \dtwclust{} in the C++ programming language, ensuring an efficient calculation.
+
+Each LB can be computed with a specific $l_p$ norm. Therefore, it follows that the $l_p$ norms used for DTW and LB calculations must match, such that $\text{LB}_p \leq \dtwp{}$. Moreover, $\text{LB\_Keogh}_p \leq \text{LB\_Improved}_p \leq \dtwp{}$, meaning that \code{LB_Improved} can provide a tighter LB. However, \code{LB_Keogh} requires the calculation of one set of envelops for every pair of series compared, whereas \code{LB_Improved} must calculate two sets of envelops for every pair of series. If the LBs must be calculated between several time-series, some envelops can be reused when a given series is compared against many others. This optimization is included in the LB functions registered with \pkg{proxy} by \dtwclust{}.
+
+Finally, it must be noted that the LBs are \textbf{only} defined for series of equal length, and similar to DTW, are \textbf{not} symmetric regardless of the $l_p$ norm used to compute them. Also note that the choice of step pattern affects the value of the DTW distance, changing the tightness of a given LB.
 
 \subsection{Shape-based distance}
 \label{sec:sbd}
@@ -215,5 +247,24 @@ As final comments, it should be noted that the DTW distance does \textbf{not} sa
 
 \nocite{*}
 \bibliography{REFERENCES}
+
+\appendix
+
+\section{Registering a custom distance with proxy}
+\label{app:custom-dist}
+
+This sample takes the autocorrelation-based distance included in the \pkg{TSclust} package \citep{montero2014} and registers it with \pkg{proxy}.
+
+<<example-register-proxy, echo = TRUE, message = FALSE>>=
+require(TSclust)
+
+proxy::pr_DB$set_entry(FUN = diss.ACF, names=c("ACFD"),
+                       loop = TRUE, type = "metric", distance = TRUE,
+                       description = "Autocorrelation-based distance")
+
+# Taking just a subset of the data
+# Note that subsetting with a single brackets preserves the list format
+proxy::dist(CharTraj[3:8], method = "ACFD", upper = TRUE)
+@
 
 \end{document}
