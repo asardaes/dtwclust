@@ -67,8 +67,8 @@ Alexis Sard\'a-Espinosa\\
 Abstract
 }
 
-\Keywords{time-series, clustering, \R{}, dynamic time warping}
-\Plainkeywords{time-series, clustering, R, dynamic time warping}
+\Keywords{time-series, clustering, \R{}, dynamic time warping, lower bound}
+\Plainkeywords{time-series, clustering, R, dynamic time warping, lower bound}
 
 % ===========================================================================================================
 % Main matter
@@ -109,7 +109,7 @@ In this context, it is common to change the distance measure for the \textbf{Dyn
 
 Due to its nature, clustering procedures lend themselves for parallelization, since a lot of similar calculations are performed independently of each other. This can make a very significant difference, especially if the data complexity increases (which can happen really quickly in case of time-series), or some of the more computationally expensive algorithms are used.
 
-Variations in the clustering procedure could have a big impact in performance with respecto to cluster quality and execution time. As such, it is desirable to have a common platform on which clustering algorithms can be tested and compared against each other. The \dtwclust{} package, developed for the \R{} statistical software \citep{rcore}, provides such functionality, and includes implementations of recently developed time-series clustering algorithms and optimizations. Instead of providing a detailed explanation of the existing algorithms, we will concern ourselves with describing which ones are available in \dtwclust{}, mentioning the most important characteristics of each and showing how the package can be used to evaluate them. Additionally, some variations related to DTW and other common distances will be explored, and the parallelization strategies and optimizations will be described. For a more comprehensive overview of the state of the art in time-series clustering, the reader is referred to the included references and the articles mentioned therein.
+Variations in the clustering procedure could have a big impact in performance with respecto to cluster quality and execution time. As such, it is desirable to have a common platform on which clustering algorithms can be tested and compared against each other. The \dtwclust{} package, developed for the \R{} statistical software \citep{rcore}, provides such functionality, and includes implementations of recently developed time-series clustering algorithms and optimizations. Many of the included algorithms and optimizations are tailored to the DTW distance, hence the name's package. However, the main clustering function is flexible so that one can test many different clustering approaches, using either the time series directly, or by applying suitable transformations and then clustering in the resulting space. Instead of providing a detailed explanation of the existing algorithms, we will concern ourselves with describing which ones are available in \dtwclust{}, mentioning the most important characteristics of each and showing how the package can be used to evaluate them. Additionally, the variations related to DTW and other common distances will be explored, and the parallelization strategies and optimizations will be described. For a more comprehensive overview of the state of the art in time-series clustering, the reader is referred to the included references and the articles mentioned therein.
 
 The rest of this paper is organized as follows. The relevant information to the distance measures will be presented in \cref{sec:distances}. Supported algorithms for prototype extraction will be discussed in \cref{sec:prototypes}. The main clustering algorithms will be described in \cref{sec:clustering}. Some basic information with respect to cluster evaluation will be provided in \cref{sec:evaluation}, and the final remarks will be given in \cref{sec:conclusion}. Code examples will be given in the appendices. The data used throughout this paper is included in the package (saved in a list called \code{CharTraj}), and is a subset of the character trajectories dataset found in \citet{lichman2013}; they are pen tip trajectories recorded for individual characters, and the subset contains 5 examples of the $X$ velocity for each considered character.
 
@@ -122,7 +122,7 @@ It is important to note that the \code{proxy::dist} function parses all matrix-l
 
 The $l_1$ and $l_2$ vector norms, also known as Manhattan and Euclidean distances respectively, are the most commonly used distance measures, and are arguably the only competitive distances when measuring dissimilarity \citep{aggarwal2001, lemire2009}. They can be efficiently computed, but are only defined for series of equal length and are sensitive to noise and time shifts.
 
-To facilitate notation, define a time-series as a vector (or set of vectors in case of multivariate series) $x$. Each vector has length $n$. In general, $x^v_i$ represents the $i$-th element of the $v$-th variable of the (possibly multivariate) time-series $x$. We will assume that all elements are equally spaced in time in order to avoid the time index explicitly.
+To facilitate notation in the following sections, we define a time-series as a vector (or set of vectors in case of multivariate series) $x$. Each vector has length $n$. In general, $x^v_i$ represents the $i$-th element of the $v$-th variable of the (possibly multivariate) time-series $x$. We will assume that all elements are equally spaced in time in order to avoid the time index explicitly.
 
 \subsection{Dynamic time warping distance}
 \label{sec:dtw}
@@ -206,17 +206,42 @@ This distance can be efficiently computed by utilizing the Fast Fourier Transfor
 \section{Time-series prototypes}
 \label{sec:prototypes}
 
+A very important element of time-series clustering has to do with the calculation of so-called time-series \textit{prototypes}. It is expected that all series within a cluster are similar to each other, and one may be interested in trying to define a time-series that effectively summarizes the most important characteristics of all series in a given cluster; this series is sometimes referred to as an \textit{average} series, and prototyping is also sometimes called time-series averaging, however we will prefer the term ``prototyping'' in this paper. The prototypes could be used for visualization aid or to perform time-series classification, but in the context of clustering, partitional procedures rely heavily on the prototyping function, since the resulting prototypes are used as cluster \textit{centroids}; more information will be provided in \cref{sec:clustering}.
+
+The choice of prototyping function is closely related to the chosen distance measure, and in a similar fashion, it is not simple to know which kind of prototype will be better \textit{a priori}. There are several strategies available for time-series prototyping, although due to their high dimensionality, it is debatable what exactly constitutes an average time-series, and some notions could worsen performance significantly. The following sections will briefly describe some of the common approaches, which are the ones included by default in \dtwclust{}. Nevertheless, it is possible to create custom prototyping functions and provide them in the \code{centroid} argument.
+
 \subsection{Mean and median}
 \label{sec:mean-median}
+
+The arithmetic mean is used very often in conjunction with the Euclidean distance, and in many applications, this combination is very competitive, even with multi-variate data. However, because of the structure of time-series, the mean is arguably a poor prototyping choice, and could even perturb convergence of a clustering algorithm \citep{petitjean2011}.
+
+Mathematically, the mean simply takes the average of each time-point $i$ across all variables of the considered time-series. For a cluster $C$ of size $N$, the (possibly multivariate) time-series mean $\mu$ can be calculated with \cref{eq:ts-mean}, where $x^v_{c,i}$ is the $i$-th element of the $v$-th variable from the $c$-th series that belongs to cluster $C$.
+
+\begin{equation}
+\label{eq:ts-mean}
+\mu^v_i = \frac{1}{N} \sum_c x^v_{c,i}, \; \forall c \in C
+\end{equation}
+
+Following this idea, it is also possible to use the median value across series in $C$ instead of the mean, although we are not aware if this has been used in the existing literature. Also note that this prototype is limited to series with equal length and equal amount of variables.
 
 \subsection{Partition around medoids}
 \label{sec:pam}
 
+Another very common approach is to use partinion around medoids (PAM). A \textit{medoid} is simply a representative object from a cluster, in this case also a time-series, whose average distance to all other objects in the same cluster is minimal. Since the medoid object is always an element of the original data, PAM is sometimes preferred over mean or median so that the time-series structure is not altered.
+
 \subsection{DTW barycenter averaging}
 \label{sec:dba}
 
+The DTW distance is used very often when working with time-series, and thus a prototyping function based on DTW has also been developed in \citet{petitjean2011}. The procedure is called DTW barycenter averaging (DBA), and is an iterative, \textit{global} method. The latter means that the order in which the series enter the prototyping function is \textbf{not} important.
+
+DBA requires a series to be used as reference (centroid), and it usually begins by \textbf{randomly} selecting one of the series in the data. In each iteration, the DTW alignment between each series in the cluster $C$ and the centroid is computed. Because of the warping performed in DTW, it can be that several time-points from a given time-series map to a single time-point in the centroid series, so for each time-point in the centroid, all the correspoindg values from all series in $C$ are grouped together according to the DTW alignment, and the mean is computed for each centroid point using the values contained in each group. This is then iteratively repeated until a certain number of iterations are reached, or until convergence is assumed.
+
+DBA is much more computationally expensive, due to all the DTW calculations that must be performed. However, it is very competitive when using the DTW distance, and thanks to DTW itself, it can support series with different length directly, with the caveat that the length of the resulting prototype will be the same as the reference series that was initially chosen by the algorithm.
+
 \subsection{Shape extraction}
 \label{sec:shape}
+
+A recently proposed method to calculated time-series prototypes is termed \textit{shape extraction}, and is part of the \kshape{} algorithm (see \cref{sec:kshape}) described in \citet{paparrizos2015}. As with the corresponding SBD (see \cref{sec:sbd}), the algorithm depends on NCCc, and it first uses it to match two series as best as possible. \Cref{fig:sbd-alignment} depicts the alignment that is performed using two sample series.
 
 <<sbd-alignment, out.width = "0.45\\linewidth", fig.width = 6, fig.cap = "Visualization of the NCCc-based alignment performed on two sample series. After alignment, the second (red) series is either truncated and/or prepended/appended with zeros so that its length matches the first(black) series.", fig.subcap = c("Series before alignment", "Series after alignment")>>=
 matplot(cbind(CharTraj[[61L]], CharTraj[[65L]]),
@@ -230,8 +255,14 @@ matplot(cbind(CharTraj[[61L]], sbd_align$yshift),
         xlab = "Time", ylab = "Series")
 @
 
-\subsection{Fuzzy c-means}
-\label{sec:fcm}
+As with DBA, a centroid series is needed, so one is usually \textbf{randomly} chosen from the data. The alignment can be done between series with different length, and since one of the series is \textit{shifted} in time, it may be necessary to truncate and prepend or append zeros to the non-reference series, so that the final length matches that of the reference. This is because the final step of the algorithm builds a matrix with the matched series and performs a so-called maximization of Rayleigh Quotient to obtain the final prototype; see \citet{paparrizos2015} for more details.
+
+The output series of the algorithm \textbf{must} be \textit{z}-normalized. Thus, the input series as well as the reference series \textbf{must} also have this normalization. Even though the alignment can be done between series with different length, it has the same caveat as DBA, namely that the length of the resulting prototype will depend on the length of the chosen reference. Technically, for multivariate series, the shape extraction algorithm could be applied for each variable $v$ of all involved series, but this was \textbf{not} explored by the authors of \kshape{}.
+
+\subsection{Fuzzy-based prototype}
+\label{sec:fuzzy-cent}
+
+Even though fuzzy clustering will not be discussed until \cref{sec:fuzzy}, it is worth mentioning here that its most common implementation uses its own centroid function, which works like a \textit{weighted average}. Therefore, it will only work with data of equal dimension, and it may not be suitable to use directly with raw time-series data.
 
 \section{Time-series clustering algorithms}
 \label{sec:clustering}
@@ -251,6 +282,9 @@ matplot(cbind(CharTraj[[61L]], sbd_align$yshift),
 \subsection{Fuzzy clustering}
 \label{sec:fuzzy}
 
+\section{Parallel computation}
+\label{sec:parallel}
+
 \section{Cluster evaluation}
 \label{sec:evaluation}
 
@@ -264,12 +298,16 @@ matplot(cbind(CharTraj[[61L]], sbd_align$yshift),
 \nocite{*}
 \bibliography{REFERENCES}
 
+% ===========================================================================================================
+% Appendices
+% ===========================================================================================================
+
 \appendix
 
 \section{Registering a custom distance with proxy}
 \label{app:custom-dist}
 
-This sample takes the autocorrelation-based distance included in the \pkg{TSclust} package \citep{montero2014} and registers it with \pkg{proxy}.
+This example takes the autocorrelation-based distance included in the \pkg{TSclust} package \citep{montero2014} and registers it with \pkg{proxy} so that it can be used either directly, or with \dtwclust{}.
 
 <<example-register-proxy, echo = TRUE, message = FALSE>>=
 require(TSclust)
