@@ -82,17 +82,17 @@ SBD <- function(x, y, znorm = FALSE) {
      shift <- which.max(CCseq) - max(nx, ny)
 
      if (is.null(flip)) {
-          if (shift < 0)
-               yshift <- y[(-shift+1):ny]
+          if (shift < 0L)
+               yshift <- y[(-shift + 1L):ny]
           else
                yshift <- c( rep(0, shift), y )
 
      } else {
           ## Remember, if I flipped them, then I have to shift what is now saved in 'x'
-          if (shift < 0)
+          if (shift < 0L)
                yshift <- c( rep(0, -shift), x )
           else
-               yshift <- x[(shift+1):ny]
+               yshift <- x[(shift + 1L):ny]
      }
 
      nys <- length(yshift)
@@ -100,7 +100,7 @@ SBD <- function(x, y, znorm = FALSE) {
      if (nys < nx)
           yshift <- c( yshift, rep(0, nx-nys) )
      else
-          yshift <- yshift[1:nx]
+          yshift <- yshift[1L:nx]
 
      list(dist = 1 - m, yshift = yshift)
 }
@@ -164,8 +164,8 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
                                         CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
 
                                         ## Truncate to correct length
-                                        CCseq <- c(CCseq[(length(ffty)-length(y)+2):length(CCseq)],
-                                                   CCseq[1:length(x)])
+                                        CCseq <- c(CCseq[(length(ffty) - length(y) + 2L):length(CCseq)],
+                                                   CCseq[1L:length(x)])
 
                                         CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
 
@@ -192,8 +192,8 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
                                                          CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
 
                                                          ## Truncate to correct length
-                                                         CCseq <- c(CCseq[(length(ffty)-length(y)+2):length(CCseq)],
-                                                                    CCseq[1:length(x)])
+                                                         CCseq <- c(CCseq[(length(ffty) - length(y) + 2L):length(CCseq)],
+                                                                    CCseq[1L:length(x)])
 
                                                          CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
 

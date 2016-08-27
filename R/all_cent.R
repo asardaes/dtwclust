@@ -40,7 +40,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
           new_cent
      }
 
-     shape_cent <- function(x_split, cent, id_changed, cl_id, cl_old, ...) {
+     shape_cent <- function(x_split, cent, ...) {
 
           check_parallel()
 
@@ -93,7 +93,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
           new_cent
      }
 
-     dba_cent <- function(x_split, cent, id_changed, cl_id, cl_old, ...) {
+     dba_cent <- function(x_split, cent, ...) {
 
           check_parallel()
 
@@ -249,8 +249,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                                           x_split = x_split[id_changed],
                                           cent = cent[id_changed],
                                           id_changed = id_changed,
-                                          cl_id = cl_id,
-                                          cl_old = cl_old),
+                                          cl_id = cl_id),
                                      list(...)))
 
                cent[id_changed] <- new_cent

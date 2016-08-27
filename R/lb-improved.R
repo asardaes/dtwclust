@@ -117,7 +117,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
      H2[ind3] <- EH$max[ind3]
      H2[ind4] <- EH$min[ind4]
 
-     d2 <- abs(y-H2)
+     d2 <- abs(y - H2)
 
      ## LB_Improved is defined as root-p of the sum of LB_Keoghs^p
      d <- switch(EXPR = norm,
@@ -195,7 +195,7 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
                                         H[ind1] <- u[ind1]
                                         H[ind2] <- l[ind2]
 
-                                        d1 <- abs(x-H)
+                                        d1 <- abs(x - H)
 
                                         ## Lemire's improvement
                                         EH <- call_envelop(H, window.size*2L + 1L)
@@ -207,7 +207,7 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
                                         H2[ind3] <- EH$max[ind3]
                                         H2[ind4] <- EH$min[ind4]
 
-                                        d2 <- abs(y-H2)
+                                        d2 <- abs(y - H2)
 
                                         ## calculate LB_Improved
 
@@ -243,7 +243,7 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
                                                          H[ind1] <- u[ind1]
                                                          H[ind2] <- l[ind2]
 
-                                                         d1 <- abs(x-H)
+                                                         d1 <- abs(x - H)
 
                                                          ## Lemire's improvement
                                                          EH <- call_envelop(H, window.size*2L + 1L)
@@ -255,7 +255,7 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
                                                          H2[ind3] <- EH$max[ind3]
                                                          H2[ind4] <- EH$min[ind4]
 
-                                                         d2 <- abs(y-H2)
+                                                         d2 <- abs(y - H2)
 
                                                          ## calculate LB_Improved
 

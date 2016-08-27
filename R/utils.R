@@ -204,7 +204,6 @@ split_parallel <- function(obj, margin = NULL) {
 colMedians <- function(mat) { apply(mat, 2L, stats::median) }
 
 # PREFUN for some of my proxy distances so that they support 'pairwise' direclty
-# Currently results in warnings because proxy does !is.na(reg_entry$PREFUN)
 proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
      if (!is.null(params$force.pairwise)) {
           warning("The argument 'force.pairwise. has been deprecated. Simply use 'pairwise' instead.")
