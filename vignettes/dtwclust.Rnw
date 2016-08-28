@@ -239,6 +239,8 @@ Following this idea, it is also possible to use the median value across series i
 
 Another very common approach is to use partinion around medoids (PAM). A \textit{medoid} is simply a representative object from a cluster, in this case also a time-series, whose average distance to all other objects in the same cluster is minimal. Since the medoid object is always an element of the original data, PAM is sometimes preferred over mean or median so that the time-series structure is not altered.
 
+Another possible advantage of PAM is that, since the data does not change, it is possible to \textit{precompute} the whole distance matrix once and re-use it on each iteration, and even across different number of clusters. While this is not necessary, it usually saves time overall. This precomputation is done by default by \dtwclust{}.
+
 \subsection{DTW barycenter averaging}
 \label{sec:dba}
 
