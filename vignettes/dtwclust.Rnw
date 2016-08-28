@@ -284,6 +284,23 @@ Even though fuzzy clustering will not be discussed until \cref{sec:fuzzy}, it is
 \subsection{Hierarchical clustering}
 \label{sec:hc}
 
+Hierarchical clustering, as its name suggests, is an algorithm that tries to create a hierarchy of groups in which, as the level in the hierarchy increases, clusters are created by merging the clusters from the next lower level, such that an ordered sequence of groupings is obtained \citep{hastie2009}. In order to decide how the merging is performed, a similarity measure between \textit{groups} should be specified, in addition to the one that is used to calculate pairwise similarities. However, a specific number of clusters does not need to be specified for the hierarchy to be created, and the procedure is deterministic, so it will always give the same result for a chosen set of similarity measures.
+
+Algorithms for hierarchical clustering can be \textbf{agglomerative} or \textbf{divisive}, with the former being much more common than the latter \citep{hastie2009}. In agglomerative procedures, every element of the data starts in its own cluster, and elements are grouped together sequentially based on the similarity measure until all elements are contained in a single cluster. Divisive procedures do the exact opposite, starting with all data in one cluster and dividing it until each element is in a \textit{singleton}. Both strategies suffer from a lack of flexibility, because they can't perform adjustments once a split or merger has been done.
+
+The intergroup dissimilarity is also known as \textit{linkage}. As an example, single linkage takes the intergroup dissimilarity to be that of the closest (least dissimilar) pair \citep{hastie2009}. There are many linkage methods available, although if the data can be ``easily'' grouped, they should all provide similar results. In \dtwclust{}, the native \R{} function \code{hclust} is called, and all its linkage methods are supported.
+
+The created hierarchy can be visualized as a binary tree where the height of each node is proportional to the value of the intergroup dissimilarity between its two daughter nodes \citep{hastie2009}. Such a plot is called a \textbf{dendrogram}, and an example can be seen in \cref{fig:dendrogram}. These plots can be a useful way of summarizing the whole data in an interpretable way, although it may be deceptive, as the algorithms impose the hierarchical structure even if such structure is not inherent to the data \citep{hastie2009}.
+
+<<dendrogram, fig.width = 12, fig.cap = "Sample dendrogram created by using SBD and average linkage.">>=
+hc <- dtwclust(CharTraj, type = "h", method = "average", distance = "sbd")
+plot(hc)
+@
+
+The dendrogram does \textbf{not} directly imply a certain number of clusters, but one can be induced. One option is to visually evaluate the dendrogram in order to assess the height at which the largest change in dissimilarity occurs, consequently \textit{cutting} the dendrogram at said height and extracting the clusters that are created. Another option is to specify the number of clusters that are desired, and cut the dendrogram in such a way that the chosen number is obtained. In the latter case, several cuts can be made, and validity indices can be used to decide which value yields better performance (see \cref{sec:evaluation}).
+
+Once the clusters have been obtained, it may be desirable to use them to create prototypes (see \cref{sec:prototypes}). At this point, any suitable prototyping function may be used, but we want to emphasize that this is not a mandatory step in hierarchical clustering. A complete example is provided in \cref{app:hc}.
+
 \subsection{Partitional clustering}
 \label{sec:pc}
 
@@ -366,6 +383,35 @@ proxy::pr_DB$set_entry(FUN = diss.ACF, names=c("ACFD"),
 # Taking just a subset of the data
 # Note that subsetting with single brackets preserves the list format
 proxy::dist(CharTraj[3:8], method = "ACFD", upper = TRUE)
+@
+
+\section{Hierarchical clustering example}
+\label{app:hc}
+
+In the following call to \dtwclust{}, specifying the value of \code{k} indicates the number of desired clusters, so that internally the \code{cutree} function is called. Additionally, the shape extraction \textbf{function} is provided in the \code{centroid} argument so that, once the \code{k} clusters are obtained, their prototypes are extracted. Therefore, the data is \textit{z}-normalized by means of the \code{zscore} function. The seed is provided because of the randomness in shape extraction when choosing a reference series (see \cref{sec:shape}).
+
+<<example-hc, echo = TRUE, fig.cap = c("Resulting dendrogram after hierarchical clustering.", "Obtained clusters and their respective prototypes (centroids) shown as dashed lines.")>>=
+hc_sbd <- dtwclust(CharTraj, type = "h", k = 20L,
+                   method = "average", preproc = zscore,
+                   distance = "sbd", centroid = shape_extraction,
+                   seed = 899, control = list(trace = TRUE))
+
+# Cluster sizes
+table(hc_sbd@cluster)
+
+# By default, the dendrogram is plotted in hierarchical clustering
+plot(hc_sbd)
+
+# The series and the obtained prototypes can be plotted too
+plot(hc_sbd, type = "sc")
+@
+
+\FloatBarrier
+
+<<example-hc-2, echo = TRUE, out.width = "0.45\\linewidth", fig.cap = "Side by side comparison of the series in the first cluster and the obtained prototype.", fig.subcap = c("Series in cluster 1", "Prototype obtained by applying shape extraction to cluster 1")>>=
+# Focusing on the first cluster
+plot(hc_sbd, type = "series", clus = 1L)
+plot(hc_sbd, type = "centroids", clus = 1L)
 @
 
 \section[Using the doParallel package for parallel computation]{Using the \pkg{doParallel} package for parallel computation}
