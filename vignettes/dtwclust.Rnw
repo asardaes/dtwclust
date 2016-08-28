@@ -324,6 +324,8 @@ CVIs can be classified as \textbf{internal}, \textbf{external} or \textbf{relati
 
 Knowing which CVI will work best cannot be determined \textit{a priori}, so they should be tested for each specific application. Usually, many CVIs are utilized and compared to each other, maybe using a majority vote to decide on a final result. Furthermore, it should be noted that many CVIs perform additional distance calculations when being computed, which can be very considerable if using DTW. For example, the Silhouette index effectively needs the whole distance matrix to be calculated, making it prohibitive in some cases.
 
+Note that, even though a fuzzy partition can be changed into a crisp one, making it compatible with many of the existing CVIs, there are also fuzzy CVIs tailored specifically to fuzzy clustering, and these may be more suitable in those situations.
+
 \section{Conclusion}
 \label{sec:conclusion}
 
