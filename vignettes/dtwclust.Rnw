@@ -137,7 +137,7 @@ plot(dtw_example, type = "two", offset = 1, match.indices = 30,
      xlab = "Time", ylab = "Series")
 @
 
-DTW is computationally expensive. If $x$ has lengh $n$ and $y$ has length $m$, the DTW distance between them can be computed in $O(nm)$ time, which is almost quadratic if $m$ and $n$ are similar. Additionally, DTW is prone to implementation bias since its calculations are not easily vectorized and tend to be very slow in non-compiled programming languages. The \pkg{dtw} package includes a C implementation of the dynamic programming step of the algorithm, which should be very fast; its level of generality may sacrifice some performance, but in most situations it will be negligible. DTW is considered a more robust distance measure for time-series \citep{wang2013}, and can potentially deal with series of different length directly. This is not necessarily an advantage, as it has been shown before that performing linear reinterpolation to obtain equal length may be appropriate if $m$ and $n$ do not vary significantly \citep{keogh2004}. For a more detailed explanation of the DTW algorithm, see e.g. \citet{giorgino2009}. However, there are some aspects that are worth discussing here.
+DTW is computationally expensive. If $x$ has lengh $n$ and $y$ has length $m$, the DTW distance between them can be computed in $O(nm)$ time, which is almost quadratic if $m$ and $n$ are similar. Additionally, DTW is prone to implementation bias since its calculations are not easily vectorized and tend to be very slow in non-compiled programming languages. The \pkg{dtw} package includes a \proglang{C} implementation of the dynamic programming step of the algorithm, which should be very fast; its level of generality may sacrifice some performance, but in most situations it will be negligible. DTW is considered a more robust distance measure for time-series \citep{wang2013}, and can potentially deal with series of different length directly. This is not necessarily an advantage, as it has been shown before that performing linear reinterpolation to obtain equal length may be appropriate if $m$ and $n$ do not vary significantly \citep{keogh2004}. For a more detailed explanation of the DTW algorithm, see e.g. \citet{giorgino2009}. However, there are some aspects that are worth discussing here.
 
 The first step in DTW involves creating a \textbf{local cost matrix} (LCM  or $lcm$), which has $n \times m$ dimensions. Such matrix must be created for every pair of distances compared, meaning that memory requirements may grow quickly as the dataset size grows. Considering $x$ and $y$ as the input series, for each element $(i,j)$ of the LCM, the $l_p$ norm between $x_i$ and $y_j$ must be computed. This is defined in \cref{eq:lcm}, explicitly denoting that multivariate series are supported as long as they have the same number of variables (note that for univariate series, the LCM will be identical regardless of the norm used). Thus, it makes sense to speak of a $\dtwp{}$ distance, where $p$ corresponds to the $l_p$ norm that was used to construct the LCM. However, this norm also plays an important role in the next step of DTW.
 
@@ -286,7 +286,7 @@ Even though fuzzy clustering will not be discussed until \cref{sec:fuzzy}, it is
 
 Hierarchical clustering, as its name suggests, is an algorithm that tries to create a hierarchy of groups in which, as the level in the hierarchy increases, clusters are created by merging the clusters from the next lower level, such that an ordered sequence of groupings is obtained \citep{hastie2009}. In order to decide how the merging is performed, a similarity measure between \textit{groups} should be specified, in addition to the one that is used to calculate pairwise similarities. However, a specific number of clusters does not need to be specified for the hierarchy to be created, and the procedure is deterministic, so it will always give the same result for a chosen set of similarity measures.
 
-Algorithms for hierarchical clustering can be \textbf{agglomerative} or \textbf{divisive}, with the former being much more common than the latter \citep{hastie2009}. In agglomerative procedures, every element of the data starts in its own cluster, and elements are grouped together sequentially based on the similarity measure until all elements are contained in a single cluster. Divisive procedures do the exact opposite, starting with all data in one cluster and dividing it until each element is in a \textit{singleton}. Both strategies suffer from a lack of flexibility, because they can't perform adjustments once a split or merger has been done.
+Algorithms for hierarchical clustering can be \textbf{agglomerative} or \textbf{divisive}, with the former being much more common than the latter \citep{hastie2009}. In agglomerative procedures, every member of the data starts in its own cluster, and members are grouped together sequentially based on the similarity measure until all members are contained in a single cluster. Divisive procedures do the exact opposite, starting with all data in one cluster and dividing it until each member is in a \textit{singleton}. Both strategies suffer from a lack of flexibility, because they can't perform adjustments once a split or merger has been done.
 
 The intergroup dissimilarity is also known as \textit{linkage}. As an example, single linkage takes the intergroup dissimilarity to be that of the closest (least dissimilar) pair \citep{hastie2009}. There are many linkage methods available, although if the data can be ``easily'' grouped, they should all provide similar results. In \dtwclust{}, the native \R{} function \code{hclust} is called, and all its linkage methods are supported.
 
@@ -312,6 +312,33 @@ Once the clusters have been obtained, it may be desirable to use them to create 
 
 \subsection{Fuzzy clustering}
 \label{sec:fuzzy}
+
+The previous procedures result in what is known as a \textbf{crisp} partition, although hierarchical clustering only indirectly when the dendrogram is cut. In crisp partitions, each member of the data belongs to only one cluster, and clusters are mutually exclusive. By contrast, fuzzy clustering creates a \textbf{fuzzy} or \textbf{soft} partition in which each member belongs to each cluster to a certain degree. For each member of the data, the degree of belongingness is constrained so that its sum equals 1. Therefore, if there are $N$ objects in the data and $k$ clusters are desired, an $N \times k$ membership matrix $u$ can be created, where all the rows must sum to 1.
+
+One of the most widely used versions of the algorithm is \textbf{fuzzy c-means}, which is described in \citet{bezdek1981}. It tries to create a fuzzy partition by minimizing the function in \cref{eq:fuzzy-objective} under the constraints given in \cref{eq:fuzzy-constraints}. The membership matrix $u$ is initialized randomly in such a way that the constraints are fulfilled. The exponent $m$ is known as the \textbf{fuzziness exponent} and should be greater than 1, with a common default value of 2. Originally, the distance $d_{p,c}$ was defined as the Euclidean distance between the $p$-th object and the $c$-th fuzzy centroid, so that the objective was written in terms of the squared Euclidean distance. However, the definition of this distance can change (see e.g. \citet{durso2009}).
+
+\begin{subequations}
+\begin{align}
+\min \sum^N_{p = 1} \sum^k_{c = 1} u^m_{p,c} d^2_{p,c} \label{eq:fuzzy-objective} \\
+\sum^k_{c = 1} u_{p,c} = 1, \quad u_{p,c} \geq 0 \label{eq:fuzzy-constraints}
+\end{align}
+\end{subequations}
+
+The centroid function used by fuzzy c-means calculates the mean for each point of all members in the data, weighted by their degree of belongingness. If we define $\mu_{c,i}$ as the $i$-th element of the $c$-th centroid, and $x_{p,i}$ as the $i$-th element of the $p$-th object in the data, the centroid calculation can be expressed with \cref{eq:fuzzy-centroid}. It follows that all members of the data must have the same dimensionality in this case. As with the normal mean prototype, this centroid function might not be suitable for time-series, and it is common to first apply a transformation to the data and cluster in the resulting space. For instance, \citet{durso2009} used the autocorrelation function to extract a certain amount of coefficients, resulting in data with equal dimensionality, and performed fuzzy clustering on the autocorrelation coefficients. See \cref{app:fuzzy} for an example.
+
+\begin{equation}
+\label{eq:fuzzy-centroid}
+\mu_{c,i} = \frac{\sum^N_{p = 1} u^m_{p,c} x_{p,i}}{\sum^N_{p = 1} u^m_{p,c}}
+\end{equation}
+
+Finally, the objective is minimized iteratively by applying \cref{eq:fuzzy-update} a certain number of iterations or until convergence is assumed. In \cref{eq:fuzzy-update}, $d_{a,b}$ represents the distance between the $a$-th member of the data and the $b$-th fuzzy centroid, so great care must be given to the shown indices $p$, $c$ and $q$. It is clear from the equation that this update only depends on the chosen fuzziness exponent and the distance measure.
+
+\begin{equation}
+\label{eq:fuzzy-update}
+u_{p,c} = \frac{1}{d_{p,c} ^ \frac{2}{m - 1} \sum^k_{q=1} \left( \frac{1}{d_{p,q}} \right) ^ \frac{2}{m - 1}}
+\end{equation}
+
+Technically, fuzzy clustering can be repeated several times with different random starts, since $u$ is initialized randomly. However, comparing the results would be difficult, since it could be that the values within $u$ are shuffled but the overall fuzzy grouping remains the same, or changes very slightly, once the algorithm has converged. Additionally, it is straightforward to change the fuzzy partition to a crisp one by taking the \textit{argument} of the row-wise maxima of $u$ and assigning the respective series to the corresponding cluster only.
 
 \section{Parallel computation}
 \label{sec:parallel}
@@ -412,6 +439,34 @@ plot(hc_sbd, type = "sc")
 # Focusing on the first cluster
 plot(hc_sbd, type = "series", clus = 1L)
 plot(hc_sbd, type = "centroids", clus = 1L)
+@
+
+\section{Fuzzy clustering example}
+\label{app:fuzzy}
+
+This example performs autocorrelation-based fuzzy clustering as investigated by \citet{durso2009}. Using the autocorrelation function overcomes the problem of time-series with different length.
+
+<<example-fuzzy, echo = TRUE, fig.cap = "Visualization of the clusters that would result from changing the fuzzy partition to a crisp one. Note that the original time-series are used, so the centroids are not shown, since the centroids are made of autocorrelation coefficients.">>=
+# Calculate autocorrelation up to 50th lag
+acf_fun <- function(dat) {
+     lapply(dat, function(x) {
+          as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf)}
+     )
+}
+
+# Fuzzy c-means
+fc <- dtwclust(CharTraj[1:20], type = "f", k = 4L,
+               preproc = acf_fun, distance = "L2",
+               seed = 42)
+
+# Fuzzy membership matrix
+fc@fcluster
+
+# Are constraints fulfilled?
+all.equal(rep(1, 20), rowSums(fc@fcluster), check.attributes = FALSE)
+
+# Plot crisp partition in the original space
+plot(fc, data = CharTraj[1:20], type = "series")
 @
 
 \section[Using the doParallel package for parallel computation]{Using the \pkg{doParallel} package for parallel computation}
