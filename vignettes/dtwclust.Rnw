@@ -309,8 +309,16 @@ Once the clusters have been obtained, it may be desirable to use them to create 
 \subsubsection{TADPole clustering}
 \label{sec:tadpole}
 
+TADPole clustering was proposed in \citet{begum2015}. It adopts a relatively new clustering framework and adapts it to time series clustering with the DTW distance. Because of the way the algorithm works, it can be considered a kind of PAM clustering, since the cluster centroids are always elements of the data. However, this algorithm is deterministic, depending on the value of a cutoff distance ($d_c$).
+
+The algorithm first uses the DTW distance's upper (Euclidean distance) and lower (\code{LB_Keogh}) bounds to find series with many close neighbors (in DTW space). Anything below $d_c$ is considered a neighbor. Aided with this information, the algorithm then tries to prune as many DTW calculations as possible in order to accelerate the clustering procedure. The series that lie in dense areas (i.e. that have lots of neighbors) are taken as cluster centers. For a more detailed explanation of each step in the algorithm, please refer to \citet{begum2015}.
+
+The algorithm relies on the DTW bounds, which are only defined for time series of equal length. Consequently, it requires a Sakoe-Chiba constraint. Furthermore, it should be noted that the Euclidean distance is \textbf{only} valid as a DTW upper bound if the \code{symmetric1} step pattern is used (see \cref{fig:step-patterns}).
+
 \subsubsection[k-Shape clustering]{\kshape{} clustering}
 \label{sec:kshape}
+
+The \kshape{} clustering algorithm was developed by \citet{paparrizos2015}. It is a partitional clustering algorithm with a custom distance measure (SBD; see \cref{sec:sbd}), as well as a custom centroid function (shape extraction; see \cref{sec:shape}). It is also stochastic in nature, and requires \textit{z}-normalization in its default definition.
 
 \subsection{Fuzzy clustering}
 \label{sec:fuzzy}
@@ -442,6 +450,9 @@ plot(hc_sbd, type = "sc")
 plot(hc_sbd, type = "series", clus = 1L)
 plot(hc_sbd, type = "centroids", clus = 1L)
 @
+
+\section{Partitional clustering example}
+\label{app:pc}
 
 \section{Fuzzy clustering example}
 \label{app:fuzzy}
