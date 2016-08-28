@@ -3,7 +3,7 @@
 % Vignette options
 %\VignetteEngine{knitr::knitr}
 %\VignettePackage{dtwclust}
-%\VignetteDepends{TSclust}
+%\VignetteDepends{TSclust, doParallel}
 %\VignetteIndexEntry{Comparing Time-Series Clustering Algorithms in R Using the dtwclust Package}
 %\VignetteEncoding{UTF-8}
 
@@ -190,7 +190,7 @@ matplot(cbind(lbk$lower.env, lbk$upper.env),
 lines(CharTraj[[2L]])
 @
 
-In order for the LBs to be worth it, they must be computed in significantly less time than it takes to calculate the DTW distance. \citet{lemire2009} developed a streaming algorithm to calculate the envelops using no more than $3n$ comparisons when using a Sakoe-Chiba window. This algorithm is implemented in \dtwclust{} in the C++ programming language, ensuring an efficient calculation.
+In order for the LBs to be worth it, they must be computed in significantly less time than it takes to calculate the DTW distance. \citet{lemire2009} developed a streaming algorithm to calculate the envelops using no more than $3n$ comparisons when using a Sakoe-Chiba window. This algorithm is implemented in \dtwclust{} using the \proglang{C++} programming language, ensuring an efficient calculation.
 
 Each LB can be computed with a specific $l_p$ norm. Therefore, it follows that the $l_p$ norms used for DTW and LB calculations must match, such that $\text{LB}_p \leq \dtwp{}$. Moreover, $\text{LB\_Keogh}_p \leq \text{LB\_Improved}_p \leq \dtwp{}$, meaning that \code{LB_Improved} can provide a tighter LB. However, \code{LB_Keogh} requires the calculation of one set of envelops for every pair of series compared, whereas \code{LB_Improved} must calculate two sets of envelops for every pair of series. If the LBs must be calculated between several time-series, some envelops can be reused when a given series is compared against many others. This optimization is included in the LB functions registered with \pkg{proxy} by \dtwclust{}.
 
@@ -285,6 +285,22 @@ Even though fuzzy clustering will not be discussed until \cref{sec:fuzzy}, it is
 \section{Parallel computation}
 \label{sec:parallel}
 
+Using parallelization is not something that is commonly explored explicitly in the literature, but it is something that can be extremely useful in practical applications. In the case of time-series clustering, and particularly when using the DTW distance, parallel computation can result in a very significant reduction in execution times.
+
+There are some important considerations when using parallelization. The amount of \textit{parallel workers}, i.e. subprocesses that can each handle a given task, is dependent on the computer processor that is being used and the number of physical processing cores and logical threads it can handle. Each worker may require additional memory, namely more random access memory (RAM); \R{} can only work with data that is loaded on RAM, so there is no way around this limitation. Finally, the overhead introduced for the orchestration of the parallel workers may be too large when compared to the amount of time each worker needs to finish their assigned tasks, which is especially true for relatively simple workloads. Therefore, using parallelization does \textbf{not} guarantee faster execution times, and should be tested in the context of a specific application.
+
+Handling parallelization has been greatly simplified in \R{} by different software packages. The implementations done in \dtwclust{} use the \pkg{foreach} package \citep{foreach}, since it provides a flexible way of specifying the parallel backend that should be used, and can be extended by other packages. See \cref{app:doParallel} for a specific example.
+
+Before describing the different cases where \dtwclust{} can take advantage of parallel computation, it should also be noted that, by default, there is only one level of parallelization. This means that all tasks performed by a given parallel worker are done sequentially, and they cannot take advantage of further parallelization even if there are workers available.
+
+When performing partitional clustering, it is common to do many repetitions with different random seeds to account for different starting points. When many repetitions are specified directly to \dtwclust{}, the package attempts to assign each repetition to a different worker. This is also the case when the function is called with several values of \code{k}, i.e. when different number of clusters are to be tested; they are detected in partitional, fuzzy and TADPole clustering.
+
+Calculating distance matrices involves performing several independent pairwise comparisons. The default distance function included with \dtwclust{} parallelizes said calculations by grouping the amount of comparisons in \textit{chunks} and assigning a chunk to each parallel worker. For instance, if 100 distance calculations are needed, and there are 4 workers available, each of them would get a chunk with 25 calculations. This should provide a good load balance, since each distance calculation is usually very fast. This \textit{chunking} is also performed by the distance functions used by \dtwclust{} which are registered with \pkg{proxy}, especifically \code{LB_Keogh}, \code{LB_Improved}, \code{SBD} and \code{dtw_lb}.
+
+The included implementation of the TADPole and DBA algorithms also try to create chunks when calculating DTW distances. The amount of calculations needed should be relatively small, so parallelization may not always be worth it in that case.
+
+Finally, in the context of partitional clustering, calculating time-series prototypes is something that is done many times each iteration. Since clusters are mutually exclusive, the prototype calculations can be done in parallel, but this is only worth it if the calculations are time consuming. Therefore, in \dtwclust{}, only DBA and shape extraction attempt to do parallelization when used in partitional clustering.
+
 \section{Cluster evaluation}
 \label{sec:evaluation}
 
@@ -304,7 +320,7 @@ Even though fuzzy clustering will not be discussed until \cref{sec:fuzzy}, it is
 
 \appendix
 
-\section{Registering a custom distance with proxy}
+\section[Registering a custom distance with proxy]{Registering a custom distance with \pkg{proxy}}
 \label{app:custom-dist}
 
 This example takes the autocorrelation-based distance included in the \pkg{TSclust} package \citep{montero2014} and registers it with \pkg{proxy} so that it can be used either directly, or with \dtwclust{}.
@@ -319,6 +335,34 @@ proxy::pr_DB$set_entry(FUN = diss.ACF, names=c("ACFD"),
 # Taking just a subset of the data
 # Note that subsetting with single brackets preserves the list format
 proxy::dist(CharTraj[3:8], method = "ACFD", upper = TRUE)
+@
+
+\section[Using the doParallel package for parallel computation]{Using the \pkg{doParallel} package for parallel computation}
+\label{app:doParallel}
+
+One way of using parallelization with \R{} and \pkg{foreach} is by means of the \pkg{doParallel} package \citep{doParallel}. It provides a great level of abstraction so that users can easily configure a parallel backend which can be used by \dtwclust{}. The example below does the backend registration and calls \dtwclust{}, returning to sequential computation after it finishes.
+
+<<example-doParallel, echo = TRUE, message = FALSE>>=
+require(doParallel)
+
+# Create parallel workers
+workers <- makeCluster(detectCores())
+
+# Preload dtwclust in each worker; not necessary but useful
+invisible(clusterEvalQ(workers, library(dtwclust)))
+
+# Register the backend; this step MUST be done
+registerDoParallel(workers)
+
+# Calling dtwclust
+pc_par <- dtwclust(CharTraj, k = 20L,
+                   distance = "dtw", centroid = "dba",
+                   seed = 938, control = list(trace = TRUE,
+                                              window.size = 15L))
+
+# Going back to sequential computation
+stopCluster(workers)
+registerDoSEQ()
 @
 
 \end{document}
