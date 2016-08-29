@@ -568,13 +568,13 @@ plot(fc, data = CharTraj[1:20], type = "series")
 \section[Using the doParallel package for parallel computation]{Using the \pkg{doParallel} package for parallel computation}
 \label{app:doParallel}
 
-One way of using parallelization with \R{} and \pkg{foreach} is by means of the \pkg{doParallel} package \citep{doParallel}. It provides a great level of abstraction so that users can easily configure a parallel backend which can be used by \dtwclust{}. The example below does the backend registration and calls \dtwclust{}, returning to sequential computation after it finishes.
+One way of using parallelization with \R{} and \pkg{foreach} is by means of the \pkg{doParallel} package \citep{doParallel}. It provides a great level of abstraction so that users can easily configure a parallel backend which can be used by \dtwclust{}. The example below does the backend registration and calls \dtwclust{}, returning to sequential computation after it finishes. It only uses 2 parallel workers, but more can be configured depending on each processor (see function \code{detectCores} in \R{}).
 
 <<example-doParallel, echo = TRUE, message = FALSE>>=
 require(doParallel)
 
 # Create parallel workers
-workers <- makeCluster(detectCores())
+workers <- makeCluster(2L)
 
 # Preload dtwclust in each worker; not necessary but useful
 invisible(clusterEvalQ(workers, library(dtwclust)))
