@@ -303,17 +303,31 @@ The dendrogram does \textbf{not} directly imply a certain number of clusters, bu
 
 Once the clusters have been obtained, it may be desirable to use them to create prototypes (see \cref{sec:prototypes}). At this point, any suitable prototyping function may be used, but we want to emphasize that this is not a mandatory step in hierarchical clustering. A complete example is provided in \cref{app:hc}.
 
+Hierarchical clustering has the disadvantage that the whole distance matrix must be calculated for a given dataset, which in most cases has a time and memory complexity of $O(N^2)$ if $N$ is the total number of objects in the dataset. Thus, hierarchical procedures are usually used with relatively small datasets.
+
 \subsection{Partitional clustering}
 \label{sec:pc}
+
+Partitional clustering is a different strategy used to create partitions. In this case, the data is explicitly assigned to one and only one cluster out of $k$ total clusters. The total number desired clusters \textbf{must} be specified beforehand, which can be a limiting factor, although this can be ameliorated by using validity indices (see \cref{sec:evaluation}).
+
+Partitional procedures can be stated as combinatorial optimization problems that minimize the intracluster distance while maximizing the intercluster distance. However, finding a \textit{global} optimum would require enumerating all possible groupings, something which is infeasible even for relatively small datasets \citep{hastie2009}. Therefore, iterative greedy descent strategies are used instead, which examine a small fraction of the search space until convergence, but could converge to \textit{local} optima.
+
+Partitional clustering algorithms commonly work in the following way. First, $k$ centroids are \textbf{randomly} initialized, usually by choosing $k$ objects from the dataset at random; these are assigned to individual clusters. The distance between all objects in the data and all centroids is calculated, and each object is assigned to the cluster of its closest centroid. A prototyping function is applied to each cluster to update the centroid of each cluster. Then, distances and centroids are updated iteratively until a certain number of iterations have elapsed, or no object changes clusters anymore. It can happen that a cluster becomes empty at a certain iteration, in which case a new cluster is reinitialized at random by choosing a new object from the data (at least this is what \dtwclust{} does). This tries to maintain the desired amount of clusters, but can result in instability or divergence in some cases. Perhaps using a different distance function or a lower value of $k$ can help in those situations.
+
+An optimization that the included centroid functions in \dtwclust{} have is that, on each iteration, the centroid function is \textit{only} applied to those clusters that changed either by losing or gaining data objects. Additionally, when PAM centroids are used, the function simply keeps track of the data indices, how they change and which ones are chosen as cluster centroids, so that that no data is modified.
+
+Some of the most popular partitional algorithms are \textit{k}-means and \textit{k}-medoids \citep{hastie2009}. These usually use the Euclidean distance and, respectively, mean or PAM centroids (see \cref{sec:prototypes}). Most of the proposed algorithms for time-series clustering use the same basic strategy while changing the distance and/or centroid function.
+
+Partitional clustering procedures are \textbf{stochastic} due to their random start. Thus, it is common practice to test different random starts to evaluate several local optima and choose the best result out of all the \textit{repetitions}. They tend to produce \textit{spherical} clusters, but have a lower complexity, so they can be applied to very large datasets. An example is given in \cref{app:pc}.
 
 \subsubsection{TADPole clustering}
 \label{sec:tadpole}
 
-TADPole clustering was proposed in \citet{begum2015}. It adopts a relatively new clustering framework and adapts it to time series clustering with the DTW distance. Because of the way the algorithm works, it can be considered a kind of PAM clustering, since the cluster centroids are always elements of the data. However, this algorithm is deterministic, depending on the value of a cutoff distance ($d_c$).
+TADPole clustering was proposed in \citet{begum2015}. It adopts a relatively new clustering framework and adapts it to time-series clustering with the DTW distance. Because of the way the algorithm works, it can be considered a kind of PAM clustering, since the cluster centroids are always elements of the data. However, this algorithm is deterministic, depending on the value of a cutoff distance ($d_c$).
 
 The algorithm first uses the DTW distance's upper (Euclidean distance) and lower (\code{LB_Keogh}) bounds to find series with many close neighbors (in DTW space). Anything below $d_c$ is considered a neighbor. Aided with this information, the algorithm then tries to prune as many DTW calculations as possible in order to accelerate the clustering procedure. The series that lie in dense areas (i.e. that have lots of neighbors) are taken as cluster centers. For a more detailed explanation of each step in the algorithm, please refer to \citet{begum2015}.
 
-The algorithm relies on the DTW bounds, which are only defined for time series of equal length. Consequently, it requires a Sakoe-Chiba constraint. Furthermore, it should be noted that the Euclidean distance is \textbf{only} valid as a DTW upper bound if the \code{symmetric1} step pattern is used (see \cref{fig:step-patterns}).
+The algorithm relies on the DTW bounds, which are only defined for time-series of equal length. Consequently, it requires a Sakoe-Chiba constraint. Furthermore, it should be noted that the Euclidean distance is \textbf{only} valid as a DTW upper bound if the \code{symmetric1} step pattern is used (see \cref{fig:step-patterns}).
 
 \subsubsection[k-Shape clustering]{\kshape{} clustering}
 \label{sec:kshape}
@@ -323,7 +337,7 @@ The \kshape{} clustering algorithm was developed by \citet{paparrizos2015}. It i
 \subsection{Fuzzy clustering}
 \label{sec:fuzzy}
 
-The previous procedures result in what is known as a \textbf{crisp} partition, although hierarchical clustering only indirectly when the dendrogram is cut. In crisp partitions, each member of the data belongs to only one cluster, and clusters are mutually exclusive. By contrast, fuzzy clustering creates a \textbf{fuzzy} or \textbf{soft} partition in which each member belongs to each cluster to a certain degree. For each member of the data, the degree of belongingness is constrained so that its sum equals 1. Therefore, if there are $N$ objects in the data and $k$ clusters are desired, an $N \times k$ membership matrix $u$ can be created, where all the rows must sum to 1.
+The previous procedures result in what is known as a \textbf{crisp} or \textbf{hard} partition, although hierarchical clustering only indirectly when the dendrogram is cut. In crisp partitions, each member of the data belongs to only one cluster, and clusters are mutually exclusive. By contrast, fuzzy clustering creates a \textbf{fuzzy} or \textbf{soft} partition in which each member belongs to each cluster to a certain degree. For each member of the data, the degree of belongingness is constrained so that its sum equals 1. Therefore, if there are $N$ objects in the data and $k$ clusters are desired, an $N \times k$ membership matrix $u$ can be created, where all the rows must sum to 1.
 
 One of the most widely used versions of the algorithm is \textbf{fuzzy c-means}, which is described in \citet{bezdek1981}. It tries to create a fuzzy partition by minimizing the function in \cref{eq:fuzzy-objective} under the constraints given in \cref{eq:fuzzy-constraints}. The membership matrix $u$ is initialized randomly in such a way that the constraints are fulfilled. The exponent $m$ is known as the \textbf{fuzziness exponent} and should be greater than 1, with a common default value of 2. Originally, the distance $d_{p,c}$ was defined as the Euclidean distance between the $p$-th object and the $c$-th fuzzy centroid, so that the objective was written in terms of the squared Euclidean distance. However, the definition of this distance can change (see e.g. \citet{durso2009}).
 
@@ -483,10 +497,45 @@ plot(hc_sbd, type = "centroids", clus = 1L)
 \section{Partitional clustering example}
 \label{app:pc}
 
+In this example, four different partitional clustering strategies are used: DTW distance with DBA centroids, using \code{dtw_lb} and DBA centroids (which should provide the same results as the previous; see \cref{sec:lbs}), \kshape{}, and TADPole. The results are evaluated using the adjusted Rand index (see \cref{sec:evaluation}), with higher numbers indicating better results. Note that \textit{z}-normalization is applied by default when selecting shape extraction as the centroid function. For fairness, all algorithms used the reinterpolated and normalized data, since some algorithms require series of equal length. The outcome should not be generalized to other data, and normalization/reinterpolation may actually \textit{worsen} some of the algorithms' performance.
+
+<<example-pc, echo = TRUE, warning = FALSE>>=
+# Reinterpolate to same length
+data <- lapply(CharTraj, reinterpolate,
+               newLength = max(lengths(CharTraj)))
+
+# z-normalization
+data <- zscore(data)
+
+pc_dtw <- dtwclust(data, k = 20L,
+                   distance = "dtw2", centroid = "dba",
+                   seed = 8, control = list(window.size = 20L,
+                                            norm = "L2",
+                                            trace = TRUE))
+
+pc_dtwlb <- dtwclust(data, k = 20L,
+                     distance = "dtw_lb", centroid = "dba",
+                     seed = 8, control = list(window.size = 20L,
+                                              norm = "L2",
+                                              trace = TRUE))
+
+pc_ks <- dtwclust(data, k = 20L,
+                  distance = "sbd", centroid = "shape",
+                  seed = 8, control = list(trace = TRUE))
+
+pc_tp <-dtwclust(data, k = 20L,
+                 type = "tadpole", dc = 1.5,
+                 seed = 8, control = list(window.size = 20L,
+                                          trace = TRUE))
+
+sapply(list(DTW = pc_dtw, DTW_LB = pc_dtwlb, kShape = pc_ks, TADPole = pc_tp),
+       randIndex, y = CharTrajLabels)
+@
+
 \section{Fuzzy clustering example}
 \label{app:fuzzy}
 
-This example performs autocorrelation-based fuzzy clustering as investigated by \citet{durso2009}. Using the autocorrelation function overcomes the problem of time-series with different length.
+This example performs autocorrelation-based fuzzy clustering as proposed by \citet{durso2009}. Using the autocorrelation function overcomes the problem of time-series with different length.
 
 <<example-fuzzy, echo = TRUE, fig.cap = "Visualization of the clusters that would result from changing the fuzzy partition to a crisp one. Note that the original time-series are used, so the centroids are not shown, since the centroids are made of autocorrelation coefficients.">>=
 # Calculate autocorrelation up to 50th lag
