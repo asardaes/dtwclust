@@ -50,7 +50,8 @@ hierarchical procedures are used, or \code{length(k)} \code{>} \code{1}, a list 
 }
 \description{
 This is the main function to perform time series clustering. It supports partitional, hierarchical, fuzzy,
-k-Shape and TADPole clustering. See the details and the examples for more information.
+k-Shape and TADPole clustering. See the details and the examples for more information, as well as the
+included package vignette (which can be loaded by typing \code{vignette("dtwclust")}).
 }
 \details{
 Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering is done

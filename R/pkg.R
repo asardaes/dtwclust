@@ -29,6 +29,9 @@
 #' is attached in an attempt to preserve reproducibility. You are free to change this afterwards if
 #' you wish. See \code{\link[base]{RNGkind}}.
 #'
+#' For more information, please read the included package vignette, which can be accessed by typing
+#' \code{vignette("dtwclust")}.
+#'
 #' @docType package
 #' @name dtwclust-package
 #'

@@ -34,6 +34,9 @@ function and entry point for this package is \code{\link{dtwclust}}.
 Please note the random number generator is set to L'Ecuyer-CMRG when \code{dtwclust}
 is attached in an attempt to preserve reproducibility. You are free to change this afterwards if
 you wish. See \code{\link[base]{RNGkind}}.
+
+For more information, please read the included package vignette, which can be accessed by typing
+\code{vignette("dtwclust")}.
 }
 \author{
 Alexis Sarda-Espinosa

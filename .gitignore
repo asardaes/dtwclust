@@ -7,7 +7,6 @@ src/*.so
 
 # Vignette
 vignettes/*.gz
-vignettes/*.pdf
 vignettes/*.bbl
 vignettes/*.log
 vignettes/*.tex

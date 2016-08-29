@@ -1,7 +1,8 @@
 #' Time series clustering
 #'
 #' This is the main function to perform time series clustering. It supports partitional, hierarchical, fuzzy,
-#' k-Shape and TADPole clustering. See the details and the examples for more information.
+#' k-Shape and TADPole clustering. See the details and the examples for more information, as well as the
+#' included package vignette (which can be loaded by typing \code{vignette("dtwclust")}).
 #'
 #' Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering is done
 #' with \code{\link[stats]{hclust}}. TADPole clustering uses the \code{\link{TADPole}} function. Specifying
