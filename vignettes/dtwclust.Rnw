@@ -204,7 +204,7 @@ In order for the LBs to be worth it, they must be computed in significantly less
 
 Each LB can be computed with a specific $l_p$ norm. Therefore, it follows that the $l_p$ norms used for DTW and LB calculations must match, such that $\text{LB}_p \leq \dtwp{}$. Moreover, $\text{LB\_Keogh}_p \leq \text{LB\_Improved}_p \leq \dtwp{}$, meaning that \code{LB_Improved} can provide a tighter LB. However, \code{LB_Keogh} requires the calculation of one set of envelops for every pair of series compared, whereas \code{LB_Improved} must calculate two sets of envelops for every pair of series. If the LBs must be calculated between several time-series, some envelops can be reused when a given series is compared against many others. This optimization is included in the LB functions registered with \pkg{proxy} by \dtwclust{}.
 
-The function \code{dtw_lb} included in \dtwclust{} (and the corresponding version registered with \pkg{proxy}) leverages \code{LB_Improved} in order to find nearest neighbors faster. It first computes a distance matrix using only \code{LB_Improved}. Then, it looks for the nearest neighbor by taking the argument of the row-wise minima of the resulting matrix. Using this information, it updates the distance values of the nearest neighbors using the DTW distance. It continues this process iteratively until no changes in the nearest neighbors are detected. Because of the way it works, this function may only be useful if one is only interested in nearest neighbors, which is usually the case in partitional clustering. However, if PAM is performed, the distance matrix should \textbf{not} be precomputed so that the matrices are correctly updated on each iteration.
+The function \code{dtw_lb} included in \dtwclust{} (and the corresponding version registered with \pkg{proxy}) leverages \code{LB_Improved} in order to find nearest neighbors faster. It first computes a distance matrix using only \code{LB_Improved}. Then, it looks for the nearest neighbor by taking the argument of the row-wise minima of the resulting matrix. Using this information, it updates the distance values of the nearest neighbors using the DTW distance. It continues this process iteratively until no changes in the nearest neighbors are detected. Because of the way it works, this function may only be useful if one is only interested in nearest neighbors, which is usually the case in \textbf{partitional} clustering. However, if PAM is performed, the distance matrix should \textbf{not} be precomputed so that the matrices are correctly updated on each iteration. See \cref{app:dtw-lb} for an example.
 
 Finally, it must be noted that the LBs are \textbf{only} defined for series of equal length, and similar to DTW, are \textbf{not} symmetric regardless of the $l_p$ norm used to compute them. Also note that the choice of step pattern affects the value of the DTW distance, changing the tightness of a given LB.
 
@@ -420,6 +420,35 @@ proxy::pr_DB$set_entry(FUN = diss.ACF, names=c("ACFD"),
 # Taking just a subset of the data
 # Note that subsetting with single brackets preserves the list format
 proxy::dist(CharTraj[3:8], method = "ACFD", upper = TRUE)
+@
+
+\section{Calculating nearest neighbors in DTW space}
+\label{app:dtw-lb}
+
+In the following example, the nearest neighbors in DTW space of the first 5 time-series are found in two different ways, first calculating all DTW distance, and then using \code{dtw_lb} to leverage \code{LB_Improved}. Since the LB is only defined for series of equal length, reinterpolation is performed.
+
+<<example-dtw-lb, echo = TRUE>>=
+# Reinterpolate to same length
+data <- lapply(CharTraj, reinterpolate, newLength = 180L)
+
+# Calculate the DTW distances between all elements
+system.time(D1 <- proxy::dist(data[1L:5L], data[6L:100L],
+                              method = "DTW",
+                              window.type = "sakoechiba",
+                              window.size = 20L))
+
+# Nearest neighbors
+NN1 <- apply(D1, 1L, which.min)
+
+# Calculate the distance matrix with dtw_lb
+system.time(D2 <- dtw_lb(data[1L:5L], data[6L:100L],
+                         window.size = 20L))
+
+# Nearest neighbors
+NN2 <- apply(D2, 1L, which.min)
+
+# Same results?
+all(NN1 == NN2)
 @
 
 \section{Hierarchical clustering example}
