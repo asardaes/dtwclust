@@ -6,6 +6,7 @@
 * The custom argument `force.pairwise` used in some of the `proxy` distances is not necessary anymore
 * No longer enforcing `NULL` dimensions for each series (in case multivariate series are to be used)
 * Fixed an error that prevented fuzzy clustering to work when `k = 2`
+* Fixed a possible problem in some of the included proxy distances when a data object had a length of 1
 
 ## Version 2.1.2
 * Added option to specify a function to extract prototypes in hierarchical and TADPole clustering

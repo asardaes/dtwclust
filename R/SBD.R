@@ -207,7 +207,12 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
                        }
 
           attr(D, "class") <- "crossdist"
-          D <- t(D)
+
+          ## foreach's combine does weird things when an argument has length one
+          if (length(x) == 1L || length(y) == 1L)
+               dim(D) <- c(length(x), length(y))
+          else
+               D <- t(D)
      }
 
      attr(D, "method") <- "SBD"

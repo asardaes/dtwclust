@@ -271,7 +271,12 @@ lb_improved_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE
                        }
 
           attr(D, "class") <- "crossdist"
-          D <- t(D)
+
+          ## foreach's combine does weird things when an argument has length one
+          if (length(x) == 1L || length(y) == 1L)
+               dim(D) <- c(length(x), length(y))
+          else
+               D <- t(D)
      }
 
      if (force.symmetry && !pairwise) {
