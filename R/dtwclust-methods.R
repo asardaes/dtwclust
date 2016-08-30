@@ -356,6 +356,205 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
           })
 
 # ========================================================================================================
+# Cluster validity indices
+# ========================================================================================================
+
+#' @title
+#' Cluster validity indices
+#'
+#' @description
+#' Compute different cluster validity indices (CVIs) of a given cluster partition, using the
+#' clustering distance measure if applicable.
+#'
+#' @details
+#'
+#' Clustering is commonly considered to be an unsupervised procedure, so evaluating its performance
+#' can be rather subjective. However, a great amount of effort has been invested in trying to standardize
+#' cluster evaluation metrics by using cluster validity indices (CVIs).
+#'
+#' CVIs can be classified as internal, external or relative depending on how they are computed.
+#' Focusing on the first two, the crucial difference is that internal CVIs only consider the partitioned
+#' data and try to define a measure of cluster purity, whereas external CVIs compare the obtained partition
+#' to the correct one. Thus, external CVIs can only be used if the ground truth is known. Each index defines
+#' their range of values and whether they are to be minimized or maximized. In many cases, these CVIs can be
+#' used to evaluate the result of a clustering algorithm regardless of how the clustering works internally,
+#' or how the partition came to be.
+#'
+#' Knowing which CVI will work best cannot be determined a priori, so they should be tested for each
+#' specific application. Usually, many CVIs are utilized and compared to each other, maybe using a majority
+#' vote to decide on a final result. Furthermore, it should be noted that many CVIs perform additional
+#' distance calculations when being computed, which can be very considerable if using DTW.
+#'
+#' Note that, even though a fuzzy partition can be changed into a crisp one, making it compatible with many
+#' of the existing CVIs, there are also fuzzy CVIs tailored specifically to fuzzy clustering, and these may
+#' be more suitable in those situations, but have not been implemented here yet.
+#'
+#' External CVIs (the first 4 are calculated via \code{\link[flexclust]{comPart}}):
+#'
+#' \itemize{
+#'   \item \code{"RI"}: Rand Index (to be maximized).
+#'   \item \code{"ARI"}: Adjusted Rand Index (to be maximized).
+#'   \item \code{"J"}: Jaccard Index (to be maximized).
+#'   \item \code{"FM"}: Fowlkes-Mallows (to be maximized).
+#'   \item \code{"VI"}: Variation of Information (to be minimized).
+#' }
+#'
+#' Internal CVIs:
+#'
+#' \itemize{
+#'   \item \code{"Sil"}: Silhouette index (to be maximized). A normalized summation-type index based on
+#'   intracluster distance and the distance to nearest neighbors. This index essentially calculates (or
+#'   re-uses, if already available) the whole distance matrix using the clustering distance measure, so if
+#'   you were trying to avoid that in the first place, this may not be the best CVI for your application.
+#' }
+#'
+#' @name cvi
+#' @rdname cvi
+#'
+#' @param a An object returned by the \code{\link{dtwclust}} function, or a vector that can be coerced to
+#' integers which indicate the cluster memeberships.
+#' @param b If needed, a vector that can be coerced to integers which indicate the cluster memeberships.
+#' @param type Character vector indicating which indices are to be computed. See details.
+#' @param ... Arguments to pass to and from other methods.
+#' @param log.base Base of the logarithm to be used in the calculation of VI.
+#'
+#' @return The chosen CVIs
+#'
+#' @references
+#'
+#' Arbelaitz, O., Gurrutxaga, I., Muguerza, J., Perez, J. M., & Perona, I. (2013). An extensive
+#' comparative study of cluster validity indices. Pattern Recognition, 46(1), 243-256.
+#'
+#' @exportMethod cvi
+#'
+setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 2) {
+     ## Only external CVIs here
+     if (is.null(b))
+          stop("A second set of cluster membership indices is required in 'b' for this/these CVI(s).")
+
+     a <- as.integer(a)
+     b <- as.integer(b)
+
+     type <- match.arg(type, several.ok = TRUE,
+                       c("RI", "ARI", "J", "FM", "VI",
+                         "valid", "external"))
+
+     if (any(type %in% c("valid", "external")))
+          type <- c("RI", "ARI", "J", "FM", "VI")
+
+     which_flexclust <- type %in% c("RI", "ARI", "J", "FM")
+
+     if (any(which_flexclust))
+          CVIs <- flexclust::comPart(x = a, y = b, type = type[which_flexclust])
+     else
+          CVIs <- numeric()
+
+     if (any(type == "VI")) {
+          ## Variation of information
+          ## taken from https://github.com/cran/mcclust/blob/master/R/vi.dist.R
+
+          ## entropy
+          ent <- function(cl) {
+               n <- length(cl)
+               p <- table(cl) / n
+               -sum(p * log(p, base = log.base))
+          }
+
+          ## mutual information
+          mi <- function(cl1, cl2) {
+               p12 <- table(cl1, cl2) / length(cl1)
+               p1p2 <- outer(table(cl1) / length(cl1), table(cl2) / length(cl2))
+               sum(p12[p12 > 0] * log(p12[p12 > 0] / p1p2[p12 > 0], base = log.base))
+          }
+
+          VI <- ent(a) + ent(b) - 2 * mi(a, b)
+          CVIs <- c(CVIs, VI = VI)
+     }
+
+     CVIs
+})
+
+#' @rdname cvi
+#' @aliases cvi,dtwclust-method
+#'
+setMethod("cvi", signature(a = "dtwclust"),
+          function(a, b = NULL, type = "valid", ...) {
+               if (a@type == "fuzzy")
+                    stop("Only CVIs for crisp partitions are currently implemented.")
+
+               type <- match.arg(type, several.ok = TRUE,
+                                 c("RI", "ARI", "J", "FM", "VI",
+                                   "Sil", "SF", "CH", "DB", "DB*", "DB**", "D",
+                                   "valid", "internal", "external"))
+
+               dots <- list(...)
+
+               internal <- c("Sil", "SF", "CH", "DB", "DB*", "DB**", "D")
+               external <- c("RI", "ARI", "J", "FM", "VI")
+
+               if (any(type == "valid")) {
+                    type <- if(is.null(b)) internal else c(internal, external)
+
+               } else if (any(type == "internal")) {
+                    type <- internal
+
+               } else if (any(type == "external")) {
+                    type <- external
+               }
+
+               which_internal <- type %in% internal
+               which_external <- type %in% external
+
+               if (any(which_external))
+                    CVIs <- cvi(a@cluster, b = b, type = type[which_external], ...)
+               else
+                    CVIs <- numeric()
+
+               if (any(which_internal)) {
+                    if (is.null(a@distmat)) {
+                         distmat <- do.call(a@family@dist,
+                                            args = c(list(x = a@datalist, centers = NULL),
+                                                     a@dots))
+                    } else {
+                         distmat <- a@distmat
+                    }
+
+                    CVIs <- c(CVIs, sapply(type[which_internal], function(CVI) {
+                         switch(EXPR = CVI,
+                                ## Silhouette index
+                                Sil = {
+                                     c_k <- as.numeric(table(a@cluster)[a@cluster])
+
+                                     ab <- lapply(unique(a@cluster), function(k) {
+                                          idx <- a@cluster == k
+
+                                          this_a <- rowSums(distmat[idx, idx, drop = FALSE]) / c_k[idx]
+
+                                          this_b <- apply(distmat[idx, !idx, drop = FALSE], 1L, function(row) {
+                                               ret <- row / c_k[!idx]
+                                               ret <- min(tapply(ret, a@cluster[!idx], sum))
+                                               ret
+                                          })
+
+                                          data.frame(a = this_a, b = this_b)
+                                     })
+
+                                     ab <- do.call(rbind, ab)
+
+                                     Sil <- sum((ab$b - ab$a) / apply(ab, 1L, max)) / length(a@datalist)
+
+                                     Sil
+                                },
+
+                                ## Default for now
+                                -1)
+                    }))
+               }
+
+               CVIs
+          })
+
+# ========================================================================================================
 # Rand Index from flexclust package
 # ========================================================================================================
 
@@ -401,78 +600,6 @@ setMethod("randIndex", signature(x="ANY", y="dtwclust"),
 setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
           function(x, y, correct = TRUE, original = !correct) {
                randIndex(x@cluster, y@cluster, correct = correct, original = original)
-          })
-
-# ========================================================================================================
-# Silhouette Index
-# ========================================================================================================
-
-#' @title
-#' Silhouette cluster validity index
-#'
-#' @description
-#' Compute the Silhouette (Sil) cluster validity index (CVI) of a given cluster partition using the
-#' chosen distance measure.
-#'
-#' @details
-#' A normalized summation-type index based on intracluster distance and the distance to nearest neighbors.
-#'
-#' This index essentially calculates (or re-uses, if available) the whole distance matrix using the
-#' chosen distance measure, so if you were trying to avoid that in the first place, this may not be the
-#' best CVI for your application.
-#'
-#' @name silIndex
-#' @rdname silIndex
-#'
-#' @param x An object returned by the \code{\link{dtwclust}} function.
-#'
-#' @return The Sil index, which is to be maximized across different values of \code{k}.
-#'
-#' @references
-#'
-#' Arbelaitz, O., Gurrutxaga, I., Muguerza, J., Perez, J. M., & Perona, I. (2013). An extensive
-#' comparative study of cluster validity indices. Pattern Recognition, 46(1), 243-256.
-#'
-#' @exportMethod silIndex
-#'
-setGeneric("silIndex", def = function(x) standardGeneric("silIndex"))
-
-#' @rdname silIndex
-#' @aliases silIndex,dtwclust-method
-#'
-setMethod("silIndex", signature(x = "dtwclust"),
-          function(x) {
-               if (x@type == "fuzzy")
-                    stop("Silhouette index is only valid for crisp (non-fuzzy) partitions.")
-
-               if (is.null(x@distmat)) {
-                    distmat <- do.call(x@family@dist,
-                                       args = c(list(x = x@datalist, centers = NULL), x@dots))
-               } else {
-                    distmat <- x@distmat
-               }
-
-               c_k <- as.numeric(table(x@cluster)[x@cluster])
-
-               ab <- lapply(unique(x@cluster), function(k) {
-                    idx <- x@cluster == k
-
-                    a <- rowSums(distmat[idx, idx, drop = FALSE]) / c_k[idx]
-
-                    b <- apply(distmat[idx, !idx, drop = FALSE], 1L, function(row) {
-                         ret <- row / c_k[!idx]
-                         ret <- min(tapply(ret, x@cluster[!idx], sum))
-                         ret
-                    })
-
-                    data.frame(a = a, b = b)
-               })
-
-               ab <- do.call(rbind, ab)
-
-               Sil <- sum((ab$b - ab$a) / apply(ab, 1L, max)) / length(x@datalist)
-
-               Sil
           })
 
 # ========================================================================================================
@@ -554,33 +681,6 @@ setMethod("clusterSim", "dtwclust",
 
                z
           })
-
-# ========================================================================================================
-# info from modeltools (perhaps for internal support of some flexclust functions)
-# ========================================================================================================
-
-# setMethod("info", "dtwclust",
-#           function(object, which, ...) {
-#                ret <- switch(EXPR = which,
-#                              help = c("distsum", "size", "av_dist"),
-#                              distsum = sum(object@cldist[, 1]),
-#                              size = {
-#                                   var <- object@clusinfo$size
-#                                   names(var) <- rownames(object@clusinfo)
-#
-#                                   var
-#                              },
-#                              av_dist = {
-#                                   var <- object@clusinfo$av_dist
-#                                   names(var) <- rownames(object@clusinfo)
-#
-#                                   var
-#                              },
-#
-#                              stop("Requested info not available. Use which = 'help'."))
-#
-#                ret
-#           })
 
 # ========================================================================================================
 # Validity and coercion methods for control

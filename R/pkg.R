@@ -119,6 +119,7 @@
 #' @importFrom stats runif
 #' @importFrom flexclust randIndex
 #' @importFrom flexclust clusterSim
+#' @importFrom flexclust comPart
 #' @importFrom graphics plot
 #' @importFrom rngtools RNGseq
 #' @importFrom rngtools setRNG
