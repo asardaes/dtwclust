@@ -24,7 +24,7 @@ setMethod("initialize", "dtwclust",
           function(.Object, ..., call) {
                .Object <- callNextMethod(.Object = .Object, ...)
 
-               if(!missing(call))
+               if (!missing(call))
                     .Object@call <- call
 
                .Object
@@ -226,7 +226,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
                     type <- "sc"
 
                ## plot dendrogram?
-               if(x@type == "hierarchical" && type == "dendrogram") {
+               if (x@type == "hierarchical" && type == "dendrogram") {
                     x <- S3Part(x, strictS3 = TRUE)
                     if (plot) plot(x, ...)
                     return(invisible(NULL))
@@ -324,7 +324,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
                                        group = "variable"))
 
                if (type %in% c("sc", "centroids")) {
-                    if(length(list(...)) == 0L)
+                    if (length(list(...)) == 0L)
                          gg <- gg + geom_line(data = cenm[cenm$cl %in% clus, ],
                                               linetype = "dashed",
                                               size = 1.5,
@@ -438,6 +438,9 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #' In the original definition of many internal CVIs, the Euclidean distance and a mean centroid was used. The
 #' implementations here change this, making use of whatever distance/centroid was chosen during clustering.
 #'
+#' Some internal indices require the original data for calculations, so the control flag \code{save.data}
+#' must be set to \code{TRUE} when running the clustering algorithm.
+#'
 #' @name cvi
 #' @rdname cvi
 #'
@@ -530,7 +533,7 @@ setMethod("cvi", signature(a = "dtwclust"),
                external <- c("RI", "ARI", "J", "FM", "VI")
 
                if (any(type == "valid")) {
-                    type <- if(is.null(b)) internal else c(internal, external)
+                    type <- if (is.null(b)) internal else c(internal, external)
 
                } else if (any(type == "internal")) {
                     type <- internal
@@ -548,10 +551,11 @@ setMethod("cvi", signature(a = "dtwclust"),
                     CVIs <- numeric()
 
                if (any(which_internal)) {
-                    needs_distmat <- c("Sil", "D")
+                    if (!a@control@save.data && any(type %in% c("Sil", "SF", "CH", "D")))
+                         stop("The control flag 'save.data' must be TRUE to calculate Sil, SF, CH or D index.")
 
                     ## calculate distmat if needed
-                    if (any(type[which_internal] %in% needs_distmat)) {
+                    if (any(type[which_internal] %in% c("Sil", "D"))) {
                          if (is.null(a@distmat)) {
                               distmat <- do.call(a@family@dist,
                                                  args = c(list(x = a@datalist, centers = NULL),
@@ -563,9 +567,7 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                     ## calculate some values that both Davies-Bouldin indices use
                     if (any(grepl("DB.*", type[which_internal]))) {
-                         S <- sapply(1L:a@k, function(k) {
-                              mean(a@cldist[a@cluster == k, 1L, drop = TRUE])
-                         })
+                         S <- tapply(a@cldist[ , 1L], list(a@cluster), mean)
 
                          ## distance between centroids
                          distcent <- do.call(a@family@dist,
@@ -592,6 +594,8 @@ setMethod("cvi", signature(a = "dtwclust"),
                          dist_global_cent <- do.call(a@family@dist,
                                                      args = c(list(x = a@centers, centers = global_cent),
                                                               a@dots))
+
+                         dim(dist_global_cent) <- NULL
                     }
 
                     CVIs <- c(CVIs, sapply(type[which_internal], function(CVI) {
@@ -641,10 +645,9 @@ setMethod("cvi", signature(a = "dtwclust"),
                                 ## Davies-Bouldin
                                 DB = {
                                      mean(sapply(1L:a@k, function(k) {
-                                          max(sapply(setdiff(1L:a@k, k),
-                                                     function(l) {
-                                                          (S[k] + S[l]) / distcent[k, l]
-                                                     }))
+                                          max(sapply(setdiff(1L:a@k, k), function(l) {
+                                               (S[k] + S[l]) / distcent[k, l]
+                                          }))
                                      }))
                                 },
 

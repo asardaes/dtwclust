@@ -583,8 +583,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
           ## If distmat was provided, let it be shown in the results
           if (distmat_flag) {
-               family@dist <- function(...) stop("'distmat' provided in call, no distance calculations performed")
-
                if (!is.null(attr(distmat, "method")))
                     distance <- attr(distmat, "method")
                else

@@ -1,4 +1,8 @@
-context("Test centroids")
+context("Test centroids and CVIs")
+
+## CVIs require data and must be evaluated before resetting nondeterministic values,
+## since the functions in the family slot are needed
+ctrl@save.data <- TRUE
 
 # =================================================================================================
 # mean
@@ -10,6 +14,11 @@ suppressWarnings(
                          distance = "sbd", centroid = "mean",
                          preproc = NULL, control = ctrl, seed = 123)
 )
+
+cvi_mean <- cvi(pc_mean, labels)
+
+test_that("mean centroid CVI gives the same result as reference",
+          my_expect_equal_to_reference(cvi_mean))
 
 pc_mean <- reset_nondeterministic(pc_mean)
 
@@ -24,6 +33,11 @@ pc_median <- dtwclust(data_matrix, type = "partitional", k = 20,
                       distance = "sbd", centroid = "median",
                       preproc = NULL, control = ctrl, seed = 123)
 
+cvi_median <- cvi(pc_median, labels)
+
+test_that("median centroid CVI gives the same result as reference",
+          my_expect_equal_to_reference(cvi_median))
+
 pc_median <- reset_nondeterministic(pc_median)
 
 test_that("median centroid gives the same result as reference",
@@ -37,6 +51,11 @@ pc_shape <- dtwclust(data, type = "partitional", k = 20,
                      distance = "sbd", centroid = "shape",
                      preproc = NULL, control = ctrl, seed = 123)
 
+cvi_shape <- cvi(pc_shape, labels)
+
+test_that("shape centroid CVI gives the same result as reference",
+          my_expect_equal_to_reference(cvi_shape))
+
 pc_shape <- reset_nondeterministic(pc_shape)
 
 test_that("shape centroid gives the same result as reference",
@@ -49,6 +68,11 @@ test_that("shape centroid gives the same result as reference",
 pc_pam <- dtwclust(data, type = "partitional", k = 20,
                    distance = "sbd", centroid = "pam",
                    preproc = NULL, control = ctrl, seed = 123)
+
+cvi_pam <- cvi(pc_pam, labels)
+
+test_that("pam centroid CVI gives the same result as reference",
+          my_expect_equal_to_reference(cvi_pam))
 
 pc_pam <- reset_nondeterministic(pc_pam)
 
@@ -66,6 +90,11 @@ suppressWarnings(
                         preproc = NULL, control = ctrl, seed = 123)
 )
 
+suppressWarnings(cvi_dba <- cvi(pc_dba, labels_subset))
+
+test_that("dba centroid CVI gives the same result as reference",
+          my_expect_equal_to_reference(cvi_dba))
+
 pc_dba <- reset_nondeterministic(pc_dba)
 
 test_that("dba centroid gives the same result as reference",
@@ -74,6 +103,8 @@ test_that("dba centroid gives the same result as reference",
 # =================================================================================================
 # colMeans
 # =================================================================================================
+
+ctrl@save.data <- FALSE
 
 mycent <- function(x, cl_id, k, cent, cl_old, ...) {
      x_split <- split(x, cl_id)

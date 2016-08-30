@@ -55,6 +55,9 @@ be more suitable in those situations, but have not been implemented here yet.
 \note{
 In the original definition of many internal CVIs, the Euclidean distance and a mean centroid was used. The
 implementations here change this, making use of whatever distance/centroid was chosen during clustering.
+
+Some internal indices require the original data for calculations, so the control flag \code{save.data}
+must be set to \code{TRUE} when running the clustering algorithm.
 }
 \section{External CVIs}{
 
