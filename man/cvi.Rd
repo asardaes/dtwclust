@@ -17,7 +17,7 @@ integers which indicate the cluster memeberships.}
 \item{b}{If needed, a vector that can be coerced to integers which indicate the cluster memeberships.
 The ground truth (if known) should be provided here.}
 
-\item{type}{Character vector indicating which indices are to be computed. See details.}
+\item{type}{Character vector indicating which indices are to be computed. See supported values below.}
 
 \item{...}{Arguments to pass to and from other methods.}
 
@@ -54,7 +54,7 @@ be more suitable in those situations, but have not been implemented here yet.
 }
 \note{
 In the original definition of many internal CVIs, the Euclidean distance and a mean centroid was used. The
-implementations here change this, making use of whatever distance/centroid was used during clustering.
+implementations here change this, making use of whatever distance/centroid was chosen during clustering.
 }
 \section{External CVIs}{
 
@@ -92,6 +92,7 @@ associated, these indices might not be appropriate for those centroids.
   \item \code{"DBstar"} (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005);
   to be minimized).
   \item \code{"CH"} (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
+  \item \code{"SF"} (~): Score Function (Arbelaitz et al. (2013); to be maximized).
 }
 }
 

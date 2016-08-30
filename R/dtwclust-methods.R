@@ -421,6 +421,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #'   \item \code{"DBstar"} (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005);
 #'   to be minimized).
 #'   \item \code{"CH"} (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
+#'   \item \code{"SF"} (~): Score Function (Arbelaitz et al. (2013); to be maximized).
 #' }
 #'
 #' @section Additionally:
@@ -435,7 +436,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #'
 #' @note
 #' In the original definition of many internal CVIs, the Euclidean distance and a mean centroid was used. The
-#' implementations here change this, making use of whatever distance/centroid was used during clustering.
+#' implementations here change this, making use of whatever distance/centroid was chosen during clustering.
 #'
 #' @name cvi
 #' @rdname cvi
@@ -444,7 +445,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #' integers which indicate the cluster memeberships.
 #' @param b If needed, a vector that can be coerced to integers which indicate the cluster memeberships.
 #' The ground truth (if known) should be provided here.
-#' @param type Character vector indicating which indices are to be computed. See details.
+#' @param type Character vector indicating which indices are to be computed. See supported values below.
 #' @param ... Arguments to pass to and from other methods.
 #' @param log.base Base of the logarithm to be used in the calculation of VI.
 #'
@@ -658,8 +659,12 @@ setMethod("cvi", signature(a = "dtwclust"),
                                           sum(a@cldist[ , 1L, drop = TRUE])
                                 },
 
-                                ## Default for now
-                                -1)
+                                ## Score function
+                                SF = {
+                                     bcd <- sum(tabulate(a@cluster) * dist_global_cent) / (N * a@k)
+                                     wcd <- sum(tapply(a@cldist[ , 1L, drop = TRUE], list(a@cluster), mean))
+                                     1 - 1 / exp(exp(bcd + wcd))
+                                })
                     }))
                }
 

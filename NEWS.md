@@ -2,8 +2,8 @@
 
 ## Version 2.1.3
 * Added package vignette
+* Implemented several cluster validity indices in the new `cvi` function
 * The custom argument `force.pairwise` used in some of the `proxy` distances is not necessary anymore
-* Added Silhouette Cluster Validity Index
 * No longer enforcing `NULL` dimensions for each series (in case multivariate series are to be used)
 * Fixed an error that prevented fuzzy clustering to work when `k = 2`
 
