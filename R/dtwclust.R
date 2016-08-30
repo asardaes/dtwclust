@@ -93,15 +93,15 @@
 #' fuzzy c-means centroid by default.
 #'
 #' In either case, a custom function can be provided. If one is provided, it will receive the following
-#' inputs in the shown order (examples for partitional clustering are shown in parenthesis):
+#' parameters with the shown names (examples for partitional clustering are shown in parenthesis):
 #'
 #' \itemize{
-#'   \item The \emph{whole} data list (\code{list(ts1, ts2, ts3)})
-#'   \item A numeric vector with length equal to the number of series in \code{data}, indicating which
-#'   cluster a series belongs to (\code{c(1L, 2L, 2L)})
-#'   \item The desired number of total clusters (\code{2L})
-#'   \item The current centers in order, in a list (\code{list(center1, center2)})
-#'   \item The membership vector of the \emph{previous} iteration (\code{c(1L, 1L, 2L)})
+#'   \item \code{"x"}: The \emph{whole} data list (\code{list(ts1, ts2, ts3)})
+#'   \item \code{"cl_id"}: A numeric vector with length equal to the number of series in \code{data},
+#'   indicating which cluster a series belongs to (\code{c(1L, 2L, 2L)})
+#'   \item \code{"k"}: The desired number of total clusters (\code{2L})
+#'   \item \code{"cent"}: The current centers in order, in a list (\code{list(center1, center2)})
+#'   \item \code{"cl_old"}: The membership vector of the \emph{previous} iteration (\code{c(1L, 1L, 2L)})
 #'   \item The elements of \code{...}
 #' }
 #'

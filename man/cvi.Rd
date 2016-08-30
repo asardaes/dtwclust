@@ -73,13 +73,17 @@ The first 4 CVIs are calculated via \code{\link[flexclust]{comPart}}, so please 
 \section{Internal CVIs}{
 
 
-The indices marked with an exclamation mark calculate (or re-use if already available) the whole
+The indices marked with an exclamation mark (!) calculate (or re-use if already available) the whole
 distance matrix. If you were trying to avoid this in the first place, then these CVIs might not be
 suitable for your application.
 
-The indices marked with a question mark depend on both the extracted centroids,
-so bear that in mind if a hierarchical procedure was used and/or the centroid function has associated
-randomness (such as \code{\link{SBD}} with series of different length).
+The indices marked with a question mark (?) depend on the extracted centroids, so bear that in mind if a
+hierarchical procedure was used and/or the centroid function has associated randomness (such as
+\code{\link{shape_extraction}} with series of different length).
+
+The indices marked with a tilde (~) require the calculation of a global centroid. Since
+\code{\link{DBA}} and \code{\link{shape_extraction}} (for series of different length) have some randomness
+associated, these indices might not be appropriate for those centroids.
 
 \itemize{
   \item \code{"Sil"} (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
@@ -87,6 +91,7 @@ randomness (such as \code{\link{SBD}} with series of different length).
   \item \code{"DB"} (?): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
   \item \code{"DBstar"} (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005);
   to be minimized).
+  \item \code{"CH"} (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
 }
 }
 

@@ -402,13 +402,17 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #'
 #' @section Internal CVIs:
 #'
-#' The indices marked with an exclamation mark calculate (or re-use if already available) the whole
+#' The indices marked with an exclamation mark (!) calculate (or re-use if already available) the whole
 #' distance matrix. If you were trying to avoid this in the first place, then these CVIs might not be
 #' suitable for your application.
 #'
-#' The indices marked with a question mark depend on both the extracted centroids,
-#' so bear that in mind if a hierarchical procedure was used and/or the centroid function has associated
-#' randomness (such as \code{\link{SBD}} with series of different length).
+#' The indices marked with a question mark (?) depend on the extracted centroids, so bear that in mind if a
+#' hierarchical procedure was used and/or the centroid function has associated randomness (such as
+#' \code{\link{shape_extraction}} with series of different length).
+#'
+#' The indices marked with a tilde (~) require the calculation of a global centroid. Since
+#' \code{\link{DBA}} and \code{\link{shape_extraction}} (for series of different length) have some randomness
+#' associated, these indices might not be appropriate for those centroids.
 #'
 #' \itemize{
 #'   \item \code{"Sil"} (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
@@ -416,6 +420,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #'   \item \code{"DB"} (?): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
 #'   \item \code{"DBstar"} (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005);
 #'   to be minimized).
+#'   \item \code{"CH"} (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
 #' }
 #'
 #' @section Additionally:
@@ -555,7 +560,7 @@ setMethod("cvi", signature(a = "dtwclust"),
                          }
                     }
 
-                    ## calculate some values that all Davies-Bouldin indices use
+                    ## calculate some values that both Davies-Bouldin indices use
                     if (any(grepl("DB.*", type[which_internal]))) {
                          S <- sapply(1L:a@k, function(k) {
                               mean(a@cldist[a@cluster == k, 1L, drop = TRUE])
@@ -565,6 +570,23 @@ setMethod("cvi", signature(a = "dtwclust"),
                          distcent <- do.call(a@family@dist,
                                              args = c(list(x = a@centers, centers = NULL),
                                                       a@dots))
+                    }
+
+                    ## calculate global centroids if needed
+                    if (any(type[which_internal] %in% c("SF", "CH"))) {
+                         N <- length(a@datalist)
+
+                         global_cent <- do.call(a@family@allcent,
+                                                args = c(list(x = a@datalist,
+                                                              cl_id = rep(1L, N),
+                                                              k = 1L,
+                                                              cent = a@datalist[sample(N, 1L)],
+                                                              cl_old = rep(0L, N)),
+                                                         a@dots))
+
+                         dist_global_cent <- do.call(a@family@dist,
+                                                     args = c(list(x = a@centers, centers = global_cent),
+                                                              a@dots))
                     }
 
                     CVIs <- c(CVIs, sapply(type[which_internal], function(CVI) {
@@ -626,6 +648,14 @@ setMethod("cvi", signature(a = "dtwclust"),
                                      mean(sapply(1L:a@k, function(k) {
                                           max(S[k] + S[-k]) / min(distcent[k, -k, drop = TRUE])
                                      }))
+                                },
+
+                                ## Calinski-Harabasz
+                                CH = {
+                                     (N - a@k) /
+                                          (a@k - 1) *
+                                          sum(tabulate(a@cluster) * dist_global_cent) /
+                                          sum(a@cldist[ , 1L, drop = TRUE])
                                 },
 
                                 ## Default for now
