@@ -58,20 +58,42 @@ External CVIs (the first 4 are calculated via \code{\link[flexclust]{comPart}}):
   \item \code{"ARI"}: Adjusted Rand Index (to be maximized).
   \item \code{"J"}: Jaccard Index (to be maximized).
   \item \code{"FM"}: Fowlkes-Mallows (to be maximized).
-  \item \code{"VI"}: Variation of Information (to be minimized).
+  \item \code{"VI"}: Variation of Information (Meila (2003); to be minimized).
 }
 
 Internal CVIs:
 
+Those indices marked with an exclamation mark calculate (or re-use if already available) the whole
+distance matrix. If you were trying to avoid this in the first place, then these CVIs might not be
+suitable for your application.
+
 \itemize{
-  \item \code{"Sil"}: Silhouette index (to be maximized). A normalized summation-type index based on
-  intracluster distance and the distance to nearest neighbors. This index essentially calculates (or
-  re-uses, if already available) the whole distance matrix using the clustering distance measure, so if
-  you were trying to avoid that in the first place, this may not be the best CVI for your application.
+  \item \code{"Sil"} (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
+  \item \code{"D"} (!): Dunn index (Arbelaitz et al. (2013); to be maximized).
 }
+
+Additionally:
+
+\itemize{
+  \item \code{"valid"}: Returns all valid indices depending on the type of \code{a} and whether \code{b}
+  was provided or not.
+  \item \code{"internal"}: Returns all internal CVIs. Only supported for \code{\link{dtwclust-class}}
+  objects.
+  \item \code{"external"}: Returns all external CVIs. Requires \code{b} to be provided.
+}
+}
+\note{
+In the original definition of many internal CVIs, the Euclidean distance and a mean centroid was used. The
+implementations here change this, making use of whatever distance/centroid was used during clustering.
 }
 \references{
 Arbelaitz, O., Gurrutxaga, I., Muguerza, J., Perez, J. M., & Perona, I. (2013). An extensive
 comparative study of cluster validity indices. Pattern Recognition, 46(1), 243-256.
+
+Kim, M., & Ramakrishna, R. S. (2005). New indices for cluster validity assessment.
+Pattern Recognition Letters, 26(15), 2353-2363.
+
+Meila, M. (2003). Comparing clusterings by the variation of information. In Learning theory
+and kernel machines (pp. 173-187). Springer Berlin Heidelberg.
 }
 

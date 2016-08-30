@@ -406,6 +406,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #'
 #' \itemize{
 #'   \item \code{"Sil"} (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
+#'   \item \code{"D"} (!): Dunn index (Arbelaitz et al. (2013); to be maximized).
 #' }
 #'
 #' Additionally:
@@ -561,9 +562,25 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                                      ab <- do.call(rbind, ab)
 
-                                     Sil <- sum((ab$b - ab$a) / apply(ab, 1L, max)) / length(a@datalist)
+                                     sum((ab$b - ab$a) / apply(ab, 1L, max)) / length(a@datalist)
+                                },
 
-                                     Sil
+                                ## Dunn index
+                                D = {
+                                     pairs <- call_pairs(a@k)
+
+                                     deltas <- mapply(pairs[ , 1L], pairs[ , 2L],
+                                                      USE.NAMES = FALSE, SIMPLIFY = TRUE,
+                                                      FUN = function(i, j) {
+                                                           min(distmat[a@cluster == i,
+                                                                       a@cluster == j])
+                                                      })
+
+                                     Deltas <- sapply(1L:a@k, function(k) {
+                                          max(distmat[a@cluster == k, a@cluster == k])
+                                     })
+
+                                     min(deltas) / max(Deltas)
                                 },
 
                                 ## Default for now
