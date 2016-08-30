@@ -156,6 +156,9 @@ ddist <- function(distance, control, distmat) {
                                                            y = centers,
                                                            method = distance)))
 
+                                      if (length(centers) == 1L)
+                                           dd <- t(dd)
+
                                       dd
 
                                  }

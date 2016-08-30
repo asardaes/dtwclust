@@ -577,13 +577,17 @@ setMethod("cvi", signature(a = "dtwclust"),
                     if (any(type[which_internal] %in% c("SF", "CH"))) {
                          N <- length(a@datalist)
 
-                         global_cent <- do.call(a@family@allcent,
-                                                args = c(list(x = a@datalist,
-                                                              cl_id = rep(1L, N),
-                                                              k = 1L,
-                                                              cent = a@datalist[sample(N, 1L)],
-                                                              cl_old = rep(0L, N)),
-                                                         a@dots))
+                         if (a@type == "partitional") {
+                              global_cent <- do.call(a@family@allcent,
+                                                     args = c(list(x = a@datalist,
+                                                                   cl_id = rep(1L, N),
+                                                                   k = 1L,
+                                                                   cent = a@datalist[sample(N, 1L)],
+                                                                   cl_old = rep(0L, N)),
+                                                              a@dots))
+                         } else {
+                              global_cent <- a@family@allcent(a@datalist)
+                         }
 
                          dist_global_cent <- do.call(a@family@dist,
                                                      args = c(list(x = a@centers, centers = global_cent),

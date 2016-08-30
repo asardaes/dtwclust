@@ -692,6 +692,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     cluster <- stats::cutree(hc, k)
 
                     if (is.function(centroid)) {
+                         allcent <- centroid
+
                          centers <- lapply(1L:k, function(kcent) centroid(data[cluster == kcent]))
 
                          cldist <- do.call("distfun", c(list(x = data,
@@ -702,6 +704,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                          cldist <- as.matrix(cldist)
 
                     } else {
+                         allcent <- function(dummy) { data[which.min(apply(D, 1L, sum))] }
+
                          centers <- sapply(1L:k, function(kcent) {
                               id_k <- cluster == kcent
 
@@ -726,6 +730,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                         control = control,
                         family = new("dtwclustFamily",
                                      dist = distfun,
+                                     allcent = allcent,
                                      preproc = preproc),
                         distmat = D,
 
@@ -807,8 +812,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                ## ----------------------------------------------------------------------------------------------------------
 
                if (is.function(centroid)) {
+                    allcent <- centroid
                     centers <- lapply(1L:k, function(kcent) centroid(data[R$cl == kcent]))
                } else {
+                    allcent <- function(dummy) { data[R$centers[1L]] }
                     centers <- data[R$centers]
                }
 
@@ -828,6 +835,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                    control = control,
                    family = new("dtwclustFamily",
                                 dist = distfun,
+                                allcent = allcent,
                                 preproc = preproc),
                    distmat = NULL,
 
