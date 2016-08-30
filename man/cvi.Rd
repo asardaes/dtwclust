@@ -77,8 +77,8 @@ The first 4 CVIs are calculated via \code{\link[flexclust]{comPart}}, so please 
 
 
 The indices marked with an exclamation mark (!) calculate (or re-use if already available) the whole
-distance matrix. If you were trying to avoid this in the first place, then these CVIs might not be
-suitable for your application.
+distance matrix between the series in the data. If you were trying to avoid this in the first place,
+then these CVIs might not be suitable for your application.
 
 The indices marked with a question mark (?) depend on the extracted centroids, so bear that in mind if a
 hierarchical procedure was used and/or the centroid function has associated randomness (such as

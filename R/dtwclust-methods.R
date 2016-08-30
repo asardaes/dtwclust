@@ -403,8 +403,8 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #' @section Internal CVIs:
 #'
 #' The indices marked with an exclamation mark (!) calculate (or re-use if already available) the whole
-#' distance matrix. If you were trying to avoid this in the first place, then these CVIs might not be
-#' suitable for your application.
+#' distance matrix between the series in the data. If you were trying to avoid this in the first place,
+#' then these CVIs might not be suitable for your application.
 #'
 #' The indices marked with a question mark (?) depend on the extracted centroids, so bear that in mind if a
 #' hierarchical procedure was used and/or the centroid function has associated randomness (such as
@@ -566,7 +566,7 @@ setMethod("cvi", signature(a = "dtwclust"),
                     }
 
                     ## calculate some values that both Davies-Bouldin indices use
-                    if (any(grepl("DB.*", type[which_internal]))) {
+                    if (any(type[which_internal] %in% c("DB", "DBstar"))) {
                          S <- tapply(a@cldist[ , 1L], list(a@cluster), mean)
 
                          ## distance between centroids
@@ -707,6 +707,7 @@ NULL
 #'
 setMethod("randIndex", signature(x="dtwclust", y="ANY"),
           function(x, y, correct = TRUE, original = !correct) {
+               warning("Consider using the 'cvi' function for more options.")
                randIndex(x@cluster, y, correct = correct, original = original)
           })
 
@@ -715,6 +716,7 @@ setMethod("randIndex", signature(x="dtwclust", y="ANY"),
 #'
 setMethod("randIndex", signature(x="ANY", y="dtwclust"),
           function(x, y, correct = TRUE, original = !correct) {
+               warning("Consider using the 'cvi' function for more options.")
                randIndex(x, y@cluster, correct = correct, original = original)
           })
 
@@ -723,6 +725,7 @@ setMethod("randIndex", signature(x="ANY", y="dtwclust"),
 #'
 setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
           function(x, y, correct = TRUE, original = !correct) {
+               warning("Consider using the 'cvi' function for more options.")
                randIndex(x@cluster, y@cluster, correct = correct, original = original)
           })
 
