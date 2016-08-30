@@ -406,14 +406,16 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #' distance matrix. If you were trying to avoid this in the first place, then these CVIs might not be
 #' suitable for your application.
 #'
-#' The indices marked with a double exclamation marks depend on both the distance matrix and the centroids,
+#' The indices marked with a question mark depend on both the extracted centroids,
 #' so bear that in mind if a hierarchical procedure was used and/or the centroid function has associated
 #' randomness (such as \code{\link{SBD}} with series of different length).
 #'
 #' \itemize{
 #'   \item \code{"Sil"} (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
 #'   \item \code{"D"} (!): Dunn index (Arbelaitz et al. (2013); to be maximized).
-#'   \item \code{"DB"} (!!): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
+#'   \item \code{"DB"} (?): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
+#'   \item \code{"DBstar"} (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005);
+#'   to be minimized).
 #' }
 #'
 #' @section Additionally:
@@ -513,12 +515,12 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                type <- match.arg(type, several.ok = TRUE,
                                  c("RI", "ARI", "J", "FM", "VI",
-                                   "Sil", "SF", "CH", "DB", "DBstar", "DBdstar", "D",
+                                   "Sil", "SF", "CH", "DB", "DBstar", "D",
                                    "valid", "internal", "external"))
 
                dots <- list(...)
 
-               internal <- c("Sil", "SF", "CH", "DB", "DBstar", "DBdstar", "D")
+               internal <- c("Sil", "SF", "CH", "DB", "DBstar", "D")
                external <- c("RI", "ARI", "J", "FM", "VI")
 
                if (any(type == "valid")) {
@@ -540,12 +542,29 @@ setMethod("cvi", signature(a = "dtwclust"),
                     CVIs <- numeric()
 
                if (any(which_internal)) {
-                    if (is.null(a@distmat)) {
-                         distmat <- do.call(a@family@dist,
-                                            args = c(list(x = a@datalist, centers = NULL),
-                                                     a@dots))
-                    } else {
-                         distmat <- a@distmat
+                    needs_distmat <- c("Sil", "D")
+
+                    ## calculate distmat if needed
+                    if (any(type[which_internal] %in% needs_distmat)) {
+                         if (is.null(a@distmat)) {
+                              distmat <- do.call(a@family@dist,
+                                                 args = c(list(x = a@datalist, centers = NULL),
+                                                          a@dots))
+                         } else {
+                              distmat <- a@distmat
+                         }
+                    }
+
+                    ## calculate some values that all Davies-Bouldin indices use
+                    if (any(grepl("DB.*", type[which_internal]))) {
+                         S <- sapply(1L:a@k, function(k) {
+                              mean(a@cldist[a@cluster == k, 1L, drop = TRUE])
+                         })
+
+                         ## distance between centroids
+                         distcent <- do.call(a@family@dist,
+                                             args = c(list(x = a@centers, centers = NULL),
+                                                      a@dots))
                     }
 
                     CVIs <- c(CVIs, sapply(type[which_internal], function(CVI) {
@@ -594,22 +613,19 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                                 ## Davies-Bouldin
                                 DB = {
-                                     S <- sapply(1L:a@k, function(k) {
-                                          mean(a@cldist[a@cluster == k, 1L, drop = TRUE])
-                                     })
-
-                                     distcent <- do.call(a@family@dist,
-                                                         args = c(list(x = a@centers, centers = NULL),
-                                                                  a@dots))
-
-                                     R <- sapply(1L:a@k, function(k) {
+                                     mean(sapply(1L:a@k, function(k) {
                                           max(sapply(setdiff(1L:a@k, k),
                                                      function(l) {
                                                           (S[k] + S[l]) / distcent[k, l]
                                                      }))
-                                     })
+                                     }))
+                                },
 
-                                     mean(R)
+                                ## Modified DB -> DB*
+                                DBstar = {
+                                     mean(sapply(1L:a@k, function(k) {
+                                          max(S[k] + S[-k]) / min(distcent[k, -k, drop = TRUE])
+                                     }))
                                 },
 
                                 ## Default for now

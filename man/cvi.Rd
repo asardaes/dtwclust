@@ -77,14 +77,16 @@ The indices marked with an exclamation mark calculate (or re-use if already avai
 distance matrix. If you were trying to avoid this in the first place, then these CVIs might not be
 suitable for your application.
 
-The indices marked with a double exclamation marks depend on both the distance matrix and the centroids,
+The indices marked with a question mark depend on both the extracted centroids,
 so bear that in mind if a hierarchical procedure was used and/or the centroid function has associated
 randomness (such as \code{\link{SBD}} with series of different length).
 
 \itemize{
   \item \code{"Sil"} (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
   \item \code{"D"} (!): Dunn index (Arbelaitz et al. (2013); to be maximized).
-  \item \code{"DB"} (!!): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
+  \item \code{"DB"} (?): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
+  \item \code{"DBstar"} (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005);
+  to be minimized).
 }
 }
 
