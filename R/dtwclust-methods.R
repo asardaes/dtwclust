@@ -388,7 +388,9 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #' of the existing CVIs, there are also fuzzy CVIs tailored specifically to fuzzy clustering, and these may
 #' be more suitable in those situations, but have not been implemented here yet.
 #'
-#' External CVIs (the first 4 are calculated via \code{\link[flexclust]{comPart}}):
+#' @section External CVIs:
+#'
+#' The first 4 CVIs are calculated via \code{\link[flexclust]{comPart}}, so please refer to that function.
 #'
 #' \itemize{
 #'   \item \code{"RI"}: Rand Index (to be maximized).
@@ -398,18 +400,23 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #'   \item \code{"VI"}: Variation of Information (Meila (2003); to be minimized).
 #' }
 #'
-#' Internal CVIs:
+#' @section Internal CVIs:
 #'
-#' Those indices marked with an exclamation mark calculate (or re-use if already available) the whole
+#' The indices marked with an exclamation mark calculate (or re-use if already available) the whole
 #' distance matrix. If you were trying to avoid this in the first place, then these CVIs might not be
 #' suitable for your application.
+#'
+#' The indices marked with a double exclamation marks depend on both the distance matrix and the centroids,
+#' so bear that in mind if a hierarchical procedure was used and/or the centroid function has associated
+#' randomness (such as \code{\link{SBD}} with series of different length).
 #'
 #' \itemize{
 #'   \item \code{"Sil"} (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
 #'   \item \code{"D"} (!): Dunn index (Arbelaitz et al. (2013); to be maximized).
+#'   \item \code{"DB"} (!!): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
 #' }
 #'
-#' Additionally:
+#' @section Additionally:
 #'
 #' \itemize{
 #'   \item \code{"valid"}: Returns all valid indices depending on the type of \code{a} and whether \code{b}
@@ -429,6 +436,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #' @param a An object returned by the \code{\link{dtwclust}} function, or a vector that can be coerced to
 #' integers which indicate the cluster memeberships.
 #' @param b If needed, a vector that can be coerced to integers which indicate the cluster memeberships.
+#' The ground truth (if known) should be provided here.
 #' @param type Character vector indicating which indices are to be computed. See details.
 #' @param ... Arguments to pass to and from other methods.
 #' @param log.base Base of the logarithm to be used in the calculation of VI.
@@ -505,12 +513,12 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                type <- match.arg(type, several.ok = TRUE,
                                  c("RI", "ARI", "J", "FM", "VI",
-                                   "Sil", "SF", "CH", "DB", "DB*", "DB**", "D",
+                                   "Sil", "SF", "CH", "DB", "DBstar", "DBdstar", "D",
                                    "valid", "internal", "external"))
 
                dots <- list(...)
 
-               internal <- c("Sil", "SF", "CH", "DB", "DB*", "DB**", "D")
+               internal <- c("Sil", "SF", "CH", "DB", "DBstar", "DBdstar", "D")
                external <- c("RI", "ARI", "J", "FM", "VI")
 
                if (any(type == "valid")) {
@@ -542,7 +550,7 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                     CVIs <- c(CVIs, sapply(type[which_internal], function(CVI) {
                          switch(EXPR = CVI,
-                                ## Silhouette index
+                                ## Silhouette
                                 Sil = {
                                      c_k <- as.numeric(table(a@cluster)[a@cluster])
 
@@ -565,7 +573,7 @@ setMethod("cvi", signature(a = "dtwclust"),
                                      sum((ab$b - ab$a) / apply(ab, 1L, max)) / length(a@datalist)
                                 },
 
-                                ## Dunn index
+                                ## Dunn
                                 D = {
                                      pairs <- call_pairs(a@k)
 
@@ -573,14 +581,35 @@ setMethod("cvi", signature(a = "dtwclust"),
                                                       USE.NAMES = FALSE, SIMPLIFY = TRUE,
                                                       FUN = function(i, j) {
                                                            min(distmat[a@cluster == i,
-                                                                       a@cluster == j])
+                                                                       a@cluster == j,
+                                                                       drop = TRUE])
                                                       })
 
                                      Deltas <- sapply(1L:a@k, function(k) {
-                                          max(distmat[a@cluster == k, a@cluster == k])
+                                          max(distmat[a@cluster == k, a@cluster == k, drop = TRUE])
                                      })
 
                                      min(deltas) / max(Deltas)
+                                },
+
+                                ## Davies-Bouldin
+                                DB = {
+                                     S <- sapply(1L:a@k, function(k) {
+                                          mean(a@cldist[a@cluster == k, 1L, drop = TRUE])
+                                     })
+
+                                     distcent <- do.call(a@family@dist,
+                                                         args = c(list(x = a@centers, centers = NULL),
+                                                                  a@dots))
+
+                                     R <- sapply(1L:a@k, function(k) {
+                                          max(sapply(setdiff(1L:a@k, k),
+                                                     function(l) {
+                                                          (S[k] + S[l]) / distcent[k, l]
+                                                     }))
+                                     })
+
+                                     mean(R)
                                 },
 
                                 ## Default for now

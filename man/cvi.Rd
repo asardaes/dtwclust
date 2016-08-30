@@ -14,7 +14,8 @@ cvi(a, b = NULL, type = "valid", ..., log.base = 2)
 \item{a}{An object returned by the \code{\link{dtwclust}} function, or a vector that can be coerced to
 integers which indicate the cluster memeberships.}
 
-\item{b}{If needed, a vector that can be coerced to integers which indicate the cluster memeberships.}
+\item{b}{If needed, a vector that can be coerced to integers which indicate the cluster memeberships.
+The ground truth (if known) should be provided here.}
 
 \item{type}{Character vector indicating which indices are to be computed. See details.}
 
@@ -50,8 +51,15 @@ distance calculations when being computed, which can be very considerable if usi
 Note that, even though a fuzzy partition can be changed into a crisp one, making it compatible with many
 of the existing CVIs, there are also fuzzy CVIs tailored specifically to fuzzy clustering, and these may
 be more suitable in those situations, but have not been implemented here yet.
+}
+\note{
+In the original definition of many internal CVIs, the Euclidean distance and a mean centroid was used. The
+implementations here change this, making use of whatever distance/centroid was used during clustering.
+}
+\section{External CVIs}{
 
-External CVIs (the first 4 are calculated via \code{\link[flexclust]{comPart}}):
+
+The first 4 CVIs are calculated via \code{\link[flexclust]{comPart}}, so please refer to that function.
 
 \itemize{
   \item \code{"RI"}: Rand Index (to be maximized).
@@ -60,19 +68,28 @@ External CVIs (the first 4 are calculated via \code{\link[flexclust]{comPart}}):
   \item \code{"FM"}: Fowlkes-Mallows (to be maximized).
   \item \code{"VI"}: Variation of Information (Meila (2003); to be minimized).
 }
+}
 
-Internal CVIs:
+\section{Internal CVIs}{
 
-Those indices marked with an exclamation mark calculate (or re-use if already available) the whole
+
+The indices marked with an exclamation mark calculate (or re-use if already available) the whole
 distance matrix. If you were trying to avoid this in the first place, then these CVIs might not be
 suitable for your application.
+
+The indices marked with a double exclamation marks depend on both the distance matrix and the centroids,
+so bear that in mind if a hierarchical procedure was used and/or the centroid function has associated
+randomness (such as \code{\link{SBD}} with series of different length).
 
 \itemize{
   \item \code{"Sil"} (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
   \item \code{"D"} (!): Dunn index (Arbelaitz et al. (2013); to be maximized).
+  \item \code{"DB"} (!!): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
+}
 }
 
-Additionally:
+\section{Additionally}{
+
 
 \itemize{
   \item \code{"valid"}: Returns all valid indices depending on the type of \code{a} and whether \code{b}
@@ -81,10 +98,6 @@ Additionally:
   objects.
   \item \code{"external"}: Returns all external CVIs. Requires \code{b} to be provided.
 }
-}
-\note{
-In the original definition of many internal CVIs, the Euclidean distance and a mean centroid was used. The
-implementations here change this, making use of whatever distance/centroid was used during clustering.
 }
 \references{
 Arbelaitz, O., Gurrutxaga, I., Muguerza, J., Perez, J. M., & Perona, I. (2013). An extensive
