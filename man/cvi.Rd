@@ -6,9 +6,9 @@
 \alias{cvi,dtwclust-method}
 \title{Cluster validity indices}
 \usage{
-cvi(a, b = NULL, type = "valid", ..., log.base = 2)
+cvi(a, b = NULL, type = "valid", ..., log.base = 10)
 
-\S4method{cvi}{dtwclust}(a, b = NULL, type = "valid", ..., log.base = 2)
+\S4method{cvi}{dtwclust}(a, b = NULL, type = "valid", ..., log.base = 10)
 }
 \arguments{
 \item{a}{An object returned by the \code{\link{dtwclust}} function, or a vector that can be coerced to

@@ -59,8 +59,8 @@
 #' # Return to sequential computations
 #' registerDoSEQ()
 #'
-#' # Compute Rand Index
-#' cat("Rand index for TADPole:", randIndex(kc.tadp$cl, CharTrajLabels), "\n\n")
+#' # Compute VI Index
+#' cat("VI index for TADPole:", cvi(kc.tadp$cl, CharTrajLabels, "VI"), "\n\n")
 #' }
 #'
 #' @references

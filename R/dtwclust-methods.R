@@ -458,7 +458,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #'
 #' @exportMethod cvi
 #'
-setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 2) {
+setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10) {
      ## Only external CVIs here
      if (is.null(b))
           stop("A second set of cluster membership indices is required in 'b' for this/these CVI(s).")

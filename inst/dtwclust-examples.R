@@ -36,8 +36,8 @@ hc.l2 <- update(kc.l2[[3L]], k = 4L,
                 type = "hierarchical", method = "all",
                 distmat = kc.l2[[3L]]@distmat)
 
-cat("Rand indices for L2+HC:\n")
-sapply(hc.l2, randIndex, y = labels)
+cat("CVIs for L2+HC:\n")
+sapply(hc.l2, cvi, b = labels)
 
 # ====================================================================================
 # Registering a custom distance with the 'proxy' package and using it
@@ -180,8 +180,8 @@ kc.ndtw.reps <- dtwclust(CharTraj, k = 20, distance = "nDTW", centroid = "dba",
                          preproc = zscore, seed = 8319,
                          control = list(window.size = 10L, nrep = 8L))
 
-# See Rand index for each repetition
-sapply(kc.ndtw.reps, randIndex, y = CharTrajLabels)
+# See VI index for each repetition
+sapply(kc.ndtw.reps, cvi, b = CharTrajLabels, type = "VI")
 
 # Stop parallel workers
 stopCluster(cl)
