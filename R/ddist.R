@@ -58,6 +58,11 @@ ddist <- function(distance, control, distmat) {
                ## I need to re-register any custom distances in each parallel worker
                dist_entry <- proxy::pr_DB$get_entry(distance)
 
+               ## dtw uses L2 by default, but in dtwclust I want dtw to use L1 by default
+               ## Important for multivariate series
+               if (toupper(dist_entry$names[1L]) == "DTW" && is.null(dots$dist.method))
+                    dots$dist.method <- "L1"
+
                ## Does the registered function possess '...' in its definition?
                has_dots <- is.function(dist_entry$FUN) && !is.null(formals(dist_entry$FUN)$...)
 
