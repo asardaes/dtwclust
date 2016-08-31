@@ -40,11 +40,15 @@
 #'         type = "l", col = 1:5)
 #' points(C)
 #'
-#' @param X Numeric matrix where each row is a time series, or a list of time series.
-#' @param center Center to use as basis. \emph{It will be z-normalized}.
+#' @param X A data matrix where each row is a time series, or a list where each element is a time series.
+#' Multivariate series should be provided as a list of matrices where time spans the rows and the variables
+#' span the columns.
+#' @param center Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
+#' \code{NULL}. For multivariate series, this should be a matrix with the same characteristics as the
+#' matrices in \code{X}. \emph{It will be z-normalized}.
 #' @param znorm Logical flag. Should z-scores be calculated for \code{X} before processing?
 #'
-#' @return Centroid time series.
+#' @return Centroid time series (z-normalized).
 #'
 #' @export
 #'
@@ -54,6 +58,35 @@ shape_extraction <- function(X, center = NULL, znorm = FALSE) {
      X <- consistency_check(X, "tsmat")
 
      consistency_check(X, "vltslist")
+
+     ## check for multivariate case
+     dims <- sapply(X, function(x) is.null(dim(x)))
+
+     if (length(unique(dims)) != 1L)
+          stop("Inconsistent dimensions across series.")
+
+     if (!any(dims)) {
+          ## multivariate
+          ncols <- ncol(X[[1L]])
+          ncols <- rep(1L:ncols, length(X))
+
+          x <- do.call(cbind, x)
+          x <- split.data.frame(t(x), ncols)
+
+          c <- lapply(1L:ncol(X[[1L]]), function(idc) {
+               if (is.null(center))
+                    NULL
+               else
+                    center[ , idc, drop = TRUE]
+          })
+
+          new_c <- mapply(x, c, SIMPLIFY = FALSE,
+                          FUN = function(xx, cc) {
+                               new_c <- shape_extraction(xx, cc, znorm = znorm)
+                          })
+
+          return(do.call(cbind, new_c))
+     }
 
      if (znorm)
           Xz <- zscore(X)
@@ -82,6 +115,8 @@ shape_extraction <- function(X, center = NULL, znorm = FALSE) {
           }
 
      } else {
+          consistency_check(center, "ts")
+
           center <- zscore(center) # use given reference
 
           A <- lapply(Xz, function(a) { SBD(center, a)$yshift })

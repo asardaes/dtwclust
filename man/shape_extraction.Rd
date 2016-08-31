@@ -7,14 +7,18 @@
 shape_extraction(X, center = NULL, znorm = FALSE)
 }
 \arguments{
-\item{X}{Numeric matrix where each row is a time series, or a list of time series.}
+\item{X}{A data matrix where each row is a time series, or a list where each element is a time series.
+Multivariate series should be provided as a list of matrices where time spans the rows and the variables
+span the columns.}
 
-\item{center}{Center to use as basis. \emph{It will be z-normalized}.}
+\item{center}{Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
+\code{NULL}. For multivariate series, this should be a matrix with the same characteristics as the
+matrices in \code{X}. \emph{It will be z-normalized}.}
 
 \item{znorm}{Logical flag. Should z-scores be calculated for \code{X} before processing?}
 }
 \value{
-Centroid time series.
+Centroid time series (z-normalized).
 }
 \description{
 Time-series shape extraction based on optimal alignments as proposed by Paparrizos and Gravano, 2015, for

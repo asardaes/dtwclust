@@ -12,9 +12,6 @@ consistency_check <- function(obj, case, ...) {
           if (!is.numeric(obj)) {
                stop("The series must be numeric")
           }
-          if (!is.null(dim(obj))) {
-               stop("The series must be univariate vectors (provided object has non-NULL dim)")
-          }
           if (length(obj) < 1L) {
                stop("The series must have at least one point")
           }
