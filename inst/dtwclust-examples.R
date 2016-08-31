@@ -36,8 +36,8 @@ hc.l2 <- update(kc.l2[[3L]], k = 4L,
                 type = "hierarchical", method = "all",
                 distmat = kc.l2[[3L]]@distmat)
 
-cat("CVIs for L2+HC:\n")
-sapply(hc.l2, cvi, b = labels)
+cat("VI for L2+HC:\n")
+sapply(hc.l2, cvi, b = labels, type = "VI")
 
 # ====================================================================================
 # Registering a custom distance with the 'proxy' package and using it
