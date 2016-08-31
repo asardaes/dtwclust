@@ -164,7 +164,7 @@ check_parallel <- function() {
      foreach::getDoParWorkers() > 1L
 }
 
-# Split a given object into tasks for parallel workers
+# Split a given object into chunks for parallel workers
 split_parallel <- function(obj, margin = NULL) {
      num_workers <- foreach::getDoParWorkers()
 

@@ -129,6 +129,7 @@
 NULL
 
 .onAttach <- function(lib, pkg) {
+     ## proxy_prefun is in utils.R
 
      ## Register DTW2
      if (!consistency_check("DTW2", "dist", silent = TRUE))
