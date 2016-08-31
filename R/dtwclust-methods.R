@@ -143,10 +143,16 @@ setMethod("predict", "dtwclust",
 
                } else {
                     newdata <- consistency_check(newdata, "tsmat")
-                    nm <- names(newdata)
                     consistency_check(newdata, "vltslist")
+                    nm <- names(newdata)
+
                     newdata <- object@family@preproc(newdata)
-                    distmat <- object@family@dist(newdata, object@centers, ...)
+
+                    distmat <- do.call(object@family@dist,
+                                       args = c(list(x = newdata,
+                                                     centers = object@centers),
+                                                object@dots))
+
                     ret <- object@family@cluster(distmat = distmat, m = object@control@fuzziness)
 
                     if (object@type != "fuzzy")
@@ -555,7 +561,7 @@ NULL
 #'
 setMethod("randIndex", signature(x="dtwclust", y="ANY"),
           function(x, y, correct = TRUE, original = !correct) {
-               warning("Consider using the 'cvi' function for more options.")
+               message("Consider using the 'cvi' function for more options.")
                randIndex(x@cluster, y, correct = correct, original = original)
           })
 
@@ -564,7 +570,7 @@ setMethod("randIndex", signature(x="dtwclust", y="ANY"),
 #'
 setMethod("randIndex", signature(x="ANY", y="dtwclust"),
           function(x, y, correct = TRUE, original = !correct) {
-               warning("Consider using the 'cvi' function for more options.")
+               message("Consider using the 'cvi' function for more options.")
                randIndex(x, y@cluster, correct = correct, original = original)
           })
 
@@ -573,7 +579,7 @@ setMethod("randIndex", signature(x="ANY", y="dtwclust"),
 #'
 setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
           function(x, y, correct = TRUE, original = !correct) {
-               warning("Consider using the 'cvi' function for more options.")
+               message("Consider using the 'cvi' function for more options.")
                randIndex(x@cluster, y@cluster, correct = correct, original = original)
           })
 
@@ -614,12 +620,20 @@ setMethod("clusterSim", "dtwclust",
                     return(matrix(1))
 
                if (method == "shadow") {
-                    if (is.null(data))
-                         data <- object@datalist
-                    else
-                         data <- consistency_check(data, "tsmat")
+                    if (is.null(data)) {
+                         if (!object@control@save.data)
+                              stop("No data provided nor found in the dtwclust object.")
 
-                    distmat <- object@family@dist(data, object@centers)
+                         data <- object@datalist
+
+                    } else {
+                         data <- consistency_check(data, "tsmat")
+                    }
+
+                    distmat <- do.call(object@family@dist,
+                                       args = c(list(x = data,
+                                                     centers = object@centers),
+                                                object@dots))
 
                     r <- t(matrix(apply(distmat, 1, rank, ties.method = "first"),
                                   nrow = ncol(distmat)))
@@ -650,7 +664,11 @@ setMethod("clusterSim", "dtwclust",
                          z <- (z + t(z))/2
 
                } else {
-                    z <- object@family@dist(object@centers, object@centers)
+                    z <- do.call(object@family@dist,
+                                 args = c(list(x = object@centers,
+                                               centers = object@centers),
+                                          object@dots))
+
                     z <- 1 - z/max(z)
                }
 
