@@ -421,7 +421,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #'   \item \code{"DBstar"} (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005);
 #'   to be minimized).
 #'   \item \code{"CH"} (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
-#'   \item \code{"SF"} (~): Score Function (Arbelaitz et al. (2013); to be maximized).
+#'   \item \code{"SF"} (~): Score Function (Saitta et al. (2007); to be maximized).
 #' }
 #'
 #' @section Additionally:
@@ -464,6 +464,10 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 #'
 #' Meila, M. (2003). Comparing clusterings by the variation of information. In Learning theory
 #' and kernel machines (pp. 173-187). Springer Berlin Heidelberg.
+#'
+#' Saitta, S., Raphael, B., & Smith, I. F. (2007). A bounded index for cluster validity.
+#' In International Workshop on Machine Learning and Data Mining in Pattern Recognition (pp. 174-187).
+#' Springer Berlin Heidelberg.
 #'
 #' @exportMethod cvi
 #'
@@ -670,7 +674,7 @@ setMethod("cvi", signature(a = "dtwclust"),
                                 SF = {
                                      bcd <- sum(tabulate(a@cluster) * dist_global_cent) / (N * a@k)
                                      wcd <- sum(tapply(a@cldist[ , 1L, drop = TRUE], list(a@cluster), mean))
-                                     1 - 1 / exp(exp(bcd + wcd))
+                                     1 - 1 / exp(exp(bcd - wcd))
                                 })
                     }))
                }
