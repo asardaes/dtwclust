@@ -108,12 +108,15 @@
 #' @exportMethod cvi
 #'
 setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10) {
-     ## Only external CVIs here
+     ## Only external CVIs for default, dtwclust-methods.R has the internal ones
      if (is.null(b))
           stop("A second set of cluster membership indices is required in 'b' for this/these CVI(s).")
 
      a <- as.integer(a)
      b <- as.integer(b)
+
+     if (length(a) != length(b))
+          stop("External CVIs: the length of 'a' and 'b' must match.")
 
      type <- match.arg(type, several.ok = TRUE,
                        c("RI", "ARI", "J", "FM", "VI",

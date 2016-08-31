@@ -397,8 +397,10 @@ setMethod("cvi", signature(a = "dtwclust"),
                     CVIs <- numeric()
 
                if (any(which_internal)) {
-                    if (!a@control@save.data && any(type %in% c("Sil", "SF", "CH", "D")))
-                         stop("The control flag 'save.data' must be TRUE to calculate Sil, SF, CH or D index.")
+                    if ((!a@control@save.data || length(a@datalist) == 0L) &&
+                        any(type %in% c("Sil", "SF", "CH", "D")))
+                         stop("Internal CVIs: the original data must be saved to calculate ",
+                              "Sil, SF, CH or D indices.")
 
                     ## calculate distmat if needed
                     if (any(type[which_internal] %in% c("Sil", "D"))) {
