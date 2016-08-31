@@ -18,7 +18,8 @@ random series of \code{X} if \code{NULL}.}
 \item{norm}{Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for Euclidean
 distance.}
 
-\item{window.size}{Window constraint for the DTW calculations. \code{NULL} means no constraint.}
+\item{window.size}{Window constraint for the DTW calculations. \code{NULL} means no constraint. A slanted
+band is used by default.}
 
 \item{delta}{At iteration \code{i}, if \code{all(abs(center_{i}} \code{ - center_{i-1})} \code{ < delta)},
 convergence is assumed.}
@@ -27,8 +28,7 @@ convergence is assumed.}
 
 \item{trace}{If \code{TRUE}, the current iteration is printed to screen.}
 
-\item{...}{Further arguments for \code{\link[dtw]{dtw}}, e.g. \code{step.pattern}. Do not provide
-\code{window.type} here, just set \code{window.size} to the desired value.}
+\item{...}{Further arguments for \code{\link[dtw]{dtw}}, e.g. \code{step.pattern}.}
 }
 \value{
 The average time series.

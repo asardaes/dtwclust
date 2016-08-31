@@ -64,13 +64,13 @@
 #' @param max.iter Maximum number of iterations allowed.
 #' @param norm Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for Euclidean
 #' distance.
-#' @param window.size Window constraint for the DTW calculations. \code{NULL} means no constraint.
+#' @param window.size Window constraint for the DTW calculations. \code{NULL} means no constraint. A slanted
+#' band is used by default.
 #' @param delta At iteration \code{i}, if \code{all(abs(center_{i}} \code{ - center_{i-1})} \code{ < delta)},
 #' convergence is assumed.
 #' @param error.check Should inconsistencies in the data be checked?
 #' @param trace If \code{TRUE}, the current iteration is printed to screen.
-#' @param ... Further arguments for \code{\link[dtw]{dtw}}, e.g. \code{step.pattern}. Do not provide
-#' \code{window.type} here, just set \code{window.size} to the desired value.
+#' @param ... Further arguments for \code{\link[dtw]{dtw}}, e.g. \code{step.pattern}.
 #'
 #' @return The average time series.
 #'
@@ -83,16 +83,19 @@ DBA <- function(X, center = NULL, max.iter = 20L,
 
      X <- consistency_check(X, "tsmat")
 
+     norm <- match.arg(norm, c("L1", "L2"))
+
+     dots <- list(...)
+
      if (!is.null(window.size)) {
           w <- consistency_check(window.size, "window")
-          window.type = "slantedband"
+
+          if (is.null(dots$window.type))
+               dots$window.type <- "slantedband"
 
      } else {
           w <- NULL
-          window.type = "none"
      }
-
-     norm <- match.arg(norm, c("L1", "L2"))
 
      ## for C helper
      square <- norm == "L2"
@@ -119,8 +122,6 @@ DBA <- function(X, center = NULL, max.iter = 20L,
      Xs <- split_parallel(X)
      LCMs <- split_parallel(LCM)
 
-     dots <- list(...)
-
      ## Iterations
      iter <- 1L
      center_old <- center
@@ -136,7 +137,6 @@ DBA <- function(X, center = NULL, max.iter = 20L,
                                   .Call("update_lcm", lcm, x, center, square, PACKAGE = "dtwclust")
 
                                   d <- do.call(dtw::dtw, c(list(x = lcm,
-                                                                window.type = window.type,
                                                                 window.size = w),
                                                            dots))
 
@@ -177,8 +177,8 @@ DBA <- function(X, center = NULL, max.iter = 20L,
           }
      }
 
-     if (iter > max.iter)
-          warning("DBA algorithm did not converge within the allowed iterations.")
+     if (iter > max.iter && trace)
+          warning("DBA algorithm did not 'converge' within the allowed iterations.")
 
      as.numeric(center)
 }
