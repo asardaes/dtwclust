@@ -96,6 +96,7 @@ If created, the function returns the \code{gg} object invisibly, in case you wan
 liking. You might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 }
 \seealso{
-\code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}}
+\code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}},
+\code{\link{cvi}}
 }
 
