@@ -8,6 +8,10 @@ data_multivariate <- lapply(seq(1L, 100L, 5L), function(x) cbind(data_list[[x]],
 
 labels <- CharTrajLabels
 labels_subset <- labels[1:20]
+labels_shuffled <- sample(labels)
+
+internal_cvis <- c("Sil", "D", "DB", "DBstar", "CH", "SF")
+external_cvis <- c("RI", "ARI", "J", "FM", "VI")
 
 ctrl <- new("dtwclustControl", window.size = 18L, save.data = FALSE)
 
