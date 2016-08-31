@@ -3,7 +3,7 @@
 
 \title{News for package \pkg{dtwclust}}
 
-\section{Changes in version 2.1.3}{
+\section{Changes in version 2.2.0}{
 \itemize{
      \item Added package vignette.
      \item Implemented several cluster validity indices in the new \code{cvi} function.

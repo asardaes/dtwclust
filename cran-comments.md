@@ -1,4 +1,4 @@
-## Update to version 2.1.3
+## Update to version 2.2.0
 * Updates related to new version of dependency "proxy"
 * Added vignette
 * Added functionality
