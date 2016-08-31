@@ -179,40 +179,36 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
 
      } else {
           D <- foreach(x = x, fftx = fftx,
-                       .combine = cbind,
+                       .combine = rbind,
                        .multicombine = TRUE,
                        .packages = "stats") %dopar% {
-                            mapply(x, fftx, MoreArgs = list(Y = y, FFTY = ffty),
-                                   FUN = function(x, fftx, Y, FFTY) {
+                            ret <- mapply(x, fftx,
+                                          MoreArgs = list(Y = y, FFTY = ffty),
+                                          SIMPLIFY = FALSE,
+                                          FUN = function(x, fftx, Y, FFTY) {
+                                               mapply(Y, FFTY,
+                                                      MoreArgs = list(x = x, fftx = fftx),
+                                                      FUN = function(y, ffty, x, fftx) {
+                                                           ## Manually normalize by length
+                                                           CCseq <- Re(stats::fft(fftx * Conj(ffty),
+                                                                                  inverse = TRUE)) / length(fftx)
 
-                                        d <- mapply(Y, FFTY, MoreArgs = list(x = x, fftx = fftx),
-                                                    FUN = function(y, ffty, x, fftx) {
+                                                           ## Truncate to correct length
+                                                           CCseq <- c(CCseq[(length(ffty) - length(y) + 2L):length(CCseq)],
+                                                                      CCseq[1L:length(x)])
 
-                                                         ## Manually normalize by length
-                                                         CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
+                                                           CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
 
-                                                         ## Truncate to correct length
-                                                         CCseq <- c(CCseq[(length(ffty) - length(y) + 2L):length(CCseq)],
-                                                                    CCseq[1L:length(x)])
+                                                           dd <- 1 - max(CCseq)
 
-                                                         CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
+                                                           dd
+                                                      })
+                                          })
 
-                                                         dd <- 1 - max(CCseq)
-
-                                                         dd
-                                                    })
-
-                                        d
-                                   })
+                            do.call(rbind, ret)
                        }
 
           attr(D, "class") <- "crossdist"
-
-          ## foreach's combine does weird things when an argument has length one
-          if (length(x) == 1L || length(y) == 1L)
-               dim(D) <- c(length(x), length(y))
-          else
-               D <- t(D)
      }
 
      attr(D, "method") <- "SBD"

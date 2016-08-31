@@ -71,15 +71,18 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, up
      norm <- match.arg(norm, c("L1", "L2"))
 
      consistency_check(x, "ts")
-     consistency_check(y, "ts")
 
-     if (length(x) != length(y))
-          stop("The series must have the same length")
+     if (is.null(lower.env) || is.null(upper.env)) {
+          consistency_check(y, "ts")
 
-     window.size <- consistency_check(window.size, "window")
+          if (length(x) != length(y))
+               stop("The series must have the same length")
 
-     if (window.size > length(x))
-          stop("The width of the window should not exceed the length of the series")
+          window.size <- consistency_check(window.size, "window")
+
+          if (window.size > length(x))
+               stop("The width of the window should not exceed the length of the series")
+     }
 
      ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
      if (is.null(lower.env) && is.null(upper.env)) {
@@ -94,11 +97,11 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, up
           upper.env <- caTools::runmax(y, window.size*2L + 1L)
      }
 
-     if (length(lower.env) != length(y))
-          stop("Length mismatch between 'y' and its lower envelope")
+     if (length(lower.env) != length(x))
+          stop("Length mismatch between 'x' and the lower envelope")
 
-     if (length(upper.env) != length(y))
-          stop("Length mismatch between 'y' and its upper envelope")
+     if (length(upper.env) != length(x))
+          stop("Length mismatch between 'x' and the upper envelope")
 
      D <- rep(0, length(x))
 
@@ -120,8 +123,8 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, up
 # Loop without using native 'proxy' looping (to avoid multiple calculations of the envelope)
 # ========================================================================================================
 
-lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
-                          force.symmetry = FALSE, norm = "L1", pairwise = FALSE) {
+lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
+                           force.symmetry = FALSE, norm = "L1", pairwise = FALSE) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 
@@ -170,19 +173,10 @@ lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
                        .multicombine = TRUE) %dopar% {
                             mapply(upper.env, lower.env, x,
                                    FUN = function(u, l, x) {
-
-                                        D <- rep(0, length(x))
-
-                                        ind1 <- x > u
-                                        D[ind1] <- x[ind1] - u[ind1]
-                                        ind2 <- x < l
-                                        D[ind2] <- l[ind2] - x[ind2]
-
-                                        d <- switch(EXPR = norm,
-                                                    L1 = sum(D),
-                                                    L2 = sqrt(sum(D^2)))
-
-                                        d
+                                        lb_keogh(x,
+                                                 norm = norm,
+                                                 lower.env = l,
+                                                 upper.env = u)$d
                                    })
                        }
 
@@ -190,39 +184,26 @@ lb_keogh_loop <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
 
      } else {
           D <- foreach(x = x,
-                       .combine = cbind,
+                       .combine = rbind,
                        .multicombine = TRUE) %dopar% {
-                            sapply(X=x, U=upper.env, L=lower.env,
-                                   FUN = function(x, U, L) {
+                            ret <- lapply(X = x, U = upper.env, L = lower.env,
+                                          FUN = function(x, U, L) {
+                                               ## This will return one row of the distance matrix
+                                               D <- mapply(U, L,
+                                                           MoreArgs = list(x = x),
+                                                           FUN = function(u, l, x) {
+                                                                lb_keogh(x,
+                                                                         norm = norm,
+                                                                         lower.env = l,
+                                                                         upper.env = u)$d
+                                                           })
+                                               D
+                                          })
 
-                                        ## This will return one column of the distance matrix
-                                        D <- mapply(U, L, MoreArgs=list(x=x),
-                                                    FUN = function(u, l, x) {
-
-                                                         D <- rep(0, length(x))
-
-                                                         ind1 <- x > u
-                                                         D[ind1] <- x[ind1] - u[ind1]
-                                                         ind2 <- x < l
-                                                         D[ind2] <- l[ind2] - x[ind2]
-
-                                                         d <- switch(EXPR = norm,
-                                                                     L1 = sum(D),
-                                                                     L2 = sqrt(sum(D^2)))
-
-                                                         d
-                                                    })
-                                        D
-                                   })
+                            do.call(rbind, ret)
                        }
 
           attr(D, "class") <- "crossdist"
-
-          ## foreach's combine does weird things when an argument has length one
-          if (length(x) == 1L || length(y) == 1L)
-               dim(D) <- c(length(x), length(y))
-          else
-               D <- t(D)
      }
 
      if (force.symmetry && !pairwise) {

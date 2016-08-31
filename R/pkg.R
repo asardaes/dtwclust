@@ -140,7 +140,7 @@ NULL
 
      ## Register LB_Keogh with the 'proxy' package for distance matrix calculation
      if (!consistency_check("LB_Keogh", "dist", silent = TRUE))
-          proxy::pr_DB$set_entry(FUN = lb_keogh_loop, names=c("LBK", "LB_Keogh", "lbk"),
+          proxy::pr_DB$set_entry(FUN = lb_keogh_proxy, names=c("LBK", "LB_Keogh", "lbk"),
                                  loop = FALSE, type = "metric", distance = TRUE,
                                  description = "Keogh's DTW lower bound for the Sakoe-Chiba band",
                                  PACKAGE = "dtwclust", PREFUN = proxy_prefun)
@@ -148,7 +148,7 @@ NULL
 
      ## Register LB_Improved with the 'proxy' package for distance matrix calculation
      if (!consistency_check("LB_Improved", "dist", silent = TRUE))
-          proxy::pr_DB$set_entry(FUN = lb_improved_loop, names=c("LBI", "LB_Improved", "lbi"),
+          proxy::pr_DB$set_entry(FUN = lb_improved_proxy, names=c("LBI", "LB_Improved", "lbi"),
                                  loop = FALSE, type = "metric", distance = TRUE,
                                  description = "Lemire's improved DTW lower bound for the Sakoe-Chiba band",
                                  PACKAGE = "dtwclust", PREFUN = proxy_prefun)
