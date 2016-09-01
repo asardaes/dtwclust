@@ -404,24 +404,40 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                if (any(which_internal)) {
                     if ((!a@control@save.data || length(a@datalist) == 0L) &&
-                        any(type %in% c("SF", "CH", "D")))
-                         stop("Internal CVIs: the original data must be saved to calculate ",
-                              "SF, CH or D indices.")
+                        any(type[which_internal] %in% c("SF", "CH"))) {
+                         warning("Internal CVIs: the original data must be in object to calculate ",
+                                 "the following indices:",
+                                 "\n\tSF\tCH")
+
+                         type <- setdiff(type, c("SF", "CH"))
+                         which_internal <- type %in% internal
+                    }
 
                     ## calculate distmat if needed
                     if (any(type[which_internal] %in% c("Sil", "D", "COP"))) {
                          if (is.null(a@distmat)) {
-                              if (length(a@datalist) == 0L)
-                                   stop("Internal CVIs: need distmat or original data for Sil, D and COP indices. ",
-                                        "Please re-run the algorithm with save.data=TRUE")
+                              if (length(a@datalist) == 0L) {
+                                   warning("Internal CVIs: need distmat OR original data for indices:",
+                                           "\n\tSil\tD\tCOP\n",
+                                           "Please re-run the algorithm with save.data = TRUE, ",
+                                           "or save the datalist in the corresponding object slot.")
 
-                              distmat <- do.call(a@family@dist,
-                                                 args = c(list(x = a@datalist, centers = NULL),
-                                                          a@dots))
+                                   type <- setdiff(type, c("Sil", "D", "COP"))
+                                   which_internal <- type %in% internal
+
+                              } else {
+                                   distmat <- do.call(a@family@dist,
+                                                      args = c(list(x = a@datalist, centers = NULL),
+                                                               a@dots))
+                              }
                          } else {
                               distmat <- a@distmat
                          }
                     }
+
+                    ## are valid indices still left?
+                    if (length(type) == 0L)
+                         return(CVIs)
 
                     ## calculate some values that both Davies-Bouldin indices use
                     if (any(type[which_internal] %in% c("DB", "DBstar"))) {
