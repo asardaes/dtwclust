@@ -183,7 +183,6 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, error.check = TRU
           D <- foreach(x = x, y = y, lower.env = lower.env, upper.env = upper.env,
                        .combine = c,
                        .multicombine = TRUE,
-                       .export = "call_envelop",
                        .packages = "dtwclust") %dopar% {
                             mapply(upper.env, lower.env, y, x,
                                    FUN = function(u, l, y, x) {
@@ -201,7 +200,6 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, error.check = TRU
           D <- foreach(x = x,
                        .combine = rbind,
                        .multicombine = TRUE,
-                       .export = "call_envelop",
                        .packages = "dtwclust") %dopar% {
                             ret <- lapply(X = x, U = upper.env, L = lower.env, Y = y,
                                           FUN = function(x, U, L, Y) {
