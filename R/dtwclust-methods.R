@@ -376,12 +376,12 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                type <- match.arg(type, several.ok = TRUE,
                                  c("RI", "ARI", "J", "FM", "VI",
-                                   "Sil", "SF", "CH", "DB", "DBstar", "D",
+                                   "Sil", "SF", "CH", "DB", "DBstar", "D", "COP",
                                    "valid", "internal", "external"))
 
                dots <- list(...)
 
-               internal <- c("Sil", "SF", "CH", "DB", "DBstar", "D")
+               internal <- c("Sil", "SF", "CH", "DB", "DBstar", "D", "COP")
                external <- c("RI", "ARI", "J", "FM", "VI")
 
                if (any(type == "valid")) {
@@ -404,13 +404,17 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                if (any(which_internal)) {
                     if ((!a@control@save.data || length(a@datalist) == 0L) &&
-                        any(type %in% c("Sil", "SF", "CH", "D")))
+                        any(type %in% c("SF", "CH", "D")))
                          stop("Internal CVIs: the original data must be saved to calculate ",
-                              "Sil, SF, CH or D indices.")
+                              "SF, CH or D indices.")
 
                     ## calculate distmat if needed
-                    if (any(type[which_internal] %in% c("Sil", "D"))) {
+                    if (any(type[which_internal] %in% c("Sil", "D", "COP"))) {
                          if (is.null(a@distmat)) {
+                              if (length(a@datalist) == 0L)
+                                   stop("Internal CVIs: need distmat or original data for Sil, D and COP indices. ",
+                                        "Please re-run the algorithm with save.data=TRUE")
+
                               distmat <- do.call(a@family@dist,
                                                  args = c(list(x = a@datalist, centers = NULL),
                                                           a@dots))
@@ -474,7 +478,7 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                                      ab <- do.call(rbind, ab)
 
-                                     sum((ab$b - ab$a) / apply(ab, 1L, max)) / length(a@datalist)
+                                     sum((ab$b - ab$a) / apply(ab, 1L, max)) / nrow(distmat)
                                 },
 
                                 ## Dunn
@@ -525,6 +529,17 @@ setMethod("cvi", signature(a = "dtwclust"),
                                      bcd <- sum(tabulate(a@cluster) * dist_global_cent) / (N * a@k)
                                      wcd <- sum(tapply(a@cldist[ , 1L, drop = TRUE], list(a@cluster), mean))
                                      1 - 1 / exp(exp(bcd - wcd))
+                                },
+
+                                ## COP
+                                COP = {
+                                     1 / nrow(distmat) * sum(sapply(1L:a@k, function(k) {
+                                          sum(a@cldist[a@cluster == k, 1L]) / min(apply(distmat[a@cluster != k,
+                                                                                                a@cluster == k,
+                                                                                                drop = FALSE],
+                                                                                        2L,
+                                                                                        max))
+                                     }))
                                 })
                     }))
                }

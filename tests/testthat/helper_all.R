@@ -10,7 +10,7 @@ labels <- CharTrajLabels
 labels_subset <- labels[1:20]
 labels_shuffled <- sample(labels)
 
-internal_cvis <- c("Sil", "D", "DB", "DBstar", "CH", "SF")
+internal_cvis <- c("Sil", "D", "DB", "DBstar", "CH", "SF", "COP")
 external_cvis <- c("RI", "ARI", "J", "FM", "VI")
 
 ctrl <- new("dtwclustControl", window.size = 18L, save.data = FALSE)

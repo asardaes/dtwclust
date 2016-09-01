@@ -91,6 +91,7 @@ associated, these indices might not be appropriate for those centroids.
 \itemize{
   \item \code{"Sil"} (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
   \item \code{"D"} (!): Dunn index (Arbelaitz et al. (2013); to be maximized).
+  \item \code{"COP"} (!): COP index (Arbelaitz et al. (2013); to be minimized).
   \item \code{"DB"} (?): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
   \item \code{"DBstar"} (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005);
   to be minimized).
