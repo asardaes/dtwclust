@@ -414,10 +414,6 @@ hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
 # Plot dendrogram
 plot(hc.sbd[[ which.max(sapply(hc.sbd, randIndex, y = CharTrajLabels)) ]])
 
-# Plot subset of crisp partition with k = 20
-plot(hc.sbd[[ which.max(sapply(hc.sbd, randIndex, y = CharTrajLabels)) ]],
-     clus = 1, type = "sc")
-
 # ====================================================================================
 # Autocorrelation-based fuzzy clustering (see D'Urso and Maharaj 2009)
 # ====================================================================================
