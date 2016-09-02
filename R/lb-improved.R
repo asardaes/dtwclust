@@ -56,14 +56,20 @@
 #' @param y A time series with the same length as \code{x} (query).
 #' @param window.size Window size for envelope calculation. See details.
 #' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
-#' @param lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided.
-#' @param upper.env Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided.
+#' lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided
+#' (non-proxy version only).
+#' @param upper.env Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided
+#' (non-proxy version only).
+#' @param force.symmetry If \code{TRUE}, a second lower bound is calculated by swapping \code{x} and
+#' \code{y}, and whichever result has a \emph{higher} distance value is returned. The proxy version
+#' can only work if a square matrix is obtained, but use carefully.
 #'
 #' @return The improved lower bound for the DTW distance.
 #'
 #' @export
 
-lb_improved <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, upper.env = NULL) {
+lb_improved <- function(x, y, window.size = NULL, norm = "L1",
+                        lower.env = NULL, upper.env = NULL, force.symmetry = FALSE) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 
@@ -126,6 +132,12 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
                  L2 = sqrt(sum(d1^2) + sum(d2^2))
      )
 
+     if (force.symmetry) {
+          d2 <- lb_improved(x = y, y = x, window.size = window.size, norm = norm)
+
+          if (d2 > d) d <- d2
+     }
+
      ## Finish
      d
 }
@@ -134,8 +146,8 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
 # Loop without using native 'proxy' looping (to avoid multiple calculations of the envelope)
 # ========================================================================================================
 
-lb_improved_proxy <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
-                              force.symmetry = FALSE, norm = "L1", pairwise = FALSE) {
+lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
+                              force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 
@@ -224,6 +236,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, error.check = TRU
      if (force.symmetry && !pairwise) {
           if (nrow(D) != ncol(D)) {
                warning("Unable to force symmetry. Resulting distance matrix is not square.")
+
           } else {
                ind.tri <- lower.tri(D)
 

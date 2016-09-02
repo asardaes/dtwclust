@@ -54,8 +54,13 @@
 #' @param y A time series with the same length as \code{x} (query).
 #' @param window.size Window size for envelope calculation. See details.
 #' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
-#' @param lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided.
-#' @param upper.env Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided.
+#' @param lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided
+#' (non-proxy version only).
+#' @param upper.env Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided
+#' (non-proxy version only).
+#' @param force.symmetry If \code{TRUE}, a second lower bound is calculated by swapping \code{x} and
+#' \code{y}, and whichever result has a \emph{higher} distance value is returned. The proxy version
+#' can only work if a square matrix is obtained, but use carefully.
 #'
 #' @return A list with: \itemize{
 #'   \item \code{d}: The lower bound of the DTW distance.
@@ -66,7 +71,8 @@
 #' @export
 #'
 
-lb_keogh <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, upper.env = NULL) {
+lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
+                     lower.env = NULL, upper.env = NULL, force.symmetry = FALSE) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 
@@ -114,6 +120,17 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, up
                  L1 = sum(D),
                  L2 = sqrt(sum(D^2)))
 
+     if (force.symmetry) {
+          d2 <- lb_keogh(x = y, y = x, window.size = window.size, norm = norm)
+
+          if (d2$d > d) {
+               d <- d2$d
+               lower.env = d2$lower.env
+               upper.env = d2$upper.env
+          }
+     }
+
+     ## Finish
      list(d = d,
           upper.env = upper.env,
           lower.env = lower.env)
@@ -123,8 +140,8 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1", lower.env = NULL, up
 # Loop without using native 'proxy' looping (to avoid multiple calculations of the envelope)
 # ========================================================================================================
 
-lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, error.check = TRUE,
-                           force.symmetry = FALSE, norm = "L1", pairwise = FALSE) {
+lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
+                           force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE) {
 
      norm <- match.arg(norm, c("L1", "L2"))
 

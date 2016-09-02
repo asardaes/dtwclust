@@ -5,7 +5,7 @@
 \title{Lemire's improved DTW lower bound}
 \usage{
 lb_improved(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
-  upper.env = NULL)
+  upper.env = NULL, force.symmetry = FALSE)
 }
 \arguments{
 \item{x}{A time series (reference).}
@@ -14,11 +14,16 @@ lb_improved(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
 
 \item{window.size}{Window size for envelope calculation. See details.}
 
-\item{norm}{Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.}
+\item{norm}{Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
+lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided
+(non-proxy version only).}
 
-\item{lower.env}{Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided.}
+\item{upper.env}{Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided
+(non-proxy version only).}
 
-\item{upper.env}{Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided.}
+\item{force.symmetry}{If \code{TRUE}, a second lower bound is calculated by swapping \code{x} and
+\code{y}, and whichever result has a \emph{higher} distance value is returned. The proxy version
+can only work if a square matrix is obtained, but use carefully.}
 }
 \value{
 The improved lower bound for the DTW distance.
