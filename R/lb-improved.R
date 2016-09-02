@@ -55,9 +55,7 @@
 #' @param x A time series (reference).
 #' @param y A time series with the same length as \code{x} (query).
 #' @param window.size Window size for envelope calculation. See details.
-#' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
-#' lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided
-#' (non-proxy version only).
+#' @param norm Vector norm. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.
 #' @param lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided
 #' (non-proxy version only).
 #' @param upper.env Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided

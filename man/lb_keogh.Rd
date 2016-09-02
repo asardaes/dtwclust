@@ -14,7 +14,7 @@ lb_keogh(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
 
 \item{window.size}{Window size for envelope calculation. See details.}
 
-\item{norm}{Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.}
+\item{norm}{Vector norm. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.}
 
 \item{lower.env}{Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided
 (non-proxy version only).}
