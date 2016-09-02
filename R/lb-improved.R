@@ -58,6 +58,8 @@
 #' @param norm Pointwise distance. Either \code{L1} for Manhattan distance or \code{L2} for Euclidean.
 #' lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided
 #' (non-proxy version only).
+#' @param lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided
+#' (non-proxy version only).
 #' @param upper.env Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided
 #' (non-proxy version only).
 #' @param force.symmetry If \code{TRUE}, a second lower bound is calculated by swapping \code{x} and

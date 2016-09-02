@@ -18,6 +18,9 @@ lb_improved(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
 lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided
 (non-proxy version only).}
 
+\item{lower.env}{Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided
+(non-proxy version only).}
+
 \item{upper.env}{Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided
 (non-proxy version only).}
 

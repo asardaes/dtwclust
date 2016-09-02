@@ -169,7 +169,9 @@ NULL
 
      RNGkind("L'Ecuyer")
 
-     packageStartupMessage("Setting random number generator to L'Ecuyer-CMRG")
+     packageStartupMessage("\ndtwclust: Setting random number generator to L'Ecuyer-CMRG.\n",
+                           "To read the included vignette, type vignette(",
+                           dQuote("dtwclust"), ").\n")
 }
 
 .onUnload <- function(libpath) {
