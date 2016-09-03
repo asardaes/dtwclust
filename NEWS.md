@@ -1,6 +1,6 @@
 # NEWS
 
-## Version 2.2.0
+## Version 2.2.1
 * Added package vignette
 * Implemented several cluster validity indices in the new `cvi` function
 * The custom argument `force.pairwise` used in some of the `proxy` distances is not necessary anymore

@@ -427,7 +427,7 @@ Choosing a specific clustering algorithm for a given application is not an easy 
 
 The main clustering function in \dtwclust{} has the same name, i.e. \code{dtwclust}. It returns objects of type \code{S4}, which are one way in which \R{} implements classes. The formal elements of the class are called \code{slots}, and can be accessed with the \code{@} operator (instead of the usual \code{$}). All documented information about the slots can be found by typing \code{?"dtwclust-class"} in the console. The associated methods can be found with \code{?"dtwclust-methods"}. Note that the \code{dtwclust} class contains the \code{S3} class \code{hclust} as a superclass. This can lead to some unexpected behavior, such as \code{is.list(new("dtwclust"))} being \code{TRUE}.
 
-Many control parameters can be modified by using the \code{control} parameter, which should have a \code{dtwclustControl} class. A \textbf{named list} is also accepted. The documentation of all control parameters, as well as their default values, can be accessed by typing \code{?"dtwclustControl"} in the console.
+Many control parameters can be modified by using the \code{control} argument, which should have a \code{dtwclustControl} class. A \textbf{named list} is also accepted. The documentation of all control parameters, as well as their default values, can be accessed by typing \code{?"dtwclustControl"} in the console.
 
 The random number generator of \R{} is set to L'Ecuyer-CMRG when \dtwclust{} is attached in an attempt to preserve reproducibility. The user is free to change this afterwards by using the \code{RNGkind} function.
 
@@ -458,7 +458,7 @@ In the following example, the nearest neighbors in DTW space of the first 5 time
 data <- lapply(CharTraj, reinterpolate, newLength = 180L)
 
 # Calculate the DTW distances between all elements
-system.time(D1 <- proxy::dist(data[1L:5L], data[6L:100L],
+system.time(D1 <- proxy::dist(data[1L:5L], data[6L:50L],
                               method = "DTW",
                               window.type = "sakoechiba",
                               window.size = 20L))
@@ -467,7 +467,7 @@ system.time(D1 <- proxy::dist(data[1L:5L], data[6L:100L],
 NN1 <- apply(D1, 1L, which.min)
 
 # Calculate the distance matrix with dtw_lb
-system.time(D2 <- dtw_lb(data[1L:5L], data[6L:100L],
+system.time(D2 <- dtw_lb(data[1L:5L], data[6L:50L],
                          window.size = 20L))
 
 # Nearest neighbors
@@ -509,7 +509,7 @@ plot(hc_sbd, type = "centroids", clus = 1L)
 \section{Partitional clustering example}
 \label{app:pc}
 
-In this example, four different partitional clustering strategies are used: DTW distance with DBA centroids, using \code{dtw_lb} and DBA centroids (which should provide the same results as the previous; see \cref{sec:lbs}), \kshape{}, and TADPole. The results are evaluated using Variation of Information (see \cref{sec:evaluation}), with lower numbers indicating better results. Note that \textit{z}-normalization is applied by default when selecting shape extraction as the centroid function. For fairness, all algorithms used the reinterpolated and normalized data, since some algorithms require series of equal length. The outcome should not be generalized to other data, and normalization/reinterpolation may actually \textit{worsen} some of the algorithms' performance.
+In this example, three different partitional clustering strategies are used: using \code{dtw_lb} and DBA centroids (which provides the same results as using the DTW distance directly; see \cref{sec:lbs}), \kshape{}, and TADPole. The results are evaluated using Variation of Information (see \cref{sec:evaluation}), with lower numbers indicating better results. Note that \textit{z}-normalization is applied by default when selecting shape extraction as the centroid function. For fairness, all algorithms used the reinterpolated and normalized data, since some algorithms require series of equal length. A subset of the data is used for speed. The outcome should not be generalized to other data, and normalization/reinterpolation may actually \textit{worsen} some of the algorithms' performance.
 
 <<example-pc, echo = TRUE, warning = FALSE>>=
 # Reinterpolate to same length
@@ -517,31 +517,31 @@ data <- lapply(CharTraj, reinterpolate,
                newLength = max(lengths(CharTraj)))
 
 # z-normalization
-data <- zscore(data)
+data <- zscore(data[60L:100L])
 
-pc_dtw <- dtwclust(data, k = 20L,
+pc_dtw <- dtwclust(data, k = 4L,
                    distance = "dtw2", centroid = "dba",
                    seed = 8, control = list(window.size = 20L,
                                             norm = "L2",
                                             trace = TRUE))
 
-pc_dtwlb <- dtwclust(data, k = 20L,
+pc_dtwlb <- dtwclust(data, k = 4L,
                      distance = "dtw_lb", centroid = "dba",
                      seed = 8, control = list(window.size = 20L,
                                               norm = "L2",
                                               trace = TRUE))
 
-pc_ks <- dtwclust(data, k = 20L,
+pc_ks <- dtwclust(data, k = 4L,
                   distance = "sbd", centroid = "shape",
                   seed = 8, control = list(trace = TRUE))
 
-pc_tp <-dtwclust(data, k = 20L,
+pc_tp <-dtwclust(data, k = 4L,
                  type = "tadpole", dc = 1.5,
                  seed = 8, control = list(window.size = 20L,
                                           trace = TRUE))
 
 sapply(list(DTW = pc_dtw, DTW_LB = pc_dtwlb, kShape = pc_ks, TADPole = pc_tp),
-       cvi, b = CharTrajLabels, type = "VI")
+       cvi, b = CharTrajLabels[60L:100L], type = "VI")
 @
 
 \section{Fuzzy clustering example}
@@ -590,7 +590,7 @@ invisible(clusterEvalQ(workers, library(dtwclust)))
 registerDoParallel(workers)
 
 # Calling dtwclust
-pc_par <- dtwclust(CharTraj, k = 20L,
+pc_par <- dtwclust(CharTraj[1L:20L], k = 4L,
                    distance = "dtw", centroid = "dba",
                    seed = 938, control = list(trace = TRUE,
                                               window.size = 15L))
