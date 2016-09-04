@@ -16,14 +16,14 @@
 \S4method{predict}{dtwclust}(object, newdata = NULL, ...)
 
 \S4method{plot}{dtwclust,missing}(x, y, ..., clus = seq_len(x@k),
-  labs.arg = NULL, data = NULL, time = NULL, plot = TRUE, type = NULL,
-  show.centroids = TRUE)
+  labs.arg = NULL, data = NULL, time = NULL, plot = TRUE, type = NULL)
 }
 \arguments{
 \item{object, x}{An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.}
 
-\item{...}{Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
-\emph{cluster centers}, or to \code{\link[stats]{plot.hclust}}. See details.}
+\item{...}{For \code{plot}, further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting
+of the \emph{cluster centers}, or to \code{\link[stats]{plot.hclust}}. See details. For \code{update}, any
+supported argument. Otherwise, currently ignored.}
 
 \item{evaluate}{Logical. Defaults to \code{TRUE} and evaluates the updated call, which will result in
 a new \code{dtwclust} object. Otherwise, it returns the unevaluated call.}
@@ -48,8 +48,6 @@ the longest series.}
 printing anything to screen}
 
 \item{type}{What to plot. \code{NULL} means default. See details.}
-
-\item{show.centroids}{Deprecated.}
 }
 \value{
 The plot method returns a \code{gg} object (or \code{NULL} for dendrogram plot) invisibly.

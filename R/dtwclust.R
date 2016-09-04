@@ -105,8 +105,8 @@
 #'   \item The elements of \code{...}
 #' }
 #'
-#' Therefore, the function should \emph{always} include the ellipsis \code{...} in its definition. In case of
-#' fuzzy clustering, the membership vectors (2nd and 5th elements above) are matrices with number of rows
+#' Therefore, the function should \emph{always} include the ellipsis (\code{...}) in its definition. In case
+#' of fuzzy clustering, the membership vectors (2nd and 5th elements above) are matrices with number of rows
 #' equal to amount of elements in the data, and number of columns equal to the number of desired clusters.
 #' Each row must sum to 1.
 #'
@@ -305,12 +305,12 @@
 #' Ignored for \code{type} = \code{"tadpole"}.
 #' @param centroid Either a supported string or an appropriate function to calculate centroids
 #' when using partitional or prototypes for hierarchical/tadpole methods. See Centroid section.
-#' @param preproc Function to preprocess data. Defaults to \code{zscore} \emph{only} if \code{centroid}
+#' @param preproc Function to preprocess data. Defaults to \code{\link{zscore}} \emph{only} if \code{centroid}
 #' \code{=} \code{"shape"}, but will be replaced by a custom function if provided. See Preprocessing section.
 #' @param dc Cutoff distance for the \code{\link{TADPole}} algorithm.
 #' @param control Named list of parameters or \code{dtwclustControl} object for clustering algorithms. See
 #' \code{\link{dtwclustControl}}. \code{NULL} means defaults.
-#' @param seed Random seed for reproducibility of partitional and fuzzy algorithms.
+#' @param seed Random seed for reproducibility.
 #' @param distmat If a cross-distance matrix is already available, it can be provided here so it's re-used.
 #' Only relevant if \code{centroid} = "pam" or \code{type} = "hierarchical". See examples.
 #' @param ... Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function.

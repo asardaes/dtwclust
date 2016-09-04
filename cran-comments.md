@@ -1,9 +1,4 @@
-## Update to version 2.2.1
-* Re-upload: reduced running time of vignette's examples as requested, it should finish in under a minute
-* Updates related to new version of dependency "proxy"
-* Added vignette
-* Added functionality
-* Bug fixes
+## Update to version 2.2.2
 
 ## Test environments
 * Local GNU/Linux, R 3.3.1

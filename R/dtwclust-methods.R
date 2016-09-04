@@ -194,8 +194,9 @@ setMethod("predict", "dtwclust",
 #' liking. You might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 #'
 #' @param y Ignored.
-#' @param ... Further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting of the
-#' \emph{cluster centers}, or to \code{\link[stats]{plot.hclust}}. See details.
+#' @param ... For \code{plot}, further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting
+#' of the \emph{cluster centers}, or to \code{\link[stats]{plot.hclust}}. See details. For \code{update}, any
+#' supported argument. Otherwise, currently ignored.
 #' @param clus A numeric vector indicating which clusters to plot.
 #' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
 #' information
@@ -205,7 +206,6 @@ setMethod("predict", "dtwclust",
 #' @param plot Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot object without
 #' printing anything to screen
 #' @param type What to plot. \code{NULL} means default. See details.
-#' @param show.centroids Deprecated.
 #'
 #' @return The plot method returns a \code{gg} object (or \code{NULL} for dendrogram plot) invisibly.
 #'
@@ -218,10 +218,9 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
           function(x, y, ...,
                    clus = seq_len(x@k), labs.arg = NULL,
                    data = NULL, time = NULL,
-                   plot = TRUE, type = NULL,
-                   show.centroids = TRUE) {
+                   plot = TRUE, type = NULL) {
 
-               if (!missing(show.centroids))
+               if (!is.null(list(...)$show.centroids))
                     warning("The 'show.centroids' argument has been deprecated. Use 'type' instead.")
 
                ## set default type if none was provided

@@ -1,5 +1,8 @@
 # NEWS
 
+## Version 2.2.2
+* Suggestions?
+
 ## Version 2.2.1
 * Added package vignette
 * Implemented several cluster validity indices in the new `cvi` function
