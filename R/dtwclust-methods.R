@@ -518,9 +518,7 @@ setMethod("cvi", signature(a = "dtwclust"),
                                 ## Davies-Bouldin
                                 DB = {
                                      mean(sapply(1L:a@k, function(k) {
-                                          max(sapply(setdiff(1L:a@k, k), function(l) {
-                                               (S[k] + S[l]) / distcent[k, l]
-                                          }))
+                                          max((S[k] + S[-k]) / distcent[k, -k])
                                      }))
                                 },
 
