@@ -136,9 +136,9 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
      L <- max(lengths(x)) + max(lengths(y)) - 1L
      fftlen <- stats::nextn(L, 2L)
 
-     fftx <- lapply(x, function(u) { stats::fft(c(u, rep(0, fftlen-length(u)))) })
+     fftx <- lapply(x, function(u) { stats::fft(c(u, rep(0, fftlen - length(u)))) })
 
-     ffty <- lapply(y, function(v) { stats::fft(c(v, rep(0, fftlen-length(v)))) })
+     ffty <- lapply(y, function(v) { stats::fft(c(v, rep(0, fftlen - length(v)))) })
 
      ## Register doSEQ if necessary
      check_parallel()

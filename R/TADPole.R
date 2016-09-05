@@ -309,7 +309,7 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
      ## How many calculations were actually performed
      distCalc <-  sum(utv == 1L) + sum(DNN[ , 3L])
 
-     if(any(cl == -1))
+     if(any(cl == -1L))
           warning(c("At least one series wasn't assigned to a cluster. ",
                     "This shouldn't happen, please contact maintainer."))
 
