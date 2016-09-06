@@ -8,14 +8,14 @@
 #' with DTW. See the cited article for the details of the algorithm.
 #'
 #' Because of the way the algorithm works, it can be considered a kind of Partitioning Around Medoids (PAM).
-#' This means that the cluster centers are always elements of the data. However, this algorithm is deterministic,
+#' This means that the cluster centroids are always elements of the data. However, this algorithm is deterministic,
 #' depending on the value of \code{dc}.
 #'
 #' The algorithm first uses the DTW's upper and lower bounds to find series with many close neighbors (in
 #' DTW space). Anything below the cutoff distance (\code{dc}) is considered a neighbor. Aided with this
 #' information, the algorithm then tries to prune as many DTW calculations as possible in order to accelerate
 #' the clustering procedure. The series that lie in dense areas (i.e. that have lots of neighbors) are taken
-#' as cluster centers.
+#' as cluster centroids.
 #'
 #' The algorithm relies on the DTW bounds, which are only defined for time series of equal length.
 #'
@@ -77,14 +77,14 @@
 #'
 #' @return A list with: \itemize{
 #'   \item \code{cl}: Cluster indices.
-#'   \item \code{centers}: Indices of the centers.
+#'   \item \code{centroids}: Indices of the centroids.
 #'   \item \code{distCalcPercentage}: Percentage of distance calculations that were actually performed.
 #' }
 #'
 #' @export
 #'
 
-TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
+TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE) {
 
      if (missing(window.size))
           stop("Please provide a positive window size")
@@ -134,9 +134,7 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
 
      ## Calculate values for the upper triangular part of the flag matrix (column-wise)
      utv <- unlist(lapply(2L:n, function(j) {
-
           sapply(1L:(j-1L), function(i) {
-
                if (LBM[i,j]<=dc && UBM[i,j]>dc)
                     f <- 1L
                else if (LBM[i,j]<=dc && UBM[i,j]<dc)
@@ -157,7 +155,6 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
      ind1 <- which(Flags == 1L, arr.ind = TRUE)
 
      if (nrow(ind1) > 0L) {
-
           ind1 <- split_parallel(ind1, 1L)
 
           exclude <- setdiff(ls(), c("x", "step.pattern", "window.size"))
@@ -236,7 +233,6 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
                     .combine = rbind,
                     .multicombine = TRUE,
                     .packages = "dtwclust") %dopar% {
-
                          t(sapply(i, function (i) {
                               ## Index of higher density neighbors
                               indHDN <- TADPorder$ix[1L:(i-1L)]
@@ -289,10 +285,10 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
      else
           zDelta <- (delta - min(delta)) / (max(delta) - min(delta))
 
-     ## Those with the most density are the cluster centers (PAM)
+     ## Those with the most density are the cluster centroids (PAM)
      C <- sort(sort(Rho * zDelta[indOrig], decreasing = TRUE, index.return = TRUE)$ix[1L:k])
 
-     ## Assign a unique number to each cluster center
+     ## Assign a unique number to each cluster centroid
      cl <- rep(-1L, n)
      cl[C] <- 1L:k
 
@@ -313,8 +309,13 @@ TADPole <- function(data, window.size, k = 2, dc, error.check = TRUE) {
           warning(c("At least one series wasn't assigned to a cluster. ",
                     "This shouldn't happen, please contact maintainer."))
 
+     if (error.check)
+          message("Please note that the returned list element 'centers' is deprecated and will be ",
+                  "removed and replaced by 'centroids' in the next version.")
+
      ## Return
      list(cl = cl,
           centers = C,
+          centroids = C,
           distCalcPercentage = (distCalc / (n * (n+1) / 2 - n)) * 100)
 }

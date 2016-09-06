@@ -5,7 +5,7 @@
 #' This function tries to find the optimum average series between a group of time series in DTW space. Refer to
 #' the cited article for specific details on the algorithm.
 #'
-#' If a given series reference is provided in \code{center}, the algorithm should always converge to the same
+#' If a given series reference is provided in \code{centroid}, the algorithm should always converge to the same
 #' result provided the elements of \code{X} keep the same values, although their order may change.
 #'
 #' @section Parallel Computing:
@@ -61,15 +61,16 @@
 #' @param X A data matrix where each row is a time series, or a list where each element is a time series.
 #' Multivariate series should be provided as a list of matrices where time spans the rows and the variables
 #' span the columns.
-#' @param center Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
+#' @param centroid Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
 #' \code{NULL}. For multivariate series, this should be a matrix with the same characteristics as the
 #' matrices in \code{X}.
+#' @param center Deprecated, please use \code{centroid} instead.
 #' @param max.iter Maximum number of iterations allowed.
 #' @param norm Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for Euclidean
 #' distance.
 #' @param window.size Window constraint for the DTW calculations. \code{NULL} means no constraint. A slanted
 #' band is used by default.
-#' @param delta At iteration \code{i}, if \code{all(abs(center_{i}} \code{ - center_{i-1})} \code{ < delta)},
+#' @param delta At iteration \code{i}, if \code{all(abs(centroid_{i}} \code{ - centroid_{i-1})} \code{ < delta)},
 #' convergence is assumed.
 #' @param error.check Should inconsistencies in the data be checked?
 #' @param trace If \code{TRUE}, the current iteration is printed to screen.
@@ -80,18 +81,23 @@
 #' @export
 #'
 
-DBA <- function(X, center = NULL, max.iter = 20L,
+DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
                 norm = "L1", window.size = NULL, delta = 1e-3,
                 error.check = TRUE, trace = FALSE, ...) {
+     if (!missing(center)) {
+          warning("The 'center' argument has been deprecated, please use 'centroid' instead.")
+
+          if (is.null(centroid)) centroid <- center
+     }
 
      X <- consistency_check(X, "tsmat")
 
-     if (is.null(center))
-          center <- X[[sample(n, 1L)]] # Random choice
+     if (is.null(centroid))
+          centroid <- X[[sample(n, 1L)]] # Random choice
 
      if (error.check) {
           consistency_check(X, "vltslist")
-          consistency_check(center, "ts")
+          consistency_check(centroid, "ts")
      }
 
      norm <- match.arg(norm, c("L1", "L2"))
@@ -127,8 +133,8 @@ DBA <- function(X, center = NULL, max.iter = 20L,
           x <- do.call(cbind, X)
           x <- split.data.frame(t(x), ncols)
 
-          c <- lapply(1L:ncol(center), function(idc) {
-               center[ , idc, drop = TRUE]
+          c <- lapply(1L:ncol(centroid), function(idc) {
+               centroid[ , idc, drop = TRUE]
           })
 
           new_c <- mapply(x, c, SIMPLIFY = FALSE,
@@ -152,7 +158,7 @@ DBA <- function(X, center = NULL, max.iter = 20L,
      n <- length(X)
 
      ## pre-allocate local cost matrices
-     LCM <- lapply(X, function(x) { matrix(0, length(x), length(center)) })
+     LCM <- lapply(X, function(x) { matrix(0, length(x), length(centroid)) })
 
      ## maximum length of considered series
      L <- max(lengths(X))
@@ -165,17 +171,17 @@ DBA <- function(X, center = NULL, max.iter = 20L,
 
      ## Iterations
      iter <- 1L
-     center_old <- center
+     centroid_old <- centroid
 
      while(iter <= max.iter) {
-          ## Return the coordinates of each series in X grouped by the coordinate they match to in the center time series
+          ## Return the coordinates of each series in X grouped by the coordinate they match to in the centroid time series
           ## Also return the number of coordinates used in each case (for averaging below)
           xg <- foreach(X = Xs, LCM = LCMs,
                         .combine = c,
                         .multicombine = TRUE,
                         .packages = c("dtwclust", "stats")) %dopar% {
                              mapply(X, LCM, SIMPLIFY = FALSE, FUN = function(x, lcm) {
-                                  .Call("update_lcm", lcm, x, center, square, PACKAGE = "dtwclust")
+                                  .Call("update_lcm", lcm, x, centroid, square, PACKAGE = "dtwclust")
 
                                   d <- do.call(dtw::dtw, c(list(x = lcm,
                                                                 window.size = w),
@@ -196,20 +202,20 @@ DBA <- function(X, center = NULL, max.iter = 20L,
           ## Put everything in one big data frame
           xg <- reshape2::melt(xg)
 
-          ## Aggregate according to index of center time series (Var1) and also the variable type (Var2)
+          ## Aggregate according to index of centroid time series (Var1) and also the variable type (Var2)
           xg <- stats::aggregate(xg$value, by = list(xg$Var1, xg$Var2), sum)
 
           ## Average
-          center <- xg$x[xg$Group.2 == "sum"] / xg$x[xg$Group.2 == "n"]
+          centroid <- xg$x[xg$Group.2 == "sum"] / xg$x[xg$Group.2 == "n"]
 
-          if (all(abs(center - center_old) < delta)) {
+          if (all(abs(centroid - centroid_old) < delta)) {
                if (trace)
                     cat("DBA: Iteration", iter ,"- Converged!\n\n")
 
                break
 
           } else {
-               center_old <- center
+               centroid_old <- centroid
 
                if (trace)
                     cat("DBA: Iteration", iter, "\n")
@@ -221,5 +227,5 @@ DBA <- function(X, center = NULL, max.iter = 20L,
      if (iter > max.iter && trace)
           warning("DBA algorithm did not 'converge' within the allowed iterations.")
 
-     as.numeric(center)
+     as.numeric(centroid)
 }

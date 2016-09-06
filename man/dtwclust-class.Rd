@@ -39,7 +39,9 @@ series and one column for each cluster. The rows must sum to 1. Only relevant fo
 \item{\code{clusinfo}}{A data frame with two columns: \code{size} indicates the number of series each cluster has,
 and \code{av_dist} indicates the average distance between series of each cluster (crisp partition).}
 
-\item{\code{centers}}{A list with the centroid time series.}
+\item{\code{centers}}{Deprecated, please use \code{centroids} instead.}
+
+\item{\code{centroids}}{A list with the centroid time series.}
 
 \item{\code{cldist}}{A column vector with the distance between each series in the data and its corresponding
 centroid (crisp partition).}

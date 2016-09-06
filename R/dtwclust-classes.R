@@ -160,7 +160,8 @@ setClass("dtwclustControl",
 #' @slot converged A logical indicating whether the function converged.
 #' @slot clusinfo A data frame with two columns: \code{size} indicates the number of series each cluster has,
 #' and \code{av_dist} indicates the average distance between series of each cluster (crisp partition).
-#' @slot centers A list with the centroid time series.
+#' @slot centers Deprecated, please use \code{centroids} instead.
+#' @slot centroids A list with the centroid time series.
 #' @slot cldist A column vector with the distance between each series in the data and its corresponding
 #' centroid (crisp partition).
 #' @slot type A string indicating one of the supported clustering types of \code{\link{dtwclust}}.
@@ -201,6 +202,7 @@ setClass("dtwclust", contains = c("hclust"),
                    clusinfo = "data.frame",
 
                    centers = "list",
+                   centroids = "list",
                    cldist = "matrix",
 
                    type = "character",

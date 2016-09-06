@@ -4,16 +4,18 @@
 \alias{shape_extraction}
 \title{Shape average of several time series}
 \usage{
-shape_extraction(X, center = NULL, znorm = FALSE)
+shape_extraction(X, centroid = NULL, center = NULL, znorm = FALSE)
 }
 \arguments{
 \item{X}{A data matrix where each row is a time series, or a list where each element is a time series.
 Multivariate series should be provided as a list of matrices where time spans the rows and the variables
 span the columns.}
 
-\item{center}{Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
+\item{centroid}{Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
 \code{NULL}. For multivariate series, this should be a matrix with the same characteristics as the
 matrices in \code{X}. \emph{It will be z-normalized}.}
+
+\item{center}{Deprecated, please use \code{centroid} instead.}
 
 \item{znorm}{Logical flag. Should z-scores be calculated for \code{X} before processing?}
 }
@@ -27,7 +29,7 @@ the k-Shape clustering algorithm.
 \details{
 This works only if the series are \emph{z-normalized}, since the output will also have this normalization.
 
-The resulting centroid will have the same length as \code{center} if provided. Otherwise, there are two
+The resulting centroid will have the same length as \code{centroid} if provided. Otherwise, there are two
 possibilities: if all series from \code{X} have the same length, all of them
 will be used as-is, and the output will have the same length as the series; if series have different
 lengths, a series will be chosen at random and used as reference. The output series will then have the

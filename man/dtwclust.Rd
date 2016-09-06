@@ -80,7 +80,7 @@ argument.
 
 
 Stochastic algorithm that creates a hard partition of the data into \code{k} clusters, where each cluster
-has a center/centroid. In case of time series clustering, the centroids are also time series.
+has a centroid. In case of time series clustering, the centroids are also time series.
 
 The cluster centroids are first randomly initialized by selecting some of the series in the data. The
 distance between each series and each centroid is calculated, and the series are assigned to the cluster
@@ -135,7 +135,7 @@ clusters are created.
 
 TADPole clustering adopts a relatively new clustering framework and adapts it to time series clustering
 with DTW. Because of the way it works, it can be considered a kind of Partitioning Around Medoids (PAM).
-This means that the cluster centers are always elements of the data. However, this algorithm is
+This means that the cluster centroids are always elements of the data. However, this algorithm is
 deterministic, depending on the value of the cutoff distance \code{dc}, which can be controlled with the
 corresponding parameter of this function.
 
@@ -147,8 +147,8 @@ Unlike the other algorithms, TADPole always uses DTW2 as distance (with a symmet
 \section{Centroid Calculation}{
 
 
-In the case of partitional/fuzzy algorithms, a suitable function should calculate the cluster centers at
-every iteration. In this case, the centers are themselves time series. Fuzzy clustering uses the standard
+In the case of partitional/fuzzy algorithms, a suitable function should calculate the cluster centroids at
+every iteration. In this case, the centroids are themselves time series. Fuzzy clustering uses the standard
 fuzzy c-means centroid by default.
 
 In either case, a custom function can be provided. If one is provided, it will receive the following
@@ -159,7 +159,7 @@ parameters with the shown names (examples for partitional clustering are shown i
   \item \code{"cl_id"}: A numeric vector with length equal to the number of series in \code{data},
   indicating which cluster a series belongs to (\code{c(1L, 2L, 2L)})
   \item \code{"k"}: The desired number of total clusters (\code{2L})
-  \item \code{"cent"}: The current centers in order, in a list (\code{list(center1, center2)})
+  \item \code{"cent"}: The current centroids in order, in a list (\code{list(centroid1, centroid2)})
   \item \code{"cl_old"}: The membership vector of the \emph{previous} iteration (\code{c(1L, 1L, 2L)})
   \item The elements of \code{...}
 }
@@ -179,7 +179,7 @@ are available:
   \item "shape": Shape averaging. By default, all series are z-normalized in this case, since the resulting
   centroids will also have this normalization. See \code{\link{shape_extraction}} for more details.
   \item "dba": DTW Barycenter Averaging. See \code{\link{DBA}} for more details.
-  \item "pam": Partition around medoids (PAM). This basically means that the cluster centers are always
+  \item "pam": Partition around medoids (PAM). This basically means that the cluster centroids are always
   one of the time series in the data. In this case, the distance matrix can be pre-computed once using all
   time series in the data and then re-used at each iteration. It usually saves overhead overall.
   \item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and always used for that type of clustering
@@ -195,7 +195,7 @@ two series with length of 10, the final centroids will have this same length.
 
 As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid function that
 takes a list of series as only input and returns a single centroid series. These centroids are returned in
-the \code{centers} slot. By default, a type of PAM centroid function is used.
+the \code{centroids} slot. By default, a type of PAM centroid function is used.
 }
 
 \section{Distance Measures}{

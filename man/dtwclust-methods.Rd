@@ -22,7 +22,7 @@
 \item{object, x}{An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.}
 
 \item{...}{For \code{plot}, further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting
-of the \emph{cluster centers}, or to \code{\link[stats]{plot.hclust}}. See details. For \code{update}, any
+of the \emph{cluster centroids}, or to \code{\link[stats]{plot.hclust}}. See details. For \code{update}, any
 supported argument. Otherwise, currently ignored.}
 
 \item{evaluate}{Logical. Defaults to \code{TRUE} and evaluates the updated call, which will result in

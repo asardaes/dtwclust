@@ -184,7 +184,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                empty_clusters <- which(lengths(x_split) == 0L)
                id_changed <- setdiff(id_changed, empty_clusters)
 
-               ## Calculate new centers
+               ## Calculate new centroids
                new_cent <- do.call(paste0(case, "_cent"),
                                    c(list(x = x,
                                           x_split = x_split[id_changed],
@@ -200,7 +200,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
 
                ## If so, initialize new clusters
                if (num_empty > 0L) {
-                    ## Make sure no center is repeated (especially in case of PAM)
+                    ## Make sure no centroid is repeated (especially in case of PAM)
                     any_rep <- logical(num_empty)
 
                     while(TRUE) {
@@ -208,11 +208,11 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                          extra_cent <- x[id_cent_extra]
 
                          for (id_extra in 1L:num_empty) {
-                              any_rep[id_extra] <- any(sapply(cent, function(i.center) {
-                                   if (length(i.center) != length(extra_cent[[id_extra]]))
+                              any_rep[id_extra] <- any(sapply(cent, function(i.centroid) {
+                                   if (length(i.centroid) != length(extra_cent[[id_extra]]))
                                         ret <- FALSE
                                    else
-                                        ret <- all(i.center == extra_cent[[id_extra]])
+                                        ret <- all(i.centroid == extra_cent[[id_extra]])
 
                                    ret
                               }))

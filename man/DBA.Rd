@@ -4,17 +4,20 @@
 \alias{DBA}
 \title{DTW Barycenter Averaging}
 \usage{
-DBA(X, center = NULL, max.iter = 20L, norm = "L1", window.size = NULL,
-  delta = 0.001, error.check = TRUE, trace = FALSE, ...)
+DBA(X, centroid = NULL, center = NULL, max.iter = 20L, norm = "L1",
+  window.size = NULL, delta = 0.001, error.check = TRUE, trace = FALSE,
+  ...)
 }
 \arguments{
 \item{X}{A data matrix where each row is a time series, or a list where each element is a time series.
 Multivariate series should be provided as a list of matrices where time spans the rows and the variables
 span the columns.}
 
-\item{center}{Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
+\item{centroid}{Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
 \code{NULL}. For multivariate series, this should be a matrix with the same characteristics as the
 matrices in \code{X}.}
+
+\item{center}{Deprecated, please use \code{centroid} instead.}
 
 \item{max.iter}{Maximum number of iterations allowed.}
 
@@ -24,7 +27,7 @@ distance.}
 \item{window.size}{Window constraint for the DTW calculations. \code{NULL} means no constraint. A slanted
 band is used by default.}
 
-\item{delta}{At iteration \code{i}, if \code{all(abs(center_{i}} \code{ - center_{i-1})} \code{ < delta)},
+\item{delta}{At iteration \code{i}, if \code{all(abs(centroid_{i}} \code{ - centroid_{i-1})} \code{ < delta)},
 convergence is assumed.}
 
 \item{error.check}{Should inconsistencies in the data be checked?}
@@ -43,7 +46,7 @@ A global averaging method for time series under DTW (Petitjean, Ketterlin and Ga
 This function tries to find the optimum average series between a group of time series in DTW space. Refer to
 the cited article for specific details on the algorithm.
 
-If a given series reference is provided in \code{center}, the algorithm should always converge to the same
+If a given series reference is provided in \code{centroid}, the algorithm should always converge to the same
 result provided the elements of \code{X} keep the same values, although their order may change.
 }
 \section{Parallel Computing}{

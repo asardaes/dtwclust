@@ -4,23 +4,23 @@
 \alias{TADPole}
 \title{TADPole clustering}
 \usage{
-TADPole(data, window.size, k = 2, dc, error.check = TRUE)
+TADPole(data, k = 2L, dc, window.size, error.check = TRUE)
 }
 \arguments{
 \item{data}{The data matrix where each row is a time series. Optionally a list with each time series.}
 
-\item{window.size}{Window size constraint for DTW. See details.}
-
 \item{k}{The number of desired clusters.}
 
 \item{dc}{The cutoff distance.}
+
+\item{window.size}{Window size constraint for DTW. See details.}
 
 \item{error.check}{Should the data be checked for inconsistencies?}
 }
 \value{
 A list with: \itemize{
   \item \code{cl}: Cluster indices.
-  \item \code{centers}: Indices of the centers.
+  \item \code{centroids}: Indices of the centroids.
   \item \code{distCalcPercentage}: Percentage of distance calculations that were actually performed.
 }
 }
@@ -34,14 +34,14 @@ TADPole clustering adopts a relatively new clustering framework and adapts it to
 with DTW. See the cited article for the details of the algorithm.
 
 Because of the way the algorithm works, it can be considered a kind of Partitioning Around Medoids (PAM).
-This means that the cluster centers are always elements of the data. However, this algorithm is deterministic,
+This means that the cluster centroids are always elements of the data. However, this algorithm is deterministic,
 depending on the value of \code{dc}.
 
 The algorithm first uses the DTW's upper and lower bounds to find series with many close neighbors (in
 DTW space). Anything below the cutoff distance (\code{dc}) is considered a neighbor. Aided with this
 information, the algorithm then tries to prune as many DTW calculations as possible in order to accelerate
 the clustering procedure. The series that lie in dense areas (i.e. that have lots of neighbors) are taken
-as cluster centers.
+as cluster centroids.
 
 The algorithm relies on the DTW bounds, which are only defined for time series of equal length.
 

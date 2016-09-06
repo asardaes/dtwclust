@@ -11,18 +11,18 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
           stop("Number of clusters cannot be greater than number of observations in the data")
 
      if (is.null(names(x)))
-          names(x) <- paste0("series_", 1:N) # used by custom PAM centers
+          names(x) <- paste0("series_", 1:N) # used by custom PAM centroids
 
      if (fuzzy) {
           cluster <- matrix(0, N, k)
           cluster[ , -1L] <- stats::runif(N *(k - 1L)) / (k - 1)
           cluster[ , 1L] <- 1 - apply(cluster[ , -1L, drop = FALSE], 1L, sum)
-          centers <- family@allcent(x, cluster, k, ...)
+          centroids <- family@allcent(x, cluster, k, ...)
 
      } else {
           id_cent <- sample(N, k)
-          centers <- x[id_cent]
-          attr(centers, "id_cent") <- id_cent
+          centroids <- x[id_cent]
+          attr(centroids, "id_cent") <- id_cent
           cluster <- integer(N)
      }
 
@@ -32,11 +32,11 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
      while (iter <= control@iter.max) {
           clustold <- cluster
 
-          distmat <- family@dist(x, centers, ...)
+          distmat <- family@dist(x, centroids, ...)
 
           cluster <- family@cluster(distmat = distmat, m = control@fuzziness)
 
-          centers <- family@allcent(x, cluster, k, centers, clustold, ...)
+          centroids <- family@allcent(x, cluster, k, centroids, clustold, ...)
 
           if (fuzzy) {
                # fuzzy.R
@@ -86,7 +86,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
           converged <- TRUE
      }
 
-     distmat <- family@dist(x, centers, ...)
+     distmat <- family@dist(x, centroids, ...)
      cluster <- family@cluster(distmat = distmat, m = control@fuzziness)
 
      if (fuzzy) {
@@ -105,14 +105,14 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
      clusinfo <- data.frame(size = size,
                             av_dist = as.vector(tapply(cldist[ , 1L], cluster, sum))/size)
 
-     names(centers) <- NULL
-     attr(centers, "id_cent") <- NULL
-     centers <- lapply(centers, "attr<-", which = "id_cent", value = NULL)
+     names(centroids) <- NULL
+     attr(centroids, "id_cent") <- NULL
+     centroids <- lapply(centroids, "attr<-", which = "id_cent", value = NULL)
 
      list(k = k,
           cluster = cluster,
           fcluster = fcluster,
-          centers = centers,
+          centroids = centroids,
           clusinfo = clusinfo,
           cldist = cldist,
           iter = iter,

@@ -150,7 +150,7 @@ setMethod("predict", "dtwclust",
 
                     distmat <- do.call(object@family@dist,
                                        args = c(list(x = newdata,
-                                                     centers = object@centers),
+                                                     centroids = object@centroids),
                                                 object@dots))
 
                     ret <- object@family@cluster(distmat = distmat, m = object@control@fuzziness)
@@ -195,7 +195,7 @@ setMethod("predict", "dtwclust",
 #'
 #' @param y Ignored.
 #' @param ... For \code{plot}, further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting
-#' of the \emph{cluster centers}, or to \code{\link[stats]{plot.hclust}}. See details. For \code{update}, any
+#' of the \emph{cluster centroids}, or to \code{\link[stats]{plot.hclust}}. See details. For \code{update}, any
 #' supported argument. Otherwise, currently ignored.
 #' @param clus A numeric vector indicating which clusters to plot.
 #' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
@@ -269,11 +269,11 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
                          or provide the data manually.")
                }
 
-               ## Obtain centers (which can be matrix or lists of series)
-               Lengths <- lengths(x@centers)
+               ## Obtain centroids (which can be matrix or lists of series)
+               Lengths <- lengths(x@centroids)
                trail <- L - Lengths
 
-               cen <- mapply(x@centers, trail, SIMPLIFY = FALSE,
+               cen <- mapply(x@centroids, trail, SIMPLIFY = FALSE,
                              FUN = function(series, trail) {
                                   c(series, rep(NA, trail))
                              })
@@ -312,7 +312,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 
                dfm <- data.frame(dfm, cl = cl, color = color)
 
-               ## transform centers
+               ## transform centroids
 
                cen <- data.frame(t = t, cen)
                cenm <- reshape2::melt(cen, id.vars = "t")
@@ -426,7 +426,7 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                               } else {
                                    distmat <- do.call(a@family@dist,
-                                                      args = c(list(x = a@datalist, centers = NULL),
+                                                      args = c(list(x = a@datalist, centroids = NULL),
                                                                a@dots))
                               }
                          } else {
@@ -444,7 +444,7 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                          ## distance between centroids
                          distcent <- do.call(a@family@dist,
-                                             args = c(list(x = a@centers, centers = NULL),
+                                             args = c(list(x = a@centroids, centroids = NULL),
                                                       a@dots))
                     }
 
@@ -465,7 +465,7 @@ setMethod("cvi", signature(a = "dtwclust"),
                          }
 
                          dist_global_cent <- do.call(a@family@dist,
-                                                     args = c(list(x = a@centers, centers = global_cent),
+                                                     args = c(list(x = a@centroids, centroids = global_cent),
                                                               a@dots))
 
                          dim(dist_global_cent) <- NULL
@@ -660,7 +660,7 @@ setMethod("clusterSim", "dtwclust",
 
                     distmat <- do.call(object@family@dist,
                                        args = c(list(x = data,
-                                                     centers = object@centers),
+                                                     centroids = object@centroids),
                                                 object@dots))
 
                     r <- t(matrix(apply(distmat, 1, rank, ties.method = "first"),
@@ -693,8 +693,8 @@ setMethod("clusterSim", "dtwclust",
 
                } else {
                     z <- do.call(object@family@dist,
-                                 args = c(list(x = object@centers,
-                                               centers = object@centers),
+                                 args = c(list(x = object@centroids,
+                                               centroids = object@centroids),
                                           object@dots))
 
                     z <- 1 - z/max(z)

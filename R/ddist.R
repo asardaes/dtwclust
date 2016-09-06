@@ -16,19 +16,24 @@ ddist <- function(distance, control, distmat) {
 
      ## Closures will capture the values of the constants
 
-     distfun <- function(x, centers = NULL, ...) {
+     distfun <- function(x, centroids = NULL, ...) {
+          if (!is.null(list(...)$centers)) {
+               warning("The 'centers' argument has been deprecated, please use 'centroids' instead.")
+
+               if (is.null(centroids)) centroids <- list(...)$centers
+          }
 
           if (!is.null(distmat)) {
 
-               if (is.null(centers)) {
+               if (is.null(centroids)) {
                     d <- distmat
 
                } else {
                     ## distmat matrix already calculated, just subset it
-                    id_XC <- attr(centers, "id_cent")
+                    id_XC <- attr(centroids, "id_cent")
 
                     if (is.null(id_XC) || any(is.na(id_XC)))
-                         id_XC <- sapply(centers, FUN = function(i.c) {
+                         id_XC <- sapply(centroids, FUN = function(i.c) {
                               i.row <- sapply(x, function(i.x) {
                                    if (length(i.x) == length(i.c))
                                         ret <- all(i.x == i.c)
@@ -82,7 +87,7 @@ ddist <- function(distance, control, distmat) {
                ## variables/functions from the parent environment that should be exported
                export <- c("distance", "consistency_check")
 
-               if (is.null(centers) && control@symmetric && dist_entry$loop) {
+               if (is.null(centroids) && control@symmetric && dist_entry$loop) {
                     ## WHOLE SYMMETRIC DISTMAT
                     ## Only half of it is computed
 
@@ -126,26 +131,26 @@ ddist <- function(distance, control, distmat) {
                } else {
                     ## WHOLE OR SUBDISTMAT, NOT SYMMETRIC OR loop = FALSE
 
-                    if (is.null(centers))
-                         centers <- x
+                    if (is.null(centroids))
+                         centroids <- x
 
-                    dim_names <- list(names(x), names(centers))
+                    dim_names <- list(names(x), names(centroids))
 
                     if (!is.null(dots$pairwise) && dots$pairwise) {
-                         if (length(x) != length(centers))
+                         if (length(x) != length(centroids))
                               stop("Both sets of data must have the same amount of series for pairwise calculation")
 
-                         centers <- split_parallel(centers)
+                         centroids <- split_parallel(centroids)
                          combine <- c
 
                     } else {
-                         centers <- lapply(1:length(x), function(dummy) centers)
+                         centroids <- lapply(1:length(x), function(dummy) centroids)
                          combine <- rbind
                     }
 
                     x <- split_parallel(x)
 
-                    d <- foreach(x = x, centers = centers,
+                    d <- foreach(x = x, centroids = centroids,
                                  .combine = combine,
                                  .multicombine = TRUE,
                                  .packages = control@packages,
@@ -158,7 +163,7 @@ ddist <- function(distance, control, distmat) {
                                       dd <- do.call(proxy::dist,
                                                     c(dots,
                                                       list(x = x,
-                                                           y = centers,
+                                                           y = centroids,
                                                            method = distance)))
 
                                       dd
