@@ -34,7 +34,7 @@ See Parallel Computing section in \code{\link{dtwclust}}.}
 
 \item{\code{dba.iter}}{Integer. Maximum number of iterations for \code{\link{DBA}} centroids.}
 
-\item{\code{pam.precompute}}{Logical flag. Precompute the whole distance matrix once and reuse it at each iteration
+\item{\code{pam.precompute}}{Logical flag. Precompute the whole distance matrix once and reuse it on each iteration
 if using PAM centroids. Otherwise calculate distances at every iteration.}
 
 \item{\code{fuzziness}}{Numeric. Exponent used for fuzzy clustering. Commonly termed \code{m} in the literature.}

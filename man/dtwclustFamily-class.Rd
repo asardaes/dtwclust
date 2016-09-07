@@ -22,7 +22,7 @@ pass-through \code{preproc} function.
 \describe{
 \item{\code{dist}}{The function to calculate the distance matrices.}
 
-\item{\code{allcent}}{The function to calculate centroids at each iteration.}
+\item{\code{allcent}}{The function to calculate centroids on each iteration.}
 
 \item{\code{cluster}}{The function used to assign a series to a cluster.}
 

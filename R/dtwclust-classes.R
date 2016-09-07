@@ -11,7 +11,7 @@
 #' pass-through \code{preproc} function.
 #'
 #' @slot dist The function to calculate the distance matrices.
-#' @slot allcent The function to calculate centroids at each iteration.
+#' @slot allcent The function to calculate centroids on each iteration.
 #' @slot cluster The function used to assign a series to a cluster.
 #' @slot preproc The function used to preprocess the data (relevant for \code{\link[stats]{predict}}).
 #'
@@ -76,7 +76,7 @@ setClass("dtwclustFamily",
 #' }
 #'
 #' @slot dba.iter Integer. Maximum number of iterations for \code{\link{DBA}} centroids.
-#' @slot pam.precompute Logical flag. Precompute the whole distance matrix once and reuse it at each iteration
+#' @slot pam.precompute Logical flag. Precompute the whole distance matrix once and reuse it on each iteration
 #' if using PAM centroids. Otherwise calculate distances at every iteration.
 #'
 #' @section Only for fuzzy clustering:

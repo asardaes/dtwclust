@@ -879,7 +879,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
      if (control@trace) {
           cat("\tElapsed time is", toc["elapsed"], "seconds.\n\n")
-          message("Please note that the 'centers' slot will be removed and replaced with 'centroids'.\n\n")
      }
 
      RET

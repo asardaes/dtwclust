@@ -80,7 +80,11 @@ consistency_check <- function(obj, case, ...) {
                obj <- list(obj)
 
           } else if (is.data.frame(obj)) {
+               message("Please note that on the next version of 'dtwclust', data frames will be parsed ",
+                       "row-wise, like matrices, to maintain consistency with the 'proxy' package.")
+
                obj <- as.list(obj)
+               # obj <- consistency_check(as.matrix(obj), "tsmat")
 
           } else if (!is.list(obj))
                stop("Unsupported type for data")

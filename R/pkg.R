@@ -123,7 +123,6 @@
 #' @importFrom graphics plot
 #' @importFrom rngtools RNGseq
 #' @importFrom rngtools setRNG
-#' @importFrom utils head
 #' @importFrom Rcpp evalCpp
 #'
 NULL
@@ -170,8 +169,9 @@ NULL
      RNGkind("L'Ecuyer")
 
      packageStartupMessage("\ndtwclust: Setting random number generator to L'Ecuyer-CMRG.\n",
-                           "To read the included vignette, type vignette(",
-                           dQuote("dtwclust"), ").\n")
+                           "Note that the 'centers' slot/argument of included objects/functions will be removed ",
+                           "and replaced with 'centroids' in the next package version for consistency.\n",
+                           "To read the included vignette, type: vignette(", dQuote("dtwclust"), ").\n")
 }
 
 .onUnload <- function(libpath) {
