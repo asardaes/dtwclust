@@ -45,7 +45,7 @@ Collate:
     'NCCc.R'
     'SBD.R'
     'TADPole.R'
-    'all_cent.R'
+    'all-cent.R'
     'cvi.R'
     'ddist.R'
     'dtw-lb.R'

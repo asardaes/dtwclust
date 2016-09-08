@@ -2,6 +2,7 @@
 
 ## Version 2.2.2
 * Suggestions?
+* Consistency adjustments: all `center(s)` arguments/slots will be removed and replaced with `centroid(s)`
 
 ## Version 2.2.1
 * Added package vignette

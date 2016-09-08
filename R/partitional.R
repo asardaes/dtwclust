@@ -106,9 +106,9 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...)
      }
 
      cldist <- as.matrix(distmat[cbind(1L:N, cluster)])
-     size <- as.vector(table(cluster))
+     size <- tabulate(cluster)
      clusinfo <- data.frame(size = size,
-                            av_dist = as.vector(tapply(cldist[ , 1L], cluster, sum))/size)
+                            av_dist = as.vector(tapply(cldist[ , 1L], cluster, mean)))
 
      names(centroids) <- NULL
      attr(centroids, "id_cent") <- NULL

@@ -497,7 +497,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           ## Centroid function
           ## ----------------------------------------------------------------------------------------------------------
 
-          ## Closures, all_cent.R
+          ## Closures, all-cent.R
           allcent <- all_cent(case = centroid,
                               distmat = distmat,
                               distfun = distfun,

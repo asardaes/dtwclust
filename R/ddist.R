@@ -3,7 +3,6 @@
 # ========================================================================================================
 
 ddist <- function(distance, control, distmat) {
-
      needs_window <- c("dtw_lb", "lbk", "lbi")
 
      if (distance %in% needs_window)
@@ -24,7 +23,6 @@ ddist <- function(distance, control, distmat) {
           }
 
           if (!is.null(distmat)) {
-
                if (is.null(centroids)) {
                     d <- distmat
 

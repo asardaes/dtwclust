@@ -10,7 +10,6 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
           stop("Centroid definition must be either a function or a character")
 
      pam_cent <- function(x, x_split, cl_id, id_changed, ...) {
-
           if(is.null(distmat)) {
                new_cent <- lapply(x_split, function(xsub) {
                     distmat <- distfun(xsub, xsub)
@@ -41,7 +40,6 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
      }
 
      shape_cent <- function(x_split, cent, ...) {
-
           check_parallel()
 
           x_split <- split_parallel(x_split)
@@ -67,7 +65,6 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
      }
 
      dba_cent <- function(x_split, cent, ...) {
-
           check_parallel()
 
           x_split <- split_parallel(x_split)
