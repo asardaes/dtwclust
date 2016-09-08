@@ -305,7 +305,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
                dfm <- reshape2::melt(df, id.vars = "t")
 
                cl <- rep(x@cluster, each = L)
-               color <- lapply(tabulate(x@cluster), function(i) {
+               color <- lapply(x@clusinfo$size, function(i) {
                     rep(1L:i, each = L)
                })
                color <- factor(unlist(color))
@@ -533,13 +533,13 @@ setMethod("cvi", signature(a = "dtwclust"),
                                 CH = {
                                      (N - a@k) /
                                           (a@k - 1) *
-                                          sum(tabulate(a@cluster) * dist_global_cent) /
+                                          sum(a@clusinfo$size * dist_global_cent) /
                                           sum(a@cldist[ , 1L, drop = TRUE])
                                 },
 
                                 ## Score function
                                 SF = {
-                                     bcd <- sum(tabulate(a@cluster) * dist_global_cent) / (N * a@k)
+                                     bcd <- sum(a@clusinfo$size * dist_global_cent) / (N * a@k)
                                      wcd <- sum(a@clusinfo$av_dist)
                                      1 - 1 / exp(exp(bcd - wcd))
                                 },
