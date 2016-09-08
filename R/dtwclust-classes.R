@@ -159,7 +159,8 @@ setClass("dtwclustControl",
 #' @slot iter The number of iterations used.
 #' @slot converged A logical indicating whether the function converged.
 #' @slot clusinfo A data frame with two columns: \code{size} indicates the number of series each cluster has,
-#' and \code{av_dist} indicates the average distance between series of each cluster (crisp partition).
+#' and \code{av_dist} indicates, for each cluster, the average distance between series and their respective
+#' centroids (crisp partition).
 #' @slot centers Deprecated, please use \code{centroids} instead.
 #' @slot centroids A list with the centroid time series.
 #' @slot cldist A column vector with the distance between each series in the data and its corresponding

@@ -37,7 +37,8 @@ series and one column for each cluster. The rows must sum to 1. Only relevant fo
 \item{\code{converged}}{A logical indicating whether the function converged.}
 
 \item{\code{clusinfo}}{A data frame with two columns: \code{size} indicates the number of series each cluster has,
-and \code{av_dist} indicates the average distance between series of each cluster (crisp partition).}
+and \code{av_dist} indicates, for each cluster, the average distance between series and their respective
+centroids (crisp partition).}
 
 \item{\code{centers}}{Deprecated, please use \code{centroids} instead.}
 

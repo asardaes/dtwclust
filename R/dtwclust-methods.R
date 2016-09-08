@@ -440,7 +440,7 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                     ## calculate some values that both Davies-Bouldin indices use
                     if (any(type[which_internal] %in% c("DB", "DBstar"))) {
-                         S <- tapply(a@cldist[ , 1L], list(a@cluster), mean)
+                         S <- a@clusinfo$av_dist
 
                          ## distance between centroids
                          distcent <- do.call(a@family@dist,
@@ -540,7 +540,7 @@ setMethod("cvi", signature(a = "dtwclust"),
                                 ## Score function
                                 SF = {
                                      bcd <- sum(tabulate(a@cluster) * dist_global_cent) / (N * a@k)
-                                     wcd <- sum(tapply(a@cldist[ , 1L, drop = TRUE], list(a@cluster), mean))
+                                     wcd <- sum(a@clusinfo$av_dist)
                                      1 - 1 / exp(exp(bcd - wcd))
                                 },
 
