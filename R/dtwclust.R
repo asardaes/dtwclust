@@ -814,7 +814,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                if (is.function(centroid)) {
                     allcent <- centroid
                     centroids <- lapply(1L:k, function(kcent) centroid(data[R$cl == kcent]))
+
                } else {
+                    ## this is important for cvi function
                     allcent <- function(dummy) { data[R$centroids[1L]] }
                     centroids <- data[R$centroids]
                }
