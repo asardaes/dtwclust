@@ -226,7 +226,7 @@ DTW2 is done with \code{\link[dtw]{dtw}}, but it differs from the result you wou
 \code{L2} as \code{dist.method}: with \code{DTW2}, pointwise distances (the local cost matrix) are
 calculated with \code{L1} norm, \emph{each} element of the matrix is squared and the result is fed into
 \code{\link[dtw]{dtw}}, which finds the optimum warping path. The square root of the resulting
-distance is \emph{then} computed.
+distance is \emph{then} computed. See \code{\link{dtw2}}.
 
 Only \code{dtw}, \code{dtw2} and \code{sbd} support series of different length. The lower bounds
 are probably unsuitable for direct clustering unless series are very easily distinguishable.

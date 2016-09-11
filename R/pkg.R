@@ -132,7 +132,7 @@ NULL
 
      ## Register DTW2
      if (!consistency_check("DTW2", "dist", silent = TRUE))
-          proxy::pr_DB$set_entry(FUN = dtw2, names=c("DTW2", "dtw2"),
+          proxy::pr_DB$set_entry(FUN = dtw2.proxy, names=c("DTW2", "dtw2"),
                                  loop = TRUE, type = "metric", distance = TRUE,
                                  description = "DTW with L2 norm",
                                  PACKAGE = "dtwclust")
