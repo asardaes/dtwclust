@@ -721,8 +721,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                     ## Some additional cluster information (taken from flexclust)
                     size <- as.vector(table(cluster))
-                    clusinfo <- data.frame(size = size,
-                                           av_dist = as.vector(tapply(cldist[,1], cluster, mean)))
+                    clusinfo <- data.frame(size = size, av_dist = 0)
+                    clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(cldist[ , 1L], cluster, mean))
 
                     new("dtwclust", hc,
                         call = MYCALL,
@@ -829,8 +829,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                cldist <- as.matrix(cldist)
                size <- as.vector(table(R$cl))
-               clusinfo <- data.frame(size = size,
-                                      av_dist = as.vector(tapply(cldist[ , 1L], R$cl, mean)))
+               clusinfo <- data.frame(size = size, av_dist = 0)
+               clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(cldist[ , 1L], R$cl, mean))
 
                new("dtwclust",
                    call = MYCALL,
