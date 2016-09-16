@@ -23,14 +23,12 @@
 NCCc <- function(x, y) {
 
      # Notice that the native 'convolve' function already uses FFT for the calculation
-     r <- stats::convolve(x, y, conj = TRUE, type = "open")
+     CCseq <- stats::convolve(x, y, conj = TRUE, type = "open")
 
-     den <- sqrt(crossprod(x)) * sqrt(crossprod(y))
-
-     CCseq <- r / den
+     den <- lnorm(x, 2) * lnorm(y, 2)
 
      if (den == 0)
-          return(Inf)
+          Inf
      else
-          return(CCseq)
+          CCseq / den
 }

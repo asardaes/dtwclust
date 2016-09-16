@@ -148,10 +148,10 @@ shape_extraction <- function(X, centroid = NULL, center = NULL, znorm = FALSE) {
      P <- diag(nc) - 1 / nc * matrix(1, nc, nc)
      M <- P %*% S %*% P
 
-     ksc <- eigen(M)$vectors[ , 1L]
+     ksc <- eigen(M)$vectors[ , 1L, drop = TRUE]
 
-     d1 <- sqrt(crossprod(A[1L, ] - ksc))
-     d2 <- sqrt(crossprod(A[1L, ] + ksc))
+     d1 <- lnorm(A[1L, , drop = TRUE] - ksc, 2)
+     d2 <- lnorm(A[1L, , drop = TRUE] + ksc, 2)
 
      if (d1 >= d2)
           ksc <- -ksc

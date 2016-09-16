@@ -167,7 +167,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
                                         CCseq <- c(CCseq[(length(ffty) - length(y) + 2L):length(CCseq)],
                                                    CCseq[1L:length(x)])
 
-                                        CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
+                                        CCseq <- CCseq / (lnorm(x, 2) * lnorm(y, 2))
 
                                         dd <- 1 - max(CCseq)
 
@@ -197,7 +197,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
                                                            CCseq <- c(CCseq[(length(ffty) - length(y) + 2L):length(CCseq)],
                                                                       CCseq[1L:length(x)])
 
-                                                           CCseq <- CCseq / (sqrt(crossprod(x)) * sqrt(crossprod(y)))
+                                                           CCseq <- CCseq / (lnorm(x, 2) * lnorm(y, 2))
 
                                                            dd <- 1 - max(CCseq)
 

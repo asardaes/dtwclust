@@ -204,6 +204,14 @@ split_parallel <- function(obj, margin = NULL) {
 # column-wise medians
 colMedians <- function(mat) { apply(mat, 2L, stats::median) }
 
+# l-norm, I think I'll only use L2
+lnorm <- function(x, n = 2) {
+     if (n %% 2 == 0L)
+          sum(x ^ n) ^ (1 / n)
+     else
+          sum(abs(x) ^ n) ^ (1 / n)
+}
+
 # PREFUN for some of my proxy distances so that they support 'pairwise' direclty
 proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
      if (!is.null(params$force.pairwise)) {

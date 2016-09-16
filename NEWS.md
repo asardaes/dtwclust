@@ -3,6 +3,7 @@
 ## Version 2.2.2
 * Suggestions?
 * Consistency adjustments: all `center(s)` arguments/slots will be removed and replaced with `centroid(s)`
+* The `SBD` and `shape_extraction` functions used the `crossprod` function. This has been changed, but it resulted in very small numerical differences, which may be enough to alter some clustering results.
 
 ## Version 2.2.1
 * Added package vignette
