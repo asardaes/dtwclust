@@ -153,8 +153,36 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
           allcent <- function(x, cl_id, k, cent, cl_old, ...) {
                u <- cl_id ^ control@fuzziness
 
-               cent <- t(u) %*% do.call(rbind, x)
-               cent <- apply(cent, 2L, "/", e2 = colSums(u))
+               fuzzy_cent <- function(x, u) {
+                    cent <- t(u) %*% do.call(rbind, x)
+                    apply(cent, 2L, "/", e2 = colSums(u))
+               }
+
+               ## check for multivariate case
+               dims <- sapply(x, function(x) {
+                    if (is.null(dim(x)))
+                         0L
+                    else
+                         ncol(x)
+               })
+
+               if (length(unique(dims)) != 1L)
+                    stop("Inconsistent dimensions across series.")
+
+               if (any(dims > 0L)) {
+                    ## multivariate
+                    mv <- reshape_multviariate(x, NULL)
+
+                    cent <- lapply(mv$series, fuzzy_cent, u = u)
+                    cent <- lapply(1L:k, function(idc) {
+                         sapply(cent, function(c) { c[idc, , drop = TRUE] })
+                    })
+                    cent <- lapply(cent, "dimnames<-", NULL)
+
+                    return(cent)
+               }
+
+               cent <- fuzzy_cent(x, u)
 
                # Coerce back to list
                consistency_check(cent, "tsmat")

@@ -25,3 +25,15 @@ test_that("Fuzzy clustering gives the same result as reference",
 test_that("Fuzzy clustering doesn't allow series with different lengths",
           expect_error(dtwclust(data_subset, type = "fuzzy", k = 4),
                        "different length"))
+
+# =================================================================================================
+# Multivariate input
+# =================================================================================================
+
+fcmv <- dtwclust(data_multivariate, type = "fuzzy", k = 3,
+                 distance = "dtw2", seed = 123)
+
+fcmv <- lapply(fcmv, reset_nondeterministic)
+
+test_that("Fuzzy clustering gives the same result as reference",
+          my_expect_equal_to_reference(fcmv))
