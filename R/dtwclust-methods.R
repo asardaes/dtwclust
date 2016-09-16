@@ -306,7 +306,10 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 
                cl <- rep(x@cluster, each = L)
                color <- lapply(x@clusinfo$size, function(i) {
-                    rep(1L:i, each = L)
+                    if (i > 0L)
+                         rep(1L:i, each = L)
+                    else
+                         numeric()
                })
                color <- factor(unlist(color))
 
