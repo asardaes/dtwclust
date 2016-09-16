@@ -228,3 +228,25 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
           p = params,
           reg_entry = reg_entry)
 }
+
+# ========================================================================================================
+# Reshape multviariate series for mapply
+# ========================================================================================================
+
+reshape_multviariate <- function(series, cent) {
+     ncols <- ncol(series[[1L]])
+     ncols <- rep(1L:ncols, length(series))
+
+     series <- suppressWarnings(do.call(cbind, series))
+     series <- split.data.frame(t(series), ncols)
+     series <- lapply(series, consistency_check, case = "tsmat")
+
+     cent <- lapply(1L:ncols[length(ncols)], function(idc) {
+          if (is.null(cent))
+               NULL
+          else
+               cent[ , idc, drop = TRUE]
+     })
+
+     list(series = series, cent = cent)
+}

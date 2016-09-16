@@ -127,17 +127,9 @@ DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
 
      if (any(dims > 0L)) {
           ## multivariate
-          ncols <- ncol(X[[1L]])
-          ncols <- rep(1L:ncols, length(X))
+          mv <- reshape_multviariate(X, centroid) # utils.R
 
-          x <- do.call(cbind, X)
-          x <- split.data.frame(t(x), ncols)
-
-          c <- lapply(1L:ncol(centroid), function(idc) {
-               centroid[ , idc, drop = TRUE]
-          })
-
-          new_c <- mapply(x, c, SIMPLIFY = FALSE,
+          new_c <- mapply(mv$series, mv$cent, SIMPLIFY = FALSE,
                           FUN = function(xx, cc) {
                                DBA(xx, cc,
                                    norm = norm,

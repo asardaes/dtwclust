@@ -80,20 +80,9 @@ shape_extraction <- function(X, centroid = NULL, center = NULL, znorm = FALSE) {
 
      if (any(dims > 0L)) {
           ## multivariate
-          ncols <- ncol(X[[1L]])
-          ncols <- rep(1L:ncols, length(X))
+          mv <- reshape_multviariate(X, centroid) # utils.R
 
-          x <- do.call(cbind, x)
-          x <- split.data.frame(t(x), ncols)
-
-          c <- lapply(1L:ncol(X[[1L]]), function(idc) {
-               if (is.null(centroid))
-                    NULL
-               else
-                    centroid[ , idc, drop = TRUE]
-          })
-
-          new_c <- mapply(x, c, SIMPLIFY = FALSE,
+          new_c <- mapply(mv$series, mv$cent, SIMPLIFY = FALSE,
                           FUN = function(xx, cc) {
                                new_c <- shape_extraction(xx, cc, znorm = znorm)
                           })
