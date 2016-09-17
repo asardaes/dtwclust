@@ -3,7 +3,7 @@
 ## Version 2.2.2
 * Suggestions?
 * Consistency adjustments: all `center(s)` arguments/slots will be removed and replaced with `centroid(s)`
-* The `SBD` and `shape_extraction` functions used the `crossprod` function. This has been changed, but it resulted in very small numerical differences, which may be enough to alter some clustering results.
+* The `SBD` and `shape_extraction` functions used the `crossprod` function internally, which returned a 1x1 matrix by default, causing some dimension inconsistencies. In the future, `R` will give an error about the inconsistency, so the function has been changed in `dtwclust`, but it resulted in very small numerical differences, which may be enough to alter some clustering results.
 
 ## Version 2.2.1
 * Added package vignette
