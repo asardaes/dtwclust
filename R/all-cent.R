@@ -149,21 +149,22 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
           new_cent
      }
 
+     fcm_cent <- function(x, u) {
+          cent <- t(u) %*% do.call(rbind, x)
+          apply(cent, 2L, "/", e2 = colSums(u))
+     }
+
      if (fuzzy) {
           allcent <- function(x, cl_id, k, cent, cl_old, ...) {
+               ## cent and cl_old are unused here, but R complains if signatures don't match
                u <- cl_id ^ control@fuzziness
-
-               fuzzy_cent <- function(x, u) {
-                    cent <- t(u) %*% do.call(rbind, x)
-                    apply(cent, 2L, "/", e2 = colSums(u))
-               }
 
                ## utils.R
                if (check_multivariate(x)) {
                     ## multivariate
                     mv <- reshape_multviariate(x, NULL)
 
-                    cent <- lapply(mv$series, fuzzy_cent, u = u)
+                    cent <- lapply(mv$series, fcm_cent, u = u)
                     cent <- lapply(1L:k, function(idc) {
                          sapply(cent, function(c) { c[idc, , drop = TRUE] })
                     })
@@ -172,7 +173,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                     return(cent)
                }
 
-               cent <- fuzzy_cent(x, u)
+               cent <- fcm_cent(x, u)
 
                # Coerce back to list
                consistency_check(cent, "tsmat")

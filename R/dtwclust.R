@@ -344,6 +344,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
      MYCALL <- match.call(expand.dots = TRUE)
 
+     if (type == "fuzzy" && !missing(centroid) && is.character(centroid) && centroid != "fcm")
+          warning("The 'centroid' argument was provided but was different than 'fcm', so it was ignored.")
+
      ## ----------------------------------------------------------------------------------------------------------
      ## Control parameters
      ## ----------------------------------------------------------------------------------------------------------
