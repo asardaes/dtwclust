@@ -156,6 +156,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
           D <- foreach(x = x, fftx = fftx, y = y, ffty = ffty,
                        .combine = c,
                        .multicombine = TRUE,
+                       .export = "lnorm",
                        .packages = "stats") %dopar% {
                             mapply(y, ffty, x, fftx,
                                    FUN = function(y, ffty, x, fftx) {
