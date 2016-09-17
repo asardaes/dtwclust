@@ -158,18 +158,8 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                     apply(cent, 2L, "/", e2 = colSums(u))
                }
 
-               ## check for multivariate case
-               dims <- sapply(x, function(x) {
-                    if (is.null(dim(x)))
-                         0L
-                    else
-                         ncol(x)
-               })
-
-               if (length(unique(dims)) != 1L)
-                    stop("Inconsistent dimensions across series.")
-
-               if (any(dims > 0L)) {
+               ## utils.R
+               if (check_multivariate(x)) {
                     ## multivariate
                     mv <- reshape_multviariate(x, NULL)
 

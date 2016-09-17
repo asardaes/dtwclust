@@ -67,18 +67,8 @@ shape_extraction <- function(X, centroid = NULL, center = NULL, znorm = FALSE) {
 
      consistency_check(X, "vltslist")
 
-     ## check for multivariate case
-     dims <- sapply(X, function(x) {
-          if (is.null(dim(x)))
-               0L
-          else
-               ncol(x)
-     })
-
-     if (length(unique(dims)) != 1L)
-          stop("Inconsistent dimensions across series.")
-
-     if (any(dims > 0L)) {
+     ## utils.R
+     if (check_multivariate(X)) {
           ## multivariate
           mv <- reshape_multviariate(X, centroid) # utils.R
 

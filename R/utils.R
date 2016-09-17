@@ -230,8 +230,22 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
 }
 
 # ========================================================================================================
-# Reshape multviariate series for mapply
+# Multviariate helpers
 # ========================================================================================================
+
+check_multivariate <- function(x) {
+     dims <- sapply(x, function(x) {
+          if (is.null(dim(x)))
+               0L
+          else
+               ncol(x)
+     })
+
+     if (length(unique(dims)) != 1L)
+          stop("Inconsistent dimensions across series.")
+
+     any(dims > 0L)
+}
 
 reshape_multviariate <- function(series, cent) {
      ncols <- ncol(series[[1L]])
