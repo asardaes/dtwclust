@@ -32,7 +32,7 @@
 #' @export
 #'
 dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
-                      step.pattern = symmetric1, backtrack = FALSE, normalize = FALSE) {
+                      step.pattern = symmetric2, backtrack = FALSE, normalize = FALSE) {
      consistency_check(x, "ts")
      consistency_check(y, "ts")
 
@@ -78,14 +78,14 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 }
 
 dtw_basic_proxy <- function(x, y, window.size = NULL, norm = "L1",
-                            step.pattern = symmetric1, normalize = FALSE) {
+                            step.pattern = symmetric2, backtrack = FALSE, normalize = FALSE) {
      dtw_basic(x, y, window.size = window.size,
                norm = norm, step.pattern = step.pattern,
                backtrack = FALSE, normalize = normalize)
 }
 
 dtw_dba <- function(x, y, window.size = NULL, norm = "L1",
-                    step.pattern = symmetric1, backtrack = TRUE,
+                    step.pattern = symmetric2, backtrack = TRUE,
                     normalize = FALSE, lcm_gcm = NULL, ...) {
      if (is.null(lcm_gcm))
           return(dtw_basic(x, y, window.size = window.size, norm = norm,

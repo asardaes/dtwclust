@@ -96,6 +96,23 @@ test_that("dtw2 distance gives the same result as reference",
           my_expect_equal_to_reference(pc_dtw2))
 
 # =================================================================================================
+# dtw_basic
+# =================================================================================================
+
+pc_dtwb <- dtwclust(data_subset, type = "partitional", k = 4,
+                    distance = "dtw_basic", centroid = "pam",
+                    preproc = NULL, control = ctrl, seed = 123)
+
+pc_dtwb <- reset_nondeterministic(pc_dtwb)
+
+test_that("dtw_basic distance gives the same result as reference",
+          my_expect_equal_to_reference(pc_dtwb))
+
+test_that("dtw_basic gives the same distmat as dtw",
+          expect_equal(pc_dtw@distmat, pc_dtwb@distmat,
+                       check.attributes = FALSE, use.names = FALSE))
+
+# =================================================================================================
 # distance function
 # =================================================================================================
 

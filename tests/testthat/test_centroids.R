@@ -100,6 +100,18 @@ pc_dba <- reset_nondeterministic(pc_dba)
 test_that("dba centroid gives the same result as reference",
           my_expect_equal_to_reference(pc_dba))
 
+suppressWarnings(
+     pc_dba_basic <- dtwclust(data_subset, type = "partitional", k = 4,
+                              distance = "sbd", centroid = "dba",
+                              preproc = NULL, control = ctrl, seed = 123,
+                              dba.alignment = "dtw_basic")
+)
+
+pc_dba_basic <- reset_nondeterministic(pc_dba_basic)
+
+test_that("dba_basic centroid gives the same result as reference",
+          my_expect_equal_to_reference(pc_dba_basic))
+
 # =================================================================================================
 # colMeans
 # =================================================================================================
