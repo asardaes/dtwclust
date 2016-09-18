@@ -8,6 +8,12 @@
 #' If a given series reference is provided in \code{centroid}, the algorithm should always converge to the same
 #' result provided the elements of \code{X} keep the same values, although their order may change.
 #'
+#' The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
+#' that represents the distance between the point considered and one of the edges of the window. Therefore,
+#' if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
+#' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21} observations falling within
+#' the window.
+#'
 #' @section Parallel Computing:
 #'
 #' Please note that running tasks in parallel does \strong{not} guarantee faster computations.
@@ -74,7 +80,11 @@
 #' convergence is assumed.
 #' @param error.check Should inconsistencies in the data be checked?
 #' @param trace If \code{TRUE}, the current iteration is printed to screen.
-#' @param ... Further arguments for \code{\link[dtw]{dtw}}, e.g. \code{step.pattern}.
+#' @param ... Further arguments for \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}, e.g.
+#' \code{step.pattern}.
+#' @param dba.alignment Character indicating which function to use for calculating alignments, either
+#' \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}. The latter should be faster, but the backtracking
+#' method differs from that in the former.
 #'
 #' @return The average time series.
 #'
@@ -83,17 +93,22 @@
 
 DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
                 norm = "L1", window.size = NULL, delta = 1e-3,
-                error.check = TRUE, trace = FALSE, ...) {
+                error.check = TRUE, trace = FALSE, ..., dba.alignment = "dtw") {
      if (!missing(center)) {
           warning("The 'center' argument has been deprecated, please use 'centroid' instead.")
 
           if (is.null(centroid)) centroid <- center
      }
 
+     dba.alignment <- match.arg(dba.alignment, c("dtw", "dtw_basic"))
+
+     if (dba.alignment == "dtw")
+          message("DBA: In the next package version, dba.alignment = 'dtw_basic' will be the default.")
+
      X <- consistency_check(X, "tsmat")
 
      if (is.null(centroid))
-          centroid <- X[[sample(n, 1L)]] # Random choice
+          centroid <- X[[sample(length(X), 1L)]] # Random choice
 
      if (error.check) {
           consistency_check(X, "vltslist")
@@ -134,13 +149,11 @@ DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
           return(do.call(cbind, new_c))
      }
 
-     ## for C helper
-     square <- norm == "L2"
-
-     n <- length(X)
-
      ## pre-allocate local cost matrices
-     LCM <- lapply(X, function(x) { matrix(0, length(x), length(centroid)) })
+     if (dba.alignment == "dtw")
+          LCM <- lapply(X, function(x) { matrix(0, length(x), length(centroid)) })
+     else
+          LCM <- lapply(X, function(x) { matrix(0, length(x) + 1L, length(centroid) + 1L) })
 
      ## maximum length of considered series
      L <- max(lengths(X))
@@ -161,13 +174,22 @@ DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
           xg <- foreach(X = Xs, LCM = LCMs,
                         .combine = c,
                         .multicombine = TRUE,
+                        .export = "dtw_dba",
                         .packages = c("dtwclust", "stats")) %dopar% {
                              mapply(X, LCM, SIMPLIFY = FALSE, FUN = function(x, lcm) {
-                                  .Call("update_lcm", lcm, x, centroid, square, PACKAGE = "dtwclust")
+                                  if (dba.alignment == "dtw") {
+                                       .Call("update_lcm", lcm, x, centroid,
+                                             isTRUE(norm == "L2"), PACKAGE = "dtwclust")
 
-                                  d <- do.call(dtw::dtw, c(list(x = lcm,
-                                                                window.size = w),
-                                                           dots))
+                                       d <- do.call(dtw::dtw, c(list(x = lcm,
+                                                                     window.size = w),
+                                                                dots))
+                                  } else {
+                                       d <- do.call(dtw_dba, c(list(x = x, y = centroid,
+                                                                    window.size = w, norm = norm,
+                                                                    lcm_gcm = lcm),
+                                                               dots))
+                                  }
 
                                   x.sub <- stats::aggregate(x[d$index1],
                                                             by = list(ind = d$index2),

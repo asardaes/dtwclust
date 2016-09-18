@@ -64,8 +64,11 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
           new_cent
      }
 
-     dba_cent <- function(x_split, cent, ...) {
+     dba_cent <- function(x, x_split, cent, id_changed, cl_id, ...) {
+          ## not all arguments are used, but I want them to be isolated from ...
           check_parallel()
+
+          dots <- list(...)
 
           x_split <- split_parallel(x_split)
           cent <- split_parallel(cent)
@@ -79,12 +82,14 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                                    mapply(x_split, cent,
                                           SIMPLIFY = FALSE,
                                           FUN = function(x, c) {
-                                               new_c <- DBA(x, c,
-                                                            norm = control@norm,
-                                                            window.size = control@window.size,
-                                                            max.iter = control@dba.iter,
-                                                            delta = control@delta,
-                                                            error.check = FALSE)
+                                               new_c <- do.call(DBA,
+                                                                c(dots,
+                                                                  list(x, c,
+                                                                       norm = control@norm,
+                                                                       window.size = control@window.size,
+                                                                       max.iter = control@dba.iter,
+                                                                       delta = control@delta,
+                                                                       error.check = FALSE)))
 
                                                ## return
                                                new_c
