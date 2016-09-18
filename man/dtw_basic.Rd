@@ -5,7 +5,7 @@
 \title{Basic DTW distance}
 \usage{
 dtw_basic(x, y, window.size = NULL, norm = "L1",
-  step.pattern = symmetric2, backtrack = FALSE, normalize = FALSE)
+  step.pattern = get("symmetric2"), backtrack = FALSE, normalize = FALSE)
 }
 \arguments{
 \item{x, y}{Time series. Multivariate series must have time spanning the rows and variables spanning the
@@ -20,7 +20,7 @@ columns.}
 
 \item{backtrack}{Also compute the warping path between series? See details.}
 
-\item{Normalize}{Should the distance be normalized? Only supported for \code{symmetric2}.}
+\item{normalize}{Should the distance be normalized? Only supported for \code{symmetric2}.}
 }
 \value{
 The DTW distance. For \code{backtrack} \code{=} \code{TRUE}, a list with: \itemize{
