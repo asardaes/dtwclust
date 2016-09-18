@@ -59,6 +59,8 @@ data <- lapply(CharTraj, reinterpolate, newLength = 180)
 ctrl <- new("dtwclustControl", window.size = 20L, trace = TRUE)
 ```
 
+### Partitional
+
 ```{r partitional}
 ## =============================================================================================
 ## Partitional clustering using DTW with help of lower bounds and PAM centroids
@@ -72,6 +74,8 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 
 plot(kc.dtwlb)
 ```
+
+### Hierarchical
 
 ```{r hierarchical}
 ## =============================================================================================
@@ -89,6 +93,8 @@ print(cvis <- sapply(hc.sbd, cvi, b = CharTrajLabels))
 plot(hc.sbd[[which.min(cvis["VI", ])]])
 ```
 
+### TADPole
+
 ```{r tadpole}
 ## =============================================================================================
 ## TADPole clustering
@@ -100,6 +106,8 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 plot(kc.tadp, clus = 1:4)
 ```
 
+### Parallel support
+
 ```{r parallel}
 ## =============================================================================================
 ## Parallel support
@@ -107,7 +115,6 @@ plot(kc.tadp, clus = 1:4)
 
 require(doParallel)
 cl <- makeCluster(detectCores(), "FORK")
-invisible(clusterEvalQ(cl, library(dtwclust)))
 registerDoParallel(cl)
 
 ## Creating a custom distance (normalized DTW)
@@ -130,8 +137,9 @@ sapply(kc.ndtw, cvi, b = CharTrajLabels, type = "VI")
 
 ## DBA centroids
 kc <- dtwclust(datalist, k = 20,
-               distance = "nDTW", centroid = "dba",
-               seed = 9421, control = list(trace = TRUE))
+               distance = "dtw_basic", centroid = "dba",
+               seed = 9421, control = list(trace = TRUE, window.size = 20L),
+               dba.alignment = "dtw_basic", normalize = TRUE)
 
 ## Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
@@ -140,6 +148,8 @@ plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
 stopCluster(cl)
 registerDoSEQ()
 ```
+
+### Fuzzy
 
 ```{r fuzzy}
 ## =============================================================================================

@@ -1,5 +1,6 @@
 ## Update to version 2.2.2
 * Bug fixes
+* Consistency adjustments
 
 ## Test environments
 * Local GNU/Linux, R 3.3.1

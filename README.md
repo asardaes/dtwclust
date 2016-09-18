@@ -43,6 +43,8 @@ data <- lapply(CharTraj, reinterpolate, newLength = 180)
 ctrl <- new("dtwclustControl", window.size = 20L, trace = TRUE)
 ```
 
+### Partitional
+
 ``` r
 ## =============================================================================================
 ## Partitional clustering using DTW with help of lower bounds and PAM centroids
@@ -59,12 +61,14 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 4: Changes / Distsum = 2 / 1311.201
 #> Iteration 5: Changes / Distsum = 0 / 1311.201
 #> 
-#>  Elapsed time is 10.037 seconds.
+#>  Elapsed time is 9.897 seconds.
 
 plot(kc.dtwlb)
 ```
 
 ![](README-partitional-1.png)
+
+### Hierarchical
 
 ``` r
 ## =============================================================================================
@@ -80,7 +84,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.695 seconds.
+#>  Elapsed time is 0.767 seconds.
 
 cat("CVIs for HC+SBD:\n")
 #> CVIs for HC+SBD:
@@ -156,6 +160,8 @@ plot(hc.sbd[[which.min(cvis["VI", ])]])
 
 ![](README-hierarchical-1.png)
 
+### TADPole
+
 ``` r
 ## =============================================================================================
 ## TADPole clustering
@@ -168,12 +174,14 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 3.42 seconds.
+#>  Elapsed time is 3.67 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
 
 ![](README-tadpole-1.png)
+
+### Parallel support
 
 ``` r
 ## =============================================================================================
@@ -185,7 +193,6 @@ require(doParallel)
 #> Loading required package: foreach
 #> Loading required package: iterators
 cl <- makeCluster(detectCores(), "FORK")
-invisible(clusterEvalQ(cl, library(dtwclust)))
 registerDoParallel(cl)
 
 ## Creating a custom distance (normalized DTW)
@@ -212,15 +219,16 @@ sapply(kc.ndtw, cvi, b = CharTrajLabels, type = "VI")
 
 ## DBA centroids
 kc <- dtwclust(datalist, k = 20,
-               distance = "nDTW", centroid = "dba",
-               seed = 9421, control = list(trace = TRUE))
-#> Series have different length. Please confirm that the provided distance function supports this.
-#> Iteration 1: Changes / Distsum = 100 / 5.057696
-#> Iteration 2: Changes / Distsum = 2 / 3.594286
-#> Iteration 3: Changes / Distsum = 1 / 3.550964
-#> Iteration 4: Changes / Distsum = 0 / 3.531171
+               distance = "dtw_basic", centroid = "dba",
+               seed = 9421, control = list(trace = TRUE, window.size = 20L),
+               dba.alignment = "dtw_basic", normalize = TRUE)
+#> Iteration 1: Changes / Distsum = 100 / 6.749242
+#> Iteration 2: Changes / Distsum = 3 / 4.799065
+#> Iteration 3: Changes / Distsum = 2 / 4.746283
+#> Iteration 4: Changes / Distsum = 1 / 4.689033
+#> Iteration 5: Changes / Distsum = 0 / 4.656551
 #> 
-#>  Elapsed time is 18.137 seconds.
+#>  Elapsed time is 6.245 seconds.
 
 ## Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
@@ -234,6 +242,8 @@ plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
 stopCluster(cl)
 registerDoSEQ()
 ```
+
+### Fuzzy
 
 ``` r
 ## =============================================================================================
@@ -260,7 +270,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.176   0.000   0.175 
+#>   0.152   0.000   0.152 
 #> 
 #> Head of fuzzy memberships:
 #> 
