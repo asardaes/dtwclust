@@ -97,17 +97,24 @@
 #' @param norm Pointwise distance. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.
 #' @param error.check Should inconsistencies in the data be checked?
 #' @param pairwise Calculate pairwise distances?
+#' @param dtw.func Which function to use for core DTW the calculations, either "dtw" or "dtw_basic". See
+#' \code{\link[dtw]{dtw}} and \code{\link{dtw_basic}}.
+#' @param ... Further arguments for \code{dtw.func}.
 #'
 #' @return The distance matrix with class \code{crossdist}.
 #'
 #' @export
 
 dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
-                   error.check = TRUE, pairwise = FALSE) {
-
+                   error.check = TRUE, pairwise = FALSE,
+                   dtw.func = "dtw_basic", ...) {
      norm <- match.arg(norm, c("L1", "L2"))
+     dtw.func <- match.arg(dtw.func, c("dtw", "dtw_basic"))
 
-     method <- ifelse(norm == "L1", "DTW", "DTW2")
+     if (dtw.func == "dtw")
+          method <- ifelse(norm == "L1", "DTW", "DTW2")
+     else
+          method <- toupper(dtw.func)
 
      X <- consistency_check(x, "tsmat")
 
@@ -138,8 +145,10 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                                         pairwise = TRUE,
                                         method = method,
                                         dist.method = norm,
+                                        norm = norm,
                                         window.type = window.type,
-                                        window.size = window.size)
+                                        window.size = window.size,
+                                        ...)
                        }
 
           return(D)
@@ -189,8 +198,10 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                                            pairwise = TRUE,
                                            method = method,
                                            dist.method = norm,
+                                           norm = norm,
                                            window.type = "slantedband",
-                                           window.size = window.size)
+                                           window.size = window.size,
+                                           ...)
                           }
 
           D[cbind(1L:length(X), indNN)[unlist(indNew), , drop = FALSE]] <- dSub

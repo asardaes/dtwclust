@@ -5,7 +5,7 @@
 \title{DTW distance matrix guided by Lemire's improved lower bound}
 \usage{
 dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
-  pairwise = FALSE)
+  pairwise = FALSE, dtw.func = "dtw_basic", ...)
 }
 \arguments{
 \item{x, y}{A matrix where rows are time series, or a list of time series.}
@@ -17,6 +17,11 @@ dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
 \item{error.check}{Should inconsistencies in the data be checked?}
 
 \item{pairwise}{Calculate pairwise distances?}
+
+\item{dtw.func}{Which function to use for core DTW the calculations, either "dtw" or "dtw_basic". See
+\code{\link[dtw]{dtw}} and \code{\link{dtw_basic}}.}
+
+\item{...}{Further arguments for \code{dtw.func}.}
 }
 \value{
 The distance matrix with class \code{crossdist}.

@@ -81,7 +81,8 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 }
 
 dtw_basic_proxy <- function(x, y, window.size = NULL, norm = "L1",
-                            step.pattern = get("symmetric2"), backtrack = FALSE, normalize = FALSE) {
+                            step.pattern = get("symmetric2"), backtrack = FALSE,
+                            normalize = FALSE, ...) {
      dtw_basic(x, y, window.size = window.size,
                norm = norm, step.pattern = step.pattern,
                backtrack = FALSE, normalize = normalize)
