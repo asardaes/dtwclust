@@ -61,7 +61,8 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
                 norm, step.pattern, backtrack,
                 PACKAGE = "dtwclust")
 
-     if (normalize) d <- d / (NROW(x) + NROW(y))
+     if (normalize && step.pattern == 2)
+          d <- d / (NROW(x) + NROW(y))
 
      if (backtrack) {
           path <- attr(d, "path")
@@ -120,7 +121,8 @@ dtw_dba <- function(x, y, window.size = NULL, norm = "L1",
                 norm, step.pattern, lcm_gcm,
                 PACKAGE = "dtwclust")
 
-     if (normalize) d <- d / (NROW(x) + NROW(y))
+     if (normalize && step.pattern == 2)
+          d <- d / (NROW(x) + NROW(y))
 
      path <- attr(d, "path")
      index1 <- attr(d, "index1")
