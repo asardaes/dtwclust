@@ -89,6 +89,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                                                                        window.size = control@window.size,
                                                                        max.iter = control@dba.iter,
                                                                        delta = control@delta,
+                                                                       trace = control@trace,
                                                                        error.check = FALSE)))
 
                                                ## return

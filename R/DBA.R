@@ -168,6 +168,8 @@ DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
      iter <- 1L
      centroid_old <- centroid
 
+     if (trace) cat("\tDBA Iteration:")
+
      while(iter <= max.iter) {
           ## Return the coordinates of each series in X grouped by the coordinate they match to in the centroid time series
           ## Also return the number of coordinates used in each case (for averaging below)
@@ -214,7 +216,7 @@ DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
 
           if (all(abs(centroid - centroid_old) < delta)) {
                if (trace)
-                    cat("DBA: Iteration", iter ,"- Converged!\n\n")
+                    cat("", iter ,"- Converged!\n")
 
                break
 
@@ -222,14 +224,14 @@ DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
                centroid_old <- centroid
 
                if (trace)
-                    cat("DBA: Iteration", iter, "\n")
+                    cat(" ", iter, ",", sep = "")
 
                iter <- iter + 1L
           }
      }
 
      if (iter > max.iter && trace)
-          warning("DBA algorithm did not 'converge' within the allowed iterations.")
+          cat(" Did not 'converge'\n")
 
      as.numeric(centroid)
 }
