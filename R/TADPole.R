@@ -164,9 +164,11 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE) {
                         .multicombine = TRUE,
                         .packages = "dtwclust",
                         .noexport = exclude) %dopar% {
-                             proxy::dist(x[ind1[ , 1L]], x[ind1[ , 2L]], method = "DTW2",
+                             proxy::dist(x[ind1[ , 1L]], x[ind1[ , 2L]],
+                                         method = "dtw_basic",
+                                         window.size = window.size,
                                          step.pattern = step.pattern,
-                                         window.type = "slantedband", window.size = window.size,
+                                         norm = "L2",
                                          pairwise = TRUE)
                         }
 
@@ -254,10 +256,10 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE) {
 
                               if (any(indCompute)) {
                                    d2 <- proxy::dist(x[ii], x[indHDN[indCompute]],
-                                                     method = "DTW2",
+                                                     method = "dtw_basic",
+                                                     window.size = window.size,
                                                      step.pattern = step.pattern,
-                                                     window.type = "slantedband",
-                                                     window.size = window.size)
+                                                     norm = "L2")
 
                                    delta[indCompute] <- d2
                               }
