@@ -152,6 +152,8 @@
 #'   \item \code{"dtw"}: DTW, optionally with a Sakoe-Chiba/Slanted-band constraint*.
 #'   \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint*. Read
 #'   details below.
+#'   \item \code{"dtw_basic"}: A custom version of DTW with less functionality, but marginally faster.
+#'   See \code{\link{dtw_basic}}.
 #'   \item \code{"dtw_lb"}: DTW with L1 or L2 norm* and optionally a Sakoe-Chiba constraint*. Some
 #'   computations are avoided by first estimating the distance matrix with Lemire's lower bound and then
 #'   iteratively refining with DTW. See \code{\link{dtw_lb}}. Not suitable for \code{pam.precompute}* =
