@@ -87,7 +87,8 @@ test_that("pam centroid gives the same result as reference",
 suppressWarnings(
      pc_dba <- dtwclust(data_subset, type = "partitional", k = 4,
                         distance = "sbd", centroid = "dba",
-                        preproc = NULL, control = ctrl, seed = 123)
+                        preproc = NULL, control = ctrl, seed = 123,
+                        dba.alignment = "dtw")
 )
 
 suppressWarnings(cvi_dba <- cvi(pc_dba, labels_subset))

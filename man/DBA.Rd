@@ -6,7 +6,7 @@
 \usage{
 DBA(X, centroid = NULL, center = NULL, max.iter = 20L, norm = "L1",
   window.size = NULL, delta = 0.001, error.check = TRUE, trace = FALSE,
-  ..., dba.alignment = "dtw")
+  ..., dba.alignment = "dtw_basic")
 }
 \arguments{
 \item{X}{A data matrix where each row is a time series, or a list where each element is a time series.

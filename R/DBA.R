@@ -93,7 +93,7 @@
 
 DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
                 norm = "L1", window.size = NULL, delta = 1e-3,
-                error.check = TRUE, trace = FALSE, ..., dba.alignment = "dtw") {
+                error.check = TRUE, trace = FALSE, ..., dba.alignment = "dtw_basic") {
      if (!missing(center)) {
           warning("The 'center' argument has been deprecated, please use 'centroid' instead.")
 
@@ -101,9 +101,6 @@ DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
      }
 
      dba.alignment <- match.arg(dba.alignment, c("dtw", "dtw_basic"))
-
-     if (dba.alignment == "dtw")
-          message("DBA: In the next package version, dba.alignment = 'dtw_basic' will be the default.")
 
      X <- consistency_check(X, "tsmat")
 

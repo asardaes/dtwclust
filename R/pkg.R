@@ -176,8 +176,7 @@ NULL
      RNGkind("L'Ecuyer")
 
      packageStartupMessage("\ndtwclust: Setting random number generator to L'Ecuyer-CMRG.\n",
-                           "Note that the 'centers' slot/argument of included objects/functions will be removed ",
-                           "and replaced with 'centroids' in the next package version for consistency.\n",
+                           "Please see news(package = ", dQuote("dtwclust"), ") for important information.\n",
                            "To read the included vignette, type: vignette(", dQuote("dtwclust"), ").\n")
 }
 
