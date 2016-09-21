@@ -110,7 +110,6 @@ SBD <- function(x, y, znorm = FALSE) {
 # ========================================================================================================
 
 SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise = FALSE) {
-
      x <- consistency_check(x, "tsmat")
 
      if (error.check)
@@ -182,6 +181,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
           D <- foreach(x = x, fftx = fftx,
                        .combine = rbind,
                        .multicombine = TRUE,
+                       .export = "lnorm",
                        .packages = "stats") %dopar% {
                             ret <- mapply(x, fftx,
                                           MoreArgs = list(Y = y, FFTY = ffty),
