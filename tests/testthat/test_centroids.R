@@ -109,9 +109,13 @@ suppressWarnings(
 )
 
 pc_dba_basic <- reset_nondeterministic(pc_dba_basic)
+pc_dba_basic@dots <- list()
+pc_dba@dots <- list()
+pc_dba_basic@call <- as.call(list("zas", a = 1))
+pc_dba@call <- as.call(list("zas", a = 1))
 
-test_that("dba_basic centroid gives the same result as reference",
-          my_expect_equal_to_reference(pc_dba_basic))
+test_that("pc_dba_basic centroid gives the same result as pc_dba",
+          expect_identical(pc_dba, pc_dba_basic))
 
 # =================================================================================================
 # colMeans

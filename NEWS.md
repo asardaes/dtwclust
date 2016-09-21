@@ -5,7 +5,7 @@
 * Fixed a bug where multivariate series with different length had spurious data added to them.
 * Consistency adjustments: all `center(s)` arguments/slots will be removed and replaced with `centroid(s)`.
 * Added the `dtw_basic` function, which might be marginally faster due to its limited functionality. It can
-also be used with `dtw_lb` and `DBA`. It will now be used by default, but in the case of `DBA`, the results **will** be different because the backtracking algorithm differs with respect to the one in the `dtw` package.
+also be used with `dtw_lb` and `DBA`. It will now be used by default.
 * The `SBD` and `shape_extraction` functions used the `crossprod` function internally, which returned a 1x1 matrix by default, causing some dimension inconsistencies. In the future, `R` will give an error about the inconsistency, so the function has been changed in `dtwclust`, but it resulted in very small numerical differences, which may be enough to alter some clustering results.
 
 ## Version 2.2.1

@@ -5,7 +5,7 @@
 \title{Time series clustering}
 \usage{
 dtwclust(data = NULL, type = "partitional", k = 2L, method = "average",
-  distance = "dtw", centroid = "pam", preproc = NULL, dc = NULL,
+  distance = "dtw_basic", centroid = "pam", preproc = NULL, dc = NULL,
   control = NULL, seed = NULL, distmat = NULL, ...)
 }
 \arguments{

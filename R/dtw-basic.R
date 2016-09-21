@@ -22,6 +22,11 @@
 #' \code{\link[dtw]{stepPattern}}.
 #' @param backtrack Also compute the warping path between series? See details.
 #' @param normalize Should the distance be normalized? Only supported for \code{symmetric2}.
+#' @param ... Currently ignored.
+#' @param gcm Optionally, a matrix with \code{NROW(x)+1} rows and \code{NROW(y)+1} columns to use for
+#' the global cost matrix calculations. Used internally for memory optimization.
+#' @param dm Optionally, a matrix with \code{NROW(x)+1} rows and \code{NROW(y)+1} columns to use for
+#' the direction matrix and backtracking calculations. Used internally for memory optimization.
 #'
 #' @return The DTW distance. For \code{backtrack} \code{=} \code{TRUE}, a list with: \itemize{
 #'   \item \code{distance}: The DTW distance.
@@ -32,7 +37,8 @@
 #' @export
 #'
 dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
-                      step.pattern = get("symmetric2"), backtrack = FALSE, normalize = FALSE) {
+                      step.pattern = get("symmetric2"), backtrack = FALSE,
+                      normalize = FALSE, ..., gcm = NULL, dm = NULL) {
      consistency_check(x, "ts")
      consistency_check(y, "ts")
 
@@ -56,25 +62,41 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
      else
           stop("step.pattern must be either symmetric1 or symmetric2")
 
+     if (is.null(gcm))
+          gcm <- matrix(-1, NROW(x) + 1L, NROW(y) + 1L)
+     else if (nrow(gcm) < NROW(x) + 1L || ncol(gcm) < NROW(y) + 1L)
+          stop("dtw_basic: Dimension inconsistency in 'gcm'")
+
+     if (backtrack) {
+          if (is.null(dm))
+               dm <- matrix(-1L, NROW(x) + 1L, NROW(y) + 1L)
+          else {
+               storage.mode(dm) <- "integer"
+
+               if (nrow(dm) < NROW(x) + 1L || ncol(dm) < NROW(y) + 1L)
+                    stop("dtw_basic: Dimension inconsistency in 'dm'")
+          }
+     }
+
      d <- .Call("dtw_basic", x, y, window.size,
                 NROW(x), NROW(y), NCOL(x),
                 norm, step.pattern, backtrack,
+                gcm, dm,
                 PACKAGE = "dtwclust")
 
-     if (normalize && step.pattern == 2)
-          d <- d / (NROW(x) + NROW(y))
-     else if (normalize && step.pattern != 2)
+     if (normalize && step.pattern == 2) {
+          if (backtrack)
+               d$distance <- d$distance / (NROW(x) + NROW(y))
+          else
+               d <- d / (NROW(x) + NROW(y))
+
+     } else if (normalize && step.pattern != 2)
           warning("Unable to normalize with the chosen 'step.pattern'.")
 
      if (backtrack) {
-          path <- attr(d, "path")
-          index1 <- attr(d, "index1")
-          index1 <- index1[path:length(index1)]
-          index2 <- attr(d, "index2")
-          index2 <- index2[path:length(index2)]
-          attributes(d) <- NULL
-
-          d <- list(distance = d, index1 = index1, index2 = index2)
+          d$index1 <- d$index1[d$path:1L]
+          d$index2 <- d$index2[d$path:1L]
+          d$path <- NULL
      }
 
      d
@@ -82,61 +104,9 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 
 dtw_basic_proxy <- function(x, y, window.size = NULL, norm = "L1",
                             step.pattern = get("symmetric2"), backtrack = FALSE,
-                            normalize = FALSE, ...) {
+                            normalize = FALSE, ..., gcm = NULL, dm = NULL) {
      dtw_basic(x, y, window.size = window.size,
                norm = norm, step.pattern = step.pattern,
-               backtrack = FALSE, normalize = normalize)
-}
-
-dtw_dba <- function(x, y, window.size = NULL, norm = "L1",
-                    step.pattern = get("symmetric2"), backtrack = TRUE,
-                    normalize = FALSE, lcm_gcm = NULL, ...) {
-     if (is.null(lcm_gcm))
-          return(dtw_basic(x, y, window.size = window.size, norm = norm,
-                           step.pattern = step.pattern, backtrack = TRUE,
-                           normalize = normalize))
-     else if (any(dim(lcm_gcm) != c(length(x) + 1L, length(y) + 1L)))
-          stop("Dimension inconsistency when calculating DTW within DBA.")
-
-     consistency_check(x, "ts")
-     consistency_check(y, "ts")
-
-     if (NCOL(x) != NCOL(y))
-          stop("Multivariate series must have the same number of variables.")
-
-     if (is.null(window.size))
-          window.size <- -1L
-     else
-          window.size <- consistency_check(window.size, "window")
-
-     norm <- match.arg(norm, c("L1", "L2"))
-     norm <- switch(norm, "L1" = 1, "L2" = 2)
-
-     if (identical(step.pattern, get("symmetric1")))
-          step.pattern <- 1
-     else if (identical(step.pattern, get("symmetric2")))
-          step.pattern <- 2
-     else
-          stop("step.pattern must be either symmetric1 or symmetric2")
-
-     d <- .Call("dtw_dba", x, y, window.size,
-                NROW(x), NROW(y), NCOL(x),
-                norm, step.pattern, lcm_gcm,
-                PACKAGE = "dtwclust")
-
-     if (normalize && step.pattern == 2)
-          d <- d / (NROW(x) + NROW(y))
-     else if (normalize && step.pattern != 2)
-          warning("Unable to normalize with the chosen 'step.pattern'.")
-
-     path <- attr(d, "path")
-     index1 <- attr(d, "index1")
-     index1 <- index1[path:length(index1)]
-     index2 <- attr(d, "index2")
-     index2 <- index2[path:length(index2)]
-     attributes(d) <- NULL
-
-     d <- list(distance = d, index1 = index1, index2 = index2)
-
-     d
+               backtrack = FALSE, normalize = normalize,
+               gcm = gcm, dm = dm)
 }

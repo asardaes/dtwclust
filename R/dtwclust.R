@@ -326,7 +326,7 @@
 #'
 
 dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "average",
-                     distance = "dtw", centroid = "pam", preproc = NULL,
+                     distance = "dtw_basic", centroid = "pam", preproc = NULL,
                      dc = NULL, control = NULL, seed = NULL, distmat = NULL,
                      ...)
 {
@@ -426,11 +426,11 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                consistency_check(centroid, "cent", trace = control@trace)
      }
 
-     if (diff_lengths && distance %in% c("dtw", "dtw2"))
+     if (diff_lengths && distance %in% c("dtw", "dtw2", "dtw_basic"))
           control@symmetric <- FALSE
      else if (distance %in% c("lbk", "lbi"))
           control@symmetric <- FALSE
-     else if (distance %in% c("sbd", "dtw", "dtw2"))
+     else if (distance %in% c("sbd", "dtw", "dtw2", "dtw_basic"))
           control@symmetric <- TRUE
 
      ## For parallel computation

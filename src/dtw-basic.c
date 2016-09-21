@@ -4,29 +4,43 @@
 #include <float.h>
 #include <R.h>
 #include <Rdefines.h>
-#include "shared.h"
+
+int d2s(const int i, const int j, const int nx)
+{
+     return i + j * (nx + 1);
+}
+
+double lnorm(const double *x, const double *y, const double norm,
+             const int nx, const int ny, const int dim,
+             const int i, const int j)
+{
+     double res = 0;
+     for (int k = 0; k < dim; k++) res += pow(fabs(x[i + nx*k] - y[j + ny*k]), norm);
+     res = pow(res, 1/norm);
+     return res;
+}
 
 double dtw_no_backtrack(const double *x, const double *y, const int w,
                         const int nx, const int ny, const int dim,
                         const double norm, const double step,
-                        double **D)
+                        double *D)
 {
-     int i, j;
-     int j1, j2;
-     double local_cost, global_cost;
-
      // initialization
-     for (i = 0; i <= nx; i++)
+     for (int i = 0; i <= nx; i++)
      {
-          for (j = 0; j <= ny; j++)
-               D[i][j] = -1;
+          for (int j = 0; j <= ny; j++)
+               D[d2s(i,j,nx)] = -1;
      }
 
-     D[1][1] = pow(lnorm(x, y, norm, nx, ny, dim, 0, 0), norm);
+     D[d2s(1,1,nx)] = pow(lnorm(x, y, norm, nx, ny, dim, 0, 0), norm);
 
      // dynamic programming
-     for (i = 1; i <= nx; i++)
+     double temp, local_cost, global_cost;
+
+     for (int i = 1; i <= nx; i++)
      {
+          int j1, j2;
+
           if (w == -1)
           {
                j1 = 1;
@@ -41,130 +55,197 @@ double dtw_no_backtrack(const double *x, const double *y, const int w,
                j2 = j2 < ny ? j2 : ny;
           }
 
-          for (j = j1; j <= j2; j++)
+          for (int j = j1; j <= j2; j++)
           {
                if (i == 1 && j == 1) continue;
 
                local_cost = pow(lnorm(x, y, norm, nx, ny, dim, i-1, j-1), norm);
 
-               if (D[i-1][j] == -1)
+               temp = D[d2s(i-1,j,nx)];
+
+               if (temp == -1)
                     global_cost = -1;
                else
-                    global_cost = D[i-1][j] + local_cost;
+                    global_cost = temp + local_cost;
 
-               if (D[i][j-1] != -1 && (global_cost == -1 || D[i][j-1] + local_cost < global_cost))
-                    global_cost = D[i][j-1] + local_cost;
+               temp = D[d2s(i,j-1,nx)];
 
-               if (D[i-1][j-1] != -1 && (global_cost == -1 || D[i-1][j-1] + step*local_cost < global_cost))
-                    global_cost = D[i-1][j-1] + step*local_cost;
+               if (temp != -1 && (global_cost == -1 || temp + local_cost < global_cost))
+                    global_cost = temp + local_cost;
 
-               D[i][j] = global_cost;
+               temp = D[d2s(i-1,j-1,nx)];
+
+               if (temp != -1 && (global_cost == -1 || temp + step*local_cost < global_cost))
+                    global_cost = temp + step*local_cost;
+
+               D[d2s(i,j,nx)] = global_cost;
           }
      }
 
-     return pow(D[nx][ny], 1/norm);
+     return pow(D[(nx+1) * (ny+1) - 1], 1/norm);
 }
 
-void backtrack_gcm(double **D, const int nx, const int ny,
-                   int *index1, int *index2, int *path)
+double dtw_backtrack(const double *x, const double *y, const int w,
+                     const int nx, const int ny, const int dim,
+                     const double norm, const double step,
+                     double *D, int *S, int *index1, int *index2, int *path)
 {
-     index1[nx + ny - 1] = nx;
-     index2[nx + ny - 1] = ny;
-     *path = nx + ny - 2;
+     // initialization
+     for (int i = 0; i <= nx; i++)
+     {
+          for (int j = 0; j <= ny; j++)
+          {
+               D[d2s(i,j,nx)] = -1;
+               S[d2s(i,j,nx)] = -1;
+          }
+     }
 
+     D[d2s(1,1,nx)] = pow(lnorm(x, y, norm, nx, ny, dim, 0, 0), norm);
+
+     // dynamic programming
+     double temp, local_cost, global_cost;
+     int direction; // 1 = diag, 2 = left, 3 = up
+
+     for (int i = 1; i <= nx; i++)
+     {
+          int j1, j2;
+
+          if (w == -1)
+          {
+               j1 = 1;
+               j2 = ny;
+          }
+          else
+          {
+               j1 = ceil((double)i * ny / nx - w);
+               j2 = floor((double)i * ny / nx + w);
+
+               j1 = j1 > 1 ? j1 : 1;
+               j2 = j2 < ny ? j2 : ny;
+          }
+
+          for (int j = j1; j <= j2; j++)
+          {
+               if (i == 1 && j == 1) continue;
+
+               local_cost = pow(lnorm(x, y, norm, nx, ny, dim, i-1, j-1), norm);
+
+               temp = D[d2s(i-1,j,nx)];
+               direction = 3; // up
+
+               if (temp == -1)
+                    global_cost = -1;
+               else
+                    global_cost = temp + local_cost;
+
+               temp = D[d2s(i,j-1,nx)];
+
+               if (temp != -1 && (global_cost == -1 || temp + local_cost <= global_cost))
+               {
+                    global_cost = temp + local_cost;
+                    direction = 2; // left
+               }
+
+               temp = D[d2s(i-1,j-1,nx)];
+
+               if (temp != -1 && (global_cost == -1 || temp + step*local_cost <= global_cost))
+               {
+                    global_cost = temp + step*local_cost;
+                    direction = 1; // diag
+               }
+
+               D[d2s(i,j,nx)] = global_cost;
+               S[d2s(i,j,nx)] = direction;
+          }
+     }
+
+     // backtrack
      int i = nx;
      int j = ny;
-     double triplet[3];
-     int temp, which_min;
 
-     double slope = ((double)nx - 1) / (ny - 1);
-     double intercept = 1 - slope;
+     index1[0] = nx;
+     index2[0] = ny;
+     *path = 1;
 
-     while (i > 1 || j > 1)
+     while(!(i == 1 && j == 1))
      {
-          triplet[0] = (i - 1 > 0) ? D[i-1][j] : DBL_MAX;
-          triplet[1] = (i - 1 > 0 && j - 1 > 0) ? D[i-1][j-1] : DBL_MAX;
-          triplet[2] = (j - 1 > 0) ? D[i][j-1] : DBL_MAX;
-
-          if (triplet[0] == -1) triplet[0] = DBL_MAX;
-          if (triplet[1] == -1) triplet[1] = DBL_MAX;
-          if (triplet[2] == -1) triplet[2] = DBL_MAX;
-
-          if (triplet[0] == triplet[1])
+          switch(S[d2s(i,j,nx)])
           {
-               // what leaves me closer to diagonal?
-               double diag = slope*j + intercept;
+          case 1:
+               i--;
+               j--;
+               break;
 
-               temp = (i < diag) ? 0 : 1;
-          }
-          else
-          {
-               temp = (triplet[0] < triplet[1]) ? 0 : 1;
-          }
+          case 2:
+               j--;
+               break;
 
-          if (triplet[temp] == triplet[2])
-          {
-               // what leaves me closer to diagonal?
-               double diag = slope*j + intercept;
+          case 3:
+               i--;
+               break;
 
-               which_min = (i >= diag) ? temp : 2;
-          }
-          else
-          {
-               which_min = (triplet[temp] < triplet[2]) ? temp : 2;
+          default:
+               error("dtw_basic: Invalid direction matrix computed.");
           }
 
-          if (which_min < 2 && i > 0) i--;
-          if (which_min > 0 && j > 0) j--;
-
-          index1[(*path)] = i;
-          index2[(*path)] = j;
-          (*path)--;
+          index1[*path] = i;
+          index2[*path] = j;
+          (*path)++;
      }
+
+     return pow(D[(nx+1) * (ny+1) - 1], 1/norm);
 }
 
 /* the gateway function */
 SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
-               SEXP nx, SEXP ny, SEXP dim,
-               SEXP norm, SEXP step, SEXP backtrack)
+               SEXP m, SEXP n, SEXP dim,
+               SEXP norm, SEXP step, SEXP backtrack,
+               SEXP D, SEXP S)
 {
      double d;
-     int p = 0;
-     int m = asInteger(nx);
-     int n = asInteger(ny);
-
-     // create gcm
-     double **D = (double **)malloc((m + 1) * sizeof(double *));
-
-     for (int i = 0; i <= m; i++)
-          D[i] = (double *)malloc((n + 1) * sizeof(double));
-
-     // calculate distance
-     d = dtw_no_backtrack(REAL(x), REAL(y), asInteger(window),
-                          m, n, asInteger(dim),
-                          asReal(norm), asReal(step), D);
-
-     SEXP ret = PROTECT(ScalarReal(d));
-     p++;
+     int nx = asInteger(m);
+     int ny = asInteger(n);
 
      if (asLogical(backtrack)) {
-          SEXP index1 = PROTECT(allocVector(INTSXP, m + n));
-          SEXP index2 = PROTECT(allocVector(INTSXP, m + n));
-          p += 2;
+          SEXP index1 = PROTECT(allocVector(INTSXP, nx + ny));
+          SEXP index2 = PROTECT(allocVector(INTSXP, nx + ny));
 
           int path = 0;
 
-          backtrack_gcm(D, m, n, INTEGER(index1), INTEGER(index2), &path);
+          // calculate distance
+          d = dtw_backtrack(REAL(x), REAL(y), asInteger(window),
+                            nx, ny, asInteger(dim),
+                            asReal(norm), asReal(step),
+                            REAL(D), INTEGER(S),
+                            INTEGER(index1), INTEGER(index2), &path);
 
-          setAttrib(ret, install("index1"), index1);
-          setAttrib(ret, install("index2"), index2);
-          setAttrib(ret, install("path"), ScalarInteger(path + 2));
+          // put results in a list
+          SEXP list_names = PROTECT(allocVector(STRSXP, 4));
+          SET_STRING_ELT(list_names, 0, mkChar("distance"));
+          SET_STRING_ELT(list_names, 1, mkChar("index1"));
+          SET_STRING_ELT(list_names, 2, mkChar("index2"));
+          SET_STRING_ELT(list_names, 3, mkChar("path"));
+
+          SEXP ret = PROTECT(allocVector(VECSXP, 4));
+          SET_VECTOR_ELT(ret, 0, PROTECT(ScalarReal(d)));
+          SET_VECTOR_ELT(ret, 1, index1);
+          SET_VECTOR_ELT(ret, 2, index2);
+          SET_VECTOR_ELT(ret, 3, PROTECT(ScalarInteger(path)));
+          setAttrib(ret, R_NamesSymbol, list_names);
+
+          UNPROTECT(6);
+          return ret;
+
+     } else {
+          // calculate distance
+          d = dtw_no_backtrack(REAL(x), REAL(y), asInteger(window),
+                               nx, ny, asInteger(dim),
+                               asReal(norm), asReal(step),
+                               REAL(D));
+
+          SEXP ret = PROTECT(ScalarReal(d));
+
+          UNPROTECT(1);
+          return ret;
      }
-
-     // free D
-     for (int i = 0; i <= m; i++) free(D[i]);
-     free(D);
-
-     UNPROTECT(p);
-     return ret;
 }

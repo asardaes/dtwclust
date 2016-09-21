@@ -140,6 +140,7 @@ DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
                                    delta = delta,
                                    error.check = FALSE,
                                    trace = trace,
+                                   dba.alignment = dba.alignment,
                                    ...)
                           })
 
@@ -147,10 +148,14 @@ DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
      }
 
      ## pre-allocate local cost matrices
-     if (dba.alignment == "dtw")
+     if (dba.alignment == "dtw") {
           LCM <- lapply(X, function(x) { matrix(0, length(x), length(centroid)) })
-     else
+          DM <- lapply(X, function(dummy) NULL)
+
+     } else {
           LCM <- lapply(X, function(x) { matrix(0, length(x) + 1L, length(centroid) + 1L) })
+          DM <- lapply(X, function(x) { matrix(0L, length(x) + 1L, length(centroid) + 1L) })
+     }
 
      ## maximum length of considered series
      L <- max(lengths(X))
@@ -160,6 +165,7 @@ DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
 
      Xs <- split_parallel(X)
      LCMs <- split_parallel(LCM)
+     DMs <- split_parallel(DM)
 
      ## Iterations
      iter <- 1L
@@ -170,12 +176,12 @@ DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
      while(iter <= max.iter) {
           ## Return the coordinates of each series in X grouped by the coordinate they match to in the centroid time series
           ## Also return the number of coordinates used in each case (for averaging below)
-          xg <- foreach(X = Xs, LCM = LCMs,
+          xg <- foreach(X = Xs, LCM = LCMs, DM = DMs,
                         .combine = c,
                         .multicombine = TRUE,
                         .export = "dtw_dba",
                         .packages = c("dtwclust", "stats")) %dopar% {
-                             mapply(X, LCM, SIMPLIFY = FALSE, FUN = function(x, lcm) {
+                             mapply(X, LCM, DM, SIMPLIFY = FALSE, FUN = function(x, lcm, dm) {
                                   if (dba.alignment == "dtw") {
                                        .Call("update_lcm", lcm, x, centroid,
                                              isTRUE(norm == "L2"), PACKAGE = "dtwclust")
@@ -184,10 +190,10 @@ DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
                                                                      window.size = w),
                                                                 dots))
                                   } else {
-                                       d <- do.call(dtw_dba, c(list(x = x, y = centroid,
-                                                                    window.size = w, norm = norm,
-                                                                    lcm_gcm = lcm),
-                                                               dots))
+                                       d <- do.call(dtw_basic, c(list(x = x, y = centroid,
+                                                                      window.size = w, norm = norm,
+                                                                      backtrack = TRUE, gcm = lcm, dm = dm),
+                                                                 dots))
                                   }
 
                                   x.sub <- stats::aggregate(x[d$index1],
