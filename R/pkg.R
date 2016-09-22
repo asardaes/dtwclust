@@ -176,8 +176,8 @@ NULL
      RNGkind("L'Ecuyer")
 
      packageStartupMessage("\ndtwclust: Setting random number generator to L'Ecuyer-CMRG.\n",
-                           "Please see news(package = ", dQuote("dtwclust"), ") for important information.\n",
-                           "To read the included vignette, type: vignette(", dQuote("dtwclust"), ").\n")
+                           "To read the included vignette, type: vignette(", dQuote("dtwclust"), ").\n",
+                           "Please see news(package = ", dQuote("dtwclust"), ") for important information!\n")
 }
 
 .onUnload <- function(libpath) {
