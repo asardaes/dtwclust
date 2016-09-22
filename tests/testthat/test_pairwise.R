@@ -38,3 +38,13 @@ pdist_dtw_lb <- proxy::dist(data_list[1:50], data_list[51:100], method = "DTW_LB
 
 test_that("pairwise dtw_lb distance gives the same result as reference",
           my_expect_equal_to_reference(pdist_dtw_lb))
+
+# =================================================================================================
+# dtw_basic
+# =================================================================================================
+
+pdist_dtw_basic <- proxy::dist(data_list[1:50], data_list[51:100], method = "dtw_basic",
+                               window.size = 18L, pairwise = TRUE)
+
+test_that("pairwise dtw_basic distance gives the same result as reference",
+          my_expect_equal_to_reference(pdist_dtw_basic))

@@ -102,11 +102,80 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
      d
 }
 
-dtw_basic_proxy <- function(x, y, window.size = NULL, norm = "L1",
+dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
                             step.pattern = get("symmetric2"), backtrack = FALSE,
-                            normalize = FALSE, ..., gcm = NULL, dm = NULL) {
-     dtw_basic(x, y, window.size = window.size,
-               norm = norm, step.pattern = step.pattern,
-               backtrack = FALSE, normalize = normalize,
-               gcm = gcm, dm = dm)
+                            normalize = FALSE, ..., gcm = NULL, dm = NULL, pairwise = FALSE) {
+     x <- consistency_check(x, "tsmat")
+     consistency_check(x, "vltslist")
+
+     if (is.null(y)) {
+          y <- x
+
+     } else {
+          y <- consistency_check(y, "tsmat")
+          consistency_check(y, "vltslist")
+     }
+
+     ## Register doSEQ if necessary
+     check_parallel()
+
+     X <- split_parallel(x)
+
+     if (pairwise)
+          Y <- split_parallel(y)
+     else
+          Y <- y
+
+     ## Calculate distance matrix
+     if (pairwise) {
+          D <- foreach(x = X, y = Y,
+                       .combine = c,
+                       .multicombine = TRUE,
+                       .packages = "dtwclust") %dopar% {
+                            L1 <- max(lengths(x))
+                            L2 <- max(lengths(y))
+
+                            gcm <- matrix(0, L1 + 1, L2 + 1)
+                            dm <- matrix(0L, L1 + 1, L2 + 1)
+
+                            mapply(x, y, FUN = function(x, y) {
+                                 dtw_basic(x, y, window.size = window.size,
+                                           norm = norm, step.pattern = step.pattern,
+                                           backtrack = FALSE, normalize = normalize,
+                                           gcm = gcm, dm = dm)
+                            })
+                       }
+
+          names(D) <- NULL
+          attr(D, "class") <- "pairdist"
+
+     } else {
+          D <- foreach(x = X,
+                       .combine = rbind,
+                       .multicombine = TRUE,
+                       .packages = "dtwclust") %dopar% {
+                            L1 <- max(lengths(x))
+                            L2 <- max(lengths(y))
+
+                            gcm <- matrix(0, L1 + 1, L2 + 1)
+                            dm <- matrix(0L, L1 + 1, L2 + 1)
+
+                            ret <- lapply(x, y = Y, FUN = function(x, y) {
+                                 sapply(y, x = x, FUN = function(y, x) {
+                                      dtw_basic(x, y, window.size = window.size,
+                                                norm = norm, step.pattern = step.pattern,
+                                                backtrack = FALSE, normalize = normalize,
+                                                gcm = gcm, dm = dm)
+                                 })
+                            })
+
+                            do.call(rbind, ret)
+                       }
+
+          attr(D, "class") <- "crossdist"
+     }
+
+     attr(D, "method") <- "DTW_BASIC"
+
+     D
 }

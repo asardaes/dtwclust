@@ -130,19 +130,19 @@ NULL
 .onAttach <- function(lib, pkg) {
      ## proxy_prefun is in utils.R
 
-     ## Register DTW_BASIC
-     if (!consistency_check("DTW_BASIC", "dist", silent = TRUE))
-          proxy::pr_DB$set_entry(FUN = dtw_basic_proxy, names=c("DTW_BASIC", "dtw_basic"),
-                                 loop = TRUE, type = "metric", distance = TRUE,
-                                 description = "Basic and maybe faster DTW distance",
-                                 PACKAGE = "dtwclust")
-
      ## Register DTW2
      if (!consistency_check("DTW2", "dist", silent = TRUE))
           proxy::pr_DB$set_entry(FUN = dtw2.proxy, names=c("DTW2", "dtw2"),
                                  loop = TRUE, type = "metric", distance = TRUE,
                                  description = "DTW with L2 norm",
                                  PACKAGE = "dtwclust")
+
+     ## Register DTW_BASIC
+     if (!consistency_check("DTW_BASIC", "dist", silent = TRUE))
+          proxy::pr_DB$set_entry(FUN = dtw_basic_proxy, names=c("DTW_BASIC", "dtw_basic"),
+                                 loop = FALSE, type = "metric", distance = TRUE,
+                                 description = "Basic and maybe faster DTW distance",
+                                 PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
      ## Register LB_Keogh with the 'proxy' package for distance matrix calculation
      if (!consistency_check("LB_Keogh", "dist", silent = TRUE))
