@@ -1,4 +1,3 @@
-// THIS EXPECTS THE SERIES TO SPAN TIME ACROSS ROWS AND DIMENSIONS ACROSS COLUMNS
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>

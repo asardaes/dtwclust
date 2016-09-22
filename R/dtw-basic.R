@@ -24,9 +24,13 @@
 #' @param normalize Should the distance be normalized? Only supported for \code{symmetric2}.
 #' @param ... Currently ignored.
 #' @param gcm Optionally, a matrix with \code{NROW(x)+1} rows and \code{NROW(y)+1} columns to use for
-#' the global cost matrix calculations. Used internally for memory optimization.
+#' the global cost matrix calculations. Used internally for memory optimization. If provided, it \strong{will}
+#' be modified \emph{in place} by \code{C} code, except in the parallel version in \code{proxy::}\code{\link[proxy]{dist}}
+#' which ignores it for thread-safe reasons.
 #' @param dm Optionally, a matrix with \code{NROW(x)+1} rows and \code{NROW(y)+1} columns to use for
 #' the direction matrix and backtracking calculations. Used internally for memory optimization.
+#' If provided, it \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel
+#' version in \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.
 #'
 #' @return The DTW distance. For \code{backtrack} \code{=} \code{TRUE}, a list with: \itemize{
 #'   \item \code{distance}: The DTW distance.
@@ -64,17 +68,17 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 
      if (is.null(gcm))
           gcm <- matrix(-1, NROW(x) + 1L, NROW(y) + 1L)
-     else if (nrow(gcm) < NROW(x) + 1L || ncol(gcm) < NROW(y) + 1L)
+     else if (!is.matrix(gcm) || nrow(gcm) < NROW(x) + 1L || ncol(gcm) < NROW(y) + 1L)
           stop("dtw_basic: Dimension inconsistency in 'gcm'")
 
      if (backtrack) {
           if (is.null(dm))
                dm <- matrix(-1L, NROW(x) + 1L, NROW(y) + 1L)
           else {
-               storage.mode(dm) <- "integer"
-
-               if (nrow(dm) < NROW(x) + 1L || ncol(dm) < NROW(y) + 1L)
+               if (!is.matrix(dm) || nrow(dm) < NROW(x) + 1L || ncol(dm) < NROW(y) + 1L)
                     stop("dtw_basic: Dimension inconsistency in 'dm'")
+
+               storage.mode(dm) <- "integer"
           }
      }
 
@@ -117,7 +121,10 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
      }
 
      ## Register doSEQ if necessary
-     check_parallel()
+     if (check_parallel())
+          GCM <- lapply(1L:foreach::getDoParWorkers(), function(dummy) NULL)
+     else
+          GCM <- list(gcm)
 
      X <- split_parallel(x)
 
@@ -128,21 +135,23 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
      ## Calculate distance matrix
      if (pairwise) {
-          D <- foreach(x = X, y = Y,
+          D <- foreach(x = X, y = Y, gcm = GCM,
                        .combine = c,
                        .multicombine = TRUE,
                        .packages = "dtwclust") %dopar% {
                             L1 <- max(lengths(x))
                             L2 <- max(lengths(y))
 
-                            gcm <- matrix(0, L1 + 1, L2 + 1)
-                            dm <- matrix(0L, L1 + 1, L2 + 1)
+                            if (is.null(gcm))
+                              gcm <- matrix(0, L1 + 1, L2 + 1)
+                            else if (!is.matrix(gcm) || nrow(gcm) < L1 + 1L || ncol(gcm) < L2 + 1L)
+                                 stop("dtw_basic: Dimension inconsistency in 'gcm'")
 
                             mapply(x, y, FUN = function(x, y) {
                                  dtw_basic(x, y, window.size = window.size,
                                            norm = norm, step.pattern = step.pattern,
                                            backtrack = FALSE, normalize = normalize,
-                                           gcm = gcm, dm = dm)
+                                           gcm = gcm)
                             })
                        }
 
@@ -150,22 +159,24 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
           attr(D, "class") <- "pairdist"
 
      } else {
-          D <- foreach(x = X,
+          D <- foreach(x = X, gcm = GCM,
                        .combine = rbind,
                        .multicombine = TRUE,
                        .packages = "dtwclust") %dopar% {
                             L1 <- max(lengths(x))
-                            L2 <- max(lengths(y))
+                            L2 <- max(lengths(Y))
 
-                            gcm <- matrix(0, L1 + 1, L2 + 1)
-                            dm <- matrix(0L, L1 + 1, L2 + 1)
+                            if (is.null(gcm))
+                                 gcm <- matrix(0, L1 + 1, L2 + 1)
+                            else if (!is.matrix(gcm) || nrow(gcm) < L1 + 1L || ncol(gcm) < L2 + 1L)
+                                 stop("dtw_basic: Dimension inconsistency in 'gcm'")
 
                             ret <- lapply(x, y = Y, FUN = function(x, y) {
                                  sapply(y, x = x, FUN = function(y, x) {
                                       dtw_basic(x, y, window.size = window.size,
                                                 norm = norm, step.pattern = step.pattern,
                                                 backtrack = FALSE, normalize = normalize,
-                                                gcm = gcm, dm = dm)
+                                                gcm = gcm)
                                  })
                             })
 
