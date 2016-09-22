@@ -169,6 +169,8 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
                stop("Window size should not exceed length of the time series")
      }
 
+     retclass <- "crossdist"
+
      ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
      envelops <- lapply(y, function(s) { call_envelop(s, window.size*2L + 1L) })
 
@@ -182,9 +184,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
      if (pairwise) {
           lower.env <- split_parallel(lower.env)
           upper.env <- split_parallel(upper.env)
-     }
 
-     if (pairwise) {
           D <- foreach(x = x, lower.env = lower.env, upper.env = upper.env,
                        .combine = c,
                        .multicombine = TRUE) %dopar% {
@@ -197,7 +197,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
                                    })
                        }
 
-          attr(D, "class") <- "pairdist"
+          retclass <- "pairdist"
 
      } else {
           D <- foreach(x = x,
@@ -219,8 +219,6 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
                             do.call(rbind, ret)
                        }
-
-          attr(D, "class") <- "crossdist"
      }
 
      if (force.symmetry && !pairwise) {
@@ -240,6 +238,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
           }
      }
 
+     class(D) <- retclass
      attr(D, "method") <- "LB_Keogh"
 
      D

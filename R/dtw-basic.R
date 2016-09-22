@@ -120,6 +120,8 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
           consistency_check(y, "vltslist")
      }
 
+     retclass <- "crossdist"
+
      ## Register doSEQ if necessary
      if (check_parallel())
           GCM <- lapply(1L:foreach::getDoParWorkers(), function(dummy) NULL)
@@ -128,13 +130,10 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
      X <- split_parallel(x)
 
-     if (pairwise)
-          Y <- split_parallel(y)
-     else
-          Y <- y
-
      ## Calculate distance matrix
      if (pairwise) {
+          Y <- split_parallel(y)
+
           D <- foreach(x = X, y = Y, gcm = GCM,
                        .combine = c,
                        .multicombine = TRUE,
@@ -156,7 +155,7 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
                        }
 
           names(D) <- NULL
-          attr(D, "class") <- "pairdist"
+          retclass <- "pairdist"
 
      } else {
           D <- foreach(x = X, gcm = GCM,
@@ -164,14 +163,14 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
                        .multicombine = TRUE,
                        .packages = "dtwclust") %dopar% {
                             L1 <- max(lengths(x))
-                            L2 <- max(lengths(Y))
+                            L2 <- max(lengths(y))
 
                             if (is.null(gcm))
                                  gcm <- matrix(0, L1 + 1, L2 + 1)
                             else if (!is.matrix(gcm) || nrow(gcm) < L1 + 1L || ncol(gcm) < L2 + 1L)
                                  stop("dtw_basic: Dimension inconsistency in 'gcm'")
 
-                            ret <- lapply(x, y = Y, FUN = function(x, y) {
+                            ret <- lapply(x, y = y, FUN = function(x, y) {
                                  sapply(y, x = x, FUN = function(y, x) {
                                       dtw_basic(x, y, window.size = window.size,
                                                 norm = norm, step.pattern = step.pattern,
@@ -182,10 +181,9 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
                             do.call(rbind, ret)
                        }
-
-          attr(D, "class") <- "crossdist"
      }
 
+     class(D) <- retclass
      attr(D, "method") <- "DTW_BASIC"
 
      D

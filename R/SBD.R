@@ -131,6 +131,8 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
           }
      }
 
+     retclass <- "crossdist"
+
      ## Precompute FFTs, padding with zeros as necessary, which will be compensated later
      L <- max(lengths(x)) + max(lengths(y)) - 1L
      fftlen <- stats::nextn(L, 2L)
@@ -145,13 +147,11 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
      x <- split_parallel(x)
      fftx <- split_parallel(fftx)
 
+     ## Calculate distance matrix
      if (pairwise) {
           y <- split_parallel(y)
           ffty <- split_parallel(ffty)
-     }
 
-     ## Calculate distance matrix
-     if (pairwise) {
           D <- foreach(x = x, fftx = fftx, y = y, ffty = ffty,
                        .combine = c,
                        .multicombine = TRUE,
@@ -175,7 +175,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
                                    })
                        }
 
-          attr(D, "class") <- "pairdist"
+          retclass <- "pairdist"
 
      } else {
           D <- foreach(x = x, fftx = fftx,
@@ -208,10 +208,9 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
 
                             do.call(rbind, ret)
                        }
-
-          attr(D, "class") <- "crossdist"
      }
 
+     class(D) <- retclass
      attr(D, "method") <- "SBD"
 
      D

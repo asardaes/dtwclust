@@ -161,12 +161,10 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
      if (!is.null(y)) {
           Y <- consistency_check(y, "tsmat")
-
           force.symmetry <- FALSE
 
      } else {
           Y <- X
-
           force.symmetry <- TRUE
      }
 
@@ -209,6 +207,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
           new.indNN <- apply(D, 1L, which.min)
      }
 
+     class(D) <- "crossdist"
      attr(D, "method") <- "DTW_LB"
 
      D
