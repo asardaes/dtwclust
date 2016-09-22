@@ -106,21 +106,58 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
      d
 }
 
-dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
-                            step.pattern = get("symmetric2"), backtrack = FALSE,
-                            normalize = FALSE, ..., gcm = NULL, dm = NULL, pairwise = FALSE) {
+dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symmetric = FALSE) {
      x <- consistency_check(x, "tsmat")
      consistency_check(x, "vltslist")
 
      if (is.null(y)) {
           y <- x
+          symmetric <- !any(diff(lengths(x)) != 0)
 
      } else {
           y <- consistency_check(y, "tsmat")
           consistency_check(y, "vltslist")
+
+          if (symmetric && length(x) != length(y))
+               stop("dtw_basic: Dimension inconsistency when calculating cross-distance matrix within proxy.")
      }
 
+     dots <- list(...)
+
      retclass <- "crossdist"
+
+     if (symmetric) {
+          check_parallel()
+
+          pairs <- call_pairs(length(x), lower = FALSE)
+          pairs <- split_parallel(pairs, 1L)
+
+          dots$pairwise <- TRUE
+
+          d <- foreach(pairs = pairs,
+                       .combine = c,
+                       .multicombine = TRUE,
+                       .packages = "dtwclust") %dopar% {
+                            do.call(proxy::dist,
+                                    c(dots,
+                                      list(x = x[pairs[ , 1L]],
+                                           y = x[pairs[ , 2L]],
+                                           method = "dtw_basic")))
+                       }
+
+          rm("pairs")
+
+          D <- matrix(0, nrow = length(x), ncol = length(x))
+          D[upper.tri(D)] <- d
+          D <- t(D)
+          D[upper.tri(D)] <- d
+
+          class(D) <- retclass
+          attr(D, "dimnames") <- list(names(x), names(x))
+          attr(D, "method") <- "DTW_BASIC"
+
+          return(D)
+     }
 
      ## Register doSEQ if necessary
      if (check_parallel())
@@ -142,15 +179,15 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
                             L2 <- max(lengths(y))
 
                             if (is.null(gcm))
-                              gcm <- matrix(0, L1 + 1, L2 + 1)
+                                 dots$gcm <- matrix(0, L1 + 1, L2 + 1)
                             else if (!is.matrix(gcm) || nrow(gcm) < L1 + 1L || ncol(gcm) < L2 + 1L)
                                  stop("dtw_basic: Dimension inconsistency in 'gcm'")
 
                             mapply(x, y, FUN = function(x, y) {
-                                 dtw_basic(x, y, window.size = window.size,
-                                           norm = norm, step.pattern = step.pattern,
-                                           backtrack = FALSE, normalize = normalize,
-                                           gcm = gcm)
+                                 do.call("dtw_basic",
+                                         c(dots,
+                                           list(x = x,
+                                                y = y)))
                             })
                        }
 
@@ -166,16 +203,16 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
                             L2 <- max(lengths(y))
 
                             if (is.null(gcm))
-                                 gcm <- matrix(0, L1 + 1, L2 + 1)
+                                 dots$gcm <- matrix(0, L1 + 1, L2 + 1)
                             else if (!is.matrix(gcm) || nrow(gcm) < L1 + 1L || ncol(gcm) < L2 + 1L)
                                  stop("dtw_basic: Dimension inconsistency in 'gcm'")
 
                             ret <- lapply(x, y = y, FUN = function(x, y) {
                                  sapply(y, x = x, FUN = function(y, x) {
-                                      dtw_basic(x, y, window.size = window.size,
-                                                norm = norm, step.pattern = step.pattern,
-                                                backtrack = FALSE, normalize = normalize,
-                                                gcm = gcm)
+                                      do.call("dtw_basic",
+                                              c(dots,
+                                                list(x = x,
+                                                     y = y)))
                                  })
                             })
 

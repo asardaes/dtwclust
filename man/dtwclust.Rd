@@ -335,8 +335,7 @@ workers available.
 The lower bounds are defined only for time series of equal length. \code{DTW} and \code{DTW2}
 don't require this, but they are much slower to compute.
 
-The lower bounds are \strong{not} symmetric, and \code{DTW} is only symmetric if series have equal
-lengths.
+The lower bounds are \strong{not} symmetric, and \code{DTW} is not symmetric in general.
 }
 \examples{
 ## NOTE: All examples should work, some are simply set to not run automatically

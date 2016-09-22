@@ -264,8 +264,7 @@
 #' The lower bounds are defined only for time series of equal length. \code{DTW} and \code{DTW2}
 #' don't require this, but they are much slower to compute.
 #'
-#' The lower bounds are \strong{not} symmetric, and \code{DTW} is only symmetric if series have equal
-#' lengths.
+#' The lower bounds are \strong{not} symmetric, and \code{DTW} is not symmetric in general.
 #'
 #' @references
 #'
@@ -391,7 +390,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           datalist <- list()
 
      Lengths <- lengths(data)
-     diff_lengths <- length(unique(Lengths)) > 1L
+     diff_lengths <- any(diff(Lengths) != 0L)
 
      consistency_check(distance, "dist", trace = control@trace, Lengths = diff_lengths, silent = FALSE)
 
@@ -466,7 +465,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     if (control@trace)
                          cat("\n\tPrecomputing distance matrix...\n\n")
 
-                    distmat <- do.call("distfun", c(list(data), dots))
+                    distmat <- do.call("distfun", c(list(x = data, centroids = NULL), dots))
 
                     ## Redefine new distmat
                     assign("distmat", distmat, envir = environment(distfun))

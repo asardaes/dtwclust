@@ -129,8 +129,13 @@ ddist <- function(distance, control, distmat) {
                } else {
                     ## WHOLE OR SUBDISTMAT, NOT SYMMETRIC OR loop = FALSE
 
-                    if (is.null(centroids))
+                    if (is.null(centroids)) {
                          centroids <- x
+
+                         ## for dtw_basic_proxy
+                         if (has_dots && !any(diff(lengths(x)) != 0L))
+                              dots$symmetric <- TRUE
+                    }
 
                     dim_names <- list(names(x), names(centroids))
 
