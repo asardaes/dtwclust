@@ -83,8 +83,7 @@
 #' @param ... Further arguments for \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}, e.g.
 #' \code{step.pattern}.
 #' @param dba.alignment Character indicating which function to use for calculating alignments, either
-#' \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}. The latter should be faster, but the backtracking
-#' method differs from that in the former.
+#' \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}. The latter should be faster.
 #'
 #' @return The average time series.
 #'

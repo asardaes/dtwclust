@@ -4,9 +4,7 @@
 #' \code{\link[dtw]{dtw}}. Because of that, it should be slightly faster, while still supporting the most
 #' common options.
 #'
-#' If \code{backtrack} is \code{TRUE}, the mapping of indices between series is returned in a list. The
-#' backtracking algorithm is faster than the one in \code{\link[dtw]{dtw}}, but the results differ when more
-#' than one optimal warping path exists.
+#' If \code{backtrack} is \code{TRUE}, the mapping of indices between series is returned in a list.
 #'
 #' The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 #' that represents the distance between the point considered and one of the edges of the window. Therefore,
