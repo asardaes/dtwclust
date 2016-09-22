@@ -77,7 +77,7 @@ test_that("pam centroid CVI gives the same result as reference",
 pc_pam <- reset_nondeterministic(pc_pam)
 
 test_that("pam centroid gives the same result as reference",
-          my_expect_equal_to_reference(pc_pam, TRUE))
+          my_expect_equal_to_reference(pc_pam))
 
 # =================================================================================================
 # dba
@@ -204,7 +204,7 @@ mv_pam <- dtwclust(data_multivariate, type = "partitional", k = 4,
 mv_pam <- reset_nondeterministic(mv_pam)
 
 test_that("multivariate pam centroid gives the same result as reference",
-          my_expect_equal_to_reference(mv_pam, TRUE))
+          my_expect_equal_to_reference(mv_pam))
 
 # =================================================================================================
 # dba multivariate
