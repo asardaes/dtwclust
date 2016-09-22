@@ -26,10 +26,14 @@ columns.}
 \item{...}{Currently ignored.}
 
 \item{gcm}{Optionally, a matrix with \code{NROW(x)+1} rows and \code{NROW(y)+1} columns to use for
-the global cost matrix calculations. Used internally for memory optimization.}
+the global cost matrix calculations. Used internally for memory optimization. If provided, it \strong{will}
+be modified \emph{in place} by \code{C} code, except in the parallel version in \code{proxy::}\code{\link[proxy]{dist}}
+which ignores it for thread-safe reasons.}
 
 \item{dm}{Optionally, a matrix with \code{NROW(x)+1} rows and \code{NROW(y)+1} columns to use for
-the direction matrix and backtracking calculations. Used internally for memory optimization.}
+the direction matrix and backtracking calculations. Used internally for memory optimization.
+If provided, it \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel
+version in \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.}
 }
 \value{
 The DTW distance. For \code{backtrack} \code{=} \code{TRUE}, a list with: \itemize{
