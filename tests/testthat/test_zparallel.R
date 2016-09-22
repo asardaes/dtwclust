@@ -13,13 +13,8 @@ test_that("Parallel computation gives the same results as sequential", {
 
      require(doParallel)
 
-     if (.Platform$OS.type == "windows")
-          cl <- makeCluster(detectCores())
-     else
-          cl <- makeCluster(detectCores(), "FORK")
-
+     cl <- makeCluster(detectCores())
      invisible(clusterEvalQ(cl, library(dtwclust)))
-
      registerDoParallel(cl)
 
      ## Filter excludes files that have "parallel" in them, otherwise it would be recursive
@@ -28,4 +23,20 @@ test_that("Parallel computation gives the same results as sequential", {
      stopCluster(cl)
      stopImplicitCluster()
      registerDoSEQ()
+
+     ## Also test FORK in Unix
+     if (.Platform$OS.type != "windows") {
+          cat("FORKs:\n")
+
+          rm(cl)
+          cl <- makeCluster(detectCores(), "FORK")
+          registerDoParallel(cl)
+
+          ## Filter excludes files that have "parallel" in them, otherwise it would be recursive
+          test_dir("./", filter = "^(?!.*parallel).*$", perl = TRUE)
+
+          stopCluster(cl)
+          stopImplicitCluster()
+          registerDoSEQ()
+     }
 })
