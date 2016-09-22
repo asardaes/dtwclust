@@ -534,6 +534,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                k0 <- k
                rng0 <- rng
+               i <- integer() # CHECK complains now?
 
                kc.list <- foreach(k = k0, rng = rng0, .combine = comb0, .multicombine = TRUE,
                                   .packages = control@packages, .export = export) %:%
