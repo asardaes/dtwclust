@@ -350,11 +350,11 @@ ctrl <- new("dtwclustControl", trace = TRUE)
 # Simple partitional clustering with Euclidean distance and PAM centroids
 # ====================================================================================
 
-# Reinterpolate to same length and coerce as matrix
-data <- t(sapply(CharTraj, reinterpolate, newLength = 180))
+# Reinterpolate to same length
+data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 
 # Subset for speed
-data <- data[1:20, ]
+data <- data[1:20]
 labels <- CharTrajLabels[1:20]
 
 # Testing several values of k

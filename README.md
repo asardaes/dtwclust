@@ -37,7 +37,7 @@ data(uciCT)
 
 ## Reinterpolate data to equal length
 datalist <- zscore(CharTraj)
-data <- lapply(CharTraj, reinterpolate, newLength = 180)
+data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 
 ## Common controls
 ctrl <- new("dtwclustControl", window.size = 20L, trace = TRUE)
@@ -55,13 +55,14 @@ ctrl@pam.precompute <- FALSE
 kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
                      centroid = "pam", seed = 3247, 
                      control = ctrl)
-#> Iteration 1: Changes / Distsum = 100 / 1747.417
-#> Iteration 2: Changes / Distsum = 18 / 1417.733
-#> Iteration 3: Changes / Distsum = 13 / 1349.521
-#> Iteration 4: Changes / Distsum = 2 / 1311.201
-#> Iteration 5: Changes / Distsum = 0 / 1311.201
+#> Iteration 1: Changes / Distsum = 100 / 2055.902
+#> Iteration 2: Changes / Distsum = 11 / 1743.629
+#> Iteration 3: Changes / Distsum = 5 / 1702.148
+#> Iteration 4: Changes / Distsum = 3 / 1702.929
+#> Iteration 5: Changes / Distsum = 2 / 1690.314
+#> Iteration 6: Changes / Distsum = 0 / 1690.314
 #> 
-#>  Elapsed time is 4.158 seconds.
+#>  Elapsed time is 5.17 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -84,7 +85,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.719 seconds.
+#>  Elapsed time is 0.655 seconds.
 
 cat("CVIs for HC+SBD:\n")
 #> CVIs for HC+SBD:
@@ -172,9 +173,9 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> Entering TADPole...
 #> 
-#> TADPole completed, pruning percentage = 86.7%
+#> TADPole completed, pruning percentage = 86.5%
 #> 
-#>  Elapsed time is 1.479 seconds.
+#>  Elapsed time is 1.662 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -226,7 +227,7 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 2: Changes / Distsum = 2 / 4.229023
 #> Iteration 3: Changes / Distsum = 0 / 4.180198
 #> 
-#>  Elapsed time is 5.366 seconds.
+#>  Elapsed time is 5.326 seconds.
 
 ## Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
@@ -268,7 +269,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.160   0.000   0.159 
+#>   0.148   0.004   0.149 
 #> 
 #> Head of fuzzy memberships:
 #> 

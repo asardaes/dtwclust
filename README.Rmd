@@ -53,7 +53,7 @@ data(uciCT)
 
 ## Reinterpolate data to equal length
 datalist <- zscore(CharTraj)
-data <- lapply(CharTraj, reinterpolate, newLength = 180)
+data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 
 ## Common controls
 ctrl <- new("dtwclustControl", window.size = 20L, trace = TRUE)

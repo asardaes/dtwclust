@@ -4,12 +4,18 @@
 \alias{reinterpolate}
 \title{Wrapper for simple linear reinterpolation}
 \usage{
-reinterpolate(ts, newLength)
+reinterpolate(x, new.length, multivariate = FALSE, newLength)
 }
 \arguments{
-\item{ts}{A time series.}
+\item{x}{Data to reinterpolate. Either a vector, a matrix/data.frame where each row is to be reinterpolated, or a list of
+vectors.}
 
-\item{newLength}{Desired length of the output series.}
+\item{new.length}{Desired length of the output series.}
+
+\item{multivariate}{Is \code{x} a multivariate time series? It will be detected automatically if a list is provided in
+\code{x}.}
+
+\item{newLength}{Deprecated.}
 }
 \value{
 Reinterpolated time series

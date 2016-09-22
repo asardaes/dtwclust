@@ -3,7 +3,9 @@
 ## Version 2.3.0
 * Correction: DTW can be symmetric for series of both equal/different length, although in general this is not necessarily the case.
 * Exported the `dtw2` function.
+* Revamped `zscore` and `reinterpolate` functions.
 * Fixed a bug where multivariate series with different length had spurious data added to them.
+* Fixed a bug in multivariate `shape_extraction`. Reminder: multivariate shape extraction might not be a good idea.
 * Consistency adjustments: all `center(s)` arguments/slots will be removed and replaced with `centroid(s)`.
 * Added the `dtw_basic` function, which might be marginally faster due to its limited functionality. It can
 also be used with `dtw_lb` and `DBA`. It will now be used by default.

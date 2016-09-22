@@ -4,15 +4,18 @@
 \alias{zscore}
 \title{Wrapper for z-normalization}
 \usage{
-zscore(x, ..., na.rm = FALSE)
+zscore(x, ..., na.rm = FALSE, multivariate = FALSE)
 }
 \arguments{
-\item{x}{Data to normalize. Either a vector, a matrix where each row is to be normalized, or a list of
+\item{x}{Data to normalize. Either a vector, a matrix/data.frame where each row is to be normalized, or a list of
 vectors.}
 
 \item{...}{Further arguments to pass to \code{\link[base]{scale}}.}
 
 \item{na.rm}{Logical flag. Should \code{NA}s be removed? Ignored for matrix input.}
+
+\item{multivariate}{Is \code{x} a multivariate time series? It will be detected automatically if a list is provided in
+\code{x}.}
 }
 \value{
 Normalized data in the same format as provided.

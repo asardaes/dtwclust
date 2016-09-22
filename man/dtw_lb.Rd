@@ -65,7 +65,7 @@ speed up the calculations (see the examples).
 data(uciCT)
 
 # Reinterpolate to same length
-data <- lapply(CharTraj, reinterpolate, newLength = 180)
+data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 
 # Calculate the DTW distance between a certain subset aided with the lower bound
 system.time(d <- dtw_lb(data[1:5], data[6:50], window.size = 20))

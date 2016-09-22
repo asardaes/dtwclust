@@ -42,8 +42,8 @@
 #' # Load data
 #' data(uciCT)
 #'
-#' # Reinterpolate to same length and coerce as matrix
-#' data <- t(sapply(CharTraj, reinterpolate, newLength = 180))
+#' # Reinterpolate to same length
+#' data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 #'
 #' # Create parallel workers
 #' cl <- makeCluster(detectCores())

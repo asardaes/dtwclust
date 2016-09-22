@@ -460,7 +460,7 @@ In the following example, the nearest neighbors in DTW space of the first 5 time
 
 <<example-dtw-lb, echo = TRUE>>=
 # Reinterpolate to same length
-data <- lapply(CharTraj, reinterpolate, newLength = 180L)
+data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 
 # Calculate the DTW distances between all elements
 system.time(D1 <- proxy::dist(data[1L:5L], data[6L:50L],
@@ -518,8 +518,7 @@ In this example, four different partitional clustering strategies are used: one 
 
 <<example-pc, echo = TRUE, warning = FALSE>>=
 # Reinterpolate to same length
-data <- lapply(CharTraj, reinterpolate,
-               newLength = max(lengths(CharTraj)))
+data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 
 # z-normalization
 data <- zscore(data[60L:100L])

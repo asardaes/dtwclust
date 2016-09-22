@@ -1,7 +1,7 @@
 data(uciCT)
 
 data <- CharTraj
-data_list <- lapply(CharTraj, reinterpolate, newLength = 180)
+data_list <- reinterpolate(CharTraj, new.length = 180L)
 data_matrix <- do.call(rbind, data_list)
 data_subset <- data[1:20]
 data_multivariate <- lapply(seq(1L, 100L, 5L), function(x) cbind(data_list[[x]], data_list[[x+1L]]))
