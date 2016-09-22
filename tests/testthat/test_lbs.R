@@ -53,10 +53,9 @@ lbk <- lb_keogh(data_matrix[2L, ], data_matrix[1L, ],
                 window.size = 15L, norm = "L2")$d
 lbi <- lb_improved(data_matrix[2L, ], data_matrix[1L, ],
                    window.size = 15L, norm = "L2")
-dtwd <- proxy::dist(data_matrix[2L, ], data_matrix[1L, ], method = "L1")
-dtwd <- sqrt(dtw(dtwd^2,
-                 window.type = "sakoechiba", window.size = 15L,
-                 distance.only = TRUE)$distance)
+dtwd <- dtw2(data_matrix[2L, ], data_matrix[1L, ],
+             window.type = "sakoechiba", window.size = 15L,
+             distance.only = TRUE)$distance
 
 lbks <- proxy::dist(data_list[-1L], data_list[1L],
                     method = "lbk", window.size = 15L,
