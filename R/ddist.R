@@ -133,7 +133,7 @@ ddist <- function(distance, control, distmat) {
                          centroids <- x
 
                          ## for dtw_basic_proxy
-                         if (has_dots && !any(diff(lengths(x)) != 0L))
+                         if (has_dots && !check_lengths(x))
                               dots$symmetric <- TRUE
                     }
 

@@ -112,7 +112,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
 
      if (is.null(y)) {
           y <- x
-          symmetric <- !any(diff(lengths(x)) != 0)
+          symmetric <- !check_lengths(x)
 
      } else {
           y <- consistency_check(y, "tsmat")

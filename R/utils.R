@@ -201,6 +201,9 @@ lnorm <- function(x, n = 2) {
           sum(abs(x) ^ n) ^ (1 / n)
 }
 
+# Check if series have different length
+check_lengths <- function(x) { any(diff(lengths(x)) != 0L) }
+
 # PREFUN for some of my proxy distances so that they support 'pairwise' direclty
 proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
      if (!is.null(params$force.pairwise)) {
