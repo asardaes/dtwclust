@@ -115,8 +115,9 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
      if (error.check)
           consistency_check(x, "vltslist")
 
+     if(znorm) x <- zscore(x)
+
      if (is.null(y)) {
-          if(znorm) x <- zscore(x)
           y <- x
 
      } else {
@@ -125,10 +126,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
           if (error.check)
                consistency_check(y, "vltslist")
 
-          if(znorm) {
-               x <- zscore(x)
-               y <- zscore(y)
-          }
+          if(znorm) y <- zscore(y)
      }
 
      retclass <- "crossdist"
