@@ -124,6 +124,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
      dots$dist.method <- norm
      dots$norm <- norm
      dots$window.size <- window.size
+     dots$pairwise <- TRUE
 
      if (pairwise) {
           if (is.null(y))
@@ -197,7 +198,8 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                           .noexport = exclude) %dopar% {
                                do.call(proxy::dist,
                                        c(dots,
-                                         list(x = X[indNew], y = Y[indNN[indNew]],
+                                         list(x = X[indNew],
+                                              y = Y[indNN[indNew]],
                                               method = method)))
                           }
 
