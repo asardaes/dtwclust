@@ -120,6 +120,11 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
      check_parallel()
 
+     dots <- list(...)
+     dots$dist.method <- norm
+     dots$norm <- norm
+     dots$window.size <- window.size
+
      if (pairwise) {
           if (is.null(y))
                Y <- x
@@ -130,9 +135,9 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                stop("Pairwise distances require the same amount of series in 'x' and 'y'")
 
           if (is.null(window.size))
-               window.type <- "none"
+               dots$window.type <- "none"
           else
-               window.type <- "slantedband"
+               dots$window.type <- "slantedband"
 
           X <- split_parallel(X)
           Y <- split_parallel(Y)
@@ -141,20 +146,18 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                        .combine = c,
                        .multicombine = TRUE,
                        .packages = "dtwclust") %dopar% {
-                            proxy::dist(X, Y,
-                                        pairwise = TRUE,
-                                        method = method,
-                                        dist.method = norm,
-                                        norm = norm,
-                                        window.type = window.type,
-                                        window.size = window.size,
-                                        ...)
+                            do.call(proxy::dist,
+                                    c(dots,
+                                      list(x = X, y = Y,
+                                           method = method)))
                        }
 
           return(D)
      }
 
      window.size <- consistency_check(window.size, "window")
+     dots$window.size <- window.size
+     dots$window.type <- "slantedband"
 
      ## NOTE: I tried starting with LBK estimate, refining with LBI and then DTW but, overall,
      ## it was usually slower, almost the whole matrix had to be recomputed for LBI
@@ -192,14 +195,10 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                           .multicombine = TRUE,
                           .packages = "dtwclust",
                           .noexport = exclude) %dopar% {
-                               proxy::dist(X[indNew], Y[indNN[indNew]],
-                                           pairwise = TRUE,
-                                           method = method,
-                                           dist.method = norm,
-                                           norm = norm,
-                                           window.type = "slantedband",
-                                           window.size = window.size,
-                                           ...)
+                               do.call(proxy::dist,
+                                       c(dots,
+                                         list(x = X[indNew], y = Y[indNN[indNew]],
+                                              method = method)))
                           }
 
           D[cbind(1L:length(X), indNN)[unlist(indNew), , drop = FALSE]] <- dSub
