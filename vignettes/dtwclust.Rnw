@@ -168,9 +168,8 @@ plot(symmetric1)
 plot(symmetric2)
 @
 
-As final comments, it should be noted that the DTW distance does \textbf{not} satisfy the \textit{triangle inequality}, and it is \textbf{not} symmetric unless both series have the same length, i.e. $\dtwp{}(x,y) \neq \dtwp{}(y,x)$ for $n \neq m$. Currently, out of the included distances in \dtwclust{}, only those based on DTW support multivariate series.
+As final comments, it should be noted that the DTW distance does \textbf{not} satisfy the \textit{triangle inequality}, and it is \textbf{not} symmetric in general, e.g. for asymmetric step patterns \citep{giorgino2009}. Currently, out of the included distances in \dtwclust{}, only those based on DTW support multivariate series.
 
-\FloatBarrier
 \subsubsection{Global DTW constraints}
 \label{sec:dtw-window}
 

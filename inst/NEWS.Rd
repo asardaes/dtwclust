@@ -5,6 +5,7 @@
 
 \section{Changes in version 2.3.0}{
 \itemize{
+     \item Correction: DTW can be symmetric for series of equal/different length, although in general this is not necessarily the case.
      \item Exported the \code{dtw2} function.
      \item Fixed a bug where multivariate series with different length had spurious data added to them.
      \item Consistency adjustments: all \code{center(s)} arguments/slots will be removed and replaced with \code{centroid(s)}.

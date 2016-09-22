@@ -1,6 +1,7 @@
 # NEWS
 
 ## Version 2.3.0
+* Correction: DTW can be symmetric for series of equal/different length, although in general this is not necessarily the case.
 * Exported the `dtw2` function.
 * Fixed a bug where multivariate series with different length had spurious data added to them.
 * Consistency adjustments: all `center(s)` arguments/slots will be removed and replaced with `centroid(s)`.
