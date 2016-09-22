@@ -226,8 +226,10 @@ DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
           } else {
                centroid_old <- centroid
 
-               if (trace)
+               if (trace) {
                     cat(" ", iter, ",", sep = "")
+                    if (iter %% 10 == 0) cat("\n\t\t")
+               }
 
                iter <- iter + 1L
           }
