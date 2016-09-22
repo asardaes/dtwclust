@@ -1,7 +1,7 @@
 \documentclass[article,shortnames,nojss]{jss}
 
 % Vignette options
-%\VignetteEngine{knitr::knitr}
+%\VignetteEngine{knitr::knitr_notangle}
 %\VignettePackage{dtwclust}
 %\VignetteDepends{TSclust, doParallel}
 %\VignetteIndexEntry{Comparing Time-Series Clustering Algorithms in R Using the dtwclust Package}
@@ -525,19 +525,20 @@ data <- lapply(CharTraj, reinterpolate,
 # z-normalization
 data <- zscore(data[60L:100L])
 
+# Extra 'trace' is for DBA
 pc_dtw <- dtwclust(data, k = 4L,
-                   distance = "dtw2", centroid = "dba",
-                   dba.alignment = "dtw_basic",
-                   seed = 8, control = list(window.size = 20L,
-                                            norm = "L2",
-                                            trace = TRUE))
+                   distance = "dtw_basic", centroid = "dba",
+                   trace = TRUE, seed = 8,
+                   control = list(window.size = 20L,
+                                  norm = "L2",
+                                  trace = TRUE))
 
 pc_dtwlb <- dtwclust(data, k = 4L,
                      distance = "dtw_lb", centroid = "dba",
-                     dba.alignment = "dtw_basic",
-                     seed = 8, control = list(window.size = 20L,
-                                              norm = "L2",
-                                              trace = TRUE))
+                     trace = TRUE, seed = 8,
+                     control = list(window.size = 20L,
+                                    norm = "L2",
+                                    trace = TRUE))
 
 pc_ks <- dtwclust(data, k = 4L,
                   distance = "sbd", centroid = "shape",

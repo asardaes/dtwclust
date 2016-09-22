@@ -139,7 +139,7 @@ sapply(kc.ndtw, cvi, b = CharTrajLabels, type = "VI")
 kc <- dtwclust(datalist, k = 20,
                distance = "dtw_basic", centroid = "dba",
                seed = 9421, control = list(trace = TRUE, window.size = 20L),
-               dba.alignment = "dtw_basic", normalize = TRUE)
+               normalize = TRUE)
 
 ## Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))

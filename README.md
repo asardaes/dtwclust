@@ -61,7 +61,7 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 4: Changes / Distsum = 2 / 1311.201
 #> Iteration 5: Changes / Distsum = 0 / 1311.201
 #> 
-#>  Elapsed time is 9.897 seconds.
+#>  Elapsed time is 4.158 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -84,7 +84,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.767 seconds.
+#>  Elapsed time is 0.719 seconds.
 
 cat("CVIs for HC+SBD:\n")
 #> CVIs for HC+SBD:
@@ -174,7 +174,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.7%
 #> 
-#>  Elapsed time is 3.67 seconds.
+#>  Elapsed time is 1.479 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -221,14 +221,12 @@ sapply(kc.ndtw, cvi, b = CharTrajLabels, type = "VI")
 kc <- dtwclust(datalist, k = 20,
                distance = "dtw_basic", centroid = "dba",
                seed = 9421, control = list(trace = TRUE, window.size = 20L),
-               dba.alignment = "dtw_basic", normalize = TRUE)
+               normalize = TRUE)
 #> Iteration 1: Changes / Distsum = 100 / 6.749242
-#> Iteration 2: Changes / Distsum = 3 / 4.799065
-#> Iteration 3: Changes / Distsum = 2 / 4.746283
-#> Iteration 4: Changes / Distsum = 1 / 4.689033
-#> Iteration 5: Changes / Distsum = 0 / 4.656551
+#> Iteration 2: Changes / Distsum = 2 / 4.229023
+#> Iteration 3: Changes / Distsum = 0 / 4.180198
 #> 
-#>  Elapsed time is 6.245 seconds.
+#>  Elapsed time is 5.366 seconds.
 
 ## Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
@@ -270,7 +268,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.152   0.000   0.152 
+#>   0.160   0.000   0.159 
 #> 
 #> Head of fuzzy memberships:
 #> 
