@@ -119,12 +119,13 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
           d <- foreach(pairs = pairs,
                        .combine = c,
                        .multicombine = TRUE,
-                       .packages = "dtwclust") %dopar% {
+                       .packages = "dtwclust",
+                       .export = "enlist") %dopar% {
                             do.call(proxy::dist,
-                                    c(dots,
-                                      list(x = x[pairs[ , 1L]],
+                                    enlist(x = x[pairs[ , 1L]],
                                            y = x[pairs[ , 2L]],
-                                           method = "dtw_basic")))
+                                           method = "dtw_basic",
+                                           dots = dots))
                        }
 
           rm("pairs")
@@ -156,7 +157,8 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
           D <- foreach(x = X, y = Y, gcm = GCM,
                        .combine = c,
                        .multicombine = TRUE,
-                       .packages = "dtwclust") %dopar% {
+                       .packages = "dtwclust",
+                       .export = "enlist") %dopar% {
                             L1 <- max(lengths(x))
                             L2 <- max(lengths(y))
 
@@ -167,9 +169,9 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
 
                             mapply(x, y, FUN = function(x, y) {
                                  do.call("dtw_basic",
-                                         c(dots,
-                                           list(x = x,
-                                                y = y)))
+                                         enlist(x = x,
+                                                y = y,
+                                                dots = dots))
                             })
                        }
 
@@ -180,7 +182,8 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
           D <- foreach(x = X, gcm = GCM,
                        .combine = rbind,
                        .multicombine = TRUE,
-                       .packages = "dtwclust") %dopar% {
+                       .packages = "dtwclust",
+                       .export = "enlist") %dopar% {
                             L1 <- max(lengths(x))
                             L2 <- max(lengths(y))
 
@@ -192,9 +195,9 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                             ret <- lapply(x, y = y, FUN = function(x, y) {
                                  sapply(y, x = x, FUN = function(y, x) {
                                       do.call("dtw_basic",
-                                              c(dots,
-                                                list(x = x,
-                                                     y = y)))
+                                              enlist(x = x,
+                                                     y = y,
+                                                     dots = dots))
                                  })
                             })
 

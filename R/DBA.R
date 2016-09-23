@@ -173,21 +173,20 @@ DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
           xg <- foreach(X = Xs, LCM = LCMs,
                         .combine = c,
                         .multicombine = TRUE,
-                        .export = "dtw_dba",
+                        .export = "enlist",
                         .packages = c("dtwclust", "stats")) %dopar% {
                              mapply(X, LCM, SIMPLIFY = FALSE, FUN = function(x, lcm) {
                                   if (dba.alignment == "dtw") {
                                        .Call("update_lcm", lcm, x, centroid,
                                              isTRUE(norm == "L2"), PACKAGE = "dtwclust")
 
-                                       d <- do.call(dtw::dtw, c(list(x = lcm,
-                                                                     window.size = w),
-                                                                dots))
+                                       d <- do.call(dtw::dtw, enlist(x = lcm, window.size = w, dots = dots))
+
                                   } else {
-                                       d <- do.call(dtw_basic, c(list(x = x, y = centroid,
+                                       d <- do.call(dtw_basic, enlist(x = x, y = centroid,
                                                                       window.size = w, norm = norm,
-                                                                      backtrack = TRUE, gcm = lcm),
-                                                                 dots))
+                                                                      backtrack = TRUE, gcm = lcm,
+                                                                      dots = dots))
                                   }
 
                                   x.sub <- stats::aggregate(x[d$index1],

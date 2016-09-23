@@ -146,11 +146,12 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
           D <- foreach(X = X, Y = Y,
                        .combine = c,
                        .multicombine = TRUE,
-                       .packages = "dtwclust") %dopar% {
+                       .packages = "dtwclust",
+                       .export = "enlist") %dopar% {
                             do.call(proxy::dist,
-                                    c(dots,
-                                      list(x = X, y = Y,
-                                           method = method)))
+                                    enlist(x = X, y = Y,
+                                           method = method,
+                                           dots = dots))
                        }
 
           return(D)
@@ -195,12 +196,13 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                           .combine = c,
                           .multicombine = TRUE,
                           .packages = "dtwclust",
-                          .noexport = exclude) %dopar% {
+                          .noexport = exclude,
+                          .export = "enlist") %dopar% {
                                do.call(proxy::dist,
-                                       c(dots,
-                                         list(x = X[indNew],
+                                       enlist(x = X[indNew],
                                               y = Y[indNN[indNew]],
-                                              method = method)))
+                                              method = method,
+                                              dots = dots))
                           }
 
           D[cbind(1L:length(X), indNN)[unlist(indNew), , drop = FALSE]] <- dSub

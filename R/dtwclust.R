@@ -464,7 +464,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     if (control@trace)
                          cat("\n\tPrecomputing distance matrix...\n\n")
 
-                    distmat <- do.call("distfun", c(list(x = data, centroids = NULL), dots))
+                    distmat <- do.call("distfun", enlist(x = data, centroids = NULL, dots = dots))
 
                     ## Redefine new distmat
                     assign("distmat", distmat, envir = environment(distfun))
@@ -514,18 +514,18 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                ## Just one repetition
                kc.list <- list(do.call("kcca.list",
-                                       c(dots,
-                                         list(x = data,
+                                       enlist(x = data,
                                               k = k,
                                               family = family,
                                               control = control,
-                                              fuzzy = isTRUE(type == "fuzzy")))))
+                                              fuzzy = isTRUE(type == "fuzzy"),
+                                              dots = dots)))
 
           } else {
                ## I need to re-register any custom distances in each parallel worker
                dist_entry <- proxy::pr_DB$get_entry(distance)
 
-               export <- c("kcca.list", "consistency_check")
+               export <- c("kcca.list", "consistency_check", "enlist")
 
                rng <- rngtools::RNGseq(length(k) * control@nrep, seed = seed, simplify = FALSE)
                rng <- lapply(parallel::splitIndices(length(rng), length(k)), function(i) rng[i])
@@ -546,12 +546,12 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                       do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                  kc <- do.call("kcca.list",
-                                               c(dots,
-                                                 list(x = data,
+                                               enlist(x = data,
                                                       k = k,
                                                       family = family,
                                                       control = control,
-                                                      fuzzy = isTRUE(type == "fuzzy"))))
+                                                      fuzzy = isTRUE(type == "fuzzy"),
+                                                      dots = dots))
 
                                  gc(FALSE)
 
@@ -648,7 +648,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     cat("\n\tCalculating distance matrix...\n")
 
                ## single argument is to calculate whole distance matrix
-               D <- do.call("distfun", c(list(data), dots))
+               D <- do.call("distfun", enlist(x = data, dots = dots))
           }
 
           ## Required form for 'hclust'
@@ -680,10 +680,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                          centroids <- lapply(1L:k, function(kcent) centroid(data[cluster == kcent]))
 
-                         cldist <- do.call("distfun", c(list(x = data,
+                         cldist <- do.call("distfun", enlist(x = data,
                                                              centroids = centroids[cluster],
-                                                             pairwise = TRUE),
-                                                        dots))
+                                                             pairwise = TRUE,
+                                                             dots = dots))
 
                          cldist <- as.matrix(cldist)
 
@@ -782,7 +782,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
           else
                centchar <- "PAM (TADPole)"
 
-          RET <- foreach(k = k, .combine = list, .multicombine = TRUE, .packages = "dtwclust") %dopar% {
+          RET <- foreach(k = k, .combine = list, .multicombine = TRUE, .packages = "dtwclust", .export = "enlist") %dopar% {
                R <- TADPole(data, k = k, dc = dc, window.size = control@window.size, error.check = FALSE)
 
                if (control@trace) {
@@ -807,10 +807,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                }
 
                ## Some additional cluster information (taken from flexclust)
-               cldist <- do.call("distfun", c(list(x = data,
+               cldist <- do.call("distfun", enlist(x = data,
                                                    centroids = centroids[R$cl],
-                                                   pairwise = TRUE),
-                                              dots))
+                                                   pairwise = TRUE,
+                                                   dots = dots))
 
                cldist <- as.matrix(cldist)
                size <- as.vector(table(R$cl))

@@ -149,9 +149,9 @@ setMethod("predict", "dtwclust",
                     newdata <- object@family@preproc(newdata)
 
                     distmat <- do.call(object@family@dist,
-                                       args = c(list(x = newdata,
-                                                     centroids = object@centroids),
-                                                object@dots))
+                                       args = enlist(x = newdata,
+                                                     centroids = object@centroids,
+                                                     dots = object@dots))
 
                     ret <- object@family@cluster(distmat = distmat, m = object@control@fuzziness)
 
@@ -429,8 +429,9 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                               } else {
                                    distmat <- do.call(a@family@dist,
-                                                      args = c(list(x = a@datalist, centroids = NULL),
-                                                               a@dots))
+                                                      args = enlist(x = a@datalist,
+                                                                    centroids = NULL,
+                                                                    dots = a@dots))
                               }
                          } else {
                               distmat <- a@distmat
@@ -447,8 +448,9 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                          ## distance between centroids
                          distcent <- do.call(a@family@dist,
-                                             args = c(list(x = a@centroids, centroids = NULL),
-                                                      a@dots))
+                                             args = enlist(x = a@centroids,
+                                                           centroids = NULL,
+                                                           dots = a@dots))
                     }
 
                     ## calculate global centroids if needed
@@ -457,19 +459,20 @@ setMethod("cvi", signature(a = "dtwclust"),
 
                          if (a@type == "partitional") {
                               global_cent <- do.call(a@family@allcent,
-                                                     args = c(list(x = a@datalist,
+                                                     args = enlist(x = a@datalist,
                                                                    cl_id = rep(1L, N),
                                                                    k = 1L,
                                                                    cent = a@datalist[sample(N, 1L)],
-                                                                   cl_old = rep(0L, N)),
-                                                              a@dots))
+                                                                   cl_old = rep(0L, N),
+                                                                   dots = a@dots))
                          } else {
                               global_cent <- a@family@allcent(a@datalist)
                          }
 
                          dist_global_cent <- do.call(a@family@dist,
-                                                     args = c(list(x = a@centroids, centroids = global_cent),
-                                                              a@dots))
+                                                     args = enlist(x = a@centroids,
+                                                                   centroids = global_cent,
+                                                                   dots = a@dots))
 
                          dim(dist_global_cent) <- NULL
                     }
@@ -662,9 +665,9 @@ setMethod("clusterSim", "dtwclust",
                     }
 
                     distmat <- do.call(object@family@dist,
-                                       args = c(list(x = data,
-                                                     centroids = object@centroids),
-                                                object@dots))
+                                       args = enlist(x = data,
+                                                     centroids = object@centroids,
+                                                     dots = object@dots))
 
                     r <- t(matrix(apply(distmat, 1, rank, ties.method = "first"),
                                   nrow = ncol(distmat)))
@@ -696,9 +699,9 @@ setMethod("clusterSim", "dtwclust",
 
                } else {
                     z <- do.call(object@family@dist,
-                                 args = c(list(x = object@centroids,
-                                               centroids = object@centroids),
-                                          object@dots))
+                                 args = enlist(x = object@centroids,
+                                               centroids = object@centroids,
+                                               dots = object@dots))
 
                     z <- 1 - z/max(z)
                }

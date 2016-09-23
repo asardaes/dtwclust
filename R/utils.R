@@ -1,9 +1,8 @@
 # ========================================================================================================
-# Check consistency, used by other functions
+# Miscellaneous
 # ========================================================================================================
 
 consistency_check <- function(obj, case, ...) {
-
      case <- match.arg(case, c("ts", "tslist", "vltslist",
                                "window", "tsmat",
                                "dist", "cent"))
@@ -120,6 +119,17 @@ consistency_check <- function(obj, case, ...) {
      invisible(NULL)
 }
 
+# Check if series have different length
+check_lengths <- function(x) { any(diff(lengths(x)) != 0L) }
+
+# Enlist parameters for do.calls
+enlist <- function(..., dots = NULL) {
+     if (is.null(dots))
+          list(...)
+     else
+          c(dots, list(...))
+}
+
 # ========================================================================================================
 # Helper C/C++ functions
 # ========================================================================================================
@@ -200,9 +210,6 @@ lnorm <- function(x, n = 2) {
      else
           sum(abs(x) ^ n) ^ (1 / n)
 }
-
-# Check if series have different length
-check_lengths <- function(x) { any(diff(lengths(x)) != 0L) }
 
 # PREFUN for some of my proxy distances so that they support 'pairwise' direclty
 proxy_prefun <- function(x, y, pairwise, params, reg_entry) {

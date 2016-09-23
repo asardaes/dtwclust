@@ -83,7 +83,7 @@ ddist <- function(distance, control, distmat) {
                check_parallel()
 
                ## variables/functions from the parent environment that should be exported
-               export <- c("distance", "consistency_check")
+               export <- c("distance", "consistency_check", "enlist")
 
                if (is.null(centroids) && control@symmetric && dist_entry$loop) {
                     ## WHOLE SYMMETRIC DISTMAT
@@ -107,10 +107,10 @@ ddist <- function(distance, control, distmat) {
 
                                       ## 'dots' has all extra arguments that are valid
                                       dd <- do.call(proxy::dist,
-                                                    c(dots,
-                                                      list(x = x[pairs[ , 1L]],
+                                                    enlist(x = x[pairs[ , 1L]],
                                                            y = x[pairs[ , 2L]],
-                                                           method = distance)))
+                                                           method = distance,
+                                                           dots = dots))
 
                                       dd
                                  }
@@ -164,10 +164,10 @@ ddist <- function(distance, control, distmat) {
 
                                       ## 'dots' has all extra arguments that are valid
                                       dd <- do.call(proxy::dist,
-                                                    c(dots,
-                                                      list(x = x,
+                                                    enlist(x = x,
                                                            y = centroids,
-                                                           method = distance)))
+                                                           method = distance,
+                                                           dots = dots))
 
                                       dd
 

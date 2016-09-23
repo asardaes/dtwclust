@@ -78,18 +78,19 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                               .combine = c,
                               .multicombine = TRUE,
                               .packages = "dtwclust",
-                              .export = "control") %dopar% {
+                              .export = c("control", "enlist")) %dopar% {
                                    mapply(x_split, cent,
                                           SIMPLIFY = FALSE,
                                           FUN = function(x, c) {
                                                new_c <- do.call(DBA,
-                                                                c(dots,
-                                                                  list(x, c,
+                                                                enlist(X = x,
+                                                                       centroid = c,
                                                                        norm = control@norm,
                                                                        window.size = control@window.size,
                                                                        max.iter = control@dba.iter,
                                                                        delta = control@delta,
-                                                                       error.check = FALSE)))
+                                                                       error.check = FALSE,
+                                                                       dots = dots))
 
                                                ## return
                                                new_c
@@ -207,12 +208,12 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
 
                ## Calculate new centroids
                new_cent <- do.call(paste0(case, "_cent"),
-                                   c(list(x = x,
+                                   enlist(x = x,
                                           x_split = x_split[id_changed],
                                           cent = cent[id_changed],
                                           id_changed = id_changed,
-                                          cl_id = cl_id),
-                                     list(...)))
+                                          cl_id = cl_id,
+                                          dots = list(...)))
 
                cent[id_changed] <- new_cent
 
