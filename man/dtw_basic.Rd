@@ -6,7 +6,7 @@
 \usage{
 dtw_basic(x, y, window.size = NULL, norm = "L1",
   step.pattern = get("symmetric2"), backtrack = FALSE, normalize = FALSE,
-  ..., gcm = NULL, dm = NULL)
+  ..., gcm = NULL)
 }
 \arguments{
 \item{x, y}{Time series. Multivariate series must have time spanning the rows and variables spanning the
@@ -29,11 +29,6 @@ columns.}
 the global cost matrix calculations. Used internally for memory optimization. If provided, it \strong{will}
 be modified \emph{in place} by \code{C} code, except in the parallel version in \code{proxy::}\code{\link[proxy]{dist}}
 which ignores it for thread-safe reasons.}
-
-\item{dm}{Optionally, a matrix with \code{NROW(x)+1} rows and \code{NROW(y)+1} columns to use for
-the direction matrix and backtracking calculations. Used internally for memory optimization.
-If provided, it \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel
-version in \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.}
 }
 \value{
 The DTW distance. For \code{backtrack} \code{=} \code{TRUE}, a list with: \itemize{

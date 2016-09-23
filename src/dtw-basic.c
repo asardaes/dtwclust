@@ -4,7 +4,14 @@
 #include <R.h>
 #include <Rdefines.h>
 
-int d2s(const int i, const int j, const int nx)
+#define NOT_VISITED -1
+#define UP 3
+#define LEFT 2
+#define DIAG 1
+
+int d2s(const int i, const int j, const int nx) __attribute__((always_inline));
+
+int inline d2s(const int i, const int j, const int nx)
 {
      return i + j * (nx + 1);
 }
@@ -28,10 +35,10 @@ double dtw_no_backtrack(const double *x, const double *y, const int w,
      for (int i = 0; i <= nx; i++)
      {
           for (int j = 0; j <= ny; j++)
-               D[d2s(i,j,nx)] = -1;
+               D[d2s(i, j, nx)] = NOT_VISITED;
      }
 
-     D[d2s(1,1,nx)] = pow(lnorm(x, y, norm, nx, ny, dim, 0, 0), norm);
+     D[d2s(1, 1, nx)] = pow(lnorm(x, y, norm, nx, ny, dim, 0, 0), norm);
 
      // dynamic programming
      double temp, local_cost, global_cost;
@@ -60,24 +67,24 @@ double dtw_no_backtrack(const double *x, const double *y, const int w,
 
                local_cost = pow(lnorm(x, y, norm, nx, ny, dim, i-1, j-1), norm);
 
-               temp = D[d2s(i-1,j,nx)];
+               temp = D[d2s(i-1, j, nx)];
 
-               if (temp == -1)
-                    global_cost = -1;
+               if (temp == NOT_VISITED)
+                    global_cost = NOT_VISITED;
                else
                     global_cost = temp + local_cost;
 
-               temp = D[d2s(i,j-1,nx)];
+               temp = D[d2s(i, j-1, nx)];
 
-               if (temp != -1 && (global_cost == -1 || temp + local_cost < global_cost))
+               if (temp != NOT_VISITED && (global_cost == NOT_VISITED || temp + local_cost < global_cost))
                     global_cost = temp + local_cost;
 
-               temp = D[d2s(i-1,j-1,nx)];
+               temp = D[d2s(i-1, j-1, nx)];
 
-               if (temp != -1 && (global_cost == -1 || temp + step*local_cost < global_cost))
+               if (temp != NOT_VISITED && (global_cost == NOT_VISITED || temp + step*local_cost < global_cost))
                     global_cost = temp + step*local_cost;
 
-               D[d2s(i,j,nx)] = global_cost;
+               D[d2s(i, j, nx)] = global_cost;
           }
      }
 
@@ -87,23 +94,20 @@ double dtw_no_backtrack(const double *x, const double *y, const int w,
 double dtw_backtrack(const double *x, const double *y, const int w,
                      const int nx, const int ny, const int dim,
                      const double norm, const double step,
-                     double *D, int *S, int *index1, int *index2, int *path)
+                     double *D, int *index1, int *index2, int *path)
 {
      // initialization
      for (int i = 0; i <= nx; i++)
      {
           for (int j = 0; j <= ny; j++)
-          {
-               D[d2s(i,j,nx)] = -1;
-               S[d2s(i,j,nx)] = -1;
-          }
+               D[d2s(i, j, nx)] = NOT_VISITED;
      }
 
-     D[d2s(1,1,nx)] = pow(lnorm(x, y, norm, nx, ny, dim, 0, 0), norm);
+     D[d2s(1, 1, nx)] = pow(lnorm(x, y, norm, nx, ny, dim, 0, 0), norm);
 
      // dynamic programming
      double temp, local_cost, global_cost;
-     int direction; // 1 = diag, 2 = left, 3 = up
+     int direction;
 
      for (int i = 1; i <= nx; i++)
      {
@@ -129,46 +133,46 @@ double dtw_backtrack(const double *x, const double *y, const int w,
 
                local_cost = pow(lnorm(x, y, norm, nx, ny, dim, i-1, j-1), norm);
 
-               temp = D[d2s(i-1,j,nx)];
-               direction = 3; // up
+               temp = D[d2s(i-1, j, nx)];
+               direction = UP;
 
-               if (temp == -1)
-                    global_cost = -1;
+               if (temp == NOT_VISITED)
+                    global_cost = NOT_VISITED;
                else
                     global_cost = temp + local_cost;
 
-               temp = D[d2s(i,j-1,nx)];
+               temp = D[d2s(i, j-1, nx)];
 
-               if (temp != -1 && (global_cost == -1 || temp + local_cost <= global_cost))
+               if (temp != NOT_VISITED && (global_cost == NOT_VISITED || temp + local_cost <= global_cost))
                {
                     global_cost = temp + local_cost;
-                    direction = 2; // left
+                    direction = LEFT;
                }
 
-               temp = D[d2s(i-1,j-1,nx)];
+               temp = D[d2s(i-1, j-1, nx)];
 
-               if (temp != -1 && (global_cost == -1 || temp + step*local_cost <= global_cost))
+               if (temp != NOT_VISITED && (global_cost == NOT_VISITED || temp + step*local_cost <= global_cost))
                {
                     global_cost = temp + step*local_cost;
-                    direction = 1; // diag
+                    direction = DIAG;
                }
 
-               D[d2s(i,j,nx)] = global_cost;
-               S[d2s(i,j,nx)] = direction;
+               D[d2s(i, j, nx)] = global_cost;
+               D[d2s(i-1, j-1, nx)] = direction;
           }
      }
 
      // backtrack
-     int i = nx;
-     int j = ny;
+     int i = nx - 1;
+     int j = ny - 1;
 
      index1[0] = nx;
      index2[0] = ny;
      *path = 1;
 
-     while(!(i == 1 && j == 1))
+     while(!(i == 0 && j == 0))
      {
-          switch(S[d2s(i,j,nx)])
+          switch((int)D[d2s(i, j, nx)])
           {
           case 1:
                i--;
@@ -187,8 +191,8 @@ double dtw_backtrack(const double *x, const double *y, const int w,
                error("dtw_basic: Invalid direction matrix computed.");
           }
 
-          index1[*path] = i;
-          index2[*path] = j;
+          index1[*path] = i + 1;
+          index2[*path] = j + 1;
           (*path)++;
      }
 
@@ -199,7 +203,7 @@ double dtw_backtrack(const double *x, const double *y, const int w,
 SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
                SEXP m, SEXP n, SEXP dim,
                SEXP norm, SEXP step, SEXP backtrack,
-               SEXP D, SEXP S)
+               SEXP D)
 {
      double d;
      int nx = asInteger(m);
@@ -215,7 +219,7 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
           d = dtw_backtrack(REAL(x), REAL(y), asInteger(window),
                             nx, ny, asInteger(dim),
                             asReal(norm), asReal(step),
-                            REAL(D), INTEGER(S),
+                            REAL(D),
                             INTEGER(index1), INTEGER(index2), &path);
 
           // put results in a list

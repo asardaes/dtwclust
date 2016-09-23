@@ -25,10 +25,6 @@
 #' the global cost matrix calculations. Used internally for memory optimization. If provided, it \strong{will}
 #' be modified \emph{in place} by \code{C} code, except in the parallel version in \code{proxy::}\code{\link[proxy]{dist}}
 #' which ignores it for thread-safe reasons.
-#' @param dm Optionally, a matrix with \code{NROW(x)+1} rows and \code{NROW(y)+1} columns to use for
-#' the direction matrix and backtracking calculations. Used internally for memory optimization.
-#' If provided, it \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel
-#' version in \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.
 #'
 #' @return The DTW distance. For \code{backtrack} \code{=} \code{TRUE}, a list with: \itemize{
 #'   \item \code{distance}: The DTW distance.
@@ -40,7 +36,7 @@
 #'
 dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
                       step.pattern = get("symmetric2"), backtrack = FALSE,
-                      normalize = FALSE, ..., gcm = NULL, dm = NULL) {
+                      normalize = FALSE, ..., gcm = NULL) {
      consistency_check(x, "ts")
      consistency_check(y, "ts")
 
@@ -69,22 +65,10 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
      else if (!is.matrix(gcm) || nrow(gcm) < NROW(x) + 1L || ncol(gcm) < NROW(y) + 1L)
           stop("dtw_basic: Dimension inconsistency in 'gcm'")
 
-     if (backtrack) {
-          if (is.null(dm))
-               dm <- matrix(-1L, NROW(x) + 1L, NROW(y) + 1L)
-          else {
-               if (!is.matrix(dm) || nrow(dm) < NROW(x) + 1L || ncol(dm) < NROW(y) + 1L)
-                    stop("dtw_basic: Dimension inconsistency in 'dm'")
-
-               storage.mode(dm) <- "integer"
-          }
-     }
-
      d <- .Call("dtw_basic", x, y, window.size,
                 NROW(x), NROW(y), NCOL(x),
                 norm, step.pattern, backtrack,
-                gcm, dm,
-                PACKAGE = "dtwclust")
+                gcm, PACKAGE = "dtwclust")
 
      if (normalize && step.pattern == 2) {
           if (backtrack)
