@@ -147,7 +147,7 @@ ddist <- function(distance, control, distmat) {
                          combine <- c
 
                     } else {
-                         centroids <- lapply(1:length(x), function(dummy) centroids)
+                         centroids <- lapply(1L:foreach::getDoParWorkers(), function(dummy) centroids)
                          combine <- rbind
                     }
 
