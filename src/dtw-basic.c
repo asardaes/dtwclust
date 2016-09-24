@@ -4,11 +4,15 @@
 #include <R.h>
 #include <Rdefines.h>
 
+// for cost matrix, in case of window constraint
 #define NOT_VISITED -1
+
+// for step matrix
 #define UP 3
 #define LEFT 2
 #define DIAG 1
 
+// double to single index, matrices are always vectors in R
 int d2s(const int i, const int j, const int nx) __attribute__((always_inline));
 
 int inline d2s(const int i, const int j, const int nx)
@@ -16,6 +20,7 @@ int inline d2s(const int i, const int j, const int nx)
      return i + j * (nx + 1);
 }
 
+// vector norm
 double lnorm(const double *x, const double *y, const double norm,
              const int nx, const int ny, const int dim,
              const int i, const int j)
@@ -26,6 +31,7 @@ double lnorm(const double *x, const double *y, const double norm,
      return res;
 }
 
+// only dtw
 double dtw_no_backtrack(const double *x, const double *y, const int w,
                         const int nx, const int ny, const int dim,
                         const double norm, const double step,
@@ -38,6 +44,7 @@ double dtw_no_backtrack(const double *x, const double *y, const int w,
                D[d2s(i, j, nx)] = NOT_VISITED;
      }
 
+     // first value, must set here to avoid multiplying by step
      D[d2s(1, 1, nx)] = pow(lnorm(x, y, norm, nx, ny, dim, 0, 0), norm);
 
      // dynamic programming
@@ -47,6 +54,7 @@ double dtw_no_backtrack(const double *x, const double *y, const int w,
      {
           int j1, j2;
 
+          // adjust limits depending on window
           if (w == -1)
           {
                j1 = 1;
@@ -63,10 +71,12 @@ double dtw_no_backtrack(const double *x, const double *y, const int w,
 
           for (int j = j1; j <= j2; j++)
           {
+               // very first value already set above
                if (i == 1 && j == 1) continue;
 
                local_cost = pow(lnorm(x, y, norm, nx, ny, dim, i-1, j-1), norm);
 
+               // start with down-step
                temp = D[d2s(i-1, j, nx)];
 
                if (temp == NOT_VISITED)
@@ -74,11 +84,13 @@ double dtw_no_backtrack(const double *x, const double *y, const int w,
                else
                     global_cost = temp + local_cost;
 
+               // prefer right-step if it's less
                temp = D[d2s(i, j-1, nx)];
 
                if (temp != NOT_VISITED && (global_cost == NOT_VISITED || temp + local_cost < global_cost))
                     global_cost = temp + local_cost;
 
+               // prefer diag-step if it's less considering weight
                temp = D[d2s(i-1, j-1, nx)];
 
                if (temp != NOT_VISITED && (global_cost == NOT_VISITED || temp + step*local_cost < global_cost))
@@ -91,6 +103,7 @@ double dtw_no_backtrack(const double *x, const double *y, const int w,
      return pow(D[(nx+1) * (ny+1) - 1], 1/norm);
 }
 
+// dtw and backtracking
 double dtw_backtrack(const double *x, const double *y, const int w,
                      const int nx, const int ny, const int dim,
                      const double norm, const double step,
@@ -103,6 +116,7 @@ double dtw_backtrack(const double *x, const double *y, const int w,
                D[d2s(i, j, nx)] = NOT_VISITED;
      }
 
+     // first value, must set here to avoid multiplying by step
      D[d2s(1, 1, nx)] = pow(lnorm(x, y, norm, nx, ny, dim, 0, 0), norm);
 
      // dynamic programming
@@ -113,6 +127,7 @@ double dtw_backtrack(const double *x, const double *y, const int w,
      {
           int j1, j2;
 
+          // adjust limits depending on window
           if (w == -1)
           {
                j1 = 1;
@@ -129,10 +144,12 @@ double dtw_backtrack(const double *x, const double *y, const int w,
 
           for (int j = j1; j <= j2; j++)
           {
+               // very first value already set above
                if (i == 1 && j == 1) continue;
 
                local_cost = pow(lnorm(x, y, norm, nx, ny, dim, i-1, j-1), norm);
 
+               // start with down-step, directions go backwards
                temp = D[d2s(i-1, j, nx)];
                direction = UP;
 
@@ -141,6 +158,7 @@ double dtw_backtrack(const double *x, const double *y, const int w,
                else
                     global_cost = temp + local_cost;
 
+               // prefer right-step if it's less, directions go backwards
                temp = D[d2s(i, j-1, nx)];
 
                if (temp != NOT_VISITED && (global_cost == NOT_VISITED || temp + local_cost <= global_cost))
@@ -149,6 +167,7 @@ double dtw_backtrack(const double *x, const double *y, const int w,
                     direction = LEFT;
                }
 
+               // prefer diag-step if it's less considering weight
                temp = D[d2s(i-1, j-1, nx)];
 
                if (temp != NOT_VISITED && (global_cost == NOT_VISITED || temp + step*local_cost <= global_cost))
@@ -156,6 +175,13 @@ double dtw_backtrack(const double *x, const double *y, const int w,
                     global_cost = temp + step*local_cost;
                     direction = DIAG;
                }
+
+               /*
+                * I can use the same matrix to save both cost values and steps taken by shifting
+                * the indices left and up for direction. Since the loop advances row-wise, the
+                * appropriate values for the cost will be available, and the unnecessary ones are
+                * replaced by steps along the way.
+                */
 
                D[d2s(i, j, nx)] = global_cost;
                D[d2s(i-1, j-1, nx)] = direction;
@@ -166,6 +192,7 @@ double dtw_backtrack(const double *x, const double *y, const int w,
      int i = nx - 1;
      int j = ny - 1;
 
+     // always start at end of series
      index1[0] = nx;
      index2[0] = ny;
      *path = 1;
@@ -210,9 +237,11 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
      int ny = asInteger(n);
 
      if (asLogical(backtrack)) {
+          // longest possible path, length will be adjusted in R
           SEXP index1 = PROTECT(allocVector(INTSXP, nx + ny));
           SEXP index2 = PROTECT(allocVector(INTSXP, nx + ny));
 
+          // actual length holder
           int path = 0;
 
           // calculate distance
