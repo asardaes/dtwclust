@@ -190,7 +190,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
           indNew <- split_parallel(indNew)
 
-          exclude <- setdiff(ls(), c("X", "Y", "norm", "indNN", "window.size", "method"))
+          exclude <- setdiff(ls(), c("X", "Y", "method", "dots"))
 
           dSub <- foreach(indNew = indNew,
                           .combine = c,

@@ -108,7 +108,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
 
      retclass <- "crossdist"
 
-     if (symmetric) {
+     if (symmetric && !pairwise) {
           check_parallel()
 
           pairs <- call_pairs(length(x), lower = FALSE)

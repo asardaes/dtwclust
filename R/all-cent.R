@@ -26,7 +26,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                id_x <- lapply(id_changed, function(cl_num) which(cl_id == cl_num))
 
                new_cent <- lapply(id_x, function(i_x) {
-                    d <- apply(distmat[i_x, i_x, drop=FALSE], 1L, sum)
+                    d <- apply(distmat[i_x, i_x, drop = FALSE], 1L, sum)
 
                     i_cent <- x[[i_x[which.min(d)]]]
                     attr(i_cent, "id_cent") <- i_x[which.min(d)]
