@@ -1,4 +1,4 @@
-context("Test centroids and CVIs")
+context("Test centroids")
 
 ctrl <- new("dtwclustControl", window.size = 18L)
 x <- data_reinterpolated[1L:20L]
