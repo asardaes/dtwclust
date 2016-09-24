@@ -28,6 +28,8 @@ The latest version from CRAN can be installed with `install.packages("dtwclust")
 
 If you want to test the latest version from github, first install the [prerequisites for R package development](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites) and then type `devtools::install_github("asardaes/dtwclust")`. If you want the vignette to be installed, set the `build_vignettes` parameter to `TRUE`, it will take a couple of minutes.
 
+If you're wondering about which version to install, take a look at the [NEWS](NEWS.md) file, it contains the changelog and I try to keep it updated.
+
 Examples
 --------
 
@@ -62,7 +64,7 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 5: Changes / Distsum = 2 / 1690.314
 #> Iteration 6: Changes / Distsum = 0 / 1690.314
 #> 
-#>  Elapsed time is 5.17 seconds.
+#>  Elapsed time is 4.992 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -85,7 +87,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.655 seconds.
+#>  Elapsed time is 0.656 seconds.
 
 cat("CVIs for HC+SBD:\n")
 #> CVIs for HC+SBD:
@@ -175,7 +177,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.5%
 #> 
-#>  Elapsed time is 1.662 seconds.
+#>  Elapsed time is 1.583 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -227,7 +229,7 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 2: Changes / Distsum = 2 / 4.229023
 #> Iteration 3: Changes / Distsum = 0 / 4.180198
 #> 
-#>  Elapsed time is 5.326 seconds.
+#>  Elapsed time is 4.723 seconds.
 
 ## Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
@@ -269,7 +271,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.148   0.004   0.149 
+#>   0.148   0.000   0.150 
 #> 
 #> Head of fuzzy memberships:
 #> 

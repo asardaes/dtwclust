@@ -45,6 +45,8 @@ The latest version from CRAN can be installed with `install.packages("dtwclust")
 
 If you want to test the latest version from github, first install the [prerequisites for R package development](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites) and then type `devtools::install_github("asardaes/dtwclust")`. If you want the vignette to be installed, set the `build_vignettes` parameter to `TRUE`, it will take a couple of minutes.
 
+If you're wondering about which version to install, take a look at the [NEWS](NEWS.md) file, it contains the changelog and I try to keep it updated.
+
 ## Examples
 
 ```{r set-up}
