@@ -92,9 +92,11 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
      x <- consistency_check(x, "tsmat")
      consistency_check(x, "vltslist")
 
+     dots <- list(...)
+
      if (is.null(y)) {
           y <- x
-          symmetric <- !check_lengths(x)
+          symmetric <- is.null(dots$window.size) || !check_lengths(x)
 
      } else {
           y <- consistency_check(y, "tsmat")
@@ -103,8 +105,6 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
           if (symmetric && length(x) != length(y))
                stop("dtw_basic: Dimension inconsistency when calculating cross-distance matrix within proxy.")
      }
-
-     dots <- list(...)
 
      retclass <- "crossdist"
 

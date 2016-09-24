@@ -152,7 +152,7 @@
 #'   \item \code{"dtw"}: DTW, optionally with a Sakoe-Chiba/Slanted-band constraint*.
 #'   \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint*. Read
 #'   details below.
-#'   \item \code{"dtw_basic"}: A custom version of DTW with less functionality, but marginally faster.
+#'   \item \code{"dtw_basic"}: A custom version of DTW with less functionality, but slightly faster.
 #'   See \code{\link{dtw_basic}}.
 #'   \item \code{"dtw_lb"}: DTW with L1 or L2 norm* and optionally a Sakoe-Chiba constraint*. Some
 #'   computations are avoided by first estimating the distance matrix with Lemire's lower bound and then
@@ -405,12 +405,26 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                consistency_check(centroid, "cent", trace = control@trace)
      }
 
-     if (diff_lengths && distance %in% c("dtw", "dtw2", "dtw_basic"))
+     ## symmetric versions of dtw that I know of
+     ## unconstrained and with symmetric1/symmetric2 is always symmetric, regardless of diff_lengths
+     symmetric_pattern <- !is.null(dots$step.pattern) &&
+          (identical(dots$step.pattern, get("symmetric1")) ||
+                identical(dots$step.pattern, get("symmetric2")))
+
+     if (distance %in% c("dtw", "dtw2", "dtw_basic")) {
+          if (!symmetric_pattern)
+               control@symmetric <- FALSE
+          else if (!is.null(control@window.size) && diff_lengths)
+               control@symmetric <- FALSE
+          else
+               control@symmetric <- TRUE
+
+     } else if (distance %in% c("lbk", "lbi")) {
           control@symmetric <- FALSE
-     else if (distance %in% c("lbk", "lbi"))
-          control@symmetric <- FALSE
-     else if (distance %in% c("sbd", "dtw", "dtw2", "dtw_basic"))
+
+     } else if (distance %in% c("sbd")) {
           control@symmetric <- TRUE
+     }
 
      ## For parallel computation
      control@packages <- c("dtwclust", control@packages)
