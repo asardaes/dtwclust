@@ -99,7 +99,7 @@
 #' @param pairwise Calculate pairwise distances?
 #' @param dtw.func Which function to use for core DTW the calculations, either "dtw" or "dtw_basic". See
 #' \code{\link[dtw]{dtw}} and \code{\link{dtw_basic}}.
-#' @param ... Further arguments for \code{dtw.func}.
+#' @param ... Further arguments for \code{dtw.func} or \code{\link{lb_improved}}.
 #'
 #' @return The distance matrix with class \code{crossdist}.
 #'
@@ -164,21 +164,17 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
      ## NOTE: I tried starting with LBK estimate, refining with LBI and then DTW but, overall,
      ## it was usually slower, almost the whole matrix had to be recomputed for LBI
 
-     if (!is.null(y)) {
+     if (!is.null(y))
           Y <- consistency_check(y, "tsmat")
-          force.symmetry <- FALSE
-
-     } else {
+     else
           Y <- X
-          force.symmetry <- TRUE
-     }
 
      ## Initial estimate
      D <- proxy::dist(X, Y, method = "LBI",
                       window.size = window.size,
                       norm = norm,
                       error.check = error.check,
-                      force.symmetry = force.symmetry)
+                      ...)
 
      ## Update with DTW
      new.indNN <- apply(D, 1L, which.min) # index of nearest neighbors

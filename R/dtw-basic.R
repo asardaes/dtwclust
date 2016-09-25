@@ -154,6 +154,9 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
      if (pairwise) {
           Y <- split_parallel(y)
 
+          if (lengths(X) != lengths(Y))
+               stop("Pairwise distances require the same amount of series in 'x' and 'y'")
+
           D <- foreach(x = X, y = Y, gcm = GCM,
                        .combine = c,
                        .multicombine = TRUE,

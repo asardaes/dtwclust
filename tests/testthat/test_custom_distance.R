@@ -1,4 +1,4 @@
-context("Test custom proxy distances")
+context("Test custom proxy distances in dtwclust")
 
 # =================================================================================================
 # Registered with proxy
