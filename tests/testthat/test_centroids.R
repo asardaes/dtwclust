@@ -1,4 +1,4 @@
-context("Test centroids")
+context("Test included centroids")
 
 ctrl <- new("dtwclustControl", window.size = 18L)
 x <- data_reinterpolated[1L:20L]
@@ -252,4 +252,7 @@ test_that("Errors in centroid argument are correctly detected.", {
 
      expect_error(dtwclust(data, centroid = NULL),
                   "definition", info = "NULL centroid")
+
+     expect_error(dtwclust(data, centroid = NA),
+                  "definition", info = "NA centroid")
 })
