@@ -53,14 +53,12 @@
 #'
 #' @export
 #'
-
 shape_extraction <- function(X, centroid = NULL, center = NULL, znorm = FALSE) {
-
-     if (!missing(center) && is.null(centroid)) {
+     if (!missing(center)) {
           warning("The 'center' argument has been deprecated and will be removed in the next version. ",
                   "Please use 'centroid' instead.")
 
-          centroid <- center
+          if (is.null(centroid)) centroid <- center
      }
 
      X <- consistency_check(X, "tsmat")
@@ -88,7 +86,7 @@ shape_extraction <- function(X, centroid = NULL, center = NULL, znorm = FALSE) {
      ## make sure at least one series is not just a flat line at zero
      if (all(sapply(Xz, sum) == 0)) {
           if (is.null(centroid)) {
-               return(rep(0, sample(lengths(Xz), 1)))
+               return(rep(0, sample(lengths(Xz), 1L)))
 
           } else {
                return(centroid)
@@ -96,9 +94,10 @@ shape_extraction <- function(X, centroid = NULL, center = NULL, znorm = FALSE) {
      }
 
      if (is.null(centroid)) {
-          if (length(unique(lengths(Xz))) == 1L)
+          if (!check_lengths(Xz)) {
                A <- do.call(rbind, Xz) # use all
-          else {
+
+          } else {
                centroid <- Xz[[sample(length(Xz), 1L)]] # random choice as reference
 
                A <- lapply(Xz, function(a) { SBD(centroid, a)$yshift })
