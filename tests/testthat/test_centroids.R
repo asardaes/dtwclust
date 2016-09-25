@@ -15,29 +15,29 @@ test_that("Operations with mean centroid give same results as references.", {
                    control = ctrl,
                    allcent = "mean")
 
-     pc_mean <- family@allcent(x,
-                               cl_id = cl_id,
-                               k = k,
-                               cent = x[c(1L,20L)],
-                               cl_old = 0L)
+     cent_mean <- family@allcent(x,
+                                 cl_id = cl_id,
+                                 k = k,
+                                 cent = x[c(1L,20L)],
+                                 cl_old = 0L)
 
-     expect_identical(length(pc_mean), k)
+     expect_identical(length(cent_mean), k)
 
      ## ---------------------------------------------------------- multivariate
-     mv_mean <- family@allcent(data_multivariate,
-                               cl_id = cl_id,
-                               k = k,
-                               cent = data_multivariate[c(1L,20L)],
-                               cl_old = 0L)
+     cent_mv_mean <- family@allcent(data_multivariate,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = data_multivariate[c(1L,20L)],
+                                    cl_old = 0L)
 
-     expect_identical(length(mv_mean), k)
+     expect_identical(length(cent_mv_mean), k)
 
-     expect_identical(dim(mv_mean[[1L]]), dim(data_multivariate[[1L]]))
+     expect_identical(dim(cent_mv_mean[[1L]]), dim(data_multivariate[[1L]]))
 
      skip_on_cran()
 
-     expect_equal_to_reference(pc_mean, file_name(pc_mean), info = "Univariate")
-     expect_equal_to_reference(mv_mean, file_name(mv_mean), info = "Multivariate")
+     expect_equal_to_reference(cent_mean, file_name(cent_mean), info = "Univariate")
+     expect_equal_to_reference(cent_mv_mean, file_name(cent_mv_mean), info = "Multivariate")
 })
 
 # =================================================================================================
@@ -50,29 +50,29 @@ test_that("Operations with median centroid give same results as references.", {
                    control = ctrl,
                    allcent = "median")
 
-     pc_median <- family@allcent(x,
-                                 cl_id = cl_id,
-                                 k = k,
-                                 cent = x[c(1L,20L)],
-                                 cl_old = 0L)
+     cent_median <- family@allcent(x,
+                                   cl_id = cl_id,
+                                   k = k,
+                                   cent = x[c(1L,20L)],
+                                   cl_old = 0L)
 
-     expect_identical(length(pc_median), k)
+     expect_identical(length(cent_median), k)
 
      ## ---------------------------------------------------------- multivariate
-     mv_median <- family@allcent(data_multivariate,
-                                 cl_id = cl_id,
-                                 k = k,
-                                 cent = data_multivariate[c(1L,20L)],
-                                 cl_old = 0L)
+     cent_mv_median <- family@allcent(data_multivariate,
+                                      cl_id = cl_id,
+                                      k = k,
+                                      cent = data_multivariate[c(1L,20L)],
+                                      cl_old = 0L)
 
-     expect_identical(length(mv_median), k)
+     expect_identical(length(cent_mv_median), k)
 
-     expect_identical(dim(mv_median[[1L]]), dim(data_multivariate[[1L]]))
+     expect_identical(dim(cent_mv_median[[1L]]), dim(data_multivariate[[1L]]))
 
      skip_on_cran()
 
-     expect_equal_to_reference(pc_median, file_name(pc_median), info = "Univariate")
-     expect_equal_to_reference(mv_median, file_name(mv_median), info = "Multivariate")
+     expect_equal_to_reference(cent_median, file_name(cent_median), info = "Univariate")
+     expect_equal_to_reference(cent_mv_median, file_name(cent_mv_median), info = "Multivariate")
 })
 
 # =================================================================================================
@@ -85,29 +85,29 @@ test_that("Operations with shape centroid give same results as references.", {
                    control = ctrl,
                    allcent = "shape")
 
-     pc_shape <- family@allcent(x,
-                                cl_id = cl_id,
-                                k = k,
-                                cent = x[c(1L,20L)],
-                                cl_old = 0L)
+     cent_shape <- family@allcent(x,
+                                  cl_id = cl_id,
+                                  k = k,
+                                  cent = x[c(1L,20L)],
+                                  cl_old = 0L)
 
-     expect_identical(length(pc_shape), k)
+     expect_identical(length(cent_shape), k)
 
      ## ---------------------------------------------------------- multivariate
-     mv_shape <- family@allcent(data_multivariate,
-                                cl_id = cl_id,
-                                k = k,
-                                cent = data_multivariate[c(1L,20L)],
-                                cl_old = 0L)
+     cent_mv_shape <- family@allcent(data_multivariate,
+                                     cl_id = cl_id,
+                                     k = k,
+                                     cent = data_multivariate[c(1L,20L)],
+                                     cl_old = 0L)
 
-     expect_identical(length(mv_shape), k)
+     expect_identical(length(cent_mv_shape), k)
 
-     expect_identical(dim(mv_shape[[1L]]), dim(data_multivariate[[1L]]))
+     expect_identical(dim(cent_mv_shape[[1L]]), dim(data_multivariate[[1L]]))
 
      skip_on_cran()
 
-     expect_equal_to_reference(pc_shape, file_name(pc_shape), info = "Univariate")
-     expect_equal_to_reference(mv_shape, file_name(mv_shape), info = "Multivariate")
+     expect_equal_to_reference(cent_shape, file_name(cent_shape), info = "Univariate")
+     expect_equal_to_reference(cent_mv_shape, file_name(cent_mv_shape), info = "Multivariate")
 })
 
 # =================================================================================================
@@ -121,13 +121,13 @@ test_that("Operations with pam centroid give same results as references.", {
                    dist = "sbd",
                    allcent = "pam")
 
-     pc_pam <- family@allcent(x,
-                              cl_id = cl_id,
-                              k = k,
-                              cent = x[c(1L,20L)],
-                              cl_old = 0L)
+     cent_pam <- family@allcent(x,
+                                cl_id = cl_id,
+                                k = k,
+                                cent = x[c(1L,20L)],
+                                cl_old = 0L)
 
-     expect_identical(length(pc_pam), k)
+     expect_identical(length(cent_pam), k)
 
      expect_null(as.list(environment(family@allcent))$distmat)
 
@@ -138,17 +138,17 @@ test_that("Operations with pam centroid give same results as references.", {
                    allcent = "pam",
                    distmat = proxy::dist(x, method = "sbd"))
 
-     pc_pam_distmat <- family@allcent(x,
-                                      cl_id = cl_id,
-                                      k = k,
-                                      cent = x[c(1L,20L)],
-                                      cl_old = 0L)
+     cent_pam_distmat <- family@allcent(x,
+                                        cl_id = cl_id,
+                                        k = k,
+                                        cent = x[c(1L,20L)],
+                                        cl_old = 0L)
 
-     expect_identical(length(pc_pam_distmat), k)
+     expect_identical(length(cent_pam_distmat), k)
 
      expect_false(is.null(as.list(environment(family@allcent))$distmat))
 
-     expect_identical(pc_pam, pc_pam_distmat)
+     expect_identical(cent_pam, cent_pam_distmat)
 
      ## ---------------------------------------------------------- multivariate
      family <- new("dtwclustFamily",
@@ -156,20 +156,20 @@ test_that("Operations with pam centroid give same results as references.", {
                    dist = "dtw_basic",
                    allcent = "pam")
 
-     mv_pam <- family@allcent(data_multivariate,
-                              cl_id = cl_id,
-                              k = k,
-                              cent = data_multivariate[c(1L,20L)],
-                              cl_old = 0L)
+     cent_mv_pam <- family@allcent(data_multivariate,
+                                   cl_id = cl_id,
+                                   k = k,
+                                   cent = data_multivariate[c(1L,20L)],
+                                   cl_old = 0L)
 
-     expect_identical(length(mv_pam), k)
+     expect_identical(length(cent_mv_pam), k)
 
-     expect_identical(dim(mv_pam[[1L]]), dim(data_multivariate[[1L]]))
+     expect_identical(dim(cent_mv_pam[[1L]]), dim(data_multivariate[[1L]]))
 
      skip_on_cran()
 
-     expect_equal_to_reference(pc_pam, file_name(pc_pam), info = "Univariate without distmat")
-     expect_equal_to_reference(mv_pam, file_name(mv_pam), info = "Multivariate")
+     expect_equal_to_reference(cent_pam, file_name(cent_pam), info = "Univariate without distmat")
+     expect_equal_to_reference(cent_mv_pam, file_name(cent_mv_pam), info = "Multivariate")
 })
 
 # =================================================================================================
@@ -182,29 +182,29 @@ test_that("Operations with dba centroid give same results as references.", {
                    control = ctrl,
                    allcent = "dba")
 
-     pc_dba <- family@allcent(x,
-                              cl_id = cl_id,
-                              k = k,
-                              cent = x[c(1L,20L)],
-                              cl_old = 0L)
+     cent_dba <- family@allcent(x,
+                                cl_id = cl_id,
+                                k = k,
+                                cent = x[c(1L,20L)],
+                                cl_old = 0L)
 
-     expect_identical(length(pc_dba), k)
+     expect_identical(length(cent_dba), k)
 
      ## ---------------------------------------------------------- multivariate
-     mv_dba <- family@allcent(data_multivariate,
-                              cl_id = cl_id,
-                              k = k,
-                              cent = data_multivariate[c(1L,20L)],
-                              cl_old = 0L)
+     cent_mv_dba <- family@allcent(data_multivariate,
+                                   cl_id = cl_id,
+                                   k = k,
+                                   cent = data_multivariate[c(1L,20L)],
+                                   cl_old = 0L)
 
-     expect_identical(length(mv_dba), k)
+     expect_identical(length(cent_mv_dba), k)
 
-     expect_identical(dim(mv_dba[[1L]]), dim(data_multivariate[[1L]]))
+     expect_identical(dim(cent_mv_dba[[1L]]), dim(data_multivariate[[1L]]))
 
      skip_on_cran()
 
-     expect_equal_to_reference(pc_dba, file_name(pc_dba), info = "Univariate")
-     expect_equal_to_reference(mv_dba, file_name(mv_dba), info = "Multivariate")
+     expect_equal_to_reference(cent_dba, file_name(cent_dba), info = "Univariate")
+     expect_equal_to_reference(cent_mv_dba, file_name(cent_mv_dba), info = "Multivariate")
 })
 
 # =================================================================================================
@@ -222,15 +222,15 @@ test_that("Operations with custom centroid give same results as references.", {
           new_cent
      }
 
-     pc_colMeans <- dtwclust(data_matrix, type = "partitional", k = 20,
-                             distance = "sbd", centroid = mycent,
-                             preproc = NULL, control = ctrl, seed = 123)
+     cent_colMeans <- dtwclust(data_matrix, type = "partitional", k = 20,
+                               distance = "sbd", centroid = mycent,
+                               preproc = NULL, control = ctrl, seed = 123)
 
-     pc_colMeans <- reset_nondeterministic(pc_colMeans)
+     cent_colMeans <- reset_nondeterministic(cent_colMeans)
 
      skip_on_cran()
 
-     expect_equal_to_reference(pc_colMeans, file_name(pc_colMeans), info = "Custom colMeans")
+     expect_equal_to_reference(cent_colMeans, file_name(cent_colMeans), info = "Custom colMeans")
 })
 
 # =================================================================================================
