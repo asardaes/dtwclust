@@ -178,6 +178,9 @@ NULL
      packageStartupMessage("\ndtwclust: Setting random number generator to L'Ecuyer-CMRG.\n",
                            'To read the included vignette, type: vignette("dtwclust").\n',
                            'Please see news(package = "dtwclust") for important information!\n')
+
+     if (grepl(".9000", packageVersion("dtwclust")))
+          message("This is a developer version of 'dtwclust'. Note that the CHECK tests fail due to parallelization.")
 }
 
 .onUnload <- function(libpath) {
