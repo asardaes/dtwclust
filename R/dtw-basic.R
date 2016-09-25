@@ -64,6 +64,8 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
           gcm <- matrix(-1, NROW(x) + 1L, NROW(y) + 1L)
      else if (!is.matrix(gcm) || nrow(gcm) < NROW(x) + 1L || ncol(gcm) < NROW(y) + 1L)
           stop("dtw_basic: Dimension inconsistency in 'gcm'")
+     else
+          storage.mode(gcm) <- "numeric"
 
      d <- .Call("dtw_basic", x, y, window.size,
                 NROW(x), NROW(y), NCOL(x),
