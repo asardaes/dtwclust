@@ -471,8 +471,7 @@ data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 
 # Calculate the DTW distances between all elements
 system.time(D1 <- proxy::dist(data[1L:5L], data[6L:50L],
-                              method = "DTW",
-                              window.type = "sakoechiba",
+                              method = "dtw_basic",
                               window.size = 20L))
 
 # Nearest neighbors
