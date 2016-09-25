@@ -150,7 +150,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
           y <- split_parallel(y)
           ffty <- split_parallel(ffty)
 
-          if (lengths(x) != lengths(y))
+          if (length(lengths(x)) != length(lengths(y)) || lengths(x) != lengths(y))
                stop("Pairwise distances require the same amount of series in 'x' and 'y'")
 
           D <- foreach(x = x, fftx = fftx, y = y, ffty = ffty,

@@ -189,7 +189,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
           lower.env <- split_parallel(lower.env)
           upper.env <- split_parallel(upper.env)
 
-          if (lengths(x) != lengths(lower.env))
+          if (length(lengths(x)) != length(lengths(lower.env)) || any(lengths(x) != lengths(lower.env)))
                stop("Pairwise distances require the same amount of series in 'x' and 'y'")
 
           D <- foreach(x = x, lower.env = lower.env, upper.env = upper.env,
