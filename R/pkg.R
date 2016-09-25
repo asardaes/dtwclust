@@ -181,7 +181,9 @@ NULL
                            'Please see news(package = "dtwclust") for important information!\n')
 
      if (grepl(".9000", utils::packageVersion("dtwclust")))
-          packageStartupMessage("This is a developer version of 'dtwclust'. Note that the CHECK tests fail due to parallelization.")
+          packageStartupMessage("This is a developer version of 'dtwclust'. ",
+                                "Note that running CHECK will have failing tests due to parallelization ",
+                                "and missing rds files.")
 }
 
 .onUnload <- function(libpath) {
