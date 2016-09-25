@@ -31,6 +31,39 @@ setMethod("initialize", "dtwclust",
                .Object
           })
 
+# for dtwclustFamily to call in tests
+
+setMethod("initialize", "dtwclustFamily",
+          function(.Object, dist, allcent, ..., distmat = NULL, control = NULL, fuzzy = FALSE) {
+               dots <- list(...)
+               dots$.Object <- .Object
+
+               if (is.null(control))
+                    control <- new("dtwclustControl")
+
+               if (!missing(dist)) {
+                    if (is.character(dist))
+                         dots$dist <- ddist(dist, control, distmat)
+                    else
+                         dots$dist <- dist
+               }
+
+               if (!missing(allcent)) {
+                    if (is.character(allcent))
+                         dots$allcent <- all_cent(allcent,
+                                                  distmat = distmat,
+                                                  distfun = dots$dist,
+                                                  control = control,
+                                                  fuzzy = fuzzy)
+                    else
+                         dots$allcent <- allcent
+               }
+
+               if (fuzzy) dots$cluster <- fcm_cluster # fuzzy.R
+
+               do.call(callNextMethod, dots)
+          })
+
 # ========================================================================================================
 # Show
 # ========================================================================================================
