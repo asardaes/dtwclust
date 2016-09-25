@@ -48,6 +48,14 @@
 \newcommand{\dtwp}{\text{DTW}_p}
 \newcommand{\kshape}{\textit{k}-Shape}
 
+% Blank footnote
+\newcommand\blankfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+
 % ===========================================================================================================
 % Cover
 % ===========================================================================================================
@@ -63,7 +71,7 @@ Alexis Sard\'a-Espinosa\\
 \email{alexis.sarda@gmail.com}
 }
 
-\Abstract{
+\Abstract{%
 Clustering strategies have not changed considerably since their initial definition. Most of the improvements are either related to the distance measure used to assess dissimilarity, or the function used to calculate prototypes or centroids. Time-series clustering is no exception, with the Dynamic Time Warping distance being particularly popular in that context. This distance is computationally expensive, so many related optimizations have been developed over the years. Since no single clustering algorithm can be said to perform best on all datasets, different strategies must be tested and compared, so a common infrastructure can be advantageous. In this paper, a general overview of time-series clustering is given, including many specifics related to Dynamic Time Warping and other recently proposed techniques. At the same time, a description of the \dtwclust{} package for the \R{} statistical software is provided, showcasing how it can be used to evaluate many different time-series clustering procedures.
 }
 
@@ -89,11 +97,10 @@ opts_chunk$set(fig.width = 8, fig.asp = 0.5625,
                cache = TRUE, echo = FALSE, autodep = TRUE)
 @
 
-
 \section{Introduction}
 \label{sec:introduction}
 
-Cluster analysis is a general task which concerns itself with the creation of groups of objects, where each group is called a cluster. Ideally, all members of the same cluster are similar to each other, but are as dissimilar as possible from objects in a different cluster. There is no single definition of a cluster, and the characteristics of the objects to be clustered vary. Thus, there are several algorithms to perform clustering. Each one defines specific ways of defining what a cluster is, how to measure similarities, how to find groups efficiently, etc. Additionally, each application might have different goals, so a certain clustering algorithm may be preferred depending on the type of clusters sought \citep{kaufman1990}.
+\blankfootnote{This paper corresponds to \dtwclust{} version \Sexpr{packageVersion("dtwclust")}, \Sexpr{Sys.Date()}.}Cluster analysis is a general task which concerns itself with the creation of groups of objects, where each group is called a cluster. Ideally, all members of the same cluster are similar to each other, but are as dissimilar as possible from objects in a different cluster. There is no single definition of a cluster, and the characteristics of the objects to be clustered vary. Thus, there are several algorithms to perform clustering. Each one defines specific ways of defining what a cluster is, how to measure similarities, how to find groups efficiently, etc. Additionally, each application might have different goals, so a certain clustering algorithm may be preferred depending on the type of clusters sought \citep{kaufman1990}.
 
 Clustering algorithms can be organized differently depending on how they handle the data and how the groups are created. When it comes to static data, i.e. if the values do not change with time \citep{liao2005}, clustering methods are usually divided into five major categories: \textbf{partitioning (or partitional)}, \textbf{hierarchical}, \textbf{density-based}, \textbf{grid-based} and \textbf{model-based} methods \citep{liao2005, rani2012}. They may be used as the main algorithm, as an intermediate step, or as a preprocessing step \citep{aghabozorgi2015}.
 
@@ -256,7 +263,7 @@ Another possible advantage of PAM is that, since the data does not change, it is
 
 The DTW distance is used very often when working with time-series, and thus a prototyping function based on DTW has also been developed in \citet{petitjean2011}. The procedure is called DTW barycenter averaging (DBA), and is an iterative, \textit{global} method. The latter means that the order in which the series enter the prototyping function does \textbf{not} affect the outcome.
 
-DBA requires a series to be used as reference (centroid), and it usually begins by \textbf{randomly} selecting one of the series in the data. In each iteration, the DTW alignment \footnote{Internally, the DTW alignment can be computed by the \pkg{dtw} package or with the included \code{dtw\_basic} function.} between each series in the cluster $C$ and the centroid is computed. Because of the warping performed in DTW, it can be that several time-points from a given time-series map to a single time-point in the centroid series, so for each time-point in the centroid, all the corresponding values from all series in $C$ are grouped together according to the DTW alignment, and the mean is computed for each centroid point using the values contained in each group. This is then iteratively repeated until a certain number of iterations are reached, or until convergence is assumed.
+DBA requires a series to be used as reference (centroid), and it usually begins by \textbf{randomly} selecting one of the series in the data. In each iteration, the DTW alignment\footnote{Internally, the DTW alignment can be computed by the \pkg{dtw} package or with the included \code{dtw\_basic} function.} between each series in the cluster $C$ and the centroid is computed. Because of the warping performed in DTW, it can be that several time-points from a given time-series map to a single time-point in the centroid series, so for each time-point in the centroid, all the corresponding values from all series in $C$ are grouped together according to the DTW alignment, and the mean is computed for each centroid point using the values contained in each group. This is then iteratively repeated until a certain number of iterations are reached, or until convergence is assumed.
 
 One way in which DBA can be optimized is in its usage of random access memory (RAM). Since the series used on each iteration do not change, the LCMs generated by DTW always have the same size, so the required memory can be allocated once and re-used on each iteration. In order to ensure that this is the case, \dtwclust{} updates the LCMs when using DBA by means of \proglang{C} code.
 
