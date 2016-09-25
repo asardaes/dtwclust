@@ -63,14 +63,15 @@ test_that("Included proxy distances can be called for pairwise = TRUE and give e
           expect_equal(d, rep(0, length(d2)), check.attributes = FALSE,
                        info = paste(distance, "pairwise double all zero"))
 
-          d3 <- proxy::dist(x[1L:3L], x[4L:6L], method = distance, window.size = 15L, pairwise = TRUE)
-
-          expect_equal_to_reference(d3, paste0("rds/pdist_", distance, ".rds"))
-
           expect_error(proxy::dist(x[1L:3L], x[4L:5L], method = distance,
                                    window.size = 15L, pairwise = TRUE),
                        "same amount",
                        info = paste(distance, "invalid pairwise"))
+
+          if (identical(Sys.getenv("NOT_CRAN"), "true")) {
+               d3 <- proxy::dist(x[1L:3L], x[4L:6L], method = distance, window.size = 15L, pairwise = TRUE)
+               expect_equal_to_reference(d3, paste0("rds/pdist_", distance, ".rds"))
+          }
      }
 })
 
