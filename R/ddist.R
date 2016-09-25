@@ -133,7 +133,7 @@ ddist <- function(distance, control, distmat) {
                          centroids <- x
 
                          ## for dtw_basic_proxy
-                         if (has_dots && (is.null(control@window.size) || !check_lengths(x)))
+                         if (!check_parallel() && has_dots && (is.null(control@window.size) || !check_lengths(x)))
                               dots$symmetric <- TRUE
                     }
 
