@@ -48,6 +48,11 @@ setMethod("initialize", "dtwclustFamily",
                          dots$dist <- dist
                }
 
+               if (fuzzy) {
+                    dots$cluster <- fcm_cluster # fuzzy.R
+                    allcent <- "fcm"
+               }
+
                if (!missing(allcent)) {
                     if (is.character(allcent))
                          dots$allcent <- all_cent(allcent,
@@ -58,8 +63,6 @@ setMethod("initialize", "dtwclustFamily",
                     else
                          dots$allcent <- allcent
                }
-
-               if (fuzzy) dots$cluster <- fcm_cluster # fuzzy.R
 
                do.call(callNextMethod, dots)
           })
