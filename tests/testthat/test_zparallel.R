@@ -10,7 +10,7 @@ test_that("Parallel computation gives the same results as sequential", {
      skip_on_cran()
 
      if (getOption("skip_par_tests", FALSE))
-          skip("Parallel tests must be enabled explicitly.")
+          skip("Parallel tests disabled explicitly.")
 
      cat("\n")
 
