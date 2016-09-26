@@ -29,7 +29,7 @@ test_that("Parallel computation gives the same results as sequential", {
 
      ## Also test FORK in Unix
      if (.Platform$OS.type != "windows") {
-          cat("FORKs:\n")
+          cat("Test FORKs:\n")
 
           rm(cl)
           cl <- makeCluster(detectCores(), "FORK")
