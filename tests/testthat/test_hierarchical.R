@@ -5,6 +5,8 @@ context("Test hierarchical")
 # =================================================================================================
 
 test_that("Invalid combinations in hierarchical clustering are detected.", {
+     expect_error(dtwclust(data, type = "h", k = 101L), "more clusters")
+
      expect_error(dtwclust(data, type = "h", distance = "lbk"), "different length")
      expect_error(dtwclust(data, type = "h", distance = "lbi"), "different length")
      expect_error(dtwclust(data, type = "h", distance = "dtw_lb"), "different length")

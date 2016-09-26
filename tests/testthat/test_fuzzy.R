@@ -10,6 +10,8 @@ acf_fun <- function(dat) {
 # =================================================================================================
 
 test_that("Invalid combinations in hierarchical clustering are detected.", {
+     expect_error(dtwclust(data, type = "f", k = 101L), "more clusters")
+
      ctrl <- list(window.size = 15L)
 
      expect_error(dtwclust(data_matrix, type = "f", distance = "lbk", control = ctrl), "different length")

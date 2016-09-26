@@ -5,6 +5,8 @@ context("Test partitional algorithms")
 # =================================================================================================
 
 test_that("Invalid combinations in partitional clustering are detected.", {
+     expect_error(dtwclust(data, k = 101L), "more clusters")
+
      expect_error(dtwclust(data, distance = "lbk"), "different length")
      expect_error(dtwclust(data, distance = "lbi"), "different length")
      expect_error(dtwclust(data, distance = "dtw_lb"), "different length")
