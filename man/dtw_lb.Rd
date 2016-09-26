@@ -21,7 +21,7 @@ dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
 \item{dtw.func}{Which function to use for core DTW the calculations, either "dtw" or "dtw_basic". See
 \code{\link[dtw]{dtw}} and \code{\link{dtw_basic}}.}
 
-\item{...}{Further arguments for \code{dtw.func}.}
+\item{...}{Further arguments for \code{dtw.func} or \code{\link{lb_improved}}.}
 }
 \value{
 The distance matrix with class \code{crossdist}.

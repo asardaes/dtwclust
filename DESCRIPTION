@@ -10,6 +10,7 @@ Depends:
     dtw,
     ggplot2
 Imports:
+    utils,
     stats,
     methods,
     parallel,

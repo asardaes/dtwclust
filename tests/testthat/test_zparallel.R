@@ -9,6 +9,9 @@ context("Test parallel")
 test_that("Parallel computation gives the same results as sequential", {
      skip_on_cran()
 
+     if (getOption("skip_par_tests", FALSE))
+          skip("Parallel tests disabled explicitly.")
+
      cat("\n")
 
      require(doParallel)
@@ -26,7 +29,7 @@ test_that("Parallel computation gives the same results as sequential", {
 
      ## Also test FORK in Unix
      if (.Platform$OS.type != "windows") {
-          cat("FORKs:\n")
+          cat("Test FORKs:\n")
 
           rm(cl)
           cl <- makeCluster(detectCores(), "FORK")

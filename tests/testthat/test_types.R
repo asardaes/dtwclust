@@ -1,37 +1,66 @@
 context("Test data types")
 
 # =================================================================================================
-# matrix
+# data errors
 # =================================================================================================
 
-pc_matrix <- dtwclust(data_matrix, type = "partitional", k = 20,
-                      distance = "L2", centroid = "pam",
-                      preproc = NULL, seed = 123,
-                      control = ctrl)
+test_that("Errors in input data are detected", {
+     expect_error(dtwclust(NULL), "No data")
+     expect_error(dtwclust(NA), "type")
+     expect_error(dtwclust(mean), "type")
+     expect_error(dtwclust("data"), "type")
 
-pc_matrix <- reset_nondeterministic(pc_matrix)
+     expect_error(dtwclust(as.logical(data_matrix)), "type")
 
-test_that("matrix input gives the same result as reference",
-          my_expect_equal_to_reference(pc_matrix))
+     temp <- data[[1L]]
+     temp[2L] <- NA
+     data[[1L]] <- temp
 
-# =================================================================================================
-# list
-# =================================================================================================
+     expect_error(dtwclust(data), "missing values")
 
-pc_list <- dtwclust(data_list, type = "partitional", k = 20,
-                    distance = "L1", centroid = "pam",
-                    preproc = NULL, seed = 123,
-                    conrol = ctrl)
+     data[[1L]] <- numeric()
 
-pc_list <- reset_nondeterministic(pc_list)
-
-test_that("list input gives the same result as reference",
-          my_expect_equal_to_reference(pc_list))
+     expect_error(dtwclust(data), "one point")
+})
 
 # =================================================================================================
-# data.frame
+# data formats
 # =================================================================================================
 
-test_that("logical input gives data type error",
-          expect_error(dtwclust(as.logical(data_matrix), k = 20, distance = "L2"),
-                       "type"))
+test_that("Results are the same regardless of data format, as long as supported.", {
+     pc_matrix <- dtwclust(data_matrix[1L:20L, ], type = "partitional", k = 4L,
+                           distance = "L2", centroid = "pam",
+                           seed = 939)
+
+     pc_matrix <- reset_nondeterministic(pc_matrix)
+
+     pc_list <- dtwclust(data_reinterpolated[1L:20L], type = "partitional", k = 4L,
+                         distance = "L2", centroid = "pam",
+                         seed = 939)
+
+     pc_list <- reset_nondeterministic(pc_list)
+
+     suppressMessages(
+          pc_df<- dtwclust(as.data.frame(t(data_matrix[1L:20L, ])),
+                           type = "partitional", k = 4L,
+                           distance = "L2", centroid = "pam",
+                           seed = 939)
+     )
+
+     pc_df <- reset_nondeterministic(pc_df)
+
+     pc_matrix <- lapply(pc_matrix, function(obj) {
+          obj@call <- as.call(list("zas", a = 1))
+     })
+
+     pc_list <- lapply(pc_list, function(obj) {
+          obj@call <- as.call(list("zas", a = 1))
+     })
+
+     pc_df <- lapply(pc_df, function(obj) {
+          obj@call <- as.call(list("zas", a = 1))
+     })
+
+     expect_identical(pc_matrix, pc_list)
+     expect_identical(pc_matrix, pc_df)
+})

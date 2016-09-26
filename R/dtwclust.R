@@ -345,8 +345,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
      MYCALL <- match.call(expand.dots = TRUE)
 
-     if (type == "fuzzy" && !missing(centroid) && is.character(centroid) && centroid != "fcm")
+     if (type == "fuzzy" && !missing(centroid) && is.character(centroid) && centroid != "fcm") {
           warning("The 'centroid' argument was provided but was different than 'fcm', so it was ignored.")
+          centroid <- "fcm"
+     }
 
      ## ----------------------------------------------------------------------------------------------------------
      ## Control parameters
@@ -394,6 +396,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      consistency_check(distance, "dist", trace = control@trace, Lengths = diff_lengths, silent = FALSE)
 
      if(type %in% c("partitional", "fuzzy")) {
+          if (diff_lengths && type == "fuzzy")
+               stop("Fuzzy clustering does not support series with different length.")
+
           if (is.character(centroid)) {
                if (type == "fuzzy")
                     centroid <- "fcm"

@@ -1,224 +1,258 @@
-context("Test centroids and CVIs")
+context("Test included centroids")
 
-## CVIs require data and must be evaluated before resetting nondeterministic values,
-## since the functions in the family slot are needed
-ctrl@save.data <- TRUE
+ctrl <- new("dtwclustControl", window.size = 18L)
+x <- data_reinterpolated[1L:20L]
+k <- 2L
+cl_id <- rep(c(1L, 2L), each = length(x) / 2L)
 
 # =================================================================================================
 # mean
 # =================================================================================================
 
-## Will not converge
-suppressWarnings(
-     pc_mean <- dtwclust(data_matrix, type = "partitional", k = 20,
-                         distance = "sbd", centroid = "mean",
-                         preproc = NULL, control = ctrl, seed = 123)
-)
+test_that("Operations with mean centroid give same results as references.", {
+     ## ---------------------------------------------------------- univariate
+     family <- new("dtwclustFamily",
+                   control = ctrl,
+                   allcent = "mean")
 
-cvi_mean <- cvi(pc_mean, labels)
+     cent_mean <- family@allcent(x,
+                                 cl_id = cl_id,
+                                 k = k,
+                                 cent = x[c(1L,20L)],
+                                 cl_old = 0L)
 
-test_that("mean centroid CVI gives the same result as reference",
-          my_expect_equal_to_reference(cvi_mean))
+     expect_identical(length(cent_mean), k)
 
-pc_mean <- reset_nondeterministic(pc_mean)
+     ## ---------------------------------------------------------- multivariate
+     cent_mv_mean <- family@allcent(data_multivariate,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = data_multivariate[c(1L,20L)],
+                                    cl_old = 0L)
 
-test_that("mean centroid gives the same result as reference",
-          my_expect_equal_to_reference(pc_mean))
+     expect_identical(length(cent_mv_mean), k)
+
+     expect_identical(dim(cent_mv_mean[[1L]]), dim(data_multivariate[[1L]]))
+
+     skip_on_cran()
+
+     expect_equal_to_reference(cent_mean, file_name(cent_mean), info = "Univariate")
+     expect_equal_to_reference(cent_mv_mean, file_name(cent_mv_mean), info = "Multivariate")
+})
 
 # =================================================================================================
 # median
 # =================================================================================================
 
-pc_median <- dtwclust(data_matrix, type = "partitional", k = 20,
-                      distance = "sbd", centroid = "median",
-                      preproc = NULL, control = ctrl, seed = 123)
+test_that("Operations with median centroid give same results as references.", {
+     ## ---------------------------------------------------------- univariate
+     family <- new("dtwclustFamily",
+                   control = ctrl,
+                   allcent = "median")
 
-cvi_median <- cvi(pc_median, labels)
+     cent_median <- family@allcent(x,
+                                   cl_id = cl_id,
+                                   k = k,
+                                   cent = x[c(1L,20L)],
+                                   cl_old = 0L)
 
-test_that("median centroid CVI gives the same result as reference",
-          my_expect_equal_to_reference(cvi_median))
+     expect_identical(length(cent_median), k)
 
-pc_median <- reset_nondeterministic(pc_median)
+     ## ---------------------------------------------------------- multivariate
+     cent_mv_median <- family@allcent(data_multivariate,
+                                      cl_id = cl_id,
+                                      k = k,
+                                      cent = data_multivariate[c(1L,20L)],
+                                      cl_old = 0L)
 
-test_that("median centroid gives the same result as reference",
-          my_expect_equal_to_reference(pc_median))
+     expect_identical(length(cent_mv_median), k)
+
+     expect_identical(dim(cent_mv_median[[1L]]), dim(data_multivariate[[1L]]))
+
+     skip_on_cran()
+
+     expect_equal_to_reference(cent_median, file_name(cent_median), info = "Univariate")
+     expect_equal_to_reference(cent_mv_median, file_name(cent_mv_median), info = "Multivariate")
+})
 
 # =================================================================================================
 # shape
 # =================================================================================================
 
-pc_shape <- dtwclust(data, type = "partitional", k = 20,
-                     distance = "sbd", centroid = "shape",
-                     preproc = NULL, control = ctrl, seed = 123)
+test_that("Operations with shape centroid give same results as references.", {
+     ## ---------------------------------------------------------- univariate
+     family <- new("dtwclustFamily",
+                   control = ctrl,
+                   allcent = "shape")
 
-cvi_shape <- cvi(pc_shape, labels)
+     cent_shape <- family@allcent(x,
+                                  cl_id = cl_id,
+                                  k = k,
+                                  cent = x[c(1L,20L)],
+                                  cl_old = 0L)
 
-test_that("shape centroid CVI gives the same result as reference",
-          my_expect_equal_to_reference(cvi_shape))
+     expect_identical(length(cent_shape), k)
 
-pc_shape <- reset_nondeterministic(pc_shape)
+     ## ---------------------------------------------------------- multivariate
+     cent_mv_shape <- family@allcent(data_multivariate,
+                                     cl_id = cl_id,
+                                     k = k,
+                                     cent = data_multivariate[c(1L,20L)],
+                                     cl_old = 0L)
 
-test_that("shape centroid gives the same result as reference",
-          my_expect_equal_to_reference(pc_shape))
+     expect_identical(length(cent_mv_shape), k)
+
+     expect_identical(dim(cent_mv_shape[[1L]]), dim(data_multivariate[[1L]]))
+
+     skip_on_cran()
+
+     expect_equal_to_reference(cent_shape, file_name(cent_shape), info = "Univariate")
+     expect_equal_to_reference(cent_mv_shape, file_name(cent_mv_shape), info = "Multivariate")
+})
 
 # =================================================================================================
 # pam
 # =================================================================================================
 
-pc_pam <- dtwclust(data, type = "partitional", k = 20,
-                   distance = "sbd", centroid = "pam",
-                   preproc = NULL, control = ctrl, seed = 123)
+test_that("Operations with pam centroid give same results as references.", {
+     ## ---------------------------------------------------------- univariate without distmat
+     family <- new("dtwclustFamily",
+                   control = ctrl,
+                   dist = "sbd",
+                   allcent = "pam")
 
-cvi_pam <- cvi(pc_pam, labels)
+     cent_pam <- family@allcent(x,
+                                cl_id = cl_id,
+                                k = k,
+                                cent = x[c(1L,20L)],
+                                cl_old = 0L)
 
-test_that("pam centroid CVI gives the same result as reference",
-          my_expect_equal_to_reference(cvi_pam))
+     expect_identical(length(cent_pam), k)
 
-pc_pam <- reset_nondeterministic(pc_pam)
+     expect_null(as.list(environment(family@allcent))$distmat)
 
-test_that("pam centroid gives the same result as reference",
-          my_expect_equal_to_reference(pc_pam))
+     ## ---------------------------------------------------------- univariate with distmat
+     family <- new("dtwclustFamily",
+                   control = ctrl,
+                   dist = "sbd",
+                   allcent = "pam",
+                   distmat = proxy::dist(x, method = "sbd"))
+
+     cent_pam_distmat <- family@allcent(x,
+                                        cl_id = cl_id,
+                                        k = k,
+                                        cent = x[c(1L,20L)],
+                                        cl_old = 0L)
+
+     expect_identical(length(cent_pam_distmat), k)
+
+     expect_false(is.null(as.list(environment(family@allcent))$distmat))
+
+     expect_identical(cent_pam, cent_pam_distmat)
+
+     ## ---------------------------------------------------------- multivariate
+     family <- new("dtwclustFamily",
+                   control = ctrl,
+                   dist = "dtw_basic",
+                   allcent = "pam")
+
+     cent_mv_pam <- family@allcent(data_multivariate,
+                                   cl_id = cl_id,
+                                   k = k,
+                                   cent = data_multivariate[c(1L,20L)],
+                                   cl_old = 0L)
+
+     expect_identical(length(cent_mv_pam), k)
+
+     expect_identical(dim(cent_mv_pam[[1L]]), dim(data_multivariate[[1L]]))
+
+     skip_on_cran()
+
+     expect_equal_to_reference(cent_pam, file_name(cent_pam), info = "Univariate without distmat")
+     expect_equal_to_reference(cent_mv_pam, file_name(cent_mv_pam), info = "Multivariate")
+})
 
 # =================================================================================================
 # dba
 # =================================================================================================
 
-## Will not converge
-suppressWarnings(
-     pc_dba <- dtwclust(data_subset, type = "partitional", k = 4,
-                        distance = "sbd", centroid = "dba",
-                        preproc = NULL, control = ctrl, seed = 123,
-                        dba.alignment = "dtw")
-)
+test_that("Operations with dba centroid give same results as references.", {
+     ## ---------------------------------------------------------- univariate
+     family <- new("dtwclustFamily",
+                   control = ctrl,
+                   allcent = "dba")
 
-suppressWarnings(cvi_dba <- cvi(pc_dba, labels_subset))
+     cent_dba <- family@allcent(x,
+                                cl_id = cl_id,
+                                k = k,
+                                cent = x[c(1L,20L)],
+                                cl_old = 0L)
 
-test_that("dba centroid CVI gives the same result as reference",
-          my_expect_equal_to_reference(cvi_dba))
+     expect_identical(length(cent_dba), k)
 
-pc_dba <- reset_nondeterministic(pc_dba)
+     ## ---------------------------------------------------------- multivariate
+     cent_mv_dba <- family@allcent(data_multivariate,
+                                   cl_id = cl_id,
+                                   k = k,
+                                   cent = data_multivariate[c(1L,20L)],
+                                   cl_old = 0L)
 
-test_that("dba centroid gives the same result as reference",
-          my_expect_equal_to_reference(pc_dba))
+     expect_identical(length(cent_mv_dba), k)
 
-suppressWarnings(
-     pc_dba_basic <- dtwclust(data_subset, type = "partitional", k = 4,
-                              distance = "sbd", centroid = "dba",
-                              preproc = NULL, control = ctrl, seed = 123,
-                              dba.alignment = "dtw_basic")
-)
+     expect_identical(dim(cent_mv_dba[[1L]]), dim(data_multivariate[[1L]]))
 
-pc_dba_basic <- reset_nondeterministic(pc_dba_basic)
-pc_dba_basic@dots <- list()
-pc_dba@dots <- list()
-pc_dba_basic@call <- as.call(list("zas", a = 1))
-pc_dba@call <- as.call(list("zas", a = 1))
+     skip_on_cran()
 
-test_that("pc_dba_basic centroid gives the same result as pc_dba",
-          expect_identical(pc_dba, pc_dba_basic))
+     expect_equal_to_reference(cent_dba, file_name(cent_dba), info = "Univariate")
+     expect_equal_to_reference(cent_mv_dba, file_name(cent_mv_dba), info = "Multivariate")
+})
 
 # =================================================================================================
-# colMeans
+# custom
 # =================================================================================================
 
-ctrl@save.data <- FALSE
+test_that("Operations with custom centroid give same results as references.", {
+     mycent <- function(x, cl_id, k, cent, cl_old, ...) {
+          x_split <- split(x, cl_id)
 
-mycent <- function(x, cl_id, k, cent, cl_old, ...) {
-     x_split <- split(x, cl_id)
+          x_split <- lapply(x_split, function(xx) do.call(rbind, xx))
 
-     x_split <- lapply(x_split, function(xx) do.call(rbind, xx))
+          new_cent <- lapply(x_split, colMeans)
 
-     new_cent <- lapply(x_split, colMeans)
+          new_cent
+     }
 
-     new_cent
-}
+     cent_colMeans <- dtwclust(data_matrix, type = "partitional", k = 20,
+                               distance = "sbd", centroid = mycent,
+                               preproc = NULL, control = ctrl, seed = 123)
 
-## Will not converge
-suppressWarnings(
-     pc_colMeans <- dtwclust(data_matrix, type = "partitional", k = 20,
-                             distance = "sbd", centroid = mycent,
-                             preproc = NULL, control = ctrl, seed = 123)
-)
+     cent_colMeans <- reset_nondeterministic(cent_colMeans)
 
-pc_colMeans <- reset_nondeterministic(pc_colMeans)
+     skip_on_cran()
 
-test_that("custom centroid function gives the same result as reference",
-          my_expect_equal_to_reference(pc_colMeans))
+     expect_equal_to_reference(cent_colMeans, file_name(cent_colMeans), info = "Custom colMeans")
+})
 
 # =================================================================================================
 # invalid centroid
 # =================================================================================================
 
-test_that("invalid centroid for series with different lengths gives error",
-          expect_error(dtwclust(data, k = 20, distance = "sbd", centroid = "mean"),
-                       "different length"))
-# =================================================================================================
-# mean multivariate
-# =================================================================================================
+test_that("Errors in centroid argument are correctly detected.", {
+     expect_error(dtwclust(data, centroid = "mean"),
+                  "different length", "mean")
 
-mv_mean <- dtwclust(data_multivariate, type = "partitional", k = 4,
-                    distance = "dtw", centroid = "mean",
-                    preproc = NULL, control = ctrl, seed = 123,
-                    dist.method = "L1")
+     expect_error(dtwclust(data, centroid = "mean"),
+                  "different length", "median")
 
-mv_mean <- reset_nondeterministic(mv_mean)
+     expect_error(dtwclust(data, centroid = "fcm"),
+                  "arg", info = "FCM is for fuzzy")
 
-test_that("multivariate mean centroid gives the same result as reference",
-          my_expect_equal_to_reference(mv_mean))
+     expect_error(dtwclust(data, centroid = "goku"),
+                  "arg", info = "Unknown centroid")
 
-# =================================================================================================
-# median multivariate
-# =================================================================================================
+     expect_error(dtwclust(data, centroid = NULL),
+                  "definition", info = "NULL centroid")
 
-mv_median <- dtwclust(data_multivariate, type = "partitional", k = 4,
-                      distance = "dtw2", centroid = "median",
-                      preproc = NULL, control = ctrl, seed = 123)
-
-mv_median <- reset_nondeterministic(mv_median)
-
-test_that("multivariate median centroid gives the same result as reference",
-          my_expect_equal_to_reference(mv_median))
-
-# =================================================================================================
-# shape multivariate
-# =================================================================================================
-
-mv_shape <- dtwclust(data_multivariate, type = "partitional", k = 4,
-                     distance = "dtw", centroid = "shape",
-                     preproc = NULL, control = ctrl, seed = 123,
-                     dist.method = "L1")
-
-mv_shape <- reset_nondeterministic(mv_shape)
-
-test_that("multivariate shape centroid gives the same result as reference",
-          my_expect_equal_to_reference(mv_shape))
-
-# =================================================================================================
-# pam multivariate
-# =================================================================================================
-
-mv_pam <- dtwclust(data_multivariate, type = "partitional", k = 4,
-                   distance = "dtw2", centroid = "pam",
-                   preproc = NULL, control = ctrl, seed = 123)
-
-mv_pam <- reset_nondeterministic(mv_pam)
-
-test_that("multivariate pam centroid gives the same result as reference",
-          my_expect_equal_to_reference(mv_pam))
-
-# =================================================================================================
-# dba multivariate
-# =================================================================================================
-
-## Will not converge
-suppressWarnings(
-     mv_dba <- dtwclust(data_multivariate, type = "partitional", k = 4,
-                        distance = "dtw", centroid = "dba",
-                        preproc = NULL, control = ctrl, seed = 123,
-                        dist.method = "L1")
-)
-
-mv_dba <- reset_nondeterministic(mv_dba)
-
-test_that("multivariate dba centroid gives the same result as reference",
-          my_expect_equal_to_reference(mv_dba))
+     expect_error(dtwclust(data, centroid = NA),
+                  "definition", info = "NA centroid")
+})

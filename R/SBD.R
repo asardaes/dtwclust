@@ -109,7 +109,7 @@ SBD <- function(x, y, znorm = FALSE) {
 # Wrapper for proxy::dist
 # ========================================================================================================
 
-SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise = FALSE) {
+SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise = FALSE, ...) {
      x <- consistency_check(x, "tsmat")
 
      if (error.check)
@@ -149,6 +149,9 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
      if (pairwise) {
           y <- split_parallel(y)
           ffty <- split_parallel(ffty)
+
+          if (length(lengths(x)) != length(lengths(y)) || lengths(x) != lengths(y))
+               stop("Pairwise distances require the same amount of series in 'x' and 'y'")
 
           D <- foreach(x = x, fftx = fftx, y = y, ffty = ffty,
                        .combine = c,
