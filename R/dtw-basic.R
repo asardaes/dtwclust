@@ -64,8 +64,8 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
           gcm <- matrix(-1, NROW(x) + 1L, NROW(y) + 1L)
      else if (!is.matrix(gcm) || nrow(gcm) < NROW(x) + 1L || ncol(gcm) < NROW(y) + 1L)
           stop("dtw_basic: Dimension inconsistency in 'gcm'")
-     else
-          storage.mode(gcm) <- "numeric"
+     else if (storage.mode(gcm) != "double")
+          stop("If provided, 'gcm' must have storage mode double.")
 
      d <- .Call("dtw_basic", x, y, window.size,
                 NROW(x), NROW(y), NCOL(x),
@@ -171,8 +171,8 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                                  dots$gcm <- matrix(0, L1 + 1, L2 + 1)
                             else if (!is.matrix(gcm) || nrow(gcm) < L1 + 1L || ncol(gcm) < L2 + 1L)
                                  stop("dtw_basic: Dimension inconsistency in 'gcm'")
-                            else
-                                 storage.mode(gcm) <- "numeric"
+                            else if (storage.mode(gcm) != "double")
+                                 stop("If provided, 'gcm' must have storage mode double.")
 
                             mapply(x, y, FUN = function(x, y) {
                                  do.call("dtw_basic",
@@ -198,8 +198,8 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                                  dots$gcm <- matrix(0, L1 + 1, L2 + 1)
                             else if (!is.matrix(gcm) || nrow(gcm) < L1 + 1L || ncol(gcm) < L2 + 1L)
                                  stop("dtw_basic: Dimension inconsistency in 'gcm'")
-                            else
-                                 storage.mode(gcm) <- "numeric"
+                            else if (storage.mode(gcm) != "double")
+                                 stop("If provided, 'gcm' must have storage mode double.")
 
                             ret <- lapply(x, y = y, FUN = function(x, y) {
                                  sapply(y, x = x, FUN = function(y, x) {
