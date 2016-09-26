@@ -337,7 +337,7 @@ test_that("Operations with dtwclustFamily@dist give expected results", {
 # invalid distance
 # =================================================================================================
 
-test_that("Errors in centroid argument are correctly detected.", {
+test_that("Errors in distance argument are correctly detected.", {
      expect_error(dtwclust(data_matrix, k = 20, distance = mean), "proxy", info = "Function")
 
      expect_error(dtwclust(data_matrix, k = 20, distance = NULL), "proxy", info = "NULL")
