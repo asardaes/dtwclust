@@ -171,6 +171,8 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                                  dots$gcm <- matrix(0, L1 + 1, L2 + 1)
                             else if (!is.matrix(gcm) || nrow(gcm) < L1 + 1L || ncol(gcm) < L2 + 1L)
                                  stop("dtw_basic: Dimension inconsistency in 'gcm'")
+                            else
+                                 storage.mode(gcm) <- "numeric"
 
                             mapply(x, y, FUN = function(x, y) {
                                  do.call("dtw_basic",
@@ -196,6 +198,8 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                                  dots$gcm <- matrix(0, L1 + 1, L2 + 1)
                             else if (!is.matrix(gcm) || nrow(gcm) < L1 + 1L || ncol(gcm) < L2 + 1L)
                                  stop("dtw_basic: Dimension inconsistency in 'gcm'")
+                            else
+                                 storage.mode(gcm) <- "numeric"
 
                             ret <- lapply(x, y = y, FUN = function(x, y) {
                                  sapply(y, x = x, FUN = function(y, x) {
