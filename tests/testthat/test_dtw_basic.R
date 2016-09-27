@@ -49,7 +49,7 @@ test_that("dtw_basic gives the same results as dtw/dtw2", {
           }
 
           ## comparing doubles apparently sucks in 32 bits
-          if (grepl("x86", Sys.info()["machine"])) next
+          if (!grepl("64", Sys.info()["machine"])) next
 
           expect_identical(d1$index1, d2$index1, info = paste("Indices:", i, j, "- Norm:", norm))
           expect_identical(d1$index2, d2$index2, info = paste("Indices:", i, j, "- Norm:", norm))
