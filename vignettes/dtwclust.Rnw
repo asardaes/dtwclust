@@ -146,7 +146,7 @@ plot(dtw_example, type = "two",
      xlab = "Time", ylab = "Series")
 @
 
-DTW is computationally expensive. If $x$ has length $n$ and $y$ has length $m$, the DTW distance between them can be computed in $O(nm)$ time, which is almost quadratic if $m$ and $n$ are similar. Additionally, DTW is prone to implementation bias since its calculations are not easily vectorized and tend to be very slow in non-compiled programming languages. The \pkg{dtw} package includes a \proglang{C} implementation of the dynamic programming step of the algorithm, which should be very fast; its level of generality may sacrifice some performance, but in most situations it will be negligible. Optionally, a basic custom implementation of the DTW algorithm is included with \pkg{dtwclust} in the \code{dtw_basic} function, which has less functionality but still supports the most common options, and it might be marginally faster. DTW is considered a more robust distance measure for time-series \citep{wang2013}, and can potentially deal with series of different length directly. This is not necessarily an advantage, as it has been shown before that performing linear reinterpolation to obtain equal length may be appropriate if $m$ and $n$ do not vary significantly \citep{keogh2004}. For a more detailed explanation of the DTW algorithm, see e.g. \citet{giorgino2009}. However, there are some aspects that are worth discussing here.
+DTW is computationally expensive. If $x$ has length $n$ and $y$ has length $m$, the DTW distance between them can be computed in $O(nm)$ time, which is almost quadratic if $m$ and $n$ are similar. Additionally, DTW is prone to implementation bias since its calculations are not easily vectorized and tend to be very slow in non-compiled programming languages. The \pkg{dtw} package includes a \proglang{C} implementation of the dynamic programming step of the algorithm, which should be very fast; its level of generality may sacrifice some performance, but in most situations it will be negligible. Optionally, a basic custom implementation of the DTW algorithm is included with \pkg{dtwclust} in the \code{dtw_basic} function, which has less functionality but still supports the most common options, and it should be faster. DTW is considered a more robust distance measure for time-series \citep{wang2013}, and can potentially deal with series of different length directly. This is not necessarily an advantage, as it has been shown before that performing linear reinterpolation to obtain equal length may be appropriate if $m$ and $n$ do not vary significantly \citep{keogh2004}. For a more detailed explanation of the DTW algorithm, see e.g. \citet{giorgino2009}. However, there are some aspects that are worth discussing here.
 
 The first step in DTW involves creating a \textbf{local cost matrix} (LCM  or $lcm$), which has $n \times m$ dimensions. Such a matrix must be created for every pair of distances compared, meaning that memory requirements may grow quickly as the dataset size grows. Considering $x$ and $y$ as the input series, for each element $(i,j)$ of the LCM, the $l_p$ norm between $x_i$ and $y_j$ must be computed. This is defined in \cref{eq:lcm}, explicitly denoting that multivariate series are supported as long as they have the same number of variables (note that for univariate series, the LCM will be identical regardless of the norm used). Thus, it makes sense to speak of a $\dtwp{}$ distance, where $p$ corresponds to the $l_p$ norm that was used to construct the LCM. However, this norm also plays an important role in the next step of DTW.
 
@@ -198,6 +198,8 @@ It should be noted that, when reported, window sizes are always integers greater
 
 Due to the fact that DTW itself is expensive to compute, \textit{lower bounds} (LBs) for the DTW distance have been developed. These lower bounds guarantee being less than or equal to the corresponding DTW distance. They have been exploited when indexing time-series databases, classification of time-series, clustering, etc. \citep{keogh2005, begum2015}. Out of the existing DTW LBs, the two most effective are termed \code{LB_Keogh} \citep{keogh2005} and \code{LB_Improved} \citep{lemire2009}. The reader is referred to the respective articles for a detailed definition and proof of the LBs, however some important considerations will be further discussed here.
 
+Each LB can be computed with a specific $l_p$ norm. Therefore, it follows that the $l_p$ norms used for DTW and LB calculations must match, such that $\text{LB}_p \leq \dtwp{}$. Moreover, $\text{LB\_Keogh}_p \leq \text{LB\_Improved}_p \leq \dtwp{}$, meaning that \code{LB_Improved} can provide a tighter LB. It must be noted that the LBs are \textbf{only} defined for series of equal length, and similar to DTW, are \textbf{not} symmetric regardless of the $l_p$ norm used to compute them. Also note that the choice of step pattern affects the value of the DTW distance, changing the tightness of a given LB.
+
 One crucial step when calculating the LBs is the computation of the so-called \textit{envelops}. These envelops \textbf{require} a window constraint, and thus are dependent on both the type and size of the window. Based on these, a \textit{running} minimum and maximum are computed and, respectively, a lower and upper envelop are generated. \Cref{fig:envelop-plot} depicts a sample time-series with its corresponding envelops for a Sakoe-Chiba window of size 15.
 
 <<envelop-plot, out.width = "0.75\\linewidth", fig.cap = "Visual representation of a time-series (shown as a solid black line) and its corresponding envelops based on the Sakoe-Chiba window. The green dashed line represents the upper envelop, while the red dashed line represents the lower envelop.">>=
@@ -208,15 +210,33 @@ matplot(cbind(lbk$lower.env, lbk$upper.env),
 lines(CharTraj[[2L]])
 @
 
+When calculating the LBs between $x$ and $y$, a copy of the \textit{reference} series is created; denote this copy with $H$. Then the envelops for the other series (the \textit{query}) are computed: if $y$ is the query, then its upper and lower envelop (UE and LE respectively) are compared against $x$, so that the values of $H$ are updated according to \cref{eq:lb-envelop}. Subsequently, \code{LB_Keogh} is defined as in \cref{eq:lbk}, where $\left\lVert \cdot \right\rVert_p$ is the $l_p$ norm of the series. The improvement made by \code{LB_Improved} consists in calculating a second vector $H'$ by using $H$ as query and $y$ as reference, effectively defining the LB as in \cref{eq:lbi} (cf. Fig. 5 in \citet{lemire2009}).
+
+\begin{subequations}
+\label{eq:lb-envelop}
+\begin{align}
+H_i = UE_i, \quad \forall x_i > UE_i \\
+H_j = LE_j \quad \forall x_j < LE_j
+\end{align}
+\end{subequations}
+
+\begin{equation}
+\label{eq:lbk}
+\text{LB\_Keogh}_p(x,y) = \left\lVert x - H \right\rVert_p
+\end{equation}
+
+\begin{equation}
+\label{eq:lbi}
+\text{LB\_Improved} = \sqrt[p]{\text{LB\_Keogh}_p(x,y)^p + \text{LB\_Keogh}_p(y,H)^p}
+\end{equation}
+
 In order for the LBs to be worth it, they must be computed in significantly less time than it takes to calculate the DTW distance. \citet{lemire2009} developed a streaming algorithm to calculate the envelops using no more than $3n$ comparisons when using a Sakoe-Chiba window. This algorithm is implemented in \dtwclust{} using the \proglang{C++} programming language, ensuring an efficient calculation.
 
-Each LB can be computed with a specific $l_p$ norm. Therefore, it follows that the $l_p$ norms used for DTW and LB calculations must match, such that $\text{LB}_p \leq \dtwp{}$. Moreover, $\text{LB\_Keogh}_p \leq \text{LB\_Improved}_p \leq \dtwp{}$, meaning that \code{LB_Improved} can provide a tighter LB. However, \code{LB_Keogh} requires the calculation of one set of envelops for every pair of series compared, whereas \code{LB_Improved} must calculate two sets of envelops for every pair of series. If the LBs must be calculated between several time-series, some envelops can be reused when a given series is compared against many others. This optimization is included in the LB functions registered with \pkg{proxy} by \dtwclust{}.
+\code{LB_Keogh} requires the calculation of one set of envelops for every pair of series compared, whereas \code{LB_Improved} must calculate two sets of envelops for every pair of series. If the LBs must be calculated between several time-series, some envelops can be reused when a given series is compared against many others. This optimization is included in the LB functions registered with \pkg{proxy} by \dtwclust{}.
 
 The function \code{dtw_lb} included in \dtwclust{} (and the corresponding version registered with \pkg{proxy}) leverages \code{LB_Improved} in order to find nearest neighbors faster. It first computes a distance matrix using only \code{LB_Improved}. Then, it looks for the nearest neighbor by taking the argument of the row-wise minima of the resulting matrix. Using this information, it updates the distance values of the nearest neighbors using the DTW distance. It continues this process iteratively until no changes in the nearest neighbors are detected. See \cref{app:dtw-lb} for an example.
 
-Because of the way it works, this function may only be useful if one is only interested in nearest neighbors, which is usually the case in \textbf{partitional} clustering. However, if partition around medoids is performed (see \cref{sec:pam}), the distance matrix should \textbf{not} be precomputed so that the matrices are correctly updated on each iteration.
-
-Finally, it must be noted that the LBs are \textbf{only} defined for series of equal length, and similar to DTW, are \textbf{not} symmetric regardless of the $l_p$ norm used to compute them. Also note that the choice of step pattern affects the value of the DTW distance, changing the tightness of a given LB.
+Because of the way it works, \code{dtw_lb} may only be useful if one is only interested in nearest neighbors, which is usually the case in \textbf{partitional} clustering. However, if partition around medoids is performed (see \cref{sec:pam}), the distance matrix should \textbf{not} be precomputed so that the matrices are correctly updated on each iteration.
 
 \subsection{Shape-based distance}
 \label{sec:sbd}
