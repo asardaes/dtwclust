@@ -35,7 +35,7 @@ double which_min(const int i, const int j, const int nx,
                  const double step, const double local_cost,
                  double *D)
 {
-     double tuple[3];
+     volatile double *tuple = (double *)malloc(3 * sizeof(double));
 
      // DIAG, LEFT, UP
      tuple[0] = (D[d2s(i-1, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j-1, nx)] + step * local_cost;
@@ -44,6 +44,8 @@ double which_min(const int i, const int j, const int nx,
 
      int min = (tuple[1] < tuple[0]) ? 1 : 0;
      min = (tuple[2] < tuple[min]) ? 2 : min;
+
+     free((double *)tuple);
 
      return ((double) min + 1.0);
 }

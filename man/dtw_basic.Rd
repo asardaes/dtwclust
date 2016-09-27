@@ -51,10 +51,4 @@ if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_
 between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21} observations falling within
 the window.
 }
-\note{
-In my tests, distances and, thus, warping paths computed in 32 bit architectures were \strong{not} always
-\emph{identical} to the results obtained with 64 bits. This is especially important for \code{\link{DBA}},
-because it can significantly alter results. The \code{\link[dtw]{dtw}} function does not seem to have this
-problem.
-}
 

@@ -39,17 +39,14 @@ test_that("dtw_basic gives the same results as dtw/dtw2", {
           d2 <- dtw_basic(x, y, window.size = window.size, norm = norm,
                           step.pattern = step.pattern, backtrack = TRUE)
 
-          expect_equal(d1$distance, d2$distance, info = paste("Indices:", i, j, "- Norm:", norm))
+          expect_identical(d1$distance, d2$distance, info = paste("Indices:", i, j, "- Norm:", norm))
 
           if (identical(step.pattern, symmetric2)) {
                d3 <- dtw_basic(x, y, window.size = window.size, norm = norm,
                                step.pattern = step.pattern, normalize = TRUE)
 
-               expect_equal(d1$normalizedDistance, d3, info = paste("Indices:", i, j, "- Norm:", norm))
+               expect_identical(d1$normalizedDistance, d3, info = paste("Indices:", i, j, "- Norm:", norm))
           }
-
-          ## comparing doubles apparently sucks in 32 bits
-          if (8L * .Machine$sizeof.pointer == 32L) next
 
           expect_identical(d1$index1, d2$index1, info = paste("Indices:", i, j, "- Norm:", norm))
           expect_identical(d1$index2, d2$index2, info = paste("Indices:", i, j, "- Norm:", norm))
@@ -58,13 +55,13 @@ test_that("dtw_basic gives the same results as dtw/dtw2", {
      D1_L1 <- proxy::dist(data[31L:46L], data[71L:86L], method = "dtw")
      D2_L1 <- proxy::dist(data[31L:46L], data[71L:86L], method = "dtw_basic")
 
-     expect_equal(D1_L1, D2_L1, check.attributes = FALSE,
+     expect_equal(D1_L1, D2_L1, tolerance = 0, check.attributes = FALSE,
                   info = "dtw vs dtw_basic")
 
      D1_L2 <- proxy::dist(data[31L:46L], data[71L:86L], method = "dtw2")
      D2_L2 <- proxy::dist(data[31L:16L], data[71L:16L], method = "dtw_basic", norm = "L2")
 
-     expect_equal(D1_L1, D2_L1, check.attributes = FALSE,
+     expect_equal(D1_L1, D2_L1, tolerance = 0, check.attributes = FALSE,
                   info = "dtw2 vs dtw_basic")
 
      skip_on_cran()
