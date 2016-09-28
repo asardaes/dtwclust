@@ -1,7 +1,7 @@
 data(uciCT)
 
 data <- CharTraj
-data_subset <- data[1:20]
+data_subset <- data[1L:20L]
 data_reinterpolated <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 data_multivariate <- lapply(seq(1L, 100L, 5L), function(x) {
      cbind(data_reinterpolated[[x]], data_reinterpolated[[x+1L]])
@@ -9,7 +9,7 @@ data_multivariate <- lapply(seq(1L, 100L, 5L), function(x) {
 data_matrix <- do.call(rbind, data_reinterpolated)
 
 labels <- CharTrajLabels
-labels_subset <- labels[1:20]
+labels_subset <- labels[1L:20L]
 labels_shuffled <- sample(labels)
 
 internal_cvis <- c("Sil", "D", "DB", "DBstar", "CH", "SF", "COP")

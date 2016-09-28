@@ -107,6 +107,8 @@ setMethod("show", "dtwclust",
                     cat("\nCluster sizes with average intra-cluster distance:\n\n")
                     print(object@clusinfo)
                }
+
+               invisible(NULL)
           })
 
 # ========================================================================================================
