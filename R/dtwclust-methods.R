@@ -182,7 +182,7 @@ setMethod("predict", "dtwclust",
                     consistency_check(newdata, "vltslist")
                     nm <- names(newdata)
 
-                    newdata <- object@family@preproc(newdata)
+                    newdata <- object@family@preproc(newdata, ... = object@dots)
 
                     distmat <- do.call(object@family@dist,
                                        args = enlist(x = newdata,

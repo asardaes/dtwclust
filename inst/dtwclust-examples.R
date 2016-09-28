@@ -80,7 +80,7 @@ plot(hc.sbd[[ which.max(sapply(hc.sbd, randIndex, y = CharTrajLabels)) ]])
 # ====================================================================================
 
 # Calculate autocorrelation up to 50th lag, considering a list of time series as input
-acf_fun <- function(dat) {
+acf_fun <- function(dat, ...) {
      lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
 }
 

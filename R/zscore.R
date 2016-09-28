@@ -28,7 +28,11 @@ zscore <- function(x, ..., na.rm, multivariate = FALSE) {
      } else {
           consistency_check(x, "ts")
 
-          x <- scale(x, ...)
+          dots <- list(...)
+          center <- if(is.null(dots$center)) formals(scale)$center else dots$center
+          scale <- if(is.null(dots$scale)) formals(scale)$scale else dots$scale
+
+          x <- scale(x, center = center, scale = scale)
           x[is.nan(x)] <- 0
 
           if (multivariate)

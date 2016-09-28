@@ -213,7 +213,8 @@
 #' on the data, but the user must make sure that the format stays consistent, i.e. a list of time series.
 #'
 #' Setting to \code{NULL} means no preprocessing (except for \code{centroid = "shape"}). A provided function
-#' will receive the data as first and only argument.
+#' will receive the data as first argument, followed by the contents of \code{...}. Therefore, the preprocessing
+#' function should have \code{...} in its arguments, even if it is not used.
 #'
 #' It is convenient to provide this function if you're planning on using the \code{\link[stats]{predict}}
 #' generic.
@@ -368,16 +369,16 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      ## ----------------------------------------------------------------------------------------------------------
 
      if (!is.null(preproc) && is.function(preproc)) {
-          data <- preproc(data)
-          preproc_char <- as.character(substitute(preproc))[[1]]
+          data <- preproc(data, ...)
+          preproc_char <- as.character(substitute(preproc))[1L]
 
      } else if (type == "partitional" && is.character(centroid) && centroid == "shape") {
           preproc <- zscore
           preproc_char <- "zscore"
-          data <- zscore(data)
+          data <- zscore(data, ...)
 
      } else if (is.null(preproc)) {
-          preproc <- function(x) x
+          preproc <- function(x, ...) x
           preproc_char <- "none"
 
      } else stop("Invalid preprocessing")

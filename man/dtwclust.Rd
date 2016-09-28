@@ -278,7 +278,8 @@ default in this case. The user can, however, specify a custom function that perf
 on the data, but the user must make sure that the format stays consistent, i.e. a list of time series.
 
 Setting to \code{NULL} means no preprocessing (except for \code{centroid = "shape"}). A provided function
-will receive the data as first and only argument.
+will receive the data as first argument, followed by the contents of \code{...}. Therefore, the preprocessing
+function should have \code{...} in its arguments, even if it is not used.
 
 It is convenient to provide this function if you're planning on using the \code{\link[stats]{predict}}
 generic.
@@ -420,7 +421,7 @@ plot(hc.sbd[[ which.max(sapply(hc.sbd, randIndex, y = CharTrajLabels)) ]])
 # ====================================================================================
 
 # Calculate autocorrelation up to 50th lag, considering a list of time series as input
-acf_fun <- function(dat) {
+acf_fun <- function(dat, ...) {
      lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
 }
 
