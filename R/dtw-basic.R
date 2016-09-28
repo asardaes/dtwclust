@@ -60,9 +60,12 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
      else
           stop("step.pattern must be either symmetric1 or symmetric2")
 
+     if (normalize && step.pattern == 1)
+          stop("Unable to normalize with chosen step pattern.")
+
      if (is.null(gcm))
           gcm <- matrix(-1, NROW(x) + 1L, NROW(y) + 1L)
-     else if (!is.matrix(gcm) || nrow(gcm) < NROW(x) + 1L || ncol(gcm) < NROW(y) + 1L)
+     else if (!is.matrix(gcm) || nrow(gcm) < (NROW(x) + 1L) || ncol(gcm) < (NROW(y) + 1L))
           stop("dtw_basic: Dimension inconsistency in 'gcm'")
      else if (storage.mode(gcm) != "double")
           stop("If provided, 'gcm' must have storage mode double.")
@@ -77,9 +80,7 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
                d$distance <- d$distance / (NROW(x) + NROW(y))
           else
                d <- d / (NROW(x) + NROW(y))
-
-     } else if (normalize && step.pattern != 2)
-          warning("Unable to normalize with the chosen 'step.pattern'.")
+     }
 
      if (backtrack) {
           d$index1 <- d$index1[d$path:1L]
@@ -144,13 +145,13 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
           return(D)
      }
 
+     X <- split_parallel(x)
+
      ## Register doSEQ if necessary
      if (check_parallel())
-          GCM <- lapply(1L:foreach::getDoParWorkers(), function(dummy) NULL)
+          GCM <- lapply(1L:length(X), function(dummy) NULL)
      else
           GCM <- list(gcm)
-
-     X <- split_parallel(x)
 
      ## Calculate distance matrix
      if (pairwise) {
@@ -168,8 +169,8 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                             L2 <- max(lengths(y))
 
                             if (is.null(gcm))
-                                 dots$gcm <- matrix(0, L1 + 1, L2 + 1)
-                            else if (!is.matrix(gcm) || nrow(gcm) < L1 + 1L || ncol(gcm) < L2 + 1L)
+                                 dots$gcm <- matrix(0, L1 + 1L, L2 + 1L)
+                            else if (!is.matrix(gcm) || nrow(gcm) < (L1 + 1L) || ncol(gcm) < (L2 + 1L))
                                  stop("dtw_basic: Dimension inconsistency in 'gcm'")
                             else if (storage.mode(gcm) != "double")
                                  stop("If provided, 'gcm' must have storage mode double.")
@@ -196,7 +197,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
 
                             if (is.null(gcm))
                                  dots$gcm <- matrix(0, L1 + 1, L2 + 1)
-                            else if (!is.matrix(gcm) || nrow(gcm) < L1 + 1L || ncol(gcm) < L2 + 1L)
+                            else if (!is.matrix(gcm) || nrow(gcm) < (L1 + 1L) || ncol(gcm) < (L2 + 1L))
                                  stop("dtw_basic: Dimension inconsistency in 'gcm'")
                             else if (storage.mode(gcm) != "double")
                                  stop("If provided, 'gcm' must have storage mode double.")
