@@ -102,10 +102,19 @@
 #' @import ggplot2
 #'
 #' @importFrom dtw dtw
-#' @importFrom reshape2 melt
-#' @importFrom parallel splitIndices
+#' @importFrom dtw symmetric1
+#' @importFrom dtw symmetric2
 #' @importFrom caTools runmin
 #' @importFrom caTools runmax
+#' @importFrom flexclust randIndex
+#' @importFrom flexclust clusterSim
+#' @importFrom flexclust comPart
+#' @importFrom graphics plot
+#' @importFrom parallel splitIndices
+#' @importFrom Rcpp evalCpp
+#' @importFrom reshape2 melt
+#' @importFrom rngtools RNGseq
+#' @importFrom rngtools setRNG
 #' @importFrom stats aggregate
 #' @importFrom stats approx
 #' @importFrom stats convolve
@@ -117,13 +126,6 @@
 #' @importFrom stats update
 #' @importFrom stats predict
 #' @importFrom stats runif
-#' @importFrom flexclust randIndex
-#' @importFrom flexclust clusterSim
-#' @importFrom flexclust comPart
-#' @importFrom graphics plot
-#' @importFrom rngtools RNGseq
-#' @importFrom rngtools setRNG
-#' @importFrom Rcpp evalCpp
 #' @importFrom utils packageVersion
 #'
 NULL
@@ -180,7 +182,7 @@ NULL
                            'To read the included vignette, type: vignette("dtwclust").\n',
                            'Please see news(package = "dtwclust") for important information!\n')
 
-     if (grepl(".9000", utils::packageVersion("dtwclust")))
+     if (grepl(".9000$", utils::packageVersion("dtwclust")))
           packageStartupMessage("This is a developer version of 'dtwclust'. ",
                                 "Note that running CHECK will have failing tests due to parallelization ",
                                 "and missing rds files.")

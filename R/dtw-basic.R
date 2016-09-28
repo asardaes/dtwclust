@@ -35,7 +35,7 @@
 #' @export
 #'
 dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
-                      step.pattern = get("symmetric2"), backtrack = FALSE,
+                      step.pattern = symmetric2, backtrack = FALSE,
                       normalize = FALSE, ..., gcm = NULL) {
      consistency_check(x, "ts")
      consistency_check(y, "ts")
@@ -53,9 +53,9 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
      norm <- match.arg(norm, c("L1", "L2"))
      norm <- switch(norm, "L1" = 1, "L2" = 2)
 
-     if (identical(step.pattern, get("symmetric1")))
+     if (identical(step.pattern, symmetric1))
           step.pattern <- 1
-     else if (identical(step.pattern, get("symmetric2")))
+     else if (identical(step.pattern, symmetric2))
           step.pattern <- 2
      else
           stop("step.pattern must be either symmetric1 or symmetric2")

@@ -413,8 +413,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      ## symmetric versions of dtw that I know of
      ## unconstrained and with symmetric1/symmetric2 is always symmetric, regardless of diff_lengths
      symmetric_pattern <- !is.null(dots$step.pattern) &&
-          (identical(dots$step.pattern, get("symmetric1")) ||
-                identical(dots$step.pattern, get("symmetric2")))
+          (identical(dots$step.pattern, symmetric1) ||
+                identical(dots$step.pattern, symmetric2))
 
      if (distance %in% c("dtw", "dtw2", "dtw_basic")) {
           if (!symmetric_pattern)

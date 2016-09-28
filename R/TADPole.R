@@ -112,7 +112,7 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE) {
      UBM <- proxy::dist(x, x, method = "L2")
 
      ## Euclidean is only valid as upper bound if 'symmetric1' step pattern is used
-     step.pattern <- get("symmetric1") # so that CHECK doesn't complain
+     step.pattern <- symmetric1
 
      ## Attempt parallel computations?
      check_parallel()

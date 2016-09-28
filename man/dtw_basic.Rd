@@ -5,8 +5,8 @@
 \title{Basic DTW distance}
 \usage{
 dtw_basic(x, y, window.size = NULL, norm = "L1",
-  step.pattern = get("symmetric2"), backtrack = FALSE, normalize = FALSE,
-  ..., gcm = NULL)
+  step.pattern = symmetric2, backtrack = FALSE, normalize = FALSE, ...,
+  gcm = NULL)
 }
 \arguments{
 \item{x, y}{Time series. Multivariate series must have time spanning the rows and variables spanning the

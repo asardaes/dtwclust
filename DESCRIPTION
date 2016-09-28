@@ -10,16 +10,16 @@ Depends:
     dtw,
     ggplot2
 Imports:
-    utils,
-    stats,
     methods,
     parallel,
-    rngtools,
-    flexclust,
+    stats,
+    utils,
     caTools,
-    reshape2,
+    flexclust,
     foreach,
-    Rcpp
+    Rcpp,
+    reshape2,
+    rngtools
 Suggests:
     TSdist,
     TSclust,
