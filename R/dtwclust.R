@@ -369,6 +369,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
      ## ----------------------------------------------------------------------------------------------------------
 
      if (!is.null(preproc) && is.function(preproc)) {
+          if (is.null(formals(preproc)$...))
+               stop("The preprocessing function should have '...' in its formal arguments, ",
+                    "even if it is not used.")
+
           data <- preproc(data, ...)
           preproc_char <- as.character(substitute(preproc))[1L]
 
