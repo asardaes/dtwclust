@@ -17,7 +17,7 @@
 
 zscore <- function(x, ..., na.rm, multivariate = FALSE) {
      if (!missing(na.rm))
-          warning("The 'na.rm' has been deprecated.")
+          warning("The 'na.rm' argument has been deprecated.")
 
      if (is.list(x)) {
           x <- lapply(x, zscore, multivariate = !is.null(dim(x[[1L]])), ...)
