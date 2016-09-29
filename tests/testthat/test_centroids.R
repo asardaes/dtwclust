@@ -6,6 +6,33 @@ k <- 2L
 cl_id <- rep(c(1L, 2L), each = length(x) / 2L)
 
 # =================================================================================================
+# invalid centroid
+# =================================================================================================
+
+test_that("Errors in centroid argument are correctly detected.", {
+     expect_error(dtwclust(data, centroid = "mean"),
+                  "different length", "mean")
+
+     expect_error(dtwclust(data, centroid = "mean"),
+                  "different length", "median")
+
+     expect_error(dtwclust(data, centroid = "fcm"),
+                  "arg", info = "FCM is for fuzzy")
+
+     expect_error(dtwclust(data, centroid = "goku"),
+                  "arg", info = "Unknown centroid")
+
+     expect_error(dtwclust(data, centroid = NULL),
+                  "definition", info = "NULL centroid")
+
+     expect_error(dtwclust(data, centroid = NA),
+                  "definition", info = "NA centroid")
+
+     expect_error(dtwclust(data, centroid = function(x, ...) { x }),
+                  "centroid.*arguments")
+})
+
+# =================================================================================================
 # mean
 # =================================================================================================
 
@@ -231,28 +258,4 @@ test_that("Operations with custom centroid give same results as references.", {
      skip_on_cran()
 
      expect_equal_to_reference(cent_colMeans, file_name(cent_colMeans), info = "Custom colMeans")
-})
-
-# =================================================================================================
-# invalid centroid
-# =================================================================================================
-
-test_that("Errors in centroid argument are correctly detected.", {
-     expect_error(dtwclust(data, centroid = "mean"),
-                  "different length", "mean")
-
-     expect_error(dtwclust(data, centroid = "mean"),
-                  "different length", "median")
-
-     expect_error(dtwclust(data, centroid = "fcm"),
-                  "arg", info = "FCM is for fuzzy")
-
-     expect_error(dtwclust(data, centroid = "goku"),
-                  "arg", info = "Unknown centroid")
-
-     expect_error(dtwclust(data, centroid = NULL),
-                  "definition", info = "NULL centroid")
-
-     expect_error(dtwclust(data, centroid = NA),
-                  "definition", info = "NA centroid")
 })
