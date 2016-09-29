@@ -8,6 +8,8 @@
 #' @param ... Further arguments to pass to \code{\link[base]{scale}}.
 #' @param multivariate Is \code{x} a multivariate time series? It will be detected automatically if a list is provided in
 #' \code{x}.
+#' @param keep.attributes Should the mean and standard deviation returned by \code{\link[base]{scale}}
+#' be preserved?
 #' @param na.rm Deprecated
 #'
 #' @return Normalized data in the same format as provided.
@@ -15,15 +17,27 @@
 #' @export
 #'
 
-zscore <- function(x, ..., na.rm, multivariate = FALSE) {
+zscore <- function(x, ..., na.rm, multivariate = FALSE, keep.attributes = FALSE) {
      if (!missing(na.rm))
           warning("The 'na.rm' argument has been deprecated.")
 
      if (is.list(x)) {
-          x <- lapply(x, zscore, multivariate = !is.null(dim(x[[1L]])), ...)
+          x <- lapply(x, zscore, ...,
+                      multivariate = !is.null(dim(x[[1L]])),
+                      keep.attributes = keep.attributes)
 
      } else if (!multivariate && (is.matrix(x) || is.data.frame(x))) {
-          x <- t(apply(x, 1L, zscore, ...))
+          consistency_check(x, "ts")
+
+          dots <- list(...)
+          center <- if(is.null(dots$center)) formals(scale)$center else dots$center
+          scale <- if(is.null(dots$scale)) formals(scale)$scale else dots$scale
+
+          x <- t(scale(t(x), center = center, scale = scale))
+          x[is.nan(x)] <- 0
+
+          if (!keep.attributes)
+               attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL
 
      } else {
           consistency_check(x, "ts")
@@ -35,10 +49,11 @@ zscore <- function(x, ..., na.rm, multivariate = FALSE) {
           x <- scale(x, center = center, scale = scale)
           x[is.nan(x)] <- 0
 
-          if (multivariate)
+          if (!multivariate)
+               dim(x) <- NULL
+
+          if (!keep.attributes)
                attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL
-          else
-               x <- as.numeric(x) # remove dimension and other attributes
      }
 
      x
