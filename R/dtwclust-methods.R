@@ -196,7 +196,7 @@ setMethod("predict", "dtwclust",
                     if (object@type != "fuzzy")
                          names(ret) <- nm
                     else
-                         dimnames(ret) <- list(nm, paste0("cluster_", 1:ncol(ret)))
+                         dimnames(ret) <- list(nm, paste0("cluster_", 1L:ncol(ret)))
                }
 
                ret
