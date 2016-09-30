@@ -52,7 +52,6 @@ consistency_check <- function(obj, case, ...) {
           return(as.integer(obj))
 
      } else if (case == "tsmat") {
-
           if (is.matrix(obj)) {
                Names <- rownames(obj)
                obj <- lapply(seq_len(nrow(obj)), function(i) obj[i, ])
@@ -62,8 +61,9 @@ consistency_check <- function(obj, case, ...) {
                obj <- list(obj)
 
           } else if (is.data.frame(obj)) {
-               message("Please note that on the next version of 'dtwclust', data frames will be parsed ",
-                       "row-wise, like matrices, to maintain consistency with the 'proxy' package.")
+               message("Please note that on the NEXT version of 'dtwclust', data frames will be parsed ",
+                       "row-wise, like matrices, to maintain consistency with the 'proxy' package. ",
+                       "For now, use as.matrix() if you want to ensure results will be the same.")
 
                obj <- as.list(obj)
                # obj <- consistency_check(as.matrix(obj), "tsmat")
