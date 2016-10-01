@@ -4,6 +4,7 @@
 * Correction: DTW can be symmetric for series of both equal/different length, although in general this is not necessarily the case, due to asymmetric step patterns or constrained paths.
 * Exported the `dtw2` function.
 * Revamped `zscore` and `reinterpolate` functions.
+* Data frames are now parsed row-wise, like matrices, to maintain consistency with `proxy`.
 * Fixed a bug where multivariate series with different length had spurious data added to them.
 * Fixed a bug in multivariate `shape_extraction`. Reminder: multivariate shape extraction might not be a good idea.
 * Consistency adjustments: all `center(s)` arguments/slots will be removed and replaced with `centroid(s)`.
