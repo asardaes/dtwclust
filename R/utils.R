@@ -19,28 +19,26 @@ consistency_check <- function(obj, case, ...) {
           }
 
      } else if (case == "tslist") {
-          if (class(obj) != "list")
-               stop("Series must be provided in a list")
+          if (!is.list(obj))
+               stop("Whoops, data should already be a list by this point...")
 
           if (length(obj) < 1L)
                stop("Data is empty")
 
-          Lengths <- lengths(obj)
-
-          if (length(unique(Lengths)) > 1L)
+          if (length(unique(lengths(obj))) > 1L)
                stop("All series must have the same length")
 
-          sapply(obj, consistency_check, case = "ts")
+          sapply(obj, consistency_check, case = "ts", ...)
 
      } else if (case == "vltslist") {
           ## list of variable-length time series
           if (class(obj) != "list")
-               stop("Series must be provided in a list")
+               stop("Whoops, data should already be a list by this point...")
 
           if (length(obj) < 1L)
                stop("Data is empty")
 
-          sapply(obj, consistency_check, case = "ts")
+          sapply(obj, consistency_check, case = "ts", ...)
 
      } else if (case == "window") {
           if (is.null(obj))
@@ -61,27 +59,23 @@ consistency_check <- function(obj, case, ...) {
                obj <- list(obj)
 
           } else if (is.data.frame(obj)) {
-               message("Please note that on the NEXT version of 'dtwclust', data frames will be parsed ",
+               message("Please note that as of this version of 'dtwclust', data frames are parsed ",
                        "row-wise, like matrices, to maintain consistency with the 'proxy' package. ",
-                       "For now, use as.matrix() if you want to ensure results will be the same.")
+                       "Use suppressMessages() or as.matrix() with your data to avoid this message.")
 
-               obj <- as.list(obj)
-               # obj <- consistency_check(as.matrix(obj), "tsmat")
+               obj <- consistency_check(as.matrix(obj), "tsmat")
 
           } else if (!is.list(obj))
-               stop("Unsupported type for data")
+               stop("Unsupported data type.")
 
           return(obj)
 
      } else if (case == "dist") {
-          trace <- list(...)$trace
-          if (is.null(trace)) trace <- FALSE
+          dots <- list(...)
 
-          Lengths <- list(...)$Lengths
-          if (is.null(Lengths)) Lengths <- FALSE
-
-          silent <- list(...)$silent
-          if (is.null(silent)) silent <- TRUE
+          trace <- if (is.null(dots$trace)) FALSE else dots$trace
+          Lengths <- if (is.null(dots$Lengths)) FALSE else dots$Lengths
+          silent <- if (is.null(dots$silent)) TRUE else dots$silent
 
           included <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd", "dtw_basic")
           valid <- c("dtw", "dtw2", "sbd", "dtw_basic")
@@ -97,7 +91,8 @@ consistency_check <- function(obj, case, ...) {
                if ((obj %in% included) && !(obj %in% valid))
                     stop("Only the following distances are supported for series with different length:\n\tdtw\tdtw2\tsbd\tdtw_basic")
                else if(!(obj %in% included) && trace)
-                    message("Series have different length. Please confirm that the provided distance function supports this.")
+                    message("Series have different length. Please confirm that the provided distance function ",
+                            "supports this.")
           }
 
           ## valid registered distance
@@ -108,12 +103,11 @@ consistency_check <- function(obj, case, ...) {
           valid <- c("dba", "pam", "shape")
 
           if (is.character(obj) && (obj %in% included) && !(obj %in% valid))
-               stop("Only the following centroids are supported for series with different length:\n\tdba\tpam\tshape")
-          else if(is.character(obj) && !(obj %in% included) && list(...)$trace)
-               message("Series have different length. Please confirm that the provided centroid function supports this.")
+               stop("Only the following centroids are supported for series with different length:",
+                    "\n\tdba\tpam\tshape")
 
      } else {
-          stop("Possibly a typo in function consistency_check")
+          stop("Possibly a typo in function consistency_check.")
      }
 
      invisible(NULL)
@@ -127,7 +121,7 @@ enlist <- function(..., dots = NULL) {
      if (is.null(dots))
           list(...)
      else
-          c(dots, list(...))
+          c(list(...), dots)
 }
 
 # ========================================================================================================
@@ -136,8 +130,6 @@ enlist <- function(..., dots = NULL) {
 
 # Envelop calculation
 call_envelop <- function(series, window) {
-     series <- as.numeric(series)
-
      consistency_check(series, "ts")
      window <- consistency_check(window, "window")
 

@@ -41,7 +41,7 @@ test_that("Results are the same regardless of data format, as long as supported.
      pc_list <- reset_nondeterministic(pc_list)
 
      suppressMessages(
-          pc_df<- dtwclust(as.data.frame(t(data_matrix[1L:20L, ])),
+          pc_df<- dtwclust(as.data.frame(data_matrix[1L:20L, ]),
                            type = "partitional", k = 4L,
                            distance = "L2", centroid = "pam",
                            seed = 939)
