@@ -10,7 +10,7 @@
 #' equivalent to the k-Shape algorithm (Paparrizos and Gravano, 2015).
 #'
 #' The \code{data} may be a matrix, a data frame or a list. Matrices and data frames are coerced to a list,
-#' the former row-wise and the latter column-wise. Only lists can have series with different lengths or
+#' both row-wise. Only lists can have series with different lengths or
 #' multiple dimensions. Most of the optimizations require series to have the same length, so consider
 #' reinterpolating them to save some time (see Ratanamahatana and Keogh, 2004; \code{\link{reinterpolate}}).
 #' No missing values are allowed.
@@ -295,8 +295,7 @@
 #'
 #' @author Alexis Sarda-Espinosa
 #'
-#' @param data A list of series, a numeric matrix or a data frame. Matrices are coerced row-wise and data frames
-#' column-wise.
+#' @param data A list of series, a numeric matrix or a data frame. Matrices and data frames are coerced row-wise.
 #' @param type What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"}, \code{"tadpole"}
 #' or \code{"fuzzy"}.
 #' @param k Number of desired clusters. It may be a numeric vector with different values.

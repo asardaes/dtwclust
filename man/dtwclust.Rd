@@ -9,8 +9,7 @@ dtwclust(data = NULL, type = "partitional", k = 2L, method = "average",
   control = NULL, seed = NULL, distmat = NULL, ...)
 }
 \arguments{
-\item{data}{A list of series, a numeric matrix or a data frame. Matrices are coerced row-wise and data frames
-column-wise.}
+\item{data}{A list of series, a numeric matrix or a data frame. Matrices and data frames are coerced row-wise.}
 
 \item{type}{What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"}, \code{"tadpole"}
 or \code{"fuzzy"}.}
@@ -60,7 +59,7 @@ with \code{\link[stats]{hclust}}. TADPole clustering uses the \code{\link{TADPol
 equivalent to the k-Shape algorithm (Paparrizos and Gravano, 2015).
 
 The \code{data} may be a matrix, a data frame or a list. Matrices and data frames are coerced to a list,
-the former row-wise and the latter column-wise. Only lists can have series with different lengths or
+both row-wise. Only lists can have series with different lengths or
 multiple dimensions. Most of the optimizations require series to have the same length, so consider
 reinterpolating them to save some time (see Ratanamahatana and Keogh, 2004; \code{\link{reinterpolate}}).
 No missing values are allowed.
@@ -491,7 +490,7 @@ mv <- lapply(seq(1L, 100L, 5L), function(x) cbind(CharTraj[[x]], CharTraj[[x+1L]
 # cost matrix in the case of multivariate series
 mvc <- dtwclust(mv, k = 4L, dist.method = "L1", seed = 390)
 
-# Note how the "dimensions" of each series are appended one after the other in the plot
+# Note how the variables of each series are appended one after the other in the plot
 plot(mvc)
 
 # ====================================================================================

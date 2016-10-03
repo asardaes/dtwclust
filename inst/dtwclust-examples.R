@@ -150,7 +150,7 @@ mv <- lapply(seq(1L, 100L, 5L), function(x) cbind(CharTraj[[x]], CharTraj[[x+1L]
 # cost matrix in the case of multivariate series
 mvc <- dtwclust(mv, k = 4L, dist.method = "L1", seed = 390)
 
-# Note how the "dimensions" of each series are appended one after the other in the plot
+# Note how the variables of each series are appended one after the other in the plot
 plot(mvc)
 
 # ====================================================================================
