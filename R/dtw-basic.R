@@ -68,7 +68,7 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
      else if (!is.matrix(gcm) || nrow(gcm) < (NROW(x) + 1L) || ncol(gcm) < (NROW(y) + 1L))
           stop("dtw_basic: Dimension inconsistency in 'gcm'")
      else if (storage.mode(gcm) != "double")
-          stop("If provided, 'gcm' must have storage mode double.")
+          stop("If provided, 'gcm' must have 'double' storage mode.")
 
      d <- .Call("dtw_basic", x, y, window.size,
                 NROW(x), NROW(y), NCOL(x),
@@ -124,6 +124,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                        .multicombine = TRUE,
                        .packages = "dtwclust",
                        .export = "enlist") %dopar% {
+                            ## gcm will be computed by pairwise case below
                             do.call(proxy::dist,
                                     enlist(x = x[pairs[ , 1L]],
                                            y = x[pairs[ , 2L]],
@@ -169,16 +170,13 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                             L2 <- max(lengths(y))
 
                             if (is.null(gcm))
-                                 dots$gcm <- matrix(0, L1 + 1L, L2 + 1L)
-                            else if (!is.matrix(gcm) || nrow(gcm) < (L1 + 1L) || ncol(gcm) < (L2 + 1L))
-                                 stop("dtw_basic: Dimension inconsistency in 'gcm'")
-                            else if (storage.mode(gcm) != "double")
-                                 stop("If provided, 'gcm' must have storage mode double.")
+                                 gcm <- matrix(0, L1 + 1L, L2 + 1L)
 
                             mapply(x, y, FUN = function(x, y) {
                                  do.call("dtw_basic",
                                          enlist(x = x,
                                                 y = y,
+                                                gcm = gcm,
                                                 dots = dots))
                             })
                        }
@@ -196,17 +194,14 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                             L2 <- max(lengths(y))
 
                             if (is.null(gcm))
-                                 dots$gcm <- matrix(0, L1 + 1, L2 + 1)
-                            else if (!is.matrix(gcm) || nrow(gcm) < (L1 + 1L) || ncol(gcm) < (L2 + 1L))
-                                 stop("dtw_basic: Dimension inconsistency in 'gcm'")
-                            else if (storage.mode(gcm) != "double")
-                                 stop("If provided, 'gcm' must have storage mode double.")
+                                 gcm <- matrix(0, L1 + 1L, L2 + 1L)
 
                             ret <- lapply(x, y = y, FUN = function(x, y) {
                                  sapply(y, x = x, FUN = function(y, x) {
                                       do.call("dtw_basic",
                                               enlist(x = x,
                                                      y = y,
+                                                     gcm = gcm,
                                                      dots = dots))
                                  })
                             })
