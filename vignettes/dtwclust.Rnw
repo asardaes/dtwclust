@@ -125,7 +125,7 @@ The rest of this paper is organized as follows. The relevant information to the 
 
 Calculating distances, as well as cross-distance matrices, between time-series objects is one of the cornerstones of any time-series clustering algorithm. It is a task that is repeated very often and loops across all objects applying a suitable distance function. The \pkg{proxy} package \citep{proxy}, also developed for \R{}, provides a highly optimized and extensible framework for these calculations, and is used extensively by \dtwclust{}. It includes several common metrics, which are saved in a database object called \code{pr_DB}. Additionally, users can register custom functions in the database. This has the advantage that all registered functions can be used with the \code{proxy::dist} function, which results in a high level of consistency. Refer to \cref{app:custom-dist} for an example. Unless otherwise noted, all the distances discussed here are registered with \pkg{proxy} when \dtwclust{} is attached.
 
-It is important to note that the \code{proxy::dist} function parses all matrix-like objects \textbf{row-wise}, meaning that, in the context of time-series clustering, it would consider the rows of a \textit{matrix} or \textit{data frame} as the time-series. Matrices and data frames cannot contain series with different length, something that can be circumvented by encapsulating the series in a \textit{list}, each element of the list being a single series. Internally, \dtwclust{} coerces all provided data to a list, however, it parses \textbf{matrices row-wise} and \textbf{data frames column-wise}. Moreover, a single multivariate time-series should be provided as a matrix where time spans the rows and the variables span the columns. Thus, several multivariate time-series should be provided as a \textit{list of matrices} to ensure that they are correctly detected, although not all distance and centroid functions support multivariate series.
+It is important to note that the \code{proxy::dist} function parses all matrix-like objects \textbf{row-wise}, meaning that, in the context of time-series clustering, it would consider the rows of a \textit{matrix} or \textit{data frame} as the individual time-series. Matrices and data frames cannot contain series with different length, something that can be circumvented by encapsulating the series in a \textit{list}, each element of the list being a single series. Internally, \dtwclust{} coerces all provided data to a list, and as of version 2.3.0, it parses both matrices and data frames row-wise. Moreover, lists enable support for multivariate series, where a single multivariate time-series should be provided as a matrix where time spans the rows and the variables span the columns. Thus, several multivariate time-series should be provided as a \textit{list of matrices} to ensure that they are correctly detected. Note, however, that not all distance and centroid functions support multivariate time-series.
 
 The $l_1$ and $l_2$ vector norms, also known as Manhattan and Euclidean distances respectively, are the most commonly used distance measures, and are arguably the only competitive distances when measuring dissimilarity \citep{aggarwal2001, lemire2009}. They can be efficiently computed, but are only defined for series of equal length and are sensitive to noise, scale and time shifts.
 
@@ -227,7 +227,7 @@ H_j = LE_j \quad \forall x_j < LE_j
 
 \begin{equation}
 \label{eq:lbi}
-\text{LB\_Improved} = \sqrt[p]{\text{LB\_Keogh}_p(x,y)^p + \text{LB\_Keogh}_p(y,H)^p}
+\text{LB\_Improved}_p(x,y) = \sqrt[p]{\text{LB\_Keogh}_p(x,y)^p + \text{LB\_Keogh}_p(y,H)^p}
 \end{equation}
 
 In order for the LBs to be worth it, they must be computed in significantly less time than it takes to calculate the DTW distance. \citet{lemire2009} developed a streaming algorithm to calculate the envelops using no more than $3n$ comparisons when using a Sakoe-Chiba window. This algorithm is implemented in \dtwclust{} using the \proglang{C++} programming language, ensuring an efficient calculation.
@@ -452,6 +452,7 @@ Choosing a specific clustering algorithm for a given application is not an easy 
 % Appendices
 % ===========================================================================================================
 
+\newpage
 \appendix
 
 \section{Technical notes}
@@ -480,7 +481,7 @@ proxy::pr_DB$set_entry(FUN = diss.ACF, names=c("ACFD"),
 proxy::dist(CharTraj[3:8], method = "ACFD", upper = TRUE)
 @
 
-\section{Calculating nearest neighbors in DTW space}
+\section{Finding nearest neighbors in DTW space}
 \label{app:dtw-lb}
 
 In the following example, the nearest neighbors in DTW space of the first 5 time-series are found in two different ways, first calculating all DTW distance, and then using \code{dtw_lb} to leverage \code{LB_Improved}. Since the LB is only defined for series of equal length, reinterpolation is performed.
@@ -490,7 +491,7 @@ In the following example, the nearest neighbors in DTW space of the first 5 time
 data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 
 # Calculate the DTW distances between all elements
-system.time(D1 <- proxy::dist(data[1L:5L], data[6L:50L],
+system.time(D1 <- proxy::dist(data[1L:5L], data[6L:100L],
                               method = "dtw_basic",
                               window.size = 20L))
 
@@ -498,7 +499,7 @@ system.time(D1 <- proxy::dist(data[1L:5L], data[6L:50L],
 NN1 <- apply(D1, 1L, which.min)
 
 # Calculate the distance matrix with dtw_lb
-system.time(D2 <- dtw_lb(data[1L:5L], data[6L:50L],
+system.time(D2 <- dtw_lb(data[1L:5L], data[6L:100L],
                          window.size = 20L))
 
 # Nearest neighbors
