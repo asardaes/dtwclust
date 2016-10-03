@@ -625,7 +625,7 @@ registerDoParallel(workers)
 
 # Calling dtwclust
 pc_par <- dtwclust(CharTraj[1L:20L], k = 4L,
-                   distance = "dtw", centroid = "dba",
+                   distance = "dtw_basic", centroid = "dba",
                    seed = 938, control = list(trace = TRUE,
                                               window.size = 15L))
 
