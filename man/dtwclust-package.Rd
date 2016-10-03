@@ -8,7 +8,7 @@
 Time series clustering with a wide variety of strategies and a series of optimizations specific to
 the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs). There are
 implementations of both traditional clustering algorithms, and more recent procedures such as
-k-Shape and TADPole clustering. The functionality can be easily extended with custom distance
+k-Shape and TADPole clustering. Functionality can be easily extended with custom distance
 measures and centroid definitions.
 }
 \details{
@@ -42,54 +42,7 @@ For more information, please read the included package vignette, which can be ac
 Alexis Sarda-Espinosa
 }
 \references{
-Arbelaitz, O., Gurrutxaga, I., Muguerza, J., Perez, J. M., & Perona, I. (2013). An extensive
-comparative study of cluster validity indices. Pattern Recognition, 46(1), 243-256.
-
-Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering with
-a Novel Admissible Pruning Strategy.'' In \emph{Conference on Knowledge Discovery and Data Mining},
-series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{http://dx.doi.org/10.1145/2783258.2783286}.
-
-Giorgino T (2009). ``Computing and Visualizing Dynamic Time Warping Alignments in \code{R}: The
-'dtw' Package.'' \emph{Journal of Statistical Software}, \strong{31}(7), pp. 1-24.
-\url{http://www.jstatsoft.org/v31/i07/}.
-
-Ratanamahatana A and Keogh E (2004). ``Everything you know about dynamic time warping is wrong.''
-In \emph{3rd Workshop on Mining Temporal and Sequential Data, in conjunction with 10th ACM SIGKDD
-Int. Conf. Knowledge Discovery and Data Mining (KDD-2004), Seattle, WA}.
-
-Keogh E and Ratanamahatana CA (2005). ``Exact indexing of dynamic time warping.'' \emph{Knowledge
-and information systems}, \strong{7}(3), pp. 358-386.
-
-Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .''
-\emph{Pattern Recognition}, \strong{42}(9), pp. 2169 - 2180. ISSN 0031-3203,
-\url{http://dx.doi.org/10.1016/j.patcog.2008.11.030},
-\url{http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
-
-Liao TW (2005). ``Clustering of time series data - a survey.'' \emph{Pattern recognition},
-\strong{38}(11), pp. 1857-1874.
-
-Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.''
-In \emph{Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data},
-series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{http://doi.org/10.1145/2723372.2737793}.
-
-Petitjean F, Ketterlin A and Gancarski P (2011). ``A global averaging method for dynamic time
-warping, with applications to clustering.'' \emph{Pattern Recognition}, \strong{44}(3), pp. 678 -
-693. ISSN 0031-3203, \url{http://dx.doi.org/10.1016/j.patcog.2010.09.013},
-\url{http://www.sciencedirect.com/science/article/pii/S003132031000453X}.
-
-Sakoe H and Chiba S (1978). ``Dynamic programming algorithm optimization for spoken word
-recognition.'' \emph{Acoustics, Speech and Signal Processing, IEEE Transactions on},
-\strong{26}(1), pp. 43-49. ISSN 0096-3518, \url{http://doi.org/10.1109/TASSP.1978.1163055}.
-
-Wang X, Mueen A, Ding H, Trajcevski G, Scheuermann P and Keogh E (2013). ``Experimental comparison
-of representation methods and distance measures for time series data.'' \emph{Data Mining and
-Knowledge Discovery}, \strong{26}(2), pp. 275-309. ISSN 1384-5810,
-\url{http://doi.org/10.1007/s10618-012-0250-5}, \url{http://dx.doi.org/10.1007/s10618-012-0250-5}.
-
-Bedzek, J.C. (1981). Pattern recognition with fuzzy objective function algorithms.
-
-D'Urso, P., & Maharaj, E. A. (2009). Autocorrelation-based fuzzy clustering of time series.
-Fuzzy Sets and Systems, 160(24), 3565-3589.
+Please refer to the package vignette references.
 }
 \seealso{
 \code{\link{dtwclust}}, \code{\link[proxy]{dist}}, \code{\link[dtw]{dtw}}
