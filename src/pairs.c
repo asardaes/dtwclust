@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <R.h>
-#include <Rdefines.h>
+#include <Rinternals.h>
 
 /* ==================================================================================================================================================
  * All possible combinations in pairs

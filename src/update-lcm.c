@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <R.h>
-#include <Rdefines.h>
+#include <Rinternals.h>
 
 /* ==================================================================================================================================================
  * Update local cost matrix for DBA
