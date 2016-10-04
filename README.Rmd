@@ -11,9 +11,9 @@ library(knitr)
 library(dtwclust)
 
 knitr::opts_chunk$set(
-     collapse = TRUE,
-     comment = "#>",
-     fig.path = "README-"
+    collapse = TRUE,
+    comment = "#>",
+    fig.path = "README-"
 )
 ```
 
@@ -121,8 +121,8 @@ registerDoParallel(cl)
 
 ## Creating a custom distance (normalized DTW)
 ndtw <- function(x, y, ...) {
-     dtw::dtw(x, y, step.pattern = symmetric2,
-              distance.only = TRUE, ...)$normalizedDistance
+    dtw::dtw(x, y, step.pattern = symmetric2,
+             distance.only = TRUE, ...)$normalizedDistance
 }
 
 ## Registering the function with 'proxy'
@@ -160,7 +160,7 @@ registerDoSEQ()
 
 # Calculate autocorrelation up to 50th lag, considering a list of time series as input
 acf_fun <- function(dat, ...) {
-     lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
+    lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
 }
 
 # Fuzzy c-means
@@ -175,7 +175,7 @@ fc
 
 * Partitional procedures are inspired by the `flexclust` package.
 * Hierarchical procedures use the native `hclust` function.
-* Cross-distances make use of the `proxy` package.
-* The core DTW calculations are done by the `dtw` package.
+* Cross-distance matrix calculations make use of the `proxy` package.
+* The core DTW calculations are (mostly) done by the `dtw` package.
 * Plotting is done with the `ggplot2` package.
 * Parallel computation depends on the `foreach` package.

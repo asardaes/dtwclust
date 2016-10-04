@@ -64,7 +64,7 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 5: Changes / Distsum = 2 / 1690.314
 #> Iteration 6: Changes / Distsum = 0 / 1690.314
 #> 
-#>  Elapsed time is 5.698 seconds.
+#>  Elapsed time is 4.945 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -87,7 +87,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.807 seconds.
+#>  Elapsed time is 0.651 seconds.
 
 cat("CVIs for HC+SBD:\n")
 #> CVIs for HC+SBD:
@@ -177,7 +177,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.5%
 #> 
-#>  Elapsed time is 1.584 seconds.
+#>  Elapsed time is 1.319 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -200,8 +200,8 @@ registerDoParallel(cl)
 
 ## Creating a custom distance (normalized DTW)
 ndtw <- function(x, y, ...) {
-     dtw::dtw(x, y, step.pattern = symmetric2,
-              distance.only = TRUE, ...)$normalizedDistance
+    dtw::dtw(x, y, step.pattern = symmetric2,
+             distance.only = TRUE, ...)$normalizedDistance
 }
 
 ## Registering the function with 'proxy'
@@ -229,7 +229,7 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 2: Changes / Distsum = 2 / 4.229023
 #> Iteration 3: Changes / Distsum = 0 / 4.180198
 #> 
-#>  Elapsed time is 5.417 seconds.
+#>  Elapsed time is 5.049 seconds.
 
 ## Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
@@ -253,7 +253,7 @@ registerDoSEQ()
 
 # Calculate autocorrelation up to 50th lag, considering a list of time series as input
 acf_fun <- function(dat, ...) {
-     lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
+    lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
 }
 
 # Fuzzy c-means
@@ -271,7 +271,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.156   0.000   0.157 
+#>   0.144   0.000   0.147 
 #> 
 #> Head of fuzzy memberships:
 #> 
@@ -289,7 +289,7 @@ Dependencies
 
 -   Partitional procedures are inspired by the `flexclust` package.
 -   Hierarchical procedures use the native `hclust` function.
--   Cross-distances make use of the `proxy` package.
--   The core DTW calculations are done by the `dtw` package.
+-   Cross-distance matrix calculations make use of the `proxy` package.
+-   The core DTW calculations are (mostly) done by the `dtw` package.
 -   Plotting is done with the `ggplot2` package.
 -   Parallel computation depends on the `foreach` package.

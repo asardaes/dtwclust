@@ -385,15 +385,15 @@ sapply(hc.l2, cvi, b = labels, type = "VI")
 
 # Normalized DTW distance
 ndtw <- function(x, y, ...) {
-     dtw::dtw(x, y, step.pattern = symmetric2,
-              distance.only = TRUE, ...)$normalizedDistance
+    dtw::dtw(x, y, step.pattern = symmetric2,
+             distance.only = TRUE, ...)$normalizedDistance
 }
 
 # Registering the function with 'proxy'
 if (!pr_DB$entry_exists("nDTW"))
-     proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
-                            loop = TRUE, type = "metric", distance = TRUE,
-                            description = "Normalized DTW")
+    proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
+                           loop = TRUE, type = "metric", distance = TRUE,
+                           description = "Normalized DTW")
 
 # Subset of (original) data for speed
 kc.ndtw <- dtwclust(CharTraj[31:39], k = 2L,
@@ -421,7 +421,7 @@ plot(hc.sbd[[ which.max(sapply(hc.sbd, randIndex, y = CharTrajLabels)) ]])
 
 # Calculate autocorrelation up to 50th lag, considering a list of time series as input
 acf_fun <- function(dat, ...) {
-     lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
+    lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
 }
 
 # Fuzzy c-means

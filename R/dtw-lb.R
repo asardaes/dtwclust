@@ -108,106 +108,106 @@
 dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                    error.check = TRUE, pairwise = FALSE,
                    dtw.func = "dtw_basic", ...) {
-     norm <- match.arg(norm, c("L1", "L2"))
-     dtw.func <- match.arg(dtw.func, c("dtw", "dtw_basic"))
+    norm <- match.arg(norm, c("L1", "L2"))
+    dtw.func <- match.arg(dtw.func, c("dtw", "dtw_basic"))
 
-     if (dtw.func == "dtw")
-          method <- ifelse(norm == "L1", "DTW", "DTW2")
-     else
-          method <- toupper(dtw.func)
+    if (dtw.func == "dtw")
+        method <- ifelse(norm == "L1", "DTW", "DTW2")
+    else
+        method <- toupper(dtw.func)
 
-     X <- consistency_check(x, "tsmat")
+    X <- consistency_check(x, "tsmat")
 
-     check_parallel()
+    check_parallel()
 
-     dots <- list(...)
-     dots$dist.method <- norm
-     dots$norm <- norm
-     dots$window.size <- window.size
-     dots$pairwise <- TRUE
+    dots <- list(...)
+    dots$dist.method <- norm
+    dots$norm <- norm
+    dots$window.size <- window.size
+    dots$pairwise <- TRUE
 
-     if (pairwise) {
-          if (is.null(y))
-               Y <- x
-          else
-               Y <- consistency_check(y, "tsmat")
+    if (pairwise) {
+        if (is.null(y))
+            Y <- x
+        else
+            Y <- consistency_check(y, "tsmat")
 
-          if (length(X) != length(Y))
-               stop("Pairwise distances require the same amount of series in 'x' and 'y'")
+        if (length(X) != length(Y))
+            stop("Pairwise distances require the same amount of series in 'x' and 'y'")
 
-          if (is.null(window.size))
-               dots$window.type <- "none"
-          else
-               dots$window.type <- "slantedband"
+        if (is.null(window.size))
+            dots$window.type <- "none"
+        else
+            dots$window.type <- "slantedband"
 
-          X <- split_parallel(X)
-          Y <- split_parallel(Y)
+        X <- split_parallel(X)
+        Y <- split_parallel(Y)
 
-          D <- foreach(X = X, Y = Y,
-                       .combine = c,
-                       .multicombine = TRUE,
-                       .packages = "dtwclust",
-                       .export = "enlist") %dopar% {
+        D <- foreach(X = X, Y = Y,
+                     .combine = c,
+                     .multicombine = TRUE,
+                     .packages = "dtwclust",
+                     .export = "enlist") %dopar% {
+                         do.call(proxy::dist,
+                                 enlist(x = X, y = Y,
+                                        method = method,
+                                        dots = dots))
+                     }
+
+        return(D)
+    }
+
+    window.size <- consistency_check(window.size, "window")
+    dots$window.size <- window.size
+    dots$window.type <- "slantedband"
+
+    ## NOTE: I tried starting with LBK estimate, refining with LBI and then DTW but, overall,
+    ## it was usually slower, almost the whole matrix had to be recomputed for LBI
+
+    if (!is.null(y))
+        Y <- consistency_check(y, "tsmat")
+    else
+        Y <- X
+
+    ## Initial estimate
+    D <- proxy::dist(X, Y, method = "LBI",
+                     window.size = window.size,
+                     norm = norm,
+                     error.check = error.check,
+                     ...)
+
+    ## Update with DTW
+    new.indNN <- apply(D, 1L, which.min) # index of nearest neighbors
+    indNN <- new.indNN + 1L # initialize all different
+
+    while (any(new.indNN != indNN)) {
+        indNew <- which(new.indNN != indNN)
+        indNN <- new.indNN
+
+        indNew <- split_parallel(indNew)
+
+        exclude <- setdiff(ls(), c("X", "Y", "method", "dots", "indNew", "indNN"))
+
+        dSub <- foreach(indNew = indNew,
+                        .combine = c,
+                        .multicombine = TRUE,
+                        .packages = "dtwclust",
+                        .noexport = exclude,
+                        .export = "enlist") %dopar% {
                             do.call(proxy::dist,
-                                    enlist(x = X, y = Y,
+                                    enlist(x = X[indNew],
+                                           y = Y[indNN[indNew]],
                                            method = method,
                                            dots = dots))
-                       }
+                        }
 
-          return(D)
-     }
+        D[cbind(1L:length(X), indNN)[unlist(indNew), , drop = FALSE]] <- dSub
 
-     window.size <- consistency_check(window.size, "window")
-     dots$window.size <- window.size
-     dots$window.type <- "slantedband"
+        new.indNN <- apply(D, 1L, which.min)
+    }
 
-     ## NOTE: I tried starting with LBK estimate, refining with LBI and then DTW but, overall,
-     ## it was usually slower, almost the whole matrix had to be recomputed for LBI
+    class(D) <- "crossdist"
+    attr(D, "method") <- "DTW_LB"
 
-     if (!is.null(y))
-          Y <- consistency_check(y, "tsmat")
-     else
-          Y <- X
-
-     ## Initial estimate
-     D <- proxy::dist(X, Y, method = "LBI",
-                      window.size = window.size,
-                      norm = norm,
-                      error.check = error.check,
-                      ...)
-
-     ## Update with DTW
-     new.indNN <- apply(D, 1L, which.min) # index of nearest neighbors
-     indNN <- new.indNN + 1L # initialize all different
-
-     while (any(new.indNN != indNN)) {
-          indNew <- which(new.indNN != indNN)
-          indNN <- new.indNN
-
-          indNew <- split_parallel(indNew)
-
-          exclude <- setdiff(ls(), c("X", "Y", "method", "dots", "indNew", "indNN"))
-
-          dSub <- foreach(indNew = indNew,
-                          .combine = c,
-                          .multicombine = TRUE,
-                          .packages = "dtwclust",
-                          .noexport = exclude,
-                          .export = "enlist") %dopar% {
-                               do.call(proxy::dist,
-                                       enlist(x = X[indNew],
-                                              y = Y[indNN[indNew]],
-                                              method = method,
-                                              dots = dots))
-                          }
-
-          D[cbind(1L:length(X), indNN)[unlist(indNew), , drop = FALSE]] <- dSub
-
-          new.indNN <- apply(D, 1L, which.min)
-     }
-
-     class(D) <- "crossdist"
-     attr(D, "method") <- "DTW_LB"
-
-     D
+    D
 }

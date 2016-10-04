@@ -18,43 +18,43 @@
 #'
 
 zscore <- function(x, ..., na.rm, multivariate = FALSE, keep.attributes = FALSE) {
-     if (!missing(na.rm))
-          warning("The 'na.rm' argument has been deprecated.")
+    if (!missing(na.rm))
+        warning("The 'na.rm' argument has been deprecated.")
 
-     if (is.list(x)) {
-          x <- lapply(x, zscore, ...,
-                      multivariate = !is.null(dim(x[[1L]])),
-                      keep.attributes = keep.attributes)
+    if (is.list(x)) {
+        x <- lapply(x, zscore, ...,
+                    multivariate = !is.null(dim(x[[1L]])),
+                    keep.attributes = keep.attributes)
 
-     } else if (!multivariate && (is.matrix(x) || is.data.frame(x))) {
-          consistency_check(x, "ts")
+    } else if (!multivariate && (is.matrix(x) || is.data.frame(x))) {
+        consistency_check(x, "ts")
 
-          dots <- list(...)
-          center <- if(is.null(dots$center)) formals(scale)$center else dots$center
-          scale <- if(is.null(dots$scale)) formals(scale)$scale else dots$scale
+        dots <- list(...)
+        center <- if(is.null(dots$center)) formals(scale)$center else dots$center
+        scale <- if(is.null(dots$scale)) formals(scale)$scale else dots$scale
 
-          x <- t(scale(t(x), center = center, scale = scale))
-          x[is.nan(x)] <- 0
+        x <- t(scale(t(x), center = center, scale = scale))
+        x[is.nan(x)] <- 0
 
-          if (!keep.attributes)
-               attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL
+        if (!keep.attributes)
+            attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL
 
-     } else {
-          consistency_check(x, "ts")
+    } else {
+        consistency_check(x, "ts")
 
-          dots <- list(...)
-          center <- if(is.null(dots$center)) formals(scale)$center else dots$center
-          scale <- if(is.null(dots$scale)) formals(scale)$scale else dots$scale
+        dots <- list(...)
+        center <- if(is.null(dots$center)) formals(scale)$center else dots$center
+        scale <- if(is.null(dots$scale)) formals(scale)$scale else dots$scale
 
-          x <- scale(x, center = center, scale = scale)
-          x[is.nan(x)] <- 0
+        x <- scale(x, center = center, scale = scale)
+        x[is.nan(x)] <- 0
 
-          if (!multivariate)
-               dim(x) <- NULL
+        if (!multivariate)
+            dim(x) <- NULL
 
-          if (!keep.attributes)
-               attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL
-     }
+        if (!keep.attributes)
+            attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL
+    }
 
-     x
+    x
 }

@@ -94,137 +94,137 @@ DBA <- function(X, centroid = NULL, ...,
                 max.iter = 20L, delta = 1e-3,
                 error.check = TRUE, trace = FALSE,
                 dba.alignment = "dtw_basic") {
-     dba.alignment <- match.arg(dba.alignment, c("dtw", "dtw_basic"))
+    dba.alignment <- match.arg(dba.alignment, c("dtw", "dtw_basic"))
 
-     X <- consistency_check(X, "tsmat")
+    X <- consistency_check(X, "tsmat")
 
-     if (is.null(centroid))
-          centroid <- X[[sample(length(X), 1L)]] # Random choice
+    if (is.null(centroid))
+        centroid <- X[[sample(length(X), 1L)]] # Random choice
 
-     if (error.check) {
-          consistency_check(X, "vltslist")
-          consistency_check(centroid, "ts")
-     }
+    if (error.check) {
+        consistency_check(X, "vltslist")
+        consistency_check(centroid, "ts")
+    }
 
-     norm <- match.arg(norm, c("L1", "L2"))
+    norm <- match.arg(norm, c("L1", "L2"))
 
-     dots <- list(...)
+    dots <- list(...)
 
-     if (!is.null(window.size)) {
-          w <- consistency_check(window.size, "window")
+    if (!is.null(window.size)) {
+        w <- consistency_check(window.size, "window")
 
-          if (is.null(dots$window.type))
-               dots$window.type <- "slantedband"
+        if (is.null(dots$window.type))
+            dots$window.type <- "slantedband"
 
-     } else {
-          w <- NULL
-     }
+    } else {
+        w <- NULL
+    }
 
-     ## utils.R
-     if (check_multivariate(X)) {
-          ## multivariate
-          mv <- reshape_multviariate(X, centroid) # utils.R
+    ## utils.R
+    if (check_multivariate(X)) {
+        ## multivariate
+        mv <- reshape_multviariate(X, centroid) # utils.R
 
-          new_c <- mapply(mv$series, mv$cent, SIMPLIFY = FALSE,
-                          FUN = function(xx, cc) {
-                               DBA(xx, cc,
-                                   norm = norm,
-                                   window.size = window.size,
-                                   max.iter = max.iter,
-                                   delta = delta,
-                                   error.check = FALSE,
-                                   trace = trace,
-                                   dba.alignment = dba.alignment,
-                                   ...)
+        new_c <- mapply(mv$series, mv$cent, SIMPLIFY = FALSE,
+                        FUN = function(xx, cc) {
+                            DBA(xx, cc,
+                                norm = norm,
+                                window.size = window.size,
+                                max.iter = max.iter,
+                                delta = delta,
+                                error.check = FALSE,
+                                trace = trace,
+                                dba.alignment = dba.alignment,
+                                ...)
+                        })
+
+        return(do.call(cbind, new_c))
+    }
+
+    ## pre-allocate local cost matrices
+    if (dba.alignment == "dtw")
+        LCM <- lapply(X, function(x) { matrix(0, length(x), length(centroid)) })
+    else
+        LCM <- lapply(X, function(x) { matrix(0, length(x) + 1L, length(centroid) + 1L) })
+
+    ## maximum length of considered series
+    L <- max(lengths(X))
+
+    ## Register doSEQ if necessary
+    check_parallel()
+
+    Xs <- split_parallel(X)
+    LCMs <- split_parallel(LCM)
+
+    ## Iterations
+    iter <- 1L
+    centroid_old <- centroid
+
+    if (trace) cat("\tDBA Iteration:")
+
+    while(iter <= max.iter) {
+        ## Return the coordinates of each series in X grouped by the coordinate they match to in the centroid time series
+        ## Also return the number of coordinates used in each case (for averaging below)
+        xg <- foreach(X = Xs, LCM = LCMs,
+                      .combine = c,
+                      .multicombine = TRUE,
+                      .export = "enlist",
+                      .packages = c("dtwclust", "stats")) %dopar% {
+                          mapply(X, LCM, SIMPLIFY = FALSE, FUN = function(x, lcm) {
+                              if (dba.alignment == "dtw") {
+                                  .Call("update_lcm", lcm, x, centroid,
+                                        isTRUE(norm == "L2"), PACKAGE = "dtwclust")
+
+                                  d <- do.call(dtw::dtw, enlist(x = lcm, window.size = w, dots = dots))
+
+                              } else {
+                                  d <- do.call(dtw_basic, enlist(x = x, y = centroid,
+                                                                 window.size = w, norm = norm,
+                                                                 backtrack = TRUE, gcm = lcm,
+                                                                 dots = dots))
+                              }
+
+                              x.sub <- stats::aggregate(x[d$index1],
+                                                        by = list(ind = d$index2),
+                                                        sum)
+
+                              n.sub <- stats::aggregate(x[d$index1],
+                                                        by = list(ind = d$index2),
+                                                        length)
+
+                              cbind(sum = x.sub$x, n = n.sub$x)
                           })
+                      }
 
-          return(do.call(cbind, new_c))
-     }
+        ## Put everything in one big data frame
+        xg <- reshape2::melt(xg)
 
-     ## pre-allocate local cost matrices
-     if (dba.alignment == "dtw")
-          LCM <- lapply(X, function(x) { matrix(0, length(x), length(centroid)) })
-     else
-          LCM <- lapply(X, function(x) { matrix(0, length(x) + 1L, length(centroid) + 1L) })
+        ## Aggregate according to index of centroid time series (Var1) and also the variable type (Var2)
+        xg <- stats::aggregate(xg$value, by = list(xg$Var1, xg$Var2), sum)
 
-     ## maximum length of considered series
-     L <- max(lengths(X))
+        ## Average
+        centroid <- xg$x[xg$Group.2 == "sum"] / xg$x[xg$Group.2 == "n"]
 
-     ## Register doSEQ if necessary
-     check_parallel()
+        if (all(abs(centroid - centroid_old) < delta)) {
+            if (trace)
+                cat("", iter ,"- Converged!\n")
 
-     Xs <- split_parallel(X)
-     LCMs <- split_parallel(LCM)
+            break
 
-     ## Iterations
-     iter <- 1L
-     centroid_old <- centroid
+        } else {
+            centroid_old <- centroid
 
-     if (trace) cat("\tDBA Iteration:")
+            if (trace) {
+                cat(" ", iter, ",", sep = "")
+                if (iter %% 10 == 0) cat("\n\t\t")
+            }
 
-     while(iter <= max.iter) {
-          ## Return the coordinates of each series in X grouped by the coordinate they match to in the centroid time series
-          ## Also return the number of coordinates used in each case (for averaging below)
-          xg <- foreach(X = Xs, LCM = LCMs,
-                        .combine = c,
-                        .multicombine = TRUE,
-                        .export = "enlist",
-                        .packages = c("dtwclust", "stats")) %dopar% {
-                             mapply(X, LCM, SIMPLIFY = FALSE, FUN = function(x, lcm) {
-                                  if (dba.alignment == "dtw") {
-                                       .Call("update_lcm", lcm, x, centroid,
-                                             isTRUE(norm == "L2"), PACKAGE = "dtwclust")
+            iter <- iter + 1L
+        }
+    }
 
-                                       d <- do.call(dtw::dtw, enlist(x = lcm, window.size = w, dots = dots))
+    if (iter > max.iter && trace)
+        cat(" Did not 'converge'\n")
 
-                                  } else {
-                                       d <- do.call(dtw_basic, enlist(x = x, y = centroid,
-                                                                      window.size = w, norm = norm,
-                                                                      backtrack = TRUE, gcm = lcm,
-                                                                      dots = dots))
-                                  }
-
-                                  x.sub <- stats::aggregate(x[d$index1],
-                                                            by = list(ind = d$index2),
-                                                            sum)
-
-                                  n.sub <- stats::aggregate(x[d$index1],
-                                                            by = list(ind = d$index2),
-                                                            length)
-
-                                  cbind(sum = x.sub$x, n = n.sub$x)
-                             })
-                        }
-
-          ## Put everything in one big data frame
-          xg <- reshape2::melt(xg)
-
-          ## Aggregate according to index of centroid time series (Var1) and also the variable type (Var2)
-          xg <- stats::aggregate(xg$value, by = list(xg$Var1, xg$Var2), sum)
-
-          ## Average
-          centroid <- xg$x[xg$Group.2 == "sum"] / xg$x[xg$Group.2 == "n"]
-
-          if (all(abs(centroid - centroid_old) < delta)) {
-               if (trace)
-                    cat("", iter ,"- Converged!\n")
-
-               break
-
-          } else {
-               centroid_old <- centroid
-
-               if (trace) {
-                    cat(" ", iter, ",", sep = "")
-                    if (iter %% 10 == 0) cat("\n\t\t")
-               }
-
-               iter <- iter + 1L
-          }
-     }
-
-     if (iter > max.iter && trace)
-          cat(" Did not 'converge'\n")
-
-     as.numeric(centroid)
+    as.numeric(centroid)
 }

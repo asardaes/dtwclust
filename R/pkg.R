@@ -84,63 +84,63 @@
 NULL
 
 .onAttach <- function(lib, pkg) {
-     ## proxy_prefun is in utils.R
+    ## proxy_prefun is in utils.R
 
-     ## Register DTW2
-     if (!consistency_check("DTW2", "dist", silent = TRUE))
-          proxy::pr_DB$set_entry(FUN = dtw2.proxy, names=c("DTW2", "dtw2"),
-                                 loop = TRUE, type = "metric", distance = TRUE,
-                                 description = "DTW with L2 norm",
-                                 PACKAGE = "dtwclust")
+    ## Register DTW2
+    if (!consistency_check("DTW2", "dist", silent = TRUE))
+        proxy::pr_DB$set_entry(FUN = dtw2.proxy, names=c("DTW2", "dtw2"),
+                               loop = TRUE, type = "metric", distance = TRUE,
+                               description = "DTW with L2 norm",
+                               PACKAGE = "dtwclust")
 
-     ## Register DTW_BASIC
-     if (!consistency_check("DTW_BASIC", "dist", silent = TRUE))
-          proxy::pr_DB$set_entry(FUN = dtw_basic_proxy, names=c("DTW_BASIC", "dtw_basic"),
-                                 loop = FALSE, type = "metric", distance = TRUE,
-                                 description = "Basic and maybe faster DTW distance",
-                                 PACKAGE = "dtwclust", PREFUN = proxy_prefun)
+    ## Register DTW_BASIC
+    if (!consistency_check("DTW_BASIC", "dist", silent = TRUE))
+        proxy::pr_DB$set_entry(FUN = dtw_basic_proxy, names=c("DTW_BASIC", "dtw_basic"),
+                               loop = FALSE, type = "metric", distance = TRUE,
+                               description = "Basic and maybe faster DTW distance",
+                               PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
-     ## Register LB_Keogh with the 'proxy' package for distance matrix calculation
-     if (!consistency_check("LB_Keogh", "dist", silent = TRUE))
-          proxy::pr_DB$set_entry(FUN = lb_keogh_proxy, names=c("LBK", "LB_Keogh", "lbk"),
-                                 loop = FALSE, type = "metric", distance = TRUE,
-                                 description = "Keogh's DTW lower bound for the Sakoe-Chiba band",
-                                 PACKAGE = "dtwclust", PREFUN = proxy_prefun)
+    ## Register LB_Keogh with the 'proxy' package for distance matrix calculation
+    if (!consistency_check("LB_Keogh", "dist", silent = TRUE))
+        proxy::pr_DB$set_entry(FUN = lb_keogh_proxy, names=c("LBK", "LB_Keogh", "lbk"),
+                               loop = FALSE, type = "metric", distance = TRUE,
+                               description = "Keogh's DTW lower bound for the Sakoe-Chiba band",
+                               PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
 
-     ## Register LB_Improved with the 'proxy' package for distance matrix calculation
-     if (!consistency_check("LB_Improved", "dist", silent = TRUE))
-          proxy::pr_DB$set_entry(FUN = lb_improved_proxy, names=c("LBI", "LB_Improved", "lbi"),
-                                 loop = FALSE, type = "metric", distance = TRUE,
-                                 description = "Lemire's improved DTW lower bound for the Sakoe-Chiba band",
-                                 PACKAGE = "dtwclust", PREFUN = proxy_prefun)
+    ## Register LB_Improved with the 'proxy' package for distance matrix calculation
+    if (!consistency_check("LB_Improved", "dist", silent = TRUE))
+        proxy::pr_DB$set_entry(FUN = lb_improved_proxy, names=c("LBI", "LB_Improved", "lbi"),
+                               loop = FALSE, type = "metric", distance = TRUE,
+                               description = "Lemire's improved DTW lower bound for the Sakoe-Chiba band",
+                               PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
-     ## Register SBD
-     if (!consistency_check("SBD", "dist", silent = TRUE))
-          proxy::pr_DB$set_entry(FUN = SBD.proxy, names=c("SBD", "sbd"),
-                                 loop = FALSE, type = "metric", distance = TRUE,
-                                 description = "Paparrizos and Gravanos' shape-based distance for time series",
-                                 PACKAGE = "dtwclust", PREFUN = proxy_prefun)
+    ## Register SBD
+    if (!consistency_check("SBD", "dist", silent = TRUE))
+        proxy::pr_DB$set_entry(FUN = SBD.proxy, names=c("SBD", "sbd"),
+                               loop = FALSE, type = "metric", distance = TRUE,
+                               description = "Paparrizos and Gravanos' shape-based distance for time series",
+                               PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
-     ## Register DTW_LB
-     if (!consistency_check("DTW_LB", "dist", silent = TRUE))
-          proxy::pr_DB$set_entry(FUN = dtw_lb, names=c("DTW_LB", "dtw_lb"),
-                                 loop = FALSE, type = "metric", distance = TRUE,
-                                 description = "DTW distance aided with Lemire's lower bound",
-                                 PACKAGE = "dtwclust", PREFUN = proxy_prefun)
+    ## Register DTW_LB
+    if (!consistency_check("DTW_LB", "dist", silent = TRUE))
+        proxy::pr_DB$set_entry(FUN = dtw_lb, names=c("DTW_LB", "dtw_lb"),
+                               loop = FALSE, type = "metric", distance = TRUE,
+                               description = "DTW distance aided with Lemire's lower bound",
+                               PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
-     RNGkind("L'Ecuyer")
+    RNGkind("L'Ecuyer")
 
-     packageStartupMessage("\ndtwclust: Setting random number generator to L'Ecuyer-CMRG.\n",
-                           'To read the included vignette, type: vignette("dtwclust").\n',
-                           'Please see news(package = "dtwclust") for important information!\n')
+    packageStartupMessage("\ndtwclust: Setting random number generator to L'Ecuyer-CMRG.\n",
+                          'To read the included vignette, type: vignette("dtwclust").\n',
+                          'Please see news(package = "dtwclust") for important information!\n')
 
-     if (grepl(".9000$", utils::packageVersion("dtwclust")))
-          packageStartupMessage("This is a developer version of 'dtwclust'. ",
-                                "Note that running CHECK will have failing tests due to parallelization ",
-                                "and missing rds files.")
+    if (grepl(".9000$", utils::packageVersion("dtwclust")))
+        packageStartupMessage("This is a developer version of 'dtwclust'. ",
+                              "Note that running CHECK will have failing tests due to parallelization ",
+                              "and missing rds files.")
 }
 
 .onUnload <- function(libpath) {
-     library.dynam.unload("dtwclust", libpath)
+    library.dynam.unload("dtwclust", libpath)
 }

@@ -16,26 +16,26 @@
 #'
 
 reinterpolate <- function(x, new.length, multivariate = FALSE, newLength) {
-     if (!missing(newLength)) {
-          warning("The 'newLength' argument has been deprecated, use 'new.length' instead.")
+    if (!missing(newLength)) {
+        warning("The 'newLength' argument has been deprecated, use 'new.length' instead.")
 
-          if (missing(new.length)) new.length <- newLength
-     }
+        if (missing(new.length)) new.length <- newLength
+    }
 
-     if (is.list(x)) {
-          x <- lapply(x, reinterpolate, new.length = new.length, multivariate = !is.null(dim(x[[1L]])))
+    if (is.list(x)) {
+        x <- lapply(x, reinterpolate, new.length = new.length, multivariate = !is.null(dim(x[[1L]])))
 
-     } else if (!multivariate && (is.matrix(x) || is.data.frame(x))) {
-          x <- t(apply(x, 1L, reinterpolate, new.length = new.length))
+    } else if (!multivariate && (is.matrix(x) || is.data.frame(x))) {
+        x <- t(apply(x, 1L, reinterpolate, new.length = new.length))
 
-     } else {
-          consistency_check(x, "ts")
+    } else {
+        consistency_check(x, "ts")
 
-          if (multivariate)
-               x <- apply(x, 2L, reinterpolate, new.length = new.length)
-          else
-               x <- stats::approx(x, method = "linear", n = new.length)$y
-     }
+        if (multivariate)
+            x <- apply(x, 2L, reinterpolate, new.length = new.length)
+        else
+            x <- stats::approx(x, method = "linear", n = new.length)$y
+    }
 
-     x
+    x
 }

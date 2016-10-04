@@ -53,80 +53,80 @@
 #' @export
 #'
 shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
-     X <- consistency_check(X, "tsmat")
+    X <- consistency_check(X, "tsmat")
 
-     consistency_check(X, "vltslist")
+    consistency_check(X, "vltslist")
 
-     ## utils.R
-     if (check_multivariate(X)) {
-          ## multivariate
-          mv <- reshape_multviariate(X, centroid) # utils.R
+    ## utils.R
+    if (check_multivariate(X)) {
+        ## multivariate
+        mv <- reshape_multviariate(X, centroid) # utils.R
 
-          new_c <- mapply(mv$series, mv$cent, SIMPLIFY = FALSE,
-                          FUN = function(xx, cc) {
-                               new_c <- shape_extraction(xx, cc, znorm = znorm)
-                          })
+        new_c <- mapply(mv$series, mv$cent, SIMPLIFY = FALSE,
+                        FUN = function(xx, cc) {
+                            new_c <- shape_extraction(xx, cc, znorm = znorm)
+                        })
 
-          return(do.call(cbind, new_c))
-     }
+        return(do.call(cbind, new_c))
+    }
 
-     if (znorm)
-          Xz <- zscore(X)
-     else
-          Xz <- X
+    if (znorm)
+        Xz <- zscore(X)
+    else
+        Xz <- X
 
-     ## make sure at least one series is not just a flat line at zero
-     if (all(sapply(Xz, sum) == 0)) {
-          if (is.null(centroid)) {
-               return(rep(0, sample(lengths(Xz), 1L)))
+    ## make sure at least one series is not just a flat line at zero
+    if (all(sapply(Xz, sum) == 0)) {
+        if (is.null(centroid)) {
+            return(rep(0, sample(lengths(Xz), 1L)))
 
-          } else {
-               return(centroid)
-          }
-     }
+        } else {
+            return(centroid)
+        }
+    }
 
-     if (is.null(centroid)) {
-          if (!check_lengths(Xz)) {
-               A <- do.call(rbind, Xz) # use all
+    if (is.null(centroid)) {
+        if (!check_lengths(Xz)) {
+            A <- do.call(rbind, Xz) # use all
 
-          } else {
-               centroid <- Xz[[sample(length(Xz), 1L)]] # random choice as reference
+        } else {
+            centroid <- Xz[[sample(length(Xz), 1L)]] # random choice as reference
 
-               A <- lapply(Xz, function(a) { SBD(centroid, a)$yshift })
+            A <- lapply(Xz, function(a) { SBD(centroid, a)$yshift })
 
-               A <- do.call(rbind, A)
-          }
+            A <- do.call(rbind, A)
+        }
 
-     } else {
-          consistency_check(centroid, "ts")
+    } else {
+        consistency_check(centroid, "ts")
 
-          centroid <- zscore(centroid) # use given reference
+        centroid <- zscore(centroid) # use given reference
 
-          A <- lapply(Xz, function(a) { SBD(centroid, a)$yshift })
+        A <- lapply(Xz, function(a) { SBD(centroid, a)$yshift })
 
-          A <- do.call(rbind, A)
-     }
+        A <- do.call(rbind, A)
+    }
 
-     Y <- zscore(A)
+    Y <- zscore(A)
 
-     if (is.matrix(Y))
-          S <- t(Y) %*% Y
-     else
-          S <- Y %*% t(Y)
+    if (is.matrix(Y))
+        S <- t(Y) %*% Y
+    else
+        S <- Y %*% t(Y)
 
-     nc <- ncol(A)
-     P <- diag(nc) - 1 / nc * matrix(1, nc, nc)
-     M <- P %*% S %*% P
+    nc <- ncol(A)
+    P <- diag(nc) - 1 / nc * matrix(1, nc, nc)
+    M <- P %*% S %*% P
 
-     ksc <- eigen(M)$vectors[ , 1L, drop = TRUE]
+    ksc <- eigen(M)$vectors[ , 1L, drop = TRUE]
 
-     d1 <- lnorm(A[1L, , drop = TRUE] - ksc, 2)
-     d2 <- lnorm(A[1L, , drop = TRUE] + ksc, 2)
+    d1 <- lnorm(A[1L, , drop = TRUE] - ksc, 2)
+    d2 <- lnorm(A[1L, , drop = TRUE] + ksc, 2)
 
-     if (d1 >= d2)
-          ksc <- -ksc
+    if (d1 >= d2)
+        ksc <- -ksc
 
-     ksc <- zscore(ksc)
+    ksc <- zscore(ksc)
 
-     ksc
+    ksc
 }

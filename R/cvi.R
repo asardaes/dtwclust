@@ -109,51 +109,51 @@
 #' @exportMethod cvi
 #'
 setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10) {
-     ## Only external CVIs for default, dtwclust-methods.R has the internal ones
-     if (is.null(b))
-          stop("A second set of cluster membership indices is required in 'b' for this/these CVI(s).")
+    ## Only external CVIs for default, dtwclust-methods.R has the internal ones
+    if (is.null(b))
+        stop("A second set of cluster membership indices is required in 'b' for this/these CVI(s).")
 
-     a <- as.integer(a)
-     b <- as.integer(b)
+    a <- as.integer(a)
+    b <- as.integer(b)
 
-     if (length(a) != length(b))
-          stop("External CVIs: the length of 'a' and 'b' must match.")
+    if (length(a) != length(b))
+        stop("External CVIs: the length of 'a' and 'b' must match.")
 
-     type <- match.arg(type, several.ok = TRUE,
-                       c("RI", "ARI", "J", "FM", "VI",
-                         "valid", "external"))
+    type <- match.arg(type, several.ok = TRUE,
+                      c("RI", "ARI", "J", "FM", "VI",
+                        "valid", "external"))
 
-     if (any(type %in% c("valid", "external")))
-          type <- c("RI", "ARI", "J", "FM", "VI")
+    if (any(type %in% c("valid", "external")))
+        type <- c("RI", "ARI", "J", "FM", "VI")
 
-     which_flexclust <- type %in% c("RI", "ARI", "J", "FM")
+    which_flexclust <- type %in% c("RI", "ARI", "J", "FM")
 
-     if (any(which_flexclust))
-          CVIs <- flexclust::comPart(x = a, y = b, type = type[which_flexclust])
-     else
-          CVIs <- numeric()
+    if (any(which_flexclust))
+        CVIs <- flexclust::comPart(x = a, y = b, type = type[which_flexclust])
+    else
+        CVIs <- numeric()
 
-     if (any(type == "VI")) {
-          ## Variation of information
-          ## taken from https://github.com/cran/mcclust/blob/master/R/vi.dist.R
+    if (any(type == "VI")) {
+        ## Variation of information
+        ## taken from https://github.com/cran/mcclust/blob/master/R/vi.dist.R
 
-          ## entropy
-          ent <- function(cl) {
-               n <- length(cl)
-               p <- table(cl) / n
-               -sum(p * log(p, base = log.base))
-          }
+        ## entropy
+        ent <- function(cl) {
+            n <- length(cl)
+            p <- table(cl) / n
+            -sum(p * log(p, base = log.base))
+        }
 
-          ## mutual information
-          mi <- function(cl1, cl2) {
-               p12 <- table(cl1, cl2) / length(cl1)
-               p1p2 <- outer(table(cl1) / length(cl1), table(cl2) / length(cl2))
-               sum(p12[p12 > 0] * log(p12[p12 > 0] / p1p2[p12 > 0], base = log.base))
-          }
+        ## mutual information
+        mi <- function(cl1, cl2) {
+            p12 <- table(cl1, cl2) / length(cl1)
+            p1p2 <- outer(table(cl1) / length(cl1), table(cl2) / length(cl2))
+            sum(p12[p12 > 0] * log(p12[p12 > 0] / p1p2[p12 > 0], base = log.base))
+        }
 
-          VI <- ent(a) + ent(b) - 2 * mi(a, b)
-          CVIs <- c(CVIs, VI = VI)
-     }
+        VI <- ent(a) + ent(b) - 2 * mi(a, b)
+        CVIs <- c(CVIs, VI = VI)
+    }
 
-     CVIs
+    CVIs
 })

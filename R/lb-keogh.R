@@ -78,66 +78,66 @@
 lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
                      lower.env = NULL, upper.env = NULL, force.symmetry = FALSE) {
 
-     norm <- match.arg(norm, c("L1", "L2"))
+    norm <- match.arg(norm, c("L1", "L2"))
 
-     consistency_check(x, "ts")
+    consistency_check(x, "ts")
 
-     if (is.null(lower.env) || is.null(upper.env)) {
-          consistency_check(y, "ts")
+    if (is.null(lower.env) || is.null(upper.env)) {
+        consistency_check(y, "ts")
 
-          if (length(x) != length(y))
-               stop("The series must have the same length")
+        if (length(x) != length(y))
+            stop("The series must have the same length")
 
-          window.size <- consistency_check(window.size, "window")
+        window.size <- consistency_check(window.size, "window")
 
-          if (window.size > length(x))
-               stop("The width of the window should not exceed the length of the series")
-     }
+        if (window.size > length(x))
+            stop("The width of the window should not exceed the length of the series")
+    }
 
-     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
-     if (is.null(lower.env) && is.null(upper.env)) {
-          envelopes <- call_envelop(y, window.size*2L + 1L)
-          lower.env <- envelopes$min
-          upper.env <- envelopes$max
+    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
+    if (is.null(lower.env) && is.null(upper.env)) {
+        envelopes <- call_envelop(y, window.size*2L + 1L)
+        lower.env <- envelopes$min
+        upper.env <- envelopes$max
 
-     } else if (is.null(lower.env)) {
-          lower.env <- caTools::runmin(y, window.size*2L + 1L)
+    } else if (is.null(lower.env)) {
+        lower.env <- caTools::runmin(y, window.size*2L + 1L)
 
-     } else if (is.null(upper.env)) {
-          upper.env <- caTools::runmax(y, window.size*2L + 1L)
-     }
+    } else if (is.null(upper.env)) {
+        upper.env <- caTools::runmax(y, window.size*2L + 1L)
+    }
 
-     if (length(lower.env) != length(x))
-          stop("Length mismatch between 'x' and the lower envelope")
+    if (length(lower.env) != length(x))
+        stop("Length mismatch between 'x' and the lower envelope")
 
-     if (length(upper.env) != length(x))
-          stop("Length mismatch between 'x' and the upper envelope")
+    if (length(upper.env) != length(x))
+        stop("Length mismatch between 'x' and the upper envelope")
 
-     D <- rep(0, length(x))
+    D <- rep(0, length(x))
 
-     ind1 <- x > upper.env
-     D[ind1] <- x[ind1] - upper.env[ind1]
-     ind2 <- x < lower.env
-     D[ind2] <- lower.env[ind2] - x[ind2]
+    ind1 <- x > upper.env
+    D[ind1] <- x[ind1] - upper.env[ind1]
+    ind2 <- x < lower.env
+    D[ind2] <- lower.env[ind2] - x[ind2]
 
-     d <- switch(EXPR = norm,
-                 L1 = sum(D),
-                 L2 = sqrt(sum(D^2)))
+    d <- switch(EXPR = norm,
+                L1 = sum(D),
+                L2 = sqrt(sum(D^2)))
 
-     if (force.symmetry) {
-          d2 <- lb_keogh(x = y, y = x, window.size = window.size, norm = norm)
+    if (force.symmetry) {
+        d2 <- lb_keogh(x = y, y = x, window.size = window.size, norm = norm)
 
-          if (d2$d > d) {
-               d <- d2$d
-               lower.env = d2$lower.env
-               upper.env = d2$upper.env
-          }
-     }
+        if (d2$d > d) {
+            d <- d2$d
+            lower.env = d2$lower.env
+            upper.env = d2$upper.env
+        }
+    }
 
-     ## Finish
-     list(d = d,
-          upper.env = upper.env,
-          lower.env = lower.env)
+    ## Finish
+    list(d = d,
+         upper.env = upper.env,
+         lower.env = lower.env)
 }
 
 # ========================================================================================================
@@ -147,106 +147,106 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
 lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
                            force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE, ...) {
 
-     norm <- match.arg(norm, c("L1", "L2"))
+    norm <- match.arg(norm, c("L1", "L2"))
 
-     if (error.check)
-          window.size <- consistency_check(window.size, "window")
+    if (error.check)
+        window.size <- consistency_check(window.size, "window")
 
-     x <- consistency_check(x, "tsmat")
+    x <- consistency_check(x, "tsmat")
 
-     if (error.check)
-          consistency_check(x, "tslist")
+    if (error.check)
+        consistency_check(x, "tslist")
 
-     if (window.size > length(x[[1L]]))
-          stop("Window size should not exceed length of the time series")
+    if (window.size > length(x[[1L]]))
+        stop("Window size should not exceed length of the time series")
 
-     if (is.null(y)) {
-          y <- x
+    if (is.null(y)) {
+        y <- x
 
-     } else {
-          y <- consistency_check(y, "tsmat")
+    } else {
+        y <- consistency_check(y, "tsmat")
 
-          if (error.check)
-               consistency_check(y, "tslist")
+        if (error.check)
+            consistency_check(y, "tslist")
 
-          if (window.size > length(y[[1L]]))
-               stop("Window size should not exceed length of the time series")
-     }
+        if (window.size > length(y[[1L]]))
+            stop("Window size should not exceed length of the time series")
+    }
 
-     retclass <- "crossdist"
+    retclass <- "crossdist"
 
-     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
-     envelops <- lapply(y, function(s) { call_envelop(s, window.size*2L + 1L) })
+    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
+    envelops <- lapply(y, function(s) { call_envelop(s, window.size*2L + 1L) })
 
-     lower.env <- lapply(envelops, "[[", "min")
-     upper.env <- lapply(envelops, "[[", "max")
+    lower.env <- lapply(envelops, "[[", "min")
+    upper.env <- lapply(envelops, "[[", "max")
 
-     check_parallel()
+    check_parallel()
 
-     x <- split_parallel(x)
+    x <- split_parallel(x)
 
-     if (pairwise) {
-          lower.env <- split_parallel(lower.env)
-          upper.env <- split_parallel(upper.env)
+    if (pairwise) {
+        lower.env <- split_parallel(lower.env)
+        upper.env <- split_parallel(upper.env)
 
-          if (length(lengths(x)) != length(lengths(lower.env)) || any(lengths(x) != lengths(lower.env)))
-               stop("Pairwise distances require the same amount of series in 'x' and 'y'")
+        if (length(lengths(x)) != length(lengths(lower.env)) || any(lengths(x) != lengths(lower.env)))
+            stop("Pairwise distances require the same amount of series in 'x' and 'y'")
 
-          D <- foreach(x = x, lower.env = lower.env, upper.env = upper.env,
-                       .combine = c,
-                       .multicombine = TRUE) %dopar% {
-                            mapply(upper.env, lower.env, x,
-                                   FUN = function(u, l, x) {
-                                        lb_keogh(x,
-                                                 norm = norm,
-                                                 lower.env = l,
-                                                 upper.env = u)$d
-                                   })
-                       }
+        D <- foreach(x = x, lower.env = lower.env, upper.env = upper.env,
+                     .combine = c,
+                     .multicombine = TRUE) %dopar% {
+                         mapply(upper.env, lower.env, x,
+                                FUN = function(u, l, x) {
+                                    lb_keogh(x,
+                                             norm = norm,
+                                             lower.env = l,
+                                             upper.env = u)$d
+                                })
+                     }
 
-          retclass <- "pairdist"
+        retclass <- "pairdist"
 
-     } else {
-          D <- foreach(x = x,
-                       .combine = rbind,
-                       .multicombine = TRUE) %dopar% {
-                            ret <- lapply(X = x, U = upper.env, L = lower.env,
-                                          FUN = function(x, U, L) {
-                                               ## This will return one row of the distance matrix
-                                               D <- mapply(U, L,
-                                                           MoreArgs = list(x = x),
-                                                           FUN = function(u, l, x) {
-                                                                lb_keogh(x,
-                                                                         norm = norm,
-                                                                         lower.env = l,
-                                                                         upper.env = u)$d
-                                                           })
-                                               D
-                                          })
+    } else {
+        D <- foreach(x = x,
+                     .combine = rbind,
+                     .multicombine = TRUE) %dopar% {
+                         ret <- lapply(X = x, U = upper.env, L = lower.env,
+                                       FUN = function(x, U, L) {
+                                           ## This will return one row of the distance matrix
+                                           D <- mapply(U, L,
+                                                       MoreArgs = list(x = x),
+                                                       FUN = function(u, l, x) {
+                                                           lb_keogh(x,
+                                                                    norm = norm,
+                                                                    lower.env = l,
+                                                                    upper.env = u)$d
+                                                       })
+                                           D
+                                       })
 
-                            do.call(rbind, ret)
-                       }
-     }
+                         do.call(rbind, ret)
+                     }
+    }
 
-     if (force.symmetry && !pairwise) {
-          if (nrow(D) != ncol(D)) {
-               warning("Unable to force symmetry. Resulting distance matrix is not square.")
+    if (force.symmetry && !pairwise) {
+        if (nrow(D) != ncol(D)) {
+            warning("Unable to force symmetry. Resulting distance matrix is not square.")
 
-          } else {
-               ind.tri <- lower.tri(D)
+        } else {
+            ind.tri <- lower.tri(D)
 
-               new.low.tri.vals <- t(D)[ind.tri]
-               indCorrect <- D[ind.tri] > new.low.tri.vals
-               new.low.tri.vals[indCorrect] <- D[ind.tri][indCorrect]
+            new.low.tri.vals <- t(D)[ind.tri]
+            indCorrect <- D[ind.tri] > new.low.tri.vals
+            new.low.tri.vals[indCorrect] <- D[ind.tri][indCorrect]
 
-               D[ind.tri] <- new.low.tri.vals
-               D <- t(D)
-               D[ind.tri] <- new.low.tri.vals
-          }
-     }
+            D[ind.tri] <- new.low.tri.vals
+            D <- t(D)
+            D[ind.tri] <- new.low.tri.vals
+        }
+    }
 
-     class(D) <- retclass
-     attr(D, "method") <- "LB_Keogh"
+    class(D) <- retclass
+    attr(D, "method") <- "LB_Keogh"
 
-     D
+    D
 }

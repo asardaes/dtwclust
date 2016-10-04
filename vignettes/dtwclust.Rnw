@@ -190,7 +190,7 @@ Strictly speaking, if the series being compared have different length, a constra
 
 It is not possible to know \textit{a priori} what window size, if any, will be best for a specific application, although it is usually agreed that no constraint is a poor choice. For this reason, it is better to perform tests with the data one wants to work with, perhaps taking a subset to avoid excessive running times.
 
-It should be noted that, when reported, window sizes are always integers greater than zero. If we denote this number with $w$, and for the specific case of the slanted band window, the valid region of the LCM will be constituted by all valid $lcm(i,j \pm w)$ for all $(i,j)$ along the diagonal. Thus, $2w + 1$ elements will fall within the window for a given window size $w$. This is the convention followed by \dtwclust{}.
+It should be noted that, when reported, window sizes are always integers greater than zero. If we denote this number with $w$, and for the specific case of the slanted band window, the valid region of the LCM will be constituted by all valid points in the range $\left[ (i,j - w), (i, j + w) \right]$ for all $(i,j)$ along the LCM diagonal. Thus, $2w + 1$ elements will fall within the window for a given window size $w$. This is the convention followed by \dtwclust{}.
 
 \FloatBarrier
 \subsubsection{Lower bounds for DTW}

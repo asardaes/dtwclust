@@ -7,39 +7,39 @@ context("Test parallel")
 # =================================================================================================
 
 test_that("Parallel computation gives the same results as sequential", {
-     skip_on_cran()
+    skip_on_cran()
 
-     if (getOption("skip_par_tests", FALSE))
-          skip("Parallel tests disabled explicitly.")
+    if (getOption("skip_par_tests", FALSE))
+        skip("Parallel tests disabled explicitly.")
 
-     cat("\n")
+    cat("\n")
 
-     require(doParallel)
+    require(doParallel)
 
-     cl <- makeCluster(detectCores())
-     invisible(clusterEvalQ(cl, library(dtwclust)))
-     registerDoParallel(cl)
+    cl <- makeCluster(detectCores())
+    invisible(clusterEvalQ(cl, library(dtwclust)))
+    registerDoParallel(cl)
 
-     ## Filter excludes files that have "parallel" in them, otherwise it would be recursive
-     test_dir("./", filter = "^(?!.*parallel).*$", perl = TRUE)
+    ## Filter excludes files that have "parallel" in them, otherwise it would be recursive
+    test_dir("./", filter = "^(?!.*parallel).*$", perl = TRUE)
 
-     stopCluster(cl)
-     stopImplicitCluster()
-     registerDoSEQ()
+    stopCluster(cl)
+    stopImplicitCluster()
+    registerDoSEQ()
 
-     ## Also test FORK in Unix
-     if (.Platform$OS.type != "windows") {
-          cat("Test FORKs:\n")
+    ## Also test FORK in Unix
+    if (.Platform$OS.type != "windows") {
+        cat("Test FORKs:\n")
 
-          rm(cl)
-          cl <- makeCluster(detectCores(), "FORK")
-          registerDoParallel(cl)
+        rm(cl)
+        cl <- makeCluster(detectCores(), "FORK")
+        registerDoParallel(cl)
 
-          ## Filter excludes files that have "parallel" in them, otherwise it would be recursive
-          test_dir("./", filter = "^(?!.*parallel).*$", perl = TRUE)
+        ## Filter excludes files that have "parallel" in them, otherwise it would be recursive
+        test_dir("./", filter = "^(?!.*parallel).*$", perl = TRUE)
 
-          stopCluster(cl)
-          stopImplicitCluster()
-          registerDoSEQ()
-     }
+        stopCluster(cl)
+        stopImplicitCluster()
+        registerDoSEQ()
+    }
 })

@@ -75,75 +75,75 @@
 lb_improved <- function(x, y, window.size = NULL, norm = "L1",
                         lower.env = NULL, upper.env = NULL, force.symmetry = FALSE) {
 
-     norm <- match.arg(norm, c("L1", "L2"))
+    norm <- match.arg(norm, c("L1", "L2"))
 
-     consistency_check(x, "ts")
-     consistency_check(y, "ts")
+    consistency_check(x, "ts")
+    consistency_check(y, "ts")
 
-     if (length(x) != length(y))
-          stop("The series must have the same length")
+    if (length(x) != length(y))
+        stop("The series must have the same length")
 
-     window.size <- consistency_check(window.size, "window")
+    window.size <- consistency_check(window.size, "window")
 
-     if (window.size > length(x))
-          stop("The width of the window should not exceed the length of the series")
+    if (window.size > length(x))
+        stop("The width of the window should not exceed the length of the series")
 
-     ## LB Keogh first
+    ## LB Keogh first
 
-     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
-     if (is.null(lower.env) && is.null(upper.env)) {
-          envelopes <- call_envelop(y, window.size*2L + 1L)
-          lower.env <- envelopes$min
-          upper.env <- envelopes$max
+    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
+    if (is.null(lower.env) && is.null(upper.env)) {
+        envelopes <- call_envelop(y, window.size*2L + 1L)
+        lower.env <- envelopes$min
+        upper.env <- envelopes$max
 
-     } else if (is.null(lower.env)) {
-          lower.env <- caTools::runmin(y, window.size*2L + 1L)
+    } else if (is.null(lower.env)) {
+        lower.env <- caTools::runmin(y, window.size*2L + 1L)
 
-     } else if (is.null(upper.env)) {
-          upper.env <- caTools::runmax(y, window.size*2L + 1L)
-     }
+    } else if (is.null(upper.env)) {
+        upper.env <- caTools::runmax(y, window.size*2L + 1L)
+    }
 
-     if (length(lower.env) != length(x))
-          stop("Length mismatch between 'x' and the lower envelope")
+    if (length(lower.env) != length(x))
+        stop("Length mismatch between 'x' and the lower envelope")
 
-     if (length(upper.env) != length(x))
-          stop("Length mismatch between 'x' and the upper envelope")
+    if (length(upper.env) != length(x))
+        stop("Length mismatch between 'x' and the upper envelope")
 
-     ind1 <- x > upper.env
-     ind2 <- x < lower.env
+    ind1 <- x > upper.env
+    ind2 <- x < lower.env
 
-     H <- x
-     H[ind1] <- upper.env[ind1]
-     H[ind2] <- lower.env[ind2]
+    H <- x
+    H[ind1] <- upper.env[ind1]
+    H[ind2] <- lower.env[ind2]
 
-     d1 <- abs(x - H)
+    d1 <- abs(x - H)
 
-     ## From here on is Lemire's improvement
-     EH <- call_envelop(H, window.size*2+1)
+    ## From here on is Lemire's improvement
+    EH <- call_envelop(H, window.size*2+1)
 
-     ind3 <- y > EH$max
-     ind4 <- y < EH$min
+    ind3 <- y > EH$max
+    ind4 <- y < EH$min
 
-     H2 <- y
-     H2[ind3] <- EH$max[ind3]
-     H2[ind4] <- EH$min[ind4]
+    H2 <- y
+    H2[ind3] <- EH$max[ind3]
+    H2[ind4] <- EH$min[ind4]
 
-     d2 <- abs(y - H2)
+    d2 <- abs(y - H2)
 
-     ## LB_Improved is defined as root-p of the sum of LB_Keoghs^p
-     d <- switch(EXPR = norm,
-                 L1 = sum(d1) + sum(d2),
-                 L2 = sqrt(sum(d1^2) + sum(d2^2))
-     )
+    ## LB_Improved is defined as root-p of the sum of LB_Keoghs^p
+    d <- switch(EXPR = norm,
+                L1 = sum(d1) + sum(d2),
+                L2 = sqrt(sum(d1^2) + sum(d2^2))
+    )
 
-     if (force.symmetry) {
-          d2 <- lb_improved(x = y, y = x, window.size = window.size, norm = norm)
+    if (force.symmetry) {
+        d2 <- lb_improved(x = y, y = x, window.size = window.size, norm = norm)
 
-          if (d2 > d) d <- d2
-     }
+        if (d2 > d) d <- d2
+    }
 
-     ## Finish
-     d
+    ## Finish
+    d
 }
 
 # ========================================================================================================
@@ -153,110 +153,110 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
 lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
                               force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE, ...) {
 
-     norm <- match.arg(norm, c("L1", "L2"))
+    norm <- match.arg(norm, c("L1", "L2"))
 
-     if (error.check)
-          window.size <- consistency_check(window.size, "window")
+    if (error.check)
+        window.size <- consistency_check(window.size, "window")
 
-     x <- consistency_check(x, "tsmat")
+    x <- consistency_check(x, "tsmat")
 
-     if (error.check)
-          consistency_check(x, "tslist")
+    if (error.check)
+        consistency_check(x, "tslist")
 
-     if (window.size > length(x[[1L]]))
-          stop("Window size should not exceed length of the time series")
+    if (window.size > length(x[[1L]]))
+        stop("Window size should not exceed length of the time series")
 
-     if (is.null(y)) {
-          y <- x
+    if (is.null(y)) {
+        y <- x
 
-     } else {
-          y <- consistency_check(y, "tsmat")
+    } else {
+        y <- consistency_check(y, "tsmat")
 
-          if (error.check)
-               consistency_check(y, "tslist")
+        if (error.check)
+            consistency_check(y, "tslist")
 
-          if (window.size > length(y[[1L]]))
-               stop("Window size should not exceed length of the time series")
-     }
+        if (window.size > length(y[[1L]]))
+            stop("Window size should not exceed length of the time series")
+    }
 
-     retclass <- "crossdist"
+    retclass <- "crossdist"
 
-     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
-     envelops <- lapply(y, function(s) { call_envelop(s, window.size*2L + 1L) })
+    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
+    envelops <- lapply(y, function(s) { call_envelop(s, window.size*2L + 1L) })
 
-     lower.env <- lapply(envelops, "[[", "min")
-     upper.env <- lapply(envelops, "[[", "max")
+    lower.env <- lapply(envelops, "[[", "min")
+    upper.env <- lapply(envelops, "[[", "max")
 
-     check_parallel()
+    check_parallel()
 
-     x <- split_parallel(x)
+    x <- split_parallel(x)
 
-     if (pairwise) {
-          y <- split_parallel(y)
-          lower.env <- split_parallel(lower.env)
-          upper.env <- split_parallel(upper.env)
+    if (pairwise) {
+        y <- split_parallel(y)
+        lower.env <- split_parallel(lower.env)
+        upper.env <- split_parallel(upper.env)
 
-          if (length(lengths(x)) != length(lengths(y)) || any(lengths(x) != lengths(y)))
-               stop("Pairwise distances require the same amount of series in 'x' and 'y'")
+        if (length(lengths(x)) != length(lengths(y)) || any(lengths(x) != lengths(y)))
+            stop("Pairwise distances require the same amount of series in 'x' and 'y'")
 
-          D <- foreach(x = x, y = y, lower.env = lower.env, upper.env = upper.env,
-                       .combine = c,
-                       .multicombine = TRUE,
-                       .packages = "dtwclust") %dopar% {
-                            mapply(upper.env, lower.env, y, x,
-                                   FUN = function(u, l, y, x) {
-                                        lb_improved(x, y,
-                                                    window.size = window.size,
-                                                    norm = norm,
-                                                    lower.env = l,
-                                                    upper.env = u)
-                                   })
-                       }
+        D <- foreach(x = x, y = y, lower.env = lower.env, upper.env = upper.env,
+                     .combine = c,
+                     .multicombine = TRUE,
+                     .packages = "dtwclust") %dopar% {
+                         mapply(upper.env, lower.env, y, x,
+                                FUN = function(u, l, y, x) {
+                                    lb_improved(x, y,
+                                                window.size = window.size,
+                                                norm = norm,
+                                                lower.env = l,
+                                                upper.env = u)
+                                })
+                     }
 
-          retclass <- "pairdist"
+        retclass <- "pairdist"
 
-     } else {
-          D <- foreach(x = x,
-                       .combine = rbind,
-                       .multicombine = TRUE,
-                       .packages = "dtwclust") %dopar% {
-                            ret <- lapply(X = x, U = upper.env, L = lower.env, Y = y,
-                                          FUN = function(x, U, L, Y) {
-                                               ## This will return one row of the distance matrix
-                                               mapply(U, L, Y,
-                                                      MoreArgs = list(x = x),
-                                                      FUN = function(u, l, y, x) {
-                                                           lb_improved(x, y,
-                                                                       window.size = window.size,
-                                                                       norm = norm,
-                                                                       lower.env = l,
-                                                                       upper.env = u)
-                                                      })
-                                          })
+    } else {
+        D <- foreach(x = x,
+                     .combine = rbind,
+                     .multicombine = TRUE,
+                     .packages = "dtwclust") %dopar% {
+                         ret <- lapply(X = x, U = upper.env, L = lower.env, Y = y,
+                                       FUN = function(x, U, L, Y) {
+                                           ## This will return one row of the distance matrix
+                                           mapply(U, L, Y,
+                                                  MoreArgs = list(x = x),
+                                                  FUN = function(u, l, y, x) {
+                                                      lb_improved(x, y,
+                                                                  window.size = window.size,
+                                                                  norm = norm,
+                                                                  lower.env = l,
+                                                                  upper.env = u)
+                                                  })
+                                       })
 
-                            do.call(rbind, ret)
-                       }
-     }
+                         do.call(rbind, ret)
+                     }
+    }
 
-     if (force.symmetry && !pairwise) {
-          if (nrow(D) != ncol(D)) {
-               warning("Unable to force symmetry. Resulting distance matrix is not square.")
+    if (force.symmetry && !pairwise) {
+        if (nrow(D) != ncol(D)) {
+            warning("Unable to force symmetry. Resulting distance matrix is not square.")
 
-          } else {
-               ind.tri <- lower.tri(D)
+        } else {
+            ind.tri <- lower.tri(D)
 
-               new.low.tri.vals <- t(D)[ind.tri]
-               indCorrect <- D[ind.tri] > new.low.tri.vals
-               new.low.tri.vals[indCorrect] <- D[ind.tri][indCorrect]
+            new.low.tri.vals <- t(D)[ind.tri]
+            indCorrect <- D[ind.tri] > new.low.tri.vals
+            new.low.tri.vals[indCorrect] <- D[ind.tri][indCorrect]
 
-               D[ind.tri] <- new.low.tri.vals
-               D <- t(D)
-               D[ind.tri] <- new.low.tri.vals
-          }
-     }
+            D[ind.tri] <- new.low.tri.vals
+            D <- t(D)
+            D[ind.tri] <- new.low.tri.vals
+        }
+    }
 
-     class(D) <- retclass
-     attr(D, "method") <- "LB_Improved"
+    class(D) <- retclass
+    attr(D, "method") <- "LB_Improved"
 
-     D
+    D
 }

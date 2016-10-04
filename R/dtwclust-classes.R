@@ -30,10 +30,10 @@ setClass("dtwclustFamily",
 
          prototype = prototype(preproc = function(x, ...) x,
                                cluster = function(distmat = NULL, ...) {
-                                    if (is.null(distmat))
-                                         stop("Something is wrong, couldn't calculate distances.")
+                                   if (is.null(distmat))
+                                       stop("Something is wrong, couldn't calculate distances.")
 
-                                    max.col(-distmat, "first")
+                                   max.col(-distmat, "first")
                                })
 )
 
