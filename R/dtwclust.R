@@ -596,7 +596,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                    centroid = centroid,
                    preproc = preproc_char,
 
-                   centers = kc$centroids,
                    centroids = kc$centroids,
                    k = kc$k,
                    cluster = kc$cluster,
@@ -732,7 +731,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                         centroid = as.character(substitute(centroid)),
                         preproc = preproc_char,
 
-                        centers = centroids,
                         centroids = centroids,
                         k = as.integer(k),
                         cluster = cluster,
@@ -839,7 +837,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                    centroid = centchar,
                    preproc = preproc_char,
 
-                   centers = centroids,
                    centroids = centroids,
                    k = as.integer(k),
                    cluster = as.integer(R$cl),

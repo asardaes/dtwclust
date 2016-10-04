@@ -70,18 +70,17 @@
 #' @param centroid Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
 #' \code{NULL}. For multivariate series, this should be a matrix with the same characteristics as the
 #' matrices in \code{X}.
-#' @param center Deprecated, please use \code{centroid} instead.
-#' @param max.iter Maximum number of iterations allowed.
-#' @param norm Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for Euclidean
-#' distance.
+#' @param ... Further arguments for \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}, e.g.
+#' \code{step.pattern}.
 #' @param window.size Window constraint for the DTW calculations. \code{NULL} means no constraint. A slanted
 #' band is used by default.
+#' @param norm Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for Euclidean
+#' distance.
+#' @param max.iter Maximum number of iterations allowed.
 #' @param delta At iteration \code{i}, if \code{all(abs(centroid_{i}} \code{ - centroid_{i-1})} \code{ < delta)},
 #' convergence is assumed.
 #' @param error.check Should inconsistencies in the data be checked?
 #' @param trace If \code{TRUE}, the current iteration is printed to screen.
-#' @param ... Further arguments for \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}, e.g.
-#' \code{step.pattern}.
 #' @param dba.alignment Character indicating which function to use for calculating alignments, either
 #' \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}. The latter should be faster.
 #'
@@ -90,15 +89,11 @@
 #' @export
 #'
 
-DBA <- function(X, centroid = NULL, center = NULL, max.iter = 20L,
-                norm = "L1", window.size = NULL, delta = 1e-3,
-                error.check = TRUE, trace = FALSE, ..., dba.alignment = "dtw_basic") {
-     if (!missing(center)) {
-          warning("The 'center' argument has been deprecated, please use 'centroid' instead.")
-
-          if (is.null(centroid)) centroid <- center
-     }
-
+DBA <- function(X, centroid = NULL, ...,
+                window.size = NULL, norm = "L1",
+                max.iter = 20L, delta = 1e-3,
+                error.check = TRUE, trace = FALSE,
+                dba.alignment = "dtw_basic") {
      dba.alignment <- match.arg(dba.alignment, c("dtw", "dtw_basic"))
 
      X <- consistency_check(X, "tsmat")

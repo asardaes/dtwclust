@@ -311,13 +311,8 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE) {
           warning(c("At least one series wasn't assigned to a cluster. ",
                     "This shouldn't happen, please contact maintainer."))
 
-     if (error.check)
-          message("Please note that the returned list element 'centers' is deprecated and will be ",
-                  "removed and replaced by 'centroids' in the next version.")
-
      ## Return
      list(cl = cl,
-          centers = C,
           centroids = C,
           distCalcPercentage = (distCalc / (n * (n+1) / 2 - n)) * 100)
 }

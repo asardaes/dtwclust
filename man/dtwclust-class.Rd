@@ -40,8 +40,6 @@ series and one column for each cluster. The rows must sum to 1. Only relevant fo
 and \code{av_dist} indicates, for each cluster, the average distance between series and their respective
 centroids (crisp partition).}
 
-\item{\code{centers}}{Deprecated, please use \code{centroids} instead.}
-
 \item{\code{centroids}}{A list with the centroid time series.}
 
 \item{\code{cldist}}{A column vector with the distance between each series in the data and its corresponding

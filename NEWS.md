@@ -1,5 +1,8 @@
 # NEWS
 
+## Version 3.0.0
+* Removed deprecated arguments/slots
+
 ## Version 2.3.0
 * Correction: DTW can be symmetric for series of both equal/different length, although in general this is not necessarily the case, due to asymmetric step patterns or constrained paths.
 * Exported the `dtw2` function.

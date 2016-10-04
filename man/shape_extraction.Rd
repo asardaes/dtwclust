@@ -4,7 +4,7 @@
 \alias{shape_extraction}
 \title{Shape average of several time series}
 \usage{
-shape_extraction(X, centroid = NULL, center = NULL, znorm = FALSE)
+shape_extraction(X, centroid = NULL, znorm = FALSE)
 }
 \arguments{
 \item{X}{A data matrix where each row is a time series, or a list where each element is a time series.
@@ -14,8 +14,6 @@ span the columns.}
 \item{centroid}{Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
 \code{NULL}. For multivariate series, this should be a matrix with the same characteristics as the
 matrices in \code{X}. \emph{It will be z-normalized}.}
-
-\item{center}{Deprecated, please use \code{centroid} instead.}
 
 \item{znorm}{Logical flag. Should z-scores be calculated for \code{X} before processing?}
 }

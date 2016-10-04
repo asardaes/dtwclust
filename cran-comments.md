@@ -1,9 +1,5 @@
-## Update to version 2.3.0
-* Critical: R-devel warns about dropping dimension of a 1x1 matrix. Some functions in this package had this problem, which now results in thousands of warnings (see check results of current package with R-devel), so the functions have been adjusted.
-* More thorough but faster tests.
-* Bug fixes.
-* Consistency adjustments.
-* Added functionality.
+## Update to version 3.0.0
+* Removed deprecated arguments/slots
 
 ## Test environments
 * Local GNU/Linux, R 3.3.1

@@ -205,13 +205,6 @@ lnorm <- function(x, n = 2) {
 
 # PREFUN for some of my proxy distances so that they support 'pairwise' direclty
 proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
-     if (!is.null(params$force.pairwise)) {
-          warning("The argument 'force.pairwise. has been deprecated. Simply use 'pairwise' instead.")
-
-          pairwise <- params$force.pairwise
-          params$force.pairwise <- NULL
-     }
-
      params$pairwise <- pairwise
 
      list(x = x, y = y,

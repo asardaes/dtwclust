@@ -16,12 +16,6 @@ ddist <- function(distance, control, distmat) {
      ## Closures will capture the values of the constants
 
      distfun <- function(x, centroids = NULL, ...) {
-          if (!is.null(list(...)$centers)) {
-               warning("The 'centers' argument has been deprecated, please use 'centroids' instead.")
-
-               if (is.null(centroids)) centroids <- list(...)$centers
-          }
-
           if (!is.null(distmat)) {
                if (is.null(centroids)) {
                     d <- distmat

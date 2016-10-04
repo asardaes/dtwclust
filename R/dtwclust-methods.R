@@ -257,10 +257,6 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
                    clus = seq_len(x@k), labs.arg = NULL,
                    data = NULL, time = NULL,
                    plot = TRUE, type = NULL) {
-
-               if (!is.null(list(...)$show.centroids))
-                    warning("The 'show.centroids' argument has been deprecated. Use 'type' instead.")
-
                ## set default type if none was provided
                if (!is.null(type))
                     type <- match.arg(type, c("dendrogram", "series", "centroids", "sc"))

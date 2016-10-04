@@ -4,9 +4,9 @@
 \alias{DBA}
 \title{DTW Barycenter Averaging}
 \usage{
-DBA(X, centroid = NULL, center = NULL, max.iter = 20L, norm = "L1",
-  window.size = NULL, delta = 0.001, error.check = TRUE, trace = FALSE,
-  ..., dba.alignment = "dtw_basic")
+DBA(X, centroid = NULL, ..., window.size = NULL, norm = "L1",
+  max.iter = 20L, delta = 0.001, error.check = TRUE, trace = FALSE,
+  dba.alignment = "dtw_basic")
 }
 \arguments{
 \item{X}{A data matrix where each row is a time series, or a list where each element is a time series.
@@ -17,15 +17,16 @@ span the columns.}
 \code{NULL}. For multivariate series, this should be a matrix with the same characteristics as the
 matrices in \code{X}.}
 
-\item{center}{Deprecated, please use \code{centroid} instead.}
+\item{...}{Further arguments for \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}, e.g.
+\code{step.pattern}.}
 
-\item{max.iter}{Maximum number of iterations allowed.}
+\item{window.size}{Window constraint for the DTW calculations. \code{NULL} means no constraint. A slanted
+band is used by default.}
 
 \item{norm}{Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for Euclidean
 distance.}
 
-\item{window.size}{Window constraint for the DTW calculations. \code{NULL} means no constraint. A slanted
-band is used by default.}
+\item{max.iter}{Maximum number of iterations allowed.}
 
 \item{delta}{At iteration \code{i}, if \code{all(abs(centroid_{i}} \code{ - centroid_{i-1})} \code{ < delta)},
 convergence is assumed.}
@@ -33,9 +34,6 @@ convergence is assumed.}
 \item{error.check}{Should inconsistencies in the data be checked?}
 
 \item{trace}{If \code{TRUE}, the current iteration is printed to screen.}
-
-\item{...}{Further arguments for \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}, e.g.
-\code{step.pattern}.}
 
 \item{dba.alignment}{Character indicating which function to use for calculating alignments, either
 \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}. The latter should be faster.}

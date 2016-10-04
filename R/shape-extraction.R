@@ -46,21 +46,13 @@
 #' @param centroid Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
 #' \code{NULL}. For multivariate series, this should be a matrix with the same characteristics as the
 #' matrices in \code{X}. \emph{It will be z-normalized}.
-#' @param center Deprecated, please use \code{centroid} instead.
 #' @param znorm Logical flag. Should z-scores be calculated for \code{X} before processing?
 #'
 #' @return Centroid time series (z-normalized).
 #'
 #' @export
 #'
-shape_extraction <- function(X, centroid = NULL, center = NULL, znorm = FALSE) {
-     if (!missing(center)) {
-          warning("The 'center' argument has been deprecated and will be removed in the next version. ",
-                  "Please use 'centroid' instead.")
-
-          if (is.null(centroid)) centroid <- center
-     }
-
+shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
      X <- consistency_check(X, "tsmat")
 
      consistency_check(X, "vltslist")
