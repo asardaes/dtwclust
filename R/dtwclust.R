@@ -299,7 +299,8 @@
 #' @param seed Random seed for reproducibility.
 #' @param distmat If a cross-distance matrix is already available, it can be provided here so it's re-used.
 #' Only relevant if \code{centroid} = "pam" or \code{type} = "hierarchical". See examples.
-#' @param ... Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function.
+#' @param ... Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function (preprocessing,
+#' centroid, etc.)
 #'
 #' @return An object with formal class \code{\link{dtwclust-class}}.
 #'

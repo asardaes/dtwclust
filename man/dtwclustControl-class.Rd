@@ -16,10 +16,9 @@ Default values are shown at the end.
 \item{\code{window.size}}{Integer or \code{NULL}. Window constraint for DTW, DBA and LB calculations.}
 
 \item{\code{norm}}{Character. Pointwise distance for DTW, DBA and the LBs. Either \code{"L1"} for Manhattan distance
-or \code{"L2"} for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{"L1"}) and
-\code{distance = "DTW2"} (which always uses \code{"L2"}).}
+or \code{"L2"} for Euclidean. Ignored for \code{distance = "DTW2"} (which always uses \code{"L2"}).}
 
-\item{\code{delta}}{Numeric. Stopping criterion for \code{\link{DBA}} centroids and fuzzy clustering.}
+\item{\code{delta}}{Numeric. Convergence criterion for \code{\link{DBA}} centroids and fuzzy clustering.}
 
 \item{\code{trace}}{Logical flag. If \code{TRUE}, more output regarding the progress is printed to screen.}
 
@@ -27,7 +26,8 @@ or \code{"L2"} for Euclidean. Ignored for \code{distance = "DTW"} (which always 
 things internally, all copies should point to the same memory address.}
 
 \item{\code{symmetric}}{Logical flag. Is the distance function symmetric? In other words, is \code{dist(x,y)} ==
-\code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be computed.}
+\code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be computed. Only relevant for
+PAM centroids and hierarchical clustering.}
 
 \item{\code{packages}}{Character vector with the names of any packages required for custom \code{proxy} functions.
 See Parallel Computing section in \code{\link{dtwclust}}.}

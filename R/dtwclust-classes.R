@@ -57,14 +57,14 @@ setClass("dtwclustFamily",
 #'
 #' @slot window.size Integer or \code{NULL}. Window constraint for DTW, DBA and LB calculations.
 #' @slot norm Character. Pointwise distance for DTW, DBA and the LBs. Either \code{"L1"} for Manhattan distance
-#' or \code{"L2"} for Euclidean. Ignored for \code{distance = "DTW"} (which always uses \code{"L1"}) and
-#' \code{distance = "DTW2"} (which always uses \code{"L2"}).
-#' @slot delta Numeric. Stopping criterion for \code{\link{DBA}} centroids and fuzzy clustering.
+#' or \code{"L2"} for Euclidean. Ignored for \code{distance = "DTW2"} (which always uses \code{"L2"}).
+#' @slot delta Numeric. Convergence criterion for \code{\link{DBA}} centroids and fuzzy clustering.
 #' @slot trace Logical flag. If \code{TRUE}, more output regarding the progress is printed to screen.
 #' @slot save.data Return a "copy" of the data in the returned object? Because of the way \code{R} handles
 #' things internally, all copies should point to the same memory address.
 #' @slot symmetric Logical flag. Is the distance function symmetric? In other words, is \code{dist(x,y)} ==
-#' \code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be computed.
+#' \code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be computed. Only relevant for
+#' PAM centroids and hierarchical clustering.
 #' @slot packages Character vector with the names of any packages required for custom \code{proxy} functions.
 #' See Parallel Computing section in \code{\link{dtwclust}}.
 #'

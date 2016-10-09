@@ -39,7 +39,8 @@ when using partitional or prototypes for hierarchical/tadpole methods. See Centr
 \item{distmat}{If a cross-distance matrix is already available, it can be provided here so it's re-used.
 Only relevant if \code{centroid} = "pam" or \code{type} = "hierarchical". See examples.}
 
-\item{...}{Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function.}
+\item{...}{Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function (preprocessing,
+centroid, etc.)}
 }
 \value{
 An object with formal class \code{\link{dtwclust-class}}.
