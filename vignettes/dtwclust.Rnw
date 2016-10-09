@@ -134,7 +134,7 @@ To facilitate notation in the following sections, we define a time-series as a v
 \subsection{Dynamic time warping distance}
 \label{sec:dtw}
 
-At the core, DTW is a dynamic programming algorithm that compares two series and tries to find the optimum warping curve between them under certain constraints, such as monotonicity. It started being used by the data mining community to overcome some of the limitations associated with the Euclidean distance \citep{keogh2004, berndt1994}. In \dtwclust{}, all DTW calculations are performed by the \pkg{dtw} package \citep{giorgino2009}, which comprehensively aggregates most of the related variations and optimizations.
+At the core, DTW is a dynamic programming algorithm that compares two series and tries to find the optimum warping curve between them under certain constraints, such as monotonicity. It started being used by the data mining community to overcome some of the limitations associated with the Euclidean distance \citep{keogh2004, berndt1994}.
 
 The easiest way to get an intuition of what DTW does is graphically. \Cref{fig:dtw-intuition} shows the alignment between two sample time-series $x$ and $y$. In this instance, the initial and final points of the series must match, but other points may be warped in time in order to find better matches.
 
@@ -146,7 +146,7 @@ plot(dtw_example, type = "two",
      xlab = "Time", ylab = "Series")
 @
 
-DTW is computationally expensive. If $x$ has length $n$ and $y$ has length $m$, the DTW distance between them can be computed in $O(nm)$ time, which is almost quadratic if $m$ and $n$ are similar. Additionally, DTW is prone to implementation bias since its calculations are not easily vectorized and tend to be very slow in non-compiled programming languages. The \pkg{dtw} package includes a \proglang{C} implementation of the dynamic programming step of the algorithm, which should be very fast; its level of generality may sacrifice some performance, but in most situations it will be negligible. Optionally, a basic custom implementation of the DTW algorithm is included with \pkg{dtwclust} in the \code{dtw_basic} function, which has less functionality but still supports the most common options, and it should be faster. DTW is considered a more robust distance measure for time-series \citep{wang2013}, and can potentially deal with series of different length directly. This is not necessarily an advantage, as it has been shown before that performing linear reinterpolation to obtain equal length may be appropriate if $m$ and $n$ do not vary significantly \citep{keogh2004}. For a more detailed explanation of the DTW algorithm, see e.g. \citet{giorgino2009}. However, there are some aspects that are worth discussing here.
+DTW is computationally expensive. If $x$ has length $n$ and $y$ has length $m$, the DTW distance between them can be computed in $O(nm)$ time, which is almost quadratic if $m$ and $n$ are similar. Additionally, DTW is prone to implementation bias since its calculations are not easily vectorized and tend to be very slow in non-compiled programming languages. The \pkg{dtw} package \citep{giorgino2009} includes a \proglang{C} implementation of the dynamic programming step of the algorithm, which should be very fast; its level of generality may sacrifice some performance, but in most situations it will be negligible. Optionally, a basic custom implementation of the DTW algorithm is included with \pkg{dtwclust} in the \code{dtw_basic} function, which has less functionality but still supports the most common options, and it should be faster. DTW is considered a more robust distance measure for time-series \citep{wang2013}, and can potentially deal with series of different length directly. This is not necessarily an advantage, as it has been shown before that performing linear reinterpolation to obtain equal length may be appropriate if $m$ and $n$ do not vary significantly \citep{keogh2004}. For a more detailed explanation of the DTW algorithm, see e.g. \citet{giorgino2009}. However, there are some aspects that are worth discussing here.
 
 The first step in DTW involves creating a \textbf{local cost matrix} (LCM  or $lcm$), which has $n \times m$ dimensions. Such a matrix must be created for every pair of distances compared, meaning that memory requirements may grow quickly as the dataset size grows. Considering $x$ and $y$ as the input series, for each element $(i,j)$ of the LCM, the $l_p$ norm between $x_i$ and $y_j$ must be computed. This is defined in \cref{eq:lcm}, explicitly denoting that multivariate series are supported as long as they have the same number of variables (note that for univariate series, the LCM will be identical regardless of the norm used). Thus, it makes sense to speak of a $\dtwp{}$ distance, where $p$ corresponds to the $l_p$ norm that was used to construct the LCM. However, this norm also plays an important role in the next step of DTW.
 
@@ -180,7 +180,7 @@ As final comments, it should be noted that the DTW distance does \textbf{not} sa
 \subsubsection{Global DTW constraints}
 \label{sec:dtw-window}
 
-One of the possible modifications of DTW is to use global constraints, also known as window constraints. Such constraints limit the area of the LCM that can be reached by the algorithm. There are many types of windows (see e.g. \citet{giorgino2009}), but one of the most common ones is the Sakoe-Chiba window \citep{sakoe1978}, with which an allowed region is created along the diagonal of the LCM (see \cref{fig:dtw-window-plot}). These constraints can marginally speed up the DTW calculation, but they are mainly used to avoid pathological warping. It is common to use a window whose size 10\% of the series' length, although sometimes smaller windows produce even better results \citep{keogh2004}.
+One of the possible modifications of DTW is to use global constraints, also known as window constraints. Such constraints limit the area of the LCM that can be reached by the algorithm. There are many types of windows (see e.g. \citet{giorgino2009}), but one of the most common ones is the Sakoe-Chiba window \citep{sakoe1978}, with which an allowed region is created along the diagonal of the LCM (see \cref{fig:dtw-window-plot}). These constraints can marginally speed up the DTW calculation, but they are mainly used to avoid pathological warping. It is common to use a window whose size is 10\% of the series' length, although sometimes smaller windows produce even better results \citep{keogh2004}.
 
 <<dtw-window-plot, out.width = "0.6\\linewidth", fig.asp = 1, fig.cap = "Visual representation of the Sakoe-Chiba constraint for DTW. The red elements will not be considered by the algorithm when traversing the LCM.">>=
 dtwWindow.plot(sakoeChibaWindow, window.size = 2, reference = 10, query = 10)
@@ -248,7 +248,7 @@ The shape-based distance (SBD) was recently proposed as part of the \kshape{} cl
 SBD(x,y) = 1 - \frac{\max \left( NCCc(x,y) \right)}{\left\lVert x \right\rVert_2 \left\lVert y \right\rVert_2}
 \end{equation}
 
-This distance can be efficiently computed by utilizing the Fast Fourier Transform (FFT) to obtain the NCCc sequence, although that might make it sensitive to numerical precision, which can produce discrepancies between systems with 32 and 64-bit architectures. Nevertheless, it can be very fast, it is symmetric, it was very competitive in the experiments performed in \citet{paparrizos2015}, and it supports (univariate) series of different length directly. Additionally, some FFTs can be reused when computing the SBD between several series. This optimization is also included in the SBD function registered with \pkg{proxy}.
+This distance can be efficiently computed by utilizing the Fast Fourier Transform (FFT) to obtain the NCCc sequence, although that might make it sensitive to numerical precision. It can be very fast, it is symmetric, it was very competitive in the experiments performed in \citet{paparrizos2015}, and it supports (univariate) series of different length directly. Additionally, some FFTs can be reused when computing the SBD between several series. This optimization is also included in the SBD function registered with \pkg{proxy}.
 
 \section{Time-series prototypes}
 \label{sec:prototypes}
@@ -292,7 +292,7 @@ DBA is much more computationally expensive due to all the DTW calculations that 
 \subsection{Shape extraction}
 \label{sec:shape}
 
-A recently proposed method to calculated time-series prototypes is termed \textit{shape extraction}, and is part of the \kshape{} algorithm (see \cref{sec:kshape}) described in \citet{paparrizos2015}. As with the corresponding SBD (see \cref{sec:sbd}), the algorithm depends on NCCc, and it first uses it to match two series as well as possible. \Cref{fig:sbd-alignment} depicts the alignment that is performed using two sample series.
+A recently proposed method to calculated time-series prototypes is termed \textit{shape extraction}, and is part of the \kshape{} algorithm (see \cref{sec:kshape}) described in \citet{paparrizos2015}. As with the corresponding SBD (see \cref{sec:sbd}), the algorithm depends on NCCc, and it first uses it to match two series optimally. \Cref{fig:sbd-alignment} depicts the alignment that is performed using two sample series.
 
 <<sbd-alignment, out.width = "0.45\\linewidth", fig.width = 6, fig.cap = "Visualization of the NCCc-based alignment performed on two sample series. After alignment, the second (red) series is either truncated and/or prepended/appended with zeros so that its length matches the first(black) series.", fig.subcap = c("Series before alignment", "Series after alignment")>>=
 matplot(cbind(CharTraj[[61L]], CharTraj[[65L]]),
@@ -306,7 +306,7 @@ matplot(cbind(CharTraj[[61L]], sbd_align$yshift),
         xlab = "Time", ylab = "Series")
 @
 
-As with DBA, a centroid series is needed, so one is usually \textbf{randomly} chosen from the data. The alignment can be done between series with different length, and since one of the series is \textit{shifted} in time, it may be necessary to truncate and prepend or append zeros to the non-reference series, so that the final length matches that of the reference. This is because the final step of the algorithm builds a matrix with the matched series and performs a so-called maximization of Rayleigh Quotient to obtain the final prototype; see \citet{paparrizos2015} for more details.
+As with DBA, a centroid series is needed, so one is usually \textbf{randomly} chosen from the data; an exception is when all considered time-series have the same length, in which case no centroid is needed beforehand. The alignment can be done between series with different length, and since one of the series is \textit{shifted} in time, it may be necessary to truncate and prepend or append zeros to the non-reference series, so that the final length matches that of the reference. This is because the final step of the algorithm builds a matrix with the matched series and performs a so-called maximization of Rayleigh Quotient to obtain the final prototype; see \citet{paparrizos2015} for more details.
 
 The output series of the algorithm \textbf{must} be \textit{z}-normalized. Thus, the input series as well as the reference series \textbf{must} also have this normalization. Even though the alignment can be done between series with different length, it has the same caveat as DBA, namely that the length of the resulting prototype will depend on the length of the chosen reference. Technically, for multivariate series, the shape extraction algorithm could be applied for each variable $v$ of all involved series, but this was \textbf{not} explored by the authors of \kshape{}.
 
@@ -390,7 +390,7 @@ The centroid function used by fuzzy c-means calculates the mean for each point a
 \mu_{c,i} = \frac{\sum^N_{p = 1} u^m_{p,c} x_{p,i}}{\sum^N_{p = 1} u^m_{p,c}}
 \end{equation}
 
-Finally, the objective is minimized iteratively by applying \cref{eq:fuzzy-update} a certain number of iterations or until convergence is assumed. In \cref{eq:fuzzy-update}, $d_{a,b}$ represents the distance between the $a$-th member of the data and the $b$-th fuzzy centroid, so great care must be given to the shown indices $p$, $c$ and $q$. It is clear from the equation that this update only depends on the chosen fuzziness exponent and the distance measure.
+Finally, the objective is minimized iteratively by applying \cref{eq:fuzzy-update} a certain number of iterations or until convergence is assumed. In \cref{eq:fuzzy-update}, $d_{p,c}$ represents the distance between the $p$-th member of the data and the $c$-th fuzzy centroid, so great care must be given to the shown indices $p$, $c$ and $q$. It is clear from the equation that this update only depends on the chosen fuzziness exponent and the distance measure.
 
 \begin{equation}
 \label{eq:fuzzy-update}
@@ -440,7 +440,7 @@ In this paper, a general overview of the current state of the art in time-series
 
 The goal was not to give a comprehensive and thorough explanation of all the discussed algorithms, but rather to provide information related to what has been done in the literature, including some more recent propositions, so that the reader knows where to start looking for further information, as well as what can or cannot be done with \dtwclust{}.
 
-Choosing a specific clustering algorithm for a given application is not an easy task. There are many factors to take into account and it is not possible to know \textit{a priori} which one will yield the best results. The included implementations try to use the native (and heavily optimized) \R{} functions as much as possible, relying on compiled code were needed, and we hope that, if time-series clustering is required, \dtwclust{} can serve as a starting point.
+Choosing a specific clustering algorithm for a given application is not an easy task. There are many factors to take into account and it is not possible to know \textit{a priori} which one will yield the best results. The included implementations try to use the native (and heavily optimized) \R{} functions as much as possible, relying on compiled code were needed, so we hope that, if time-series clustering is required, \dtwclust{} can serve as a starting point.
 
 % ===========================================================================================================
 % Bibliography
@@ -472,7 +472,7 @@ This example takes the autocorrelation-based distance included in the \pkg{TSclu
 <<example-register-proxy, echo = TRUE, message = FALSE>>=
 require(TSclust)
 
-proxy::pr_DB$set_entry(FUN = diss.ACF, names=c("ACFD"),
+proxy::pr_DB$set_entry(FUN = diss.ACF, names = c("ACFD"),
                        loop = TRUE, type = "metric", distance = TRUE,
                        description = "Autocorrelation-based distance")
 
@@ -587,8 +587,8 @@ This example performs autocorrelation-based fuzzy clustering as proposed by \cit
 # Calculate autocorrelation up to 50th lag
 acf_fun <- function(dat, ...) {
      lapply(dat, function(x) {
-          as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf)}
-     )
+          as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf)
+     })
 }
 
 # Fuzzy c-means
