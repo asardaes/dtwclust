@@ -10,17 +10,13 @@
 #' \code{x}.
 #' @param keep.attributes Should the mean and standard deviation returned by \code{\link[base]{scale}}
 #' be preserved?
-#' @param na.rm Deprecated
 #'
 #' @return Normalized data in the same format as provided.
 #'
 #' @export
 #'
 
-zscore <- function(x, ..., na.rm, multivariate = FALSE, keep.attributes = FALSE) {
-    if (!missing(na.rm))
-        warning("The 'na.rm' argument has been deprecated.")
-
+zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE) {
     if (is.list(x)) {
         x <- lapply(x, zscore, ...,
                     multivariate = !is.null(dim(x[[1L]])),

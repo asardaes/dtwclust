@@ -8,20 +8,13 @@
 #' @param new.length Desired length of the output series.
 #' @param multivariate Is \code{x} a multivariate time series? It will be detected automatically if a list is provided in
 #' \code{x}.
-#' @param newLength Deprecated.
 #'
 #' @return Reinterpolated time series
 #'
 #' @export
 #'
 
-reinterpolate <- function(x, new.length, multivariate = FALSE, newLength) {
-    if (!missing(newLength)) {
-        warning("The 'newLength' argument has been deprecated, use 'new.length' instead.")
-
-        if (missing(new.length)) new.length <- newLength
-    }
-
+reinterpolate <- function(x, new.length, multivariate = FALSE) {
     if (is.list(x)) {
         x <- lapply(x, reinterpolate, new.length = new.length, multivariate = !is.null(dim(x[[1L]])))
 
