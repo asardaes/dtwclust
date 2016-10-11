@@ -31,6 +31,9 @@
 
 % References
 \usepackage[capitalise,noabbrev]{cleveref}
+% Avoid parentheses
+\crefformat{equation}{Equation~#1}
+\Crefformat{equation}{Equation~#1}
 
 % Used for knitr images from Rnw files
 \newcommand{\subfloat}[2][default for first parameter: need a sub-caption]{\subcaptionbox{#1}{#2}}
