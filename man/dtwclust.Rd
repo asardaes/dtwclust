@@ -16,9 +16,9 @@ or \code{"fuzzy"}.}
 
 \item{k}{Number of desired clusters. It may be a numeric vector with different values.}
 
-\item{method}{One or more linkage methods to use in hierarchical procedures. See \code{\link[stats]{hclust}}.
-You can provide a character vector to compute different hierarchical cluster structures in one go, or
-specify \code{method} \code{=} \code{"all"} to use all the available ones.}
+\item{method}{Character vector with one or more linkage methods to use in hierarchical procedures (see
+\code{\link[stats]{hclust}}) or a function that performs hierarchical clustering based on distance matrices
+(e.g. \code{\link[cluster]{diana}}). See Hierarchical section for more details.}
 
 \item{distance}{A supported distance from \code{proxy}'s \code{\link[proxy]{dist}} (see Distance section).
 Ignored for \code{type} = \code{"tadpole"}.}
@@ -119,15 +119,21 @@ interpretation (see \code{\link{dtwclust-class}}).
 \section{Hierarchical Clustering}{
 
 
-This is a deterministic algorithm that creates a hierarchy of groups by using different linkage methods
+This is (by default) a deterministic algorithm that creates a hierarchy of groups by using different linkage methods
 (see \code{\link[stats]{hclust}}). The linkage method is controlled through the \code{method} parameter
-of this function, with the additional option "all" that uses all of the available methods. The distance
-to be used can be controlled with the \code{distance} parameter.
+of this function, which can be a character vector with several methods, with the additional option "all"
+that uses all of the available methods in \code{\link[stats]{hclust}}. The distance to be used can be
+controlled with the \code{distance} parameter.
+
+Optionally, \code{method} may be a \strong{function} that performs the hierarchical clustering based on a
+distance matrix, such as the functions included in package \pkg{cluster}. The function will receive
+the \code{dist} object as first argument (see \code{\link[stats]{as.dist}}), followed by the elements in
+\code{...} that match the function's formal arguments. The object it returns must support the
+\code{\link[stats]{as.hclust}} generic so that \code{\link[stats]{cutree}} can be used. See the examples.
 
 The hierarchy does not imply a specific number of clusters, but one can be induced by cutting the resulting
-dendrogram (see \code{\link[stats]{cutree}}). As with fuzzy clustering, this results in a crisp partition,
-and some of the slots of the returned object are calculated by cutting the dendrogram so that \code{k}
-clusters are created.
+dendrogram (see \code{\link[stats]{cutree}}). This results in a crisp partition, and some of the slots of the
+returned object are calculated by cutting the dendrogram so that \code{k} clusters are created.
 }
 
 \section{TADPole Clustering}{
@@ -441,6 +447,18 @@ plot(fc, data = CharTraj[1:25], type = "series")
 predict(fc, newdata = CharTraj[26:28])
 
 \dontrun{
+# ====================================================================================
+# Custom hierarchical clustering
+# ====================================================================================
+
+require(cluster)
+
+hc.diana <- dtwclust(data, type = "h", k = 4L,
+                     distance = "L2", method = diana,
+                     control = ctrl)
+
+plot(hc.diana, type = "sc")
+
 # ====================================================================================
 # TADPole clustering
 # ====================================================================================

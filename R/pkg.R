@@ -50,7 +50,6 @@
 #' @useDynLib dtwclust
 #'
 #' @import methods
-#' @import proxy
 #' @import foreach
 #' @import ggplot2
 #'
@@ -64,6 +63,8 @@
 #' @importFrom flexclust comPart
 #' @importFrom graphics plot
 #' @importFrom parallel splitIndices
+#' @importFrom proxy dist
+#' @importFrom proxy pr_DB
 #' @importFrom Rcpp evalCpp
 #' @importFrom reshape2 melt
 #' @importFrom rngtools RNGseq
@@ -79,6 +80,8 @@
 #' @importFrom stats update
 #' @importFrom stats predict
 #' @importFrom stats runif
+#' @importFrom stats as.dist
+#' @importFrom stats as.hclust
 #' @importFrom utils packageVersion
 #'
 NULL

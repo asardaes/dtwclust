@@ -1,5 +1,6 @@
 ## Update to version 3.0.0
 * Removed deprecated arguments/slots
+* Added support for more hierarchical methods
 
 ## Test environments
 * Local GNU/Linux, R 3.3.1

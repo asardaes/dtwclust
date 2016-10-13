@@ -1,8 +1,9 @@
 # NEWS
 
 ## Version 3.0.0
-* Removed deprecated arguments/slots
+* Removed deprecated arguments/slots.
     + If you have older `dtwclust` objects saved, try updating them with `attr(dtwclust_object, "centers") <- NULL` if you run into compatibility problems.
+* Added (conditional) support for more hierarchical procedures.
 
 ## Version 2.3.0
 * Correction: DTW can be symmetric for series of both equal/different length, although in general this is not necessarily the case, due to asymmetric step patterns or constrained paths.

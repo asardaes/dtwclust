@@ -64,15 +64,21 @@
 #'
 #' @section Hierarchical Clustering:
 #'
-#' This is a deterministic algorithm that creates a hierarchy of groups by using different linkage methods
+#' This is (by default) a deterministic algorithm that creates a hierarchy of groups by using different linkage methods
 #' (see \code{\link[stats]{hclust}}). The linkage method is controlled through the \code{method} parameter
-#' of this function, with the additional option "all" that uses all of the available methods. The distance
-#' to be used can be controlled with the \code{distance} parameter.
+#' of this function, which can be a character vector with several methods, with the additional option "all"
+#' that uses all of the available methods in \code{\link[stats]{hclust}}. The distance to be used can be
+#' controlled with the \code{distance} parameter.
+#'
+#' Optionally, \code{method} may be a \strong{function} that performs the hierarchical clustering based on a
+#' distance matrix, such as the functions included in package \pkg{cluster}. The function will receive
+#' the \code{dist} object as first argument (see \code{\link[stats]{as.dist}}), followed by the elements in
+#' \code{...} that match the function's formal arguments. The object it returns must support the
+#' \code{\link[stats]{as.hclust}} generic so that \code{\link[stats]{cutree}} can be used. See the examples.
 #'
 #' The hierarchy does not imply a specific number of clusters, but one can be induced by cutting the resulting
-#' dendrogram (see \code{\link[stats]{cutree}}). As with fuzzy clustering, this results in a crisp partition,
-#' and some of the slots of the returned object are calculated by cutting the dendrogram so that \code{k}
-#' clusters are created.
+#' dendrogram (see \code{\link[stats]{cutree}}). This results in a crisp partition, and some of the slots of the
+#' returned object are calculated by cutting the dendrogram so that \code{k} clusters are created.
 #'
 #' @section TADPole Clustering:
 #'
@@ -284,9 +290,9 @@
 #' @param type What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"}, \code{"tadpole"}
 #' or \code{"fuzzy"}.
 #' @param k Number of desired clusters. It may be a numeric vector with different values.
-#' @param method One or more linkage methods to use in hierarchical procedures. See \code{\link[stats]{hclust}}.
-#' You can provide a character vector to compute different hierarchical cluster structures in one go, or
-#' specify \code{method} \code{=} \code{"all"} to use all the available ones.
+#' @param method Character vector with one or more linkage methods to use in hierarchical procedures (see
+#' \code{\link[stats]{hclust}}) or a function that performs hierarchical clustering based on distance matrices
+#' (e.g. \code{\link[cluster]{diana}}). See Hierarchical section for more details.
 #' @param distance A supported distance from \code{proxy}'s \code{\link[proxy]{dist}} (see Distance section).
 #' Ignored for \code{type} = \code{"tadpole"}.
 #' @param centroid Either a supported string or an appropriate function to calculate centroids
@@ -618,15 +624,19 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         ## Hierarchical
         ## =================================================================================================================
 
-        hclust_methods <- match.arg(method,
-                                    c("ward.D", "ward.D2", "single", "complete",
-                                      "average", "mcquitty", "median", "centroid",
-                                      "all"),
-                                    several.ok = TRUE)
+        if (is.character(method)) {
+            hclust_methods <- match.arg(method,
+                                        c("ward.D", "ward.D2", "single", "complete",
+                                          "average", "mcquitty", "median", "centroid",
+                                          "all"),
+                                        several.ok = TRUE)
 
-        if (any(hclust_methods == "all"))
-            hclust_methods <- c("ward.D", "ward.D2", "single", "complete",
-                                "average", "mcquitty", "median", "centroid")
+            if (any(hclust_methods == "all"))
+                hclust_methods <- c("ward.D", "ward.D2", "single", "complete",
+                                    "average", "mcquitty", "median", "centroid")
+
+        } else if (!is.function(method))
+            stop("Argument 'method' must be either a supported character or a function.")
 
         if (tolower(distance) == "dtw_lb")
             warning("Using dtw_lb with hierarchical clustering is not advised.")
@@ -659,18 +669,27 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             D <- do.call("distfun", enlist(x = data, dots = dots))
         }
 
-        ## Required form for 'hclust'
-        Dist <- D[lower.tri(D)]
-
-        ## Needed attribute for 'hclust' (case sensitive)
-        attr(Dist, "Size") <- length(data)
-        attr(Dist, "method") <- attr(D, "method")
-
         if (control@trace)
             cat("\n\tPerforming hierarchical clustering...\n\n")
 
-        ## Cluster
-        hc <- lapply(hclust_methods, function(method) stats::hclust(Dist, method))
+        if (is.character(method)) {
+            ## Required form for 'hclust'
+            Dist <- D[lower.tri(D)]
+
+            ## Needed attribute for 'hclust' (case sensitive)
+            attr(Dist, "Size") <- length(data)
+            attr(Dist, "method") <- attr(D, "method")
+
+            ## Cluster
+            hc <- lapply(hclust_methods, function(method) stats::hclust(Dist, method))
+
+        } else {
+            hc <- list(do.call(method,
+                               args = enlist(stats::as.dist(D),
+                                             dots = dots[intersect(names(dots), names(formals(method)))])))
+
+            method <- as.character(substitute(method))
+        }
 
         ## Invalid centroid specifier provided?
         if (!missing(centroid) && !is.function(centroid))
@@ -681,7 +700,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         RET <- lapply(k, function(k) {
             lapply(hc, function(hc) {
                 ## cutree and corresponding centroids
-                cluster <- stats::cutree(hc, k)
+                cluster <- stats::cutree(stats::as.hclust(hc), k)
 
                 if (is.function(centroid)) {
                     allcent <- centroid
@@ -717,7 +736,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                 clusinfo <- data.frame(size = size, av_dist = 0)
                 clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(cldist[ , 1L], cluster, mean))
 
-                new("dtwclust", hc,
+                new("dtwclust", stats::as.hclust(hc),
                     call = MYCALL,
                     control = control,
                     family = new("dtwclustFamily",
@@ -727,7 +746,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     distmat = D,
 
                     type = type,
-                    method = hc$method,
+                    method = if (!is.null(hc$method)) hc$method else method,
                     distance = distance,
                     centroid = as.character(substitute(centroid)),
                     preproc = preproc_char,
@@ -851,6 +870,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                 datalist = datalist)
         }
     }
+
+    ## =================================================================================================================
+    ## Finish
+    ## =================================================================================================================
 
     toc <- proc.time() - tic
 
