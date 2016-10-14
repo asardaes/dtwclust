@@ -4,6 +4,9 @@ language: r
 sudo: false
 cache: packages
 
+before_install:
+- tlmgr install amsmath subcaption placeins makecell
+
 os:
 - linux
 - osx
