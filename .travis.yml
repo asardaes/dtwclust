@@ -3,12 +3,12 @@
 language: r
 cache: packages
 
-before_install:
-- sudo tlmgr install makecell
-
 os:
 - linux
 - osx
 r:
 - release
 - devel
+
+before_install:
+- sudo tlmgr install makecell
