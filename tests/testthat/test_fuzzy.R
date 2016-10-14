@@ -68,6 +68,8 @@ test_that("Multiple k works as expected.", {
     expect_identical(length(fc_k), 4L)
 
     skip_on_cran()
+    skip_on_travis()
+    skip_on_appveyor()
 
     fc_k <- lapply(fc_k, reset_nondeterministic)
     expect_equal_to_reference(fc_k, file_name(fc_k))
@@ -79,6 +81,8 @@ test_that("Multiple k works as expected.", {
 
 test_that("Fuzzy clustering works as expected.", {
     skip_on_cran()
+    skip_on_travis()
+    skip_on_appveyor()
 
     ## ---------------------------------------------------------- univariate
     fc <- dtwclust(data_subset, type = "fuzzy", k = 4L,

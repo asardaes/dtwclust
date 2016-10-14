@@ -62,6 +62,8 @@ test_that("Operations with mean centroid give same results as references.", {
     expect_identical(dim(cent_mv_mean[[1L]]), dim(data_multivariate[[1L]]))
 
     skip_on_cran()
+    skip_on_travis()
+    skip_on_appveyor()
 
     expect_equal_to_reference(cent_mean, file_name(cent_mean), info = "Univariate")
     expect_equal_to_reference(cent_mv_mean, file_name(cent_mv_mean), info = "Multivariate")
@@ -97,6 +99,8 @@ test_that("Operations with median centroid give same results as references.", {
     expect_identical(dim(cent_mv_median[[1L]]), dim(data_multivariate[[1L]]))
 
     skip_on_cran()
+    skip_on_travis()
+    skip_on_appveyor()
 
     expect_equal_to_reference(cent_median, file_name(cent_median), info = "Univariate")
     expect_equal_to_reference(cent_mv_median, file_name(cent_mv_median), info = "Multivariate")
@@ -132,6 +136,8 @@ test_that("Operations with shape centroid give same results as references.", {
     expect_identical(dim(cent_mv_shape[[1L]]), dim(data_multivariate[[1L]]))
 
     skip_on_cran()
+    skip_on_travis()
+    skip_on_appveyor()
 
     expect_equal_to_reference(cent_shape, file_name(cent_shape), info = "Univariate")
     expect_equal_to_reference(cent_mv_shape, file_name(cent_mv_shape), info = "Multivariate")
@@ -194,6 +200,8 @@ test_that("Operations with pam centroid give same results as references.", {
     expect_identical(dim(cent_mv_pam[[1L]]), dim(data_multivariate[[1L]]))
 
     skip_on_cran()
+    skip_on_travis()
+    skip_on_appveyor()
 
     expect_equal_to_reference(cent_pam, file_name(cent_pam), info = "Univariate without distmat")
     expect_equal_to_reference(cent_mv_pam, file_name(cent_mv_pam), info = "Multivariate")
@@ -229,6 +237,8 @@ test_that("Operations with dba centroid give same results as references.", {
     expect_identical(dim(cent_mv_dba[[1L]]), dim(data_multivariate[[1L]]))
 
     skip_on_cran()
+    skip_on_travis()
+    skip_on_appveyor()
 
     expect_equal_to_reference(cent_dba, file_name(cent_dba), info = "Univariate")
     expect_equal_to_reference(cent_mv_dba, file_name(cent_mv_dba), info = "Multivariate")
@@ -256,6 +266,8 @@ test_that("Operations with custom centroid give same results as references.", {
     cent_colMeans <- reset_nondeterministic(cent_colMeans)
 
     skip_on_cran()
+    skip_on_travis()
+    skip_on_appveyor()
 
     expect_equal_to_reference(cent_colMeans, file_name(cent_colMeans), info = "Custom colMeans")
 })

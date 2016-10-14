@@ -47,6 +47,8 @@ test_that("Calling dtwclust after registering a custom distance works as expecte
                  check.attributes = FALSE)
 
     skip_on_cran()
+    skip_on_travis()
+    skip_on_appveyor()
 
     expect_equal_to_reference(pc_ndtw, file_name(pc_ndtw), info = "nDTW")
     expect_equal_to_reference(pc_ndtw_sym, file_name(pc_ndtw_sym), info = "Symmetric nDTW")

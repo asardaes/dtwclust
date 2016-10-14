@@ -323,6 +323,8 @@ test_that("Operations with dtwclustFamily@dist give expected results", {
     distmat_dtwb <- whole_distmat
 
     skip_on_cran()
+    skip_on_travis()
+    skip_on_appveyor()
 
     expect_equal_to_reference(distmat_lbk, file_name(distmat_lbk), info = "LBK")
     expect_equal_to_reference(distmat_lbi, file_name(distmat_lbi), info = "LBI")
