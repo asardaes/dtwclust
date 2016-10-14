@@ -2,6 +2,7 @@
 
 language: r
 cache: packages
+sudo: false
 
 os:
 - linux
@@ -9,6 +10,3 @@ os:
 r:
 - release
 - devel
-
-before_install:
-- sudo tlmgr install makecell

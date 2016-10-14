@@ -26,9 +26,6 @@
 % For \FloatBarrier
 \usepackage[section,below]{placeins}
 
-% Linebreaks in tables
-\usepackage{makecell}
-
 % References
 \usepackage[capitalise,noabbrev]{cleveref}
 % Avoid parentheses
