@@ -7,6 +7,7 @@ Date: 2016-10-14
 Depends:
     R (>= 3.2.0),
     proxy (>= 0.4-16),
+    clue,
     dtw,
     ggplot2
 Imports:

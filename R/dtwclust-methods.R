@@ -797,3 +797,77 @@ setAs("NULL", "dtwclustControl",
       function(from, to) {
           new(to)
       })
+
+# ========================================================================================================
+# Functions to support package 'clue'
+# ========================================================================================================
+#' @details
+#' Several methods from package \pkg{clue} are also provided in order to support its functions.
+#'
+#' @rdname dtwclust-methods
+
+#' @rdname dtwclust-methods
+#' @export
+#'
+n_of_classes.dtwclust <- function(x) {
+    x@k
+}
+
+#' @rdname dtwclust-methods
+#' @export
+#'
+n_of_objects.dtwclust <- function(x) {
+    length(x@cluster)
+}
+
+#' @rdname dtwclust-methods
+#' @export
+#'
+cl_class_ids.dtwclust <- function(x) {
+    as.cl_class_ids(x@cluster)
+}
+
+#' @rdname dtwclust-methods
+#' @export
+#'
+as.cl_membership.dtwclust <- function(x) {
+    as.cl_membership(x@cluster)
+}
+
+#' @rdname dtwclust-methods
+#'
+#' @param k See \code{\link[clue]{cl_membership}}
+#'
+#' @export
+#'
+cl_membership.dtwclust <- function(x, k = n_of_classes(x)) {
+    as.cl_membership(x)
+}
+
+#' @rdname dtwclust-methods
+#' @export
+#'
+is.cl_partition.dtwclust <- function(x) {
+    TRUE
+}
+
+#' @rdname dtwclust-methods
+#' @export
+#'
+is.cl_hard_partition.dtwclust <- function(x) {
+    x@type != "fuzzy"
+}
+
+#' @rdname dtwclust-methods
+#' @export
+#'
+is.cl_hierarchy.dtwclust <- function(x) {
+    x@type == "hierarchical"
+}
+
+#' @rdname dtwclust-methods
+#' @export
+#'
+is.cl_dendrogram.dtwclust <- function(x) {
+    x@type == "hierarchical"
+}

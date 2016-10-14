@@ -2,7 +2,16 @@
 % Please edit documentation in R/dtwclust-methods.R
 \docType{methods}
 \name{dtwclust-methods}
+\alias{as.cl_membership.dtwclust}
+\alias{cl_class_ids.dtwclust}
+\alias{cl_membership.dtwclust}
 \alias{dtwclust-methods}
+\alias{is.cl_dendrogram.dtwclust}
+\alias{is.cl_hard_partition.dtwclust}
+\alias{is.cl_hierarchy.dtwclust}
+\alias{is.cl_partition.dtwclust}
+\alias{n_of_classes.dtwclust}
+\alias{n_of_objects.dtwclust}
 \alias{plot,dtwclust,missing-method}
 \alias{predict,dtwclust-method}
 \alias{show,dtwclust-method}
@@ -17,6 +26,24 @@
 
 \S4method{plot}{dtwclust,missing}(x, y, ..., clus = seq_len(x@k),
   labs.arg = NULL, data = NULL, time = NULL, plot = TRUE, type = NULL)
+
+\method{n_of_classes}{dtwclust}(x)
+
+\method{n_of_objects}{dtwclust}(x)
+
+\method{cl_class_ids}{dtwclust}(x)
+
+\method{as.cl_membership}{dtwclust}(x)
+
+\method{cl_membership}{dtwclust}(x, k = n_of_classes(x))
+
+\method{is.cl_partition}{dtwclust}(x)
+
+\method{is.cl_hard_partition}{dtwclust}(x)
+
+\method{is.cl_hierarchy}{dtwclust}(x)
+
+\method{is.cl_dendrogram}{dtwclust}(x)
 }
 \arguments{
 \item{object, x}{An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.}
@@ -48,6 +75,8 @@ the longest series.}
 printing anything to screen}
 
 \item{type}{What to plot. \code{NULL} means default. See details.}
+
+\item{k}{See \code{\link[clue]{cl_membership}}}
 }
 \value{
 The plot method returns a \code{gg} object (or \code{NULL} for dendrogram plot) invisibly.
@@ -92,6 +121,8 @@ use this. Optionally, you can manually provide the data in the \code{data} param
 
 If created, the function returns the \code{gg} object invisibly, in case you want to modify it to your
 liking. You might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
+
+Several methods from package \pkg{clue} are also provided in order to support its functions.
 }
 \seealso{
 \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}},

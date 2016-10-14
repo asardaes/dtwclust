@@ -7,5 +7,6 @@
 \itemize{
     \item Removed deprecated arguments/slots. If you have older \code{dtwclust} objects saved, try updating them with \code{attr(dtwclust_object, "centers") <- NULL} if you run into compatibility problems.
     \item Added (conditional) support for more hierarchical procedures.
+    \item Added support for functions in package \pkg{clue}.
 }
 }

@@ -49,9 +49,10 @@
 #'
 #' @useDynLib dtwclust
 #'
-#' @import methods
+#' @import clue
 #' @import foreach
 #' @import ggplot2
+#' @import methods
 #'
 #' @importFrom dtw dtw
 #' @importFrom dtw symmetric1
