@@ -56,8 +56,6 @@ test_that("Multiple k and multiple repetitions work as expected.", {
     expect_identical(pc_rep[1L:2L], pc_krep[1L:2L])
 
     skip_on_cran()
-    skip_on_travis()
-    skip_on_appveyor()
 
     expect_equal_to_reference(pc_k, file_name(pc_k))
     expect_equal_to_reference(pc_rep, file_name(pc_rep))
@@ -94,8 +92,6 @@ test_that("Partitional clustering works as expected.", {
     expect_identical(pc_dtwb@cluster, pc_dtwlb@cluster, info = "dtw_basic vs dtw_lb")
 
     skip_on_cran()
-    skip_on_travis()
-    skip_on_appveyor()
 
     pc_dtwb <- reset_nondeterministic(pc_dtwb)
     pc_dtwb_npampre <- reset_nondeterministic(pc_dtwb_npampre)
@@ -155,8 +151,6 @@ test_that("TADPole works as expected", {
                  "same length")
 
     skip_on_cran()
-    skip_on_travis()
-    skip_on_appveyor()
 
     ## ---------------------------------------------------------- TADPole
     pc_tadp <- dtwclust(data_reinterpolated[1L:20L], type = "t", k = 4L,

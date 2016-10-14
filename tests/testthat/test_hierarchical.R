@@ -30,8 +30,6 @@ test_that("Multiple k works as expected.", {
     expect_identical(length(hc_k), 4L)
 
     skip_on_cran()
-    skip_on_travis()
-    skip_on_appveyor()
 
     hc_k <- lapply(hc_k, reset_nondeterministic)
     expect_equal_to_reference(hc_k, file_name(hc_k))
@@ -43,8 +41,6 @@ test_that("Multiple k works as expected.", {
 
 test_that("Hierarchical clustering works as expected.", {
     skip_on_cran()
-    skip_on_travis()
-    skip_on_appveyor()
 
     ## ---------------------------------------------------------- all
     hc_all <- dtwclust(data, type = "hierarchical", k = 20L,

@@ -65,8 +65,6 @@ test_that("dtw_basic gives the same results as dtw/dtw2", {
                  info = "dtw2 vs dtw_basic")
 
     skip_on_cran()
-    skip_on_travis()
-    skip_on_appveyor()
 
     expect_equal_to_reference(D2_L1, "rds/dtwb_l1.rds")
     expect_equal_to_reference(D2_L2, "rds/dtwb_l2.rds")

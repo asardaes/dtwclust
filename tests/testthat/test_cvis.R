@@ -21,8 +21,6 @@ test_that("dtwclust CVI calculations are consistent regardless of quantity or or
     })))
 
     skip_on_cran()
-    skip_on_travis()
-    skip_on_appveyor()
 
     expect_equal_to_reference(base_cvis, file_name(base_cvis))
 })

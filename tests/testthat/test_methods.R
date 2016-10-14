@@ -17,8 +17,6 @@ test_that("Methods for dtwclust objects are dispatched correctly.", {
     expect_true(inherits(method_update, "dtwclust") & validObject(method_update), info = "update")
 
     skip_on_cran()
-    skip_on_travis()
-    skip_on_appveyor()
 
     method_update <- reset_nondeterministic(method_update)
     expect_equal_to_reference(method_update, file_name(method_update))
