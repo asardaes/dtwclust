@@ -1,6 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.travis\.yml$
+^appveyor\.yml$
 
 tests/.*\.rds$
 
@@ -14,6 +15,5 @@ vignettes/.build.timestamp
 vignettes/cache/.*
 vignettes/figure/.*
 
-^revdep$
 ^README\.Rmd$
 ^README-.*\.png$
