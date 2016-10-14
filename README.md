@@ -1,7 +1,5 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/dtwclust)](https://cran.r-project.org/package=dtwclust) [![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](https://cran.r-project.org/package=dtwclust)
-[![Travis-CI Build Status](https://travis-ci.org/asardaes/dtwclust.svg?branch=master)](https://travis-ci.org/asardaes/dtwclust)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/asardaes/dtwclust?branch=master&svg=true)](https://ci.appveyor.com/project/asardaes/dtwclust)
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/dtwclust)](https://cran.r-project.org/package=dtwclust) [![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](http://cranlogs.r-pkg.org/badges/dtwclust) [![Travis-CI Build Status](https://travis-ci.org/asardaes/dtwclust.svg?branch=master)](https://travis-ci.org/asardaes/dtwclust) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/asardaes/dtwclust?branch=master&svg=true)](https://ci.appveyor.com/project/asardaes/dtwclust)
 
 Time Series Clustering Along with Optimizations for the Dynamic Time Warping (DTW) Distance
 ===========================================================================================
@@ -66,7 +64,7 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 5: Changes / Distsum = 2 / 1690.314
 #> Iteration 6: Changes / Distsum = 0 / 1690.314
 #> 
-#>  Elapsed time is 4.945 seconds.
+#>  Elapsed time is 5.027 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -89,7 +87,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.651 seconds.
+#>  Elapsed time is 0.666 seconds.
 
 cat("CVIs for HC+SBD:\n")
 #> CVIs for HC+SBD:
@@ -179,7 +177,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.5%
 #> 
-#>  Elapsed time is 1.319 seconds.
+#>  Elapsed time is 1.337 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -231,7 +229,7 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 2: Changes / Distsum = 2 / 4.229023
 #> Iteration 3: Changes / Distsum = 0 / 4.180198
 #> 
-#>  Elapsed time is 5.049 seconds.
+#>  Elapsed time is 5.158 seconds.
 
 ## Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
@@ -273,7 +271,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.144   0.000   0.147 
+#>   0.156   0.000   0.154 
 #> 
 #> Head of fuzzy memberships:
 #> 
@@ -292,6 +290,7 @@ Dependencies
 -   Partitional procedures are inspired by the `flexclust` package.
 -   Hierarchical procedures use the native `hclust` function.
 -   Cross-distance matrix calculations make use of the `proxy` package.
--   The core DTW calculations are (mostly) done by the `dtw` package.
+-   The core DTW calculations can be done by the `dtw` package.
 -   Plotting is done with the `ggplot2` package.
 -   Parallel computation depends on the `foreach` package.
+-   Cluster evaluation can be done with package `clue` or the `cvi` function.

@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 ```
 
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/dtwclust)](https://cran.r-project.org/package=dtwclust)
-[![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](https://cran.r-project.org/package=dtwclust)
+[![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](http://cranlogs.r-pkg.org/badges/dtwclust)
 [![Travis-CI Build Status](https://travis-ci.org/asardaes/dtwclust.svg?branch=master)](https://travis-ci.org/asardaes/dtwclust)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/asardaes/dtwclust?branch=master&svg=true)](https://ci.appveyor.com/project/asardaes/dtwclust)
 
@@ -178,6 +178,7 @@ fc
 * Partitional procedures are inspired by the `flexclust` package.
 * Hierarchical procedures use the native `hclust` function.
 * Cross-distance matrix calculations make use of the `proxy` package.
-* The core DTW calculations are (mostly) done by the `dtw` package.
+* The core DTW calculations can be done by the `dtw` package.
 * Plotting is done with the `ggplot2` package.
 * Parallel computation depends on the `foreach` package.
+* Cluster evaluation can be done with package `clue` or the `cvi` function.
