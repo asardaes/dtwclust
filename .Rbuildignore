@@ -3,7 +3,7 @@
 ^\.travis\.yml$
 ^appveyor\.yml$
 
-tests/.*\.rds$
+# tests/.*\.rds$
 
 NEWS.md
 cran-comments.md
