@@ -16,7 +16,12 @@ test_that("Parallel computation gives the same results as sequential", {
 
     require(doParallel)
 
-    cl <- makeCluster(detectCores())
+    if (identical(Sys.getenv("NOT_CRAN"), ""))
+        num_workers <- detectCores()
+    else
+        num_workers <- 2L
+
+    cl <- makeCluster(num_workers)
     invisible(clusterEvalQ(cl, library(dtwclust)))
     registerDoParallel(cl)
 
@@ -32,7 +37,7 @@ test_that("Parallel computation gives the same results as sequential", {
         cat("Test FORKs:\n")
 
         rm(cl)
-        cl <- makeCluster(detectCores(), "FORK")
+        cl <- makeCluster(num_workers, "FORK")
         registerDoParallel(cl)
 
         ## Filter excludes files that have "parallel" in them, otherwise it would be recursive

@@ -140,8 +140,8 @@ NULL
 
     if (grepl(".9000$", utils::packageVersion("dtwclust")))
         packageStartupMessage("This is a developer version of 'dtwclust'. ",
-                              "Note that running CHECK will have failing tests due to parallelization ",
-                              "and missing rds files.")
+                              "Note that running CHECK in RStudio will have failing tests due to ",
+                              "missing rds files.")
 }
 
 .onUnload <- function(libpath) {
