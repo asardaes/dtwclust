@@ -12,6 +12,9 @@ test_that("Parallel computation gives the same results as sequential", {
     if (getOption("skip_par_tests", FALSE))
         skip("Parallel tests disabled explicitly.")
 
+    ## see https://github.com/hadley/testthat/issues/129
+    Sys.setenv("R_TESTS" = "")
+
     cat("\n")
 
     require(doParallel)
