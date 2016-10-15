@@ -35,8 +35,10 @@ test_that("Parallel computation gives the same results as sequential", {
     stopImplicitCluster()
     registerDoSEQ()
 
+    skip_on_os("mac")
+
     ## Also test FORK in Unix
-    if (.Platform$OS.type != "windows") {
+    if (tolower(Sys.info()[["sysname"]]) != "windows") {
         cat("Test FORKs:\n")
 
         rm(cl)
