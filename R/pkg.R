@@ -84,6 +84,7 @@
 #' @importFrom stats as.dist
 #' @importFrom stats as.hclust
 #' @importFrom utils packageVersion
+#' @importFrom utils head
 #'
 NULL
 

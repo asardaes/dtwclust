@@ -101,7 +101,7 @@ setMethod("show", "dtwclust",
 
               if (object@type == "fuzzy") {
                   cat("\nHead of fuzzy memberships:\n\n")
-                  print(object@fcluster[1L:6L, , drop = FALSE])
+                  print(utils::head(object@fcluster))
 
               } else {
                   cat("\nCluster sizes with average intra-cluster distance:\n\n")
