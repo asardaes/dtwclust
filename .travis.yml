@@ -18,4 +18,9 @@ matrix:
       sudo: true
 
 before_install:
-- if [ "${TRAVIS_OS_NAME}" == "osx" ]; then sudo tlmgr install placeins; fi
+- if [ "${TRAVIS_OS_NAME}" == "osx" ]; then sudo tlmgr install placeins cleveref; fi
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
