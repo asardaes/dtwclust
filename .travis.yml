@@ -2,14 +2,20 @@
 
 language: r
 cache: packages
-sudo: false
 
+sudo:
+- false
 os:
 - linux
-- osx
 r:
 - release
 - devel
+
+matrix:
+  include:
+    - os: osx
+      r: release
+      sudo: true
 
 before_install:
 - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then tlmgr install placeins; fi
