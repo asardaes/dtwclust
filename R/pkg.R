@@ -146,3 +146,10 @@ NULL
 .onUnload <- function(libpath) {
     library.dynam.unload("dtwclust", libpath)
 }
+
+release_questions <- function() {
+    c(
+        "Changed vignette to use knitr_notangle?",
+        "Changed .Rbuildignore to exclude test rds files?"
+    )
+}
