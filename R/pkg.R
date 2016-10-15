@@ -136,11 +136,11 @@ NULL
 
     RNGkind("L'Ecuyer")
 
-    packageStartupMessage("\ndtwclust: Setting random number generator to L'Ecuyer-CMRG.\n",
+    packageStartupMessage("\ndtwclust: Setting random number generator to L'Ecuyer-CMRG (see RNGkind()).\n",
                           'To read the included vignette, type: vignette("dtwclust").\n',
                           'Please see news(package = "dtwclust") for important information!\n')
 
-    if (grepl(".9000$", utils::packageVersion("dtwclust")))
+    if (grepl("\\.9000$", utils::packageVersion("dtwclust")))
         packageStartupMessage("This is a developer version of 'dtwclust'.")
 }
 
