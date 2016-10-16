@@ -68,7 +68,7 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
         stop("Unable to normalize with chosen step pattern.")
 
     if (is.null(gcm))
-        gcm <- matrix(-1, NROW(x) + 1L, NROW(y) + 1L)
+        gcm <- matrix(0, NROW(x) + 1L, NROW(y) + 1L)
     else if (!is.matrix(gcm) || nrow(gcm) < (NROW(x) + 1L) || ncol(gcm) < (NROW(y) + 1L))
         stop("dtw_basic: Dimension inconsistency in 'gcm'")
     else if (storage.mode(gcm) != "double")
