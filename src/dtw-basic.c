@@ -33,7 +33,7 @@ double lnorm(const double *x, const double *y, const double norm,
 // which direction to take in the cost matrix
 double which_min(const int i, const int j, const int nx,
                  const double step, const double local_cost,
-                 double *D)
+                 volatile double *D)
 {
     volatile double *tuple = (double *)malloc(3 * sizeof(double));
 
@@ -55,7 +55,7 @@ double dtw_basic_c(const double *x, const double *y, const int w,
                    const int nx, const int ny, const int dim,
                    const double norm, const double step,
                    const int backtrack,
-                   double *D, int *index1, int *index2, int *path)
+                   volatile double *D, int *index1, int *index2, int *path)
 {
     // initialization
     for (int i = 0; i <= nx; i++)

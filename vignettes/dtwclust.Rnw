@@ -258,7 +258,7 @@ The shape-based distance (SBD) was recently proposed as part of the \kshape{} cl
 SBD(x,y) = 1 - \frac{\max \left( NCCc(x,y) \right)}{\left\lVert x \right\rVert_2 \left\lVert y \right\rVert_2}
 \end{equation}
 
-This distance can be efficiently computed by utilizing the Fast Fourier Transform (FFT) to obtain the NCCc sequence, which is how it is implemented in \dtwclust{} in the \code{SBD} function, although that might make it sensitive to numerical precision. It can be very fast, it is symmetric, it was very competitive in the experiments performed in \citet{paparrizos2015}, and it supports (univariate) series of different length directly. Additionally, some FFTs can be reused when computing the SBD between several series. This optimization is also included in the SBD function registered with \pkg{proxy} by \dtwclust{}.
+This distance can be efficiently computed by utilizing the Fast Fourier Transform (FFT) to obtain the NCCc sequence, which is how it is implemented in \dtwclust{} in the \code{SBD} function, although that might make it sensitive to numerical precision, especially in 32-bit architectures. It can be very fast, it is symmetric, it was very competitive in the experiments performed in \citet{paparrizos2015}, and it supports (univariate) series of different length directly. Additionally, some FFTs can be reused when computing the SBD between several series. This optimization is also included in the SBD function registered with \pkg{proxy} by \dtwclust{}.
 
 \section{Time-series prototypes}
 \label{sec:prototypes}
