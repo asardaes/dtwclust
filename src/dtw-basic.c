@@ -32,7 +32,7 @@ double lnorm(const double *x, const double *y, const double norm,
 
 // which direction to take in the cost matrix
 double which_min(const int i, const int j, const int nx,
-                 const double step, const double local_cost,
+                 const double step, volatile const double local_cost,
                  volatile double *D)
 {
     volatile double *tuple = (double *)malloc(3 * sizeof(double));
@@ -68,7 +68,7 @@ double dtw_basic_c(const double *x, const double *y, const int w,
     D[d2s(1, 1, nx)] = pow(lnorm(x, y, norm, nx, ny, dim, 0, 0), norm);
 
     // dynamic programming
-    double local_cost, global_cost, direction;
+    volatile double local_cost, global_cost, direction;
 
     for (int i = 1; i <= nx; i++)
     {
