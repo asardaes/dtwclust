@@ -7,6 +7,10 @@
 * Local GNU/Linux, R 3.3.1
 * Local Windows 10, R 3.3.1
 * win-builder (devel and release)
+* Travis CI
+  + Linux: devel and release
+  + OSX: release
+* AppVeyor
 
 ## R CMD check results
 * There were no ERRORs or WARNINGs
