@@ -1,7 +1,7 @@
 \documentclass[article,shortnames,nojss]{jss}
 
 % Vignette options
-%\VignetteEngine{knitr::knitr}
+%\VignetteEngine{knitr::knitr_notangle}
 %\VignettePackage{dtwclust}
 %\VignetteDepends{TSclust, TSdist, cluster, doParallel}
 %\VignetteIndexEntry{Comparing Time-Series Clustering Algorithms in R Using the dtwclust Package}
@@ -97,7 +97,7 @@ opts_chunk$set(fig.width = 8, fig.asp = 0.5625,
                cache = TRUE, echo = FALSE, autodep = TRUE)
 
 # use Sinput and Soutput environments
-render_sweave()
+# render_sweave()
 
 # prevent additional .sty files from being created
 opts_knit$set(self.contained = TRUE)
@@ -542,7 +542,7 @@ The user is also free to modify or create distance functions and use them. For i
 <<example-register-ndtw, echo = TRUE, message = FALSE>>=
 # Normalized DTW
 ndtw <- function(x, y, ...) {
-    dtw(x, y,
+    dtw(x, y, ...,
         step.pattern = asymmetric,
         distance.only = TRUE)$normalizedDistance
 }
@@ -811,9 +811,10 @@ weighted_mean_cent <- function(x, cl_id, k, cent, cl_old, ...,
 
     x_split <- split(x, cl_id)
 
-    x_split <- lapply(x_split, function(xx) do.call(rbind, xx))
-
-    new_cent <- lapply(x_split, colMeans)
+    new_cent <- lapply(x_split, function(xx) {
+        xx <- do.call(rbind, xx)
+        colMeans(xx)
+    })
 
     new_cent
 }
