@@ -13,13 +13,13 @@
 #define DIAG 1.0
 
 // the matrix for lcm/gcm/steps
-double *D;
+double volatile *D;
 
 // to avoid comparison problems in which_min
 double volatile *tuple;
 
 // double to single index, matrices are always vectors in R
-int d2s(int const i, int const j, int const nx) __attribute__((always_inline));
+int inline d2s(int const i, int const j, int const nx) __attribute__((always_inline));
 
 int inline d2s(int const i, int const j, int const nx)
 {
@@ -38,12 +38,12 @@ double lnorm(double const *x, double const *y, double const norm,
 
 // which direction to take in the cost matrix
 double which_min(int const i, int const j, int const nx,
-                 double const step, double const local_cost)
+                 double const step, double volatile * const local_cost)
 {
     // DIAG, LEFT, UP
-    tuple[0] = (D[d2s(i-1, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j-1, nx)] + step * local_cost;
-    tuple[1] = (D[d2s(i, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i, j-1, nx)] + local_cost;
-    tuple[2] = (D[d2s(i-1, j, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j, nx)] + local_cost;
+    tuple[0] = (D[d2s(i-1, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j-1, nx)] + step * (*local_cost);
+    tuple[1] = (D[d2s(i, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i, j-1, nx)] + (*local_cost);
+    tuple[2] = (D[d2s(i-1, j, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j, nx)] + (*local_cost);
 
     int min = (tuple[1] < tuple[0]) ? 1 : 0;
     min = (tuple[2] < tuple[min]) ? 2 : min;
@@ -69,7 +69,8 @@ double dtw_basic_c(double const *x, double const *y, int const w,
     D[d2s(1, 1, nx)] = pow(lnorm(x, y, norm, nx, ny, dim, 0, 0), norm);
 
     // dynamic programming
-    double local_cost, global_cost, direction;
+    double global_cost, direction;
+    double volatile local_cost;
 
     for (int i = 1; i <= nx; i++)
     {
@@ -97,7 +98,7 @@ double dtw_basic_c(double const *x, double const *y, int const w,
 
             local_cost = pow(lnorm(x, y, norm, nx, ny, dim, i-1, j-1), norm);
 
-            direction = which_min(i, j, nx, step, local_cost);
+            direction = which_min(i, j, nx, step, &local_cost);
 
             if (direction == DIAG)        global_cost = D[d2s(i-1, j-1, nx)] + step * local_cost;
             else if (direction == LEFT)   global_cost = D[d2s(i, j-1, nx)] + local_cost;
