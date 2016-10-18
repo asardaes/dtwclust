@@ -12,18 +12,21 @@
 #define LEFT 2.0
 #define DIAG 1.0
 
-// double to single index, matrices are always vectors in R
-int d2s(const int i, const int j, const int nx) __attribute__((always_inline));
+// the matrix for lcm/gcm/steps
+double *D;
 
-int inline d2s(const int i, const int j, const int nx)
+// double to single index, matrices are always vectors in R
+int d2s(int const i, int const j, int const nx) __attribute__((always_inline));
+
+int inline d2s(int const i, int const j, int const nx)
 {
     return i + j * (nx + 1);
 }
 
 // vector norm
-double lnorm(const double *x, const double *y, const double norm,
-             const int nx, const int ny, const int dim,
-             const int i, const int j)
+double lnorm(double const *x, double const *y, double const norm,
+             int const nx, int const ny, int const dim,
+             int const i, int const j)
 {
     double res = 0;
     for (int k = 0; k < dim; k++) res += pow(fabs(x[i + nx * k] - y[j + ny * k]), norm);
@@ -31,11 +34,10 @@ double lnorm(const double *x, const double *y, const double norm,
 }
 
 // which direction to take in the cost matrix
-double which_min(const int i, const int j, const int nx,
-                 const double step, volatile const double local_cost,
-                 volatile double *D)
+double which_min(int const i, int const j, int const nx,
+                 double const step, double const local_cost)
 {
-    volatile double *tuple = (double *)malloc(3 * sizeof(double));
+    double volatile *tuple = (double *)malloc(3 * sizeof(double));
 
     // DIAG, LEFT, UP
     tuple[0] = (D[d2s(i-1, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j-1, nx)] + step * local_cost;
@@ -51,11 +53,11 @@ double which_min(const int i, const int j, const int nx,
 }
 
 // the C code
-double dtw_basic_c(const double *x, const double *y, const int w,
-                   const int nx, const int ny, const int dim,
-                   const double norm, const double step,
-                   const int backtrack,
-                   volatile double *D, int *index1, int *index2, int *path)
+double dtw_basic_c(double const *x, double const *y, int const w,
+                   int const nx, int const ny, int const dim,
+                   double const norm, double const step,
+                   int const backtrack,
+                   int *index1, int *index2, int *path)
 {
     // initialization
     for (int i = 0; i <= nx; i++)
@@ -68,7 +70,7 @@ double dtw_basic_c(const double *x, const double *y, const int w,
     D[d2s(1, 1, nx)] = pow(lnorm(x, y, norm, nx, ny, dim, 0, 0), norm);
 
     // dynamic programming
-    volatile double local_cost, global_cost, direction;
+    double local_cost, global_cost, direction;
 
     for (int i = 1; i <= nx; i++)
     {
@@ -96,7 +98,7 @@ double dtw_basic_c(const double *x, const double *y, const int w,
 
             local_cost = pow(lnorm(x, y, norm, nx, ny, dim, i-1, j-1), norm);
 
-            direction = which_min(i, j, nx, step, local_cost, D);
+            direction = which_min(i, j, nx, step, local_cost);
 
             if (direction == DIAG)        global_cost = D[d2s(i-1, j-1, nx)] + step * local_cost;
             else if (direction == LEFT)   global_cost = D[d2s(i, j-1, nx)] + local_cost;
@@ -159,11 +161,12 @@ double dtw_basic_c(const double *x, const double *y, const int w,
 SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
                SEXP m, SEXP n, SEXP dim,
                SEXP norm, SEXP step, SEXP backtrack,
-               SEXP D)
+               SEXP distmat)
 {
     double d;
     int nx = asInteger(m);
     int ny = asInteger(n);
+    D = REAL(distmat);
 
     if (asLogical(backtrack)) {
         // longest possible path, length will be adjusted in R
@@ -177,7 +180,7 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
         d = dtw_basic_c(REAL(x), REAL(y), asInteger(window),
                         nx, ny, asInteger(dim),
                         asReal(norm), asReal(step), 1,
-                        REAL(D), INTEGER(index1), INTEGER(index2), &path);
+                        INTEGER(index1), INTEGER(index2), &path);
 
         // put results in a list
         SEXP list_names = PROTECT(allocVector(STRSXP, 4));
@@ -201,7 +204,7 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
         d = dtw_basic_c(REAL(x), REAL(y), asInteger(window),
                         nx, ny, asInteger(dim),
                         asReal(norm), asReal(step), 0,
-                        REAL(D), NULL, NULL, NULL);
+                        NULL, NULL, NULL);
 
         SEXP ret = PROTECT(ScalarReal(d));
 
