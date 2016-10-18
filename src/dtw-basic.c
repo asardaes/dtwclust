@@ -15,6 +15,9 @@
 // the matrix for lcm/gcm/steps
 double *D;
 
+// to avoid comparison problems in which_min
+double volatile *tuple;
+
 // double to single index, matrices are always vectors in R
 int d2s(int const i, int const j, int const nx) __attribute__((always_inline));
 
@@ -37,8 +40,6 @@ double lnorm(double const *x, double const *y, double const norm,
 double which_min(int const i, int const j, int const nx,
                  double const step, double const local_cost)
 {
-    double volatile *tuple = (double *)malloc(3 * sizeof(double));
-
     // DIAG, LEFT, UP
     tuple[0] = (D[d2s(i-1, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j-1, nx)] + step * local_cost;
     tuple[1] = (D[d2s(i, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i, j-1, nx)] + local_cost;
@@ -46,8 +47,6 @@ double which_min(int const i, int const j, int const nx,
 
     int min = (tuple[1] < tuple[0]) ? 1 : 0;
     min = (tuple[2] < tuple[min]) ? 2 : min;
-
-    free((double *)tuple);
 
     return ((double) min + 1.0);
 }
@@ -167,6 +166,7 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
     int nx = asInteger(m);
     int ny = asInteger(n);
     D = REAL(distmat);
+    tuple = malloc(3 * sizeof(double));
 
     if (asLogical(backtrack)) {
         // longest possible path, length will be adjusted in R
@@ -196,6 +196,7 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
         SET_VECTOR_ELT(ret, 3, PROTECT(ScalarInteger(path)));
         setAttrib(ret, R_NamesSymbol, list_names);
 
+        free((double *)tuple);
         UNPROTECT(6);
         return ret;
 
@@ -208,6 +209,7 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
 
         SEXP ret = PROTECT(ScalarReal(d));
 
+        free((double *)tuple);
         UNPROTECT(1);
         return ret;
     }
