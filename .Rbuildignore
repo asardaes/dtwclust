@@ -10,7 +10,7 @@ cran-comments\.md
 vignettes/.*\.gz
 vignettes/.*\.bbl
 vignettes/.*\.log
-vignettes/.build.timestamp
+vignettes/.*-concordance\.tex
 vignettes/cache/.*
 vignettes/figure/.*
 

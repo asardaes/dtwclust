@@ -1,6 +1,8 @@
-# Custom
-.Rhistory
-*.RData
+# R
+**/*.Rhistory
+**/*.RData
+
+# src
 src/*.dll
 src/*.o
 src/*.so
@@ -10,7 +12,6 @@ vignettes/*.gz
 vignettes/*.bbl
 vignettes/*.log
 vignettes/*.tex
-vignettes/.build.timestamp
 vignettes/**/
 
 # Windows image file caches
