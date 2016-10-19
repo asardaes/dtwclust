@@ -12,10 +12,6 @@
 #' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21} observations falling within
 #' the window.
 #'
-#' @note
-#'
-#' This function seems to be sensitive to numerical precision in 32-bit architectures.
-#'
 #' @param x,y Time series. Multivariate series must have time spanning the rows and variables spanning the
 #' columns.
 #' @param window.size Size for slanted band window. \code{NULL} means no constraint.

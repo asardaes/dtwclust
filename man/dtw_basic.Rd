@@ -51,7 +51,4 @@ if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_
 between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21} observations falling within
 the window.
 }
-\note{
-This function seems to be sensitive to numerical precision in 32-bit architectures.
-}
 

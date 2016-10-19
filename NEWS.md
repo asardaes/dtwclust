@@ -5,7 +5,7 @@
     + If you have older `dtwclust` objects saved, try updating them with `attr(dtwclust_object, "centers") <- NULL` if you run into compatibility problems.
 * Added (conditional) support for more hierarchical procedures. See the examples.
 * Added support for functions in package `clue`.
-* Bear in mind that the `dtw_basic`/`SBD`/`shape_extraction` functions might give different results in 32-bit systems.
+* Bear in mind that the `DTW/SBD` algorithms (and hence the functions that depend on them) might give different results in 32-bit systems.
 
 ## Version 2.3.0
 * Correction: DTW can be symmetric for series of both equal/different length, although in general this is not necessarily the case, due to asymmetric step patterns or constrained paths.

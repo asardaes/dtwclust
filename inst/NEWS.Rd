@@ -8,6 +8,6 @@
         \item Removed deprecated arguments/slots. If you have older \code{dtwclust} objects saved, try updating them with \code{attr(dtwclust_object, "centers") <- NULL} if you run into compatibility problems.
         \item Added (conditional) support for more hierarchical procedures. See the examples.
         \item Added support for functions in package \pkg{clue}.
-        \item Bear in mind that the \code{dtw_basic/SBD/shape_extraction} functions might give different results in 32-bit systems.
+        \item Bear in mind that the \code{DTW/SBD} algorithms (and hence the functions that depend on them) might give different results in 32-bit systems.
     }
 }

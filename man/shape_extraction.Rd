@@ -34,7 +34,7 @@ lengths, a series will be chosen at random and used as reference. The output ser
 same length as the chosen series.
 
 This centroid computation is casted as an optimization problem called maximization of Rayleigh Quotient.
-See the cited article for more details.
+It depends on the \code{\link{SBD}} algorithm. See the cited article for more details.
 }
 \examples{
 
