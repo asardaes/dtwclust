@@ -3,6 +3,8 @@
 ## Version 3.0.0
 * Removed deprecated arguments/slots.
     + If you have older `dtwclust` objects saved, try updating them with `attr(dtwclust_object, "centers") <- NULL` if you run into compatibility problems.
+    + `DBA` arguments changed order.
+* Fixed detection of some symmetric DTW cases.
 * Added (conditional) support for more hierarchical procedures. See the examples.
 * Added support for functions in package `clue`.
 * Bear in mind that the `DTW/SBD` algorithms (and hence the functions that depend on them) might give different results in 32-bit systems.
