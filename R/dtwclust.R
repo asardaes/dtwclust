@@ -335,12 +335,17 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     ## coerce to list if necessary
     data <- consistency_check(data, "tsmat")
 
-    MYCALL <- match.call(expand.dots = TRUE)
+    if (any(k < 2L))
+        stop("At least two clusters must be defined")
+    if (any(k > length(data)))
+        stop("Cannot have more clusters than series in the data")
 
     if (type == "fuzzy" && !missing(centroid) && is.character(centroid) && centroid != "fcm") {
         warning("The 'centroid' argument was provided but was different than 'fcm', so it was ignored.")
         centroid <- "fcm"
     }
+
+    MYCALL <- match.call(expand.dots = TRUE)
 
     ## ----------------------------------------------------------------------------------------------------------
     ## Control parameters
@@ -408,9 +413,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     ## symmetric versions of dtw that I know of
     ## unconstrained and with symmetric1/symmetric2 is always symmetric, regardless of diff_lengths
-    symmetric_pattern <- !is.null(dots$step.pattern) &&
-        (identical(dots$step.pattern, symmetric1) ||
-             identical(dots$step.pattern, symmetric2))
+    symmetric_pattern <- is.null(dots$step.pattern) ||
+        identical(dots$step.pattern, symmetric1) ||
+        identical(dots$step.pattern, symmetric2)
 
     if (distance %in% c("dtw", "dtw2", "dtw_basic")) {
         if (!symmetric_pattern)
@@ -430,11 +435,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     ## For parallel computation
     control@packages <- c("dtwclust", control@packages)
     check_parallel() # register doSEQ if necessary
-
-    if (any(k < 2L))
-        stop("At least two clusters must be defined")
-    if (any(k > length(data)))
-        stop("Cannot have more clusters than series in the data")
 
     if (type %in% c("partitional", "fuzzy")) {
 
