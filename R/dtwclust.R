@@ -392,7 +392,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     else
         datalist <- list()
 
-    diff_lengths <- check_lengths(data)
+    diff_lengths <- different_lengths(data)
 
     consistency_check(distance, "dist", trace = control@trace, Lengths = diff_lengths, silent = FALSE)
 

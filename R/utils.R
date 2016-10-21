@@ -114,7 +114,7 @@ consistency_check <- function(obj, case, ...) {
 }
 
 # Check if series have different length
-check_lengths <- function(x) { any(diff(lengths(x)) != 0L) }
+different_lengths <- function(x) { any(diff(lengths(x)) != 0L) }
 
 # Enlist parameters for do.calls
 enlist <- function(..., dots = NULL) {

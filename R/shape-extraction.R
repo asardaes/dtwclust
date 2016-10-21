@@ -86,7 +86,7 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
     }
 
     if (is.null(centroid)) {
-        if (!check_lengths(Xz)) {
+        if (!different_lengths(Xz)) {
             A <- do.call(rbind, Xz) # use all
 
         } else {
