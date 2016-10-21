@@ -396,8 +396,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     consistency_check(distance, "dist", trace = control@trace, Lengths = diff_lengths, silent = FALSE)
 
-    distance <- tolower(distance)
-
     if(type %in% c("partitional", "fuzzy")) {
         if (diff_lengths && type == "fuzzy")
             stop("Fuzzy clustering does not support series with different length.")
@@ -419,7 +417,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         identical(dots$step.pattern, symmetric1) ||
         identical(dots$step.pattern, symmetric2)
 
-    if (distance %in% c("dtw", "dtw2", "dtw_basic")) {
+    if (tolower(distance) %in% c("dtw", "dtw2", "dtw_basic")) {
         if (!symmetric_pattern)
             control@symmetric <- FALSE
         else if (!is.null(control@window.size) && diff_lengths)
@@ -427,10 +425,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         else
             control@symmetric <- TRUE
 
-    } else if (distance %in% c("lbk", "lbi")) {
+    } else if (tolower(distance) %in% c("lbk", "lbi")) {
         control@symmetric <- FALSE
 
-    } else if (distance %in% c("sbd")) {
+    } else if (tolower(distance) %in% c("sbd")) {
         control@symmetric <- TRUE
     }
 
