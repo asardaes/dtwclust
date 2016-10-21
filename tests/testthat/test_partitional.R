@@ -1,4 +1,4 @@
-context("Test partitional algorithms")
+context("Test partitional")
 
 # =================================================================================================
 # invalid combinations

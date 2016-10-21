@@ -396,6 +396,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     consistency_check(distance, "dist", trace = control@trace, Lengths = diff_lengths, silent = FALSE)
 
+    distance <- tolower(distance)
+
     if(type %in% c("partitional", "fuzzy")) {
         if (diff_lengths && type == "fuzzy")
             stop("Fuzzy clustering does not support series with different length.")
