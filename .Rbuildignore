@@ -10,9 +10,8 @@ cran-comments\.md
 vignettes/.*\.gz
 vignettes/.*\.bbl
 vignettes/.*\.log
-vignettes/.*-concordance\.tex
+vignettes/.*\.tex
 vignettes/cache/.*
 vignettes/figure/.*
 
-^README\.Rmd$
-^README-.*\.png$
+^README.*
