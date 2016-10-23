@@ -2,7 +2,7 @@
 # Miscellaneous
 # ========================================================================================================
 
-consistency_check <- function(obj, case, ...) {
+consistency_check <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, silent = TRUE) {
     case <- match.arg(case, c("ts", "tslist", "vltslist",
                               "window", "tsmat",
                               "dist", "cent"))
@@ -57,12 +57,6 @@ consistency_check <- function(obj, case, ...) {
         return(obj)
 
     } else if (case == "dist") {
-        dots <- list(...)
-
-        trace <- if (is.null(dots$trace)) FALSE else dots$trace
-        Lengths <- if (is.null(dots$Lengths)) FALSE else dots$Lengths
-        silent <- if (is.null(dots$silent)) TRUE else dots$silent
-
         included <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd", "dtw_basic")
         valid <- c("dtw", "dtw2", "sbd", "dtw_basic")
 
