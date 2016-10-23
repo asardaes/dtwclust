@@ -18,25 +18,15 @@ consistency_check <- function(obj, case, ...) {
             stop("There are missing values in the series")
         }
 
-    } else if (case == "tslist") {
+    } else if (case %in% c("tslist", "vltslist")) {
         if (!is.list(obj))
             stop("Whoops, data should already be a list by this point...")
 
         if (length(obj) < 1L)
             stop("Data is empty")
 
-        if (length(unique(lengths(obj))) > 1L)
+        if (case == "tslist" && different_lengths(obj))
             stop("All series must have the same length")
-
-        sapply(obj, consistency_check, case = "ts", ...)
-
-    } else if (case == "vltslist") {
-        ## list of variable-length time series
-        if (class(obj) != "list")
-            stop("Whoops, data should already be a list by this point...")
-
-        if (length(obj) < 1L)
-            stop("Data is empty")
 
         sapply(obj, consistency_check, case = "ts", ...)
 
@@ -59,11 +49,7 @@ consistency_check <- function(obj, case, ...) {
             obj <- list(obj)
 
         } else if (is.data.frame(obj)) {
-            message("Please note that as of this version of 'dtwclust', data frames are parsed ",
-                    "row-wise, like matrices, to maintain consistency with the 'proxy' package. ",
-                    "Use suppressMessages() or as.matrix() with your data to avoid this message.")
-
-            obj <- consistency_check(as.matrix(obj), "tsmat")
+            obj <- consistency_check(as.matrix(obj), "tsmat", ...)
 
         } else if (!is.list(obj))
             stop("Unsupported data type.")
@@ -84,12 +70,13 @@ consistency_check <- function(obj, case, ...) {
             if (silent)
                 return(FALSE)
             else
-                stop("Please provide a valid distance function registered with the proxy package.")
+                stop("Please provide a valid distance function registered with the 'proxy' package.")
         }
 
         if (Lengths) {
             if ((obj %in% included) && !(obj %in% valid))
-                stop("Only the following distances are supported for series with different length:\n\tdtw\tdtw2\tsbd\tdtw_basic")
+                stop("Only the following distances are supported for series with different length:",
+                     "\n\tdtw\tdtw2\tsbd\tdtw_basic")
             else if(!(obj %in% included) && trace)
                 message("Series have different length. Please confirm that the provided distance function ",
                         "supports this.")
@@ -113,15 +100,12 @@ consistency_check <- function(obj, case, ...) {
     invisible(NULL)
 }
 
-# Check if series have different length
+# Check if list of series have different length
 different_lengths <- function(x) { any(diff(lengths(x)) != 0L) }
 
 # Enlist parameters for do.calls
 enlist <- function(..., dots = NULL) {
-    if (is.null(dots))
-        list(...)
-    else
-        c(list(...), dots)
+    c(list(...), dots)
 }
 
 # ========================================================================================================
@@ -225,7 +209,7 @@ check_multivariate <- function(x) {
             ncol(x)
     })
 
-    if (length(unique(dims)) != 1L)
+    if (any(diff(dims) != 0L))
         stop("Inconsistent dimensions across series.")
 
     any(dims > 0L)
