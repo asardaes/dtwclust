@@ -47,11 +47,8 @@ SEXP pairs(SEXP L, SEXP lower)
     // allocate output integer vector
     SEXP ret = PROTECT(allocMatrix(INTSXP, nrow, 2));
 
-    // get pointers to output objects
-    int *out = INTEGER(ret);
-
     // dispatch to C function
-    pairs_c(n, nrow, out, asLogical(lower));
+    pairs_c(n, nrow, INTEGER(ret), asLogical(lower));
 
     // release protection
     UNPROTECT(1);
