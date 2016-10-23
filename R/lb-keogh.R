@@ -89,12 +89,9 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
             stop("The series must have the same length")
 
         window.size <- consistency_check(window.size, "window")
-
-        if (window.size > length(x))
-            stop("The width of the window should not exceed the length of the series")
     }
 
-    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
+    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'/'call_envelop'
     if (is.null(lower.env) && is.null(upper.env)) {
         envelopes <- call_envelop(y, window.size*2L + 1L)
         lower.env <- envelopes$min
@@ -149,16 +146,12 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
     norm <- match.arg(norm, c("L1", "L2"))
 
-    if (error.check)
-        window.size <- consistency_check(window.size, "window")
+    window.size <- consistency_check(window.size, "window")
 
     x <- consistency_check(x, "tsmat")
 
     if (error.check)
         consistency_check(x, "tslist")
-
-    if (window.size > length(x[[1L]]))
-        stop("Window size should not exceed length of the time series")
 
     if (is.null(y)) {
         y <- x
@@ -168,14 +161,11 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
         if (error.check)
             consistency_check(y, "tslist")
-
-        if (window.size > length(y[[1L]]))
-            stop("Window size should not exceed length of the time series")
     }
 
     retclass <- "crossdist"
 
-    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
+    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'call_envelop'
     envelops <- lapply(y, function(s) { call_envelop(s, window.size*2L + 1L) })
 
     lower.env <- lapply(envelops, "[[", "min")

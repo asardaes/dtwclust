@@ -85,12 +85,9 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
 
     window.size <- consistency_check(window.size, "window")
 
-    if (window.size > length(x))
-        stop("The width of the window should not exceed the length of the series")
-
     ## LB Keogh first
 
-    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
+    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'/'call_envelop'
     if (is.null(lower.env) && is.null(upper.env)) {
         envelopes <- call_envelop(y, window.size*2L + 1L)
         lower.env <- envelopes$min
@@ -119,7 +116,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
     d1 <- abs(x - H)
 
     ## From here on is Lemire's improvement
-    EH <- call_envelop(H, window.size*2+1)
+    EH <- call_envelop(H, window.size*2L + 1L)
 
     ind3 <- y > EH$max
     ind4 <- y < EH$min
@@ -131,6 +128,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
     d2 <- abs(y - H2)
 
     ## LB_Improved is defined as root-p of the sum of LB_Keoghs^p
+    ## careful: LBK_2 = sqrt(sum(d1^2)), so LBK^2 = sum(d1^2)
     d <- switch(EXPR = norm,
                 L1 = sum(d1) + sum(d2),
                 L2 = sqrt(sum(d1^2) + sum(d2^2))
@@ -155,16 +153,12 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
     norm <- match.arg(norm, c("L1", "L2"))
 
-    if (error.check)
-        window.size <- consistency_check(window.size, "window")
+    window.size <- consistency_check(window.size, "window")
 
     x <- consistency_check(x, "tsmat")
 
     if (error.check)
         consistency_check(x, "tslist")
-
-    if (window.size > length(x[[1L]]))
-        stop("Window size should not exceed length of the time series")
 
     if (is.null(y)) {
         y <- x
@@ -174,14 +168,11 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
         if (error.check)
             consistency_check(y, "tslist")
-
-        if (window.size > length(y[[1L]]))
-            stop("Window size should not exceed length of the time series")
     }
 
     retclass <- "crossdist"
 
-    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'
+    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'call_envelop'
     envelops <- lapply(y, function(s) { call_envelop(s, window.size*2L + 1L) })
 
     lower.env <- lapply(envelops, "[[", "min")

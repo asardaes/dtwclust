@@ -117,8 +117,8 @@ call_envelop <- function(series, window) {
     consistency_check(series, "ts")
     window <- consistency_check(window, "window")
 
-    if (window > length(series))
-        stop("Window cannot be longer than series.")
+    if (window > (2L * length(series)))
+        stop("Window cannot be greater or equal than the series' length.")
 
     .Call("envelop", series, window, PACKAGE = "dtwclust")
 }

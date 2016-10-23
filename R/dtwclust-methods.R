@@ -750,7 +750,7 @@ setMethod("clusterSim", "dtwclust",
 setValidity("dtwclustControl",
             function(object) {
 
-                if (!is.null(object@window.size) && object@window.size < 1)
+                if (!is.null(object@window.size) && object@window.size < 1L)
                     return("Window size must be positive if provided")
 
                 object@norm <- match.arg(object@norm, c("L1", "L2"))
