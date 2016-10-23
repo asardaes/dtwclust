@@ -36,7 +36,10 @@
 #'
 #' # Obtain an average for the first 5 time series
 #' dtw.avg <- DBA(CharTraj[1:5], CharTraj[[1]], trace = TRUE)
-#' plot(dtw.avg, type="l")
+#'
+#' # Plot
+#' matplot(do.call(cbind, CharTraj[1:5]), type = "l")
+#' points(dtw.avg)
 #'
 #' # Change the provided order
 #' dtw.avg2 <- DBA(CharTraj[5:1], CharTraj[[1]], trace = TRUE)
@@ -111,13 +114,13 @@ DBA <- function(X, centroid = NULL, ...,
     dots <- list(...)
 
     if (!is.null(window.size)) {
-        w <- consistency_check(window.size, "window")
+        window.size <- consistency_check(window.size, "window")
 
         if (is.null(dots$window.type))
             dots$window.type <- "slantedband"
 
     } else {
-        w <- NULL
+        window.size <- NULL
     }
 
     ## utils.R
@@ -178,11 +181,14 @@ DBA <- function(X, centroid = NULL, ...,
                                   .Call("update_lcm", lcm, x, centroid,
                                         isTRUE(norm == "L2"), PACKAGE = "dtwclust")
 
-                                  d <- do.call(dtw::dtw, enlist(x = lcm, window.size = w, dots = dots))
+                                  d <- do.call(dtw::dtw, enlist(x = lcm,
+                                                                y = NULL,
+                                                                window.size = window.size,
+                                                                dots = dots))
 
                               } else {
                                   d <- do.call(dtw_basic, enlist(x = x, y = centroid,
-                                                                 window.size = w, norm = norm,
+                                                                 window.size = window.size, norm = norm,
                                                                  backtrack = TRUE, gcm = lcm,
                                                                  dots = dots))
                               }

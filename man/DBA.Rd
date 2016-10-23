@@ -73,7 +73,10 @@ data(uciCT)
 
 # Obtain an average for the first 5 time series
 dtw.avg <- DBA(CharTraj[1:5], CharTraj[[1]], trace = TRUE)
-plot(dtw.avg, type="l")
+
+# Plot
+matplot(do.call(cbind, CharTraj[1:5]), type = "l")
+points(dtw.avg)
 
 # Change the provided order
 dtw.avg2 <- DBA(CharTraj[5:1], CharTraj[[1]], trace = TRUE)
