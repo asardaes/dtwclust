@@ -64,7 +64,7 @@ kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
 #> Iteration 5: Changes / Distsum = 2 / 1690.314
 #> Iteration 6: Changes / Distsum = 0 / 1690.314
 #> 
-#>  Elapsed time is 5.027 seconds.
+#>  Elapsed time is 4.765 seconds.
 
 plot(kc.dtwlb)
 ```
@@ -87,7 +87,7 @@ hc.sbd <- dtwclust(datalist, type = "hierarchical",
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.666 seconds.
+#>  Elapsed time is 0.705 seconds.
 
 cat("CVIs for HC+SBD:\n")
 #> CVIs for HC+SBD:
@@ -177,7 +177,7 @@ kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
 #> 
 #> TADPole completed, pruning percentage = 86.5%
 #> 
-#>  Elapsed time is 1.337 seconds.
+#>  Elapsed time is 1.181 seconds.
 
 plot(kc.tadp, clus = 1:4)
 ```
@@ -229,7 +229,7 @@ kc <- dtwclust(datalist, k = 20,
 #> Iteration 2: Changes / Distsum = 2 / 4.229023
 #> Iteration 3: Changes / Distsum = 0 / 4.180198
 #> 
-#>  Elapsed time is 5.158 seconds.
+#>  Elapsed time is 4.615 seconds.
 
 ## Modifying some plot parameters
 plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
@@ -271,7 +271,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.156   0.000   0.154 
+#>   0.144   0.000   0.143 
 #> 
 #> Head of fuzzy memberships:
 #> 

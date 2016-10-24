@@ -1,6 +1,8 @@
 # R
-**/*.Rhistory
-**/*.RData
+.Rproj.user
+.Rhistory
+.RData
+README_cache/
 
 # src
 src/*.dll
@@ -57,4 +59,3 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
-.Rproj.user

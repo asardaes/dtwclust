@@ -1,9 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^\.travis\.yml$
+^\..*
 ^appveyor\.yml$
-
-# tests/.*\.rds$
 
 cran-comments\.md
 
@@ -15,3 +13,5 @@ vignettes/cache/.*
 vignettes/figure/.*
 
 ^README.*
+
+# tests/.*\.rds$

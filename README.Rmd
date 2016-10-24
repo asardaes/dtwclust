@@ -6,14 +6,15 @@ output:
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r setOptions, cache = FALSE, echo = FALSE, warning = FALSE, message = FALSE}
+```{r setOptions, cache = FALSE, include = FALSE}
 library(knitr)
 library(dtwclust)
 
 knitr::opts_chunk$set(
     collapse = TRUE,
     comment = "#>",
-    fig.path = "README-"
+    fig.path = "README-",
+    cache = TRUE
 )
 ```
 
