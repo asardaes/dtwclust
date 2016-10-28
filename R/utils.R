@@ -102,8 +102,9 @@ enlist <- function(..., dots = NULL) {
     c(list(...), dots)
 }
 
+# This only works if it's used after split_parallel()
 validate_pairwise <- function(x, y) {
-    if (!identical(lengths(x), lengths(y)))
+    if (!identical(lengths(x, use.names = FALSE), lengths(y, use.names = FALSE)))
         stop("Pairwise distances require the same amount of series in 'x' and 'y'.")
 
     invisible(NULL)

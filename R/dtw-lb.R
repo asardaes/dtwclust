@@ -132,8 +132,6 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
         else
             Y <- consistency_check(y, "tsmat")
 
-        validate_pairwise(X, Y)
-
         if (is.null(window.size))
             dots$window.type <- "none"
         else
@@ -141,6 +139,8 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
         X <- split_parallel(X)
         Y <- split_parallel(Y)
+
+        validate_pairwise(X, Y)
 
         D <- foreach(X = X, Y = Y,
                      .combine = c,
