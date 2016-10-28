@@ -75,7 +75,7 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
                norm, step.pattern, backtrack,
                gcm, PACKAGE = "dtwclust")
 
-    if (normalize && step.pattern == 2) {
+    if (normalize) {
         if (backtrack)
             d$distance <- d$distance / (NROW(x) + NROW(y))
         else
@@ -158,8 +158,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
     if (pairwise) {
         Y <- split_parallel(y)
 
-        if (length(lengths(X)) != length(lengths(Y)) || any(lengths(X) != lengths(Y)))
-            stop("Pairwise distances require the same amount of series in 'x' and 'y'")
+        validate_pairwise(X, Y)
 
         D <- foreach(x = X, y = Y, gcm = GCM,
                      .combine = c,

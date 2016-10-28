@@ -149,8 +149,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
         y <- split_parallel(y)
         ffty <- split_parallel(ffty)
 
-        if (length(lengths(x)) != length(lengths(y)) || any(lengths(x) != lengths(y)))
-            stop("Pairwise distances require the same amount of series in 'x' and 'y'")
+        validate_pairwise(x, y)
 
         D <- foreach(x = x, fftx = fftx, y = y, ffty = ffty,
                      .combine = c,
@@ -159,7 +158,6 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
                      .packages = "stats") %dopar% {
                          mapply(y, ffty, x, fftx,
                                 FUN = function(y, ffty, x, fftx) {
-
                                     ## Manually normalize by length
                                     CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
 

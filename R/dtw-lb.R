@@ -132,8 +132,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
         else
             Y <- consistency_check(y, "tsmat")
 
-        if (length(X) != length(Y))
-            stop("Pairwise distances require the same amount of series in 'x' and 'y'")
+        validate_pairwise(X, Y)
 
         if (is.null(window.size))
             dots$window.type <- "none"

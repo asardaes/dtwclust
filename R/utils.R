@@ -102,6 +102,13 @@ enlist <- function(..., dots = NULL) {
     c(list(...), dots)
 }
 
+validate_pairwise <- function(x, y) {
+    if (!identical(lengths(x), lengths(y)))
+        stop("Pairwise distances require the same amount of series in 'x' and 'y'.")
+
+    invisible(NULL)
+}
+
 # ========================================================================================================
 # Helper C/C++ functions
 # ========================================================================================================
