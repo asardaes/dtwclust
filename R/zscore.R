@@ -15,7 +15,6 @@
 #'
 #' @export
 #'
-
 zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE) {
     if (is.list(x)) {
         x <- lapply(x, zscore, ...,

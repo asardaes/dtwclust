@@ -35,10 +35,10 @@ test_that("Parallel computation gives the same results as sequential", {
     stopImplicitCluster()
     registerDoSEQ()
 
-    skip_on_os(c("mac", "windows"))
-
     ## Also test FORK in Unix
     cat("Test FORKs:\n")
+
+    skip_on_os(c("mac", "windows"))
 
     rm(cl)
     cl <- makeCluster(num_workers, "FORK")

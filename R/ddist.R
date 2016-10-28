@@ -36,7 +36,7 @@ ddist <- function(distance, control, distmat) {
                         })
 
                         ## Take the first one in case a series is repeated more than once in the dataset
-                        which(i.row)[1]
+                        which(i.row)[1L]
                     })
 
                 d <- distmat[ , id_XC, drop = FALSE]
@@ -76,7 +76,7 @@ ddist <- function(distance, control, distmat) {
             ## Register doSEQ if necessary
             check_parallel()
 
-            ## variables/functions from the parent environment that should be exported
+            ## variables/functions from the parent environments that should be exported
             export <- c("distance", "consistency_check", "enlist")
 
             if (is.null(centroids) && control@symmetric && dist_entry$loop) {
@@ -96,7 +96,7 @@ ddist <- function(distance, control, distmat) {
                              .packages = control@packages,
                              .export = export) %dopar% {
 
-                                 if (!consistency_check(dist_entry$names[1], "dist"))
+                                 if (!consistency_check(dist_entry$names[1L], "dist"))
                                      do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                  ## 'dots' has all extra arguments that are valid
@@ -127,8 +127,8 @@ ddist <- function(distance, control, distmat) {
                     centroids <- x
 
                     ## for dtw_basic_proxy
-                    if (!check_parallel() && has_dots && (is.null(control@window.size) || !different_lengths(x)))
-                        dots$symmetric <- TRUE
+                    if (!check_parallel() && toupper(distance) == "DTW_BASIC")
+                        dots$symmetric <- is.null(control@window.size) || !different_lengths(x)
                 }
 
                 dim_names <- list(names(x), names(centroids))
@@ -152,7 +152,6 @@ ddist <- function(distance, control, distmat) {
                              .multicombine = TRUE,
                              .packages = control@packages,
                              .export = export) %dopar% {
-
                                  if (!consistency_check(dist_entry$names[1L], "dist"))
                                      do.call(proxy::pr_DB$set_entry, dist_entry)
 

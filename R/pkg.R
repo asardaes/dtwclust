@@ -22,7 +22,7 @@
 #' 2004).
 #'
 #' Other packages that are particularly leveraged here are the \code{proxy} package for distance
-#' matrix calculations, and the \code{dtw} package for the core DTW calculations. The main clustering
+#' matrix calculations and the \code{dtw} package for the core DTW calculations. The main clustering
 #' function and entry point for this package is \code{\link{dtwclust}}.
 #'
 #' Please note the random number generator is set to L'Ecuyer-CMRG when \code{dtwclust}
@@ -150,7 +150,6 @@ NULL
 
 release_questions <- function() {
     c(
-        "Changed vignette to use knitr_notangle?",
         "Changed .Rbuildignore to exclude test rds files?"
     )
 }

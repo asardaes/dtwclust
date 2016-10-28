@@ -74,7 +74,6 @@
 #'
 #' @export
 #'
-
 lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
                      lower.env = NULL, upper.env = NULL, force.symmetry = FALSE) {
 

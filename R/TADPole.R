@@ -83,9 +83,7 @@
 #'
 #' @export
 #'
-
 TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE) {
-
     if (missing(window.size))
         stop("Please provide a positive window size")
     if (missing(dc))

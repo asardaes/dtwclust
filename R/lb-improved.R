@@ -71,7 +71,7 @@
 #' @return The improved lower bound for the DTW distance.
 #'
 #' @export
-
+#'
 lb_improved <- function(x, y, window.size = NULL, norm = "L1",
                         lower.env = NULL, upper.env = NULL, force.symmetry = FALSE) {
 

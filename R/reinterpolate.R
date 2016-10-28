@@ -13,7 +13,6 @@
 #'
 #' @export
 #'
-
 reinterpolate <- function(x, new.length, multivariate = FALSE) {
     if (is.list(x)) {
         x <- lapply(x, reinterpolate, new.length = new.length, multivariate = !is.null(dim(x[[1L]])))
