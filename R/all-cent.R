@@ -3,7 +3,6 @@
 # ========================================================================================================
 
 all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
-
     if (is.function(case)) {
         if (!all(c("x", "cl_id", "k", "cent", "cl_old", "...") %in% names(formals(case))))
             stop("The provided centroid function must have the following arguments with the ",
@@ -109,17 +108,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
 
     mean_cent <- function(x_split, ...) {
         new_cent <- lapply(x_split, function(xx) {
-            dims <- sapply(xx, function(x) is.null(dim(x)))
-
-            if (length(unique(dims)) != 1L)
-                stop("Inconsistent dimensions across series.")
-
-            if (any(dims)) {
-                ## univariate
-                xx <- do.call(rbind, xx)
-                colMeans(xx)
-
-            } else {
+            if (is_multivariate(xx)) {
                 ## multivariate
                 ncols <- ncol(xx[[1L]]) # number of dimensions should be equal
                 ncols <- rep(1L:ncols, length(xx))
@@ -127,6 +116,11 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                 xx <- do.call(cbind, xx)
                 xx <- split.data.frame(t(xx), ncols)
                 do.call(cbind, lapply(xx, colMeans))
+
+            } else {
+                ## univariate
+                xx <- do.call(rbind, xx)
+                colMeans(xx)
             }
         })
 
@@ -136,17 +130,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
 
     median_cent <- function(x_split, ...) {
         new_cent <- lapply(x_split, function(xx) {
-            dims <- sapply(xx, function(x) is.null(dim(x)))
-
-            if (length(unique(dims)) != 1L)
-                stop("Inconsistent dimensions across series.")
-
-            if (any(dims)) {
-                ## univariate
-                xx <- do.call(rbind, xx)
-                colMedians(xx)
-
-            } else {
+            if (is_multivariate(xx)) {
                 ## multivariate
                 ncols <- ncol(xx[[1L]]) # number of dimensions should be equal
                 ncols <- rep(1L:ncols, length(xx))
@@ -154,6 +138,11 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                 xx <- do.call(cbind, xx)
                 xx <- split.data.frame(t(xx), ncols)
                 do.call(cbind, lapply(xx, colMedians))
+
+            } else {
+                ## univariate
+                xx <- do.call(rbind, xx)
+                colMedians(xx)
             }
         })
 
@@ -162,28 +151,29 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
     }
 
     fcm_cent <- function(x, u) {
-        cent <- t(u) %*% do.call(rbind, x)
-        apply(cent, 2L, "/", e2 = colSums(u))
+        ## utils.R
+        if (is_multivariate(x)) {
+            ## multivariate
+            mv <- reshape_multviariate(x, NULL)
+
+            cent <- lapply(mv$series, fcm_cent, u = u)
+            cent <- lapply(1L:k, function(idc) {
+                sapply(cent, function(c) { c[idc, , drop = TRUE] })
+            })
+            cent <- lapply(cent, "dimnames<-", NULL)
+
+            cent
+
+        } else {
+            cent <- t(u) %*% do.call(rbind, x)
+            apply(cent, 2L, "/", e2 = colSums(u))
+        }
     }
 
     if (fuzzy) {
         allcent <- function(x, cl_id, k, cent, cl_old, ...) {
             ## cent and cl_old are unused here, but R complains if signatures don't match
             u <- cl_id ^ control@fuzziness
-
-            ## utils.R
-            if (check_multivariate(x)) {
-                ## multivariate
-                mv <- reshape_multviariate(x, NULL)
-
-                cent <- lapply(mv$series, fcm_cent, u = u)
-                cent <- lapply(1L:k, function(idc) {
-                    sapply(cent, function(c) { c[idc, , drop = TRUE] })
-                })
-                cent <- lapply(cent, "dimnames<-", NULL)
-
-                return(cent)
-            }
 
             cent <- fcm_cent(x, u)
 

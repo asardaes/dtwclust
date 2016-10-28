@@ -124,7 +124,7 @@ DBA <- function(X, centroid = NULL, ...,
     }
 
     ## utils.R
-    if (check_multivariate(X)) {
+    if (is_multivariate(X)) {
         ## multivariate
         mv <- reshape_multviariate(X, centroid) # utils.R
 

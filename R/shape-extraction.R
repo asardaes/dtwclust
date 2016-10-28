@@ -58,7 +58,7 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
     consistency_check(X, "vltslist")
 
     ## utils.R
-    if (check_multivariate(X)) {
+    if (is_multivariate(X)) {
         ## multivariate
         mv <- reshape_multviariate(X, centroid) # utils.R
 

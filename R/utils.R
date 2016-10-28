@@ -195,7 +195,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
 # Multviariate helpers
 # ========================================================================================================
 
-check_multivariate <- function(x) {
+is_multivariate <- function(x) {
     dims <- sapply(x, function(x) {
         if (is.null(dim(x)))
             0L
