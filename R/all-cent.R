@@ -150,7 +150,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
         new_cent
     }
 
-    fcm_cent <- function(x, u) {
+    fcm_cent <- function(x, u, k) {
         ## utils.R
         if (is_multivariate(x)) {
             ## multivariate
@@ -175,7 +175,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
             ## cent and cl_old are unused here, but R complains if signatures don't match
             u <- cl_id ^ control@fuzziness
 
-            cent <- fcm_cent(x, u)
+            cent <- fcm_cent(x, u, k)
 
             # Coerce back to list
             consistency_check(cent, "tsmat")
