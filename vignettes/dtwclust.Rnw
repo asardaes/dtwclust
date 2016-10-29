@@ -133,13 +133,13 @@ The rest of this paper is organized as follows. The relevant information to the 
 \section{Distance measures}
 \label{sec:distances}
 
-Calculating distances, as well as cross-distance matrices, between time-series objects is one of the cornerstones of any time-series clustering algorithm. It is a task that is repeated very often and loops across all objects applying a suitable distance function. The \pkg{proxy} package \citep{proxy} provides a highly optimized and extensible framework for these calculations, and is used extensively by \dtwclust{}. It includes several common metrics, which are saved in a database object called \code{pr_DB}. Additionally, users can register custom functions in the database. This has the advantage that all registered functions can be used with the \code{proxy::dist} function, which results in a high level of consistency. Moreover, this also means that distance measures from \dtwclust{}, other \R{} packages, or user-created can be exploited in different applications, even those that are not directly related to time-series clustering. Refer to \cref{app:custom-dist} for examples on how to use the \pkg{proxy} package with \dtwclust{}. Unless otherwise noted, all the distances included here are registered in \code{pr_DB} when \dtwclust{} is attached.
+Calculating distances, as well as cross-distance matrices, between time-series objects is one of the cornerstones of any time-series clustering algorithm. It is a task that is repeated very often and loops across all objects applying a suitable distance function. The \pkg{proxy} package \citep{proxy} provides a highly optimized and extensible framework for these calculations, and is used extensively by \dtwclust{}. It includes several common metrics, which are saved in a database object called \code{pr_DB}. Additionally, users can register custom functions in the database. This has the advantage that all registered functions can be used with the \code{proxy::dist} function, which results in a high level of consistency. Moreover, this also means that distance measures from \dtwclust{}, other \R{} packages, or user-created can be exploited in different applications, even those that are not directly related to time-series clustering. Unless otherwise noted, all the distances included here are registered in \code{pr_DB} when \dtwclust{} is attached.
 
 It is important to note that the \code{proxy::dist} function parses all matrix-like objects row-wise, meaning that, in the context of time-series clustering, it would consider the rows of a matrix or data frame as the individual time-series. Matrices and data frames cannot contain series with different length, something that can be circumvented by encapsulating the series in a list, each element of the list being a single series. Internally, \dtwclust{} coerces all provided data to a list, and as of version 2.3.0, it parses both matrices and data frames row-wise. Moreover, lists enable support for multivariate series, where a single multivariate time-series should be provided as a matrix where time spans the rows and the variables span the columns. Thus, several multivariate time-series should be provided as a list of matrices to ensure that they are correctly detected. Note, however, that not all distance and centroid functions support multivariate time-series.
 
-The $l_1$ and $l_2$ vector norms, also known as Manhattan and Euclidean distances respectively, are the most commonly used distance measures, and are arguably the only competitive $l_p$ norms when measuring dissimilarity \citep{aggarwal2001, lemire2009}. They can be efficiently computed, but are only defined for series of equal length and are sensitive to noise, scale and time shifts.
+The $l_1$ and $l_2$ vector norms, also known as Manhattan and Euclidean distances respectively, are the most commonly used distance measures, and are arguably the only competitive $l_p$ norms when measuring dissimilarity \citep{aggarwal2001, lemire2009}. They can be efficiently computed, but are only defined for series of equal length and are sensitive to noise, scale and time shifts. Thus, many other distance measures tailored to time-series have been developed in order to overcome this limitations as well as other challenges associated with the structure of time-series, such as multiple variables, serial correlation, etc.
 
-To facilitate notation in the following sections, we define a time-series as a vector (or set of vectors in case of multivariate series) $x$. Each vector has length $n$. In general, $x^v_i$ represents the $i$-th element of the $v$-th variable of the (possibly multivariate) time-series $x$. We will assume that all elements are equally spaced in time in order to avoid the time index explicitly.
+In the following sections, a description of the distance functions included in \dtwclust{} will be provided. Refer to \cref{app:custom-dist} for examples on how to use the \pkg{proxy} package with \dtwclust{} and exploit custom distance measures, as well as those defined in other \R{} packages. To facilitate notation, we define a time-series as a vector (or set of vectors in case of multivariate series) $x$. Each vector has length $n$. In general, $x^v_i$ represents the $i$-th element of the $v$-th variable of the (possibly multivariate) time-series $x$. We will assume that all elements are equally spaced in time in order to avoid the time index explicitly.
 
 \subsection{Dynamic time warping distance}
 \label{sec:dtw}
@@ -226,10 +226,10 @@ When calculating the LBs between $x$ and $y$, a copy of the reference series is 
 
 \begin{subequations}
 \label{eq:lb-envelop}
-\begin{align}
+\begin{gather}
 H_i = UE_i, \quad \forall x_i > UE_i \\
 H_j = LE_j \quad \forall x_j < LE_j
-\end{align}
+\end{gather}
 \end{subequations}
 
 \begin{equation}
@@ -261,6 +261,59 @@ SBD(x,y) = 1 - \frac{\max \left( NCCc(x,y) \right)}{\left\lVert x \right\rVert_2
 \end{equation}
 
 This distance can be efficiently computed by utilizing the Fast Fourier Transform (FFT) to obtain the NCCc sequence, which is how it is implemented in \dtwclust{} in the \code{SBD} function, although that might make it sensitive to numerical precision, especially in 32-bit architectures. It can be very fast, it is symmetric, it was very competitive in the experiments performed in \citet{paparrizos2015}, and it supports (univariate) series of different length directly. Additionally, some FFTs can be reused when computing the SBD between several series. This optimization is also included in the SBD function registered with \pkg{proxy} by \dtwclust{}.
+
+\subsection{Global alignment kernel distance}
+\label{sec:gak}
+
+\citet{cuturi2011} proposed an algorithm to assess similarity between time series by using kernels. He begins by formalizing an alignment between two series $x$ and $y$ as $\pi$, and defines the set of all possible alignments as $\mathcal{A}(n,m)$, which is constrained by the lengths of $x$ and $y$. It is shown that the DTW distance can be understood as the cost associated with the minimum alignment as shown in \cref{eq:dtw-kernel}, where $|\pi|$ is the length of $\pi$ and the divergence function $\varphi$ is typically the Euclidean distance.
+
+\begin{subequations}
+\label{eq:dtw-kernel}
+\begin{gather}
+\text{DTW(x,y)} = \min_{\pi \in \mathcal{A}(n,m)} D_{\text{x,y}}(\pi) \\
+D_{\text{x,y}}(\pi) = \sum_{i=1}^{|\pi|} \varphi \left( x_{\pi_1(i)}, y_{\pi_2(i)} \right)
+\end{gather}
+\end{subequations}
+
+A Global Alignment (GA) kernel is defined as in \cref{eq:ga-kernel}, where $\kappa$ is a local similarity function. In contrast to DTW, this kernel considers the cost of all possible alignments by computing their exponentiated soft-minimum, so it is argued that it quantifies similarities in a more coherent way. However, the GA kernel has associated limitations, namely diagonal dominance and a complexity $O(nm)$. With respect to the former, \citet{cuturi2011} states that diagonal dominance should not be an issue as long as one of the series being compared is not longer than twice the length of the other.
+
+\begin{equation}
+\label{eq:ga-kernel}
+k_{\text{GA}}(\text{x,y}) = \sum_{\pi \in \mathcal{A}(n,m)} \prod_{i=1}^{|\pi|} \kappa \left( x_{\pi_1(i)}, y_{\pi_2(i)} \right)
+\end{equation}
+
+In order to reduce the GA kernel's complexity, the author proposes using the triangular local kernel for integers shown in \cref{eq:int-kernel}, where $T$ represents the kernel's order. By combining it with the kernel $\kappa$ in \cref{eq:phi-kernel} (which is based on the Gaussian kernel $\kappa_\sigma$), the Triangular Global Alignment Kernel (TGAK) in \cref{eq:tga-kernel} is obtained. Such a kernel can be computed in $O(T \min(n,m))$, and is parameterized by the triangular constraint $T$ and the Gaussian's kernel width $\sigma$.
+
+\begin{equation}
+\label{eq:int-kernel}
+\omega(i,j) = \left( 1 - \frac{|i - j|}{T} \right)_{+}
+\end{equation}
+
+\begin{subequations}
+\label{eq:phi-kernel}
+\begin{gather}
+\kappa (x,y) = e ^ {-\phi_\sigma(x,y)} \\
+\phi_\sigma(x,y) = \frac{1}{2 \sigma ^ 2} \left\lVert x - y \right\rVert ^ 2 + \log \left( 2 - e ^ {-\frac{\left\lVert x - y \right\rVert ^ 2}{2 \sigma ^ 2}} \right)
+\end{gather}
+\end{subequations}
+
+\begin{equation}
+\label{eq:tga-kernel}
+\text{TGAK}(x,y,\sigma,T) = \tau ^ {-1} \left( \omega \otimes \frac{1}{2} \kappa \right) (i,x;j,y) = \frac{\omega(i,j) \kappa (x,y)}{2 - \omega(i,j) \kappa (x,y)}
+\end{equation}
+
+The triangular constraint is similar to the window constraints that can be used in the DTW algorithm. When $T = 0$ or $T \rightarrow \infty$, the TGAK converges to the original GA kernel. When $T = 1$, the TGAK becomes a slightly modified Gaussian kernel that can only compare series of equal length. If $T > 1$, then only the alignments that fulfil $-T < \pi_1(i) - \pi_2(i) < T$ are considered.
+
+\citet{cuturi2011} also proposes a strategy to estimate the value of $\sigma$ based on the time-series themselves and their lengths, namely $c \cdot \text{med}(\left\lVert x - y \right\rVert) \cdot \sqrt{\text{med}(|\text{x}|)}$, where $\text{med}(\cdot)$ is the empirical median, $c$ is some constant, and $x$ and $y$ are subsampled vectors from the dataset. This, however, introduces some randomness into the algorithm when the value of $\sigma$ is not provided, so it might be better to estimate it once and re-use it in subsequent function evaluations. In \dtwclust{}, the value of $c$ is set to 1.
+
+The similarity returned by the TGAK can be normalized with \cref{eq:tgak-norm} so that its values lie in the range $[0,1]$. Hence, a distance measure for time-series can be obtained by subtracting the normalized value from 1.
+
+\begin{equation}
+\label{eq:tgak-norm}
+\exp \left( \log\left( \text{TGAK}(x,y,\sigma,T) \right) - \frac{\log\left( \text{TGAK}(x,x,\sigma,T) \right) + \log\left( \text{TGAK}(y,y,\sigma,T) \right)}{2} \right)
+\end{equation}
+
+A \proglang{C} implementation of the TGAK algorithm is available at its author's website\footnote{\url{http://marcocuturi.net/GA.html}, accessed on 2016-10-29}. An \R{} wrapper has been implemented in \dtwclust{} in the \code{GAK} function, performing the aforementioned normalization and subtraction in order to obtain a distance measure that can be used in clustering procedures.
 
 \section{Time-series prototypes}
 \label{sec:prototypes}
@@ -391,10 +444,10 @@ The previous procedures result in what is known as a crisp or hard partition, al
 One of the most widely used versions of the algorithm is fuzzy c-means, which is described in \citet{bezdek1981}, and it is the algorithm implemented in \dtwclust{}. It tries to create a fuzzy partition by minimizing the function in \cref{eq:fuzzy-objective} under the constraints given in \cref{eq:fuzzy-constraints}. The membership matrix $u$ is initialized randomly in such a way that the constraints are fulfilled. The exponent $m$ is known as the fuzziness exponent and should be greater than 1, with a common default value of 2. Originally, the distance $d_{p,c}$ was defined as the Euclidean distance between the $p$-th object and the $c$-th fuzzy centroid, so that the objective was written in terms of the squared Euclidean distance. However, the definition of this distance can change (see, e.g., \citet{durso2009}), and doing so in \dtwclust{} is straightforward, since it only entails registering the corresponding distance function with \pkg{proxy}.
 
 \begin{subequations}
-\begin{align}
+\begin{gather}
 \min \sum^N_{p = 1} \sum^k_{c = 1} u^m_{p,c} d^2_{p,c} \label{eq:fuzzy-objective} \\
 \sum^k_{c = 1} u_{p,c} = 1, \quad u_{p,c} \geq 0 \label{eq:fuzzy-constraints}
-\end{align}
+\end{gather}
 \end{subequations}
 
 The centroid function used by fuzzy c-means calculates the mean for each point across all members in the data, weighted by their degree of belongingness. If we define $\mu_{c,i}$ as the $i$-th element of the $c$-th centroid, and $x_{p,i}$ as the $i$-th element of the $p$-th object in the data, the centroid calculation can be expressed with \cref{eq:fuzzy-centroid}. It follows that all members of the data must have the same dimensionality in this case. As with the normal mean prototype, this centroid function might not be suitable for time-series, and it is common to first apply a transformation to the data and cluster in the resulting space. For instance, \citet{durso2009} used the autocorrelation function to extract a certain amount of coefficients, resulting in data with equal dimensionality, and performed fuzzy clustering on the autocorrelation coefficients. See \cref{app:fuzzy} for an example.

@@ -167,6 +167,7 @@
 #'   \item \code{"lbk"}: Keogh's lower bound with either L1 or L2 norm* for the Sakoe-Chiba constraint*.
 #'   \item \code{"lbi"}: Lemire's lower bound with either L1 or L2 norm* for the Sakoe-Chiba constraint*.
 #'   \item \code{"sbd"}: Shape-based distance. See \code{\link{SBD}} for more details.
+#'   \item \code{"gak"}: Global alignment kernels. See \code{\link{GAK}} for more details.
 #' }
 #'
 #' DTW2 is done with \code{\link[dtw]{dtw}}, but it differs from the result you would obtain if you specify
@@ -428,7 +429,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     } else if (tolower(distance) %in% c("lbk", "lbi")) {
         control@symmetric <- FALSE
 
-    } else if (tolower(distance) %in% c("sbd")) {
+    } else if (tolower(distance) %in% c("sbd", "gak")) {
         control@symmetric <- TRUE
     }
 

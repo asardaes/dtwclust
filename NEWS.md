@@ -7,6 +7,7 @@
 * Fixed detection of some symmetric DTW cases.
 * Added (conditional) support for more hierarchical procedures. See the examples.
 * Added support for functions in package `clue`.
+* Added a new distance based on global alignment kernels.
 * Bear in mind that the `DTW/SBD` algorithms (and hence the functions that depend on them) might give different results in 32-bit systems.
 
 ## Version 2.3.0

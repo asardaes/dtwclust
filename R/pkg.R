@@ -134,6 +134,13 @@ NULL
                                description = "DTW distance aided with Lemire's lower bound",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
+    ## Register GAK
+    if (!consistency_check("GAK", "dist", silent = TRUE))
+        proxy::pr_DB$set_entry(FUN = GAK_proxy, names=c("GAK", "gak"),
+                               loop = FALSE, type = "metric", distance = TRUE,
+                               description = "Fast (triangular) global alignment kernel",
+                               PACKAGE = "dtwclust", PREFUN = proxy_prefun)
+
     RNGkind("L'Ecuyer")
 
     packageStartupMessage("\ndtwclust: Setting random number generator to L'Ecuyer-CMRG (see RNGkind()).\n",

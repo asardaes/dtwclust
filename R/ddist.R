@@ -126,9 +126,13 @@ ddist <- function(distance, control, distmat) {
                 if (is.null(centroids)) {
                     centroids <- x
 
-                    ## for dtw_basic_proxy
-                    if (!check_parallel() && toupper(distance) == "DTW_BASIC")
-                        dots$symmetric <- is.null(control@window.size) || !different_lengths(x)
+                    ## for my custom symmetric functions
+                    if (!check_parallel() && toupper(distance) %in% c("DTW_BASIC", "GAK")) {
+                        if (toupper(distance) == "DTW_BASIC")
+                            dots$symmetric <- is.null(control@window.size) || !different_lengths(x)
+                        else
+                            dots$symmetric <- TRUE
+                    }
                 }
 
                 dim_names <- list(names(x), names(centroids))

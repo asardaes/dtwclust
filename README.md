@@ -20,6 +20,7 @@ Implementations
 -   TADPole clustering
 -   DTW Barycenter Averaging
 -   Keogh's and Lemire's DTW lower bounds
+-   Global alignment kernel distance
 
 Installation
 ------------

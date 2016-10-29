@@ -57,8 +57,8 @@ consistency_check <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
         return(obj)
 
     } else if (case == "dist") {
-        included <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd", "dtw_basic")
-        valid <- c("dtw", "dtw2", "sbd", "dtw_basic")
+        included <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd", "dtw_basic", "gak")
+        valid <- c("dtw", "dtw2", "sbd", "dtw_basic", "gak")
 
         if (!is.character(obj) || !pr_DB$entry_exists(obj)) {
             if (silent)
@@ -69,8 +69,8 @@ consistency_check <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
 
         if (Lengths) {
             if ((obj %in% included) && !(obj %in% valid))
-                stop("Only the following distances are supported for series with different length:",
-                     "\n\tdtw\tdtw2\tsbd\tdtw_basic")
+                stop("Only the following distances are supported for series with different length:\n\t",
+                     paste(valid, collapse = "\t"))
             else if(!(obj %in% included) && trace)
                 message("Series have different length. Please confirm that the provided distance function ",
                         "supports this.")

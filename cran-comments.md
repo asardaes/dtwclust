@@ -2,6 +2,7 @@
 * Removed deprecated arguments/slots
 * Added support for more hierarchical methods
 * Added support for functions in package clue
+* Added a new distance measure
 
 ## Test environments
 * Local GNU/Linux, R 3.3.1

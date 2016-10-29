@@ -228,6 +228,7 @@ one of the following custom implementations (all registered with \code{proxy}):
   \item \code{"lbk"}: Keogh's lower bound with either L1 or L2 norm* for the Sakoe-Chiba constraint*.
   \item \code{"lbi"}: Lemire's lower bound with either L1 or L2 norm* for the Sakoe-Chiba constraint*.
   \item \code{"sbd"}: Shape-based distance. See \code{\link{SBD}} for more details.
+  \item \code{"gak"}: Global alignment kernels. See \code{\link{GAK}} for more details.
 }
 
 DTW2 is done with \code{\link[dtw]{dtw}}, but it differs from the result you would obtain if you specify
