@@ -16,7 +16,7 @@ the columns.}
 
 \item{window.size}{Parameterization of the constraining band (\emph{T}). See details.}
 
-\item{normalize}{Normalize the result by considering diagonal terms. See details.}
+\item{normalize}{Normalize the result by considering diagonal terms.}
 }
 \value{
 The logarithm of the GAK if \code{normalize = FALSE}, otherwise 1 minus the normalized GAK.

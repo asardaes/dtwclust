@@ -125,7 +125,8 @@ NULL
         proxy::pr_DB$set_entry(FUN = SBD.proxy, names=c("SBD", "sbd"),
                                loop = FALSE, type = "metric", distance = TRUE,
                                description = "Paparrizos and Gravanos' shape-based distance for time series",
-                               PACKAGE = "dtwclust", PREFUN = proxy_prefun)
+                               PACKAGE = "dtwclust", PREFUN = proxy_prefun,
+                               convert = function(d) { 2 - d })
 
     ## Register DTW_LB
     if (!consistency_check("DTW_LB", "dist", silent = TRUE))
@@ -139,7 +140,8 @@ NULL
         proxy::pr_DB$set_entry(FUN = GAK_proxy, names=c("GAK", "gak"),
                                loop = FALSE, type = "metric", distance = TRUE,
                                description = "Fast (triangular) global alignment kernel",
-                               PACKAGE = "dtwclust", PREFUN = proxy_prefun)
+                               PACKAGE = "dtwclust", PREFUN = proxy_prefun,
+                               convert = function(d) { 1 - d })
 
     RNGkind("L'Ecuyer")
 

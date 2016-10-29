@@ -7,7 +7,7 @@
 #' @param ... Currently ignored.
 #' @param sigma Parameter for the Gaussian kernel's width. See details for the interpretation of \code{NULL}.
 #' @param window.size Parameterization of the constraining band (\emph{T}). See details.
-#' @param normalize Normalize the result by considering diagonal terms. See details.
+#' @param normalize Normalize the result by considering diagonal terms.
 #'
 #' @export
 #'
