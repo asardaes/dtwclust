@@ -6,7 +6,7 @@
 #' the columns.
 #' @param ... Currently ignored.
 #' @param sigma Parameter for the Gaussian kernel's width. See details for the interpretation of \code{NULL}.
-#' @param window.size Parameterization of the constraining band (\emph{T}). See details.
+#' @param window.size Parameterization of the constraining band (\emph{T} in Cuturi (2011)). See details.
 #' @param normalize Normalize the result by considering diagonal terms.
 #'
 #' @export
@@ -18,7 +18,7 @@
 #' by more than 2 (or less than 0.5).
 #'
 #' The \code{window.size} parameter is similar to the one used in DTW, so \code{NULL} signifies no constraint,
-#' and its value should be larger than 1 for series of different length.
+#' and its value should be greater than 1 for series of different length.
 #'
 #' The Gaussian kernel is parameterized by \code{sigma}. Providing \code{NULL} means that the value will be
 #' estimated by using the strategy mentioned in Cuturi (2011) with a constant of 1. This estimation is subject
@@ -34,6 +34,9 @@
 #'
 #' If \code{normalize} is set to \code{FALSE}, the returned value is \strong{not} a distance, rather a similarity.
 #' The \code{proxy::}\code{\link[proxy]{dist}} version is thus always normalized.
+#'
+#' A constrained calculation (i.e. with \code{window.size > 0}) will return infinite if \code{abs(NROW(x)} \code{-}
+#' \code{NROW(y))} \code{>} \code{window.size}.
 #'
 #' @references
 #'
@@ -186,7 +189,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, pairwise
         D <- t(D)
         D[upper.tri(D)] <- d
 
-        D <- 1 - exp(D - outer(gak_x, gak_y, function(x,y) { (x + y) / 2 }))
+        D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
         diag(D) <- 0
 
         class(D) <- retclass
@@ -241,7 +244,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, pairwise
                          do.call(rbind, ret)
                      }
 
-        D <- 1 - exp(D - outer(gak_x, gak_y, function(x,y) { (x + y) / 2 }))
+        D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
     }
 
     class(D) <- retclass

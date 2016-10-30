@@ -59,7 +59,7 @@
 // Useful constants
 #define LOG0 -10000          // log(0)
 
-// LOGp
+// LOGP
 double inline LOGP(double const x, double const y) __attribute__((always_inline));
 
 double inline LOGP(double const x, double const y) {
@@ -86,34 +86,26 @@ double logGAK_c(double const *seq1 , double const *seq2,
      */
 
     int i, j, ii, cur, old, frompos1, frompos2, frompos3;
-    double aux;
+    double gram, Sig, aux, sum;
+
     int curpos = 0;                 // R compilation in windows gives warning about uninitialization...
     int cl = nY + 1;                // length of a column for the dynamic programming
-
-    double sum = 0;
-    double gram, Sig;
+    int trimax = (nX > nY) ? nX - 1 : nY - 1; // Maximum of abs(i-j) when 1<=i<=nX and 1<=j<=nY
 
     // logM is the array that will stores two successive columns of the (nX+1) x (nY+1) table used to compute the final kernel value
     double *logM = malloc(2 * cl * sizeof(double));
 
-    int trimax = (nX > nY) ? nX - 1 : nY - 1; // Maximum of abs(i-j) when 1<=i<=nX and 1<=j<=nY
-
     double *logTriangularCoefficients = malloc((trimax + 1) * sizeof(double));
 
-    if (triangular > 0) {
-        // initialize
-        for (i = 0; i <= trimax; i++) {
-            logTriangularCoefficients[i] = LOG0; // Set all to zero
-        }
+    // initialize
+    ii = (trimax < triangular) ? trimax + 1 : triangular;
+    aux = triangular ? LOG0 : 0;
 
-        for (i = 0; i < ((trimax < triangular) ? trimax + 1 : triangular); i++) {
+    for (i = 0; i <= trimax; i++) {
+        if (triangular > 0 && i < ii)
             logTriangularCoefficients[i] = log(1 - i / triangular);
-        }
-
-    } else {
-        for (i = 0; i <= trimax; i++) {
-            logTriangularCoefficients[i] = 0; // 1 for all if triangular==0, that is a log value of 0
-        }
+        else
+            logTriangularCoefficients[i] = aux;
     }
 
     Sig = -1 / (2 * sigma * sigma);
@@ -144,17 +136,17 @@ double logGAK_c(double const *seq1 , double const *seq2,
 
         // Secondary loop to vary the position for j=1..nY
         for (j = 1; j <= nY; j++) {
-            curpos = cur * cl + j;            // index of the state (i,j)
+            curpos = cur * cl + j;          // index of the state (i,j)
 
             if (logTriangularCoefficients[abs(i-j)] > LOG0) {
-                frompos1 = old*cl + j;            // index of the state (i-1,j)
-                frompos2 = cur*cl + j-1;          // index of the state (i,j-1)
-                frompos3 = old*cl + j-1;          // index of the state (i-1,j-1)
+                frompos1 = old*cl + j;      // index of the state (i-1,j)
+                frompos2 = cur*cl + j-1;    // index of the state (i,j-1)
+                frompos3 = old*cl + j-1;    // index of the state (i-1,j-1)
 
                 // We first compute the kernel value
                 sum = 0;
                 for (ii = 0; ii < dim; ii++) {
-                    sum += (seq1[i-1 + ii*nX] - seq2[j-1 + ii*nY]) * (seq1[i-1 + ii*nX] - seq2[j-1 + ii*nY]);
+                    sum += pow(seq1[i-1 + ii*nX] - seq2[j-1 + ii*nY], 2);
                 }
 
                 gram = logTriangularCoefficients[abs(i-j)] + sum*Sig;
@@ -169,7 +161,7 @@ double logGAK_c(double const *seq1 , double const *seq2,
             }
         }
 
-        /* Update the culumn order */
+        // Update the culumn order
         cur = 1 - cur;
         old = 1 - old;
     }
@@ -184,8 +176,7 @@ double logGAK_c(double const *seq1 , double const *seq2,
 }
 
 // The gateway function
-SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP dim, SEXP sigma, SEXP window)
-{
+SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP dim, SEXP sigma, SEXP window) {
     /*
      * Inputs are, in this order
      * A N1 x d matrix (d-variate time series with N1 observations)
@@ -206,7 +197,7 @@ SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP dim, SEXP sigma, SEXP window)
     double d;
 
     // If triangular is smaller than the difference in length of the time series, the kernel is equal to zero,
-    // i.e. its log is set to -100000
+    // i.e. its log is set to -Inf
     if (triangular > 0 && abs(nX - nY) > triangular)
         d = R_NegInf;
     else

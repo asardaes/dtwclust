@@ -14,7 +14,7 @@ the columns.}
 
 \item{sigma}{Parameter for the Gaussian kernel's width. See details for the interpretation of \code{NULL}.}
 
-\item{window.size}{Parameterization of the constraining band (\emph{T}). See details.}
+\item{window.size}{Parameterization of the constraining band (\emph{T} in Cuturi (2011)). See details.}
 
 \item{normalize}{Normalize the result by considering diagonal terms.}
 }
@@ -31,7 +31,7 @@ series of different length and multivariate series, so long as the ratio of the 
 by more than 2 (or less than 0.5).
 
 The \code{window.size} parameter is similar to the one used in DTW, so \code{NULL} signifies no constraint,
-and its value should be larger than 1 for series of different length.
+and its value should be greater than 1 for series of different length.
 
 The Gaussian kernel is parameterized by \code{sigma}. Providing \code{NULL} means that the value will be
 estimated by using the strategy mentioned in Cuturi (2011) with a constant of 1. This estimation is subject
@@ -43,6 +43,9 @@ For more information, refer to the package vignette and the referenced article.
 \note{
 If \code{normalize} is set to \code{FALSE}, the returned value is \strong{not} a distance, rather a similarity.
 The \code{proxy::}\code{\link[proxy]{dist}} version is thus always normalized.
+
+A constrained calculation (i.e. with \code{window.size > 0}) will return infinite if \code{abs(NROW(x)} \code{-}
+\code{NROW(y))} \code{>} \code{window.size}.
 }
 \examples{
 
