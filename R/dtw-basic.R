@@ -111,51 +111,15 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
 
     retclass <- "crossdist"
 
-    if (symmetric && !pairwise) {
-        check_parallel()
-
-        pairs <- call_pairs(length(x), lower = FALSE)
-        pairs <- split_parallel(pairs, 1L)
-
-        dots$pairwise <- TRUE
-
-        d <- foreach(pairs = pairs,
-                     .combine = c,
-                     .multicombine = TRUE,
-                     .packages = "dtwclust",
-                     .export = "enlist") %dopar% {
-                         ## gcm will be computed by pairwise case below
-                         do.call(proxy::dist,
-                                 enlist(x = x[pairs[ , 1L]],
-                                        y = x[pairs[ , 2L]],
-                                        method = "dtw_basic",
-                                        dots = dots))
-                     }
-
-        rm("pairs")
-
-        D <- matrix(0, nrow = length(x), ncol = length(x))
-        D[upper.tri(D)] <- d
-        D <- t(D)
-        D[upper.tri(D)] <- d
-
-        class(D) <- retclass
-        attr(D, "dimnames") <- list(names(x), names(x))
-        attr(D, "method") <- "DTW_BASIC"
-
-        return(D)
-    }
-
-    X <- split_parallel(x)
-
     ## Register doSEQ if necessary
     if (check_parallel())
-        GCM <- lapply(1L:length(X), function(dummy) NULL)
+        GCM <- lapply(1L:foreach::getDoParWorkers(), function(dummy) NULL)
     else
         GCM <- list(gcm)
 
     ## Calculate distance matrix
     if (pairwise) {
+        X <- split_parallel(x)
         Y <- split_parallel(y)
 
         validate_pairwise(X, Y)
@@ -183,7 +147,37 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
         names(D) <- NULL
         retclass <- "pairdist"
 
+    } else if (symmetric) {
+        pairs <- call_pairs(length(x), lower = FALSE)
+        pairs <- split_parallel(pairs, 1L)
+
+        dots$pairwise <- TRUE
+
+        d <- foreach(pairs = pairs,
+                     .combine = c,
+                     .multicombine = TRUE,
+                     .packages = "dtwclust",
+                     .export = "enlist") %dopar% {
+                         ## gcm will be computed by pairwise case above
+                         do.call(proxy::dist,
+                                 enlist(x = x[pairs[ , 1L]],
+                                        y = x[pairs[ , 2L]],
+                                        method = "dtw_basic",
+                                        dots = dots))
+                     }
+
+        rm("pairs")
+
+        D <- matrix(0, nrow = length(x), ncol = length(x))
+        D[upper.tri(D)] <- d
+        D <- t(D)
+        D[upper.tri(D)] <- d
+
+        attr(D, "dimnames") <- list(names(x), names(x))
+
     } else {
+        X <- split_parallel(x)
+
         D <- foreach(x = X, gcm = GCM,
                      .combine = rbind,
                      .multicombine = TRUE,

@@ -163,7 +163,32 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, pairwise
     ## Register doSEQ if necessary
     check_parallel()
 
-    if (symmetric && !pairwise) {
+    ## Calculate distance matrix
+    if (pairwise) {
+        X <- split_parallel(x)
+        Y <- split_parallel(y)
+
+        validate_pairwise(X, Y)
+
+        D <- foreach(x = X, y = Y,
+                     .combine = c,
+                     .multicombine = TRUE,
+                     .packages = "dtwclust",
+                     .export = "enlist") %dopar% {
+                         mapply(x, y, FUN = function(x, y) {
+                             do.call("GAK",
+                                     enlist(x = x,
+                                            y = y,
+                                            dots = dots))
+                         })
+                     }
+
+        D <- 1 - exp(D - 0.5 * (gak_x + gak_y))
+
+        names(D) <- NULL
+        retclass <- "pairdist"
+
+    } else if (symmetric) {
         pairs <- call_pairs(length(x), lower = FALSE)
         pairs <- split_parallel(pairs, 1L)
 
@@ -192,41 +217,11 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, pairwise
         D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
         diag(D) <- 0
 
-        class(D) <- retclass
         attr(D, "dimnames") <- list(names(x), names(x))
-        attr(D, "method") <- "GAK"
-        attr(D, "sigma") <- sigma
-
-        return(D)
-    }
-
-    X <- split_parallel(x)
-
-    ## Calculate distance matrix
-    if (pairwise) {
-        Y <- split_parallel(y)
-
-        validate_pairwise(X, Y)
-
-        D <- foreach(x = X, y = Y,
-                     .combine = c,
-                     .multicombine = TRUE,
-                     .packages = "dtwclust",
-                     .export = "enlist") %dopar% {
-                         mapply(x, y, FUN = function(x, y) {
-                             do.call("GAK",
-                                     enlist(x = x,
-                                            y = y,
-                                            dots = dots))
-                         })
-                     }
-
-        D <- 1 - exp(D - 0.5 * (gak_x + gak_y))
-
-        names(D) <- NULL
-        retclass <- "pairdist"
 
     } else {
+        X <- split_parallel(x)
+
         D <- foreach(x = X,
                      .combine = rbind,
                      .multicombine = TRUE,
