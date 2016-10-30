@@ -31,7 +31,7 @@ setMethod("initialize", "dtwclust",
               .Object
           })
 
-# for dtwclustFamily to call in tests
+# for dtwclustFamily
 
 setMethod("initialize", "dtwclustFamily",
           function(.Object, dist, allcent, ..., distmat = NULL, control = NULL, fuzzy = FALSE) {
@@ -130,7 +130,6 @@ setMethod("show", "dtwclust",
 #'
 setMethod("update", "dtwclust",
           function(object, ..., evaluate = TRUE) {
-
               args <- as.pairlist(list(...))
 
               if (length(args) == 0L) {
@@ -184,7 +183,9 @@ setMethod("predict", "dtwclust",
                   consistency_check(newdata, "vltslist")
                   nm <- names(newdata)
 
-                  newdata <- object@family@preproc(newdata, ... = object@dots)
+                  newdata <- do.call(object@family@preproc,
+                                     args = enlist(newdata,
+                                                   dots = object@dots))
 
                   distmat <- do.call(object@family@dist,
                                      args = enlist(x = newdata,
@@ -289,7 +290,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
                                    c(series, rep(NA, trail))
                                })
 
-              } else if (length(x@datalist) > 0){
+              } else if (length(x@datalist) > 0L) {
                   Lengths <- lengths(x@datalist)
                   L <- max(Lengths)
                   trail <- L - Lengths
@@ -684,7 +685,7 @@ setMethod("clusterSim", "dtwclust",
           {
               method <- match.arg(method)
 
-              if (object@k == 1)
+              if (object@k == 1L)
                   return(matrix(1))
 
               if (method == "shadow") {
@@ -703,33 +704,34 @@ setMethod("clusterSim", "dtwclust",
                                                    centroids = object@centroids,
                                                    dots = object@dots))
 
-                  r <- t(matrix(apply(distmat, 1, rank, ties.method = "first"),
+                  r <- t(matrix(apply(distmat, 1L, rank, ties.method = "first"),
                                 nrow = ncol(distmat)))
-                  cluster <- lapply(1:2, function(k) {
-                      apply(r, 1, function(x) which(x == k))
+                  cluster <- lapply(1L:2L, function(k) {
+                      apply(r, 1L, function(x) which(x == k))
                   })
 
-                  K <- max(cluster[[1]])
+                  K <- max(cluster[[1L]])
                   z <- matrix(0, ncol = K, nrow = K)
-                  for (k in 1:K) {
+                  for (k in 1L:K) {
                       ok1 <- cluster[[1]] == k
                       if (any(ok1)) {
-                          for (n in 1:K) {
+                          for (n in 1L:K) {
                               if (k != n) {
-                                  ok2 <- ok1 & cluster[[2]] == n
+                                  ok2 <- ok1 && cluster[[2L]] == n
                                   if (any(ok2)) {
                                       z[k, n] <- 2 * sum(distmat[ok2, k] / (distmat[ok2, k] + distmat[ok2, n]))
                                   }
                               }
                           }
-                          z[k, ] <- z[k, ]/sum(ok1)
+
+                          z[k, ] <- z[k, ] / sum(ok1)
                       }
                   }
 
                   diag(z) <- 1
 
                   if (symmetric)
-                      z <- (z + t(z))/2
+                      z <- (z + t(z)) / 2
 
               } else {
                   z <- do.call(object@family@dist,
@@ -737,7 +739,7 @@ setMethod("clusterSim", "dtwclust",
                                              centroids = object@centroids,
                                              dots = object@dots))
 
-                  z <- 1 - z/max(z)
+                  z <- 1 - z / max(z)
               }
 
               z
@@ -749,7 +751,6 @@ setMethod("clusterSim", "dtwclust",
 
 setValidity("dtwclustControl",
             function(object) {
-
                 if (!is.null(object@window.size) && object@window.size < 1L)
                     return("Window size must be positive if provided")
 
