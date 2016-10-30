@@ -9,6 +9,7 @@
 * Added support for functions in package `clue`.
 * Added a new distance based on global alignment kernels.
 * Bear in mind that the `DTW/SBD` algorithms (and hence the functions that depend on them) might give different results in 32-bit systems.
+* Updated vignette.
 
 ## Version 2.3.0
 * Correction: DTW can be symmetric for series of both equal/different length, although in general this is not necessarily the case, due to asymmetric step patterns or constrained paths.
