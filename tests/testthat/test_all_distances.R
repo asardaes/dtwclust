@@ -84,7 +84,7 @@ test_that("Included proxy distances can be called for pairwise = TRUE and give e
 test_that("Included (valid) distances can accept multivariate series.", {
     skip_on_cran()
 
-    for (distance in c("dtw_lb", "dtw_basic", "gak")) {
+    for (distance in c("dtw_basic", "gak")) {
         mv <- proxy::dist(data_multivariate, method = distance,
                           window.size = 18L, sigma = 100)
 

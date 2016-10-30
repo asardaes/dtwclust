@@ -53,6 +53,9 @@
 #'
 
 SBD <- function(x, y, znorm = FALSE) {
+    if (is_multivariate(list(x, y)))
+        stop("SBD does not support multivariate series.")
+
     x <- as.numeric(x)
     y <- as.numeric(y)
 
@@ -127,6 +130,9 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, error.check = TRUE, pairwise =
 
         if(znorm) y <- zscore(y)
     }
+
+    if (is_multivariate(x) || is_multivariate(y))
+        stop("SBD does not support multivariate series.")
 
     retclass <- "crossdist"
 

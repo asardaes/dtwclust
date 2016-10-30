@@ -214,7 +214,7 @@ is_multivariate <- function(x) {
     if (any(diff(dims) != 0L))
         stop("Inconsistent dimensions across series.")
 
-    any(dims > 0L)
+    any(dims > 1L)
 }
 
 reshape_multviariate <- function(series, cent) {

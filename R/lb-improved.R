@@ -85,6 +85,9 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
 
     window.size <- consistency_check(window.size, "window")
 
+    if (is_multivariate(list(x, y)))
+        stop("lb_improved does not support multivariate series.")
+
     ## LB Keogh first
 
     ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'/'call_envelop'
@@ -169,6 +172,9 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
         if (error.check)
             consistency_check(y, "tslist")
     }
+
+    if (is_multivariate(x) || is_multivariate(y))
+        stop("lb_improved does not support multivariate series.")
 
     retclass <- "crossdist"
 

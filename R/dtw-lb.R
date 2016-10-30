@@ -118,6 +118,14 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
     X <- consistency_check(x, "tsmat")
 
+    if (is.null(y))
+        Y <- X
+    else
+        Y <- consistency_check(y, "tsmat")
+
+    if (is_multivariate(X) || is_multivariate(Y))
+        stop("dtw_lb does not support multivariate series.")
+
     check_parallel()
 
     dots <- list(...)
@@ -127,11 +135,6 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     dots$pairwise <- TRUE
 
     if (pairwise) {
-        if (is.null(y))
-            Y <- x
-        else
-            Y <- consistency_check(y, "tsmat")
-
         if (is.null(window.size))
             dots$window.type <- "none"
         else
@@ -162,11 +165,6 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
     ## NOTE: I tried starting with LBK estimate, refining with LBI and then DTW but, overall,
     ## it was usually slower, almost the whole matrix had to be recomputed for LBI
-
-    if (!is.null(y))
-        Y <- consistency_check(y, "tsmat")
-    else
-        Y <- X
 
     ## Initial estimate
     D <- proxy::dist(X, Y, method = "LBI",

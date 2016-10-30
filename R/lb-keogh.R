@@ -81,8 +81,14 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
 
     consistency_check(x, "ts")
 
+    if (is_multivariate(list(x)))
+        stop("lb_keogh does not support multivariate series.")
+
     if (is.null(lower.env) || is.null(upper.env)) {
         consistency_check(y, "ts")
+
+        if (is_multivariate(list(y)))
+            stop("lb_keogh does not support multivariate series.")
 
         if (length(x) != length(y))
             stop("The series must have the same length")
@@ -161,6 +167,9 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
         if (error.check)
             consistency_check(y, "tslist")
     }
+
+    if (is_multivariate(x) || is_multivariate(y))
+        stop("lb_keogh does not support multivariate series.")
 
     retclass <- "crossdist"
 
