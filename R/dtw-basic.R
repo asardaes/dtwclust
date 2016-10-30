@@ -129,8 +129,8 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                      .multicombine = TRUE,
                      .packages = "dtwclust",
                      .export = "enlist") %dopar% {
-                         L1 <- max(lengths(x))
-                         L2 <- max(lengths(y))
+                         L1 <- max(sapply(x, NROW))
+                         L2 <- max(sapply(y, NROW))
 
                          if (is.null(gcm))
                              gcm <- matrix(0, L1 + 1L, L2 + 1L)
@@ -183,8 +183,8 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                      .multicombine = TRUE,
                      .packages = "dtwclust",
                      .export = "enlist") %dopar% {
-                         L1 <- max(lengths(x))
-                         L2 <- max(lengths(y))
+                         L1 <- max(sapply(x, NROW))
+                         L2 <- max(sapply(y, NROW))
 
                          if (is.null(gcm))
                              gcm <- matrix(0, L1 + 1L, L2 + 1L)
