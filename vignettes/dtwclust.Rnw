@@ -187,7 +187,7 @@ plot(symmetric1)
 plot(symmetric2)
 @
 
-As final comments, it should be noted that the DTW distance does not satisfy the triangle inequality, and it is not symmetric in general, e.g., for asymmetric step patterns \citep{giorgino2009}. Currently, out of the included distances in \dtwclust{}, only those based on DTW support multivariate series.
+As final comments, it should be noted that the DTW distance does not satisfy the triangle inequality, and it is not symmetric in general, e.g., for asymmetric step patterns \citep{giorgino2009}.
 
 \subsubsection{Global DTW constraints}
 \label{sec:dtw-window}
@@ -306,7 +306,7 @@ The triangular constraint is similar to the window constraints that can be used 
 
 \citet{cuturi2011} also proposes a strategy to estimate the value of $\sigma$ based on the time-series themselves and their lengths, namely $c \cdot \text{med}(\left\lVert x - y \right\rVert) \cdot \sqrt{\text{med}(|\text{x}|)}$, where $\text{med}(\cdot)$ is the empirical median, $c$ is some constant, and $x$ and $y$ are subsampled vectors from the dataset. This, however, introduces some randomness into the algorithm when the value of $\sigma$ is not provided, so it might be better to estimate it once and re-use it in subsequent function evaluations. In \dtwclust{}, the value of $c$ is set to 1.
 
-The similarity returned by the TGAK can be normalized with \cref{eq:tgak-norm} so that its values lie in the range $[0,1]$. Hence, a distance measure for time-series can be obtained by subtracting the normalized value from 1.
+The similarity returned by the TGAK can be normalized with \cref{eq:tgak-norm} so that its values lie in the range $[0,1]$. Hence, a distance measure for time-series can be obtained by subtracting the normalized value from 1. The algorithm supports multivariate series and series of different length (with some limitations). The resulting distance is symmetric and satisfies the triangle inequality, although it is slightly more expensive to compute in comparison to DTW.
 
 \begin{equation}
 \label{eq:tgak-norm}
