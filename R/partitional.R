@@ -82,6 +82,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...) {
     }
 
     if (iter > control@iter.max) {
+        if (control@trace) cat("\n")
         warning("Clustering did not converge within the allowed iterations.")
         converged <- FALSE
         iter <- control@iter.max

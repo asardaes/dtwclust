@@ -518,7 +518,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         if (type == "fuzzy")
             family@cluster <- fcm_cluster # fuzzy.R
 
-        if (control@trace && control@nrep > 1L)
+        if (check_parallel() && control@trace && (control@nrep > 1L || length(k) > 1L))
             message("Tracing of repetitions might not be available if done in parallel.\n")
 
         ## ----------------------------------------------------------------------------------------------------------
@@ -556,6 +556,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                .packages = control@packages, .export = export) %:%
                 foreach(i = 1L:control@nrep, .combine = list, .multicombine = TRUE,
                         .packages = control@packages, .export = export) %dopar% {
+                            if (control@trace)
+                                message("Repetition ", i, " for k = ", k)
+
                             rngtools::setRNG(rng[[i]])
 
                             if (!consistency_check(dist_entry$names[1], "dist"))
