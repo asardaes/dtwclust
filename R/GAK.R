@@ -14,7 +14,7 @@
 #' @details
 #'
 #' This function uses the Triangular Global Alignment Kernel (TGAK) described in Cuturi (2011). It supports
-#' series of different length and multivariate series, so long as the ratio of the series' length don't differ
+#' series of different length and multivariate series, so long as the ratio of the series' lengths don't differ
 #' by more than 2 (or less than 0.5).
 #'
 #' The \code{window.size} parameter is similar to the one used in DTW, so \code{NULL} signifies no constraint,
@@ -35,8 +35,10 @@
 #' If \code{normalize} is set to \code{FALSE}, the returned value is \strong{not} a distance, rather a similarity.
 #' The \code{proxy::}\code{\link[proxy]{dist}} version is thus always normalized.
 #'
-#' A constrained calculation (i.e. with \code{window.size > 0}) will return infinite if \code{abs(NROW(x)} \code{-}
-#' \code{NROW(y))} \code{>} \code{window.size}.
+#' A constrained unnormalized calculation (i.e. with \code{window.size > 0} and \code{normalize = FALSE}) will
+#' return negative infinity if \code{abs(NROW(x)} \code{-} \code{NROW(y))} \code{>} \code{window.size}. Since
+#' the function won't perform calculations in that case, it might be faster, but if this behavior is not desired,
+#' consider reinterpolating the time series (see \code{\link{reinterpolate}}) or increasing the window size.
 #'
 #' @references
 #'
@@ -49,7 +51,8 @@
 #' data(uciCT)
 #'
 #' set.seed(832)
-#' GAKd <- proxy::dist(zscore(CharTraj), method = "gak", window.size = 18L)
+#' GAKd <- proxy::dist(zscore(CharTraj), method = "gak",
+#'                     pairwise = TRUE, window.size = 18L)
 #'
 #' # Obtained estimate of sigma
 #' sigma <- attr(GAKd, "sigma")
