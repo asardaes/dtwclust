@@ -111,11 +111,23 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
 
     retclass <- "crossdist"
 
-    ## Register doSEQ if necessary
-    if (check_parallel())
-        GCM <- lapply(1L:foreach::getDoParWorkers(), function(dummy) NULL)
-    else
+    ## Register doSEQ and create GCM if necessary
+    if (check_parallel()) {
+        L1 <- max(sapply(x, NROW))
+        L2 <- max(sapply(y, NROW))
+
+        GCM <- lapply(1L:foreach::getDoParWorkers(), function(dummy) {
+            matrix(0, L1 + 1L, L2 + 1L)
+        })
+
+    } else if (is.null(gcm)) {
+        L1 <- max(sapply(x, NROW))
+        L2 <- max(sapply(y, NROW))
+        GCM <- list(matrix(0, L1 + 1L, L2 + 1L))
+
+    } else {
         GCM <- list(gcm)
+    }
 
     ## Calculate distance matrix
     if (pairwise) {
@@ -129,12 +141,6 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                      .multicombine = TRUE,
                      .packages = "dtwclust",
                      .export = "enlist") %dopar% {
-                         if (is.null(gcm)) {
-                             L1 <- max(sapply(x, NROW))
-                             L2 <- max(sapply(y, NROW))
-                             gcm <- matrix(0, L1 + 1L, L2 + 1L)
-                         }
-
                          mapply(x, y, FUN = function(x, y) {
                              do.call("dtw_basic",
                                      enlist(x = x,
@@ -153,16 +159,16 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
 
         dots$pairwise <- TRUE
 
-        d <- foreach(pairs = pairs,
+        d <- foreach(pairs = pairs, gcm = GCM,
                      .combine = c,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
                      .export = "enlist") %dopar% {
-                         ## gcm will be computed by pairwise case above
                          do.call(proxy::dist,
                                  enlist(x = x[pairs[ , 1L]],
                                         y = x[pairs[ , 2L]],
                                         method = "dtw_basic",
+                                        gcm = gcm,
                                         dots = dots))
                      }
 
@@ -183,12 +189,6 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                      .multicombine = TRUE,
                      .packages = "dtwclust",
                      .export = "enlist") %dopar% {
-                         if (is.null(gcm)) {
-                             L1 <- max(sapply(x, NROW))
-                             L2 <- max(sapply(y, NROW))
-                             gcm <- matrix(0, L1 + 1L, L2 + 1L)
-                         }
-
                          ret <- lapply(x, y = y, FUN = function(x, y) {
                              sapply(y, x = x, FUN = function(y, x) {
                                  do.call("dtw_basic",
