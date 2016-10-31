@@ -68,7 +68,7 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
     else if (!is.matrix(gcm) || nrow(gcm) < (NROW(x) + 1L) || ncol(gcm) < (NROW(y) + 1L))
         stop("dtw_basic: Dimension inconsistency in 'gcm'")
     else if (storage.mode(gcm) != "double")
-        stop("If provided, 'gcm' must have 'double' storage mode.")
+        stop("dtw_basic: If provided, 'gcm' must have 'double' storage mode.")
 
     d <- .Call("dtw_basic", x, y, window.size,
                NROW(x), NROW(y), NCOL(x),
@@ -129,11 +129,11 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                      .multicombine = TRUE,
                      .packages = "dtwclust",
                      .export = "enlist") %dopar% {
-                         L1 <- max(sapply(x, NROW))
-                         L2 <- max(sapply(y, NROW))
-
-                         if (is.null(gcm))
+                         if (is.null(gcm)) {
+                             L1 <- max(sapply(x, NROW))
+                             L2 <- max(sapply(y, NROW))
                              gcm <- matrix(0, L1 + 1L, L2 + 1L)
+                         }
 
                          mapply(x, y, FUN = function(x, y) {
                              do.call("dtw_basic",
@@ -183,11 +183,11 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE, symm
                      .multicombine = TRUE,
                      .packages = "dtwclust",
                      .export = "enlist") %dopar% {
-                         L1 <- max(sapply(x, NROW))
-                         L2 <- max(sapply(y, NROW))
-
-                         if (is.null(gcm))
+                         if (is.null(gcm)) {
+                             L1 <- max(sapply(x, NROW))
+                             L2 <- max(sapply(y, NROW))
                              gcm <- matrix(0, L1 + 1L, L2 + 1L)
+                         }
 
                          ret <- lapply(x, y = y, FUN = function(x, y) {
                              sapply(y, x = x, FUN = function(y, x) {
