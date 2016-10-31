@@ -8,6 +8,10 @@
 #' @param sigma Parameter for the Gaussian kernel's width. See details for the interpretation of \code{NULL}.
 #' @param window.size Parameterization of the constraining band (\emph{T} in Cuturi (2011)). See details.
 #' @param normalize Normalize the result by considering diagonal terms.
+#' @param logs Optionally, a matrix with \code{max(NROW(x), NROW(y)) + 1} rows and 3 columns to use for
+#' the logarithm calculations. Used internally for memory optimization. If provided, it \strong{will}
+#' be modified \emph{in place} by \code{C} code, except in the parallel version in
+#' \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.
 #'
 #' @export
 #'
@@ -65,7 +69,7 @@
 #'                         window.size = 18L))
 #' }
 #'
-GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE) {
+GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE, logs = NULL) {
     x <- cbind(x)
     y <- cbind(y)
 
@@ -74,6 +78,13 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE) {
 
     ## check dimension consistency
     is_multivariate(list(x,y))
+
+    if (is.null(logs))
+        logs <- matrix(0, max(NROW(x), NROW(y)) + 1L, 3L)
+    else if (!is.matrix(logs) || nrow(logs) < (max(NROW(x), NROW(y)) + 1L) || ncol(logs) < 3L)
+        stop("GAK: Dimension inconsistency in 'logs'")
+    else if (storage.mode(logs) != "double")
+        stop("GAK: If provided, 'logs' must have 'double' storage mode.")
 
     if (is.null(sigma)) {
         n <- round(0.5 * min(NROW(x), NROW(y)))
@@ -96,12 +107,19 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE) {
 
     logGAK <- .Call("logGAK", x, y,
                     NROW(x), NROW(y), NCOL(x),
-                    sigma, window.size,
+                    sigma, window.size, logs,
                     PACKAGE = "dtwclust")
 
     if (normalize) {
-        gak_x <- .Call("logGAK", x, x, NROW(x), NROW(x), NCOL(x), sigma, window.size, PACKAGE = "dtwclust")
-        gak_y <- .Call("logGAK", y, y, NROW(y), NROW(y), NCOL(y), sigma, window.size, PACKAGE = "dtwclust")
+        gak_x <- .Call("logGAK", x, x,
+                       NROW(x), NROW(x), NCOL(x),
+                       sigma, window.size, logs,
+                       PACKAGE = "dtwclust")
+
+        gak_y <- .Call("logGAK", y, y,
+                       NROW(y), NROW(y), NCOL(y),
+                       sigma, window.size, logs,
+                       PACKAGE = "dtwclust")
 
         logGAK <- 1 - exp(logGAK - 0.5 * (gak_x + gak_y))
     }
@@ -111,7 +129,9 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE) {
     logGAK
 }
 
-GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, pairwise = FALSE, symmetric = FALSE) {
+GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = NULL,
+                      pairwise = FALSE, symmetric = FALSE)
+{
     if (!normalize)
         warning("The proxy version of GAK is always normalized.")
 
@@ -156,15 +176,56 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, pairwise
     } else if (sigma <= 0)
         stop("Parameter 'sigma' must be positive.")
 
-    dots$sigma <- sigma
-
-    gak_x <- sapply(x, function(x) do.call("GAK", enlist(x = x, y = x, dots = dots)))
-    gak_y <- sapply(y, function(y) do.call("GAK", enlist(x = y, y = y, dots = dots)))
-
     retclass <- "crossdist"
 
-    ## Register doSEQ if necessary
-    check_parallel()
+    dots$sigma <- sigma
+
+    ## Register doSEQ and create LOGS if necessary
+    if (check_parallel()) {
+        L1 <- max(sapply(x, NROW))
+        L2 <- max(sapply(y, NROW))
+        L <- max(L1, L2)
+
+        LOGS <- lapply(1L:foreach::getDoParWorkers(), function(dummy) {
+            matrix(0, L + 1L, 3L)
+        })
+
+    } else if (is.null(logs)) {
+        L1 <- max(sapply(x, NROW))
+        L2 <- max(sapply(y, NROW))
+        LOGS <- list(matrix(0, max(L1, L2) + 1L, 3L))
+
+    } else {
+        LOGS <- list(logs)
+    }
+
+    gak_x <- foreach(xx = split_parallel(x), logs = LOGS,
+                     .combine = c,
+                     .multicombine = TRUE,
+                     .packages = "dtwclust",
+                     .export = "enlist") %dopar% {
+                         sapply(xx, function(xx) {
+                             do.call("GAK",
+                                     enlist(x = xx,
+                                            y = xx,
+                                            logs = logs,
+                                            dots = dots))
+                         })
+                     }
+
+    gak_y <- foreach(yy = split_parallel(y), logs = LOGS,
+                     .combine = c,
+                     .multicombine = TRUE,
+                     .packages = "dtwclust",
+                     .export = "enlist") %dopar% {
+                         sapply(yy, function(yy) {
+                             do.call("GAK",
+                                     enlist(x = yy,
+                                            y = yy,
+                                            logs = logs,
+                                            dots = dots))
+                         })
+                     }
 
     ## Calculate distance matrix
     if (pairwise) {
@@ -173,7 +234,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, pairwise
 
         validate_pairwise(X, Y)
 
-        D <- foreach(x = X, y = Y,
+        D <- foreach(x = X, y = Y, logs = LOGS,
                      .combine = c,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
@@ -182,6 +243,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, pairwise
                              do.call("GAK",
                                      enlist(x = x,
                                             y = y,
+                                            logs = logs,
                                             dots = dots))
                          })
                      }
@@ -195,7 +257,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, pairwise
         pairs <- call_pairs(length(x), lower = FALSE)
         pairs <- split_parallel(pairs, 1L)
 
-        d <- foreach(pairs = pairs,
+        d <- foreach(pairs = pairs, logs = LOGS,
                      .combine = c,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
@@ -206,6 +268,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, pairwise
                                     do.call("GAK",
                                             enlist(x = xx,
                                                    y = yy,
+                                                   logs = logs,
                                                    dots = dots))
                                 })
                      }
@@ -225,7 +288,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, pairwise
     } else {
         X <- split_parallel(x)
 
-        D <- foreach(x = X,
+        D <- foreach(x = X, logs = LOGS,
                      .combine = rbind,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
@@ -235,6 +298,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, pairwise
                                  do.call("GAK",
                                          enlist(x = x,
                                                 y = y,
+                                                logs = logs,
                                                 dots = dots))
                              })
                          })

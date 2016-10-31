@@ -4,7 +4,8 @@
 \alias{GAK}
 \title{Fast global alignment kernels}
 \usage{
-GAK(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE)
+GAK(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
+  logs = NULL)
 }
 \arguments{
 \item{x, y}{Time series. A multivariate series should have time spanning the rows and variables spanning
@@ -17,6 +18,11 @@ the columns.}
 \item{window.size}{Parameterization of the constraining band (\emph{T} in Cuturi (2011)). See details.}
 
 \item{normalize}{Normalize the result by considering diagonal terms.}
+
+\item{logs}{Optionally, a matrix with \code{max(NROW(x), NROW(y)) + 1} rows and 3 columns to use for
+the logarithm calculations. Used internally for memory optimization. If provided, it \strong{will}
+be modified \emph{in place} by \code{C} code, except in the parallel version in
+\code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.}
 }
 \value{
 The logarithm of the GAK if \code{normalize = FALSE}, otherwise 1 minus the normalized GAK.
