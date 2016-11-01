@@ -5,8 +5,8 @@
 * Added a new distance measure
 
 ## Test environments
-* Local GNU/Linux, R 3.3.1
-* Local Windows 10, R 3.3.1
+* Local GNU/Linux, R 3.3.2
+* Local Windows 10, R 3.3.2
 * win-builder (devel and release)
 * Travis CI
   + Linux: devel and release
