@@ -78,8 +78,6 @@
 #' Some internal indices require the original data for calculations, so the control flag \code{save.data}
 #' must be set to \code{TRUE} when running the clustering algorithm.
 #'
-#' For some reason, calculating some internal CVIs in parallel seems to be significantly slower.
-#'
 #' @name cvi
 #' @rdname cvi
 #'
