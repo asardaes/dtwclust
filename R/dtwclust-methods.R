@@ -1,15 +1,15 @@
-#' @title Methods for \code{dtwclust}
+#' Methods for \code{dtwclust}
 #'
-#' @description
 #' Methods associated with \code{\link{dtwclust-class}} objects.
-#'
-#' @details
-#' Supported generics from the \code{flexclust} package are: \code{\link[flexclust]{randIndex}} and
-#' \code{\link[flexclust]{clusterSim}}.
 #'
 #' @name dtwclust-methods
 #' @rdname dtwclust-methods
 #' @include dtwclust-classes.R
+#'
+#' @details
+#'
+#' Supported generics from the \code{flexclust} package are: \code{\link[flexclust]{randIndex}} and
+#' \code{\link[flexclust]{clusterSim}}.
 #'
 #' @seealso \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}},
 #' \code{\link{cvi}}
@@ -31,8 +31,7 @@ setMethod("initialize", "dtwclust",
               .Object
           })
 
-# for dtwclustFamily
-
+## for dtwclustFamily
 setMethod("initialize", "dtwclustFamily",
           function(.Object, dist, allcent, ..., distmat = NULL, control = NULL, fuzzy = FALSE) {
               dots <- list(...)
@@ -71,15 +70,15 @@ setMethod("initialize", "dtwclustFamily",
 # Show
 # ========================================================================================================
 
-#' @details
-#' Show method displays basic information from the clustering results.
-#'
 #' @rdname dtwclust-methods
 #' @aliases show,dtwclust-method
+#' @exportMethod show
 #'
 #' @param object,x An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.
 #'
-#' @exportMethod show
+#' @details
+#'
+#' Show method displays basic information from the clustering results.
 #'
 setMethod("show", "dtwclust",
           function(object) {
@@ -115,18 +114,18 @@ setMethod("show", "dtwclust",
 # update from stats
 # ========================================================================================================
 
-#' @details
-#' The \code{update} method takes the original function call, replaces any provided argument and optionally
-#' evaluates the call again. Use \code{evaluate = FALSE} if you want to get the
-#' unevaluated call.
-#'
 #' @rdname dtwclust-methods
 #' @aliases update,dtwclust-method
+#' @exportMethod update
 #'
 #' @param evaluate Logical. Defaults to \code{TRUE} and evaluates the updated call, which will result in
 #' a new \code{dtwclust} object. Otherwise, it returns the unevaluated call.
 #'
-#' @exportMethod update
+#' @details
+#'
+#' The \code{update} method takes the original function call, replaces any provided argument and optionally
+#' evaluates the call again. Use \code{evaluate = FALSE} if you want to get the
+#' unevaluated call.
 #'
 setMethod("update", "dtwclust",
           function(object, ..., evaluate = TRUE) {
@@ -156,19 +155,19 @@ setMethod("update", "dtwclust",
 # predict from stats
 # ========================================================================================================
 
-#' @details
-#' The \code{predict} generic can take the usual \code{newdata} argument and it returns the cluster(s) to which
-#' the data belongs; if \code{NULL}, it simply returns the obtained cluster indices. It preprocesses
-#' the data with the corresponding function if available.
-#'
 #' @rdname dtwclust-methods
 #' @aliases predict,dtwclust-method
+#' @exportMethod predict
 #'
 #' @param newdata New data to be evaluated. It can take any of the supported formats of \code{\link{dtwclust}}.
 #' Note that for multivariate series, this means that it \strong{must} be a list of matrices, even if the list
 #' has only one element.
 #'
-#' @exportMethod predict
+#' @details
+#'
+#' The \code{predict} generic can take the usual \code{newdata} argument and it returns the cluster(s) to which
+#' the data belongs; if \code{NULL}, it simply returns the obtained cluster indices. It preprocesses
+#' the data with the corresponding function if available.
 #'
 setMethod("predict", "dtwclust",
           function(object, newdata = NULL, ...) {
@@ -207,7 +206,26 @@ setMethod("predict", "dtwclust",
 # Plot
 # ========================================================================================================
 
+#' @rdname dtwclust-methods
+#' @aliases plot,dtwclust,missing-method
+#' @exportMethod plot
+#'
+#' @param y Ignored.
+#' @param ... For \code{plot}, further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting
+#' of the \emph{cluster centroids}, or to \code{\link[stats]{plot.hclust}}. See details. For \code{update}, any
+#' supported argument. Otherwise, currently ignored.
+#' @param clus A numeric vector indicating which clusters to plot.
+#' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
+#' information
+#' @param data The data in the same format as it was provided to \code{\link{dtwclust}}.
+#' @param time Optional values for the time axis. If series have different lengths, provide the time values of
+#' the longest series.
+#' @param plot Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot object without
+#' printing anything to screen
+#' @param type What to plot. \code{NULL} means default. See details.
+#'
 #' @details
+#'
 #' The plot method uses the \code{ggplot2} plotting system (see \code{\link[ggplot2]{ggplot}}).
 #'
 #' The default depends on whether a hierarchical method was used or not. In those cases, the dendrogram is
@@ -232,26 +250,7 @@ setMethod("predict", "dtwclust",
 #' If created, the function returns the \code{gg} object invisibly, in case you want to modify it to your
 #' liking. You might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 #'
-#' @param y Ignored.
-#' @param ... For \code{plot}, further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting
-#' of the \emph{cluster centroids}, or to \code{\link[stats]{plot.hclust}}. See details. For \code{update}, any
-#' supported argument. Otherwise, currently ignored.
-#' @param clus A numeric vector indicating which clusters to plot.
-#' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
-#' information
-#' @param data The data in the same format as it was provided to \code{\link{dtwclust}}.
-#' @param time Optional values for the time axis. If series have different lengths, provide the time values of
-#' the longest series.
-#' @param plot Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot object without
-#' printing anything to screen
-#' @param type What to plot. \code{NULL} means default. See details.
-#'
 #' @return The plot method returns a \code{gg} object (or \code{NULL} for dendrogram plot) invisibly.
-#'
-#' @rdname dtwclust-methods
-#' @aliases plot,dtwclust,missing-method
-#'
-#' @exportMethod plot
 #'
 setMethod("plot", signature(x = "dtwclust", y = "missing"),
           function(x, y, ...,
@@ -605,23 +604,20 @@ setMethod("cvi", signature(a = "dtwclust"),
 # Rand Index from flexclust package
 # ========================================================================================================
 
-#' @title
 #' Compare partitions
 #'
-#' @description
 #' Compute the (adjusted) Rand, Jaccard and Fowlkes-Mallows index for agreement of two partitions.
 #' This generic is included in the \code{flexclust} package.
+#'
+#' @name randIndex
+#' @rdname randIndex
+#' @exportMethod randIndex
+#'
+#' @param x,y,correct,original See \code{\link[flexclust]{randIndex}}.
 #'
 #' @seealso
 #'
 #' \code{\link[flexclust]{randIndex}}
-#'
-#' @name randIndex
-#' @rdname randIndex
-#'
-#' @param x,y,correct,original See \code{\link[flexclust]{randIndex}}.
-#'
-#' @exportMethod randIndex
 #'
 NULL
 
@@ -656,27 +652,22 @@ setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
 # Cluster Similarity from flexclust
 # ========================================================================================================
 
-#' @title
 #' Cluster Similarity Matrix
 #'
-#' @description
 #' Returns a matrix of cluster similarities. Currently two methods for computing
-#' similarities of clusters are implemented.
-#' This generic is included in the \code{flexclust} package.
+#' similarities of clusters are implemented. This generic is included in the
+#' \code{flexclust} package.
+#'
+#' @name clusterSim
+#' @rdname clusterSim
+#' @aliases clusterSim,dtwclust-method
+#' @exportMethod clusterSim
+#'
+#' @param object,data,method,symmetric,... See \code{\link[flexclust]{clusterSim}}.
 #'
 #' @seealso
 #'
 #' \code{\link[flexclust]{clusterSim}}
-#'
-#' @name clusterSim
-#' @rdname clusterSim
-#'
-#' @param object,data,method,symmetric,... See \code{\link[flexclust]{clusterSim}}.
-#'
-#' @exportMethod clusterSim
-#'
-#' @rdname clusterSim
-#' @aliases clusterSim,dtwclust-method
 #'
 setMethod("clusterSim", "dtwclust",
           function (object, data = NULL,
@@ -802,10 +793,12 @@ setAs("NULL", "dtwclustControl",
 # ========================================================================================================
 # Functions to support package 'clue'
 # ========================================================================================================
+#' @rdname dtwclust-methods
+#'
 #' @details
+#'
 #' Several methods from package \pkg{clue} are also provided in order to support its functions.
 #'
-#' @rdname dtwclust-methods
 
 #' @rdname dtwclust-methods
 #' @export
@@ -836,10 +829,9 @@ as.cl_membership.dtwclust <- function(x) {
 }
 
 #' @rdname dtwclust-methods
+#' @export
 #'
 #' @param k See \code{\link[clue]{cl_membership}}
-#'
-#' @export
 #'
 cl_membership.dtwclust <- function(x, k = n_of_classes(x)) {
     as.cl_membership(x)

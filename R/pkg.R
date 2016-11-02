@@ -6,6 +6,12 @@
 #' k-Shape and TADPole clustering. Functionality can be easily extended with custom distance
 #' measures and centroid definitions.
 #'
+#' @docType package
+#' @name dtwclust-package
+#' @include utils.R
+#'
+#' @details
+#'
 #' Many of the algorithms implemented in this package are specifically tailored to time series and
 #' DTW, hence its name. However, the main clustering function is flexible so that one can test many
 #' different clustering approaches, using either the time series directly, or by applying suitable
@@ -32,9 +38,6 @@
 #' For more information, please read the included package vignette, which can be accessed by typing
 #' \code{vignette("dtwclust")}.
 #'
-#' @docType package
-#' @name dtwclust-package
-#'
 #' @author Alexis Sarda-Espinosa
 #'
 #' @references
@@ -44,8 +47,6 @@
 #' @seealso
 #'
 #' \code{\link{dtwclust}}, \code{\link[proxy]{dist}}, \code{\link[dtw]{dtw}}
-#'
-#' @include utils.R
 #'
 #' @useDynLib dtwclust
 #'
@@ -57,19 +58,28 @@
 #' @importFrom dtw dtw
 #' @importFrom dtw symmetric1
 #' @importFrom dtw symmetric2
+#'
 #' @importFrom caTools runmin
 #' @importFrom caTools runmax
+#'
 #' @importFrom flexclust randIndex
 #' @importFrom flexclust clusterSim
 #' @importFrom flexclust comPart
+#'
 #' @importFrom graphics plot
+#'
 #' @importFrom parallel splitIndices
+#'
 #' @importFrom proxy dist
 #' @importFrom proxy pr_DB
+#'
 #' @importFrom Rcpp evalCpp
+#'
 #' @importFrom reshape2 melt
+#'
 #' @importFrom rngtools RNGseq
 #' @importFrom rngtools setRNG
+#'
 #' @importFrom stats aggregate
 #' @importFrom stats approx
 #' @importFrom stats convolve
@@ -83,6 +93,7 @@
 #' @importFrom stats runif
 #' @importFrom stats as.dist
 #' @importFrom stats as.hclust
+#'
 #' @importFrom utils packageVersion
 #' @importFrom utils head
 #'

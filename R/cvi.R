@@ -3,6 +3,18 @@
 #' Compute different cluster validity indices (CVIs) of a given cluster partition, using the
 #' clustering distance measure and centroid function if applicable.
 #'
+#' @exportMethod cvi
+#'
+#' @param a An object returned by the \code{\link{dtwclust}} function, or a vector that can be coerced to
+#' integers which indicate the cluster memeberships.
+#' @param b If needed, a vector that can be coerced to integers which indicate the cluster memeberships.
+#' The ground truth (if known) should be provided here.
+#' @param type Character vector indicating which indices are to be computed. See supported values below.
+#' @param ... Arguments to pass to and from other methods.
+#' @param log.base Base of the logarithm to be used in the calculation of VI.
+#'
+#' @details
+#'
 #' Clustering is commonly considered to be an unsupervised procedure, so evaluating its performance
 #' can be rather subjective. However, a great amount of effort has been invested in trying to standardize
 #' cluster evaluation metrics by using cluster validity indices (CVIs).
@@ -23,6 +35,8 @@
 #' Note that, even though a fuzzy partition can be changed into a crisp one, making it compatible with many
 #' of the existing CVIs, there are also fuzzy CVIs tailored specifically to fuzzy clustering, and these may
 #' be more suitable in those situations, but have not been implemented here yet.
+#'
+#' @return The chosen CVIs
 #'
 #' @section External CVIs:
 #'
@@ -78,19 +92,6 @@
 #' Some internal indices require the original data for calculations, so the control flag \code{save.data}
 #' must be set to \code{TRUE} when running the clustering algorithm.
 #'
-#' @name cvi
-#' @rdname cvi
-#'
-#' @param a An object returned by the \code{\link{dtwclust}} function, or a vector that can be coerced to
-#' integers which indicate the cluster memeberships.
-#' @param b If needed, a vector that can be coerced to integers which indicate the cluster memeberships.
-#' The ground truth (if known) should be provided here.
-#' @param type Character vector indicating which indices are to be computed. See supported values below.
-#' @param ... Arguments to pass to and from other methods.
-#' @param log.base Base of the logarithm to be used in the calculation of VI.
-#'
-#' @return The chosen CVIs
-#'
 #' @references
 #'
 #' Arbelaitz, O., Gurrutxaga, I., Muguerza, J., Perez, J. M., & Perona, I. (2013). An extensive
@@ -105,8 +106,6 @@
 #' Saitta, S., Raphael, B., & Smith, I. F. (2007). A bounded index for cluster validity.
 #' In International Workshop on Machine Learning and Data Mining in Pattern Recognition (pp. 174-187).
 #' Springer Berlin Heidelberg.
-#'
-#' @exportMethod cvi
 #'
 setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10) {
     ## Only external CVIs for default, dtwclust-methods.R has the internal ones

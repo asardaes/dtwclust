@@ -2,6 +2,8 @@
 #'
 #' Distance based on (triangular) global alignment kernels.
 #'
+#' @export
+#'
 #' @param x,y Time series. A multivariate series should have time spanning the rows and variables spanning
 #' the columns.
 #' @param ... Currently ignored.
@@ -12,8 +14,6 @@
 #' the logarithm calculations. Used internally for memory optimization. If provided, it \strong{will}
 #' be modified \emph{in place} by \code{C} code, except in the parallel version in
 #' \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.
-#'
-#' @export
 #'
 #' @details
 #'

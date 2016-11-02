@@ -3,6 +3,19 @@
 #' Calculation of a distance matrix with the Dynamic Time Warping (DTW) distance guided by Lemire's
 #' improved lower bound (LB_Improved).
 #'
+#' @export
+#'
+#' @param x,y A matrix where rows are time series, or a list of time series.
+#' @param window.size Window size to use with the LB and DTW calculation. See details.
+#' @param norm Pointwise distance. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.
+#' @param error.check Should inconsistencies in the data be checked?
+#' @param pairwise Calculate pairwise distances?
+#' @param dtw.func Which function to use for core DTW the calculations, either "dtw" or "dtw_basic". See
+#' \code{\link[dtw]{dtw}} and \code{\link{dtw_basic}}.
+#' @param ... Further arguments for \code{dtw.func} or \code{\link{lb_improved}}.
+#'
+#' @details
+#'
 #' This function first calculates an initial estimate of a distance matrix between two sets of time series
 #' using LB_Improved. Afterwards, it uses the estimate to calculate the corresponding true DTW distance
 #' between \emph{only} the nearest neighbors of each series in \code{x} found in \code{y}, and it continues
@@ -19,6 +32,8 @@
 #' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21} observations falling within
 #' the window.
 #'
+#' @return The distance matrix with class \code{crossdist}.
+#'
 #' @section Parallel Computing:
 #'
 #' Please note that running tasks in parallel does \strong{not} guarantee faster computations.
@@ -31,9 +46,7 @@
 #'
 #' This function uses a lower bound that is only defined for time series of equal length.
 #'
-#' @seealso
-#'
-#' \code{\link{lb_keogh}}, \code{\link{lb_improved}}
+#' @author Alexis Sarda-Espinosa
 #'
 #' @references
 #'
@@ -41,6 +54,10 @@
 #' \emph{Pattern Recognition}, \strong{42}(9), pp. 2169 - 2180. ISSN 0031-3203,
 #' \url{http://dx.doi.org/10.1016/j.patcog.2008.11.030},
 #' \url{http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
+#'
+#' @seealso
+#'
+#' \code{\link{lb_keogh}}, \code{\link{lb_improved}}
 #'
 #' @examples
 #'
@@ -90,21 +107,6 @@
 #' cbind(names(data[1:50]), names(data[51:100][NN]))
 #' }
 #'
-#' @author Alexis Sarda-Espinosa
-#'
-#' @param x,y A matrix where rows are time series, or a list of time series.
-#' @param window.size Window size to use with the LB and DTW calculation. See details.
-#' @param norm Pointwise distance. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.
-#' @param error.check Should inconsistencies in the data be checked?
-#' @param pairwise Calculate pairwise distances?
-#' @param dtw.func Which function to use for core DTW the calculations, either "dtw" or "dtw_basic". See
-#' \code{\link[dtw]{dtw}} and \code{\link{dtw_basic}}.
-#' @param ... Further arguments for \code{dtw.func} or \code{\link{lb_improved}}.
-#'
-#' @return The distance matrix with class \code{crossdist}.
-#'
-#' @export
-
 dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                    error.check = TRUE, pairwise = FALSE,
                    dtw.func = "dtw_basic", ...) {

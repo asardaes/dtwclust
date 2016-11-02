@@ -3,6 +3,8 @@
 #' Wrapper for function \code{\link[base]{scale}} that returns zeros instead of \code{NaN}. It also
 #' supports a list of vectors and a matrix input.
 #'
+#' @export
+#'
 #' @param x Data to normalize. Either a vector, a matrix/data.frame where each row is to be normalized, or a list of
 #' vectors.
 #' @param ... Further arguments to pass to \code{\link[base]{scale}}.
@@ -12,8 +14,6 @@
 #' be preserved?
 #'
 #' @return Normalized data in the same format as provided.
-#'
-#' @export
 #'
 zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE) {
     if (is.list(x)) {

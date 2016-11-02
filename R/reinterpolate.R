@@ -3,6 +3,8 @@
 #' This function is just a wrapper for the native function \code{\link[stats]{approx}} to do simple linear
 #' reinterpolation.
 #'
+#' @export
+#'
 #' @param x Data to reinterpolate. Either a vector, a matrix/data.frame where each row is to be reinterpolated, or a list of
 #' vectors.
 #' @param new.length Desired length of the output series.
@@ -10,8 +12,6 @@
 #' \code{x}.
 #'
 #' @return Reinterpolated time series
-#'
-#' @export
 #'
 reinterpolate <- function(x, new.length, multivariate = FALSE) {
     if (is.list(x)) {

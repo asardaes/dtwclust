@@ -3,6 +3,22 @@
 #' This function calculates a lower bound (LB) on the Dynamic Time Warp (DTW) distance between two time
 #' series. It uses a Sakoe-Chiba constraint.
 #'
+#' @export
+#'
+#' @param x A time series (reference).
+#' @param y A time series with the same length as \code{x} (query).
+#' @param window.size Window size for envelope calculation. See details.
+#' @param norm Vector norm. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.
+#' @param lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided
+#' (non-proxy version only).
+#' @param upper.env Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided
+#' (non-proxy version only).
+#' @param force.symmetry If \code{TRUE}, a second lower bound is calculated by swapping \code{x} and
+#' \code{y}, and whichever result has a \emph{higher} distance value is returned. The proxy version
+#' can only work if a square matrix is obtained, but use carefully.
+#'
+#' @details
+#'
 #' The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
 #' that represents the distance between the point considered and one of the edges of the window. Therefore,
 #' if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
@@ -10,6 +26,12 @@
 #' the window.
 #'
 #' The reference time series should go in \code{x}, whereas the query time series should go in \code{y}.
+#'
+#' @return A list with: \itemize{
+#'   \item \code{d}: The lower bound of the DTW distance.
+#'   \item \code{upper.env}: The time series of \code{y}'s upper envelope.
+#'   \item \code{lower.env}: The time series of \code{y}'s lower envelope.
+#' }
 #'
 #' @note
 #'
@@ -53,26 +75,6 @@
 #'                      window.type = "slantedband", window.size = 20)
 #'
 #' D.lbk <= D.dtw
-#'
-#' @param x A time series (reference).
-#' @param y A time series with the same length as \code{x} (query).
-#' @param window.size Window size for envelope calculation. See details.
-#' @param norm Vector norm. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.
-#' @param lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided
-#' (non-proxy version only).
-#' @param upper.env Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided
-#' (non-proxy version only).
-#' @param force.symmetry If \code{TRUE}, a second lower bound is calculated by swapping \code{x} and
-#' \code{y}, and whichever result has a \emph{higher} distance value is returned. The proxy version
-#' can only work if a square matrix is obtained, but use carefully.
-#'
-#' @return A list with: \itemize{
-#'   \item \code{d}: The lower bound of the DTW distance.
-#'   \item \code{upper.env}: The time series of \code{y}'s upper envelope.
-#'   \item \code{lower.env}: The time series of \code{y}'s lower envelope.
-#' }
-#'
-#' @export
 #'
 lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
                      lower.env = NULL, upper.env = NULL, force.symmetry = FALSE) {

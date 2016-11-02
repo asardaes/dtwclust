@@ -2,6 +2,13 @@
 #'
 #' Formal S4 class with a family of functions used in \code{\link{dtwclust}}.
 #'
+#' @name dtwclustFamily-class
+#' @rdname dtwclustFamily-class
+#' @aliases dtwclustFamily
+#' @exportClass dtwclustFamily
+#'
+#' @details
+#'
 #' The custom implementations also handle parallelization.
 #'
 #' Since the distance function makes use of \code{proxy}, it also supports any extra \code{\link[proxy]{dist}}
@@ -15,20 +22,13 @@
 #' @slot cluster The function used to assign a series to a cluster.
 #' @slot preproc The function used to preprocess the data (relevant for \code{\link[stats]{predict}}).
 #'
-#' @name dtwclustFamily-class
-#' @rdname dtwclustFamily-class
-#' @aliases dtwclustFamily
-#'
-#' @exportClass dtwclustFamily
-#'
 setClass("dtwclustFamily",
-
          slots = c(dist = "function",
                    allcent = "function",
                    cluster = "function",
                    preproc = "function"),
-
          prototype = prototype(preproc = function(x, ...) x,
+
                                cluster = function(distmat = NULL, ...) {
                                    if (is.null(distmat))
                                        stop("Something is wrong, couldn't calculate distances.")
@@ -37,23 +37,21 @@ setClass("dtwclustFamily",
                                })
 )
 
+## For window.size
+setClassUnion("intORnull", c("integer", "NULL"))
+
 #' Class definition for \code{dtwclustControl}
 #'
 #' Formal S4 class with several control parameters used in \code{\link{dtwclust}}.
 #'
+#' @name dtwclustControl-class
+#' @rdname dtwclustControl-class
+#' @aliases dtwclustControl
+#' @exportClass dtwclustControl
+#'
+#' @details
+#'
 #' Default values are shown at the end.
-#'
-#' @section Common parameters:
-#'
-#' \itemize{
-#'   \item \code{window.size} = \code{NULL}
-#'   \item \code{norm} = "L1"
-#'   \item \code{delta} = 1e-3
-#'   \item \code{trace} = \code{FALSE}
-#'   \item \code{save.data} = \code{TRUE}
-#'   \item \code{symmetric} = \code{FALSE}
-#'   \item \code{packages} = \code{character(0)}
-#' }
 #'
 #' @slot window.size Integer or \code{NULL}. Window constraint for DTW, DBA and LB calculations.
 #' @slot norm Character. Pointwise distance for DTW, DBA and the LBs. Either \code{"L1"} for Manhattan distance
@@ -68,6 +66,28 @@ setClass("dtwclustFamily",
 #' @slot packages Character vector with the names of any packages required for custom \code{proxy} functions.
 #' See Parallel Computing section in \code{\link{dtwclust}}.
 #'
+#' @slot dba.iter Integer. Maximum number of iterations for \code{\link{DBA}} centroids.
+#' @slot pam.precompute Logical flag. Precompute the whole distance matrix once and reuse it on each iteration
+#' if using PAM centroids. Otherwise calculate distances at every iteration.
+#'
+#' @slot fuzziness Numeric. Exponent used for fuzzy clustering. Commonly termed \code{m} in the literature.
+#'
+#' @slot iter.max Integer. Maximum number of iterations.
+#' @slot nrep Integer. How many times to repeat clustering with different starting points. See section
+#' Repetitions in \code{\link{dtwclust}}.
+#'
+#' @section Common parameters:
+#'
+#' \itemize{
+#'   \item \code{window.size} = \code{NULL}
+#'   \item \code{norm} = "L1"
+#'   \item \code{delta} = 1e-3
+#'   \item \code{trace} = \code{FALSE}
+#'   \item \code{save.data} = \code{TRUE}
+#'   \item \code{symmetric} = \code{FALSE}
+#'   \item \code{packages} = \code{character(0)}
+#' }
+#'
 #' @section Only for partitional procedures:
 #'
 #' \itemize{
@@ -75,17 +95,11 @@ setClass("dtwclustFamily",
 #'   \item \code{pam.precompute} = \code{TRUE}
 #' }
 #'
-#' @slot dba.iter Integer. Maximum number of iterations for \code{\link{DBA}} centroids.
-#' @slot pam.precompute Logical flag. Precompute the whole distance matrix once and reuse it on each iteration
-#' if using PAM centroids. Otherwise calculate distances at every iteration.
-#'
 #' @section Only for fuzzy clustering:
 #'
 #' \itemize{
 #'   \item \code{fuzziness} = \code{2}
 #' }
-#'
-#' @slot fuzziness Numeric. Exponent used for fuzzy clustering. Commonly termed \code{m} in the literature.
 #'
 #' @section For both partitional and fuzzy:
 #'
@@ -94,22 +108,7 @@ setClass("dtwclustFamily",
 #'   \item \code{nrep} = \code{1L}
 #' }
 #'
-#' @slot iter.max Integer. Maximum number of iterations.
-#' @slot nrep Integer. How many times to repeat clustering with different starting points. See section
-#' Repetitions in \code{\link{dtwclust}}.
-#'
-#' @name dtwclustControl-class
-#' @rdname dtwclustControl-class
-#' @aliases dtwclustControl
-#'
-#' @exportClass dtwclustControl
-#'
-NULL
-
-setClassUnion("intORnull", c("integer", "NULL"))
-
 setClass("dtwclustControl",
-
          slots = c(window.size = "intORnull",
                    norm = "character",
                    dba.iter = "integer",
@@ -122,7 +121,6 @@ setClass("dtwclustControl",
                    save.data = "logical",
                    symmetric = "logical",
                    packages = "character"),
-
          prototype = prototype(window.size = NULL,
                                norm = "L1",
                                dba.iter = 15L,
@@ -137,9 +135,24 @@ setClass("dtwclustControl",
                                packages = character(0))
 )
 
+## For dtwclust class
+setClass("proc_time4", contains = "numeric", slots = c(names = "character"))
+setOldClass("proc_time", S4Class = "proc_time4")
+removeClass("proc_time4")
+
+setClass("hclust4", contains = "list", slots = c(names = "character"))
+setOldClass("hclust", S4Class = "hclust4")
+removeClass("hclust4")
+
 #' Class definition for \code{dtwclust}
 #'
 #' Formal S4 class.
+#'
+#' @name dtwclust-class
+#' @rdname dtwclust-class
+#' @exportClass dtwclust
+#'
+#' @details
 #'
 #' This class contains \code{\link[stats]{hclust}} as superclass and supports all its methods. Plot is a
 #' special case (see \code{\link{dtwclust-methods}}).
@@ -173,21 +186,6 @@ setClass("dtwclustControl",
 #' @slot proctime Time during function execution, as measured with \code{\link[base]{proc.time}}.
 #' @slot dots The contents of the original call's ellipsis (...).
 #'
-#' @name dtwclust-class
-#' @rdname dtwclust-class
-#'
-#' @exportClass dtwclust
-#'
-NULL
-
-setClass("proc_time4", contains = "numeric", slots = c(names = "character"))
-setOldClass("proc_time", S4Class = "proc_time4")
-removeClass("proc_time4")
-
-setClass("hclust4", contains = "list", slots = c(names = "character"))
-setOldClass("hclust", S4Class = "hclust4")
-removeClass("hclust4")
-
 setClass("dtwclust", contains = c("hclust"),
          slots = c(call = "call",
                    control = "dtwclustControl",

@@ -3,6 +3,14 @@
 #' Wrapper for the \code{\link[dtw]{dtw}} function using L2 norm for both the local cost matrix (LCM)
 #' creation as well as the final cost aggregation step.
 #'
+#' @export
+#'
+#' @param x,y A time series. A multivariate series should have time spanning the rows and variables spanning
+#' the columns.
+#' @param ... Further arguments for \code{\link[dtw]{dtw}}.
+#'
+#' @details
+#'
 #' The L-norms are used in two different steps by the DTW algorithm. First when creating the LCM, where
 #' the element \eqn{(i,j)} of the matrix is computed as the L-norm of \eqn{x^v_i - y^v_j} for all variables
 #' \eqn{v}. Note that this means that, in case of multivariate series, they must have the same number of
@@ -22,13 +30,7 @@
 #' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21} observations falling within
 #' the window.
 #'
-#' @param x,y A time series. A multivariate series should have time spanning the rows and variables spanning
-#' the columns.
-#' @param ... Further arguments for \code{\link[dtw]{dtw}}.
-#'
 #' @return An object of class \code{dtw}.
-#'
-#' @export
 #'
 dtw2 <- function(x, y, ...) {
     lcm <- proxy::dist(x, y, method = "L1")

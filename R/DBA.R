@@ -2,6 +2,30 @@
 #'
 #' A global averaging method for time series under DTW (Petitjean, Ketterlin and Gancarski, 2011).
 #'
+#' @export
+#'
+#' @param X A data matrix where each row is a time series, or a list where each element is a time series.
+#' Multivariate series should be provided as a list of matrices where time spans the rows and the variables
+#' span the columns.
+#' @param centroid Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
+#' \code{NULL}. For multivariate series, this should be a matrix with the same characteristics as the
+#' matrices in \code{X}.
+#' @param ... Further arguments for \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}, e.g.
+#' \code{step.pattern}.
+#' @param window.size Window constraint for the DTW calculations. \code{NULL} means no constraint. A slanted
+#' band is used by default.
+#' @param norm Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for Euclidean
+#' distance.
+#' @param max.iter Maximum number of iterations allowed.
+#' @param delta At iteration \code{i}, if \code{all(abs(centroid_{i}} \code{ - centroid_{i-1})} \code{ < delta)},
+#' convergence is assumed.
+#' @param error.check Should inconsistencies in the data be checked?
+#' @param trace If \code{TRUE}, the current iteration is printed to screen.
+#' @param dba.alignment Character indicating which function to use for calculating alignments, either
+#' \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}. The latter should be faster.
+#'
+#' @details
+#'
 #' This function tries to find the optimum average series between a group of time series in DTW space. Refer to
 #' the cited article for specific details on the algorithm.
 #'
@@ -13,6 +37,8 @@
 #' if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
 #' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21} observations falling within
 #' the window.
+#'
+#' @return The average time series.
 #'
 #' @section Parallel Computing:
 #'
@@ -67,31 +93,6 @@
 #' registerDoSEQ()
 #' }
 #'
-#' @param X A data matrix where each row is a time series, or a list where each element is a time series.
-#' Multivariate series should be provided as a list of matrices where time spans the rows and the variables
-#' span the columns.
-#' @param centroid Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
-#' \code{NULL}. For multivariate series, this should be a matrix with the same characteristics as the
-#' matrices in \code{X}.
-#' @param ... Further arguments for \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}, e.g.
-#' \code{step.pattern}.
-#' @param window.size Window constraint for the DTW calculations. \code{NULL} means no constraint. A slanted
-#' band is used by default.
-#' @param norm Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for Euclidean
-#' distance.
-#' @param max.iter Maximum number of iterations allowed.
-#' @param delta At iteration \code{i}, if \code{all(abs(centroid_{i}} \code{ - centroid_{i-1})} \code{ < delta)},
-#' convergence is assumed.
-#' @param error.check Should inconsistencies in the data be checked?
-#' @param trace If \code{TRUE}, the current iteration is printed to screen.
-#' @param dba.alignment Character indicating which function to use for calculating alignments, either
-#' \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}. The latter should be faster.
-#'
-#' @return The average time series.
-#'
-#' @export
-#'
-
 DBA <- function(X, centroid = NULL, ...,
                 window.size = NULL, norm = "L1",
                 max.iter = 20L, delta = 1e-3,

@@ -4,6 +4,32 @@
 #' k-Shape and TADPole clustering. See the details and the examples for more information, as well as the
 #' included package vignette (which can be loaded by typing \code{vignette("dtwclust")}).
 #'
+#' @export
+#'
+#' @param data A list of series, a numeric matrix or a data frame. Matrices and data frames are coerced row-wise.
+#' @param type What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"}, \code{"tadpole"}
+#' or \code{"fuzzy"}.
+#' @param k Number of desired clusters. It may be a numeric vector with different values.
+#' @param method Character vector with one or more linkage methods to use in hierarchical procedures (see
+#' \code{\link[stats]{hclust}}) or a function that performs hierarchical clustering based on distance matrices
+#' (e.g. \code{\link[cluster]{diana}}). See Hierarchical section for more details.
+#' @param distance A supported distance from \code{proxy}'s \code{\link[proxy]{dist}} (see Distance section).
+#' Ignored for \code{type} = \code{"tadpole"}.
+#' @param centroid Either a supported string or an appropriate function to calculate centroids
+#' when using partitional or prototypes for hierarchical/tadpole methods. See Centroid section.
+#' @param preproc Function to preprocess data. Defaults to \code{\link{zscore}} \emph{only} if \code{centroid}
+#' \code{=} \code{"shape"}, but will be replaced by a custom function if provided. See Preprocessing section.
+#' @param dc Cutoff distance for the \code{\link{TADPole}} algorithm.
+#' @param control Named list of parameters or \code{dtwclustControl} object for clustering algorithms. See
+#' \code{\link{dtwclustControl}}. \code{NULL} means defaults.
+#' @param seed Random seed for reproducibility.
+#' @param distmat If a cross-distance matrix is already available, it can be provided here so it's re-used.
+#' Only relevant if \code{centroid} = "pam" or \code{type} = "hierarchical". See examples.
+#' @param ... Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function (preprocessing,
+#' centroid, etc.)
+#'
+#' @details
+#'
 #' Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering is done
 #' with \code{\link[stats]{hclust}}. TADPole clustering uses the \code{\link{TADPole}} function. Specifying
 #' \code{type} = \code{"partitional"}, \code{distance} = \code{"sbd"} and \code{centroid} = \code{"shape"} is
@@ -25,6 +51,13 @@
 #' Several parameters can be adjusted with the \code{control} argument. See \code{\link{dtwclustControl}}. In
 #' the following sections, elements marked with an asterisk (*) are those that can be adjutsed with this
 #' argument.
+#'
+#' @return
+#'
+#' An object with formal class \code{\link{dtwclust-class}}.
+#'
+#' If \code{control@nrep > 1} and a partitional procedure is used, \code{length(method)} \code{> 1} and
+#' hierarchical procedures are used, or \code{length(k)} \code{>} \code{1}, a list of objects is returned.
 #'
 #' @section Partitional Clustering:
 #'
@@ -274,49 +307,19 @@
 #'
 #' The lower bounds are \strong{not} symmetric, and \code{DTW} is not symmetric in general.
 #'
+#' @author Alexis Sarda-Espinosa
+#'
 #' @references
 #'
 #' Please refer to the package vignette references.
-#'
-#' @example inst/dtwclust-examples.R
 #'
 #' @seealso
 #'
 #' \code{\link{dtwclust-methods}}, \code{\link{dtwclust-class}}, \code{\link{dtwclustControl}},
 #' \code{\link{dtwclustFamily}}.
 #'
-#' @author Alexis Sarda-Espinosa
+#' @example inst/dtwclust-examples.R
 #'
-#' @param data A list of series, a numeric matrix or a data frame. Matrices and data frames are coerced row-wise.
-#' @param type What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"}, \code{"tadpole"}
-#' or \code{"fuzzy"}.
-#' @param k Number of desired clusters. It may be a numeric vector with different values.
-#' @param method Character vector with one or more linkage methods to use in hierarchical procedures (see
-#' \code{\link[stats]{hclust}}) or a function that performs hierarchical clustering based on distance matrices
-#' (e.g. \code{\link[cluster]{diana}}). See Hierarchical section for more details.
-#' @param distance A supported distance from \code{proxy}'s \code{\link[proxy]{dist}} (see Distance section).
-#' Ignored for \code{type} = \code{"tadpole"}.
-#' @param centroid Either a supported string or an appropriate function to calculate centroids
-#' when using partitional or prototypes for hierarchical/tadpole methods. See Centroid section.
-#' @param preproc Function to preprocess data. Defaults to \code{\link{zscore}} \emph{only} if \code{centroid}
-#' \code{=} \code{"shape"}, but will be replaced by a custom function if provided. See Preprocessing section.
-#' @param dc Cutoff distance for the \code{\link{TADPole}} algorithm.
-#' @param control Named list of parameters or \code{dtwclustControl} object for clustering algorithms. See
-#' \code{\link{dtwclustControl}}. \code{NULL} means defaults.
-#' @param seed Random seed for reproducibility.
-#' @param distmat If a cross-distance matrix is already available, it can be provided here so it's re-used.
-#' Only relevant if \code{centroid} = "pam" or \code{type} = "hierarchical". See examples.
-#' @param ... Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function (preprocessing,
-#' centroid, etc.)
-#'
-#' @return An object with formal class \code{\link{dtwclust-class}}.
-#'
-#' If \code{control@nrep > 1} and a partitional procedure is used, \code{length(method)} \code{> 1} and
-#' hierarchical procedures are used, or \code{length(k)} \code{>} \code{1}, a list of objects is returned.
-#'
-#' @export
-#'
-
 dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "average",
                      distance = "dtw_basic", centroid = "pam", preproc = NULL,
                      dc = NULL, control = NULL, seed = NULL, distmat = NULL,

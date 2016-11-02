@@ -3,6 +3,12 @@
 #' This function uses FFT to compute the cross-correlation sequence between two series. They need not be of
 #' equal length.
 #'
+#' @export
+#'
+#' @param x,y Univariate time series.
+#'
+#' @return The cross-correlation sequence with length \code{length(x) + length(y) - 1L}.
+#'
 #' @references
 #'
 #' Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.''
@@ -12,12 +18,6 @@
 #' @seealso
 #'
 #' \code{\link{SBD}}
-#'
-#' @param x,y Univariate time series.
-#'
-#' @return The cross-correlation sequence with length \code{length(x) + length(y) - 1L}.
-#'
-#' @export
 #'
 NCCc <- function(x, y) {
     # Notice that the native 'convolve' function already uses FFT for the calculation

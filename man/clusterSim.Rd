@@ -14,8 +14,8 @@
 }
 \description{
 Returns a matrix of cluster similarities. Currently two methods for computing
-similarities of clusters are implemented.
-This generic is included in the \code{flexclust} package.
+similarities of clusters are implemented. This generic is included in the
+\code{flexclust} package.
 }
 \seealso{
 \code{\link[flexclust]{clusterSim}}

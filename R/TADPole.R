@@ -2,6 +2,16 @@
 #'
 #' Time-series Anytime Density Peaks Clustering as proposed by Begum et al., 2015.
 #'
+#' @export
+#'
+#' @param data The data matrix where each row is a time series. Optionally a list with each time series.
+#' @param window.size Window size constraint for DTW. See details.
+#' @param k The number of desired clusters.
+#' @param dc The cutoff distance.
+#' @param error.check Should the data be checked for inconsistencies?
+#'
+#' @details
+#'
 #' This function can be called either directly or through \code{\link{dtwclust}}.
 #'
 #' TADPole clustering adopts a relatively new clustering framework and adapts it to time series clustering
@@ -25,6 +35,12 @@
 #' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21} observations falling within
 #' the window.
 #'
+#' @return A list with: \itemize{
+#'   \item \code{cl}: Cluster indices.
+#'   \item \code{centroids}: Indices of the centroids.
+#'   \item \code{distCalcPercentage}: Percentage of distance calculations that were actually performed.
+#' }
+#'
 #' @section Parallel Computing:
 #'
 #' Please note that running tasks in parallel does \strong{not} guarantee faster computations.
@@ -32,6 +48,12 @@
 #'
 #' The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to attempt to
 #' speed up the calculations (see the examples).
+#'
+#' @references
+#'
+#' Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering with a Novel Admissible Pruning
+#' Strategy.'' In \emph{Conference on Knowledge Discovery and Data Mining}, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{
+#' http://dx.doi.org/10.1145/2783258.2783286}.
 #'
 #' @examples
 #'
@@ -62,26 +84,6 @@
 #' # Compute VI Index
 #' cat("VI index for TADPole:", cvi(kc.tadp$cl, CharTrajLabels, "VI"), "\n\n")
 #' }
-#'
-#' @references
-#'
-#' Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering with a Novel Admissible Pruning
-#' Strategy.'' In \emph{Conference on Knowledge Discovery and Data Mining}, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{
-#' http://dx.doi.org/10.1145/2783258.2783286}.
-#'
-#' @param data The data matrix where each row is a time series. Optionally a list with each time series.
-#' @param window.size Window size constraint for DTW. See details.
-#' @param k The number of desired clusters.
-#' @param dc The cutoff distance.
-#' @param error.check Should the data be checked for inconsistencies?
-#'
-#' @return A list with: \itemize{
-#'   \item \code{cl}: Cluster indices.
-#'   \item \code{centroids}: Indices of the centroids.
-#'   \item \code{distCalcPercentage}: Percentage of distance calculations that were actually performed.
-#' }
-#'
-#' @export
 #'
 TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE) {
     if (missing(window.size))
