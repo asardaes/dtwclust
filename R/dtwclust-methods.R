@@ -371,7 +371,8 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
 
               ## add series next if appropriate
               if (type %in% c("sc", "series")) {
-                  gg <- gg + geom_line(data = dfm[dfm$cl %in% clus, ], aes(colour = color))
+                  gg <- gg + geom_line(data = dfm[dfm$cl %in% clus, ],
+                                       aes_string(colour = "color"))
               }
 
               ## add facets, remove legend, apply kinda black-white theme
