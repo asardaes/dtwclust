@@ -50,12 +50,12 @@
 
 \item{...}{For \code{plot}, further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting
 of the \emph{cluster centroids}, or to \code{\link[stats]{plot.hclust}}. See details. For \code{update}, any
-supported argument. Otherwise, currently ignored.}
+supported argument. Otherwise ignored.}
 
 \item{evaluate}{Logical. Defaults to \code{TRUE} and evaluates the updated call, which will result in
 a new \code{dtwclust} object. Otherwise, it returns the unevaluated call.}
 
-\item{newdata}{New data to be evaluated. It can take any of the supported formats of \code{\link{dtwclust}}.
+\item{newdata}{New data to be assigned to a cluster. It can take any of the supported formats of \code{\link{dtwclust}}.
 Note that for multivariate series, this means that it \strong{must} be a list of matrices, even if the list
 has only one element.}
 
@@ -66,7 +66,7 @@ has only one element.}
 \item{labs.arg}{Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
 information}
 
-\item{data}{The data in the same format as it was provided to \code{\link{dtwclust}}.}
+\item{data}{Optionally, the data in the same format as it was provided to \code{\link{dtwclust}}.}
 
 \item{time}{Optional values for the time axis. If series have different lengths, provide the time values of
 the longest series.}
@@ -98,6 +98,11 @@ The \code{predict} generic can take the usual \code{newdata} argument and it ret
 the data belongs; if \code{NULL}, it simply returns the obtained cluster indices. It preprocesses
 the data with the corresponding function if available.
 
+Several methods from package \pkg{clue} are also provided in order to support its functions.
+}
+\section{Plotting}{
+
+
 The plot method uses the \code{ggplot2} plotting system (see \code{\link[ggplot2]{ggplot}}).
 
 The default depends on whether a hierarchical method was used or not. In those cases, the dendrogram is
@@ -122,7 +127,8 @@ use this. Optionally, you can manually provide the data in the \code{data} param
 If created, the function returns the \code{gg} object invisibly, in case you want to modify it to your
 liking. You might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 
-Several methods from package \pkg{clue} are also provided in order to support its functions.
+If you want to free the scale of the X axis, you can do the following
+\code{plot(object, plot = FALSE)} \code{+} \code{facet_wrap(~cl, scales = "free")}
 }
 \seealso{
 \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}},

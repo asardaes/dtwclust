@@ -159,7 +159,7 @@ setMethod("update", "dtwclust",
 #' @aliases predict,dtwclust-method
 #' @exportMethod predict
 #'
-#' @param newdata New data to be evaluated. It can take any of the supported formats of \code{\link{dtwclust}}.
+#' @param newdata New data to be assigned to a cluster. It can take any of the supported formats of \code{\link{dtwclust}}.
 #' Note that for multivariate series, this means that it \strong{must} be a list of matrices, even if the list
 #' has only one element.
 #'
@@ -213,18 +213,18 @@ setMethod("predict", "dtwclust",
 #' @param y Ignored.
 #' @param ... For \code{plot}, further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting
 #' of the \emph{cluster centroids}, or to \code{\link[stats]{plot.hclust}}. See details. For \code{update}, any
-#' supported argument. Otherwise, currently ignored.
+#' supported argument. Otherwise ignored.
 #' @param clus A numeric vector indicating which clusters to plot.
 #' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
 #' information
-#' @param data The data in the same format as it was provided to \code{\link{dtwclust}}.
+#' @param data Optionally, the data in the same format as it was provided to \code{\link{dtwclust}}.
 #' @param time Optional values for the time axis. If series have different lengths, provide the time values of
 #' the longest series.
 #' @param plot Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot object without
 #' printing anything to screen
 #' @param type What to plot. \code{NULL} means default. See details.
 #'
-#' @details
+#' @section Plotting:
 #'
 #' The plot method uses the \code{ggplot2} plotting system (see \code{\link[ggplot2]{ggplot}}).
 #'
@@ -250,13 +250,19 @@ setMethod("predict", "dtwclust",
 #' If created, the function returns the \code{gg} object invisibly, in case you want to modify it to your
 #' liking. You might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 #'
-#' @return The plot method returns a \code{gg} object (or \code{NULL} for dendrogram plot) invisibly.
+#' If you want to free the scale of the X axis, you can do the following
+#' \code{plot(object, plot = FALSE)} \code{+} \code{facet_wrap(~cl, scales = "free")}
+#'
+#' @return
+#'
+#' The plot method returns a \code{gg} object (or \code{NULL} for dendrogram plot) invisibly.
 #'
 setMethod("plot", signature(x = "dtwclust", y = "missing"),
           function(x, y, ...,
                    clus = seq_len(x@k), labs.arg = NULL,
                    data = NULL, time = NULL,
-                   plot = TRUE, type = NULL) {
+                   plot = TRUE, type = NULL)
+          {
               ## set default type if none was provided
               if (!is.null(type))
                   type <- match.arg(type, c("dendrogram", "series", "centroids", "sc"))
@@ -272,7 +278,6 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
                   return(invisible(NULL))
 
               } else if (x@type != "hierarchical" && type == "dendrogram") {
-                  ## dendrogram for non-hierarchical is not possible
                   stop("Dendrogram plot only applies to hierarchical clustering.")
               }
 
@@ -280,81 +285,67 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
               if (!is.null(data)) {
                   data <- consistency_check(data, "tsmat")
 
-                  Lengths <- lengths(data)
-                  L <- max(Lengths)
-                  trail <- L - Lengths
-
-                  df <- mapply(data, trail, SIMPLIFY = FALSE,
-                               FUN = function(series, trail) {
-                                   c(series, rep(NA, trail))
-                               })
-
-              } else if (length(x@datalist) > 0L) {
-                  Lengths <- lengths(x@datalist)
-                  L <- max(Lengths)
-                  trail <- L - Lengths
-
-                  df <- mapply(x@datalist, trail, SIMPLIFY = FALSE,
-                               FUN = function(series, trail) {
-                                   c(series, rep(NA, trail))
-                               })
               } else {
-                  stop("Provided object has no data. Please re-run the algorithm with save.data = TRUE
-                         or provide the data manually.")
+                  if (length(x@datalist) < 1L)
+                      stop("Provided object has no data. Please re-run the algorithm with save.data = TRUE ",
+                           "or provide the data manually.")
+
+                  data <- x@datalist
               }
 
-              ## Obtain centroids (which can be matrix or lists of series)
-              Lengths <- lengths(x@centroids)
-              trail <- L - Lengths
+              ## centroids consistency
+              consistency_check(x@centroids, "vltslist")
 
-              cen <- mapply(x@centroids, trail, SIMPLIFY = FALSE,
-                            FUN = function(series, trail) {
-                                c(series, rep(NA, trail))
-                            })
+              ## helper values
+              L1 <- lengths(data)
+              L2 <- lengths(x@centroids)
 
-              cen <- as.data.frame(cen)
-              colnames(cen) <- NULL
+              ## timestamp consistency
+              if (!is.null(time) && length(time) < max(L1, L2))
+                  stop("Length mismatch between values and timestamps")
 
               ## Check if data was z-normalized
               if (x@preproc == "zscore")
-                  titleStr <- "Clusters' members (z-normalized)"
+                  title_str <- "Clusters' members (z-normalized)"
               else
-                  titleStr <- "Clusters' members"
+                  title_str <- "Clusters' members"
 
-              ## transform data
+              ## transform to data frames
+              dfm <- reshape2::melt(data)
+              dfcm <- reshape2::melt(x@centroids)
 
-              df <- as.data.frame(df)
+              ## time, cluster and colour indices
+              color_ids <- integer(x@k)
 
-              if (is.null(time)) {
-                  t <- seq_len(L)
+              dfm_tcc <- mapply(x@cluster, L1, USE.NAMES = FALSE, SIMPLIFY = FALSE,
+                                FUN = function(clus, len) {
+                                    t <- if (is.null(time)) seq_len(len) else time[1L:len]
+                                    cl <- rep(clus, len)
+                                    color <- rep(color_ids[clus], len)
 
-              } else {
-                  if (length(time) != L)
-                      stop("Length mismatch between values and time stamps")
+                                    color_ids[clus] <<- color_ids[clus] + 1L
 
-                  t <- time
-              }
+                                    data.frame(t = t, cl = cl, color = color)
+                                })
 
-              df <- data.frame(t = t, df)
-              dfm <- reshape2::melt(df, id.vars = "t")
+              dfcm_tcc <- mapply(1L:x@k, L2, USE.NAMES = FALSE, SIMPLIFY = FALSE,
+                                FUN = function(clus, len) {
+                                    t <- if (is.null(time)) seq_len(len) else time[1L:len]
+                                    cl <- rep(clus, len)
+                                    color <- cl
 
-              cl <- rep(x@cluster, each = L)
-              color <- lapply(x@clusinfo$size, function(i) {
-                  if (i > 0L)
-                      rep(1L:i, each = L)
-                  else
-                      numeric()
-              })
-              color <- factor(unlist(color))
+                                    data.frame(t = t, cl = cl, color = color)
+                                })
 
-              dfm <- data.frame(dfm, cl = cl, color = color)
+              ## bind
+              dfm <- data.frame(dfm, do.call(rbind, dfm_tcc))
+              dfcm <- data.frame(dfcm, do.call(rbind, dfcm_tcc))
 
-              ## transform centroids
-
-              cen <- data.frame(t = t, cen)
-              cenm <- reshape2::melt(cen, id.vars = "t")
-              cl <- rep(1L:x@k, each = L)
-              cenm <- data.frame(cenm, cl = cl)
+              ## make factor
+              dfm$cl <- factor(dfm$cl)
+              dfcm$cl <- factor(dfcm$cl)
+              dfm$color <- factor(dfm$color)
+              dfcm$color <- factor(dfcm$color)
 
               ## create gg object
               gg <- ggplot(data.frame(t = integer(),
@@ -364,36 +355,39 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
                                       color = factor()),
                            aes_string(x = "t",
                                       y = "value",
-                                      group = "variable"))
+                                      group = "L1"))
 
+              ## add centroids first if appropriate, so that they are at the very back
               if (type %in% c("sc", "centroids")) {
                   if (length(list(...)) == 0L)
-                      gg <- gg + geom_line(data = cenm[cenm$cl %in% clus, ],
+                      gg <- gg + geom_line(data = dfcm[dfcm$cl %in% clus, ],
                                            linetype = "dashed",
                                            size = 1.5,
                                            colour = "black",
                                            alpha = 0.5)
                   else
-                      gg <- gg + geom_line(data = cenm[cenm$cl %in% clus, ], ...)
+                      gg <- gg + geom_line(data = dfcm[dfcm$cl %in% clus, ], ...)
               }
 
+              ## add series next if appropriate
               if (type %in% c("sc", "series")) {
                   gg <- gg + geom_line(data = dfm[dfm$cl %in% clus, ], aes(colour = color))
               }
 
+              ## add facets, remove legend, apply kinda black-white theme
               gg <- gg +
                   facet_wrap(~cl, scales = "free_y") +
                   guides(colour = FALSE) +
                   theme_bw()
 
+              ## labels
               if (!is.null(labs.arg))
                   gg <- gg + labs(labs.arg)
               else
-                  gg <- gg + labs(title = titleStr)
+                  gg <- gg + labs(title = title_str)
 
-              ## If NAs were introduced by me (for length consistency), I want them to be removed
-              ## automatically, and I don't want a warning
-              if (plot) suppressWarnings(plot(gg))
+              ## plot
+              if (plot) plot(gg)
 
               invisible(gg)
           })
