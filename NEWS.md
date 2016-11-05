@@ -5,10 +5,10 @@
     + If you have older `dtwclust` objects saved, try updating them with `attr(dtwclust_object, "centers") <- NULL` if you run into compatibility problems.
     + `DBA` arguments changed order.
 * Fixed detection of some symmetric DTW cases.
-* Added (conditional) support for more hierarchical procedures. See the examples.
+* Added (conditional) support for more hierarchical procedures. See the examples and vignette.
 * Added support for functions in package `clue`.
-* Added a new distance based on global alignment kernels.
-* Bear in mind that the `DTW/SBD` algorithms (and hence the functions that depend on them) might give different results in 32-bit systems.
+* Added a new distance based on global alignment kernels: `GAK`.
+* Bear in mind that the `DTW/SBD` algorithms (and hence the functions that depend on them) might give different results in systems with 32-bit architectures.
 * Updated vignette.
 
 ## Version 2.3.0
