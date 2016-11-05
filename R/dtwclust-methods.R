@@ -27,7 +27,7 @@ NULL
 
 setMethod("initialize", "dtwclust",
           function(.Object, ..., call) {
-              .Object <- callNextMethod(.Object = .Object, ...)
+              .Object <- methods::callNextMethod(.Object = .Object, ...)
 
               if (!missing(call))
                   .Object@call <- call
@@ -279,7 +279,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
               ## plot dendrogram?
               if (x@type == "hierarchical" && type == "dendrogram") {
                   x <- S3Part(x, strictS3 = TRUE)
-                  if (plot) plot(x, ...)
+                  if (plot) graphics::plot(x, ...)
                   return(invisible(NULL))
 
               } else if (x@type != "hierarchical" && type == "dendrogram") {
@@ -351,47 +351,47 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
               dfm$color <- factor(dfm$color)
 
               ## create gg object
-              gg <- ggplot(data.frame(t = integer(),
-                                      variable = factor(),
-                                      value = numeric(),
-                                      cl = factor(),
-                                      color = factor()),
-                           aes_string(x = "t",
-                                      y = "value",
-                                      group = "L1"))
+              gg <- ggplot2::ggplot(data.frame(t = integer(),
+                                               variable = factor(),
+                                               value = numeric(),
+                                               cl = factor(),
+                                               color = factor()),
+                                    aes_string(x = "t",
+                                               y = "value",
+                                               group = "L1"))
 
               ## add centroids first if appropriate, so that they are at the very back
               if (type %in% c("sc", "centroids")) {
                   if (length(list(...)) == 0L)
-                      gg <- gg + geom_line(data = dfcm[dfcm$cl %in% clus, ],
-                                           linetype = "dashed",
-                                           size = 1.5,
-                                           colour = "black",
-                                           alpha = 0.5)
+                      gg <- gg + ggplot2::geom_line(data = dfcm[dfcm$cl %in% clus, ],
+                                                    linetype = "dashed",
+                                                    size = 1.5,
+                                                    colour = "black",
+                                                    alpha = 0.5)
                   else
-                      gg <- gg + geom_line(data = dfcm[dfcm$cl %in% clus, ], ...)
+                      gg <- gg + ggplot2::geom_line(data = dfcm[dfcm$cl %in% clus, ], ...)
               }
 
               ## add series next if appropriate
               if (type %in% c("sc", "series")) {
-                  gg <- gg + geom_line(data = dfm[dfm$cl %in% clus, ],
-                                       aes_string(colour = "color"))
+                  gg <- gg + ggplot2::geom_line(data = dfm[dfm$cl %in% clus, ],
+                                                aes_string(colour = "color"))
               }
 
               ## add facets, remove legend, apply kinda black-white theme
               gg <- gg +
-                  facet_wrap(~cl, scales = "free_y") +
-                  guides(colour = FALSE) +
-                  theme_bw()
+                  ggplot2::facet_wrap(~cl, scales = "free_y") +
+                  ggplot2::guides(colour = FALSE) +
+                  ggplot2::theme_bw()
 
               ## labels
               if (!is.null(labs.arg))
-                  gg <- gg + labs(labs.arg)
+                  gg <- gg + ggplot2::labs(labs.arg)
               else
-                  gg <- gg + labs(title = title_str)
+                  gg <- gg + ggplot2::labs(title = title_str)
 
               ## plot
-              if (plot) plot(gg)
+              if (plot) graphics::plot(gg)
 
               invisible(gg)
           })
@@ -743,7 +743,8 @@ setValidity("dtwclustControl",
                 if (!is.null(object@window.size) && object@window.size < 1L)
                     return("Window size must be positive if provided")
 
-                object@norm <- match.arg(object@norm, c("L1", "L2"))
+                if (!(object@norm %in% c("L1", "L2")))
+                    return("norm must be either L1 or L2")
 
                 if (object@dba.iter < 0L)
                     return("DBA iterations must be positive")
@@ -765,7 +766,7 @@ setValidity("dtwclustControl",
 
 setAs("list", "dtwclustControl",
       function(from, to) {
-          ctrl <- new(to)
+          ctrl <- methods::new(to)
 
           num <- c("delta", "fuzziness")
 
@@ -775,17 +776,17 @@ setAs("list", "dtwclustControl",
               if (is.numeric(val) && !(arg %in% num))
                   val <- as.integer(val)
 
-              slot(ctrl, arg) <- val
+              methods::slot(ctrl, arg) <- val
           }
 
-          validObject(ctrl)
+          methods::validObject(ctrl)
 
           ctrl
       })
 
 setAs("NULL", "dtwclustControl",
       function(from, to) {
-          new(to)
+          methods::new(to)
       })
 
 # ========================================================================================================

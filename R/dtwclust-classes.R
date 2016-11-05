@@ -38,7 +38,7 @@ setClass("dtwclustFamily",
 )
 
 ## For window.size
-setClassUnion("intORnull", c("integer", "NULL"))
+methods::setClassUnion("intORnull", c("integer", "NULL"))
 
 #' Class definition for \code{dtwclustControl}
 #'
@@ -136,13 +136,13 @@ setClass("dtwclustControl",
 )
 
 ## For dtwclust class
-setClass("proc_time4", contains = "numeric", slots = c(names = "character"))
-setOldClass("proc_time", S4Class = "proc_time4")
-removeClass("proc_time4")
+methods::setClass("proc_time4", contains = "numeric", slots = c(names = "character"))
+methods::setOldClass("proc_time", S4Class = "proc_time4")
+methods::removeClass("proc_time4")
 
-setClass("hclust4", contains = "list", slots = c(names = "character"))
-setOldClass("hclust", S4Class = "hclust4")
-removeClass("hclust4")
+methods::setClass("hclust4", contains = "list", slots = c(names = "character"))
+methods::setOldClass("hclust", S4Class = "hclust4")
+methods::removeClass("hclust4")
 
 #' Class definition for \code{dtwclust}
 #'
