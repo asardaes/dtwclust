@@ -11,7 +11,11 @@
 #' Supported generics from the \code{flexclust} package are: \code{\link[flexclust]{randIndex}} and
 #' \code{\link[flexclust]{clusterSim}}.
 #'
-#' @seealso \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}},
+#' All generics from package \pkg{clue} are also supported in order to use its functions.
+#'
+#' @seealso
+#'
+#' \code{\link{dtwclust-class}}, \code{\link{dtwclust}}, \code{\link[ggplot2]{ggplot}},
 #' \code{\link{cvi}}
 #'
 NULL
@@ -250,7 +254,8 @@ setMethod("predict", "dtwclust",
 #' If created, the function returns the \code{gg} object invisibly, in case you want to modify it to your
 #' liking. You might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 #'
-#' If you want to free the scale of the X axis, you can do the following
+#' If you want to free the scale of the X axis, you can do the following:
+#'
 #' \code{plot(object, plot = FALSE)} \code{+} \code{facet_wrap(~cl, scales = "free")}
 #'
 #' @return
@@ -786,72 +791,54 @@ setAs("NULL", "dtwclustControl",
 # ========================================================================================================
 # Functions to support package 'clue'
 # ========================================================================================================
-#' @rdname dtwclust-methods
-#'
-#' @details
-#'
-#' Several methods from package \pkg{clue} are also provided in order to support its functions.
-#'
-
-#' @rdname dtwclust-methods
 #' @export
 #'
 n_of_classes.dtwclust <- function(x) {
     x@k
 }
 
-#' @rdname dtwclust-methods
 #' @export
 #'
 n_of_objects.dtwclust <- function(x) {
     length(x@cluster)
 }
 
-#' @rdname dtwclust-methods
 #' @export
 #'
 cl_class_ids.dtwclust <- function(x) {
     as.cl_class_ids(x@cluster)
 }
 
-#' @rdname dtwclust-methods
 #' @export
 #'
 as.cl_membership.dtwclust <- function(x) {
     as.cl_membership(x@cluster)
 }
 
-#' @rdname dtwclust-methods
 #' @export
-#'
-#' @param k See \code{\link[clue]{cl_membership}}
 #'
 cl_membership.dtwclust <- function(x, k = n_of_classes(x)) {
     as.cl_membership(x)
 }
 
-#' @rdname dtwclust-methods
 #' @export
 #'
 is.cl_partition.dtwclust <- function(x) {
     TRUE
 }
 
-#' @rdname dtwclust-methods
 #' @export
 #'
 is.cl_hard_partition.dtwclust <- function(x) {
     x@type != "fuzzy"
 }
 
-#' @rdname dtwclust-methods
 #' @export
 #'
 is.cl_hierarchy.dtwclust <- function(x) {
     x@type == "hierarchical"
 }
 
-#' @rdname dtwclust-methods
 #' @export
 #'
 is.cl_dendrogram.dtwclust <- function(x) {
