@@ -58,13 +58,13 @@ consistency_check <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
 
     } else if (case == "dist") {
         included <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd", "dtw_basic", "gak")
-        valid <- c("dtw", "dtw2", "sbd", "dtw_basic", "gak")
+        valid <- c("dtw", "dtw2", "sbd", "dtw_basic", "gak") ## for different lengths
 
         if (!is.character(obj) || !pr_DB$entry_exists(obj)) {
             if (silent)
                 return(FALSE)
             else
-                stop("Please provide a valid distance function registered with the 'proxy' package.")
+                stop("Please providet the name of a valid distance function registered with the 'proxy' package.")
         }
 
         if (Lengths) {
@@ -119,6 +119,7 @@ call_envelop <- function(series, window) {
     consistency_check(series, "ts")
     window <- consistency_check(window, "window")
 
+    ## NOTE: window in this function is window.size*2 + 1, thus the 2L below
     if (window > (2L * length(series)))
         stop("Window cannot be greater or equal than the series' length.")
 
@@ -140,7 +141,7 @@ call_pairs <- function(n = 2L, lower = TRUE) {
 # Is there a registered parallel backend?
 check_parallel <- function() {
     if (is.null(foreach::getDoParName()))
-        foreach::registerDoSEQ()
+        foreach::registerDoSEQ() ## avoids default message
 
     foreach::getDoParWorkers() > 1L
 }
@@ -205,10 +206,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
 
 is_multivariate <- function(x) {
     dims <- sapply(x, function(x) {
-        if (is.null(dim(x)))
-            0L
-        else
-            ncol(x)
+        NCOL(x)
     })
 
     if (any(diff(dims) != 0L))
