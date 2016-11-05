@@ -328,24 +328,22 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"),
                                     data.frame(t = t, cl = cl, color = color)
                                 })
 
-              dfcm_tcc <- mapply(1L:x@k, L2, USE.NAMES = FALSE, SIMPLIFY = FALSE,
+              dfcm_tc <- mapply(1L:x@k, L2, USE.NAMES = FALSE, SIMPLIFY = FALSE,
                                 FUN = function(clus, len) {
                                     t <- if (is.null(time)) seq_len(len) else time[1L:len]
                                     cl <- rep(clus, len)
-                                    color <- cl
 
-                                    data.frame(t = t, cl = cl, color = color)
+                                    data.frame(t = t, cl = cl)
                                 })
 
               ## bind
               dfm <- data.frame(dfm, do.call(rbind, dfm_tcc))
-              dfcm <- data.frame(dfcm, do.call(rbind, dfcm_tcc))
+              dfcm <- data.frame(dfcm, do.call(rbind, dfcm_tc))
 
               ## make factor
               dfm$cl <- factor(dfm$cl)
               dfcm$cl <- factor(dfcm$cl)
               dfm$color <- factor(dfm$color)
-              dfcm$color <- factor(dfcm$color)
 
               ## create gg object
               gg <- ggplot(data.frame(t = integer(),
