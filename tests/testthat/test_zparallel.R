@@ -6,23 +6,26 @@ context("Test parallel")
 # - It still works if I manually build and check the project in the command line
 # =================================================================================================
 
+if (identical(Sys.getenv("NOT_CRAN"), "")) {
+    ## use all cores in local
+    num_workers <- parallel::detectCores()
+} else {
+    ## use only 2 in Travis CI
+    num_workers <- 2L
+}
+
+## see https://github.com/hadley/testthat/issues/129
+Sys.setenv("R_TESTS" = "")
+
 test_that("Parallel computation gives the same results as sequential", {
     skip_on_cran()
 
     if (getOption("skip_par_tests", FALSE))
         skip("Parallel tests disabled explicitly.")
 
-    ## see https://github.com/hadley/testthat/issues/129
-    Sys.setenv("R_TESTS" = "")
-
     cat("\n")
 
     require(doParallel)
-
-    if (identical(Sys.getenv("NOT_CRAN"), ""))
-        num_workers <- detectCores()
-    else
-        num_workers <- 2L
 
     cl <- makeCluster(num_workers)
     invisible(clusterEvalQ(cl, library(dtwclust)))
@@ -35,12 +38,20 @@ test_that("Parallel computation gives the same results as sequential", {
     stopImplicitCluster()
     registerDoSEQ()
 
-    ## Also test FORK in Unix
+    rm(cl)
+})
+
+test_that("Parallel FORK computation gives the same results as sequential", {
+    skip_on_cran()
+
+    if (getOption("skip_par_tests", FALSE))
+        skip("Parallel tests disabled explicitly.")
+
+    skip_on_os(c("mac", "windows")) # mac in Travis CI is very slow
+
+    ## Also test FORK in Linux
     cat("Test FORKs:\n")
 
-    skip_on_os(c("mac", "windows"))
-
-    rm(cl)
     cl <- makeCluster(num_workers, "FORK")
     registerDoParallel(cl)
 
