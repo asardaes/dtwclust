@@ -170,6 +170,7 @@ NULL
 
 release_questions <- function() {
     c(
-        "Changed .Rbuildignore to exclude test rds files?"
+        "Changed .Rbuildignore to exclude test rds files?",
+        "Built the binary with --compact-vignettes?"
     )
 }
