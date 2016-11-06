@@ -3,6 +3,7 @@
 #' Compute different cluster validity indices (CVIs) of a given cluster partition, using the
 #' clustering distance measure and centroid function if applicable.
 #'
+#' @export
 #' @exportMethod cvi
 #'
 #' @param a An object returned by the \code{\link{dtwclust}} function, or a vector that can be coerced to

@@ -3,8 +3,11 @@
 \docType{methods}
 \name{randIndex}
 \alias{randIndex}
+\alias{randIndex,ANY,dtwclust}
 \alias{randIndex,ANY,dtwclust-method}
+\alias{randIndex,dtwclust,ANY}
 \alias{randIndex,dtwclust,ANY-method}
+\alias{randIndex,dtwclust,dtwclust}
 \alias{randIndex,dtwclust,dtwclust-method}
 \title{Compare partitions}
 \usage{

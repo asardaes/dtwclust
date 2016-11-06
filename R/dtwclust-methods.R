@@ -75,7 +75,7 @@ setMethod("initialize", "dtwclustFamily",
 # ========================================================================================================
 
 #' @rdname dtwclust-methods
-#' @aliases show,dtwclust-method
+#' @aliases show,dtwclust
 #' @exportMethod show
 #'
 #' @param object,x An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.
@@ -119,8 +119,8 @@ setMethod("show", "dtwclust",
 # ========================================================================================================
 
 #' @rdname dtwclust-methods
-#' @aliases update,dtwclust-method
-#' @exportMethod update
+#' @method update dtwclust
+#' @export
 #'
 #' @param evaluate Logical. Defaults to \code{TRUE} and evaluates the updated call, which will result in
 #' a new \code{dtwclust} object. Otherwise, it returns the unevaluated call.
@@ -131,37 +131,42 @@ setMethod("show", "dtwclust",
 #' evaluates the call again. Use \code{evaluate = FALSE} if you want to get the
 #' unevaluated call.
 #'
-setMethod("update", "dtwclust",
-          function(object, ..., evaluate = TRUE) {
-              args <- as.pairlist(list(...))
+update.dtwclust <- function(object, ..., evaluate = TRUE) {
+    args <- as.pairlist(list(...))
 
-              if (length(args) == 0L) {
-                  message("Nothing to be updated")
+    if (length(args) == 0L) {
+        message("Nothing to be updated")
 
-                  if (evaluate)
-                      return(object)
-                  else
-                      return(object@call)
-              }
+        if (evaluate)
+            return(object)
+        else
+            return(object@call)
+    }
 
-              new_call <- object@call
-              new_call[names(args)] <- args
+    new_call <- object@call
+    new_call[names(args)] <- args
 
-              if (evaluate)
-                  ret <- eval.parent(new_call, n = 2L)
-              else
-                  ret <- new_call
+    if (evaluate)
+        ret <- eval.parent(new_call, n = 2L)
+    else
+        ret <- new_call
 
-              ret
-          })
+    ret
+}
+
+#' @rdname dtwclust-methods
+#' @aliases update,dtwclust
+#' @exportMethod update
+#'
+setMethod("update", signature(object = "dtwclust"), update.dtwclust)
 
 # ========================================================================================================
 # predict from stats
 # ========================================================================================================
 
 #' @rdname dtwclust-methods
-#' @aliases predict,dtwclust-method
-#' @exportMethod predict
+#' @method predict dtwclust
+#' @export
 #'
 #' @param newdata New data to be assigned to a cluster. It can take any of the supported formats of \code{\link{dtwclust}}.
 #' Note that for multivariate series, this means that it \strong{must} be a list of matrices, even if the list
@@ -173,46 +178,51 @@ setMethod("update", "dtwclust",
 #' the data belongs; if \code{NULL}, it simply returns the obtained cluster indices. It preprocesses
 #' the data with the corresponding function if available.
 #'
-setMethod("predict", "dtwclust",
-          function(object, newdata = NULL, ...) {
-              if (is.null(newdata)) {
-                  if (object@type != "fuzzy")
-                      ret <- object@cluster
-                  else
-                      ret <- object@fcluster
+predict.dtwclust <- function(object, newdata = NULL, ...) {
+    if (is.null(newdata)) {
+        if (object@type != "fuzzy")
+            ret <- object@cluster
+        else
+            ret <- object@fcluster
 
-              } else {
-                  newdata <- consistency_check(newdata, "tsmat")
-                  consistency_check(newdata, "vltslist")
-                  nm <- names(newdata)
+    } else {
+        newdata <- consistency_check(newdata, "tsmat")
+        consistency_check(newdata, "vltslist")
+        nm <- names(newdata)
 
-                  newdata <- do.call(object@family@preproc,
-                                     args = enlist(newdata,
-                                                   dots = object@dots))
+        newdata <- do.call(object@family@preproc,
+                           args = enlist(newdata,
+                                         dots = object@dots))
 
-                  distmat <- do.call(object@family@dist,
-                                     args = enlist(x = newdata,
-                                                   centroids = object@centroids,
-                                                   dots = object@dots))
+        distmat <- do.call(object@family@dist,
+                           args = enlist(x = newdata,
+                                         centroids = object@centroids,
+                                         dots = object@dots))
 
-                  ret <- object@family@cluster(distmat = distmat, m = object@control@fuzziness)
+        ret <- object@family@cluster(distmat = distmat, m = object@control@fuzziness)
 
-                  if (object@type != "fuzzy")
-                      names(ret) <- nm
-                  else
-                      dimnames(ret) <- list(nm, paste0("cluster_", 1L:ncol(ret)))
-              }
+        if (object@type != "fuzzy")
+            names(ret) <- nm
+        else
+            dimnames(ret) <- list(nm, paste0("cluster_", 1L:ncol(ret)))
+    }
 
-              ret
-          })
+    ret
+}
+
+#' @rdname dtwclust-methods
+#' @aliases predict,dtwclust
+#' @exportMethod predict
+#'
+setMethod("predict", signature(object = "dtwclust"), predict.dtwclust)
 
 # ========================================================================================================
 # Plot
 # ========================================================================================================
 
 #' @rdname dtwclust-methods
-#' @aliases plot,dtwclust,missing-method
-#' @exportMethod plot
+#' @method plot dtwclust
+#' @export
 #'
 #' @param y Ignored.
 #' @param ... For \code{plot}, further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting
@@ -262,146 +272,152 @@ setMethod("predict", "dtwclust",
 #'
 #' The plot method returns a \code{gg} object (or \code{NULL} for dendrogram plot) invisibly.
 #'
-setMethod("plot", signature(x = "dtwclust", y = "missing"),
-          function(x, y, ...,
-                   clus = seq_len(x@k), labs.arg = NULL,
-                   data = NULL, time = NULL,
-                   plot = TRUE, type = NULL)
-          {
-              ## set default type if none was provided
-              if (!is.null(type))
-                  type <- match.arg(type, c("dendrogram", "series", "centroids", "sc"))
-              else if (x@type == "hierarchical")
-                  type <- "dendrogram"
-              else
-                  type <- "sc"
+plot.dtwclust <- function(x, y, ...,
+                          clus = seq_len(x@k), labs.arg = NULL,
+                          data = NULL, time = NULL,
+                          plot = TRUE, type = NULL)
+{
+    ## set default type if none was provided
+    if (!is.null(type))
+        type <- match.arg(type, c("dendrogram", "series", "centroids", "sc"))
+    else if (x@type == "hierarchical")
+        type <- "dendrogram"
+    else
+        type <- "sc"
 
-              ## plot dendrogram?
-              if (x@type == "hierarchical" && type == "dendrogram") {
-                  x <- S3Part(x, strictS3 = TRUE)
-                  if (plot) graphics::plot(x, ...)
-                  return(invisible(NULL))
+    ## plot dendrogram?
+    if (x@type == "hierarchical" && type == "dendrogram") {
+        x <- S3Part(x, strictS3 = TRUE)
+        if (plot) graphics::plot(x, ...)
+        return(invisible(NULL))
 
-              } else if (x@type != "hierarchical" && type == "dendrogram") {
-                  stop("Dendrogram plot only applies to hierarchical clustering.")
-              }
+    } else if (x@type != "hierarchical" && type == "dendrogram") {
+        stop("Dendrogram plot only applies to hierarchical clustering.")
+    }
 
-              ## Obtain data, the priority is: provided data > included data list
-              if (!is.null(data)) {
-                  data <- consistency_check(data, "tsmat")
+    ## Obtain data, the priority is: provided data > included data list
+    if (!is.null(data)) {
+        data <- consistency_check(data, "tsmat")
 
-              } else {
-                  if (length(x@datalist) < 1L)
-                      stop("Provided object has no data. Please re-run the algorithm with save.data = TRUE ",
-                           "or provide the data manually.")
+    } else {
+        if (length(x@datalist) < 1L)
+            stop("Provided object has no data. Please re-run the algorithm with save.data = TRUE ",
+                 "or provide the data manually.")
 
-                  data <- x@datalist
-              }
+        data <- x@datalist
+    }
 
-              ## centroids consistency
-              consistency_check(x@centroids, "vltslist")
+    ## centroids consistency
+    consistency_check(x@centroids, "vltslist")
 
-              ## helper values
-              L1 <- lengths(data)
-              L2 <- lengths(x@centroids)
+    ## helper values
+    L1 <- lengths(data)
+    L2 <- lengths(x@centroids)
 
-              ## timestamp consistency
-              if (!is.null(time) && length(time) < max(L1, L2))
-                  stop("Length mismatch between values and timestamps")
+    ## timestamp consistency
+    if (!is.null(time) && length(time) < max(L1, L2))
+        stop("Length mismatch between values and timestamps")
 
-              ## Check if data was z-normalized
-              if (x@preproc == "zscore")
-                  title_str <- "Clusters' members (z-normalized)"
-              else
-                  title_str <- "Clusters' members"
+    ## Check if data was z-normalized
+    if (x@preproc == "zscore")
+        title_str <- "Clusters' members (z-normalized)"
+    else
+        title_str <- "Clusters' members"
 
-              ## transform to data frames
-              dfm <- reshape2::melt(data)
-              dfcm <- reshape2::melt(x@centroids)
+    ## transform to data frames
+    dfm <- reshape2::melt(data)
+    dfcm <- reshape2::melt(x@centroids)
 
-              ## time, cluster and colour indices
-              color_ids <- integer(x@k)
+    ## time, cluster and colour indices
+    color_ids <- integer(x@k)
 
-              dfm_tcc <- mapply(x@cluster, L1, USE.NAMES = FALSE, SIMPLIFY = FALSE,
-                                FUN = function(clus, len) {
-                                    t <- if (is.null(time)) seq_len(len) else time[1L:len]
-                                    cl <- rep(clus, len)
-                                    color <- rep(color_ids[clus], len)
+    dfm_tcc <- mapply(x@cluster, L1, USE.NAMES = FALSE, SIMPLIFY = FALSE,
+                      FUN = function(clus, len) {
+                          t <- if (is.null(time)) seq_len(len) else time[1L:len]
+                          cl <- rep(clus, len)
+                          color <- rep(color_ids[clus], len)
 
-                                    color_ids[clus] <<- color_ids[clus] + 1L
+                          color_ids[clus] <<- color_ids[clus] + 1L
 
-                                    data.frame(t = t, cl = cl, color = color)
-                                })
+                          data.frame(t = t, cl = cl, color = color)
+                      })
 
-              dfcm_tc <- mapply(1L:x@k, L2, USE.NAMES = FALSE, SIMPLIFY = FALSE,
-                                FUN = function(clus, len) {
-                                    t <- if (is.null(time)) seq_len(len) else time[1L:len]
-                                    cl <- rep(clus, len)
+    dfcm_tc <- mapply(1L:x@k, L2, USE.NAMES = FALSE, SIMPLIFY = FALSE,
+                      FUN = function(clus, len) {
+                          t <- if (is.null(time)) seq_len(len) else time[1L:len]
+                          cl <- rep(clus, len)
 
-                                    data.frame(t = t, cl = cl)
-                                })
+                          data.frame(t = t, cl = cl)
+                      })
 
-              ## bind
-              dfm <- data.frame(dfm, do.call(rbind, dfm_tcc))
-              dfcm <- data.frame(dfcm, do.call(rbind, dfcm_tc))
+    ## bind
+    dfm <- data.frame(dfm, do.call(rbind, dfm_tcc))
+    dfcm <- data.frame(dfcm, do.call(rbind, dfcm_tc))
 
-              ## make factor
-              dfm$cl <- factor(dfm$cl)
-              dfcm$cl <- factor(dfcm$cl)
-              dfm$color <- factor(dfm$color)
+    ## make factor
+    dfm$cl <- factor(dfm$cl)
+    dfcm$cl <- factor(dfcm$cl)
+    dfm$color <- factor(dfm$color)
 
-              ## create gg object
-              gg <- ggplot2::ggplot(data.frame(t = integer(),
-                                               variable = factor(),
-                                               value = numeric(),
-                                               cl = factor(),
-                                               color = factor()),
-                                    aes_string(x = "t",
-                                               y = "value",
-                                               group = "L1"))
+    ## create gg object
+    gg <- ggplot2::ggplot(data.frame(t = integer(),
+                                     variable = factor(),
+                                     value = numeric(),
+                                     cl = factor(),
+                                     color = factor()),
+                          aes_string(x = "t",
+                                     y = "value",
+                                     group = "L1"))
 
-              ## add centroids first if appropriate, so that they are at the very back
-              if (type %in% c("sc", "centroids")) {
-                  if (length(list(...)) == 0L)
-                      gg <- gg + ggplot2::geom_line(data = dfcm[dfcm$cl %in% clus, ],
-                                                    linetype = "dashed",
-                                                    size = 1.5,
-                                                    colour = "black",
-                                                    alpha = 0.5)
-                  else
-                      gg <- gg + ggplot2::geom_line(data = dfcm[dfcm$cl %in% clus, ], ...)
-              }
+    ## add centroids first if appropriate, so that they are at the very back
+    if (type %in% c("sc", "centroids")) {
+        if (length(list(...)) == 0L)
+            gg <- gg + ggplot2::geom_line(data = dfcm[dfcm$cl %in% clus, ],
+                                          linetype = "dashed",
+                                          size = 1.5,
+                                          colour = "black",
+                                          alpha = 0.5)
+        else
+            gg <- gg + ggplot2::geom_line(data = dfcm[dfcm$cl %in% clus, ], ...)
+    }
 
-              ## add series next if appropriate
-              if (type %in% c("sc", "series")) {
-                  gg <- gg + ggplot2::geom_line(data = dfm[dfm$cl %in% clus, ],
-                                                aes_string(colour = "color"))
-              }
+    ## add series next if appropriate
+    if (type %in% c("sc", "series")) {
+        gg <- gg + ggplot2::geom_line(data = dfm[dfm$cl %in% clus, ],
+                                      aes_string(colour = "color"))
+    }
 
-              ## add facets, remove legend, apply kinda black-white theme
-              gg <- gg +
-                  ggplot2::facet_wrap(~cl, scales = "free_y") +
-                  ggplot2::guides(colour = FALSE) +
-                  ggplot2::theme_bw()
+    ## add facets, remove legend, apply kinda black-white theme
+    gg <- gg +
+        ggplot2::facet_wrap(~cl, scales = "free_y") +
+        ggplot2::guides(colour = FALSE) +
+        ggplot2::theme_bw()
 
-              ## labels
-              if (!is.null(labs.arg))
-                  gg <- gg + ggplot2::labs(labs.arg)
-              else
-                  gg <- gg + ggplot2::labs(title = title_str)
+    ## labels
+    if (!is.null(labs.arg))
+        gg <- gg + ggplot2::labs(labs.arg)
+    else
+        gg <- gg + ggplot2::labs(title = title_str)
 
-              ## plot
-              if (plot) graphics::plot(gg)
+    ## plot
+    if (plot) graphics::plot(gg)
 
-              invisible(gg)
-          })
+    invisible(gg)
+}
+
+#' @rdname dtwclust-methods
+#' @aliases plot,dtwclust,missing
+#' @exportMethod plot
+#'
+setMethod("plot", signature(x = "dtwclust", y = "missing"), plot.dtwclust)
 
 # ========================================================================================================
 # Cluster validity indices
 # ========================================================================================================
 
 #' @rdname cvi
-#' @aliases cvi,dtwclust-method
+#' @aliases cvi,dtwclust
+#' @exportMethod cvi
 #'
 setMethod("cvi", signature(a = "dtwclust"),
           function(a, b = NULL, type = "valid", ...) {
@@ -620,29 +636,29 @@ setMethod("cvi", signature(a = "dtwclust"),
 NULL
 
 #' @rdname randIndex
-#' @aliases randIndex,dtwclust,ANY-method
+#' @aliases randIndex,dtwclust,ANY
+#' @exportMethod randIndex
 #'
 setMethod("randIndex", signature(x="dtwclust", y="ANY"),
           function(x, y, correct = TRUE, original = !correct) {
-              message("Consider using the 'cvi' function for more options.")
               randIndex(x@cluster, y, correct = correct, original = original)
           })
 
 #' @rdname randIndex
-#' @aliases randIndex,ANY,dtwclust-method
+#' @aliases randIndex,ANY,dtwclust
+#' @exportMethod randIndex
 #'
 setMethod("randIndex", signature(x="ANY", y="dtwclust"),
           function(x, y, correct = TRUE, original = !correct) {
-              message("Consider using the 'cvi' function for more options.")
               randIndex(x, y@cluster, correct = correct, original = original)
           })
 
 #' @rdname randIndex
-#' @aliases randIndex,dtwclust,dtwclust-method
+#' @aliases randIndex,dtwclust,dtwclust
+#' @exportMethod randIndex
 #'
 setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
           function(x, y, correct = TRUE, original = !correct) {
-              message("Consider using the 'cvi' function for more options.")
               randIndex(x@cluster, y@cluster, correct = correct, original = original)
           })
 
@@ -654,7 +670,7 @@ setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
 #'
 #' Returns a matrix of cluster similarities. Currently two methods for computing
 #' similarities of clusters are implemented. This generic is included in the
-#' \code{flexclust} package.
+#' \pkg{flexclust} package.
 #'
 #' @name clusterSim
 #' @rdname clusterSim
@@ -667,7 +683,7 @@ setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
 #'
 #' \code{\link[flexclust]{clusterSim}}
 #'
-setMethod("clusterSim", "dtwclust",
+setMethod("clusterSim", signature(object = "dtwclust"),
           function (object, data = NULL,
                     method = c("shadow", "centers"),
                     symmetric = FALSE, ...)
@@ -792,54 +808,63 @@ setAs("NULL", "dtwclustControl",
 # ========================================================================================================
 # Functions to support package 'clue'
 # ========================================================================================================
+#' @method n_of_classes dtwclust
 #' @export
 #'
 n_of_classes.dtwclust <- function(x) {
     x@k
 }
 
+#' @method n_of_objects dtwclust
 #' @export
 #'
 n_of_objects.dtwclust <- function(x) {
     length(x@cluster)
 }
 
+#' @method cl_class_ids dtwclust
 #' @export
 #'
 cl_class_ids.dtwclust <- function(x) {
     as.cl_class_ids(x@cluster)
 }
 
+#' @method as.cl_membership dtwclust
 #' @export
 #'
 as.cl_membership.dtwclust <- function(x) {
     as.cl_membership(x@cluster)
 }
 
+#' @method cl_membership dtwclust
 #' @export
 #'
 cl_membership.dtwclust <- function(x, k = n_of_classes(x)) {
     as.cl_membership(x)
 }
 
+#' @method is.cl_partition dtwclust
 #' @export
 #'
 is.cl_partition.dtwclust <- function(x) {
     TRUE
 }
 
+#' @method is.cl_hard_partition dtwclust
 #' @export
 #'
 is.cl_hard_partition.dtwclust <- function(x) {
     x@type != "fuzzy"
 }
 
+#' @method is.cl_hierarchy dtwclust
 #' @export
 #'
 is.cl_hierarchy.dtwclust <- function(x) {
     x@type == "hierarchical"
 }
 
+#' @method is.cl_dendrogram dtwclust
 #' @export
 #'
 is.cl_dendrogram.dtwclust <- function(x) {

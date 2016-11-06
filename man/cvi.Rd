@@ -3,6 +3,7 @@
 \docType{methods}
 \name{cvi}
 \alias{cvi}
+\alias{cvi,dtwclust}
 \alias{cvi,dtwclust-method}
 \title{Cluster validity indices}
 \usage{

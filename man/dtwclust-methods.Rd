@@ -3,17 +3,31 @@
 \docType{methods}
 \name{dtwclust-methods}
 \alias{dtwclust-methods}
+\alias{plot,dtwclust,missing}
 \alias{plot,dtwclust,missing-method}
+\alias{plot.dtwclust}
+\alias{predict,dtwclust}
 \alias{predict,dtwclust-method}
+\alias{predict.dtwclust}
+\alias{show,dtwclust}
 \alias{show,dtwclust-method}
+\alias{update,dtwclust}
 \alias{update,dtwclust-method}
+\alias{update.dtwclust}
 \title{Methods for \code{dtwclust}}
 \usage{
 \S4method{show}{dtwclust}(object)
 
+\method{update}{dtwclust}(object, ..., evaluate = TRUE)
+
 \S4method{update}{dtwclust}(object, ..., evaluate = TRUE)
 
+\method{predict}{dtwclust}(object, newdata = NULL, ...)
+
 \S4method{predict}{dtwclust}(object, newdata = NULL, ...)
+
+\method{plot}{dtwclust}(x, y, ..., clus = seq_len(x@k), labs.arg = NULL,
+  data = NULL, time = NULL, plot = TRUE, type = NULL)
 
 \S4method{plot}{dtwclust,missing}(x, y, ..., clus = seq_len(x@k),
   labs.arg = NULL, data = NULL, time = NULL, plot = TRUE, type = NULL)
