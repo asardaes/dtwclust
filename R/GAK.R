@@ -213,19 +213,24 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
                          })
                      }
 
-    gak_y <- foreach(yy = split_parallel(y), logs = LOGS,
-                     .combine = c,
-                     .multicombine = TRUE,
-                     .packages = "dtwclust",
-                     .export = "enlist") %dopar% {
-                         sapply(yy, function(yy) {
-                             do.call("GAK",
-                                     enlist(x = yy,
-                                            y = yy,
-                                            logs = logs,
-                                            dots = dots))
-                         })
-                     }
+    if (symmetric) {
+        gak_y <- gak_x
+
+    } else {
+        gak_y <- foreach(yy = split_parallel(y), logs = LOGS,
+                         .combine = c,
+                         .multicombine = TRUE,
+                         .packages = "dtwclust",
+                         .export = "enlist") %dopar% {
+                             sapply(yy, function(yy) {
+                                 do.call("GAK",
+                                         enlist(x = yy,
+                                                y = yy,
+                                                logs = logs,
+                                                dots = dots))
+                             })
+                         }
+    }
 
     ## Calculate distance matrix
     if (pairwise) {
