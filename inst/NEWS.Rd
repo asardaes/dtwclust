@@ -11,7 +11,7 @@
         \item Added (conditional) support for more hierarchical procedures. See the examples and vignette.
         \item Added support for functions in package \pkg{clue}.
         \item Added a new distance based on global alignment kernels: \code{GAK}.
-        \item Bear in mind that the \code{DTW/SBD} algorithms (and hence the functions that depend on them) might give different results in systems with 32-bit architectures.
+        \item Bear in mind that the \code{DTW/SBD} algorithms (and hence the functions that depend on them) might give different results in installations with 32-bit architectures.
         \item Updated vignette.
     }
 }
