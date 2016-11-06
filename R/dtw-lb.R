@@ -12,6 +12,7 @@
 #' @param pairwise Calculate pairwise distances?
 #' @param dtw.func Which function to use for core DTW the calculations, either "dtw" or "dtw_basic". See
 #' \code{\link[dtw]{dtw}} and \code{\link{dtw_basic}}.
+#' @param force.symmetry Force symmetry of the distance matrix. Only supported for \code{y = NULL}.
 #' @param ... Further arguments for \code{dtw.func} or \code{\link{lb_improved}}.
 #'
 #' @details
@@ -109,7 +110,7 @@
 #'
 dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                    error.check = TRUE, pairwise = FALSE,
-                   dtw.func = "dtw_basic", ...) {
+                   dtw.func = "dtw_basic", force.symmetry = FALSE, ...) {
     norm <- match.arg(norm, c("L1", "L2"))
     dtw.func <- match.arg(dtw.func, c("dtw", "dtw_basic"))
 
@@ -122,8 +123,13 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
     if (is.null(y))
         Y <- X
-    else
+    else {
         Y <- consistency_check(y, "tsmat")
+
+        if (force.symmetry) {
+            stop("Using force.symmetry = TRUE for y != NULL is not allowed.")
+        }
+    }
 
     if (is_multivariate(X) || is_multivariate(Y))
         stop("dtw_lb does not support multivariate series.")
@@ -137,6 +143,9 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     dots$pairwise <- TRUE
 
     if (pairwise) {
+        consistency_check(X, "tslist")
+        consistency_check(Y, "tslist")
+
         if (is.null(window.size))
             dots$window.type <- "none"
         else
@@ -173,6 +182,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                      window.size = window.size,
                      norm = norm,
                      error.check = error.check,
+                     force.symmetry = force.symmetry,
                      ...)
 
     ## Update with DTW
@@ -200,7 +210,12 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                                            dots = dots))
                         }
 
-        D[cbind(1L:length(X), indNN)[unlist(indNew), , drop = FALSE]] <- dSub
+        indNew <- unlist(indNew)
+
+        D[cbind(1L:length(X), indNN)[indNew, , drop = FALSE]] <- dSub
+
+        if (force.symmetry)
+            D[cbind(indNN, 1L:length(X))[indNew, , drop = FALSE]] <- dSub
 
         new.indNN <- apply(D, 1L, which.min)
     }
