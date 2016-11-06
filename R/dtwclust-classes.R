@@ -53,7 +53,8 @@ methods::setClassUnion("intORnull", c("integer", "NULL"))
 #'
 #' Default values are shown at the end.
 #'
-#' @slot window.size Integer or \code{NULL}. Window constraint for DTW, DBA and LB calculations.
+#' @slot window.size Integer or \code{NULL}. Window constraint for DTW, DBA and LB calculations. \code{NULL}
+#' means no constraint.
 #' @slot norm Character. Pointwise distance for DTW, DBA and the LBs. Either \code{"L1"} for Manhattan distance
 #' or \code{"L2"} for Euclidean. Ignored for \code{distance = "DTW2"} (which always uses \code{"L2"}).
 #' @slot delta Numeric. Convergence criterion for \code{\link{DBA}} centroids and fuzzy clustering.
@@ -62,9 +63,11 @@ methods::setClassUnion("intORnull", c("integer", "NULL"))
 #' things internally, all copies should point to the same memory address.
 #' @slot symmetric Logical flag. Is the distance function symmetric? In other words, is \code{dist(x,y)} ==
 #' \code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be computed. Only relevant for
-#' PAM centroids and hierarchical clustering.
+#' PAM centroids and hierarchical clustering. Overridden if the function detects an invalid user-provided
+#' value.
 #' @slot packages Character vector with the names of any packages required for custom \code{proxy} functions.
-#' See Parallel Computing section in \code{\link{dtwclust}}.
+#' See Parallel Computing section in \code{\link{dtwclust}}. Since the distance entries are re-registered in
+#' each parallel worker if needed, this slot is probably useless, but just in case.
 #'
 #' @slot dba.iter Integer. Maximum number of iterations for \code{\link{DBA}} centroids.
 #' @slot pam.precompute Logical flag. Precompute the whole distance matrix once and reuse it on each iteration
@@ -72,7 +75,7 @@ methods::setClassUnion("intORnull", c("integer", "NULL"))
 #'
 #' @slot fuzziness Numeric. Exponent used for fuzzy clustering. Commonly termed \code{m} in the literature.
 #'
-#' @slot iter.max Integer. Maximum number of iterations.
+#' @slot iter.max Integer. Maximum number of allowed iterations for partitional/fuzzy clustering.
 #' @slot nrep Integer. How many times to repeat clustering with different starting points. See section
 #' Repetitions in \code{\link{dtwclust}}.
 #'

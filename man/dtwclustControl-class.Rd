@@ -14,7 +14,8 @@ Default values are shown at the end.
 \section{Slots}{
 
 \describe{
-\item{\code{window.size}}{Integer or \code{NULL}. Window constraint for DTW, DBA and LB calculations.}
+\item{\code{window.size}}{Integer or \code{NULL}. Window constraint for DTW, DBA and LB calculations. \code{NULL}
+means no constraint.}
 
 \item{\code{norm}}{Character. Pointwise distance for DTW, DBA and the LBs. Either \code{"L1"} for Manhattan distance
 or \code{"L2"} for Euclidean. Ignored for \code{distance = "DTW2"} (which always uses \code{"L2"}).}
@@ -28,10 +29,12 @@ things internally, all copies should point to the same memory address.}
 
 \item{\code{symmetric}}{Logical flag. Is the distance function symmetric? In other words, is \code{dist(x,y)} ==
 \code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be computed. Only relevant for
-PAM centroids and hierarchical clustering.}
+PAM centroids and hierarchical clustering. Overridden if the function detects an invalid user-provided
+value.}
 
 \item{\code{packages}}{Character vector with the names of any packages required for custom \code{proxy} functions.
-See Parallel Computing section in \code{\link{dtwclust}}.}
+See Parallel Computing section in \code{\link{dtwclust}}. Since the distance entries are re-registered in
+each parallel worker if needed, this slot is probably useless, but just in case.}
 
 \item{\code{dba.iter}}{Integer. Maximum number of iterations for \code{\link{DBA}} centroids.}
 
@@ -40,7 +43,7 @@ if using PAM centroids. Otherwise calculate distances at every iteration.}
 
 \item{\code{fuzziness}}{Numeric. Exponent used for fuzzy clustering. Commonly termed \code{m} in the literature.}
 
-\item{\code{iter.max}}{Integer. Maximum number of iterations.}
+\item{\code{iter.max}}{Integer. Maximum number of allowed iterations for partitional/fuzzy clustering.}
 
 \item{\code{nrep}}{Integer. How many times to repeat clustering with different starting points. See section
 Repetitions in \code{\link{dtwclust}}.}
