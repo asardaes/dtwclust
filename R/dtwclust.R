@@ -860,7 +860,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                 distmat = NULL,
 
                 type = type,
-                distance = "DTW2_LB",
+                distance = "LB_Keogh+DTW2",
                 centroid = centchar,
                 preproc = preproc_char,
 
