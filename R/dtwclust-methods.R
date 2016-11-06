@@ -877,8 +877,8 @@ is.cl_dendrogram.dtwclust <- function(x) {
 
 #' as.matrix
 #'
-#' I don't know why \pkg{proxy} exported a non-generic \code{as.matrix} function. This is to re-export
-#' the base version
+#' \pkg{proxy} exported a non-generic \code{as.matrix} function. This is to re-export
+#' the base version and add some coercion methods for \code{pairdist} and \code{crossdist}.
 #'
 #' @name as.matrix
 #' @export
