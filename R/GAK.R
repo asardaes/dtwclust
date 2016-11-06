@@ -130,7 +130,7 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE, l
 }
 
 GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = NULL,
-                      pairwise = FALSE, symmetric = FALSE)
+                      pairwise = FALSE)
 {
     if (!normalize)
         warning("The proxy version of GAK is always normalized.")
@@ -151,8 +151,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
         y <- consistency_check(y, "tsmat")
         consistency_check(y, "vltslist")
 
-        if (symmetric && length(x) != length(y))
-            stop("GAK: Dimension inconsistency when calculating cross-distance matrix within proxy.")
+        symmetric <- FALSE
     }
 
     if (is.null(sigma)) {
