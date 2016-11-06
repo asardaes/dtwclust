@@ -43,6 +43,7 @@ ddist <- function(distance, control, distmat) {
             }
 
         } else {
+            ## distmat not available
             ## Extra distance parameters in case of parallel computation
             ## They can be for the function or for proxy::dist
             dots <- list(...)
@@ -79,61 +80,63 @@ ddist <- function(distance, control, distmat) {
             ## variables/functions from the parent environments that should be exported
             export <- c("distance", "consistency_check", "enlist")
 
-            if (is.null(centroids) && control@symmetric && dist_entry$loop) {
-                ## WHOLE SYMMETRIC DISTMAT
-                ## Only half of it is computed
+            if (is.null(centroids) && control@symmetric) {
+                if (dist_entry$loop) {
+                    ## WHOLE SYMMETRIC DISTMAT WITH proxy LOOP
+                    ## Only half of it is computed
 
-                ## strict pairwise as in proxy::dist doesn't make sense here, but this case needs it
-                dots$pairwise <- TRUE
+                    ## strict pairwise as in proxy::dist doesn't make sense here, but this case needs it
+                    dots$pairwise <- TRUE
 
-                pairs <- call_pairs(length(x), lower = FALSE)
+                    pairs <- call_pairs(length(x), lower = FALSE)
 
-                pairs <- split_parallel(pairs, 1L)
+                    pairs <- split_parallel(pairs, 1L)
 
-                d <- foreach(pairs = pairs,
-                             .combine = c,
-                             .multicombine = TRUE,
-                             .packages = control@packages,
-                             .export = export) %dopar% {
+                    d <- foreach(pairs = pairs,
+                                 .combine = c,
+                                 .multicombine = TRUE,
+                                 .packages = control@packages,
+                                 .export = export) %dopar% {
 
-                                 if (!consistency_check(dist_entry$names[1L], "dist"))
-                                     do.call(proxy::pr_DB$set_entry, dist_entry)
+                                     if (!consistency_check(dist_entry$names[1L], "dist"))
+                                         do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                                 ## 'dots' has all extra arguments that are valid
-                                 dd <- do.call(proxy::dist,
-                                               enlist(x = x[pairs[ , 1L]],
-                                                      y = x[pairs[ , 2L]],
-                                                      method = distance,
-                                                      dots = dots))
+                                     ## 'dots' has all extra arguments that are valid
+                                     dd <- do.call(proxy::dist,
+                                                   enlist(x = x[pairs[ , 1L]],
+                                                          y = x[pairs[ , 2L]],
+                                                          method = distance,
+                                                          dots = dots))
 
-                                 dd
-                             }
+                                     dd
+                                 }
 
-                rm("pairs")
+                    rm("pairs")
 
-                D <- matrix(0, nrow = length(x), ncol = length(x))
-                D[upper.tri(D)] <- d
-                D <- t(D)
-                D[upper.tri(D)] <- d
+                    D <- matrix(0, nrow = length(x), ncol = length(x))
+                    D[upper.tri(D)] <- d
+                    D <- t(D)
+                    D[upper.tri(D)] <- d
 
-                d <- D
-                attr(d, "class") <- "crossdist"
-                attr(d, "dimnames") <- list(names(x), names(x))
+                    d <- D
+                    attr(d, "class") <- "crossdist"
+                    attr(d, "dimnames") <- list(names(x), names(x))
+                    rm("D")
+
+                } else{
+                    ## WHOLE SYMMETRIC DISTMAT WITH CUSTOM LOOP
+                    ## most likely one of my distances, let it handle parallelization
+                    d <- do.call(proxy::dist,
+                                 enlist(x = x,
+                                        y = NULL,
+                                        method = distance,
+                                        dots = dots))
+                }
 
             } else {
-                ## WHOLE OR SUBDISTMAT, NOT SYMMETRIC OR loop = FALSE
-
-                if (is.null(centroids)) {
+                ## WHOLE DISTMAT OR SUBDISTMAT OR NOT SYMMETRIC
+                if (is.null(centroids))
                     centroids <- x
-
-                    ## for my custom symmetric functions
-                    if (!check_parallel() && toupper(distance) %in% c("DTW_BASIC", "GAK")) {
-                        if (toupper(distance) == "DTW_BASIC")
-                            dots$symmetric <- is.null(control@window.size) || !different_lengths(x)
-                        else
-                            dots$symmetric <- TRUE
-                    }
-                }
 
                 dim_names <- list(names(x), names(centroids))
 
@@ -167,7 +170,6 @@ ddist <- function(distance, control, distmat) {
                                                       dots = dots))
 
                                  dd
-
                              }
 
                 if (!is.null(dots$pairwise) && dots$pairwise) {

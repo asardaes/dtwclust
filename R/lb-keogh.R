@@ -148,8 +148,8 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
 # Loop without using native 'proxy' looping (to avoid multiple calculations of the envelope)
 # ========================================================================================================
 
-lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
-                           force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE, ...) {
+lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
+                           force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE) {
 
     norm <- match.arg(norm, c("L1", "L2"))
 

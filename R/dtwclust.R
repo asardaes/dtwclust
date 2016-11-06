@@ -460,7 +460,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         ## ----------------------------------------------------------------------------------------------------------
 
         ## for a check near the end, changed if appropriate
-        distmat_flag <- FALSE
+        pam_precompute <- FALSE
 
         # precompute distance matrix?
         if (is.character(centroid) && centroid == "pam") {
@@ -471,7 +471,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     stop("Dimensions of provided cross-distance matrix don't correspond to length of provided data")
 
                 ## distmat was provided in call
-                distmat_flag <- TRUE
+                pam_precompute <- TRUE
 
                 if (control@trace)
                     cat("\n\tDistance matrix provided...\n\n")
@@ -589,7 +589,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         assign("distmat", NULL, envir = environment(family@dist))
 
         ## If distmat was provided, let it be shown in the results
-        if (distmat_flag) {
+        if (pam_precompute) {
             if (!is.null(attr(distmat, "method")))
                 distance <- attr(distmat, "method")
             else
