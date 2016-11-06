@@ -6,8 +6,8 @@ context("Test parallel")
 # - It still works if I manually build and check the project in the command line
 # =================================================================================================
 
-if (identical(Sys.getenv("NOT_CRAN"), "")) {
-    ## use all cores in local
+if (Sys.info()["user"] == "oso") {
+    ## use all cores in local, change user if needed...
     num_workers <- parallel::detectCores()
 } else {
     ## use only 2 in Travis CI
