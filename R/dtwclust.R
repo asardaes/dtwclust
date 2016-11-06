@@ -720,6 +720,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                                         dots = dots))
 
                     cldist <- as.matrix(cldist)
+                    dimnames(cldist) <- NULL
 
                 } else {
                     allcent <- function(dummy) { data[which.min(apply(D, 1L, sum))] }
@@ -734,7 +735,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                         which(id_k)[id_centroid]
                     })
 
-                    cldist <- as.matrix(D[,centroids][cbind(1L:length(data), cluster)])
+                    cldist <- as.matrix(D[ , centroids][cbind(1L:length(data), cluster)])
+                    dimnames(cldist) <- NULL
                     centroids <- data[centroids]
                 }
 
@@ -846,6 +848,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                                 dots = dots))
 
             cldist <- as.matrix(cldist)
+            dimnames(cldist) <- NULL
             size <- as.vector(table(R$cl))
             clusinfo <- data.frame(size = size, av_dist = 0)
             clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(cldist[ , 1L], R$cl, mean))

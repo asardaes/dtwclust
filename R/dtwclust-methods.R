@@ -870,3 +870,53 @@ is.cl_hierarchy.dtwclust <- function(x) {
 is.cl_dendrogram.dtwclust <- function(x) {
     x@type == "hierarchical"
 }
+
+# ========================================================================================================
+# Coercion methods for cross/pair-dist
+# ========================================================================================================
+
+#' as.matrix
+#'
+#' I don't know why \pkg{proxy} exported a non-generic \code{as.matrix} function. This is to re-export
+#' the base version
+#'
+#' @name as.matrix
+#' @export
+#'
+#' @param x,... See \code{\link[base]{as.matrix}}.
+#'
+#' @seealso \code{\link[base]{as.matrix}}
+#'
+setGeneric("as.matrix", package = "base")
+
+#' @method as.matrix crossdist
+#' @export
+#'
+as.matrix.crossdist <- function(x, ...) {
+    x <- cbind(x)
+    class(x) <- "matrix"
+    x
+}
+
+#' @method as.matrix pairdist
+#' @export
+#'
+as.matrix.pairdist <- function(x, ...) {
+    x <- cbind(x)
+    class(x) <- "matrix"
+    x
+}
+
+#' @method as.data.frame crossdist
+#' @export
+#'
+as.data.frame.crossdist <- function(x, ...) {
+    as.data.frame(as.matrix(x, ...), ...)
+}
+
+#' @method as.data.frame pairdist
+#' @export
+#'
+as.data.frame.pairdist <- function(x, ...) {
+    as.data.frame(as.matrix(x, ...), ...)
+}
