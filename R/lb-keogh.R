@@ -195,6 +195,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         validate_pairwise(x, lower.env)
 
         D <- foreach(x = x, lower.env = lower.env, upper.env = upper.env,
+                     .packages = "dtwclust",
                      .combine = c,
                      .multicombine = TRUE) %dopar% {
                          mapply(upper.env, lower.env, x,
@@ -210,6 +211,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 
     } else {
         D <- foreach(x = x,
+                     .packages = "dtwclust",
                      .combine = rbind,
                      .multicombine = TRUE) %dopar% {
                          ret <- lapply(X = x, U = upper.env, L = lower.env,
