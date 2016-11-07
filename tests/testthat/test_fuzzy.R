@@ -9,7 +9,7 @@ acf_fun <- function(dat, ...) {
 # invalid combinations
 # =================================================================================================
 
-test_that("Invalid combinations in hierarchical clustering are detected.", {
+test_that("Invalid combinations in fuzzy clustering are detected.", {
     expect_error(dtwclust(data_matrix, type = "f", k = 101L), "more clusters")
 
     ctrl <- list(window.size = 15L)
@@ -23,7 +23,6 @@ test_that("Invalid combinations in hierarchical clustering are detected.", {
     expect_error(dtwclust(data, type = "f", distance = "sbd"), "different length")
 
     expect_error(dtwclust(data, type = "f", preproc = "zscore"), "preprocessing")
-    expect_error(dtwclust(data, type = "f", preproc = reinterpolate), "preprocessing.*arguments")
 
     expect_error(dtwclust(data_matrix, type = "f", distance = mean), "proxy", info = "Function")
     expect_error(dtwclust(data_matrix, type = "f", distance = NULL), "proxy", info = "NULL")

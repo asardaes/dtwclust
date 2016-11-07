@@ -4,10 +4,10 @@
 
 all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
     if (is.function(case)) {
-        if (!all(c("x", "cl_id", "k", "cent", "cl_old", "...") %in% names(formals(case))))
-            stop("The provided centroid function must have the following arguments with the ",
-                 "shown names:\n\t",
-                 paste(c("x", "cl_id", "k", "cent", "cl_old", "..."), collapse = ", "))
+        if (!all(c("x", "cl_id", "k", "cent", "cl_old") %in% names(formals(case))))
+            stop("The provided centroid function must have at least the following arguments with ",
+                 "the shown names:\n\t",
+                 paste(c("x", "cl_id", "k", "cent", "cl_old"), collapse = ", "))
 
         return(case)
 

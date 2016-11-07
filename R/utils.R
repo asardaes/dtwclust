@@ -102,6 +102,19 @@ enlist <- function(..., dots = NULL) {
     c(list(...), dots)
 }
 
+# Check if a function has the ellipsis in its formals
+has_dots <- function(foo) {
+    is.function(foo) && !is.null(formals(foo)$`...`)
+}
+
+# Subset dots for do.calls of functions without ellipsis
+subset_dots <- function(dots = list(), foo) {
+    if (length(dots) > 0L)
+        dots[intersect(names(dots), names(formals(foo)))]
+    else
+        list()
+}
+
 # This only works if it's used after split_parallel()
 validate_pairwise <- function(x, y) {
     if (!identical(lengths(x, use.names = FALSE), lengths(y, use.names = FALSE)))

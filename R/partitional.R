@@ -5,6 +5,7 @@
 kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...) {
     N <- length(x)
     k <- as.integer(k)
+    dots <- list(...)
 
     if (N < k)
         stop("Number of clusters cannot be greater than number of observations in the data")
@@ -16,7 +17,16 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...) {
         cluster <- matrix(0, N, k)
         cluster[ , -1L] <- stats::runif(N *(k - 1)) / (k - 1)
         cluster[ , 1L] <- 1 - apply(cluster[ , -1L, drop = FALSE], 1L, sum)
-        centroids <- family@allcent(x = x, cl_id = cluster, k = k, ...)
+
+        if (has_dots(family@allcent))
+            centroids <- family@allcent(x = x, cl_id = cluster, k = k, cl_old = cluster, ...)
+        else
+            centroids <- do.call(family@allcent,
+                                 enlist(x = x,
+                                        cl_id = cluster,
+                                        k = k,
+                                        cl_old = cluster,
+                                        dots = subset_dots(dots, family@allcent)))
 
     } else {
         id_cent <- sample(N, k)

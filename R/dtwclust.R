@@ -119,9 +119,9 @@
 #'   Optionally, \code{method} may be a \strong{function} that performs the hierarchical clustering
 #'   based on a distance matrix, such as the functions included in package \pkg{cluster}. The
 #'   function will receive the \code{dist} object as first argument (see
-#'   \code{\link[stats]{as.dist}}), followed by the elements in \code{...} that match the function's
-#'   formal arguments. The object it returns must support the \code{\link[stats]{as.hclust}} generic
-#'   so that \code{\link[stats]{cutree}} can be used. See the examples.
+#'   \code{\link[stats]{as.dist}}), followed by the elements in \code{...} that match the its formal
+#'   arguments. The object it returns must support the \code{\link[stats]{as.hclust}} generic so
+#'   that \code{\link[stats]{cutree}} can be used. See the examples.
 #'
 #'   The hierarchy does not imply a specific number of clusters, but one can be induced by cutting
 #'   the resulting dendrogram (see \code{\link[stats]{cutree}}). This results in a crisp partition,
@@ -160,13 +160,12 @@
 #'       centroid2)})
 #'     \item \code{"cl_old"}: The membership vector of the \emph{previous} iteration (\code{c(1L,
 #'       1L, 2L)})
-#'     \item The elements of \code{...}
+#'     \item The elements of \code{...} that match its formal arguments
 #'   }
 #'
-#'   Therefore, the function should \emph{always} include the ellipsis (\code{...}) in its
-#'   definition. In case of fuzzy clustering, the membership vectors (2nd and 5th elements above)
-#'   are matrices with number of rows equal to amount of elements in the data, and number of columns
-#'   equal to the number of desired clusters. Each row must sum to 1.
+#'   In case of fuzzy clustering, the membership vectors (2nd and 5th elements above) are matrices
+#'   with number of rows equal to amount of elements in the data, and number of columns equal to the
+#'   number of desired clusters. Each row must sum to 1.
 #'
 #'   The other option is to provide a character string for the custom implementations. The following
 #'   options are available:
@@ -283,8 +282,7 @@
 #'
 #'   Setting to \code{NULL} means no preprocessing (except for \code{centroid = "shape"}). A
 #'   provided function will receive the data as first argument, followed by the contents of
-#'   \code{...}. Therefore, the preprocessing function should have \code{...} in its arguments, even
-#'   if it is not used.
+#'   \code{...} that match its formal arguments.
 #'
 #'   It is convenient to provide this function if you're planning on using the
 #'   \code{\link[stats]{predict}} generic.
@@ -402,11 +400,15 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     ## ----------------------------------------------------------------------------------------------------------
 
     if (!is.null(preproc) && is.function(preproc)) {
-        if (is.null(formals(preproc)$...))
-            stop("The preprocessing function should have '...' in its formal arguments, ",
-                 "even if it is not used.")
+        if (has_dots(preproc)) {
+            data <- preproc(data, ...)
 
-        data <- preproc(data, ...)
+        } else {
+            data <- do.call("preproc",
+                            enlist(data,
+                                   dots = subset_dots(dots, preproc)))
+        }
+
         preproc_char <- as.character(substitute(preproc))[1L]
 
     } else if (type == "partitional" && is.character(centroid) && centroid == "shape") {
@@ -724,9 +726,14 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             hc <- lapply(hclust_methods, function(method) stats::hclust(Dist, method))
 
         } else {
-            hc <- list(do.call(method,
-                               args = enlist(stats::as.dist(D),
-                                             dots = dots[intersect(names(dots), names(formals(method)))])))
+            if (has_dots(method)) {
+                hc <- list(method(stats::as.dist(D), ...))
+
+            } else {
+                hc <- list(do.call(method,
+                                   args = enlist(stats::as.dist(D),
+                                                 dots = subset_dots(dots, method))))
+            }
 
             method <- as.character(substitute(method))
         }

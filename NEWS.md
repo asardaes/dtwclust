@@ -10,6 +10,7 @@
 * Added a new distance based on global alignment kernels: `GAK`.
 * Bear in mind that the `DTW/SBD` algorithms (and hence the functions that depend on them) might give different results in installations with 32-bit architectures.
 * Updated vignette.
+* No longer enforcing preprocessing/centroid/hierarchical functions with ellipsis in their formals.
 
 ## Version 2.3.0
 * Correction: DTW can be symmetric for series of both equal/different length, although in general this is not necessarily the case, due to asymmetric step patterns or constrained paths.

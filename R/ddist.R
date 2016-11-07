@@ -61,18 +61,18 @@ ddist <- function(distance, control, distmat) {
             if (toupper(dist_entry$names[1L]) == "DTW" && is.null(dots$dist.method))
                 dots$dist.method <- "L1"
 
-            ## Does the registered function possess '...' in its definition?
-            has_dots <- is.function(dist_entry$FUN) && !is.null(formals(dist_entry$FUN)$...)
+            ## If the function doesn't have '...', remove invalid arguments from 'dots'
+            valid_args <- names(dots)
 
-            ## If it doesn't, remove invalid arguments from 'dots'
-            if (!has_dots) {
-                if (is.function(dist_entry$FUN))
+            if (is.function(dist_entry$FUN)) {
+                if (!has_dots(dist_entry$FUN))
                     valid_args <- union(names(formals(proxy::dist)), names(formals(dist_entry$FUN)))
-                else
-                    valid_args <- names(formals(proxy::dist))
 
-                dots <- dots[intersect(names(dots), valid_args)]
+            } else {
+                valid_args <- names(formals(proxy::dist))
             }
+
+            dots <- dots[intersect(names(dots), valid_args)]
 
             ## Register doSEQ if necessary
             check_parallel()
