@@ -75,8 +75,8 @@
 #' D.lbi <= D.dtw
 #'
 lb_improved <- function(x, y, window.size = NULL, norm = "L1",
-                        lower.env = NULL, upper.env = NULL, force.symmetry = FALSE) {
-
+                        lower.env = NULL, upper.env = NULL, force.symmetry = FALSE)
+{
     norm <- match.arg(norm, c("L1", "L2"))
 
     consistency_check(x, "ts")
@@ -154,8 +154,8 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
 # ========================================================================================================
 
 lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
-                              force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE) {
-
+                              force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE)
+{
     norm <- match.arg(norm, c("L1", "L2"))
 
     window.size <- consistency_check(window.size, "window")

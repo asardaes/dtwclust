@@ -38,7 +38,8 @@
 #'
 dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
                       step.pattern = symmetric2, backtrack = FALSE,
-                      normalize = FALSE, ..., gcm = NULL) {
+                      normalize = FALSE, ..., gcm = NULL)
+{
     consistency_check(x, "ts")
     consistency_check(y, "ts")
 

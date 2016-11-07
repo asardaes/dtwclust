@@ -97,7 +97,8 @@ DBA <- function(X, centroid = NULL, ...,
                 window.size = NULL, norm = "L1",
                 max.iter = 20L, delta = 1e-3,
                 error.check = TRUE, trace = FALSE,
-                dba.alignment = "dtw_basic") {
+                dba.alignment = "dtw_basic")
+{
     dba.alignment <- match.arg(dba.alignment, c("dtw", "dtw_basic"))
 
     X <- consistency_check(X, "tsmat")

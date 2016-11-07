@@ -110,7 +110,8 @@
 #'
 dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                    error.check = TRUE, pairwise = FALSE,
-                   dtw.func = "dtw_basic", force.symmetry = FALSE, ...) {
+                   dtw.func = "dtw_basic", force.symmetry = FALSE, ...)
+{
     norm <- match.arg(norm, c("L1", "L2"))
     dtw.func <- match.arg(dtw.func, c("dtw", "dtw_basic"))
 

@@ -123,7 +123,7 @@ ddist <- function(distance, control, distmat) {
                     attr(d, "dimnames") <- list(names(x), names(x))
                     rm("D")
 
-                } else{
+                } else {
                     ## WHOLE SYMMETRIC DISTMAT WITH CUSTOM LOOP
                     ## most likely one of my distances, let it handle parallelization
                     d <- do.call(proxy::dist,
