@@ -9,34 +9,34 @@ DBA(X, centroid = NULL, ..., window.size = NULL, norm = "L1",
   dba.alignment = "dtw_basic")
 }
 \arguments{
-\item{X}{A data matrix where each row is a time series, or a list where each element is a time series.
-Multivariate series should be provided as a list of matrices where time spans the rows and the variables
-span the columns.}
+\item{X}{A data matrix where each row is a time series, or a list where each element is a time
+series. Multivariate series should be provided as a list of matrices where time spans the rows
+and the variables span the columns.}
 
-\item{centroid}{Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
-\code{NULL}. For multivariate series, this should be a matrix with the same characteristics as the
-matrices in \code{X}.}
+\item{centroid}{Optionally, a time series to use as reference. Defaults to a random series of
+\code{X} if \code{NULL}. For multivariate series, this should be a matrix with the same
+characteristics as the matrices in \code{X}.}
 
 \item{...}{Further arguments for \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}, e.g.
 \code{step.pattern}.}
 
-\item{window.size}{Window constraint for the DTW calculations. \code{NULL} means no constraint. A slanted
-band is used by default.}
+\item{window.size}{Window constraint for the DTW calculations. \code{NULL} means no constraint. A
+slanted band is used by default.}
 
-\item{norm}{Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for Euclidean
-distance.}
+\item{norm}{Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for
+Euclidean distance.}
 
 \item{max.iter}{Maximum number of iterations allowed.}
 
-\item{delta}{At iteration \code{i}, if \code{all(abs(centroid_{i}} \code{ - centroid_{i-1})} \code{ < delta)},
-convergence is assumed.}
+\item{delta}{At iteration \code{i}, if \code{all(abs(centroid_{i}} \code{ - centroid_{i-1})}
+\code{ < delta)}, convergence is assumed.}
 
 \item{error.check}{Should inconsistencies in the data be checked?}
 
 \item{trace}{If \code{TRUE}, the current iteration is printed to screen.}
 
-\item{dba.alignment}{Character indicating which function to use for calculating alignments, either
-\code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}. The latter should be faster.}
+\item{dba.alignment}{Character indicating which function to use for calculating alignments,
+either \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}. The latter should be faster.}
 }
 \value{
 The average time series.
@@ -45,26 +45,27 @@ The average time series.
 A global averaging method for time series under DTW (Petitjean, Ketterlin and Gancarski, 2011).
 }
 \details{
-This function tries to find the optimum average series between a group of time series in DTW space. Refer to
-the cited article for specific details on the algorithm.
+This function tries to find the optimum average series between a group of time series in DTW
+space. Refer to the cited article for specific details on the algorithm.
 
-If a given series reference is provided in \code{centroid}, the algorithm should always converge to the same
-result provided the elements of \code{X} keep the same values, although their order may change.
+If a given series reference is provided in \code{centroid}, the algorithm should always converge
+to the same result provided the elements of \code{X} keep the same values, although their order
+may change.
 
-The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
-that represents the distance between the point considered and one of the edges of the window. Therefore,
-if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
-between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21} observations falling within
-the window.
+The windowing constraint uses a centered window. The calculations expect a value in
+\code{window.size} that represents the distance between the point considered and one of the edges
+of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
+observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
+in \code{10(2) + 1 = 21} observations falling within the window.
 }
 \section{Parallel Computing}{
 
 
-Please note that running tasks in parallel does \strong{not} guarantee faster computations.
-The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+  Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
+  overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 
-The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to attempt to
-speed up the calculations (see the examples).
+  The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to
+  attempt to speed up the calculations (see the examples).
 }
 \examples{
 

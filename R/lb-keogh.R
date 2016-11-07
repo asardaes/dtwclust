@@ -1,7 +1,7 @@
 #' Keogh's DTW lower bound
 #'
-#' This function calculates a lower bound (LB) on the Dynamic Time Warp (DTW) distance between two time
-#' series. It uses a Sakoe-Chiba constraint.
+#' This function calculates a lower bound (LB) on the Dynamic Time Warp (DTW) distance between two
+#' time series. It uses a Sakoe-Chiba constraint.
 #'
 #' @export
 #'
@@ -10,24 +10,26 @@
 #' @param window.size Window size for envelope calculation. See details.
 #' @param norm Vector norm. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.
 #' @param lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided
-#' (non-proxy version only).
+#'   (non-proxy version only).
 #' @param upper.env Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided
-#' (non-proxy version only).
+#'   (non-proxy version only).
 #' @param force.symmetry If \code{TRUE}, a second lower bound is calculated by swapping \code{x} and
-#' \code{y}, and whichever result has a \emph{higher} distance value is returned. The proxy version
-#' can only work if a square matrix is obtained, but use carefully.
+#'   \code{y}, and whichever result has a \emph{higher} distance value is returned. The proxy
+#'   version can only work if a square matrix is obtained, but use carefully.
 #'
 #' @details
 #'
-#' The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
-#' that represents the distance between the point considered and one of the edges of the window. Therefore,
-#' if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points
-#' between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21} observations falling within
-#' the window.
+#' The windowing constraint uses a centered window. The calculations expect a value in
+#' \code{window.size} that represents the distance between the point considered and one of the edges
+#' of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
+#' observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
+#' in \code{10(2) + 1 = 21} observations falling within the window.
 #'
-#' The reference time series should go in \code{x}, whereas the query time series should go in \code{y}.
+#' The reference time series should go in \code{x}, whereas the query time series should go in
+#' \code{y}.
 #'
-#' @return A list with: \itemize{
+#' @return A list with:
+#' \itemize{
 #'   \item \code{d}: The lower bound of the DTW distance.
 #'   \item \code{upper.env}: The time series of \code{y}'s upper envelope.
 #'   \item \code{lower.env}: The time series of \code{y}'s lower envelope.
@@ -37,13 +39,14 @@
 #'
 #' The lower bound is defined for time series of equal length only and is \strong{not} symmetric.
 #'
-#' If you wish to calculate the lower bound between several time series, it would be better to use the version
-#' registered with the \code{proxy} package, since it includes some small optimizations. The convention
-#' mentioned above for references and queries still holds. See the examples.
+#' If you wish to calculate the lower bound between several time series, it would be better to use
+#' the version registered with the \code{proxy} package, since it includes some small optimizations.
+#' The convention mentioned above for references and queries still holds. See the examples.
 #'
-#' The proxy version has an extra parameter \code{force.symmetry} that should only be used when only \code{x}
-#' is provided or both \code{x} and \code{y} are equal. It compares the lower and upper triangular of the
-#' resulting distance matrix and forces symmetry in such a way that the tightest lower bound is obtained.
+#' The proxy version has an extra parameter \code{force.symmetry} that should only be used when only
+#' \code{x} is provided or both \code{x} and \code{y} are equal. It compares the lower and upper
+#' triangular of the resulting distance matrix and forces symmetry in such a way that the tightest
+#' lower bound is obtained.
 #'
 #' @references
 #'

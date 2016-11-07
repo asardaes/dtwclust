@@ -4,50 +4,53 @@
 #'
 #' @export
 #'
-#' @param x,y Time series. A multivariate series should have time spanning the rows and variables spanning
-#' the columns.
+#' @param x,y Time series. A multivariate series should have time spanning the rows and variables
+#'   spanning the columns.
 #' @param ... Currently ignored.
-#' @param sigma Parameter for the Gaussian kernel's width. See details for the interpretation of \code{NULL}.
-#' @param window.size Parameterization of the constraining band (\emph{T} in Cuturi (2011)). See details.
+#' @param sigma Parameter for the Gaussian kernel's width. See details for the interpretation of
+#'   \code{NULL}.
+#' @param window.size Parameterization of the constraining band (\emph{T} in Cuturi (2011)). See
+#'   details.
 #' @param normalize Normalize the result by considering diagonal terms.
-#' @param logs Optionally, a matrix with \code{max(NROW(x), NROW(y)) + 1} rows and 3 columns to use for
-#' the logarithm calculations. Used internally for memory optimization. If provided, it \strong{will}
-#' be modified \emph{in place} by \code{C} code, except in the parallel version in
-#' \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.
+#' @param logs Optionally, a matrix with \code{max(NROW(x), NROW(y)) + 1} rows and 3 columns to use
+#'   for the logarithm calculations. Used internally for memory optimization. If provided, it
+#'   \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel version in
+#'   \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.
 #'
 #' @details
 #'
-#' This function uses the Triangular Global Alignment Kernel (TGAK) described in Cuturi (2011). It supports
-#' series of different length and multivariate series, so long as the ratio of the series' lengths don't differ
-#' by more than 2 (or less than 0.5).
+#' This function uses the Triangular Global Alignment Kernel (TGAK) described in Cuturi (2011). It
+#' supports series of different length and multivariate series, so long as the ratio of the series'
+#' lengths don't differ by more than 2 (or less than 0.5).
 #'
-#' The \code{window.size} parameter is similar to the one used in DTW, so \code{NULL} signifies no constraint,
-#' and its value should be greater than 1 for series of different length.
+#' The \code{window.size} parameter is similar to the one used in DTW, so \code{NULL} signifies no
+#' constraint, and its value should be greater than 1 for series of different length.
 #'
-#' The Gaussian kernel is parameterized by \code{sigma}. Providing \code{NULL} means that the value will be
-#' estimated by using the strategy mentioned in Cuturi (2011) with a constant of 1. This estimation is subject
-#' to \strong{randomness}, so consider estimating the value once and re-using it (the estimate is returned as
-#' an attribute of the result). See the examples.
+#' The Gaussian kernel is parameterized by \code{sigma}. Providing \code{NULL} means that the value
+#' will be estimated by using the strategy mentioned in Cuturi (2011) with a constant of 1. This
+#' estimation is subject to \strong{randomness}, so consider estimating the value once and re-using
+#' it (the estimate is returned as an attribute of the result). See the examples.
 #'
 #' For more information, refer to the package vignette and the referenced article.
 #'
-#' @return The logarithm of the GAK if \code{normalize = FALSE}, otherwise 1 minus the normalized GAK.
-#' The value of \code{sigma} is assigned as an attribute of the result.
+#' @return The logarithm of the GAK if \code{normalize = FALSE}, otherwise 1 minus the normalized
+#'   GAK. The value of \code{sigma} is assigned as an attribute of the result.
 #'
 #' @note
 #'
-#' If \code{normalize} is set to \code{FALSE}, the returned value is \strong{not} a distance, rather a similarity.
-#' The \code{proxy::}\code{\link[proxy]{dist}} version is thus always normalized.
+#' If \code{normalize} is set to \code{FALSE}, the returned value is \strong{not} a distance, rather
+#' a similarity. The \code{proxy::}\code{\link[proxy]{dist}} version is thus always normalized.
 #'
-#' A constrained unnormalized calculation (i.e. with \code{window.size > 0} and \code{normalize = FALSE}) will
-#' return negative infinity if \code{abs(NROW(x)} \code{-} \code{NROW(y))} \code{>} \code{window.size}. Since
-#' the function won't perform calculations in that case, it might be faster, but if this behavior is not desired,
-#' consider reinterpolating the time series (see \code{\link{reinterpolate}}) or increasing the window size.
+#' A constrained unnormalized calculation (i.e. with \code{window.size > 0} and \code{normalize =
+#' FALSE}) will return negative infinity if \code{abs(NROW(x)} \code{-} \code{NROW(y))} \code{>}
+#' \code{window.size}. Since the function won't perform calculations in that case, it might be
+#' faster, but if this behavior is not desired, consider reinterpolating the time series (see
+#' \code{\link{reinterpolate}}) or increasing the window size.
 #'
 #' @references
 #'
-#' Cuturi, M. (2011). Fast global alignment kernels. In \emph{Proceedings of the 28th international conference on
-#' machine learning (ICML-11)} (pp. 929-936).
+#' Cuturi, M. (2011). Fast global alignment kernels. In \emph{Proceedings of the 28th international
+#' conference on machine learning (ICML-11)} (pp. 929-936).
 #'
 #' @examples
 #'

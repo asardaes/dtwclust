@@ -5,13 +5,13 @@
 #'
 #' @export
 #'
-#' @param x Data to normalize. Either a vector, a matrix/data.frame where each row is to be normalized, or a list of
-#' vectors.
+#' @param x Data to normalize. Either a vector, a matrix/data.frame where each row is to be
+#'   normalized, or a list of vectors.
 #' @param ... Further arguments to pass to \code{\link[base]{scale}}.
-#' @param multivariate Is \code{x} a multivariate time series? It will be detected automatically if a list is provided in
-#' \code{x}.
-#' @param keep.attributes Should the mean and standard deviation returned by \code{\link[base]{scale}}
-#' be preserved?
+#' @param multivariate Is \code{x} a multivariate time series? It will be detected automatically if
+#'   a list is provided in \code{x}.
+#' @param keep.attributes Should the mean and standard deviation returned by
+#'   \code{\link[base]{scale}} be preserved?
 #'
 #' @return Normalized data in the same format as provided.
 #'

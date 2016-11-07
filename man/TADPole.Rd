@@ -19,9 +19,13 @@ series.}
 \item{error.check}{Should the data be checked for inconsistencies?}
 }
 \value{
-A list with: \itemize{ \item \code{cl}: Cluster indices. \item \code{centroids}: Indices
-  of the centroids. \item \code{distCalcPercentage}: Percentage of distance calculations that
-  were actually performed. }
+A list with:
+\itemize{
+  \item \code{cl}: Cluster indices.
+  \item \code{centroids}: Indices of the centroids.
+  \item \code{distCalcPercentage}: Percentage of distance calculations that were actually
+    performed.
+}
 }
 \description{
 Time-series Anytime Density Peaks Clustering as proposed by Begum et al., 2015.

@@ -36,9 +36,13 @@
 #' observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
 #' in \code{10*2 + 1 = 21} observations falling within the window.
 #'
-#' @return A list with: \itemize{ \item \code{cl}: Cluster indices. \item \code{centroids}: Indices
-#'   of the centroids. \item \code{distCalcPercentage}: Percentage of distance calculations that
-#'   were actually performed. }
+#' @return A list with:
+#' \itemize{
+#'   \item \code{cl}: Cluster indices.
+#'   \item \code{centroids}: Indices of the centroids.
+#'   \item \code{distCalcPercentage}: Percentage of distance calculations that were actually
+#'     performed.
+#' }
 #'
 #' @section Parallel Computing:
 #'

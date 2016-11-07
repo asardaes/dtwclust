@@ -5,8 +5,8 @@
 \alias{dtwclust-package}
 \title{Time series clustering along with optimizations for the Dynamic Time Warping distance}
 \description{
-Time series clustering with a wide variety of strategies and a series of optimizations specific to
-the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs). There are
+Time series clustering with a wide variety of strategies and a series of optimizations specific
+to the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs). There are
 implementations of both traditional clustering algorithms, and more recent procedures such as
 k-Shape and TADPole clustering. Functionality can be easily extended with custom distance
 measures and centroid definitions.
@@ -22,18 +22,18 @@ series. Over the years, several variations have appeared in order to make the pr
 more efficient. Please refer to the included references for more information, especially Giorgino
 (2009), which is a good practical introduction.
 
-Most optimizations require equal dimensionality, which means time series should have equal length.
-DTW itself does not require this, but it is relatively expensive to compute. Other distance definitions
-may be used, or series could be reinterpolated to a matching length (Ratanamahatana and Keogh,
-2004).
+Most optimizations require equal dimensionality, which means time series should have equal
+length. DTW itself does not require this, but it is relatively expensive to compute. Other
+distance definitions may be used, or series could be reinterpolated to a matching length
+(Ratanamahatana and Keogh, 2004).
 
 Other packages that are particularly leveraged here are the \code{proxy} package for distance
 matrix calculations and the \code{dtw} package for the core DTW calculations. The main clustering
 function and entry point for this package is \code{\link{dtwclust}}.
 
-Please note the random number generator is set to L'Ecuyer-CMRG when \code{dtwclust}
-is attached in an attempt to preserve reproducibility. You are free to change this afterwards if
-you wish. See \code{\link[base]{RNGkind}}.
+Please note the random number generator is set to L'Ecuyer-CMRG when \code{dtwclust} is attached
+in an attempt to preserve reproducibility. You are free to change this afterwards if you wish.
+See \code{\link[base]{RNGkind}}.
 
 For more information, please read the included package vignette, which can be accessed by typing
 \code{vignette("dtwclust")}.

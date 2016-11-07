@@ -78,7 +78,8 @@ setMethod("initialize", "dtwclustFamily",
 #' @aliases show,dtwclust
 #' @exportMethod show
 #'
-#' @param object,x An object of class \code{\link{dtwclust-class}} as returned by \code{\link{dtwclust}}.
+#' @param object,x An object of class \code{\link{dtwclust-class}} as returned by
+#'   \code{\link{dtwclust}}.
 #'
 #' @details
 #'
@@ -122,13 +123,13 @@ setMethod("show", "dtwclust",
 #' @method update dtwclust
 #' @export
 #'
-#' @param evaluate Logical. Defaults to \code{TRUE} and evaluates the updated call, which will result in
-#' a new \code{dtwclust} object. Otherwise, it returns the unevaluated call.
+#' @param evaluate Logical. Defaults to \code{TRUE} and evaluates the updated call, which will
+#'   result in a new \code{dtwclust} object. Otherwise, it returns the unevaluated call.
 #'
 #' @details
 #'
-#' The \code{update} method takes the original function call, replaces any provided argument and optionally
-#' evaluates the call again. Use \code{evaluate = FALSE} if you want to get the
+#' The \code{update} method takes the original function call, replaces any provided argument and
+#' optionally evaluates the call again. Use \code{evaluate = FALSE} if you want to get the
 #' unevaluated call.
 #'
 update.dtwclust <- function(object, ..., evaluate = TRUE) {
@@ -168,15 +169,15 @@ setMethod("update", signature(object = "dtwclust"), update.dtwclust)
 #' @method predict dtwclust
 #' @export
 #'
-#' @param newdata New data to be assigned to a cluster. It can take any of the supported formats of \code{\link{dtwclust}}.
-#' Note that for multivariate series, this means that it \strong{must} be a list of matrices, even if the list
-#' has only one element.
+#' @param newdata New data to be assigned to a cluster. It can take any of the supported formats of
+#'   \code{\link{dtwclust}}. Note that for multivariate series, this means that it \strong{must} be
+#'   a list of matrices, even if the list has only one element.
 #'
 #' @details
 #'
-#' The \code{predict} generic can take the usual \code{newdata} argument and it returns the cluster(s) to which
-#' the data belongs; if \code{NULL}, it simply returns the obtained cluster indices. It preprocesses
-#' the data with the corresponding function if available.
+#' The \code{predict} generic can take the usual \code{newdata} argument and it returns the
+#' cluster(s) to which the data belongs; if \code{NULL}, it simply returns the obtained cluster
+#' indices. It preprocesses the data with the corresponding function if available.
 #'
 predict.dtwclust <- function(object, newdata = NULL, ...) {
     if (is.null(newdata)) {
@@ -225,48 +226,49 @@ setMethod("predict", signature(object = "dtwclust"), predict.dtwclust)
 #' @export
 #'
 #' @param y Ignored.
-#' @param ... For \code{plot}, further arguments to pass to \code{\link[ggplot2]{geom_line}} for the plotting
-#' of the \emph{cluster centroids}, or to \code{\link[stats]{plot.hclust}}. See details. For \code{update}, any
-#' supported argument. Otherwise ignored.
+#' @param ... For \code{plot}, further arguments to pass to \code{\link[ggplot2]{geom_line}} for the
+#'   plotting of the \emph{cluster centroids}, or to \code{\link[stats]{plot.hclust}}. See details.
+#'   For \code{update}, any supported argument. Otherwise ignored.
 #' @param clus A numeric vector indicating which clusters to plot.
-#' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}} for more
-#' information
+#' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}}
+#'   for more information
 #' @param data Optionally, the data in the same format as it was provided to \code{\link{dtwclust}}.
-#' @param time Optional values for the time axis. If series have different lengths, provide the time values of
-#' the longest series.
-#' @param plot Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot object without
-#' printing anything to screen
+#' @param time Optional values for the time axis. If series have different lengths, provide the time
+#'   values of the longest series.
+#' @param plot Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot
+#'   object without printing anything to screen
 #' @param type What to plot. \code{NULL} means default. See details.
 #'
 #' @section Plotting:
 #'
-#' The plot method uses the \code{ggplot2} plotting system (see \code{\link[ggplot2]{ggplot}}).
+#'   The plot method uses the \code{ggplot2} plotting system (see \code{\link[ggplot2]{ggplot}}).
 #'
-#' The default depends on whether a hierarchical method was used or not. In those cases, the dendrogram is
-#' plotted by default; you can pass any extra parameters to \code{\link[stats]{plot.hclust}} via \code{...}.
+#'   The default depends on whether a hierarchical method was used or not. In those cases, the
+#'   dendrogram is plotted by default; you can pass any extra parameters to
+#'   \code{\link[stats]{plot.hclust}} via \code{...}.
 #'
-#' Otherwise, the function plots the time series of each cluster along with the obtained centroid.
-#' The default values for cluster centroids are: \code{linetype = "dashed"}, \code{size = 1.5},
-#' \code{colour = "black"}, \code{alpha = 0.5}. You can change this by means of \code{...}.
+#'   Otherwise, the function plots the time series of each cluster along with the obtained centroid.
+#'   The default values for cluster centroids are: \code{linetype = "dashed"}, \code{size = 1.5},
+#'   \code{colour = "black"}, \code{alpha = 0.5}. You can change this by means of \code{...}.
 #'
-#' You can choose what to plot with the \code{type} parameter. Possible options are:
+#'   You can choose what to plot with the \code{type} parameter. Possible options are:
 #'
-#' \itemize{
-#'   \item \code{"dendrogram"}: Only available for hierarchical clustering.
-#'   \item \code{"series"}: Plot the time series divided into clusters without including centroids.
-#'   \item \code{"centroids"}: Plot the obtained centroids only.
-#'   \item \code{"sc"}: Plot both series and centroids
-#' }
+#'   \itemize{
+#'     \item \code{"dendrogram"}: Only available for hierarchical clustering.
+#'     \item \code{"series"}: Plot the time series divided into clusters without including centroids.
+#'     \item \code{"centroids"}: Plot the obtained centroids only.
+#'     \item \code{"sc"}: Plot both series and centroids
+#'   }
 #'
-#' The flag \code{save.data} should be set to \code{TRUE} when running \code{\link{dtwclust}} to be able to
-#' use this. Optionally, you can manually provide the data in the \code{data} parameter.
+#'   The flag \code{save.data} should be set to \code{TRUE} when running \code{\link{dtwclust}} to be
+#'   able to use this. Optionally, you can manually provide the data in the \code{data} parameter.
 #'
-#' If created, the function returns the \code{gg} object invisibly, in case you want to modify it to your
-#' liking. You might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
+#'   If created, the function returns the \code{gg} object invisibly, in case you want to modify it to
+#'   your liking. You might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the case.
 #'
-#' If you want to free the scale of the X axis, you can do the following:
+#'   If you want to free the scale of the X axis, you can do the following:
 #'
-#' \code{plot(object, plot = FALSE)} \code{+} \code{facet_wrap(~cl, scales = "free")}
+#'   \code{plot(object, plot = FALSE)} \code{+} \code{facet_wrap(~cl, scales = "free")}
 #'
 #' @return
 #'
@@ -668,9 +670,8 @@ setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
 
 #' Cluster Similarity Matrix
 #'
-#' Returns a matrix of cluster similarities. Currently two methods for computing
-#' similarities of clusters are implemented. This generic is included in the
-#' \pkg{flexclust} package.
+#' Returns a matrix of cluster similarities. Currently two methods for computing similarities of
+#' clusters are implemented. This generic is included in the \pkg{flexclust} package.
 #'
 #' @name clusterSim
 #' @rdname clusterSim
@@ -877,8 +878,8 @@ is.cl_dendrogram.dtwclust <- function(x) {
 
 #' as.matrix
 #'
-#' \pkg{proxy} exported a non-generic \code{as.matrix} function. This is to re-export
-#' the base version and add some coercion methods for \code{pairdist} and \code{crossdist}.
+#' \pkg{proxy} exported a non-generic \code{as.matrix} function. This is to re-export the base
+#' version and add some coercion methods for \code{pairdist} and \code{crossdist}.
 #'
 #' @name as.matrix
 #' @export

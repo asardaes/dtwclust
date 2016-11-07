@@ -1,7 +1,7 @@
 #' Shape-based distance
 #'
-#' Distance based on coefficient-normalized cross-correlation as proposed by Paparrizos and Gravano, 2015,
-#' for the k-Shape clustering algorithm.
+#' Distance based on coefficient-normalized cross-correlation as proposed by Paparrizos and Gravano,
+#' 2015, for the k-Shape clustering algorithm.
 #'
 #' @export
 #'
@@ -13,30 +13,33 @@
 #' This distance works best if the series are \emph{z-normalized}. If not, at least they should have
 #' corresponding amplitudes, since the values of the signals \strong{do} affect the outcome.
 #'
-#' If \code{x} and \code{y} do \strong{not} have the same length, it would be best if the longer sequence is
-#' provided in \code{y}, because it will be shifted to match \code{x}. Anything before the matching point is
-#' discarded and the series is padded with trailing zeros as needed.
+#' If \code{x} and \code{y} do \strong{not} have the same length, it would be best if the longer
+#' sequence is provided in \code{y}, because it will be shifted to match \code{x}. Anything before
+#' the matching point is discarded and the series is padded with trailing zeros as needed.
 #'
 #' The output values lie between 0 and 2, with 0 indicating perfect similarity.
 #'
-#' @return A list with: \itemize{
+#' @return A list with:
+#' \itemize{
 #'   \item \code{dist}: The shape-based distance between \code{x} and \code{y}.
 #'   \item \code{yshift}: A shifted version of \code{y} so that it optimally matches \code{x}.
 #' }
 #'
 #' @note
 #'
-#' If you wish to calculate the distance between several time series, it would be better to use the version
-#' registered with the \code{proxy} package, since it includes some small optimizations. See the examples.
+#' If you wish to calculate the distance between several time series, it would be better to use the
+#' version registered with the \code{proxy} package, since it includes some small optimizations. See
+#' the examples.
 #'
-#' This distance is calculated with help of the Fast Fourier Transform, so it can be sensitive to numerical
-#' precision. Results could vary slightly between 32 and 64 bit architectures.
+#' This distance is calculated with help of the Fast Fourier Transform, so it can be sensitive to
+#' numerical precision. Results could vary slightly between 32 and 64 bit architectures.
 #'
 #' @references
 #'
 #' Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.''
 #' In \emph{Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data},
-#' series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{http://doi.org/10.1145/2723372.2737793}.
+#' series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9,
+#' \url{http://doi.org/10.1145/2723372.2737793}.
 #'
 #' @seealso
 #'

@@ -1,30 +1,31 @@
 #' Shape average of several time series
 #'
-#' Time-series shape extraction based on optimal alignments as proposed by Paparrizos and Gravano, 2015, for
-#' the k-Shape clustering algorithm.
+#' Time-series shape extraction based on optimal alignments as proposed by Paparrizos and Gravano,
+#' 2015, for the k-Shape clustering algorithm.
 #'
 #' @export
 #'
-#' @param X A data matrix where each row is a time series, or a list where each element is a time series.
-#' Multivariate series should be provided as a list of matrices where time spans the rows and the variables
-#' span the columns.
-#' @param centroid Optionally, a time series to use as reference. Defaults to a random series of \code{X} if
-#' \code{NULL}. For multivariate series, this should be a matrix with the same characteristics as the
-#' matrices in \code{X}. \emph{It will be z-normalized}.
+#' @param X A data matrix where each row is a time series, or a list where each element is a time
+#'   series. Multivariate series should be provided as a list of matrices where time spans the rows
+#'   and the variables span the columns.
+#' @param centroid Optionally, a time series to use as reference. Defaults to a random series of
+#'   \code{X} if \code{NULL}. For multivariate series, this should be a matrix with the same
+#'   characteristics as the matrices in \code{X}. \emph{It will be z-normalized}.
 #' @param znorm Logical flag. Should z-scores be calculated for \code{X} before processing?
 #'
 #' @details
 #'
-#' This works only if the series are \emph{z-normalized}, since the output will also have this normalization.
+#' This works only if the series are \emph{z-normalized}, since the output will also have this
+#' normalization.
 #'
-#' The resulting centroid will have the same length as \code{centroid} if provided. Otherwise, there are two
-#' possibilities: if all series from \code{X} have the same length, all of them
-#' will be used as-is, and the output will have the same length as the series; if series have different
-#' lengths, a series will be chosen at random and used as reference. The output series will then have the
+#' The resulting centroid will have the same length as \code{centroid} if provided. Otherwise, there
+#' are two possibilities: if all series from \code{X} have the same length, all of them will be used
+#' as-is, and the output will have the same length as the series; if series have different lengths,
+#' a series will be chosen at random and used as reference. The output series will then have the
 #' same length as the chosen series.
 #'
-#' This centroid computation is casted as an optimization problem called maximization of Rayleigh Quotient.
-#' It depends on the \code{\link{SBD}} algorithm. See the cited article for more details.
+#' This centroid computation is casted as an optimization problem called maximization of Rayleigh
+#' Quotient. It depends on the \code{\link{SBD}} algorithm. See the cited article for more details.
 #'
 #' @return Centroid time series (z-normalized).
 #'
@@ -32,7 +33,8 @@
 #'
 #' Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.''
 #' In \emph{Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data},
-#' series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{http://doi.org/10.1145/2723372.2737793}.
+#' series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9,
+#' \url{http://doi.org/10.1145/2723372.2737793}.
 #'
 #' @seealso
 #'
