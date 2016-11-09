@@ -239,6 +239,7 @@ test_that("Operations with dba centroid give same results as references.", {
 # =================================================================================================
 
 test_that("Operations with custom centroid give same results as references.", {
+    ## ---------------------------------------------------------- with dots
     mycent <- function(x, cl_id, k, cent, cl_old, ...) {
         x_split <- split(x, cl_id)
 
@@ -255,7 +256,27 @@ test_that("Operations with custom centroid give same results as references.", {
 
     cent_colMeans <- reset_nondeterministic(cent_colMeans)
 
+    ## ---------------------------------------------------------- without dots
+    mycent <- function(x, cl_id, k, cent, cl_old) {
+        x_split <- split(x, cl_id)
+
+        x_split <- lapply(x_split, function(xx) do.call(rbind, xx))
+
+        new_cent <- lapply(x_split, colMeans)
+
+        new_cent
+    }
+
+    cent_colMeans_nd <- dtwclust(data_matrix, type = "partitional", k = 20,
+                                 distance = "sbd", centroid = mycent,
+                                 preproc = NULL, control = ctrl, seed = 123)
+
+    cent_colMeans_nd <- reset_nondeterministic(cent_colMeans)
+
+    ## ---------------------------------------------------------- refs
     skip_on_cran()
 
+    ## notice files are the same, results should be equal
     expect_equal_to_reference(cent_colMeans, file_name(cent_colMeans), info = "Custom colMeans")
+    expect_equal_to_reference(cent_colMeans_nd, file_name(cent_colMeans), info = "Custom colMeans")
 })
