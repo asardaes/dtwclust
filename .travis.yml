@@ -4,13 +4,16 @@ language: r
 cache: packages
 r_build_args: "--compact-vignettes"
 
+r_packages:
+  - covr
+
 sudo:
-- false
+  - false
 os:
-- linux
+  - linux
 r:
-- release
-- devel
+  - release
+  - devel
 
 matrix:
   include:
@@ -19,7 +22,10 @@ matrix:
       sudo: true
 
 before_install:
-- if [ "${TRAVIS_OS_NAME}" == "osx" ]; then sudo tlmgr install placeins cleveref; fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then sudo tlmgr install placeins cleveref; fi
+
+after_success:
+  - Rscript -e 'library(covr); codecov()'
 
 notifications:
   email:

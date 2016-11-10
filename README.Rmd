@@ -22,6 +22,7 @@ knitr::opts_chunk$set(
 [![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](http://cranlogs.r-pkg.org/badges/dtwclust)
 [![Travis-CI Build Status](https://travis-ci.org/asardaes/dtwclust.svg?branch=master)](https://travis-ci.org/asardaes/dtwclust)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/asardaes/dtwclust?branch=master&svg=true)](https://ci.appveyor.com/project/asardaes/dtwclust)
+[![codecov](https://codecov.io/gh/asardaes/dtwclust/branch/master/graph/badge.svg)](https://codecov.io/gh/asardaes/dtwclust)
 
 # Time Series Clustering Along with Optimizations for the Dynamic Time Warping (DTW) Distance
 
