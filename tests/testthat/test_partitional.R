@@ -137,7 +137,7 @@ test_that("Partitional clustering works as expected.", {
 
     pc_mv_dba <- reset_nondeterministic(pc_mv_dba)
 
-    expect_equal_to_reference(pc_mv_dba, file_name(pc_mv_dba))
+    expect_equal_to_reference(pc_mv_dba, file_name(pc_mv_dba, x32 = TRUE))
 })
 
 # =================================================================================================

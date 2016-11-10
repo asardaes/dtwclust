@@ -230,8 +230,8 @@ test_that("Operations with dba centroid give same results as references.", {
 
     skip_on_cran()
 
-    expect_equal_to_reference(cent_dba, file_name(cent_dba), info = "Univariate")
-    expect_equal_to_reference(cent_mv_dba, file_name(cent_mv_dba), info = "Multivariate")
+    expect_equal_to_reference(cent_dba, file_name(cent_dba, x32 = TRUE), info = "Univariate")
+    expect_equal_to_reference(cent_mv_dba, file_name(cent_mv_dba, x32 = TRUE), info = "Multivariate")
 })
 
 # =================================================================================================

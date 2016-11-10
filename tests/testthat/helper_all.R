@@ -27,6 +27,9 @@ reset_nondeterministic <- function(obj, clear.data = TRUE) {
     obj
 }
 
-file_name <- function(object) {
-    paste0("rds/", as.character(substitute(object)), ".rds")
+file_name <- function(object, x32 = FALSE) {
+    if (x32 && .Machine$sizeof.pointer == 4L)
+        paste0("rds/x32/", as.character(substitute(object)), ".rds")
+    else
+        paste0("rds/", as.character(substitute(object)), ".rds")
 }

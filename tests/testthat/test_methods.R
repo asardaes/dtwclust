@@ -19,5 +19,5 @@ test_that("Methods for dtwclust objects are dispatched correctly.", {
     skip_on_cran()
 
     method_update <- reset_nondeterministic(method_update)
-    expect_equal_to_reference(method_update, file_name(method_update))
+    expect_equal_to_reference(method_update, file_name(method_update, x32 = TRUE))
 })

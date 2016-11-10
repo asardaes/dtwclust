@@ -48,7 +48,7 @@ test_that("Hierarchical clustering works as expected.", {
 
     hc_all <- lapply(hc_all, reset_nondeterministic)
 
-    expect_equal_to_reference(hc_all, file_name(hc_all))
+    expect_equal_to_reference(hc_all, file_name(hc_all, x32 = TRUE))
 
     ## ---------------------------------------------------------- non-symmetric
     hc_lbi <- dtwclust(data_reinterpolated, type = "hierarchical", k = 20L,

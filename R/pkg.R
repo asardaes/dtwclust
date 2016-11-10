@@ -161,7 +161,7 @@ NULL
                           'Please see news(package = "dtwclust") for important information!\n')
 
     if (grepl("\\.9000$", utils::packageVersion("dtwclust")))
-        packageStartupMessage("This is a developer version of 'dtwclust'. NOTE: tests in x32 architectures will fail.")
+        packageStartupMessage("This is a developer version of 'dtwclust'.")
 }
 
 .onUnload <- function(libpath) {
