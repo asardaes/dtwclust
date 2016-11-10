@@ -53,4 +53,8 @@ of the window. Therefore, if, for example, \code{window.size = 10}, the warping 
 observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
 in \code{10(2) + 1 = 21} observations falling within the window.
 }
+\note{
+The DTW algorithm (and the functions that depend on it) might return different values in 32 bit
+installations compared to 64 bit ones.
+}
 

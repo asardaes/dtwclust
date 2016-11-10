@@ -38,6 +38,11 @@
 #'   \item \code{index2}: \code{y} indices for the matched elements in the warping path.
 #' }
 #'
+#' @note
+#'
+#' The DTW algorithm (and the functions that depend on it) might return different values in 32 bit
+#' installations compared to 64 bit ones.
+#'
 dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
                       step.pattern = symmetric2, backtrack = FALSE,
                       normalize = FALSE, ..., gcm = NULL)

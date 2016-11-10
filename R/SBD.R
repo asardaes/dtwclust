@@ -32,7 +32,8 @@
 #' the examples.
 #'
 #' This distance is calculated with help of the Fast Fourier Transform, so it can be sensitive to
-#' numerical precision. Results could vary slightly between 32 and 64 bit architectures.
+#' numerical precision. Thus, this function (and the functions that depend on it) might return
+#' different values in 32 bit installations compared to 64 bit ones.
 #'
 #' @references
 #'
