@@ -83,7 +83,7 @@ test_that("A valid custom hierarchical function works as expected.", {
                          distance = "sbd", method = diana)
 
     hc_diana <- reset_nondeterministic(hc_diana)
-    hc_diana@call <- call("foo", bar = 1)
+    hc_diana$call <- NULL
 
-    expect_equal_to_reference(hc_diana, file_name(hc_diana))
+    expect_equal_to_reference(hc_diana, file_name(hc_diana, x32 = TRUE))
 })
