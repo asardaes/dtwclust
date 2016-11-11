@@ -389,8 +389,11 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     if (is.null(control) || is.list(control)) {
         control <- as(control, "dtwclustControl")
 
-    } else if (class(control) != "dtwclustControl" || !validObject(control)) {
-        stop("Invalid control argument") # validObject should generate an error anyway
+    } else if (class(control) != "dtwclustControl") {
+        stop("Invalid control argument")
+
+    } else {
+        validObject(control)
     }
 
     dots <- list(...)

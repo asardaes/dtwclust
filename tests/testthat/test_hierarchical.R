@@ -69,3 +69,18 @@ test_that("Hierarchical clustering works as expected.", {
 
     expect_equal_to_reference(hc_cent, file_name(hc_cent))
 })
+
+# =================================================================================================
+# cumstom hierarchical function
+# =================================================================================================
+
+test_that("A valid custom hierarchical function works as expected.", {
+    skip_on_cran()
+
+    hc_diana <- dtwclust(data, type = "hierarchical", k = 20L,
+                         distance = "sbd", method = cluster::diana)
+
+    hc_diana <- reset_nondeterministic(hc_diana)
+
+    expect_equal_to_reference(hc_diana, file_name(hc_diana, x32 = TRUE))
+})

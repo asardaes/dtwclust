@@ -89,8 +89,10 @@ test_that("Fuzzy clustering works as expected.", {
     expect_equal_to_reference(fc, file_name(fc))
 
     ## ---------------------------------------------------------- multivariate
-    fc_mv <- dtwclust(data_multivariate[1L:20L], type = "fuzzy", k = 4L,
-                      preproc = acf_fun, distance = "dtw_basic",
+    dmv <- reinterpolate(data_multivariate, new.length = max(sapply(data_multivariate, NROW)))
+
+    fc_mv <- dtwclust(dmv, type = "fuzzy", k = 4L,
+                      distance = "dtw_basic",
                       seed = 123)
 
     fc_mv <- reset_nondeterministic(fc_mv)

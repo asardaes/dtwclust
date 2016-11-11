@@ -392,6 +392,10 @@ test_that("Operations with dtwclustFamily@dist give expected results", {
 # symmetric gak
 # =================================================================================================
 
+test_that("GAK can estimate sigma.", {
+    dgak <- GAK(data[[1L]], data[[100L]])
+})
+
 test_that("Symmetric univariate GAK distance gives expected results.", {
     D1 <- proxy::dist(data_subset, method = "gak",
                       window.size = 18L)

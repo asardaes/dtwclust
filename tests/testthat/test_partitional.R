@@ -171,3 +171,23 @@ test_that("TADPole works as expected", {
 
     expect_equal_to_reference(pc_tadp_cent, file_name(pc_tadp_cent))
 })
+
+# =================================================================================================
+# cluster reinitialization
+# =================================================================================================
+
+## this case causes clusters to becom empty
+test_that("Cluster reinitialization in partitional dtwclust works.", {
+    suppressWarnings(pc_cr <- dtwclust(data_reinterpolated, k = 20,
+                                       distance = "lbk", centroid = "mean",
+                                       seed=31231,
+                                       control = list(window.size = 19L,
+                                                      iter.max = 10L)))
+
+    expect_false(pc_cr@converged)
+
+    skip_on_cran()
+
+    pc_cr <- reset_nondeterministic(pc_cr)
+    expect_equal_to_reference(pc_cr, file_name(pc_cr))
+})

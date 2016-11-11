@@ -1,5 +1,7 @@
-library(testthat) # testthat has its own definition of "proc_time"...
+library(cluster)
+library(flexclust)
 library(dtwclust)
+library(testthat)
 
 #' To test in a local machine:
 #' Sys.setenv(NOT_CRAN = "true"); test_dir("tests/testthat/")

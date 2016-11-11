@@ -204,7 +204,7 @@ test_that("Operations with pam centroid give same results as references.", {
 # =================================================================================================
 
 test_that("Operations with dba centroid give same results as references.", {
-    ## ---------------------------------------------------------- univariate
+    ## ---------------------------------------------------------- univariate with dtw_basic
     family <- new("dtwclustFamily",
                   control = ctrl,
                   allcent = "dba")
@@ -217,7 +217,17 @@ test_that("Operations with dba centroid give same results as references.", {
 
     expect_identical(length(cent_dba), k)
 
-    ## ---------------------------------------------------------- multivariate
+    ## ---------------------------------------------------------- univariate with dtw
+    cent_dba_dtw <- family@allcent(x,
+                                   cl_id = cl_id,
+                                   k = k,
+                                   cent = x[c(1L,20L)],
+                                   cl_old = 0L,
+                                   dba.alignment = "dtw")
+
+    expect_identical(cent_dba, cent_dba_dtw)
+
+    ## ---------------------------------------------------------- multivariate with dtw_basic
     cent_mv_dba <- family@allcent(data_multivariate,
                                   cl_id = cl_id,
                                   k = k,
@@ -228,6 +238,17 @@ test_that("Operations with dba centroid give same results as references.", {
 
     expect_identical(dim(cent_mv_dba[[1L]]), dim(data_multivariate[[1L]]))
 
+    ## ---------------------------------------------------------- multivariate with dtw
+    cent_mv_dba_dtw <- family@allcent(data_multivariate,
+                                      cl_id = cl_id,
+                                      k = k,
+                                      cent = data_multivariate[c(1L,20L)],
+                                      cl_old = 0L,
+                                      dba.alignment = "dtw")
+
+    expect_identical(cent_mv_dba, cent_mv_dba_dtw)
+
+    ## ---------------------------------------------------------- refs
     skip_on_cran()
 
     expect_equal_to_reference(cent_dba, file_name(cent_dba, x32 = TRUE), info = "Univariate")
