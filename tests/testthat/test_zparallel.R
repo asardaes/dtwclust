@@ -42,11 +42,11 @@ test_that("Parallel computation gives the same results as sequential", {
 
 test_that("Parallel FORK computation gives the same results as sequential", {
     skip_on_cran()
+    skip_on_travis()
+    skip_on_os("windows")
 
     if (getOption("skip_par_tests", FALSE))
         skip("Parallel tests disabled explicitly.")
-
-    skip_on_os(c("mac", "windows")) # mac in Travis CI is very slow
 
     ## Also test FORK in Linux
     cat("Test FORKs:\n")

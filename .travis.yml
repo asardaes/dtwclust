@@ -25,7 +25,7 @@ before_install:
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then sudo tlmgr install placeins cleveref; fi
 
 after_success:
-  - if [[ ("$TRAVIS_R_VERSION" != "devel") && ("$TRAVIS_OS_NAME" == "linux") ]]; then Rscript -e 'library(covr); codecov()'; fi
+  - if [[ ("$TRAVIS_R_VERSION" != "devel") && ("$TRAVIS_OS_NAME" == "linux") ]]; then travis_wait Rscript -e 'library(covr); codecov()'; fi
 
 notifications:
   email:
