@@ -13,7 +13,7 @@
 #define DIAG 1.0
 
 // the matrix for lcm/gcm/steps
-double volatile *D;
+double *D;
 
 // to avoid comparison problems in which_min
 double volatile *tuple;
@@ -21,8 +21,7 @@ double volatile *tuple;
 // double to single index, matrices are always vectors in R
 int inline d2s(int const i, int const j, int const nx) __attribute__((always_inline));
 
-int inline d2s(int const i, int const j, int const nx)
-{
+int inline d2s(int const i, int const j, int const nx) {
     return i + j * (nx + 1);
 }
 
@@ -32,18 +31,30 @@ double lnorm(double const *x, double const *y, double const norm,
              int const i, int const j)
 {
     double res = 0;
-    for (int k = 0; k < dim; k++) res += pow(fabs(x[i + nx * k] - y[j + ny * k]), norm);
+    double temp;
+
+    for (int k = 0; k < dim; k++) {
+        temp = x[i + nx * k] - y[j + ny * k];
+
+        if (norm == 1)
+            temp = fabs(temp);
+        else
+            temp = temp * temp;
+
+        res += temp;
+    }
+
     return (norm == 1) ? res : sqrt(res);
 }
 
 // which direction to take in the cost matrix
 double which_min(int const i, int const j, int const nx,
-                 double const step, double volatile * const local_cost)
+                 double const step, double volatile const local_cost)
 {
     // DIAG, LEFT, UP
-    tuple[0] = (D[d2s(i-1, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j-1, nx)] + step * (*local_cost);
-    tuple[1] = (D[d2s(i, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i, j-1, nx)] + (*local_cost);
-    tuple[2] = (D[d2s(i-1, j, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j, nx)] + (*local_cost);
+    tuple[0] = (D[d2s(i-1, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j-1, nx)] + step * local_cost;
+    tuple[1] = (D[d2s(i, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i, j-1, nx)] + local_cost;
+    tuple[2] = (D[d2s(i-1, j, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j, nx)] + local_cost;
 
     int min = (tuple[1] < tuple[0]) ? 1 : 0;
     min = (tuple[2] < tuple[min]) ? 2 : min;
@@ -59,31 +70,27 @@ double dtw_basic_c(double const *x, double const *y, int const w,
                    int *index1, int *index2, int *path)
 {
     // initialization
-    for (int i = 0; i <= nx; i++)
-    {
+    for (int i = 0; i <= nx; i++) {
         for (int j = 0; j <= ny; j++)
             D[d2s(i, j, nx)] = NOT_VISITED;
     }
 
     // first value, must set here to avoid multiplying by step
-    D[d2s(1, 1, nx)] = pow(lnorm(x, y, norm, nx, ny, dim, 0, 0), norm);
+    D[d2s(1, 1, nx)] = lnorm(x, y, norm, nx, ny, dim, 0, 0);
+    if (norm == 2) D[d2s(1, 1, nx)] = D[d2s(1, 1, nx)] * D[d2s(1, 1, nx)];
 
     // dynamic programming
     double global_cost, direction;
     double volatile local_cost;
 
-    for (int i = 1; i <= nx; i++)
-    {
+    for (int i = 1; i <= nx; i++) {
         int j1, j2;
 
         // adjust limits depending on window
-        if (w == -1)
-        {
+        if (w == -1) {
             j1 = 1;
             j2 = ny;
-        }
-        else
-        {
+        } else {
             j1 = ceil((double) i * ny / nx - w);
             j2 = floor((double) i * ny / nx + w);
 
@@ -91,14 +98,14 @@ double dtw_basic_c(double const *x, double const *y, int const w,
             j2 = j2 < ny ? j2 : ny;
         }
 
-        for (int j = j1; j <= j2; j++)
-        {
+        for (int j = j1; j <= j2; j++) {
             // very first value already set above
             if (i == 1 && j == 1) continue;
 
-            local_cost = pow(lnorm(x, y, norm, nx, ny, dim, i-1, j-1), norm);
+            local_cost = lnorm(x, y, norm, nx, ny, dim, i-1, j-1);
+            if (norm == 2) local_cost = local_cost * local_cost;
 
-            direction = which_min(i, j, nx, step, &local_cost);
+            direction = which_min(i, j, nx, step, local_cost);
 
             if (direction == DIAG)        global_cost = D[d2s(i-1, j-1, nx)] + step * local_cost;
             else if (direction == LEFT)   global_cost = D[d2s(i, j-1, nx)] + local_cost;
@@ -127,10 +134,8 @@ double dtw_basic_c(double const *x, double const *y, int const w,
         index2[0] = ny;
         *path = 1;
 
-        while(!(i == 0 && j == 0))
-        {
-            switch((int) D[d2s(i, j, nx)])
-            {
+        while(!(i == 0 && j == 0)) {
+            switch((int) D[d2s(i, j, nx)]) {
             case 1:
                 i--;
                 j--;
