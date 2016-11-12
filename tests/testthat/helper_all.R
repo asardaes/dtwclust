@@ -1,4 +1,5 @@
 data(uciCT)
+options(deparse.max.lines = 5L)
 
 data <- CharTraj
 data_subset <- data[1L:20L]

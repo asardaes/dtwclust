@@ -1,17 +1,16 @@
 context("Test parallel")
 
 # =================================================================================================
-# Compare to sequential
-# - This breaks 'CMD check' within RStudio, it just crashes when it creates the parallel workers
-# - It still works if I manually build and check the project in the command line
+# run all tests with a parallel backend
 # =================================================================================================
+chk <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
 
-if (Sys.info()["user"] == "oso") {
-    ## use all cores in local, change user if needed...
-    num_workers <- parallel::detectCores()
-} else {
-    ## use only 2 in Travis CI
+if (nzchar(chk) && chk == "TRUE") {
+    ## use 2 cores in CHECK/Travis/AppVeyor
     num_workers <- 2L
+} else {
+    ## use all cores in devtools::test()
+    num_workers <- parallel::detectCores()
 }
 
 ## see https://github.com/hadley/testthat/issues/129
@@ -23,7 +22,7 @@ test_that("Parallel computation gives the same results as sequential", {
     if (getOption("skip_par_tests", FALSE))
         skip("Parallel tests disabled explicitly.")
 
-    cat("\n")
+    cat("with", num_workers, "workers\n")
 
     require(doParallel)
 

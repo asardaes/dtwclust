@@ -176,7 +176,7 @@ test_that("TADPole works as expected", {
 # cluster reinitialization
 # =================================================================================================
 
-## this case causes clusters to becom empty
+## this case causes clusters to become empty
 test_that("Cluster reinitialization in partitional dtwclust works.", {
     suppressWarnings(pc_cr <- dtwclust(data_reinterpolated, k = 20,
                                        distance = "lbk", centroid = "mean",

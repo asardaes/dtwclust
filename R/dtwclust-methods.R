@@ -778,6 +778,14 @@ setValidity("dtwclustControl",
                 if (object@delta < 0)
                     return("Delta should be positive")
 
+                for (sl in slotNames("dtwclustControl")) {
+                    if (sl == "packages") next
+
+                    if (length(slot(object, sl)) > 1L)
+                        return(paste0("Control parameters should only have one element ",
+                                      "(", sl, " had too many)"))
+                }
+
                 TRUE
             })
 

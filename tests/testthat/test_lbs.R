@@ -33,7 +33,7 @@ test_that("Lower bounds with L1 norm are always leq than DTW.", {
 # L2 norm
 # =================================================================================================
 
-test_that("Lower bounds with L1 norm are always leq than DTW.", {
+test_that("Lower bounds with L2 norm are always leq than DTW.", {
     lbk <- lb_keogh(data_matrix[2L, ], data_matrix[1L, ], norm = "L2", window.size = 15L)$d
     lbi <- lb_improved(data_matrix[2L, ], data_matrix[1L, ], norm = "L2", window.size = 15L)
     dtwd <- dtw_basic(data_matrix[2L, ], data_matrix[1L, ], norm = "L2", window.size = 15L)

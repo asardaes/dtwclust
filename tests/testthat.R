@@ -1,5 +1,3 @@
-library(cluster)
-library(flexclust)
 library(dtwclust)
 library(testthat)
 

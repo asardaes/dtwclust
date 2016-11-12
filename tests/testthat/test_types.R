@@ -64,3 +64,16 @@ test_that("Results are the same regardless of data format, as long as supported.
     expect_identical(pc_matrix, pc_list)
     expect_identical(pc_matrix, pc_df)
 })
+
+# =================================================================================================
+# control formats
+# =================================================================================================
+
+test_that("Errors in control argument are detected correctly.", {
+    expect_error(dtwclust(data, control = NA), "control")
+    expect_error(dtwclust(data, control = mean), "control")
+    expect_error(dtwclust(data, control = TRUE), "control")
+    expect_error(dtwclust(data, control = c(window.size = 15L, iter.max = 15L)), "control")
+    expect_error(dtwclust(data, control = list(window.size = c(13L, 14L))),
+                 "control", ignore.case = TRUE)
+})
