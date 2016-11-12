@@ -33,12 +33,13 @@
 #' \dontrun{
 #' data(uciCT)
 #' ctrl <- new("dtwclustControl", window.size = 18L, symmetric = TRUE)
-#' fam <- new("dtwclustFamily", dist = "gak", control = ctrl)
+#' fam <- new("dtwclustFamily", dist = "gak",
+#'            control = list(symmetric = TRUE, window.size = 18L))
 #' fam@dist(CharTraj)
 #' }
 #'
 #' # If you want the fuzzy family, use fuzzy = TRUE
-#' ffam <- new("dtwclustFamily", control = ctrl, fuzzy = TRUE)
+#' ffam <- new("dtwclustFamily", control = new("dtwclustControl"), fuzzy = TRUE)
 #'
 setClass("dtwclustFamily",
          slots = c(dist = "function",
