@@ -41,8 +41,7 @@ setMethod("initialize", "dtwclustFamily",
               dots <- list(...)
               dots$.Object <- .Object
 
-              if (is.null(control))
-                  control <- new("dtwclustControl")
+              control <- as(control, "dtwclustControl")
 
               if (!missing(dist)) {
                   if (is.character(dist))

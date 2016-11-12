@@ -29,6 +29,24 @@
 #' from the \pkg{foreach} package about \pkg{dtwclust} not being available when loading. I do not
 #' know why this happens, but it does not seem to affect functionality.
 #'
+#' @examples
+#'
+#' # The dist() function in dtwclustFamily works like proxy::dist() but supports
+#' # parallelization and optimized symmetric calculations, although parallelization
+#' # sometimes results in a warning from serialize(); this doesn't seem to affect
+#' # functionality. If you like, you can use the function more or less directly,
+#' # but provide a control argument when creating the family.
+#'
+#' \dontrun{
+#' data(uciCT)
+#' ctrl <- new("dtwclustControl", window.size = 18L, symmetric = TRUE)
+#' fam <- new("dtwclustFamily", dist = "gak", control = ctrl)
+#' fam@dist(CharTraj)
+#' }
+#'
+#' # If you want the fuzzy family, use fuzzy = TRUE
+#' ffam <- new("dtwclustFamily", control = ctrl, fuzzy = TRUE)
+#'
 setClass("dtwclustFamily",
          slots = c(dist = "function",
                    allcent = "function",
