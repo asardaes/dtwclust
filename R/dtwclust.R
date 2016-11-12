@@ -596,7 +596,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             kc.list <- foreach(k = k0, rng = rng0, .combine = comb0, .multicombine = TRUE,
                                .packages = control@packages, .export = export) %:%
                 foreach(i = 1L:control@nrep, .combine = list, .multicombine = TRUE,
-                        .packages = control@packages, .export = export) %dopar% {
+                        .packages = control@packages, .export = export) %op% {
                             if (control@trace)
                                 message("Repetition ", i, " for k = ", k)
 
@@ -860,7 +860,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         else
             centchar <- "PAM (TADPole)"
 
-        RET <- foreach(k = k, .combine = list, .multicombine = TRUE, .packages = "dtwclust", .export = "enlist") %dopar% {
+        RET <- foreach(k = k, .combine = list, .multicombine = TRUE, .packages = "dtwclust", .export = "enlist") %op% {
             R <- TADPole(data, k = k, dc = dc, window.size = control@window.size, error.check = FALSE)
 
             if (control@trace) {

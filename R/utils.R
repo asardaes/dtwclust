@@ -188,6 +188,21 @@ split_parallel <- function(obj, margin = NULL) {
     ret
 }
 
+# Custom binary operator for %dopar% to avoid unnecessary warnings
+`%op%` <- function(obj, ex) {
+    withCallingHandlers({
+        ret <- eval.parent(substitute(obj %dopar% ex))
+
+    }, warning = function(w) {
+        if (!grepl("package:dtwclust.*available", w$message, ignore.case = TRUE))
+            warning(w)
+
+        invokeRestart("muffleWarning")
+    })
+
+    ret
+}
+
 # ========================================================================================================
 # Helper distance-related
 # ========================================================================================================

@@ -166,7 +166,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
                      .combine = c,
                      .multicombine = TRUE,
                      .export = "lnorm",
-                     .packages = "stats") %dopar% {
+                     .packages = "stats") %op% {
                          mapply(y, ffty, x, fftx,
                                 FUN = function(y, ffty, x, fftx) {
                                     ## Manually normalize by length
@@ -191,7 +191,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
                      .combine = cbind,
                      .multicombine = TRUE,
                      .export = "lnorm",
-                     .packages = "stats") %dopar% {
+                     .packages = "stats") %op% {
                          ret <- mapply(y, ffty,
                                        MoreArgs = list(x = x, fftx = fftx),
                                        SIMPLIFY = FALSE,

@@ -197,7 +197,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         D <- foreach(x = X, lower.env = lower.env, upper.env = upper.env,
                      .packages = "dtwclust",
                      .combine = c,
-                     .multicombine = TRUE) %dopar% {
+                     .multicombine = TRUE) %op% {
                          mapply(upper.env, lower.env, x,
                                 FUN = function(u, l, x) {
                                     lb_keogh(x,
@@ -213,7 +213,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         D <- foreach(lower.env = lower.env, upper.env = upper.env,
                      .packages = "dtwclust",
                      .combine = cbind,
-                     .multicombine = TRUE) %dopar% {
+                     .multicombine = TRUE) %op% {
                          ret <- mapply(U = upper.env, L = lower.env,
                                        MoreArgs = list(x = x),
                                        SIMPLIFY = FALSE,

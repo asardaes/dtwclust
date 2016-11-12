@@ -525,8 +525,6 @@ pc.dba <- dtwclust(CharTraj, k = 20L, centroid = "dba", seed = 3251, control = c
 
 #' Using distance based on global alignment kernels
 #' (~35 seconds with 8 cores for all repetitions)
-#' NOTE: I don't know why serialize() produces a warning,
-#' it doesn't seem to affect functionality
 pc.gak <- dtwclust(CharTraj, k = 20,
                    distance = "gak",
                    centroid = "dba",

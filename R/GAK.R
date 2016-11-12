@@ -205,7 +205,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
                      .combine = c,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
-                     .export = "enlist") %dopar% {
+                     .export = "enlist") %op% {
                          sapply(xx, function(xx) {
                              do.call("GAK",
                                      enlist(x = xx,
@@ -223,7 +223,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
                          .combine = c,
                          .multicombine = TRUE,
                          .packages = "dtwclust",
-                         .export = "enlist") %dopar% {
+                         .export = "enlist") %op% {
                              sapply(yy, function(yy) {
                                  do.call("GAK",
                                          enlist(x = yy,
@@ -245,7 +245,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
                      .combine = c,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
-                     .export = "enlist") %dopar% {
+                     .export = "enlist") %op% {
                          mapply(x, y, FUN = function(x, y) {
                              do.call("GAK",
                                      enlist(x = x,
@@ -268,7 +268,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
                      .combine = c,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
-                     .export = "enlist") %dopar% {
+                     .export = "enlist") %op% {
                          mapply(x[pairs[ , 1L]], x[pairs[ , 2L]],
                                 SIMPLIFY = TRUE,
                                 FUN = function(xx, yy) {
@@ -299,7 +299,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
                      .combine = cbind,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
-                     .export = "enlist") %dopar% {
+                     .export = "enlist") %op% {
                          ret <- lapply(y, x = x, FUN = function(y, x) {
                              sapply(x, y = y, FUN = function(x, y) {
                                  do.call("GAK",

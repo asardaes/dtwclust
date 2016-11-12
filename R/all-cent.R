@@ -54,7 +54,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                             cent = cent,
                             .combine = c,
                             .multicombine = TRUE,
-                            .packages = "dtwclust") %dopar% {
+                            .packages = "dtwclust") %op% {
                                 mapply(x_split, cent,
                                        SIMPLIFY = FALSE,
                                        FUN = function(x, c) {
@@ -83,7 +83,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                             .combine = c,
                             .multicombine = TRUE,
                             .packages = "dtwclust",
-                            .export = c("control", "enlist")) %dopar% {
+                            .export = c("control", "enlist")) %op% {
                                 mapply(x_split, cent,
                                        SIMPLIFY = FALSE,
                                        FUN = function(x, c) {

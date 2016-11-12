@@ -162,7 +162,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                      .combine = c,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
-                     .export = "enlist") %dopar% {
+                     .export = "enlist") %op% {
                          do.call(proxy::dist,
                                  enlist(x = X, y = Y,
                                         method = method,
@@ -204,7 +204,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                         .multicombine = TRUE,
                         .packages = "dtwclust",
                         .noexport = exclude,
-                        .export = "enlist") %dopar% {
+                        .export = "enlist") %op% {
                             do.call(proxy::dist,
                                     enlist(x = X[indNew],
                                            y = Y[indNN[indNew]],

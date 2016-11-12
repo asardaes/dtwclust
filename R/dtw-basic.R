@@ -149,7 +149,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE) {
                      .combine = c,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
-                     .export = "enlist") %dopar% {
+                     .export = "enlist") %op% {
                          mapply(x, y, FUN = function(x, y) {
                              do.call("dtw_basic",
                                      enlist(x = x,
@@ -172,7 +172,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE) {
                      .combine = c,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
-                     .export = "enlist") %dopar% {
+                     .export = "enlist") %op% {
                          do.call(proxy::dist,
                                  enlist(x = x[pairs[ , 1L]],
                                         y = x[pairs[ , 2L]],
@@ -197,7 +197,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE) {
                      .combine = cbind,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
-                     .export = "enlist") %dopar% {
+                     .export = "enlist") %op% {
                          ret <- lapply(y, x = x, FUN = function(y, x) {
                              sapply(x, y = y, FUN = function(x, y) {
                                  do.call("dtw_basic",

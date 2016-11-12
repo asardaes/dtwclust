@@ -96,7 +96,7 @@ ddist <- function(distance, control, distmat) {
                                  .combine = c,
                                  .multicombine = TRUE,
                                  .packages = control@packages,
-                                 .export = export) %dopar% {
+                                 .export = export) %op% {
 
                                      if (!consistency_check(dist_entry$names[1L], "dist"))
                                          do.call(proxy::pr_DB$set_entry, dist_entry)
@@ -158,7 +158,7 @@ ddist <- function(distance, control, distmat) {
                              .combine = combine,
                              .multicombine = TRUE,
                              .packages = control@packages,
-                             .export = export) %dopar% {
+                             .export = export) %op% {
                                  if (!consistency_check(dist_entry$names[1L], "dist"))
                                      do.call(proxy::pr_DB$set_entry, dist_entry)
 

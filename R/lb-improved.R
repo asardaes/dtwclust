@@ -202,7 +202,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         D <- foreach(x = X, y = Y, lower.env = lower.env, upper.env = upper.env,
                      .combine = c,
                      .multicombine = TRUE,
-                     .packages = "dtwclust") %dopar% {
+                     .packages = "dtwclust") %op% {
                          mapply(upper.env, lower.env, y, x,
                                 FUN = function(u, l, y, x) {
                                     lb_improved(x, y,
@@ -219,7 +219,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         D <- foreach(y = Y, lower.env = lower.env, upper.env = upper.env,
                      .combine = cbind,
                      .multicombine = TRUE,
-                     .packages = "dtwclust") %dopar% {
+                     .packages = "dtwclust") %op% {
                          ret <- mapply(y = y, U = upper.env, L = lower.env,
                                        MoreArgs = list(x = x),
                                        SIMPLIFY = FALSE,

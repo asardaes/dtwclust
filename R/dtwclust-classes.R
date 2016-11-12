@@ -23,19 +23,12 @@
 #' @slot preproc The function used to preprocess the data (relevant for
 #'   \code{\link[stats]{predict}}).
 #'
-#' @note
-#'
-#' Using the \code{dist} function with a parallel backend sometimes results in a warning stemming
-#' from the \pkg{foreach} package about \pkg{dtwclust} not being available when loading. I do not
-#' know why this happens, but it does not seem to affect functionality.
-#'
 #' @examples
 #'
 #' # The dist() function in dtwclustFamily works like proxy::dist() but supports
-#' # parallelization and optimized symmetric calculations, although parallelization
-#' # sometimes results in a warning from serialize(); this doesn't seem to affect
-#' # functionality. If you like, you can use the function more or less directly,
-#' # but provide a control argument when creating the family.
+#' # parallelization and optimized symmetric calculations. If you like, you can
+#' # use the function more or less directly, but provide a control argument when
+#' # creating the family.
 #'
 #' \dontrun{
 #' data(uciCT)

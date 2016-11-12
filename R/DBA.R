@@ -178,7 +178,7 @@ DBA <- function(X, centroid = NULL, ...,
                       .combine = c,
                       .multicombine = TRUE,
                       .export = "enlist",
-                      .packages = c("dtwclust", "stats")) %dopar% {
+                      .packages = c("dtwclust", "stats")) %op% {
                           mapply(X, LCM, SIMPLIFY = FALSE, FUN = function(x, lcm) {
                               if (dba.alignment == "dtw") {
                                   .Call("update_lcm", lcm, x, centroid,

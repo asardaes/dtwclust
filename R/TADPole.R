@@ -167,7 +167,7 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE) {
                       .combine = c,
                       .multicombine = TRUE,
                       .packages = "dtwclust",
-                      .noexport = exclude) %dopar% {
+                      .noexport = exclude) %op% {
                           proxy::dist(x[ind1[ , 1L]], x[ind1[ , 2L]],
                                       method = "dtw_basic",
                                       window.size = window.size,
@@ -238,7 +238,7 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE) {
     DNN <- foreach(i = i,
                    .combine = rbind,
                    .multicombine = TRUE,
-                   .packages = "dtwclust") %dopar% {
+                   .packages = "dtwclust") %op% {
                        t(sapply(i, function (i) {
                            ## Index of higher density neighbors
                            indHDN <- TADPorder$ix[1L:(i-1L)]
