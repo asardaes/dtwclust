@@ -186,15 +186,15 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 
     check_parallel()
 
-    x <- split_parallel(x)
+    lower.env <- split_parallel(lower.env)
+    upper.env <- split_parallel(upper.env)
 
     if (pairwise) {
-        lower.env <- split_parallel(lower.env)
-        upper.env <- split_parallel(upper.env)
+        X <- split_parallel(x)
 
-        validate_pairwise(x, lower.env)
+        validate_pairwise(X, lower.env)
 
-        D <- foreach(x = x, lower.env = lower.env, upper.env = upper.env,
+        D <- foreach(x = X, lower.env = lower.env, upper.env = upper.env,
                      .packages = "dtwclust",
                      .combine = c,
                      .multicombine = TRUE) %dopar% {
@@ -210,16 +210,17 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         retclass <- "pairdist"
 
     } else {
-        D <- foreach(x = x,
+        D <- foreach(lower.env = lower.env, upper.env = upper.env,
                      .packages = "dtwclust",
-                     .combine = rbind,
+                     .combine = cbind,
                      .multicombine = TRUE) %dopar% {
-                         ret <- lapply(X = x, U = upper.env, L = lower.env,
-                                       FUN = function(x, U, L) {
+                         ret <- mapply(U = upper.env, L = lower.env,
+                                       MoreArgs = list(x = x),
+                                       SIMPLIFY = FALSE,
+                                       FUN = function(U, L, x) {
                                            ## This will return one row of the distance matrix
-                                           D <- mapply(U, L,
-                                                       MoreArgs = list(x = x),
-                                                       FUN = function(u, l, x) {
+                                           D <- sapply(x, u = U, l = L,
+                                                       FUN = function(x, u, l) {
                                                            lb_keogh(x,
                                                                     norm = norm,
                                                                     lower.env = l,
@@ -228,7 +229,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                                            D
                                        })
 
-                         do.call(rbind, ret)
+                         do.call(cbind, ret)
                      }
     }
 

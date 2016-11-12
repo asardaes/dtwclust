@@ -190,16 +190,16 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 
     check_parallel()
 
-    x <- split_parallel(x)
+    Y <- split_parallel(y)
+    lower.env <- split_parallel(lower.env)
+    upper.env <- split_parallel(upper.env)
 
     if (pairwise) {
-        y <- split_parallel(y)
-        lower.env <- split_parallel(lower.env)
-        upper.env <- split_parallel(upper.env)
+        X <- split_parallel(x)
 
-        validate_pairwise(x, y)
+        validate_pairwise(X, Y)
 
-        D <- foreach(x = x, y = y, lower.env = lower.env, upper.env = upper.env,
+        D <- foreach(x = X, y = Y, lower.env = lower.env, upper.env = upper.env,
                      .combine = c,
                      .multicombine = TRUE,
                      .packages = "dtwclust") %dopar% {
@@ -216,16 +216,17 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         retclass <- "pairdist"
 
     } else {
-        D <- foreach(x = x,
-                     .combine = rbind,
+        D <- foreach(y = Y, lower.env = lower.env, upper.env = upper.env,
+                     .combine = cbind,
                      .multicombine = TRUE,
                      .packages = "dtwclust") %dopar% {
-                         ret <- lapply(X = x, U = upper.env, L = lower.env, Y = y,
-                                       FUN = function(x, U, L, Y) {
+                         ret <- mapply(y = y, U = upper.env, L = lower.env,
+                                       MoreArgs = list(x = x),
+                                       SIMPLIFY = FALSE,
+                                       FUN = function(y, U, L, x) {
                                            ## This will return one row of the distance matrix
-                                           mapply(U, L, Y,
-                                                  MoreArgs = list(x = x),
-                                                  FUN = function(u, l, y, x) {
+                                           sapply(x, y = y, l = L, u = U,
+                                                  FUN = function(x, y, l, u) {
                                                       lb_improved(x, y,
                                                                   window.size = window.size,
                                                                   norm = norm,
@@ -234,7 +235,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                                                   })
                                        })
 
-                         do.call(rbind, ret)
+                         do.call(cbind, ret)
                      }
     }
 

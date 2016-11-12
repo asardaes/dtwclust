@@ -191,15 +191,15 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE) {
         attr(D, "dimnames") <- list(names(x), names(x))
 
     } else {
-        X <- split_parallel(x)
+        Y <- split_parallel(y)
 
-        D <- foreach(x = X, gcm = GCM,
-                     .combine = rbind,
+        D <- foreach(y = Y, gcm = GCM,
+                     .combine = cbind,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
                      .export = "enlist") %dopar% {
-                         ret <- lapply(x, y = y, FUN = function(x, y) {
-                             sapply(y, x = x, FUN = function(y, x) {
+                         ret <- lapply(y, x = x, FUN = function(y, x) {
+                             sapply(x, y = y, FUN = function(x, y) {
                                  do.call("dtw_basic",
                                          enlist(x = x,
                                                 y = y,
@@ -208,7 +208,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE) {
                              })
                          })
 
-                         do.call(rbind, ret)
+                         do.call(cbind, ret)
                      }
     }
 

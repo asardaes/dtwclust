@@ -152,13 +152,13 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     ## Register doSEQ if necessary
     check_parallel()
 
-    x <- split_parallel(x)
-    fftx <- split_parallel(fftx)
+    y <- split_parallel(y)
+    ffty <- split_parallel(ffty)
 
     ## Calculate distance matrix
     if (pairwise) {
-        y <- split_parallel(y)
-        ffty <- split_parallel(ffty)
+        x <- split_parallel(x)
+        fftx <- split_parallel(fftx)
 
         validate_pairwise(x, y)
 
@@ -187,18 +187,18 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         retclass <- "pairdist"
 
     } else {
-        D <- foreach(x = x, fftx = fftx,
-                     .combine = rbind,
+        D <- foreach(y = y, ffty = ffty,
+                     .combine = cbind,
                      .multicombine = TRUE,
                      .export = "lnorm",
                      .packages = "stats") %dopar% {
-                         ret <- mapply(x, fftx,
-                                       MoreArgs = list(Y = y, FFTY = ffty),
+                         ret <- mapply(y, ffty,
+                                       MoreArgs = list(x = x, fftx = fftx),
                                        SIMPLIFY = FALSE,
-                                       FUN = function(x, fftx, Y, FFTY) {
-                                           mapply(Y, FFTY,
-                                                  MoreArgs = list(x = x, fftx = fftx),
-                                                  FUN = function(y, ffty, x, fftx) {
+                                       FUN = function(y, ffty, x, fftx) {
+                                           mapply(x, fftx,
+                                                  MoreArgs = list(y = y, ffty = ffty),
+                                                  FUN = function(x, fftx, y, ffty) {
                                                       ## Manually normalize by length
                                                       CCseq <- Re(stats::fft(fftx * Conj(ffty),
                                                                              inverse = TRUE)) / length(fftx)
@@ -215,7 +215,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
                                                   })
                                        })
 
-                         do.call(rbind, ret)
+                         do.call(cbind, ret)
                      }
     }
 

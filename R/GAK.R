@@ -293,15 +293,15 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
         attr(D, "dimnames") <- list(names(x), names(x))
 
     } else {
-        X <- split_parallel(x)
+        Y <- split_parallel(y)
 
-        D <- foreach(x = X, logs = LOGS,
-                     .combine = rbind,
+        D <- foreach(y = Y, logs = LOGS,
+                     .combine = cbind,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
                      .export = "enlist") %dopar% {
-                         ret <- lapply(x, y = y, FUN = function(x, y) {
-                             sapply(y, x = x, FUN = function(y, x) {
+                         ret <- lapply(y, x = x, FUN = function(y, x) {
+                             sapply(x, y = y, FUN = function(x, y) {
                                  do.call("GAK",
                                          enlist(x = x,
                                                 y = y,
@@ -310,7 +310,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
                              })
                          })
 
-                         do.call(rbind, ret)
+                         do.call(cbind, ret)
                      }
 
         D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
