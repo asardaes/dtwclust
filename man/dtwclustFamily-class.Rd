@@ -29,4 +29,9 @@ pass-through \code{preproc} function.
 \item{\code{preproc}}{The function used to preprocess the data (relevant for
 \code{\link[stats]{predict}}).}
 }}
+\note{
+Using the \code{dist} function with a parallel backend sometimes results in a warning stemming
+from the \pkg{foreach} package about \pkg{dtwclust} not being available when loading. I do not
+know why this happens, but it does not seem to affect functionality.
+}
 
