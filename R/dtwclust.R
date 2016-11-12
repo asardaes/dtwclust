@@ -860,8 +860,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         else
             centchar <- "PAM (TADPole)"
 
+        lb <- if (is.null(dots$lb)) "lbk" else dots$lb
+
         RET <- foreach(k = k, .combine = list, .multicombine = TRUE, .packages = "dtwclust", .export = "enlist") %op% {
-            R <- TADPole(data, k = k, dc = dc, window.size = control@window.size, error.check = FALSE)
+            R <- TADPole(data, k = k, dc = dc, window.size = control@window.size, error.check = FALSE, lb = lb)
 
             if (control@trace) {
                 cat("TADPole completed, pruning percentage = ",

@@ -10,6 +10,8 @@
 #' @param k The number of desired clusters.
 #' @param dc The cutoff distance.
 #' @param error.check Should the data be checked for inconsistencies?
+#' @param lb Which lower bound to use, "lbk" for \code{\link{lb_keogh}} or "lbi" for
+#'   \code{\link{lb_improved}}.
 #'
 #' @details
 #'
@@ -89,7 +91,7 @@
 #' cat("VI index for TADPole:", cvi(kc.tadp$cl, CharTrajLabels, "VI"), "\n\n")
 #' }
 #'
-TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE) {
+TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk") {
     if (missing(window.size))
         stop("Please provide a positive window size")
     if (missing(dc))
@@ -106,8 +108,10 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE) {
     if (k > n)
         stop("Number of clusters should be less than the number of time series")
 
+    lb <- match.arg(lb, c("lbk", "lbi"))
+
     ## Calculate matrices with bounds
-    LBM <- proxy::dist(x, x, method = "LBK",
+    LBM <- proxy::dist(x, x, method = lb,
                        window.size = window.size,
                        force.symmetry = TRUE,
                        norm = "L2",

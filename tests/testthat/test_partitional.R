@@ -161,6 +161,15 @@ test_that("TADPole works as expected", {
 
     expect_equal_to_reference(pc_tadp, file_name(pc_tadp))
 
+    ## ---------------------------------------------------------- TADPole with LBI
+    pc_tadp_lbi <- dtwclust(data_reinterpolated[1L:20L], type = "t", k = 4L,
+                            dc = 1.5, control = list(window.size = 20L),
+                            lb = "lbi", seed = 938)
+
+    pc_tadp_lbi <- reset_nondeterministic(pc_tadp_lbi)
+
+    expect_equal_to_reference(pc_tadp_lbi, file_name(pc_tadp_lbi))
+
     ## ---------------------------------------------------------- TADPole with custom centroid
     pc_tadp_cent <- dtwclust(data_reinterpolated[1L:20L], type = "t", k = 4L,
                              preproc = zscore, centroid = shape_extraction,

@@ -4,7 +4,7 @@
 \alias{TADPole}
 \title{TADPole clustering}
 \usage{
-TADPole(data, k = 2L, dc, window.size, error.check = TRUE)
+TADPole(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk")
 }
 \arguments{
 \item{data}{The data matrix where each row is a time series. Optionally a list with each time
@@ -17,6 +17,9 @@ series.}
 \item{window.size}{Window size constraint for DTW. See details.}
 
 \item{error.check}{Should the data be checked for inconsistencies?}
+
+\item{lb}{Which lower bound to use, "lbk" for \code{\link{lb_keogh}} or "lbi" for
+\code{\link{lb_improved}}.}
 }
 \value{
 A list with:
