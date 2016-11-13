@@ -121,12 +121,12 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     else
         method <- toupper(dtw.func)
 
-    X <- consistency_check(x, "tsmat")
+    X <- check_consistency(x, "tsmat")
 
     if (is.null(y))
         Y <- X
     else {
-        Y <- consistency_check(y, "tsmat")
+        Y <- check_consistency(y, "tsmat")
 
         if (force.symmetry) {
             stop("Using force.symmetry = TRUE for y != NULL is not allowed.")
@@ -143,8 +143,8 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     dots$pairwise <- TRUE
 
     if (pairwise) {
-        consistency_check(X, "tslist")
-        consistency_check(Y, "tslist")
+        check_consistency(X, "tslist")
+        check_consistency(Y, "tslist")
 
         if (is.null(window.size))
             dots$window.type <- "none"
@@ -170,7 +170,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
         return(D)
     }
 
-    window.size <- consistency_check(window.size, "window")
+    window.size <- check_consistency(window.size, "window")
     dots$window.size <- window.size
     dots$window.type <- "slantedband"
 

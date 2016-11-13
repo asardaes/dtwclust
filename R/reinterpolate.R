@@ -21,7 +21,7 @@ reinterpolate <- function(x, new.length, multivariate = FALSE) {
         x <- t(apply(x, 1L, reinterpolate, new.length = new.length))
 
     } else {
-        consistency_check(x, "ts")
+        check_consistency(x, "ts")
 
         if (multivariate)
             x <- apply(x, 2L, reinterpolate, new.length = new.length)

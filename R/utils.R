@@ -2,7 +2,7 @@
 # Miscellaneous
 # ========================================================================================================
 
-consistency_check <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, silent = TRUE) {
+check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, silent = TRUE) {
     case <- match.arg(case, c("ts", "tslist", "vltslist",
                               "window", "tsmat",
                               "dist", "cent"))
@@ -28,7 +28,7 @@ consistency_check <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
         if (case == "tslist" && different_lengths(obj))
             stop("All series must have the same length")
 
-        sapply(obj, consistency_check, case = "ts", ...)
+        sapply(obj, check_consistency, case = "ts", ...)
 
     } else if (case == "window") {
         if (is.null(obj))
@@ -49,7 +49,7 @@ consistency_check <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
             obj <- list(obj)
 
         } else if (is.data.frame(obj)) {
-            obj <- consistency_check(as.matrix(obj), "tsmat", ...)
+            obj <- check_consistency(as.matrix(obj), "tsmat", ...)
 
         } else if (!is.list(obj))
             stop("Unsupported data type.")
@@ -88,7 +88,7 @@ consistency_check <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
                  "\n\tdba\tpam\tshape")
 
     } else {
-        stop("Possibly a typo in function consistency_check.")
+        stop("Possibly a typo in function check_consistency.")
     }
 
     invisible(NULL)
@@ -129,8 +129,8 @@ validate_pairwise <- function(x, y) {
 
 # Envelop calculation
 call_envelop <- function(series, window) {
-    consistency_check(series, "ts")
-    window <- consistency_check(window, "window")
+    check_consistency(series, "ts")
+    window <- check_consistency(window, "window")
 
     ## NOTE: window in this function is window.size*2 + 1, thus the 2L below
     if (window > (2L * length(series)))

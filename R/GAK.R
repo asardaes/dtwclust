@@ -76,8 +76,8 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE, l
     x <- cbind(x)
     y <- cbind(y)
 
-    consistency_check(x, "ts")
-    consistency_check(y, "ts")
+    check_consistency(x, "ts")
+    check_consistency(y, "ts")
 
     ## check dimension consistency
     is_multivariate(list(x,y))
@@ -106,7 +106,7 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE, l
     if (is.null(window.size))
         window.size <- 0L
     else
-        window.size <- consistency_check(window.size, "window")
+        window.size <- check_consistency(window.size, "window")
 
     logGAK <- .Call("logGAK", x, y,
                     NROW(x), NROW(y), NCOL(x),
@@ -138,8 +138,8 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
     if (!normalize)
         warning("The proxy version of GAK is always normalized.")
 
-    x <- consistency_check(x, "tsmat")
-    consistency_check(x, "vltslist")
+    x <- check_consistency(x, "tsmat")
+    check_consistency(x, "vltslist")
 
     dots <- list(...)
 
@@ -151,8 +151,8 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
         symmetric <- TRUE
 
     } else {
-        y <- consistency_check(y, "tsmat")
-        consistency_check(y, "vltslist")
+        y <- check_consistency(y, "tsmat")
+        check_consistency(y, "vltslist")
 
         symmetric <- FALSE
     }

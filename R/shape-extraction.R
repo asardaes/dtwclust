@@ -57,9 +57,9 @@
 #' points(C)
 #'
 shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
-    X <- consistency_check(X, "tsmat")
+    X <- check_consistency(X, "tsmat")
 
-    consistency_check(X, "vltslist")
+    check_consistency(X, "vltslist")
 
     ## utils.R
     if (is_multivariate(X)) {
@@ -102,7 +102,7 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
         }
 
     } else {
-        consistency_check(centroid, "ts")
+        check_consistency(centroid, "ts")
 
         centroid <- zscore(centroid) # use given reference
 

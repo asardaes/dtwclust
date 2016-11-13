@@ -47,8 +47,8 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
                       step.pattern = symmetric2, backtrack = FALSE,
                       normalize = FALSE, ..., gcm = NULL)
 {
-    consistency_check(x, "ts")
-    consistency_check(y, "ts")
+    check_consistency(x, "ts")
+    check_consistency(y, "ts")
 
     backtrack <- as.logical(backtrack)
 
@@ -58,7 +58,7 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
     if (is.null(window.size))
         window.size <- -1L
     else
-        window.size <- consistency_check(window.size, "window")
+        window.size <- check_consistency(window.size, "window")
 
     norm <- match.arg(norm, c("L1", "L2"))
     norm <- switch(norm, "L1" = 1, "L2" = 2)
@@ -102,8 +102,8 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 }
 
 dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE) {
-    x <- consistency_check(x, "tsmat")
-    consistency_check(x, "vltslist")
+    x <- check_consistency(x, "tsmat")
+    check_consistency(x, "vltslist")
 
     dots <- list(...)
 
@@ -112,8 +112,8 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE) {
         symmetric <- is.null(dots$window.size) || !different_lengths(x)
 
     } else {
-        y <- consistency_check(y, "tsmat")
-        consistency_check(y, "vltslist")
+        y <- check_consistency(y, "tsmat")
+        check_consistency(y, "vltslist")
 
         symmetric <- FALSE
     }

@@ -22,7 +22,7 @@ zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE) {
                     keep.attributes = keep.attributes)
 
     } else if (!multivariate && (is.matrix(x) || is.data.frame(x))) {
-        consistency_check(x, "ts")
+        check_consistency(x, "ts")
 
         dots <- list(...)
         center <- if(is.null(dots$center)) formals(scale)$center else dots$center
@@ -35,7 +35,7 @@ zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE) {
             attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL
 
     } else {
-        consistency_check(x, "ts")
+        check_consistency(x, "ts")
 
         dots <- list(...)
         center <- if(is.null(dots$center)) formals(scale)$center else dots$center

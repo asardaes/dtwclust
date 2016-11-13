@@ -64,8 +64,8 @@ SBD <- function(x, y, znorm = FALSE) {
     x <- as.numeric(x)
     y <- as.numeric(y)
 
-    consistency_check(x, "ts")
-    consistency_check(y, "ts")
+    check_consistency(x, "ts")
+    check_consistency(y, "ts")
 
     nx <- length(x)
     ny <- length(y)
@@ -117,10 +117,10 @@ SBD <- function(x, y, znorm = FALSE) {
 # ========================================================================================================
 
 SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairwise = FALSE) {
-    x <- consistency_check(x, "tsmat")
+    x <- check_consistency(x, "tsmat")
 
     if (error.check)
-        consistency_check(x, "vltslist")
+        check_consistency(x, "vltslist")
 
     if(znorm) x <- zscore(x)
 
@@ -128,10 +128,10 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         y <- x
 
     } else {
-        y <- consistency_check(y, "tsmat")
+        y <- check_consistency(y, "tsmat")
 
         if (error.check)
-            consistency_check(y, "vltslist")
+            check_consistency(y, "vltslist")
 
         if(znorm) y <- zscore(y)
     }

@@ -368,7 +368,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     type <- match.arg(type, c("partitional", "hierarchical", "tadpole", "fuzzy"))
 
     ## coerce to list if necessary
-    data <- consistency_check(data, "tsmat")
+    data <- check_consistency(data, "tsmat")
 
     if (any(k < 2L))
         stop("At least two clusters must be defined")
@@ -436,7 +436,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     diff_lengths <- different_lengths(data)
 
-    consistency_check(distance, "dist", trace = control@trace, Lengths = diff_lengths, silent = FALSE)
+    check_consistency(distance, "dist", trace = control@trace, Lengths = diff_lengths, silent = FALSE)
 
     if(type %in% c("partitional", "fuzzy")) {
         if (diff_lengths && type == "fuzzy")
@@ -450,7 +450,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         }
 
         if (diff_lengths)
-            consistency_check(centroid, "cent", trace = control@trace)
+            check_consistency(centroid, "cent", trace = control@trace)
     }
 
     ## symmetric versions of dtw that I know of
@@ -580,7 +580,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             ## I need to re-register any custom distances in each parallel worker
             dist_entry <- proxy::pr_DB$get_entry(distance)
 
-            export <- c("kcca.list", "consistency_check", "enlist")
+            export <- c("kcca.list", "check_consistency", "enlist")
 
             rng <- rngtools::RNGseq(length(k) * control@nrep, seed = seed, simplify = FALSE)
             rng <- lapply(parallel::splitIndices(length(rng), length(k)), function(i) rng[i])
@@ -600,7 +600,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                             rngtools::setRNG(rng[[i]])
 
-                            if (!consistency_check(dist_entry$names[1], "dist"))
+                            if (!check_consistency(dist_entry$names[1], "dist"))
                                 do.call(proxy::pr_DB$set_entry, dist_entry)
 
                             kc <- do.call("kcca.list",
@@ -825,7 +825,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         ## TADPole
         ## =================================================================================================================
 
-        control@window.size <- consistency_check(control@window.size, "window")
+        control@window.size <- check_consistency(control@window.size, "window")
         control@norm <- "L2"
 
         if (is.null(dc))
@@ -837,7 +837,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         ## Check data
         ## ----------------------------------------------------------------------------------------------------------
 
-        consistency_check(data, "tslist")
+        check_consistency(data, "tslist")
 
         ## ----------------------------------------------------------------------------------------------------------
         ## Cluster

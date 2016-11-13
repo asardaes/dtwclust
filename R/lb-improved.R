@@ -81,13 +81,13 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
 {
     norm <- match.arg(norm, c("L1", "L2"))
 
-    consistency_check(x, "ts")
-    consistency_check(y, "ts")
+    check_consistency(x, "ts")
+    check_consistency(y, "ts")
 
     if (length(x) != length(y))
         stop("The series must have the same length")
 
-    window.size <- consistency_check(window.size, "window")
+    window.size <- check_consistency(window.size, "window")
 
     if (is_multivariate(list(x, y)))
         stop("lb_improved does not support multivariate series.")
@@ -160,21 +160,21 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 {
     norm <- match.arg(norm, c("L1", "L2"))
 
-    window.size <- consistency_check(window.size, "window")
+    window.size <- check_consistency(window.size, "window")
 
-    x <- consistency_check(x, "tsmat")
+    x <- check_consistency(x, "tsmat")
 
     if (error.check)
-        consistency_check(x, "tslist")
+        check_consistency(x, "tslist")
 
     if (is.null(y)) {
         y <- x
 
     } else {
-        y <- consistency_check(y, "tsmat")
+        y <- check_consistency(y, "tsmat")
 
         if (error.check)
-            consistency_check(y, "tslist")
+            check_consistency(y, "tslist")
     }
 
     if (is_multivariate(x) || is_multivariate(y))

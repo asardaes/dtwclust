@@ -102,14 +102,14 @@ DBA <- function(X, centroid = NULL, ...,
 {
     dba.alignment <- match.arg(dba.alignment, c("dtw", "dtw_basic"))
 
-    X <- consistency_check(X, "tsmat")
+    X <- check_consistency(X, "tsmat")
 
     if (is.null(centroid))
         centroid <- X[[sample(length(X), 1L)]] # Random choice
 
     if (error.check) {
-        consistency_check(X, "vltslist")
-        consistency_check(centroid, "ts")
+        check_consistency(X, "vltslist")
+        check_consistency(centroid, "ts")
     }
 
     norm <- match.arg(norm, c("L1", "L2"))
@@ -117,7 +117,7 @@ DBA <- function(X, centroid = NULL, ...,
     dots <- list(...)
 
     if (!is.null(window.size)) {
-        window.size <- consistency_check(window.size, "window")
+        window.size <- check_consistency(window.size, "window")
 
         if (is.null(dots$window.type))
             dots$window.type <- "slantedband"

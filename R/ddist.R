@@ -6,7 +6,7 @@ ddist <- function(distance, control, distmat) {
     needs_window <- c("dtw_lb", "lbk", "lbi")
 
     if (distance %in% needs_window)
-        control@window.size <- consistency_check(control@window.size, "window")
+        control@window.size <- check_consistency(control@window.size, "window")
 
     if (is.null(control@window.size))
         window.type <- "none"
@@ -75,7 +75,7 @@ ddist <- function(distance, control, distmat) {
             dots <- dots[intersect(names(dots), valid_args)]
 
             ## variables/functions from the parent environments that should be exported
-            export <- c("distance", "consistency_check", "enlist")
+            export <- c("distance", "check_consistency", "enlist")
 
             if (is.null(centroids) && control@symmetric) {
                 if (dist_entry$loop) {
@@ -95,7 +95,7 @@ ddist <- function(distance, control, distmat) {
                                  .packages = control@packages,
                                  .export = export) %op% {
 
-                                     if (!consistency_check(dist_entry$names[1L], "dist"))
+                                     if (!check_consistency(dist_entry$names[1L], "dist"))
                                          do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                      ## 'dots' has all extra arguments that are valid
@@ -155,7 +155,7 @@ ddist <- function(distance, control, distmat) {
                              .multicombine = TRUE,
                              .packages = control@packages,
                              .export = export) %op% {
-                                 if (!consistency_check(dist_entry$names[1L], "dist"))
+                                 if (!check_consistency(dist_entry$names[1L], "dist"))
                                      do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                  ## 'dots' has all extra arguments that are valid
