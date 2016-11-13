@@ -181,7 +181,6 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
     dots$sigma <- sigma
 
     retclass <- "crossdist"
-    ncores <- foreach::getDoParWorkers()
 
     ## to pre-allocate LOGS
     L <- max(max(sapply(x, NROW)), max(sapply(y, NROW))) + 1L
