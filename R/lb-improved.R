@@ -38,10 +38,10 @@
 #' the version registered with the \code{proxy} package, since it includes some small optimizations.
 #' The convention mentioned above for references and queries still holds. See the examples.
 #'
-#' The proxy version has an extra parameter \code{force.symmetry} that should only be used when only
-#' \code{x} is provided or both \code{x} and \code{y} are equal. It compares the lower and upper
-#' triangular of the resulting distance matrix and forces symmetry in such a way that the tightest
-#' lower bound is obtained.
+#' The proxy version of \code{force.symmetry} should only be used when only \code{x} is provided or
+#' both \code{x} and \code{y} are identical. It compares the lower and upper triangular of the
+#' resulting distance matrix and forces symmetry in such a way that the tightest lower bound is
+#' obtained.
 #'
 #' @references
 #'
