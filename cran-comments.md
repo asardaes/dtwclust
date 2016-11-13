@@ -3,6 +3,8 @@
 * Added support for more hierarchical methods
 * Added support for functions in package clue
 * Added a new distance measure
+* Added another sample dataset
+* Optimizations and bug fixes
 
 ## Test environments
 * Local GNU/Linux, R 3.3.2

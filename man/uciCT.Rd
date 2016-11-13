@@ -3,6 +3,7 @@
 \name{uciCT}
 \alias{CharTraj}
 \alias{CharTrajLabels}
+\alias{CharTrajMV}
 \alias{uciCT}
 \alias{ucict}
 \title{Subset of character trajectories data set}
@@ -11,7 +12,7 @@
 \url{https://archive.ics.uci.edu/ml/datasets/Character+Trajectories}
 }
 \description{
-Subset: only 5 examples of X velocity. See details.
+Subset: only 5 examples of each considered character. See details.
 }
 \details{
 Quoting the source:
@@ -20,7 +21,10 @@ Quoting the source:
 characters. All samples are from the same writer, for the purposes of primitive extraction. Only
 characters with a single pen-down segment were considered."
 
-The subset included here (\code{CharTraj}) has only 5 examples of the X velocity for each
-character. A vector with labels is also loaded in \code{CharTrajLabels}.
+The subset included in \code{CharTraj} has only 5 examples of the X velocity for each character.
+A vector with labels is also loaded in \code{CharTrajLabels}.
+
+The subset included in \code{CharTrajMV} has 5 examples too, but includes tip force as well as X
+and Y velocity. Each element of the list is a multivariate series with 3 variables.
 }
 

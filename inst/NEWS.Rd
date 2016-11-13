@@ -14,5 +14,6 @@
         \item Bear in mind that the \code{DTW/SBD} algorithms (and hence the functions that depend on them) might give different results in installations with 32-bit architectures.
         \item Updated vignette.
         \item No longer enforcing preprocessing/centroid/hierarchical functions with ellipsis in their formals.
+        \item Added a multivariate dataset sample: \code{CharTrajMV}.
     }
 }
