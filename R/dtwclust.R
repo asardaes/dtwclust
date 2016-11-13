@@ -368,7 +368,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     type <- match.arg(type, c("partitional", "hierarchical", "tadpole", "fuzzy"))
 
     ## coerce to list if necessary
-    data <- check_consistency(data, "tsmat")
+    data <- any2list(data)
 
     if (any(k < 2L))
         stop("At least two clusters must be defined")

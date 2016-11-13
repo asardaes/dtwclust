@@ -121,12 +121,12 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     else
         method <- toupper(dtw.func)
 
-    X <- check_consistency(x, "tsmat")
+    X <- any2list(x)
 
     if (is.null(y))
         Y <- X
     else {
-        Y <- check_consistency(y, "tsmat")
+        Y <- any2list(y)
 
         if (force.symmetry) {
             stop("Using force.symmetry = TRUE for y != NULL is not allowed.")

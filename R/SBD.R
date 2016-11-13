@@ -117,7 +117,7 @@ SBD <- function(x, y, znorm = FALSE) {
 # ========================================================================================================
 
 SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairwise = FALSE) {
-    x <- check_consistency(x, "tsmat")
+    x <- any2list(x)
 
     if (error.check)
         check_consistency(x, "vltslist")
@@ -128,7 +128,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         y <- x
 
     } else {
-        y <- check_consistency(y, "tsmat")
+        y <- any2list(y)
 
         if (error.check)
             check_consistency(y, "vltslist")

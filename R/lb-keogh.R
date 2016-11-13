@@ -158,7 +158,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 
     window.size <- check_consistency(window.size, "window")
 
-    x <- check_consistency(x, "tsmat")
+    x <- any2list(x)
 
     if (error.check)
         check_consistency(x, "tslist")
@@ -167,7 +167,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         y <- x
 
     } else {
-        y <- check_consistency(y, "tsmat")
+        y <- any2list(y)
 
         if (error.check)
             check_consistency(y, "tslist")

@@ -174,7 +174,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
             cent <- fcm_cent(x, u, k)
 
             # Coerce back to list
-            check_consistency(cent, "tsmat")
+            any2list(cent)
         }
     } else {
         allcent <- function(x, cl_id, k, cent, cl_old, ...) {

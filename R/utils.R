@@ -3,9 +3,7 @@
 # ========================================================================================================
 
 check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, silent = TRUE) {
-    case <- match.arg(case, c("ts", "tslist", "vltslist",
-                              "window", "tsmat",
-                              "dist", "cent"))
+    case <- match.arg(case, c("ts", "tslist", "vltslist", "window", "dist", "cent"))
 
     if (case == "ts") {
         if (!is.numeric(obj)) {
@@ -38,23 +36,6 @@ check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
             stop("Window width must be larger than 0")
 
         return(as.integer(obj))
-
-    } else if (case == "tsmat") {
-        if (is.matrix(obj)) {
-            Names <- rownames(obj)
-            obj <- lapply(seq_len(nrow(obj)), function(i) obj[i, ])
-            names(obj) <- Names
-
-        } else if (is.numeric(obj)) {
-            obj <- list(obj)
-
-        } else if (is.data.frame(obj)) {
-            obj <- check_consistency(as.matrix(obj), "tsmat", ...)
-
-        } else if (!is.list(obj))
-            stop("Unsupported data type.")
-
-        return(obj)
 
     } else if (case == "dist") {
         included <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd", "dtw_basic", "gak")
@@ -92,6 +73,25 @@ check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
     }
 
     invisible(NULL)
+}
+
+# Coerce to list
+any2list <- function(obj) {
+    if (is.matrix(obj)) {
+        Names <- rownames(obj)
+        obj <- lapply(seq_len(nrow(obj)), function(i) obj[i, ])
+        names(obj) <- Names
+
+    } else if (is.numeric(obj)) {
+        obj <- list(obj)
+
+    } else if (is.data.frame(obj)) {
+        obj <- any2list(as.matrix(obj))
+
+    } else if (!is.list(obj))
+        stop("Unsupported data type.")
+
+    obj
 }
 
 # Check if list of series have different length

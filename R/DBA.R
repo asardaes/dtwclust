@@ -102,7 +102,7 @@ DBA <- function(X, centroid = NULL, ...,
 {
     dba.alignment <- match.arg(dba.alignment, c("dtw", "dtw_basic"))
 
-    X <- check_consistency(X, "tsmat")
+    X <- any2list(X)
 
     if (is.null(centroid))
         centroid <- X[[sample(length(X), 1L)]] # Random choice

@@ -138,7 +138,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
     if (!normalize)
         warning("The proxy version of GAK is always normalized.")
 
-    x <- check_consistency(x, "tsmat")
+    x <- any2list(x)
     check_consistency(x, "vltslist")
 
     dots <- list(...)
@@ -151,7 +151,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
         symmetric <- TRUE
 
     } else {
-        y <- check_consistency(y, "tsmat")
+        y <- any2list(y)
         check_consistency(y, "vltslist")
 
         symmetric <- FALSE

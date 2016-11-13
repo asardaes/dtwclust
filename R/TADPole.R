@@ -99,7 +99,7 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     if (dc < 0)
         stop("The cutoff distance 'dc' must be positive")
 
-    x <- check_consistency(data, "tsmat")
+    x <- any2list(data)
 
     n <- length(x)
 
