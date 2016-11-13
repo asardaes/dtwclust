@@ -15,7 +15,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
         stop("Centroid definition must be either a function or a character")
 
     pam_cent <- function(x, x_split, cl_id, id_changed, ...) {
-        if(is.null(distmat)) {
+        if (is.null(distmat)) {
             new_cent <- lapply(x_split, function(xsub) {
                 distmat <- distfun(xsub, xsub)
 
@@ -187,7 +187,7 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
                 id_changed <- union(cl_id[id_changed], cl_old[id_changed])
             }
 
-            if(length(id_changed) == 0L) {
+            if (length(id_changed) == 0L) {
                 return(cent)
             }
 

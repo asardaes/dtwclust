@@ -287,7 +287,7 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     ## ============================================================================================================================
 
     ## Normalize
-    if(max(delta) == min(delta))
+    if (max(delta) == min(delta))
         zDelta <- rep(1L, length(delta))
     else
         zDelta <- (delta - min(delta)) / (max(delta) - min(delta))
@@ -312,7 +312,7 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     ## How many calculations were actually performed
     distCalc <-  sum(utv == 1L) + sum(DNN[ , 3L])
 
-    if(any(cl == -1L))
+    if (any(cl == -1L))
         warning(c("At least one series wasn't assigned to a cluster. ",
                   "This shouldn't happen, please contact maintainer."))
 

@@ -20,7 +20,7 @@ check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
 
     } else if (case %in% c("tslist", "vltslist")) {
         if (!is.list(obj))
-            stop("Whoops, data should already be a list by this point...")
+            stop("Oops, data should already be a list by this point...")
 
         if (length(obj) < 1L)
             stop("Data is empty")
@@ -64,31 +64,31 @@ check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
             if (silent)
                 return(FALSE)
             else
-                stop("Please providet the name of a valid distance function registered with the 'proxy' package.")
+                stop("Please provide the name of a valid distance function registered with the ",
+                     "'proxy' package.")
         }
 
         if (Lengths) {
             if ((obj %in% included) && !(obj %in% valid))
                 stop("Only the following distances are supported for series with different length:\n\t",
                      paste(valid, collapse = "\t"))
-            else if(!(obj %in% included) && trace)
-                message("Series have different length. Please confirm that the provided distance function ",
-                        "supports this.")
+            else if (!(obj %in% included) && trace)
+                message("Series have different lengths. Please confirm that the provided distance ",
+                        "function supports this.")
         }
 
         ## valid registered distance
         return(TRUE)
 
     } else if (case == "cent") {
+        ## only checking for different lengths
         included <- c("mean", "median", "shape", "dba", "pam", "fcm")
         valid <- c("dba", "pam", "shape")
 
         if (is.character(obj) && (obj %in% included) && !(obj %in% valid))
-            stop("Only the following centroids are supported for series with different length:",
+            stop("Only the following centroids are supported for series with different lengths:",
                  "\n\tdba\tpam\tshape")
 
-    } else {
-        stop("Possibly a typo in function check_consistency.")
     }
 
     invisible(NULL)
@@ -98,14 +98,10 @@ check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
 different_lengths <- function(x) { any(diff(lengths(x)) != 0L) }
 
 # Enlist parameters for do.calls
-enlist <- function(..., dots = NULL) {
-    c(list(...), dots)
-}
+enlist <- function(..., dots = NULL) { c(list(...), dots) }
 
 # Check if a function has the ellipsis in its formals
-has_dots <- function(foo) {
-    is.function(foo) && !is.null(formals(foo)$`...`)
-}
+has_dots <- function(foo) { is.function(foo) && !is.null(formals(foo)$`...`) }
 
 # Subset dots for do.calls of functions without ellipsis
 subset_dots <- function(dots = list(), foo) {

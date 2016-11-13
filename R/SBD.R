@@ -122,7 +122,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     if (error.check)
         check_consistency(x, "vltslist")
 
-    if(znorm) x <- zscore(x)
+    if (znorm) x <- zscore(x)
 
     if (is.null(y)) {
         y <- x
@@ -133,7 +133,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         if (error.check)
             check_consistency(y, "vltslist")
 
-        if(znorm) y <- zscore(y)
+        if (znorm) y <- zscore(y)
     }
 
     if (is_multivariate(x) || is_multivariate(y))

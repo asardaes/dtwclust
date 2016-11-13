@@ -438,7 +438,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     check_consistency(distance, "dist", trace = control@trace, Lengths = diff_lengths, silent = FALSE)
 
-    if(type %in% c("partitional", "fuzzy")) {
+    if (type %in% c("partitional", "fuzzy")) {
         if (diff_lengths && type == "fuzzy")
             stop("Fuzzy clustering does not support series with different length.")
 
@@ -585,7 +585,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             rng <- rngtools::RNGseq(length(k) * control@nrep, seed = seed, simplify = FALSE)
             rng <- lapply(parallel::splitIndices(length(rng), length(k)), function(i) rng[i])
 
-            comb0 <- if(control@nrep > 1L) c else list
+            comb0 <- if (control@nrep > 1L) c else list
 
             k0 <- k
             rng0 <- rng
@@ -853,7 +853,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         if (!missing(centroid) && !is.function(centroid))
             warning("The 'centroid' argument was provided but it wasn't a function, so it was ignored.")
 
-        if(is.function(centroid))
+        if (is.function(centroid))
             centchar <- as.character(substitute(centroid))
         else
             centchar <- "PAM (TADPole)"
