@@ -151,12 +151,19 @@ call_pairs <- function(n = 2L, lower = TRUE) {
 # Parallel helper functions
 # ========================================================================================================
 
-# Is there a registered parallel backend?
-check_parallel <- function() {
-    if (is.null(foreach::getDoParName()))
-        foreach::registerDoSEQ() ## avoids default message
+# Custom binary operator for %dopar% to avoid unnecessary warnings
+`%op%` <- function(obj, ex) {
+    withCallingHandlers({
+        ret <- eval.parent(substitute(obj %dopar% ex))
 
-    foreach::getDoParWorkers() > 1L
+    }, warning = function(w) {
+        if (!grepl("package:dtwclust.*available", w$message, ignore.case = TRUE))
+            warning(w)
+
+        invokeRestart("muffleWarning")
+    })
+
+    ret
 }
 
 # Split a given object into chunks for parallel workers
@@ -188,19 +195,23 @@ split_parallel <- function(obj, margin = NULL) {
     ret
 }
 
-# Custom binary operator for %dopar% to avoid unnecessary warnings
-`%op%` <- function(obj, ex) {
-    withCallingHandlers({
-        ret <- eval.parent(substitute(obj %dopar% ex))
+## tasks created based on getDoParWorkers() could be larger than tasks based on objects
+allocate_matrices <- function(mat = NULL, ..., target.size) {
+    ncores <- foreach::getDoParWorkers()
 
-    }, warning = function(w) {
-        if (!grepl("package:dtwclust.*available", w$message, ignore.case = TRUE))
-            warning(w)
+    if (ncores > 1L) {
+        MAT <- lapply(1L:target.size, function(dummy) {
+            matrix(0, ...)
+        })
 
-        invokeRestart("muffleWarning")
-    })
+    } else if (is.null(mat)) {
+        MAT <- list(matrix(0, ...))
 
-    ret
+    } else {
+        MAT <- list(mat)
+    }
+
+    MAT
 }
 
 # ========================================================================================================
@@ -233,9 +244,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
 # ========================================================================================================
 
 is_multivariate <- function(x) {
-    dims <- sapply(x, function(x) {
-        NCOL(x)
-    })
+    dims <- sapply(x, NCOL)
 
     if (any(diff(dims) != 0L))
         stop("Inconsistent dimensions across series.")

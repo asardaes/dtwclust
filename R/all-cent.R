@@ -45,8 +45,6 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
     }
 
     shape_cent <- function(x_split, cent, ...) {
-        check_parallel()
-
         x_split <- split_parallel(x_split)
         cent <- split_parallel(cent)
 
@@ -71,8 +69,6 @@ all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
 
     dba_cent <- function(x, x_split, cent, id_changed, cl_id, ...) {
         ## not all arguments are used, but I want them to be isolated from ...
-        check_parallel()
-
         dots <- list(...)
 
         x_split <- split_parallel(x_split)

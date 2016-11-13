@@ -136,8 +136,6 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     if (is_multivariate(X) || is_multivariate(Y))
         stop("dtw_lb does not support multivariate series.")
 
-    check_parallel()
-
     dots <- list(...)
     dots$dist.method <- norm
     dots$norm <- norm

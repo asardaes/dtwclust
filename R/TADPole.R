@@ -122,9 +122,6 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     ## Euclidean is only valid as upper bound if 'symmetric1' step pattern is used
     step.pattern <- symmetric1
 
-    ## Attempt parallel computations?
-    check_parallel()
-
     ## ============================================================================================================================
     ## Pruning during local density calculation
     ## ============================================================================================================================

@@ -476,10 +476,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     ## For parallel computation
     control@packages <- c("dtwclust", control@packages)
-    check_parallel() # register doSEQ if necessary
 
     if (type %in% c("partitional", "fuzzy")) {
-
         ## =================================================================================================================
         ## Partitional or fuzzy
         ## =================================================================================================================
@@ -559,7 +557,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         if (type == "fuzzy")
             family@cluster <- fcm_cluster # fuzzy.R
 
-        if (check_parallel() && control@trace && (control@nrep > 1L || length(k) > 1L))
+        if ((foreach::getDoParName() != "doSEQ") && control@trace && (control@nrep > 1L || length(k) > 1L))
             message("Tracing of repetitions might not be available if done in parallel.\n")
 
         ## ----------------------------------------------------------------------------------------------------------

@@ -178,35 +178,26 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
     } else if (sigma <= 0)
         stop("Parameter 'sigma' must be positive.")
 
-    retclass <- "crossdist"
-
     dots$sigma <- sigma
 
-    ## Register doSEQ and create LOGS if necessary
-    if (check_parallel()) {
-        L1 <- max(sapply(x, NROW))
-        L2 <- max(sapply(y, NROW))
-        L <- max(L1, L2)
+    retclass <- "crossdist"
+    ncores <- foreach::getDoParWorkers()
 
-        LOGS <- lapply(1L:foreach::getDoParWorkers(), function(dummy) {
-            matrix(0, L + 1L, 3L)
-        })
+    ## to pre-allocate LOGS
+    L <- max(max(sapply(x, NROW)), max(sapply(y, NROW))) + 1L
 
-    } else if (is.null(logs)) {
-        L1 <- max(sapply(x, NROW))
-        L2 <- max(sapply(y, NROW))
-        LOGS <- list(matrix(0, max(L1, L2) + 1L, 3L))
+    X <- split_parallel(x)
+    Y <- split_parallel(y)
+    LOGS <- allocate_matrices(logs, nrow = L, ncol = 3L, target.size = length(X))
 
-    } else {
-        LOGS <- list(logs)
-    }
-
-    gak_x <- foreach(xx = split_parallel(x), logs = LOGS,
+    ## calculation normalization factors
+    # x
+    gak_x <- foreach(x = X, logs = LOGS,
                      .combine = c,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
                      .export = "enlist") %op% {
-                         sapply(xx, function(xx) {
+                         sapply(x, function(xx) {
                              do.call("GAK",
                                      enlist(x = xx,
                                             y = xx,
@@ -215,16 +206,19 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
                          })
                      }
 
+    # y
+    LOGS <- allocate_matrices(logs, nrow = L, ncol = 3L, target.size = length(Y))
+
     if (symmetric) {
         gak_y <- gak_x
 
     } else {
-        gak_y <- foreach(yy = split_parallel(y), logs = LOGS,
+        gak_y <- foreach(y = Y, logs = LOGS,
                          .combine = c,
                          .multicombine = TRUE,
                          .packages = "dtwclust",
                          .export = "enlist") %op% {
-                             sapply(yy, function(yy) {
+                             sapply(y, function(yy) {
                                  do.call("GAK",
                                          enlist(x = yy,
                                                 y = yy,
@@ -236,9 +230,6 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
 
     ## Calculate distance matrix
     if (pairwise) {
-        X <- split_parallel(x)
-        Y <- split_parallel(y)
-
         validate_pairwise(X, Y)
 
         D <- foreach(x = X, y = Y, logs = LOGS,
@@ -263,6 +254,8 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
     } else if (symmetric) {
         pairs <- call_pairs(length(x), lower = FALSE)
         pairs <- split_parallel(pairs, 1L)
+
+        LOGS <- allocate_matrices(logs, nrow = L, ncol = 3L, target.size = length(pairs))
 
         d <- foreach(pairs = pairs, logs = LOGS,
                      .combine = c,
@@ -293,8 +286,6 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
         attr(D, "dimnames") <- list(names(x), names(x))
 
     } else {
-        Y <- split_parallel(y)
-
         D <- foreach(y = Y, logs = LOGS,
                      .combine = cbind,
                      .multicombine = TRUE,

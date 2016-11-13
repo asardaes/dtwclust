@@ -184,8 +184,6 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     lower.env <- lapply(envelops, "[[", "min")
     upper.env <- lapply(envelops, "[[", "max")
 
-    check_parallel()
-
     lower.env <- split_parallel(lower.env)
     upper.env <- split_parallel(upper.env)
 

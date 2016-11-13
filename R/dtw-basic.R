@@ -120,23 +120,9 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE) {
 
     retclass <- "crossdist"
 
-    ## Register doSEQ and create GCM if necessary
-    if (check_parallel()) {
-        L1 <- max(sapply(x, NROW))
-        L2 <- max(sapply(y, NROW))
-
-        GCM <- lapply(1L:foreach::getDoParWorkers(), function(dummy) {
-            matrix(0, L1 + 1L, L2 + 1L)
-        })
-
-    } else if (is.null(gcm)) {
-        L1 <- max(sapply(x, NROW))
-        L2 <- max(sapply(y, NROW))
-        GCM <- list(matrix(0, L1 + 1L, L2 + 1L))
-
-    } else {
-        GCM <- list(gcm)
-    }
+    ## to pre-allocate GCMs
+    L1 <- max(sapply(x, NROW)) + 1L
+    L2 <- max(sapply(y, NROW)) + 1L
 
     ## Calculate distance matrix
     if (pairwise) {
@@ -144,6 +130,8 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE) {
         Y <- split_parallel(y)
 
         validate_pairwise(X, Y)
+
+        GCM <- allocate_matrices(gcm, nrow = L1, ncol = L2, target.size = length(X))
 
         D <- foreach(x = X, y = Y, gcm = GCM,
                      .combine = c,
@@ -165,6 +153,8 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE) {
     } else if (symmetric) {
         pairs <- call_pairs(length(x), lower = FALSE)
         pairs <- split_parallel(pairs, 1L)
+
+        GCM <- allocate_matrices(gcm, nrow = L1, ncol = L2, target.size = length(pairs))
 
         dots$pairwise <- TRUE
 
@@ -192,6 +182,8 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, pairwise = FALSE) {
 
     } else {
         Y <- split_parallel(y)
+
+        GCM <- allocate_matrices(gcm, nrow = L1, ncol = L2, target.size = length(Y))
 
         D <- foreach(y = Y, gcm = GCM,
                      .combine = cbind,

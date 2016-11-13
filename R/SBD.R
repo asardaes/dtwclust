@@ -149,9 +149,6 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
 
     ffty <- lapply(y, function(v) { stats::fft(c(v, rep(0, fftlen - length(v)))) })
 
-    ## Register doSEQ if necessary
-    check_parallel()
-
     y <- split_parallel(y)
     ffty <- split_parallel(ffty)
 

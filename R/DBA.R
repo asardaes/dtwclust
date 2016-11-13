@@ -150,8 +150,7 @@ DBA <- function(X, centroid = NULL, ...,
     ## maximum length of considered series
     L <- max(lengths(X))
 
-    ## Register doSEQ if necessary
-    check_parallel()
+    Xs <- split_parallel(X)
 
     ## pre-allocate local cost matrices
     if (dba.alignment == "dtw") {
@@ -159,11 +158,9 @@ DBA <- function(X, centroid = NULL, ...,
         LCMs <- split_parallel(LCM)
 
     } else {
-        LCMs <- lapply(1L:foreach::getDoParWorkers(),
+        LCMs <- lapply(1L:length(Xs),
                        function(dummy) { list(matrix(0, L + 1L, length(centroid) + 1L)) })
     }
-
-    Xs <- split_parallel(X)
 
     ## Iterations
     iter <- 1L

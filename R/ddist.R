@@ -74,9 +74,6 @@ ddist <- function(distance, control, distmat) {
 
             dots <- dots[intersect(names(dots), valid_args)]
 
-            ## Register doSEQ if necessary
-            check_parallel()
-
             ## variables/functions from the parent environments that should be exported
             export <- c("distance", "consistency_check", "enlist")
 
@@ -140,19 +137,18 @@ ddist <- function(distance, control, distmat) {
 
                 dim_names <- list(names(x), names(centroids))
 
-                if (!is.null(dots$pairwise) && dots$pairwise) {
-                    if (length(x) != length(centroids))
-                        stop("Both sets of data must have the same amount of series for pairwise calculation")
+                x <- split_parallel(x)
 
+                if (!is.null(dots$pairwise) && dots$pairwise) {
                     centroids <- split_parallel(centroids)
+                    validate_pairwise(x, centroids)
                     combine <- c
 
                 } else {
                     centroids <- lapply(1L:foreach::getDoParWorkers(), function(dummy) centroids)
+                    if (length(centroids) > length(x)) centroids <- centroids[1L:length(x)]
                     combine <- rbind
                 }
-
-                x <- split_parallel(x)
 
                 d <- foreach(x = x, centroids = centroids,
                              .combine = combine,
