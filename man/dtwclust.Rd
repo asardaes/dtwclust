@@ -496,8 +496,8 @@ plot(hc.sbd, type = "sc")
 # Multivariate time series
 # ====================================================================================
 
-# Dummy multivariate series, provided as a list of matrices
-mv <- lapply(seq(1L, 100L, 5L), function(x) cbind(CharTraj[[x]], CharTraj[[x+1L]]))
+# Multivariate series, provided as a list of matrices
+mv <- CharTrajMV[1L:20L]
 
 # "dist.method" is for the dtw function, and it affects the values of the local
 # cost matrix in the case of multivariate series
@@ -525,7 +525,7 @@ pc.dba <- dtwclust(CharTraj, k = 20L, centroid = "dba", seed = 3251, control = c
 
 #' Using distance based on global alignment kernels
 #' (~35 seconds with 8 cores for all repetitions)
-pc.gak <- dtwclust(CharTraj, k = 20,
+pc.gak <- dtwclust(CharTraj, k = 20L,
                    distance = "gak",
                    centroid = "dba",
                    seed = 8319,
