@@ -309,11 +309,43 @@ plot.dtwclust <- function(x, y, ...,
     }
 
     ## centroids consistency
-    check_consistency(x@centroids, "vltslist")
+    check_consistency(centroids <- x@centroids, "vltslist")
+
+    ## force same length for all multivariate series/centroids in the same cluster by
+    ## adding NAs
+    if (mv <- is_multivariate(data)) {
+        series <- split(data, factor(x@cluster, levels = 1L:x@k), drop = FALSE)
+
+        for (id_clus in 1L:x@k) {
+            cluster <- series[[id_clus]]
+            if (length(cluster) < 1L) next ## empty cluster
+
+            nc <- NCOL(cluster[[1L]])
+            len <- sapply(cluster, NROW)
+            L <- max(len, NROW(centroids[[id_clus]]))
+            trail <- L - len
+
+            series[[id_clus]] <- mapply(cluster, trail,
+                                        SIMPLIFY = FALSE,
+                                        FUN = function(mvs, trail) {
+                                            rbind(mvs, matrix(NA, trail, nc))
+                                        })
+
+            trail <- L - NROW(centroids[[id_clus]])
+
+            centroids[[id_clus]] <- rbind(centroids[[id_clus]],
+                                          matrix(NA, trail, nc))
+        }
+
+        ## split returns the result in order of the factor levels,
+        ## but I want to keep the original order as returned from clustering
+        ido <- sort(sort(x@cluster, index.return=T)$ix, index.return = TRUE)$ix
+        data <- unlist(series, recursive = FALSE)[ido]
+    }
 
     ## helper values
     L1 <- lengths(data)
-    L2 <- lengths(x@centroids)
+    L2 <- lengths(centroids)
 
     ## timestamp consistency
     if (!is.null(time) && length(time) < max(L1, L2))
@@ -327,7 +359,9 @@ plot.dtwclust <- function(x, y, ...,
 
     ## transform to data frames
     dfm <- reshape2::melt(data)
-    dfcm <- reshape2::melt(x@centroids)
+    dfcm <- reshape2::melt(centroids)
+
+    if (mv) colnames(dfm) <- colnames(dfcm) <- c("Index", "Variables", "value", "L1")
 
     ## time, cluster and colour indices
     color_ids <- integer(x@k)
@@ -388,6 +422,15 @@ plot.dtwclust <- function(x, y, ...,
                                       aes_string(colour = "color"))
     }
 
+    if (mv) {
+        ggdata <- data.frame(cl = rep(1L:x@k, each = (nc - 1L)),
+                             vbreaks = as.numeric(1L:(nc - 1L) %o% sapply(centroids, NROW)))
+
+        gg <- gg + ggplot2::geom_vline(data = ggdata,
+                                       colour = "black", linetype = "longdash",
+                                       aes_string(xintercept = "vbreaks"))
+    }
+
     ## add facets, remove legend, apply kinda black-white theme
     gg <- gg +
         ggplot2::facet_wrap(~cl, scales = "free_y") +
@@ -400,8 +443,8 @@ plot.dtwclust <- function(x, y, ...,
     else
         gg <- gg + ggplot2::labs(title = title_str)
 
-    ## plot
-    if (plot) graphics::plot(gg)
+    ## plot without warnings in case I added NAs for multivariate cases
+    if (plot) suppressWarnings(graphics::plot(gg))
 
     invisible(gg)
 }

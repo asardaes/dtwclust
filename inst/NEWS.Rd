@@ -15,5 +15,6 @@
         \item Updated vignette.
         \item No longer enforcing preprocessing/centroid/hierarchical functions with ellipsis in their formals.
         \item Added a multivariate dataset sample: \code{CharTrajMV}.
+        \item Improved plots for clusterings with multivariate series.
     }
 }

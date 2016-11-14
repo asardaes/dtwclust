@@ -39,6 +39,19 @@ hc.l2 <- dtwclust(series, type = "hierarchical",
 # Plot the best dendrogram according to variation of information
 plot(hc.l2[[which.min(sapply(hc.l2, cvi, b = labels, type = "VI"))]])
 
+# ====================================================================================
+# Multivariate time series
+# ====================================================================================
+
+# Multivariate series, provided as a list of matrices
+mv <- CharTrajMV[1L:20L]
+
+# Using GAK distance
+mvc <- dtwclust(mv, k = 4L, distance = "gak", seed = 390)
+
+# Note how the variables of each series are appended one after the other in the plot
+plot(mvc)
+
 \dontrun{
 # Common controls
 ctrl <- new("dtwclustControl", trace = TRUE, window.size = 18L)
@@ -112,20 +125,6 @@ hc.sbd <- dtwclust(CharTraj, type = "hierarchical",
                    seed = 320L)
 
 plot(hc.sbd, type = "sc")
-
-# ====================================================================================
-# Multivariate time series
-# ====================================================================================
-
-# Multivariate series, provided as a list of matrices
-mv <- CharTrajMV[1L:20L]
-
-# "dist.method" is for the dtw function, and it affects the values of the local
-# cost matrix in the case of multivariate series
-mvc <- dtwclust(mv, k = 4L, dist.method = "L1", seed = 390)
-
-# Note how the variables of each series are appended one after the other in the plot
-plot(mvc)
 
 # ====================================================================================
 # Using parallel computation to optimize several random repetitions

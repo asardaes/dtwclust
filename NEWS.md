@@ -12,6 +12,7 @@
 * Updated vignette.
 * No longer enforcing preprocessing/centroid/hierarchical functions with ellipsis in their formals.
 * Added a multivariate dataset sample: `CharTrajMV`.
+* Improved plots for clusterings with multivariate series.
 
 ## Version 2.3.0
 * Correction: DTW can be symmetric for series of both equal/different length, although in general this is not necessarily the case, due to asymmetric step patterns or constrained paths.
