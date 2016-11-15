@@ -35,39 +35,35 @@ Examples
 --------
 
 ``` r
-## Load data
+# Load series
 data(uciCT)
 
-## Reinterpolate data to equal length
-datalist <- zscore(CharTraj)
-data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
+# Reinterpolate series to equal length
+series <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
+series <- zscore(series)
 
-## Common controls
+# Common controls (they are only used if appropriate)
 ctrl <- new("dtwclustControl", window.size = 20L, trace = TRUE)
 ```
 
 ### Partitional
 
 ``` r
-## =============================================================================================
-## Partitional clustering using DTW with help of lower bounds and PAM centroids
-## =============================================================================================
-
+# Using DTW with help of lower bounds and PAM centroids
 ctrl@pam.precompute <- FALSE
 
-kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
-                     centroid = "pam", seed = 3247, 
-                     control = ctrl)
-#> Iteration 1: Changes / Distsum = 100 / 2055.902
-#> Iteration 2: Changes / Distsum = 11 / 1743.629
-#> Iteration 3: Changes / Distsum = 5 / 1702.148
-#> Iteration 4: Changes / Distsum = 3 / 1702.929
-#> Iteration 5: Changes / Distsum = 2 / 1690.314
-#> Iteration 6: Changes / Distsum = 0 / 1690.314
+pc.dtwlb <- dtwclust(series, k = 20L, 
+                     distance = "dtw_lb", centroid = "pam", 
+                     seed = 3247, control = ctrl)
+#> Iteration 1: Changes / Distsum = 100 / 3214.899
+#> Iteration 2: Changes / Distsum = 18 / 2786.523
+#> Iteration 3: Changes / Distsum = 7 / 2700.449
+#> Iteration 4: Changes / Distsum = 3 / 2630.285
+#> Iteration 5: Changes / Distsum = 0 / 2630.285
 #> 
-#>  Elapsed time is 4.765 seconds.
+#>  Elapsed time is 4.789 seconds.
 
-plot(kc.dtwlb)
+plot(pc.dtwlb)
 ```
 
 ![](README-partitional-1.png)
@@ -75,23 +71,18 @@ plot(kc.dtwlb)
 ### Hierarchical
 
 ``` r
-## =============================================================================================
-## Hierarchical clustering based on shape-based distance
-## =============================================================================================
-
-hc.sbd <- dtwclust(datalist, type = "hierarchical",
-                   k = 19:21, distance = "sbd",
-                   method = "all",
-                   control = ctrl)
+# Based on shape-based distance
+hc.sbd <- dtwclust(CharTraj, type = "hierarchical", k = 19L:21L, 
+                   distance = "sbd", method = "all",
+                   preproc = zscore, control = ctrl)
 #> 
 #>  Calculating distance matrix...
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.705 seconds.
+#>  Elapsed time is 0.691 seconds.
 
-cat("CVIs for HC+SBD:\n")
-#> CVIs for HC+SBD:
+# CVIs for HC+SBD
 print(cvis <- sapply(hc.sbd, cvi, b = CharTrajLabels))
 #>               [,1]        [,2]       [,3]        [,4]        [,5]
 #> ARI     0.74978939  0.68800515  0.3099641  0.52028537  0.44964526
@@ -159,6 +150,7 @@ print(cvis <- sapply(hc.sbd, cvi, b = CharTrajLabels))
 #> D       0.23163554  0.16176333  0.17471193  0.24428149
 #> COP     0.08067224  0.07635012  0.09213935  0.08780314
 
+# Best according to variation of information
 plot(hc.sbd[[which.min(cvis["VI", ])]])
 ```
 
@@ -167,103 +159,35 @@ plot(hc.sbd[[which.min(cvis["VI", ])]])
 ### TADPole
 
 ``` r
-## =============================================================================================
-## TADPole clustering
-## =============================================================================================
-
-kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
+pc.tadp <- dtwclust(series, type = "tadpole", k = 20L,
                     dc = 1.5, control = ctrl)
 #> 
 #> Entering TADPole...
 #> 
-#> TADPole completed, pruning percentage = 86.5%
+#> TADPole completed, pruning percentage = 77.8%
 #> 
-#>  Elapsed time is 1.181 seconds.
+#>  Elapsed time is 1.533 seconds.
 
-plot(kc.tadp, clus = 1:4)
+plot(pc.tadp, clus = 1L:4L)
 ```
 
 ![](README-tadpole-1.png)
 
-### Parallel support
-
-``` r
-## =============================================================================================
-## Parallel support
-## =============================================================================================
-
-require(doParallel)
-#> Loading required package: doParallel
-#> Loading required package: foreach
-#> Loading required package: iterators
-cl <- makeCluster(detectCores(), "FORK")
-registerDoParallel(cl)
-
-## Creating a custom distance (normalized DTW)
-ndtw <- function(x, y, ...) {
-    dtw::dtw(x, y, step.pattern = symmetric2,
-             distance.only = TRUE, ...)$normalizedDistance
-}
-
-## Registering the function with 'proxy'
-proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
-                       loop = TRUE, type = "metric", distance = TRUE,
-                       description = "Normalized DTW with L1 norm")
-
-## Data with different length
-kc.ndtw <- dtwclust(datalist, k = 20,
-                    distance = "nDTW", centroid = "pam",
-                    seed = 159, control = new("dtwclustControl", nrep = 8L))
-
-sapply(kc.ndtw, cvi, b = CharTrajLabels, type = "VI")
-#>        VI        VI        VI        VI        VI        VI        VI 
-#> 0.2755874 0.4448495 0.5736902 0.5047190 0.4465854 0.3929220 0.3808492 
-#>        VI 
-#> 0.4439003
-
-## DBA centroids
-kc <- dtwclust(datalist, k = 20,
-               distance = "dtw_basic", centroid = "dba",
-               seed = 9421, control = list(trace = TRUE, window.size = 20L),
-               normalize = TRUE)
-#> Iteration 1: Changes / Distsum = 100 / 6.749242
-#> Iteration 2: Changes / Distsum = 2 / 4.229023
-#> Iteration 3: Changes / Distsum = 0 / 4.180198
-#> 
-#>  Elapsed time is 4.615 seconds.
-
-## Modifying some plot parameters
-plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
-```
-
-![](README-parallel-1.png)
-
-``` r
-
-## Returning to sequential calculations
-stopCluster(cl)
-registerDoSEQ()
-```
-
 ### Fuzzy
 
 ``` r
-## =============================================================================================
-## Fuzzy clustering (autocorrelation-based)
-## =============================================================================================
-
 # Calculate autocorrelation up to 50th lag, considering a list of time series as input
 acf_fun <- function(dat, ...) {
-    lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
+    lapply(dat, function(x) as.numeric(acf(x, lag.max = 50L, plot = FALSE)$acf))
 }
 
-# Fuzzy c-means
-fc <- dtwclust(datalist[1:25], type = "fuzzy", k = 5,
+# Autocorrelation-based fuzzy c-means
+fc <- dtwclust(series[1L:25L], type = "fuzzy", k = 5L,
                preproc = acf_fun, distance = "L2",
                seed = 123)
 
 fc
-#> dtwclust(data = datalist[1:25], type = "fuzzy", k = 5, distance = "L2", 
+#> dtwclust(data = series[1L:25L], type = "fuzzy", k = 5L, distance = "L2", 
 #>     preproc = acf_fun, seed = 123)
 #> 
 #> fuzzy clustering with 5 clusters
@@ -272,26 +196,71 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.144   0.000   0.143 
+#>   0.228   0.000   0.225 
 #> 
 #> Head of fuzzy memberships:
 #> 
-#>       cluster_1   cluster_2  cluster_3  cluster_4 cluster_5
-#> A.V1 0.04517433 0.015248385 0.06048626 0.02847461 0.8506164
-#> A.V2 0.02648172 0.007341668 0.03623648 0.01489308 0.9150471
-#> A.V3 0.03920172 0.007216578 0.03668630 0.01368817 0.9032072
-#> A.V4 0.09258928 0.193779128 0.10495491 0.19932425 0.4093524
-#> A.V5 0.09366124 0.162965470 0.11758524 0.17523731 0.4505507
-#> B.V1 0.39400450 0.034717343 0.35507763 0.07914583 0.1370547
+#>       cluster_1   cluster_2   cluster_3   cluster_4 cluster_5
+#> A.V1 0.04732715 0.017695266 0.002662067 0.008402290 0.9239132
+#> A.V2 0.01494997 0.005368273 0.000809054 0.002611058 0.9762616
+#> A.V3 0.06605890 0.027250783 0.002808192 0.008388257 0.8954939
+#> A.V4 0.14725836 0.350302464 0.025041488 0.070074292 0.4073234
+#> A.V5 0.14528435 0.227567379 0.024316156 0.074457217 0.5283749
+#> B.V1 0.49030359 0.077478929 0.067994926 0.150767814 0.2134547
 ```
+
+### (Some) multivariate support
+
+``` r
+# Multivariate series, provided as a list of matrices
+mv <- CharTrajMV[1L:20L]
+
+# Using GAK distance
+mvc <- dtwclust(mv, k = 4L, distance = "gak", seed = 390)
+
+# Note how the variables of each series are appended one after the other in the plot
+plot(mvc)
+```
+
+![](README-multivariate-1.png)
+
+### Parallel support
+
+``` r
+require(doParallel)
+
+# Create and register parallel workers
+cl <- makeCluster(detectCores(), "FORK")
+registerDoParallel(cl)
+
+# Parallel backend detected automatically
+hc <- dtwclust(CharTraj, k = 20L,
+               distance = "dtw_basic", centroid = "dba",
+               seed = 9421, control = list(trace = TRUE, window.size = 20L))
+#> Iteration 1: Changes / Distsum = 100 / 1531.018
+#> Iteration 2: Changes / Distsum = 3 / 886.4655
+#> Iteration 3: Changes / Distsum = 2 / 873.7322
+#> Iteration 4: Changes / Distsum = 0 / 864.1761
+#> 
+#>  Elapsed time is 5.099 seconds.
+
+## Returning to sequential calculations
+stopCluster(cl)
+registerDoSEQ()
+
+## Modifying some plot parameters
+plot(hc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
+```
+
+![](README-parallel-1.png)
 
 Dependencies
 ------------
 
 -   Partitional procedures are inspired by the `flexclust` package.
--   Hierarchical procedures use the native `hclust` function.
+-   Hierarchical procedures use the native `hclust` function by default.
 -   Cross-distance matrix calculations make use of the `proxy` package.
--   The core DTW calculations can be done by the `dtw` package.
+-   The core DTW calculations can be done by the `dtw` package or the `dtw_basic` function.
 -   Plotting is done with the `ggplot2` package.
 -   Parallel computation depends on the `foreach` package.
 -   Cluster evaluation can be done with package `clue` or the `cvi` function.

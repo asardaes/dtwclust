@@ -1,7 +1,7 @@
 ---
 output:
-     md_document:
-          variant: markdown_github
+    md_document:
+        variant: markdown_github
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -55,133 +55,111 @@ If you're wondering about which version to install, take a look at the [NEWS](NE
 ## Examples
 
 ```{r set-up}
-## Load data
+# Load series
 data(uciCT)
 
-## Reinterpolate data to equal length
-datalist <- zscore(CharTraj)
-data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
+# Reinterpolate series to equal length
+series <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
+series <- zscore(series)
 
-## Common controls
+# Common controls (they are only used if appropriate)
 ctrl <- new("dtwclustControl", window.size = 20L, trace = TRUE)
 ```
 
 ### Partitional
 
 ```{r partitional}
-## =============================================================================================
-## Partitional clustering using DTW with help of lower bounds and PAM centroids
-## =============================================================================================
-
+# Using DTW with help of lower bounds and PAM centroids
 ctrl@pam.precompute <- FALSE
 
-kc.dtwlb <- dtwclust(data = data, k = 20, distance = "dtw_lb",
-                     centroid = "pam", seed = 3247, 
-                     control = ctrl)
+pc.dtwlb <- dtwclust(series, k = 20L, 
+                     distance = "dtw_lb", centroid = "pam", 
+                     seed = 3247, control = ctrl)
 
-plot(kc.dtwlb)
+plot(pc.dtwlb)
 ```
 
 ### Hierarchical
 
 ```{r hierarchical}
-## =============================================================================================
-## Hierarchical clustering based on shape-based distance
-## =============================================================================================
+# Based on shape-based distance
+hc.sbd <- dtwclust(CharTraj, type = "hierarchical", k = 19L:21L, 
+                   distance = "sbd", method = "all",
+                   preproc = zscore, control = ctrl)
 
-hc.sbd <- dtwclust(datalist, type = "hierarchical",
-                   k = 19:21, distance = "sbd",
-                   method = "all",
-                   control = ctrl)
-
-cat("CVIs for HC+SBD:\n")
+# CVIs for HC+SBD
 print(cvis <- sapply(hc.sbd, cvi, b = CharTrajLabels))
 
+# Best according to variation of information
 plot(hc.sbd[[which.min(cvis["VI", ])]])
 ```
 
 ### TADPole
 
 ```{r tadpole}
-## =============================================================================================
-## TADPole clustering
-## =============================================================================================
-
-kc.tadp <- dtwclust(data, type = "tadpole", k = 20,
+pc.tadp <- dtwclust(series, type = "tadpole", k = 20L,
                     dc = 1.5, control = ctrl)
 
-plot(kc.tadp, clus = 1:4)
-```
-
-### Parallel support
-
-```{r parallel}
-## =============================================================================================
-## Parallel support
-## =============================================================================================
-
-require(doParallel)
-cl <- makeCluster(detectCores(), "FORK")
-registerDoParallel(cl)
-
-## Creating a custom distance (normalized DTW)
-ndtw <- function(x, y, ...) {
-    dtw::dtw(x, y, step.pattern = symmetric2,
-             distance.only = TRUE, ...)$normalizedDistance
-}
-
-## Registering the function with 'proxy'
-proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
-                       loop = TRUE, type = "metric", distance = TRUE,
-                       description = "Normalized DTW with L1 norm")
-
-## Data with different length
-kc.ndtw <- dtwclust(datalist, k = 20,
-                    distance = "nDTW", centroid = "pam",
-                    seed = 159, control = new("dtwclustControl", nrep = 8L))
-
-sapply(kc.ndtw, cvi, b = CharTrajLabels, type = "VI")
-
-## DBA centroids
-kc <- dtwclust(datalist, k = 20,
-               distance = "dtw_basic", centroid = "dba",
-               seed = 9421, control = list(trace = TRUE, window.size = 20L),
-               normalize = TRUE)
-
-## Modifying some plot parameters
-plot(kc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
-
-## Returning to sequential calculations
-stopCluster(cl)
-registerDoSEQ()
+plot(pc.tadp, clus = 1L:4L)
 ```
 
 ### Fuzzy
 
 ```{r fuzzy}
-## =============================================================================================
-## Fuzzy clustering (autocorrelation-based)
-## =============================================================================================
-
 # Calculate autocorrelation up to 50th lag, considering a list of time series as input
 acf_fun <- function(dat, ...) {
-    lapply(dat, function(x) as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf))
+    lapply(dat, function(x) as.numeric(acf(x, lag.max = 50L, plot = FALSE)$acf))
 }
 
-# Fuzzy c-means
-fc <- dtwclust(datalist[1:25], type = "fuzzy", k = 5,
+# Autocorrelation-based fuzzy c-means
+fc <- dtwclust(series[1L:25L], type = "fuzzy", k = 5L,
                preproc = acf_fun, distance = "L2",
                seed = 123)
 
 fc
 ```
 
+### (Some) multivariate support
+
+```{r multivariate}
+# Multivariate series, provided as a list of matrices
+mv <- CharTrajMV[1L:20L]
+
+# Using GAK distance
+mvc <- dtwclust(mv, k = 4L, distance = "gak", seed = 390)
+
+# Note how the variables of each series are appended one after the other in the plot
+plot(mvc)
+```
+
+### Parallel support
+
+```{r parallel}
+require(doParallel)
+
+# Create and register parallel workers
+cl <- makeCluster(detectCores(), "FORK")
+registerDoParallel(cl)
+
+# Parallel backend detected automatically
+hc <- dtwclust(CharTraj, k = 20L,
+               distance = "dtw_basic", centroid = "dba",
+               seed = 9421, control = list(trace = TRUE, window.size = 20L))
+
+## Returning to sequential calculations
+stopCluster(cl)
+registerDoSEQ()
+
+## Modifying some plot parameters
+plot(hc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
+```
+
 ## Dependencies
 
 * Partitional procedures are inspired by the `flexclust` package.
-* Hierarchical procedures use the native `hclust` function.
+* Hierarchical procedures use the native `hclust` function by default.
 * Cross-distance matrix calculations make use of the `proxy` package.
-* The core DTW calculations can be done by the `dtw` package.
+* The core DTW calculations can be done by the `dtw` package or the `dtw_basic` function.
 * Plotting is done with the `ggplot2` package.
 * Parallel computation depends on the `foreach` package.
 * Cluster evaluation can be done with package `clue` or the `cvi` function.

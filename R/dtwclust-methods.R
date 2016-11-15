@@ -326,10 +326,10 @@ plot.dtwclust <- function(x, y, ...,
             trail <- L - len
 
             clusters[[id_clus]] <- mapply(cluster, trail,
-                                        SIMPLIFY = FALSE,
-                                        FUN = function(mvs, trail) {
-                                            rbind(mvs, matrix(NA, trail, nc))
-                                        })
+                                          SIMPLIFY = FALSE,
+                                          FUN = function(mvs, trail) {
+                                              rbind(mvs, matrix(NA, trail, nc))
+                                          })
 
             trail <- L - NROW(centroids[[id_clus]])
 
