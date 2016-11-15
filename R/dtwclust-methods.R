@@ -314,10 +314,10 @@ plot.dtwclust <- function(x, y, ...,
     ## force same length for all multivariate series/centroids in the same cluster by
     ## adding NAs
     if (mv <- is_multivariate(data)) {
-        series <- split(data, factor(x@cluster, levels = 1L:x@k), drop = FALSE)
+        clusters <- split(data, factor(x@cluster, levels = 1L:x@k), drop = FALSE)
 
         for (id_clus in 1L:x@k) {
-            cluster <- series[[id_clus]]
+            cluster <- clusters[[id_clus]]
             if (length(cluster) < 1L) next ## empty cluster
 
             nc <- NCOL(cluster[[1L]])
@@ -325,7 +325,7 @@ plot.dtwclust <- function(x, y, ...,
             L <- max(len, NROW(centroids[[id_clus]]))
             trail <- L - len
 
-            series[[id_clus]] <- mapply(cluster, trail,
+            clusters[[id_clus]] <- mapply(cluster, trail,
                                         SIMPLIFY = FALSE,
                                         FUN = function(mvs, trail) {
                                             rbind(mvs, matrix(NA, trail, nc))
@@ -333,14 +333,13 @@ plot.dtwclust <- function(x, y, ...,
 
             trail <- L - NROW(centroids[[id_clus]])
 
-            centroids[[id_clus]] <- rbind(centroids[[id_clus]],
-                                          matrix(NA, trail, nc))
+            centroids[[id_clus]] <- rbind(centroids[[id_clus]], matrix(NA, trail, nc))
         }
 
         ## split returns the result in order of the factor levels,
         ## but I want to keep the original order as returned from clustering
         ido <- sort(sort(x@cluster, index.return=T)$ix, index.return = TRUE)$ix
-        data <- unlist(series, recursive = FALSE)[ido]
+        data <- unlist(clusters, recursive = FALSE)[ido]
     }
 
     ## helper values
@@ -360,8 +359,6 @@ plot.dtwclust <- function(x, y, ...,
     ## transform to data frames
     dfm <- reshape2::melt(data)
     dfcm <- reshape2::melt(centroids)
-
-    if (mv) colnames(dfm) <- colnames(dfcm) <- c("Index", "Variables", "value", "L1")
 
     ## time, cluster and colour indices
     color_ids <- integer(x@k)
