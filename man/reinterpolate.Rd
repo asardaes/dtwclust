@@ -22,4 +22,18 @@ Reinterpolated time series
 This function is just a wrapper for the native function \code{\link[stats]{approx}} to do simple
 linear reinterpolation.
 }
+\examples{
+
+data(uciCT)
+
+# list of univariate series
+series <- reinterpolate(CharTraj, 205L)
+
+# list of multivariate series
+series <- reinterpolate(CharTrajMV, 205L)
+
+# single multivariate series
+series <- reinterpolate(CharTrajMV[[1L]], 205L, TRUE)
+
+}
 

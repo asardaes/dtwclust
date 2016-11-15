@@ -13,9 +13,22 @@
 #'
 #' @return Reinterpolated time series
 #'
+#' @examples
+#'
+#' data(uciCT)
+#'
+#' # list of univariate series
+#' series <- reinterpolate(CharTraj, 205L)
+#'
+#' # list of multivariate series
+#' series <- reinterpolate(CharTrajMV, 205L)
+#'
+#' # single multivariate series
+#' series <- reinterpolate(CharTrajMV[[1L]], 205L, TRUE)
+#'
 reinterpolate <- function(x, new.length, multivariate = FALSE) {
-    if (is.list(x)) {
-        x <- lapply(x, reinterpolate, new.length = new.length, multivariate = !is.null(dim(x[[1L]])))
+    if (is.list(x) && !is.data.frame(x)) {
+        x <- lapply(x, reinterpolate, new.length = new.length, multivariate = is_multivariate(x))
 
     } else if (!multivariate && (is.matrix(x) || is.data.frame(x))) {
         x <- t(apply(x, 1L, reinterpolate, new.length = new.length))
