@@ -18,7 +18,7 @@
 zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE) {
     if (is.list(x)) {
         x <- lapply(x, zscore, ...,
-                    multivariate = !is.null(dim(x[[1L]])),
+                    multivariate = is_multivariate(x),
                     keep.attributes = keep.attributes)
 
     } else if (!multivariate && (is.matrix(x) || is.data.frame(x))) {
