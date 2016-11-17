@@ -147,10 +147,37 @@ call_pairs <- function(n = 2L, lower = TRUE) {
 # Parallel helper functions
 # ========================================================================================================
 
+allow_parallel <- function() {
+    do_par <- TRUE
+
+    function(flag) {
+        if (!missing(flag))
+            do_par <<- as.logical(flag)[1L]
+
+        invisible(do_par)
+    }
+}
+
+#' Allow parallel computation with \pkg{dtwclust} functions
+#'
+#' Set an internal flag that is checked by the functions that support parallel computation and
+#' determines if they should attempt to use a parallel backend if one is registered.
+#'
+#' @export
+#'
+#' @param flag \code{TRUE} to allow use of parallel backends or \code{FALSE} to prevent it.
+#'
+#' @return \code{flag} invisibly
+#'
+parallel_dtwclust <- allow_parallel()
+
 # Custom binary operator for %dopar% to avoid unnecessary warnings
 `%op%` <- function(obj, ex) {
     withCallingHandlers({
-        ret <- eval.parent(substitute(obj %dopar% ex))
+        if (parallel_dtwclust())
+            ret <- eval.parent(substitute(obj %dopar% ex))
+        else
+            ret <- eval.parent(substitute(obj %do% ex))
 
     }, warning = function(w) {
         if (!grepl("package:dtwclust.*available", w$message, ignore.case = TRUE))
@@ -164,7 +191,10 @@ call_pairs <- function(n = 2L, lower = TRUE) {
 
 # Split a given object into chunks for parallel workers
 split_parallel <- function(obj, margin = NULL) {
-    num_workers <- foreach::getDoParWorkers()
+    if (parallel_dtwclust())
+        num_workers <- foreach::getDoParWorkers()
+    else
+        num_workers <- 1L
 
     if (num_workers == 1L)
         return(list(obj))
@@ -193,9 +223,12 @@ split_parallel <- function(obj, margin = NULL) {
 
 ## tasks created based on getDoParWorkers() could be larger than tasks based on objects
 allocate_matrices <- function(mat = NULL, ..., target.size) {
-    ncores <- foreach::getDoParWorkers()
+    if (parallel_dtwclust())
+        num_workers <- foreach::getDoParWorkers()
+    else
+        num_workers <- 1L
 
-    if (ncores > 1L) {
+    if (num_workers > 1L) {
         MAT <- lapply(1L:target.size, function(dummy) {
             matrix(0, ...)
         })
@@ -240,12 +273,12 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
 # ========================================================================================================
 
 is_multivariate <- function(x) {
-    dims <- sapply(x, NCOL)
+    ncols <- sapply(x, NCOL)
 
-    if (any(diff(dims) != 0L))
+    if (any(diff(ncols) != 0L))
         stop("Inconsistent dimensions across series.")
 
-    any(dims > 1L)
+    any(ncols > 1L)
 }
 
 reshape_multviariate <- function(series, cent) {
