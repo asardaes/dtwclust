@@ -8,15 +8,17 @@
 #define NOT_VISITED -1.0
 
 // for step matrix
-#define UP 3.0
-#define LEFT 2.0
-#define DIAG 1.0
+#define UP 2.0
+#define LEFT 1.0
+#define DIAG 0.0
 
 // the matrix for lcm/gcm/steps
 double *D;
 
 // to avoid comparison problems in which_min
 double volatile *tuple;
+// also for which_min but used in main function too
+int direction = -1;
 
 // double to single index, matrices are always vectors in R
 int inline d2s(int const i, int const j, int const nx) __attribute__((always_inline));
@@ -48,18 +50,16 @@ double lnorm(double const *x, double const *y, double const norm,
 }
 
 // which direction to take in the cost matrix
-double which_min(int const i, int const j, int const nx,
-                 double const step, double volatile const local_cost)
+void which_min(int const i, int const j, int const nx,
+               double const step, double volatile const local_cost)
 {
     // DIAG, LEFT, UP
     tuple[0] = (D[d2s(i-1, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j-1, nx)] + step * local_cost;
     tuple[1] = (D[d2s(i, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i, j-1, nx)] + local_cost;
     tuple[2] = (D[d2s(i-1, j, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j, nx)] + local_cost;
 
-    int min = (tuple[1] < tuple[0]) ? 1 : 0;
-    min = (tuple[2] < tuple[min]) ? 2 : min;
-
-    return ((double) min + 1.0);
+    direction = (tuple[1] < tuple[0]) ? 1 : 0;
+    direction = (tuple[2] < tuple[direction]) ? 2 : direction;
 }
 
 // the C code
@@ -69,9 +69,12 @@ double dtw_basic_c(double const *x, double const *y, int const w,
                    int const backtrack,
                    int *index1, int *index2, int *path)
 {
+    int i, j;
+    double volatile local_cost;
+
     // initialization
-    for (int i = 0; i <= nx; i++) {
-        for (int j = 0; j <= ny; j++)
+    for (i = 0; i <= nx; i++) {
+        for (j = 0; j <= ny; j++)
             D[d2s(i, j, nx)] = NOT_VISITED;
     }
 
@@ -80,16 +83,14 @@ double dtw_basic_c(double const *x, double const *y, int const w,
     if (norm == 2) D[d2s(1, 1, nx)] = D[d2s(1, 1, nx)] * D[d2s(1, 1, nx)];
 
     // dynamic programming
-    double global_cost, direction;
-    double volatile local_cost;
-
-    for (int i = 1; i <= nx; i++) {
+    for (i = 1; i <= nx; i++) {
         int j1, j2;
 
         // adjust limits depending on window
         if (w == -1) {
             j1 = 1;
             j2 = ny;
+
         } else {
             j1 = ceil((double) i * ny / nx - w);
             j2 = floor((double) i * ny / nx + w);
@@ -98,19 +99,15 @@ double dtw_basic_c(double const *x, double const *y, int const w,
             j2 = j2 < ny ? j2 : ny;
         }
 
-        for (int j = j1; j <= j2; j++) {
+        for (j = j1; j <= j2; j++) {
             // very first value already set above
             if (i == 1 && j == 1) continue;
 
             local_cost = lnorm(x, y, norm, nx, ny, dim, i-1, j-1);
             if (norm == 2) local_cost = local_cost * local_cost;
 
-            direction = which_min(i, j, nx, step, local_cost);
-
-            if (direction == DIAG)        global_cost = D[d2s(i-1, j-1, nx)] + step * local_cost;
-            else if (direction == LEFT)   global_cost = D[d2s(i, j-1, nx)] + local_cost;
-            else if (direction == UP)     global_cost = D[d2s(i-1, j, nx)] + local_cost;
-            else                          error("dtw_basic: Invalid direction obtained.");
+            // set the value of 'direction'
+            which_min(i, j, nx, step, local_cost);
 
             /*
              * I can use the same matrix to save both cost values and steps taken by shifting
@@ -119,15 +116,15 @@ double dtw_basic_c(double const *x, double const *y, int const w,
              * replaced by steps along the way.
              */
 
-            D[d2s(i, j, nx)] = global_cost;
-            if (backtrack) D[d2s(i-1, j-1, nx)] = direction;
+            D[d2s(i, j, nx)] = tuple[direction];
+            if (backtrack) D[d2s(i-1, j-1, nx)] = (double) direction;
         }
     }
 
     // backtrack
     if (backtrack) {
-        int i = nx - 1;
-        int j = ny - 1;
+        i = nx - 1;
+        j = ny - 1;
 
         // always start at end of series
         index1[0] = nx;
@@ -135,21 +132,17 @@ double dtw_basic_c(double const *x, double const *y, int const w,
         *path = 1;
 
         while(!(i == 0 && j == 0)) {
-            switch((int) D[d2s(i, j, nx)]) {
-            case 1:
+            if (D[d2s(i, j, nx)] == 0) {
                 i--;
                 j--;
-                break;
 
-            case 2:
+            } else if (D[d2s(i, j, nx)] == 1) {
                 j--;
-                break;
 
-            case 3:
+            } else if (D[d2s(i, j, nx)] == 2) {
                 i--;
-                break;
 
-            default:
+            } else {
                 error("dtw_basic: Invalid direction matrix computed. Indices %d and %d.", i+1, j+1);
             }
 
