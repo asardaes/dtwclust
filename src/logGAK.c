@@ -1,6 +1,4 @@
-/*
- * Adapted from the code available at http://marcocuturi.net/GA.html
- */
+// Adapted from the code available at http://marcocuturi.net/GA.html
 
 /*
  ***** BEGIN LICENSE BLOCK *****
@@ -48,7 +46,6 @@
  * v1.02 Changed some C syntax that was not compiled properly on Windows platforms, June 8th
  * v1.01 of Global Alignment Kernel, May 12th 2011 (updated comments fields)
  * v1.0 of Global Alignment Kernel, March 25th 2011.
-
  */
 
 #include <stdlib.h>

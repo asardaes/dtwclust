@@ -183,14 +183,15 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
     retclass <- "crossdist"
 
     ## to pre-allocate LOGS
-    L <- max(max(sapply(x, NROW)), max(sapply(y, NROW))) + 1L
+    L <- max(sapply(x, NROW), sapply(y, NROW)) + 1L
 
     X <- split_parallel(x)
     Y <- split_parallel(y)
+
+    ## calculation of normalization factors
+    # x
     LOGS <- allocate_matrices(logs, nrow = L, ncol = 3L, target.size = length(X))
 
-    ## calculation normalization factors
-    # x
     gak_x <- foreach(x = X, logs = LOGS,
                      .combine = c,
                      .multicombine = TRUE,
