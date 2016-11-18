@@ -15,7 +15,8 @@ SBD(x, y, znorm = FALSE)
 A list with:
 \itemize{
   \item \code{dist}: The shape-based distance between \code{x} and \code{y}.
-  \item \code{yshift}: A shifted version of \code{y} so that it optimally matches \code{x}.
+  \item \code{yshift}: A shifted version of \code{y} so that it optimally matches \code{x} (based
+    on correlation).
 }
 }
 \description{
@@ -27,8 +28,8 @@ This distance works best if the series are \emph{z-normalized}. If not, at least
 corresponding amplitudes, since the values of the signals \strong{do} affect the outcome.
 
 If \code{x} and \code{y} do \strong{not} have the same length, it would be best if the longer
-sequence is provided in \code{y}, because it will be shifted to match \code{x}. Anything before
-the matching point is discarded and the series is padded with trailing zeros as needed.
+sequence is provided in \code{y}, because it will be shifted to match \code{x}. After matching,
+the series may have to be truncated or extended and padded with zeros if needed.
 
 The output values lie between 0 and 2, with 0 indicating perfect similarity.
 }
