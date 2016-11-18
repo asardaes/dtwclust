@@ -117,10 +117,8 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
                        norm = "L2",
                        error.check = error.check)
 
+    ## NOTE: Euclidean is only valid as upper bound if 'symmetric1' step pattern is used
     UBM <- proxy::dist(x, x, method = "L2")
-
-    ## Euclidean is only valid as upper bound if 'symmetric1' step pattern is used
-    step.pattern <- symmetric1
 
     ## ============================================================================================================================
     ## Pruning during local density calculation
@@ -162,23 +160,23 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     if (nrow(ind1) > 0L) {
         ind1 <- split_parallel(ind1, 1L)
 
-        exclude <- setdiff(ls(), c("x", "step.pattern", "window.size"))
+        exclude <- setdiff(ls(), c("x", "window.size"))
 
         d1 <- foreach(ind1 = ind1,
                       .combine = c,
                       .multicombine = TRUE,
                       .packages = "dtwclust",
+                      .export = "symmetric1",
                       .noexport = exclude) %op% {
                           proxy::dist(x[ind1[ , 1L]], x[ind1[ , 2L]],
                                       method = "dtw_basic",
                                       window.size = window.size,
-                                      step.pattern = step.pattern,
+                                      step.pattern = symmetric1,
                                       norm = "L2",
                                       pairwise = TRUE)
                       }
 
-        if (is.list(ind1))
-            ind1 <- do.call(rbind, ind1)
+        if (is.list(ind1)) ind1 <- do.call(rbind, ind1)
 
         ## Fill distance matrix where necessary
         D[ind1] <- d1
@@ -239,6 +237,7 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     DNN <- foreach(i = i,
                    .combine = rbind,
                    .multicombine = TRUE,
+                   .export = "symmetric1",
                    .packages = "dtwclust") %op% {
                        t(sapply(i, function (i) {
                            ## Index of higher density neighbors
@@ -263,7 +262,7 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
                                d2 <- proxy::dist(x[ii], x[indHDN[indCompute]],
                                                  method = "dtw_basic",
                                                  window.size = window.size,
-                                                 step.pattern = step.pattern,
+                                                 step.pattern = symmetric1,
                                                  norm = "L2")
 
                                delta[indCompute] <- d2
