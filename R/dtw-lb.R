@@ -128,8 +128,8 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     else {
         Y <- any2list(y)
 
-        if (force.symmetry) {
-            stop("Using force.symmetry = TRUE for y != NULL is not allowed.")
+        if (force.symmetry && !pairwise && length(X) != length(Y)) {
+            warning("Unable to force symmetry. Resulting distance matrix is not square.")
         }
     }
 
@@ -212,10 +212,11 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
         indNew <- unlist(indNew)
 
-        D[cbind(1L:length(X), indNN)[indNew, , drop = FALSE]] <- dSub
+        idd <- cbind(1L:length(X), indNN)[indNew, , drop = FALSE]
 
-        if (force.symmetry)
-            D[cbind(indNN, 1L:length(X))[indNew, , drop = FALSE]] <- dSub
+        D[idd] <- dSub
+
+        if (force.symmetry) D[idd[ , 2L:1L]] <- dSub
 
         new.indNN <- apply(D, 1L, which.min)
     }
