@@ -3,7 +3,7 @@
 ^\..*
 ^appveyor\.yml$
 
-cran-comments\.md
+.*\.md
 
 vignettes/.*\.gz
 vignettes/.*\.bbl

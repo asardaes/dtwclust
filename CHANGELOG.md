@@ -1,6 +1,7 @@
 # NEWS
 
 ## Version 3.0.0
+* Bear in mind that the `DTW/SBD` algorithms (and hence the functions that depend on them) might give different results in installations with 32-bit architectures.
 * Removed deprecated arguments/slots.
     + If you have older `dtwclust` objects saved, try updating them with `attr(dtwclust_object, "centers") <- NULL` if you run into compatibility problems.
     + `DBA` arguments changed order.
@@ -8,9 +9,8 @@
 * Added (conditional) support for more hierarchical procedures. See the examples and vignette.
 * Added support for functions in package `clue`.
 * Added a new distance based on global alignment kernels: `GAK`.
-* Bear in mind that the `DTW/SBD` algorithms (and hence the functions that depend on them) might give different results in installations with 32-bit architectures.
 * Updated vignette.
-* No longer enforcing preprocessing/centroid/hierarchical functions with ellipsis in their formals.
+* No longer enforcing preprocessing/centroid functions with ellipsis in their formals.
 * Added a multivariate dataset sample: `CharTrajMV`.
 * Improved plots for clusterings with multivariate series.
 
