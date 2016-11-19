@@ -83,7 +83,7 @@ plot(pc.dtwlb)
 
 ```{r hierarchical}
 # Based on shape-based distance
-hc.sbd <- dtwclust(CharTraj, type = "hierarchical", k = 19L:21L, 
+hc.sbd <- dtwclust(CharTraj, type = "hierarchical", k = 20L, 
                    distance = "sbd", method = "all",
                    preproc = zscore, control = ctrl)
 
