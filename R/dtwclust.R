@@ -448,6 +448,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     if (tolower(distance) %in% c("dtw", "dtw2", "dtw_basic")) {
         control@symmetric <- symmetric_pattern && (is.null(control@window.size) || !diff_lengths)
 
+        if (tolower(distance) == "dtw2") control@norm <- "L2"
+
     } else if (tolower(distance) %in% c("lbk", "lbi")) {
         control@symmetric <- FALSE
 
