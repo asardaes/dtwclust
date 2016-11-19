@@ -69,8 +69,8 @@ RcppExport SEXP envelop (SEXP series, SEXP window) {
     envelop_cpp(x, as<unsigned int>(window), L, U);
 
     List ret;
-    ret["min"] = L;
-    ret["max"] = U;
+    ret["lower"] = L;
+    ret["upper"] = U;
 
     return(ret);
 }

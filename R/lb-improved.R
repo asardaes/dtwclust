@@ -94,11 +94,11 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
 
     ## LB Keogh first
 
-    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'/'call_envelop'
+    ## NOTE: the 'window.size' definition varies betwen dtw/call_envelop and runmin/max
     if (is.null(lower.env) && is.null(upper.env)) {
-        envelopes <- call_envelop(y, window.size*2L + 1L)
-        lower.env <- envelopes$min
-        upper.env <- envelopes$max
+        envelopes <- call_envelop(y, window.size)
+        lower.env <- envelopes$lower
+        upper.env <- envelopes$upper
 
     } else if (is.null(lower.env)) {
         lower.env <- caTools::runmin(y, window.size*2L + 1L)
@@ -123,14 +123,14 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
     d1 <- abs(x - H)
 
     ## From here on is Lemire's improvement
-    EH <- call_envelop(H, window.size*2L + 1L)
+    EH <- call_envelop(H, window.size)
 
-    ind3 <- y > EH$max
-    ind4 <- y < EH$min
+    ind3 <- y > EH$upper
+    ind4 <- y < EH$lower
 
     H2 <- y
-    H2[ind3] <- EH$max[ind3]
-    H2[ind4] <- EH$min[ind4]
+    H2[ind3] <- EH$upper[ind3]
+    H2[ind4] <- EH$lower[ind4]
 
     d2 <- abs(y - H2)
 
@@ -182,11 +182,10 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 
     retclass <- "crossdist"
 
-    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'call_envelop'
-    envelops <- lapply(y, function(s) { call_envelop(s, window.size*2L + 1L) })
+    envelops <- lapply(y, function(s) { call_envelop(s, window.size) })
 
-    lower.env <- lapply(envelops, "[[", "min")
-    upper.env <- lapply(envelops, "[[", "max")
+    lower.env <- lapply(envelops, "[[", "lower")
+    upper.env <- lapply(envelops, "[[", "upper")
 
     Y <- split_parallel(y)
     lower.env <- split_parallel(lower.env)

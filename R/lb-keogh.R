@@ -101,11 +101,11 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
         window.size <- check_consistency(window.size, "window")
     }
 
-    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'runminmax'/'call_envelop'
+    ## NOTE: the 'window.size' definition varies betwen dtw/call_envelop and runmin/max
     if (is.null(lower.env) && is.null(upper.env)) {
-        envelopes <- call_envelop(y, window.size*2L + 1L)
-        lower.env <- envelopes$min
-        upper.env <- envelopes$max
+        envelopes <- call_envelop(y, window.size)
+        lower.env <- envelopes$lower
+        upper.env <- envelopes$upper
 
     } else if (is.null(lower.env)) {
         lower.env <- caTools::runmin(y, window.size*2L + 1L)
@@ -178,11 +178,10 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 
     retclass <- "crossdist"
 
-    ## NOTE: the 'window.size' definition varies betwen 'dtw' and 'call_envelop'
-    envelops <- lapply(y, function(s) { call_envelop(s, window.size*2L + 1L) })
+    envelops <- lapply(y, function(s) { call_envelop(s, window.size) })
 
-    lower.env <- lapply(envelops, "[[", "min")
-    upper.env <- lapply(envelops, "[[", "max")
+    lower.env <- lapply(envelops, "[[", "lower")
+    upper.env <- lapply(envelops, "[[", "upper")
 
     lower.env <- split_parallel(lower.env)
     upper.env <- split_parallel(upper.env)

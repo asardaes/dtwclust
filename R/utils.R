@@ -124,15 +124,16 @@ validate_pairwise <- function(x, y) {
 # ========================================================================================================
 
 # Envelop calculation
-call_envelop <- function(series, window) {
+call_envelop <- function(series, window.size) {
     check_consistency(series, "ts")
-    window <- check_consistency(window, "window")
+    window.size <- check_consistency(window.size, "window")
+    window.size <- window.size * 2L + 1L
 
-    ## NOTE: window in this function is window.size*2 + 1, thus the 2L below
-    if (window > (2L * length(series)))
+    ## NOTE: window.size in this function is window.size*2 + 1, thus the 2L below
+    if (window.size > (2L * length(series)))
         stop("Window cannot be greater or equal than the series' length.")
 
-    .Call("envelop", series, window, PACKAGE = "dtwclust")
+    .Call("envelop", series, window.size, PACKAGE = "dtwclust")
 }
 
 # Create combinations of all possible pairs
