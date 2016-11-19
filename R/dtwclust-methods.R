@@ -493,28 +493,25 @@ setMethod("cvi", signature(a = "dtwclust"),
               else
                   CVIs <- numeric()
 
+              type <- type[which_internal]
+
               if (any(which_internal)) {
-                  if ((!a@control@save.data || length(a@datalist) == 0L) &&
-                      any(type[which_internal] %in% c("SF", "CH"))) {
+                  if (length(a@datalist) == 0L && any(type %in% c("SF", "CH"))) {
                       warning("Internal CVIs: the original data must be in object to calculate ",
                               "the following indices:",
                               "\n\tSF\tCH")
 
                       type <- setdiff(type, c("SF", "CH"))
-                      which_internal <- type %in% internal
                   }
 
                   ## calculate distmat if needed
-                  if (any(type[which_internal] %in% c("Sil", "D", "COP"))) {
+                  if (any(type %in% c("Sil", "D", "COP"))) {
                       if (is.null(a@distmat)) {
                           if (length(a@datalist) == 0L) {
-                              warning("Internal CVIs: need distmat OR original data for indices:",
-                                      "\n\tSil\tD\tCOP\n",
-                                      "Please re-run the algorithm with save.data = TRUE, ",
-                                      "or save the datalist in the corresponding object slot.")
+                              warning("Internal CVIs: distmat OR original data needed for indices:",
+                                      "\n\tSil\tD\tCOP")
 
                               type <- setdiff(type, c("Sil", "D", "COP"))
-                              which_internal <- type %in% internal
 
                           } else {
                               distmat <- do.call(a@family@dist,
@@ -532,7 +529,7 @@ setMethod("cvi", signature(a = "dtwclust"),
                       return(CVIs)
 
                   ## calculate some values that both Davies-Bouldin indices use
-                  if (any(type[which_internal] %in% c("DB", "DBstar"))) {
+                  if (any(type %in% c("DB", "DBstar"))) {
                       S <- a@clusinfo$av_dist
 
                       ## distance between centroids
@@ -543,7 +540,7 @@ setMethod("cvi", signature(a = "dtwclust"),
                   }
 
                   ## calculate global centroids if needed
-                  if (any(type[which_internal] %in% c("SF", "CH"))) {
+                  if (any(type %in% c("SF", "CH"))) {
                       N <- length(a@datalist)
 
                       if (a@type == "partitional") {
@@ -566,7 +563,7 @@ setMethod("cvi", signature(a = "dtwclust"),
                       dim(dist_global_cent) <- NULL
                   }
 
-                  CVIs <- c(CVIs, sapply(type[which_internal], function(CVI) {
+                  CVIs <- c(CVIs, sapply(type, function(CVI) {
                       switch(EXPR = CVI,
                              ## Silhouette
                              Sil = {

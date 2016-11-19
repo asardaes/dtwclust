@@ -5,28 +5,36 @@ context("Test CVIs")
 # =================================================================================================
 
 test_that("dtwclust CVI calculations are consistent regardless of quantity or order of CVIs computed", {
-    pc_mv <- dtwclust(data_multivariate, type = "partitional", k = 4,
+    pc_mv <- dtwclust(data_multivariate, type = "partitional", k = 4L,
                       distance = "dtw_basic", centroid = "pam",
                       preproc = NULL, control = list(window.size = 18L), seed = 123,
                       dist.method = "L1")
 
-    base_cvis <- cvi(pc_mv, rep(1:4, each = 5), "valid")
+    base_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), "valid")
     i_cvis <- cvi(pc_mv, type = "internal")
-    e_cvis <- cvi(pc_mv, rep(1:4, each = 5), type = "external")
+    e_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), type = "external")
     expect_identical(base_cvis, c(e_cvis, i_cvis))
 
     cvis <- c(internal_cvis, external_cvis)
 
     expect_true(all(replicate(100L, {
         considered_cvis <- sample(cvis, sample(length(cvis), 1L))
-        this_cvis <- cvi(pc_mv, rep(1:4, each = 5), considered_cvis)
+        this_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), considered_cvis)
         all(base_cvis[considered_cvis] == this_cvis[considered_cvis])
     })))
 
-    pc_mv@datalist <- list()
+    ## when missing elements
     pc_mv@distmat <- NULL
-    expect_warning(cvi(pc_mv, type = "valid"))
+    this_cvis <- cvi(pc_mv, type = "internal")
+    considered_cvis <- names(this_cvis)
+    expect_true(all(base_cvis[considered_cvis] == this_cvis))
 
+    pc_mv@datalist <- list()
+    expect_warning(this_cvis <- cvi(pc_mv, type = "internal"))
+    considered_cvis <- names(this_cvis)
+    expect_true(all(base_cvis[considered_cvis] == this_cvis))
+
+    ## refs
     skip_on_cran()
 
     expect_equal_to_reference(base_cvis, file_name(base_cvis))
@@ -46,4 +54,28 @@ test_that("external CVI calculations are consistent regardless of quantity or or
         this_cvis <- cvi(labels_shuffled, CharTrajLabels, considered_cvis)
         all(base_cvis[considered_cvis] == this_cvis[considered_cvis])
     })))
+})
+
+# =================================================================================================
+# hierarchical/tadpole/fuzzy cases
+# =================================================================================================
+
+test_that("CVIs work also for hierarchical and TADPole", {
+    skip_on_cran()
+
+    tadp <- dtwclust(data_reinterpolated[1L:20L], type = "t", k = 4L,
+                     dc = 1.5, control = list(window.size = 18L))
+
+    hc <- dtwclust(data_reinterpolated[1L:20L], type = "h", k = 4L,
+                   distance = "gak", sigma = 100,
+                   control = list(window.size = 18L))
+
+    fc <- dtwclust(data_reinterpolated[1L:20L], type = "f", k = 4L, distance = "L2")
+
+    expect_error(cvi(fc, labels_subset))
+    cvis_tadp <- cvi(tadp, labels_subset)
+    cvis_hc <- cvi(hc, labels_subset)
+
+    expect_equal_to_reference(cvis_tadp, file_name(cvis_tadp))
+    expect_equal_to_reference(cvis_hc, file_name(cvis_hc))
 })
