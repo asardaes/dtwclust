@@ -407,7 +407,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             data <- preproc(data, ...)
 
         } else {
-            data <- do.call("preproc",
+            data <- do.call(preproc,
                             enlist(data,
                                    dots = subset_dots(dots, preproc)))
         }
@@ -438,34 +438,15 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     check_consistency(distance, "dist", trace = control@trace, Lengths = diff_lengths, silent = FALSE)
 
-    if (type %in% c("partitional", "fuzzy")) {
-        if (diff_lengths && type == "fuzzy")
-            stop("Fuzzy clustering does not support series with different length.")
-
-        if (is.character(centroid)) {
-            if (type == "fuzzy")
-                centroid <- "fcm"
-            else
-                centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
-        }
-
-        if (diff_lengths)
-            check_consistency(centroid, "cent", trace = control@trace)
-    }
-
     ## symmetric versions of dtw that I know of
-    ## unconstrained and with symmetric1/symmetric2 is always symmetric, regardless of diff_lengths
+    ## unconstrained and with symmetric1/symmetric2 is always symmetric, regardless of lengths
+    ## constrained and same lengths with symmetric1/symmetric2 is also symmetric
     symmetric_pattern <- is.null(dots$step.pattern) ||
         identical(dots$step.pattern, symmetric1) ||
         identical(dots$step.pattern, symmetric2)
 
     if (tolower(distance) %in% c("dtw", "dtw2", "dtw_basic")) {
-        if (!symmetric_pattern)
-            control@symmetric <- FALSE
-        else if (!is.null(control@window.size) && diff_lengths)
-            control@symmetric <- FALSE
-        else
-            control@symmetric <- TRUE
+        control@symmetric <- symmetric_pattern && (is.null(control@window.size) || !diff_lengths)
 
     } else if (tolower(distance) %in% c("lbk", "lbi")) {
         control@symmetric <- FALSE
@@ -478,9 +459,24 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     control@packages <- c("dtwclust", control@packages)
 
     if (type %in% c("partitional", "fuzzy")) {
+
         ## =================================================================================================================
         ## Partitional or fuzzy
         ## =================================================================================================================
+
+        if (is.character(centroid)) {
+            if (type == "fuzzy")
+                centroid <- "fcm"
+            else
+                centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
+        }
+
+        if (diff_lengths) {
+            if (type == "fuzzy")
+                stop("Fuzzy c-means does not support series with different length.")
+
+            check_consistency(centroid, "cent", trace = control@trace)
+        }
 
         ## ----------------------------------------------------------------------------------------------------------
         ## Distance function
@@ -500,7 +496,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
         # precompute distance matrix?
         if (is.character(centroid) && centroid == "pam") {
-
             ## check if distmat was not provided and should be precomputed
             if (!is.null(distmat)) {
                 if ( nrow(distmat) != length(data) || ncol(distmat) != length(data) )
@@ -509,17 +504,15 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                 ## distmat was provided in call
                 pam_precompute <- TRUE
 
-                if (control@trace)
-                    cat("\n\tDistance matrix provided...\n\n")
+                if (control@trace) cat("\n\tDistance matrix provided...\n\n")
 
             } else if (control@pam.precompute) {
                 if (tolower(distance) == "dtw_lb")
                     warning("Using dtw_lb with control@pam.precompute = TRUE is not advised.")
 
-                if (control@trace)
-                    cat("\n\tPrecomputing distance matrix...\n\n")
+                if (control@trace) cat("\n\tPrecomputing distance matrix...\n\n")
 
-                distmat <- do.call("distfun", enlist(x = data, centroids = NULL, dots = dots))
+                distmat <- do.call(distfun, enlist(x = data, centroids = NULL, dots = dots))
 
                 ## Redefine new distmat
                 assign("distmat", distmat, envir = environment(distfun))
@@ -536,7 +529,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         ## Centroid function
         ## ----------------------------------------------------------------------------------------------------------
 
-        ## Closures, all-cent.R
+        ## Closure, all-cent.R
         allcent <- all_cent(case = centroid,
                             distmat = distmat,
                             distfun = distfun,
@@ -568,7 +561,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             rngtools::setRNG(rngtools::RNGseq(1L, seed = seed, simplify = TRUE))
 
             ## Just one repetition
-            kc.list <- list(do.call("kcca.list",
+            kc.list <- list(do.call(kcca.list,
                                     enlist(x = data,
                                            k = k,
                                            family = family,
@@ -589,7 +582,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
             k0 <- k
             rng0 <- rng
-            i <- integer() # CHECK complains now?
+            i <- integer() # CHECK complains now
 
             kc.list <- foreach(k = k0, rng = rng0, .combine = comb0, .multicombine = TRUE,
                                .packages = control@packages, .export = export) %:%
@@ -603,7 +596,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                             if (!check_consistency(dist_entry$names[1], "dist"))
                                 do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                            kc <- do.call("kcca.list",
+                            kc <- do.call(kcca.list,
                                           enlist(x = data,
                                                  k = k,
                                                  family = family,
@@ -626,10 +619,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
         ## If distmat was provided, let it be shown in the results
         if (pam_precompute) {
-            if (!is.null(attr(distmat, "method")))
-                distance <- attr(distmat, "method")
-            else
+            if (is.null(attr(distmat, "method")))
                 distance <- "unknown"
+            else
+                distance <- attr(distmat, "method")
         }
 
         ## Create objects
@@ -697,46 +690,40 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             if (control@trace)
                 cat("\n\tDistance matrix provided...\n")
 
-            D <- distmat
-
-            if (!is.null(attr(distmat, "method")))
-                distance <- attr(distmat, "method")
-            else
+            if (is.null(attr(distmat, "method")))
                 distance <- "unknown"
+            else
+                distance <- attr(distmat, "method")
 
         } else {
             if (control@trace)
                 cat("\n\tCalculating distance matrix...\n")
 
             ## single argument is to calculate whole distance matrix
-            D <- do.call("distfun", enlist(x = data, dots = dots))
+            distmat <- do.call(distfun, enlist(x = data, centroids = NULL, dots = dots))
         }
 
         if (control@trace)
             cat("\n\tPerforming hierarchical clustering...\n\n")
 
         if (is.character(method)) {
-            ## Required form for 'hclust'
-            Dist <- D[lower.tri(D)]
-
-            ## Needed attribute for 'hclust' (case sensitive)
-            attr(Dist, "Size") <- length(data)
-            attr(Dist, "method") <- attr(D, "method")
-
-            ## Cluster
-            hc <- lapply(hclust_methods, function(method) stats::hclust(Dist, method))
+            ## Using hclust
+            hc <- lapply(hclust_methods, function(method) {
+                stats::hclust(stats::as.dist(distmat), method)
+            })
 
         } else {
+            ## Using provided function
             if (has_dots(method)) {
-                hc <- list(method(stats::as.dist(D), ...))
+                hc <- list(method(stats::as.dist(distmat), ...))
 
             } else {
                 hc <- list(do.call(method,
-                                   args = enlist(stats::as.dist(D),
+                                   args = enlist(stats::as.dist(distmat),
                                                  dots = subset_dots(dots, method))))
             }
 
-            method <- as.character(substitute(method))
+            method <- as.character(substitute(method))[1L]
         }
 
         ## Invalid centroid specifier provided?
@@ -753,30 +740,31 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                 if (is.function(centroid)) {
                     allcent <- centroid
 
-                    centroids <- lapply(1L:k, function(kcent) centroid(data[cluster == kcent]))
+                    centroids <- lapply(1L:k, function(kcent) { centroid(data[cluster == kcent]) })
 
-                    cldist <- do.call("distfun", enlist(x = data,
-                                                        centroids = centroids[cluster],
-                                                        pairwise = TRUE,
-                                                        dots = dots))
+                    cldist <- do.call(distfun,
+                                      enlist(x = data,
+                                             centroids = centroids[cluster],
+                                             pairwise = TRUE,
+                                             dots = dots))
 
                     cldist <- as.matrix(cldist)
                     dimnames(cldist) <- NULL
 
                 } else {
-                    allcent <- function(dummy) { data[which.min(apply(D, 1L, sum))] }
+                    allcent <- function(dummy) { data[which.min(apply(distmat, 1L, sum))] }
 
                     centroids <- sapply(1L:k, function(kcent) {
                         id_k <- cluster == kcent
 
-                        d_sub <- D[id_k, id_k, drop = FALSE]
+                        d_sub <- distmat[id_k, id_k, drop = FALSE]
 
                         id_centroid <- which.min(apply(d_sub, 1L, sum))
 
                         which(id_k)[id_centroid]
                     })
 
-                    cldist <- as.matrix(D[ , centroids][cbind(1L:length(data), cluster)])
+                    cldist <- as.matrix(distmat[ , centroids][cbind(1L:length(data), cluster)])
                     dimnames(cldist) <- NULL
                     centroids <- data[centroids]
                 }
@@ -793,7 +781,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                  dist = distfun,
                                  allcent = allcent,
                                  preproc = preproc),
-                    distmat = D,
+                    distmat = distmat,
 
                     type = type,
                     method = if (!is.null(hc$method)) hc$method else method,
@@ -829,22 +817,15 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         control@norm <- "L2"
 
         if (is.null(dc))
-            stop("Please specify 'dc' for tadpole algorithm")
+            stop("Please specify 'dc' for the TADPole algorithm")
         if (dc < 0)
             stop("The cutoff distance 'dc' must be positive")
-
-        ## ----------------------------------------------------------------------------------------------------------
-        ## Check data
-        ## ----------------------------------------------------------------------------------------------------------
-
-        check_consistency(data, "tslist")
 
         ## ----------------------------------------------------------------------------------------------------------
         ## Cluster
         ## ----------------------------------------------------------------------------------------------------------
 
-        if (control@trace)
-            cat("\nEntering TADPole...\n\n")
+        if (control@trace) cat("\nEntering TADPole...\n\n")
 
         ## mainly for predict generic
         distfun <- ddist("dtw_lb", control = control, distmat = NULL)
@@ -861,7 +842,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         lb <- if (is.null(dots$lb)) "lbk" else dots$lb
 
         RET <- foreach(k = k, .combine = list, .multicombine = TRUE, .packages = "dtwclust", .export = "enlist") %op% {
-            R <- TADPole(data, k = k, dc = dc, window.size = control@window.size, error.check = FALSE, lb = lb)
+            R <- TADPole(data, k = k, dc = dc, window.size = control@window.size, lb = lb)
 
             if (control@trace) {
                 cat("TADPole completed, pruning percentage = ",
@@ -876,7 +857,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
             if (is.function(centroid)) {
                 allcent <- centroid
-                centroids <- lapply(1L:k, function(kcent) centroid(data[R$cl == kcent]))
+                centroids <- lapply(1L:k, function(kcent) { centroid(data[R$cl == kcent]) })
 
             } else {
                 ## this is important for cvi function
@@ -885,10 +866,11 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             }
 
             ## Some additional cluster information (taken from flexclust)
-            cldist <- do.call("distfun", enlist(x = data,
-                                                centroids = centroids[R$cl],
-                                                pairwise = TRUE,
-                                                dots = dots))
+            cldist <- do.call(distfun,
+                              enlist(x = data,
+                                     centroids = centroids[R$cl],
+                                     pairwise = TRUE,
+                                     dots = dots))
 
             cldist <- as.matrix(cldist)
             dimnames(cldist) <- NULL
