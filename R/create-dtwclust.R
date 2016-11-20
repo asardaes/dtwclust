@@ -58,9 +58,18 @@ create_dtwclust <- function(..., override.family = TRUE) {
     if (!is.null(dots$type)) dots$type <- match.arg(dots$type, c("partitional", "hierarchical",
                                                                  "fuzzy", "tadpole"))
 
-    .Object <- do.call(methods::new, enlist(Class = "dtwclust", dots = dots))
+    ## avoid infinite recursion
+    if (is.null(dots$call)) {
+        call <- match.call()
 
-    if (is.null(dots$call)) .Object@call <- match.call()
+    } else {
+        call <- dots$call
+        dots$call <- NULL
+    }
+
+    .Object <- do.call(methods::new, enlist(Class = "dtwclust", dots = dots))
+    .Object@call <- call
+
     if (is.null(dots$preproc)) .Object@preproc <- "none"
     if (is.null(dots$iter)) .Object@iter <- 1L
     if (is.null(dots$converged)) .Object@converged <- TRUE
