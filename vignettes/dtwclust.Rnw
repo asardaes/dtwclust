@@ -881,53 +881,36 @@ dtwclust(data[1L:10L], type = "p", k = 2L,
          weights = rep(c(0.9,1.1), each = 5L))
 @
 
-Other clustering algorithms that significantly alter the workflow in \dtwclust{} are harder to integrate by the user, although the provided formal class can still be of use. For instance, the following would reproduce the result of TADPole clustering, enabling the usage of the \code{cvi} function (and any other generic that has methods for \code{dtwclust} objects).
+Other clustering algorithms that significantly alter the workflow in \dtwclust{} are harder to integrate by the user, although the provided formal class can still be of use. Formal objects can be created with the \code{create_dtwclust} function. For instance, the following would reproduce the result of TADPole clustering, enabling the usage of the \code{cvi} function (and any other generic that has methods for \code{dtwclust} objects).
 
 <<example-manual-tadpole, echo = TRUE>>=
 tadp <- TADPole(data[1L:20L], k = 4L,
                 dc = 1.5, window.size = 15L)
 
-centroids <- data[tadp$centroids]
+tp_obj <- create_dtwclust(type = "tadpole",
+                          datalist = data[1L:20L],
+                          centroids = data[tadp$centroids],
+                          cluster = tadp$cl,
+                          control = list(window.size = 15L,
+                                         norm = "L2"),
+                          distance = "dtw_lb",
+                          centroid = "PAM_TADPole")
 
-ctrl <- new("dtwclustControl",
-            window.size = 15L,
-            norm = "L2")
+cbind(cvi(tp_obj, CharTrajLabels[1L:20L]))
+@
 
-fam <- new("dtwclustFamily",
-           dist = "dtw_lb",
-           control = ctrl,
-           allcent = function(dummy) {
-               data[tadp$centroids[1L]]
-           })
+Assuming the following results were obtained by applying \kshape{} independently of \dtwclust{}, the following would reproduce the values in a formal class, which can then be used, for example, to predict cluster membership of new data.
 
-cldist <- fam@dist(data[1L:20L],
-                   centroids[tadp$cl],
-                   pairwise = TRUE)
-cldist <- as.matrix(cldist)
-size <- as.vector(table(tadp$cl))
-clusinfo <- data.frame(size = size, av_dist = 0)
-clusinfo[clusinfo$size > 0L, "av_dist"] <-
-    as.vector(tapply(cldist[ , 1L], tadp$cl, mean))
+<<example-manual-kshape, echo = TRUE>>=
+ks_obj <- create_dtwclust(type = "partitional",
+                          datalist = zscore(CharTraj)[-100L],
+                          centroids = zscore(CharTraj[seq(1L, 100L, 5L)]),
+                          cluster = unclass(CharTrajLabels)[-100L],
+                          distance = "sbd",
+                          centroid = "shape")
 
-res <- new("dtwclust",
-           control = ctrl,
-           family = fam,
-           distmat = NULL,
-           type = "tadpole",
-           distance = "DTW2_LB",
-           centroid = "PAM_TADPole",
-           preproc = "none",
-           centroids = centroids,
-           k = 4L,
-           cluster = tadp$cl,
-           fcluster = matrix(NA_real_),
-           clusinfo = clusinfo,
-           cldist = cldist,
-           iter = 1L,
-           converged = TRUE,
-           datalist = data[1L:20L])
-
-cbind(cvi(res, CharTrajLabels[1L:20L]))
+## Preprocessing is performed by ks_obj@family@preproc
+predict(ks_obj, newdata = CharTraj[100L])
 @
 
 \end{document}

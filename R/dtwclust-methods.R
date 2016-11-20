@@ -21,16 +21,15 @@
 NULL
 
 # ========================================================================================================
-# Custom initialize to avoid infinite recursion
-# See https://bugs.r-project.org/bugzilla/show_bug.cgi?id=16629
+# Custom initialize
 # ========================================================================================================
 
+## to avoid infinite recursion (see https://bugs.r-project.org/bugzilla/show_bug.cgi?id=16629)
 setMethod("initialize", "dtwclust",
           function(.Object, ..., call) {
               .Object <- methods::callNextMethod(.Object = .Object, ...)
 
-              if (!missing(call))
-                  .Object@call <- call
+              if (!missing(call)) .Object@call <- call
 
               .Object
           })
