@@ -51,13 +51,15 @@ create_dtwclust <- function(..., override.family = TRUE) {
     tic <- proc.time()
 
     dots <- list(...)
+
+    ## even if it's NULL, it'll be converted correctly
     dots$control <- as(dots$control, "dtwclustControl")
 
+    ## some minor checks
     if (!is.null(dots$datalist)) dots$datalist <- any2list(dots$datalist)
     if (!is.null(dots$centroids)) dots$centroids <- any2list(dots$centroids)
     if (!is.null(dots$type)) dots$type <- match.arg(dots$type, c("partitional", "hierarchical",
                                                                  "fuzzy", "tadpole"))
-
     ## avoid infinite recursion
     if (is.null(dots$call)) {
         call <- match.call()
@@ -70,11 +72,13 @@ create_dtwclust <- function(..., override.family = TRUE) {
     .Object <- do.call(methods::new, enlist(Class = "dtwclust", dots = dots))
     .Object@call <- call
 
+    ## some "defaults"
     if (is.null(dots$preproc)) .Object@preproc <- "none"
     if (is.null(dots$iter)) .Object@iter <- 1L
     if (is.null(dots$converged)) .Object@converged <- TRUE
     if (is.null(dots$k)) .Object@k <- length(.Object@centroids)
 
+    ## more helpful for hierarchical/tadpole
     if (override.family) {
         if (length(.Object@type) == 0L)
             warning("Could not override family, 'type' slot is missing.")
@@ -93,10 +97,10 @@ create_dtwclust <- function(..., override.family = TRUE) {
                 allcent <- .Object@family@allcent
             else if (.Object@type == "hierarchical" && length(centroids))
                 allcent <- function(dummy) {
-                    datalist[which.min(apply(.Object@distmat, 1L, sum))]
+                    datalist[which.min(apply(.Object@distmat, 1L, sum))] # for CVI's global_cent
                 }
             else if (.Object@type == "tadpole" && length(centroids))
-                allcent <- function(dummy) { centroids[1L] }
+                allcent <- function(dummy) { centroids[1L] } # for CVI's global_cent
             else
                 allcent <- .Object@family@allcent
 
@@ -118,6 +122,7 @@ create_dtwclust <- function(..., override.family = TRUE) {
     }
 
     if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
+        ## no cldist available, but dist and cluster can be used to calculate it
         dm <- do.call(.Object@family@dist,
                       enlist(.Object@datalist,
                              .Object@centroids,
@@ -129,6 +134,7 @@ create_dtwclust <- function(..., override.family = TRUE) {
     }
 
     if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
+        ## no clusinfo available, but cluster and cldist can be used to calculate it
         size <- as.vector(table(.Object@cluster))
         clusinfo <- data.frame(size = size, av_dist = 0)
         clusinfo[clusinfo$size > 0L, "av_dist"] <-
@@ -138,6 +144,7 @@ create_dtwclust <- function(..., override.family = TRUE) {
     }
 
     if (.Object@type == "fuzzy" && !nrow(.Object@fcluster) && length(formals(.Object@family@dist))) {
+        ## no fcluster available, but dist and cluster function can be used to calculate it
         dm <- do.call(.Object@family@dist,
                       enlist(.Object@datalist,
                              .Object@centroids,
@@ -146,9 +153,12 @@ create_dtwclust <- function(..., override.family = TRUE) {
         .Object@fcluster <- .Object@family@cluster(dm, m = .Object@control@fuzziness)
     }
 
+    ## default for when it doesn't apply
     if (.Object@type != "fuzzy") .Object@fcluster <- matrix(NA_real_)
 
+    ## just a filler
     if (!length(.Object@proctime)) .Object@proctime <- proc.time() - tic
 
+    ## return
     .Object
 }

@@ -617,29 +617,29 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
         ## Create objects
         RET <- lapply(pc.list, function(pc) {
-            new("dtwclust",
-                call = MYCALL,
-                control = control,
-                family = family,
-                distmat = distmat,
+            create_dtwclust(call = MYCALL,
+                            control = control,
+                            family = family,
+                            distmat = distmat,
 
-                type = type,
-                method = "NA",
-                distance = distance,
-                centroid = cent_char,
-                preproc = preproc_char,
+                            type = type,
+                            method = "NA",
+                            distance = distance,
+                            centroid = cent_char,
+                            preproc = preproc_char,
 
-                centroids = pc$centroids,
-                k = pc$k,
-                cluster = pc$cluster,
-                fcluster = pc$fcluster,
+                            centroids = pc$centroids,
+                            k = pc$k,
+                            cluster = pc$cluster,
+                            fcluster = pc$fcluster,
+                            iter = pc$iter,
+                            converged = pc$converged,
+                            cldist = pc$cldist,
+                            clusinfo = pc$clusinfo,
 
-                clusinfo = pc$clusinfo,
-                cldist = pc$cldist,
-                iter = pc$iter,
-                converged = pc$converged,
-
-                datalist = datalist)
+                            datalist = datalist,
+                            dots = dots,
+                            override.family = FALSE)
         })
 
         if (class(RET) != "dtwclust" && length(RET) == 1L) RET <- RET[[1L]]
@@ -732,17 +732,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                     centroids <- lapply(1L:k, function(kcent) { centroid(data[cluster == kcent]) })
 
-                    cldist <- do.call(distfun,
-                                      enlist(x = data,
-                                             centroids = centroids[cluster],
-                                             pairwise = TRUE,
-                                             dots = dots))
-
-                    cldist <- as.matrix(cldist)
-                    dimnames(cldist) <- NULL
-
                 } else {
-                    allcent <- function(dummy) { data[which.min(apply(distmat, 1L, sum))] }
+                    allcent <- function() {}
 
                     centroids <- sapply(1L:k, function(kcent) {
                         id_k <- cluster == kcent
@@ -754,42 +745,31 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                         which(id_k)[id_centroid]
                     })
 
-                    cldist <- as.matrix(distmat[ , centroids][cbind(1L:length(data), cluster)])
-                    dimnames(cldist) <- NULL
                     centroids <- data[centroids]
                 }
 
-                ## Some additional cluster information (taken from flexclust)
-                size <- as.vector(table(cluster))
-                clusinfo <- data.frame(size = size, av_dist = 0)
-                clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(cldist[ , 1L], cluster, mean))
+                create_dtwclust(stats::as.hclust(hc),
+                                call = MYCALL,
+                                control = control,
+                                family = new("dtwclustFamily",
+                                             dist = distfun,
+                                             allcent = allcent,
+                                             preproc = preproc),
+                                distmat = distmat,
 
-                new("dtwclust", stats::as.hclust(hc),
-                    call = MYCALL,
-                    control = control,
-                    family = new("dtwclustFamily",
-                                 dist = distfun,
-                                 allcent = allcent,
-                                 preproc = preproc),
-                    distmat = distmat,
+                                type = type,
+                                method = if (!is.null(hc$method)) hc$method else method,
+                                distance = distance,
+                                centroid = as.character(substitute(centroid))[1L],
+                                preproc = preproc_char,
 
-                    type = type,
-                    method = if (!is.null(hc$method)) hc$method else method,
-                    distance = distance,
-                    centroid = as.character(substitute(centroid))[1L],
-                    preproc = preproc_char,
+                                centroids = centroids,
+                                k = as.integer(k),
+                                cluster = cluster,
 
-                    centroids = centroids,
-                    k = as.integer(k),
-                    cluster = cluster,
-                    fcluster = matrix(NA_real_),
-
-                    clusinfo = clusinfo,
-                    cldist = cldist,
-                    iter = 1L,
-                    converged = TRUE,
-
-                    datalist = datalist)
+                                datalist = datalist,
+                                dots = dots,
+                                override.family = !is.function(centroid))
             })
         })
 
@@ -850,49 +830,33 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                 centroids <- lapply(1L:k, function(kcent) { centroid(data[R$cl == kcent]) })
 
             } else {
-                ## this is important for cvi function
-                allcent <- function(dummy) { data[R$centroids[1L]] }
+                allcent <- function() {}
                 centroids <- data[R$centroids]
             }
 
-            ## Some additional cluster information (taken from flexclust)
-            cldist <- do.call(distfun,
-                              enlist(x = data,
-                                     centroids = centroids[R$cl],
-                                     pairwise = TRUE,
-                                     dots = dots))
+            obj <- create_dtwclust(call = MYCALL,
+                                   control = control,
+                                   family = new("dtwclustFamily",
+                                                dist = distfun,
+                                                allcent = allcent,
+                                                preproc = preproc),
+                                   distmat = NULL,
 
-            cldist <- as.matrix(cldist)
-            dimnames(cldist) <- NULL
-            size <- as.vector(table(R$cl))
-            clusinfo <- data.frame(size = size, av_dist = 0)
-            clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(cldist[ , 1L], R$cl, mean))
+                                   type = type,
+                                   distance = "dtw_lb",
+                                   centroid = cent_char,
+                                   preproc = preproc_char,
 
-            new("dtwclust",
-                call = MYCALL,
-                control = control,
-                family = new("dtwclustFamily",
-                             dist = distfun,
-                             allcent = allcent,
-                             preproc = preproc),
-                distmat = NULL,
+                                   centroids = centroids,
+                                   k = as.integer(k),
+                                   cluster = as.integer(R$cl),
 
-                type = type,
-                distance = "LB_Keogh+DTW2",
-                centroid = cent_char,
-                preproc = preproc_char,
+                                   datalist = datalist,
+                                   dots = dots,
+                                   override.family = !is.function(centroid))
 
-                centroids = centroids,
-                k = as.integer(k),
-                cluster = as.integer(R$cl),
-                fcluster = matrix(NA_real_),
-
-                clusinfo = clusinfo,
-                cldist = cldist,
-                iter = 1L,
-                converged = TRUE,
-
-                datalist = datalist)
+            obj@distance <- "LB_Keogh+DTW2"
+            obj
         }
     }
 
@@ -904,12 +868,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     if (class(RET) == "dtwclust") {
         RET@proctime <- toc
-        RET@dots <- dots
 
     } else {
         RET <- lapply(RET, function(ret) {
             ret@proctime <- toc
-            ret@dots <- dots
 
             ret
         })
