@@ -117,12 +117,13 @@ create_dtwclust <- function(..., override.family = TRUE) {
         }
     }
 
-    if (!nrow(.Object@cldist) && length(formals(.Object@family@dist))) {
-        .Object@cldist <- as.matrix(do.call(.Object@family@dist,
-                                            enlist(.Object@datalist,
-                                                   .Object@centroids[.Object@cluster],
-                                                   pairwise = TRUE,
-                                                   dots = .Object@dots)))
+    if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
+        dm <- do.call(.Object@family@dist,
+                      enlist(.Object@datalist,
+                             .Object@centroids,
+                             dots = .Object@dots))
+
+        .Object@cldist <- as.matrix(dm[cbind(1L:length(.Object@datalist), .Object@cluster)])
 
         dimnames(.Object@cldist) <- NULL
     }
