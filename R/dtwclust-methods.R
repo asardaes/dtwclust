@@ -62,8 +62,10 @@ setMethod("initialize", "dtwclustFamily",
                                                distfun = dots$dist,
                                                control = control,
                                                fuzzy = fuzzy)
-                  else
+                  else if (is.function(allcent))
                       dots$allcent <- allcent
+                  else
+                      stop("Centroid definition must be either a function or a character")
               }
 
               do.call(callNextMethod, dots)

@@ -393,7 +393,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         stop("Invalid control argument")
 
     } else {
-        validObject(control)
+        methods::validObject(control)
     }
 
     dots <- list(...)
@@ -466,11 +466,17 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         ## Partitional or fuzzy
         ## =================================================================================================================
 
+        ## replace any given distmat if centroid != "pam"
         if (is.character(centroid)) {
             if (type == "fuzzy")
                 centroid <- "fcm"
             else
                 centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
+
+            if (centroid != "pam") distmat <- NULL
+
+        } else {
+            distmat <- NULL
         }
 
         if (diff_lengths) {
@@ -481,22 +487,32 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         }
 
         ## ----------------------------------------------------------------------------------------------------------
-        ## Distance function
+        ## Family creation, see initialization in dtwclust-methods.R
         ## ----------------------------------------------------------------------------------------------------------
 
-        # ddist.R
-        distfun <- ddist(distance = distance,
-                         control = control,
-                         distmat = distmat)
+        family <- new("dtwclustFamily",
+                      dist = distance,
+                      allcent = centroid,
+                      preproc = preproc,
+                      distmat = distmat,
+                      control = control,
+                      fuzzy = isTRUE(type == "fuzzy"))
+
+        if (!all(c("x", "cl_id", "k", "cent", "cl_old") %in% names(formals(family@allcent))))
+            stop("The provided centroid function must have at least the following arguments with ",
+                 "the shown names:\n\t",
+                 paste(c("x", "cl_id", "k", "cent", "cl_old"), collapse = ", "))
+
+        cent_char <- as.character(substitute(centroid))[1L]
 
         ## ----------------------------------------------------------------------------------------------------------
         ## PAM precompute?
         ## ----------------------------------------------------------------------------------------------------------
 
         ## for a check near the end, changed if appropriate
-        pam_precompute <- FALSE
+        distmat_provided <- FALSE
 
-        # precompute distance matrix?
+        ## precompute distance matrix?
         if (is.character(centroid) && centroid == "pam") {
             ## check if distmat was not provided and should be precomputed
             if (!is.null(distmat)) {
@@ -504,7 +520,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     stop("Dimensions of provided cross-distance matrix don't correspond to length of provided data")
 
                 ## distmat was provided in call
-                pam_precompute <- TRUE
+                distmat_provided <- TRUE
 
                 if (control@trace) cat("\n\tDistance matrix provided...\n\n")
 
@@ -514,46 +530,15 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                 if (control@trace) cat("\n\tPrecomputing distance matrix...\n\n")
 
-                distmat <- do.call(distfun, enlist(x = data, centroids = NULL, dots = dots))
+                distmat <- do.call(family@dist, enlist(x = data, centroids = NULL, dots = dots))
 
                 ## Redefine new distmat
-                assign("distmat", distmat, envir = environment(distfun))
+                assign("distmat", distmat, environment(family@dist))
+                assign("distmat", distmat, environment(family@allcent))
 
                 gc(FALSE)
             }
-
-        } else {
-            # replace any given distmat if centroid != "pam"
-            distmat <- NULL
         }
-
-        ## ----------------------------------------------------------------------------------------------------------
-        ## Centroid function
-        ## ----------------------------------------------------------------------------------------------------------
-
-        ## Closure, all-cent.R
-        allcent <- all_cent(case = centroid,
-                            distmat = distmat,
-                            distfun = distfun,
-                            control = control,
-                            fuzzy = isTRUE(type == "fuzzy"))
-
-        centroid <- as.character(substitute(centroid))[[1L]]
-
-        ## ----------------------------------------------------------------------------------------------------------
-        ## Further options
-        ## ----------------------------------------------------------------------------------------------------------
-
-        family <- new("dtwclustFamily",
-                      dist = distfun,
-                      allcent = allcent,
-                      preproc = preproc)
-
-        if (type == "fuzzy")
-            family@cluster <- fcm_cluster # fuzzy.R
-
-        if ((foreach::getDoParName() != "doSEQ") && control@trace && (control@nrep > 1L || length(k) > 1L))
-            message("Tracing of repetitions might not be available if done in parallel.\n")
 
         ## ----------------------------------------------------------------------------------------------------------
         ## Cluster
@@ -563,7 +548,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             rngtools::setRNG(rngtools::RNGseq(1L, seed = seed, simplify = TRUE))
 
             ## Just one repetition
-            kc.list <- list(do.call(kcca.list,
+            pc.list <- list(do.call(kcca.list,
                                     enlist(x = data,
                                            k = k,
                                            family = family,
@@ -572,33 +557,36 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                            dots = dots)))
 
         } else {
+            if ((foreach::getDoParName() != "doSEQ") && control@trace)
+                message("Tracing of repetitions might not be available if done in parallel.\n")
+
             ## I need to re-register any custom distances in each parallel worker
             dist_entry <- proxy::pr_DB$get_entry(distance)
 
             export <- c("kcca.list", "check_consistency", "enlist")
 
             rng <- rngtools::RNGseq(length(k) * control@nrep, seed = seed, simplify = FALSE)
-            rng <- lapply(parallel::splitIndices(length(rng), length(k)), function(i) rng[i])
+            rng0 <- lapply(parallel::splitIndices(length(rng), length(k)), function(i) rng[i])
 
+            ## if %do% is used, the outer loop replaces value of k in this envir
+            k0 <- k
             comb0 <- if (control@nrep > 1L) c else list
 
-            k0 <- k
-            rng0 <- rng
-            i <- integer() # CHECK complains now
+            i <- integer() # CHECK complains about non-initialization now
 
-            kc.list <- foreach(k = k0, rng = rng0, .combine = comb0, .multicombine = TRUE,
+            pc.list <- foreach(k = k0, rng = rng0, .combine = comb0, .multicombine = TRUE,
                                .packages = control@packages, .export = export) %:%
                 foreach(i = 1L:control@nrep, .combine = list, .multicombine = TRUE,
-                        .packages = control@packages, .export = export) %op% {
-                            if (control@trace)
-                                message("Repetition ", i, " for k = ", k)
+                        .packages = control@packages, .export = export) %op%
+                        {
+                            if (control@trace) message("Repetition ", i, " for k = ", k)
 
                             rngtools::setRNG(rng[[i]])
 
                             if (!check_consistency(dist_entry$names[1], "dist"))
                                 do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                            kc <- do.call(kcca.list,
+                            pc <- do.call(kcca.list,
                                           enlist(x = data,
                                                  k = k,
                                                  family = family,
@@ -608,7 +596,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                             gc(FALSE)
 
-                            kc
+                            pc
                         }
         }
 
@@ -620,7 +608,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         assign("distmat", NULL, envir = environment(family@dist))
 
         ## If distmat was provided, let it be shown in the results
-        if (pam_precompute) {
+        if (distmat_provided) {
             if (is.null(attr(distmat, "method")))
                 distance <- "unknown"
             else
@@ -628,7 +616,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         }
 
         ## Create objects
-        RET <- lapply(kc.list, function(kc) {
+        RET <- lapply(pc.list, function(pc) {
             new("dtwclust",
                 call = MYCALL,
                 control = control,
@@ -638,23 +626,23 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                 type = type,
                 method = "NA",
                 distance = distance,
-                centroid = centroid,
+                centroid = cent_char,
                 preproc = preproc_char,
 
-                centroids = kc$centroids,
-                k = kc$k,
-                cluster = kc$cluster,
-                fcluster = kc$fcluster,
+                centroids = pc$centroids,
+                k = pc$k,
+                cluster = pc$cluster,
+                fcluster = pc$fcluster,
 
-                clusinfo = kc$clusinfo,
-                cldist = kc$cldist,
-                iter = kc$iter,
-                converged = kc$converged,
+                clusinfo = pc$clusinfo,
+                cldist = pc$cldist,
+                iter = pc$iter,
+                converged = pc$converged,
 
                 datalist = datalist)
         })
 
-        if (length(RET) == 1L) RET <- RET[[1L]]
+        if (class(RET) != "dtwclust" && length(RET) == 1L) RET <- RET[[1L]]
 
     } else if (type == "hierarchical") {
 
@@ -788,7 +776,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     type = type,
                     method = if (!is.null(hc$method)) hc$method else method,
                     distance = distance,
-                    centroid = as.character(substitute(centroid)),
+                    centroid = as.character(substitute(centroid))[1L],
                     preproc = preproc_char,
 
                     centroids = centroids,
@@ -807,7 +795,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
         RET <- unlist(RET, recursive = FALSE)
 
-        if (length(RET) == 1L) RET <- RET[[1L]]
+        if (class(RET) != "dtwclust" && length(RET) == 1L) RET <- RET[[1L]]
 
     } else if (type == "tadpole") {
 
@@ -837,9 +825,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             warning("The 'centroid' argument was provided but it wasn't a function, so it was ignored.")
 
         if (is.function(centroid))
-            centchar <- as.character(substitute(centroid))
+            cent_char <- as.character(substitute(centroid))
         else
-            centchar <- "PAM (TADPole)"
+            cent_char <- "PAM (TADPole)"
 
         lb <- if (is.null(dots$lb)) "lbk" else dots$lb
 
@@ -891,7 +879,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                 type = type,
                 distance = "LB_Keogh+DTW2",
-                centroid = centchar,
+                centroid = cent_char,
                 preproc = preproc_char,
 
                 centroids = centroids,

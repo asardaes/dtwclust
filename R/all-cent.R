@@ -2,18 +2,7 @@
 # Custom functions to calculate centroids
 # ========================================================================================================
 
-all_cent <- function(case = NULL, distmat, distfun, control, fuzzy = FALSE) {
-    if (is.function(case)) {
-        if (!all(c("x", "cl_id", "k", "cent", "cl_old") %in% names(formals(case))))
-            stop("The provided centroid function must have at least the following arguments with ",
-                 "the shown names:\n\t",
-                 paste(c("x", "cl_id", "k", "cent", "cl_old"), collapse = ", "))
-
-        return(case)
-
-    } else if (!is.character(case))
-        stop("Centroid definition must be either a function or a character")
-
+all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALSE) {
     pam_cent <- function(x, x_split, cl_id, id_changed, ...) {
         if (is.null(distmat)) {
             new_cent <- lapply(x_split, function(xsub) {
