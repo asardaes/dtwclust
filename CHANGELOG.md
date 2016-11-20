@@ -5,14 +5,15 @@
 * Removed deprecated arguments/slots.
     + If you have older `dtwclust` objects saved, try updating them with `attr(dtwclust_object, "centers") <- NULL` if you run into compatibility problems.
     + `DBA` arguments changed order.
-* Fixed detection of some symmetric DTW cases.
+* Removed the `dba.alignment` argument from `DBA` since other `step.pattern`s don't really work.
 * Added (conditional) support for more hierarchical procedures. See the examples and vignette.
-* Added support for functions in package `clue`.
 * Added a new distance based on global alignment kernels: `GAK`.
-* Updated vignette.
+* Added support for functions in package `clue`.
+* Fixed detection of some symmetric DTW cases.
 * No longer enforcing preprocessing/centroid functions with ellipsis in their formals.
 * Added a multivariate dataset sample: `CharTrajMV`.
 * Improved plots for clusterings with multivariate series.
+* Updated vignette.
 
 ## Version 2.3.0
 * Correction: DTW can be symmetric for series of both equal/different length, although in general this is not necessarily the case, due to asymmetric step patterns or constrained paths.

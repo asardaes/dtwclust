@@ -10,8 +10,7 @@
 #' @param centroid Optionally, a time series to use as reference. Defaults to a random series of
 #'   \code{X} if \code{NULL}. For multivariate series, this should be a matrix with the same
 #'   characteristics as the matrices in \code{X}.
-#' @param ... Further arguments for \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}, e.g.
-#'   \code{step.pattern}.
+#' @param ... Currently ignored.
 #' @param window.size Window constraint for the DTW calculations. \code{NULL} means no constraint. A
 #'   slanted band is used by default.
 #' @param norm Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for
@@ -21,8 +20,6 @@
 #'   \code{ < delta)}, convergence is assumed.
 #' @param error.check Should inconsistencies in the data be checked?
 #' @param trace If \code{TRUE}, the current iteration is printed to screen.
-#' @param dba.alignment Character indicating which function to use for calculating alignments,
-#'   either \code{\link[dtw]{dtw}} or \code{\link{dtw_basic}}. The latter should be faster.
 #'
 #' @details
 #'
@@ -97,11 +94,8 @@
 DBA <- function(X, centroid = NULL, ...,
                 window.size = NULL, norm = "L1",
                 max.iter = 20L, delta = 1e-3,
-                error.check = TRUE, trace = FALSE,
-                dba.alignment = "dtw_basic")
+                error.check = TRUE, trace = FALSE)
 {
-    dba.alignment <- match.arg(dba.alignment, c("dtw", "dtw_basic"))
-
     X <- any2list(X)
 
     if (is.null(centroid))
@@ -133,15 +127,13 @@ DBA <- function(X, centroid = NULL, ...,
 
         new_c <- mapply(mv$series, mv$cent, SIMPLIFY = FALSE,
                         FUN = function(xx, cc) {
-                            DBA(xx, cc,
+                            DBA(xx, cc, ...,
                                 norm = norm,
                                 window.size = window.size,
                                 max.iter = max.iter,
                                 delta = delta,
                                 error.check = FALSE,
-                                trace = trace,
-                                dba.alignment = dba.alignment,
-                                ...)
+                                trace = trace)
                         })
 
         return(do.call(cbind, new_c))
@@ -153,14 +145,8 @@ DBA <- function(X, centroid = NULL, ...,
     Xs <- split_parallel(X)
 
     ## pre-allocate local cost matrices
-    if (dba.alignment == "dtw") {
-        LCM <- lapply(X, function(x) { matrix(0, length(x), length(centroid)) })
-        LCMs <- split_parallel(LCM)
-
-    } else {
-        LCMs <- lapply(1L:length(Xs),
-                       function(dummy) { list(matrix(0, L + 1L, length(centroid) + 1L)) })
-    }
+    GCM <- NULL # for CHECK
+    GCMs <- lapply(Xs, function(dummy) { list(matrix(0, L + 1L, length(centroid) + 1L)) })
 
     ## Iterations
     iter <- 1L
@@ -171,27 +157,17 @@ DBA <- function(X, centroid = NULL, ...,
     while(iter <= max.iter) {
         ## Return the coordinates of each series in X grouped by the coordinate they match to in the centroid time series
         ## Also return the number of coordinates used in each case (for averaging below)
-        xg <- foreach(X = Xs, LCM = LCMs,
+        xg <- foreach(X = Xs, GCM = GCMs,
                       .combine = c,
                       .multicombine = TRUE,
                       .export = "enlist",
                       .packages = c("dtwclust", "stats")) %op% {
-                          mapply(X, LCM, SIMPLIFY = FALSE, FUN = function(x, lcm) {
-                              if (dba.alignment == "dtw") {
-                                  .Call("update_lcm", lcm, x, centroid,
-                                        isTRUE(norm == "L2"), PACKAGE = "dtwclust")
-
-                                  d <- do.call(dtw::dtw, enlist(x = lcm,
-                                                                y = NULL,
-                                                                window.size = window.size,
-                                                                dots = dots))
-
-                              } else {
-                                  d <- do.call(dtw_basic, enlist(x = x, y = centroid,
-                                                                 window.size = window.size, norm = norm,
-                                                                 backtrack = TRUE, gcm = lcm,
-                                                                 dots = dots))
-                              }
+                          mapply(X, GCM, SIMPLIFY = FALSE, FUN = function(x, gcm) {
+                              d <- do.call(dtw_basic,
+                                           enlist(x = x, y = centroid,
+                                                  window.size = window.size, norm = norm,
+                                                  backtrack = TRUE, gcm = gcm,
+                                                  dots = dots))
 
                               x.sub <- stats::aggregate(x[d$index1],
                                                         by = list(ind = d$index2),

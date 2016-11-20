@@ -208,7 +208,9 @@ test_that("Operations with pam centroid give same results as references.", {
 # =================================================================================================
 
 test_that("Operations with dba centroid give same results as references.", {
-    ## ---------------------------------------------------------- univariate with dtw_basic
+    skip_on_cran()
+
+    ## ---------------------------------------------------------- univariate
     family <- new("dtwclustFamily",
                   control = ctrl,
                   allcent = "dba")
@@ -221,47 +223,23 @@ test_that("Operations with dba centroid give same results as references.", {
 
     expect_identical(length(cent_dba), k)
 
-    ## ---------------------------------------------------------- univariate with dtw
-    cent_dba_dtw <- family@allcent(x,
+    ## ---------------------------------------------------------- multivariate
+    ctrl@norm <- "L2"
+    family2 <- new("dtwclustFamily",
+                   control = ctrl,
+                   allcent = "dba")
+
+    cent_mv_dba <- family2@allcent(data_multivariate,
                                    cl_id = cl_id,
                                    k = k,
-                                   cent = x[c(1L,20L)],
-                                   cl_old = 0L,
-                                   dba.alignment = "dtw")
-
-    expect_identical(cent_dba, cent_dba_dtw)
-
-    ## ---------------------------------------------------------- multivariate with dtw_basic
-    ctrl@norm <- "L2"
-    family <- new("dtwclustFamily",
-                  control = ctrl,
-                  allcent = "dba")
-
-    cent_mv_dba <- family@allcent(data_multivariate,
-                                  cl_id = cl_id,
-                                  k = k,
-                                  cent = data_multivariate[c(1L,20L)],
-                                  cl_old = 0L)
+                                   cent = data_multivariate[c(1L,20L)],
+                                   cl_old = 0L)
 
     expect_identical(length(cent_mv_dba), k)
 
     expect_identical(dim(cent_mv_dba[[1L]]), dim(data_multivariate[[1L]]))
 
-    ## ---------------------------------------------------------- multivariate with dtw
-    cent_mv_dba_dtw <- family@allcent(data_multivariate,
-                                      cl_id = cl_id,
-                                      k = k,
-                                      cent = data_multivariate[c(1L,20L)],
-                                      cl_old = 0L,
-                                      dba.alignment = "dtw")
-
-    ## different results with 32-bits -.-
-    if (.Machine$sizeof.pointer == 8L)
-        expect_identical(cent_mv_dba, cent_mv_dba_dtw)
-
     ## ---------------------------------------------------------- refs
-    skip_on_cran()
-
     expect_equal_to_reference(cent_dba, file_name(cent_dba, x32 = TRUE), info = "Univariate")
     expect_equal_to_reference(cent_mv_dba, file_name(cent_mv_dba, x32 = TRUE), info = "Multivariate")
 })
