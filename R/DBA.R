@@ -106,20 +106,6 @@ DBA <- function(X, centroid = NULL, ...,
         check_consistency(centroid, "ts")
     }
 
-    norm <- match.arg(norm, c("L1", "L2"))
-
-    dots <- list(...)
-
-    if (!is.null(window.size)) {
-        window.size <- check_consistency(window.size, "window")
-
-        if (is.null(dots$window.type))
-            dots$window.type <- "slantedband"
-
-    } else {
-        window.size <- NULL
-    }
-
     ## utils.R
     if (is_multivariate(X)) {
         ## multivariate
@@ -138,6 +124,13 @@ DBA <- function(X, centroid = NULL, ...,
 
         return(do.call(cbind, new_c))
     }
+
+    norm <- match.arg(norm, c("L1", "L2"))
+
+    if (!is.null(window.size))
+        window.size <- check_consistency(window.size, "window")
+
+    dots <- list(...)
 
     ## maximum length of considered series
     L <- max(lengths(X))
@@ -190,9 +183,8 @@ DBA <- function(X, centroid = NULL, ...,
         ## Average
         centroid <- xg$x[xg$Group.2 == "sum"] / xg$x[xg$Group.2 == "n"]
 
-        if (all(abs(centroid - centroid_old) < delta)) {
-            if (trace)
-                cat("", iter ,"- Converged!\n")
+        if (isTRUE(all.equal(abs(centroid), abs(centroid_old), tolerance = delta))) {
+            if (trace) cat("", iter ,"- Converged!\n")
 
             break
 
