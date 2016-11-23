@@ -181,10 +181,8 @@ parallel_dtwclust <- allow_parallel()
             ret <- eval.parent(substitute(obj %do% ex))
 
     }, warning = function(w) {
-        if (!grepl("package:dtwclust.*available", w$message, ignore.case = TRUE))
-            warning(w)
-
-        invokeRestart("muffleWarning")
+        if (grepl("package:dtwclust", w$message, ignore.case = TRUE))
+            invokeRestart("muffleWarning")
     })
 
     ret
