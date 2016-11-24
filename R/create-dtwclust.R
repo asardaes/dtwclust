@@ -154,6 +154,7 @@ create_dtwclust <- function(..., override.family = TRUE) {
                              dots = .Object@dots))
 
         .Object@fcluster <- .Object@family@cluster(dm, m = .Object@control@fuzziness)
+        colnames(.Object@fcluster) <- paste0("cluster_", 1:.Object@k)
     }
 
     ## default for when it doesn't apply
