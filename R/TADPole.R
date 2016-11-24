@@ -166,7 +166,6 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
                       .combine = c,
                       .multicombine = TRUE,
                       .packages = "dtwclust",
-                      .export = "symmetric1",
                       .noexport = exclude) %op% {
                           proxy::dist(x[ind1[ , 1L]], x[ind1[ , 2L]],
                                       method = "dtw_basic",
@@ -237,7 +236,6 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     DNN <- foreach(i = i,
                    .combine = rbind,
                    .multicombine = TRUE,
-                   .export = "symmetric1",
                    .packages = "dtwclust") %op% {
                        t(sapply(i, function (i) {
                            ## Index of higher density neighbors
