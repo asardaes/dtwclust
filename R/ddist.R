@@ -2,7 +2,7 @@
 # Return a custom distance function that calls registered functions of proxy
 # ========================================================================================================
 
-ddist <- function(distance, control, distmat) {
+ddist <- function(distance, control = new("dtwclustControl"), distmat = NULL) {
     needs_window <- c("dtw_lb", "lbk", "lbi")
 
     if (distance %in% needs_window)
@@ -13,8 +13,7 @@ ddist <- function(distance, control, distmat) {
     else
         window.type <- "slantedband"
 
-    ## Closures will capture the values of the constants
-
+    ## Closures capture the values of the objects from the environment where they're created
     distfun <- function(x, centroids = NULL, ...) {
         if (!is.null(distmat)) {
             if (is.null(centroids)) {
@@ -24,26 +23,27 @@ ddist <- function(distance, control, distmat) {
                 ## distmat matrix already calculated, just subset it
                 id_XC <- attr(centroids, "id_cent")
 
-                if (is.null(id_XC) || any(is.na(id_XC)))
-                    id_XC <- sapply(centroids, FUN = function(i.c) {
-                        i.row <- sapply(x, function(i.x) {
-                            if (length(i.x) == length(i.c))
-                                ret <- all(i.x == i.c)
-                            else
-                                ret <- FALSE
-
-                            ret
-                        })
-
-                        ## Take the first one in case a series is repeated more than once in the dataset
-                        which(i.row)[1L]
-                    })
+                ## in case I messed up something when assigning id_cent
+                # if (is.null(id_XC) || any(is.na(id_XC)))
+                #     id_XC <- sapply(centroids, FUN = function(i.c) {
+                #         i.row <- sapply(x, function(i.x) {
+                #             if (length(i.x) == length(i.c))
+                #                 ret <- all(i.x == i.c)
+                #             else
+                #                 ret <- FALSE
+                #
+                #             ret
+                #         })
+                #
+                #         ## Take the first one in case a series is repeated in the dataset
+                #         which(i.row)[1L]
+                #     })
 
                 d <- distmat[ , id_XC, drop = FALSE]
             }
 
         } else {
-            ## distmat not available
+            ## distmat not available, calculate it
             ## Extra distance parameters in case of parallel computation
             ## They can be for the function or for proxy::dist
             dots <- list(...)
@@ -81,6 +81,7 @@ ddist <- function(distance, control, distmat) {
                 if (dist_entry$loop) {
                     ## WHOLE SYMMETRIC DISTMAT WITH proxy LOOP
                     ## Only half of it is computed
+                    ## I think proxy can do this if y = NULL, but not in parallel
 
                     ## strict pairwise as in proxy::dist doesn't make sense here, but this case needs it
                     dots$pairwise <- TRUE
