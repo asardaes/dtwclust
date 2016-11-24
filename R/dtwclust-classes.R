@@ -72,8 +72,8 @@ methods::setClassUnion("intORnull", c("integer", "NULL"))
 #'
 #' Default values are shown at the end.
 #'
-#' @slot window.size Integer or \code{NULL}. Window constraint for DTW, DBA and LB calculations.
-#'   \code{NULL} means no constraint.
+#' @slot window.size Integer or \code{NULL}. Window constraint for GAK, DTW, DBA and LB
+#'   calculations. \code{NULL} means no constraint.
 #' @slot norm Character. Pointwise distance for DTW, DBA and the LBs. Either \code{"L1"} for
 #'   Manhattan distance or \code{"L2"} for Euclidean. Ignored for \code{distance = "DTW2"} (which
 #'   always uses \code{"L2"}).

@@ -14,8 +14,8 @@ Default values are shown at the end.
 \section{Slots}{
 
 \describe{
-\item{\code{window.size}}{Integer or \code{NULL}. Window constraint for DTW, DBA and LB calculations.
-\code{NULL} means no constraint.}
+\item{\code{window.size}}{Integer or \code{NULL}. Window constraint for GAK, DTW, DBA and LB
+calculations. \code{NULL} means no constraint.}
 
 \item{\code{norm}}{Character. Pointwise distance for DTW, DBA and the LBs. Either \code{"L1"} for
 Manhattan distance or \code{"L2"} for Euclidean. Ignored for \code{distance = "DTW2"} (which
