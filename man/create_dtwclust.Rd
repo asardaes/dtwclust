@@ -19,7 +19,8 @@ A \code{\link{dtwclust-class}} object.
 Helper function to manually create formal \code{\link{dtwclust-class}} objects
 }
 \details{
-In order to get a fully functional object at least the following slots should be provided:
+This function can calculate some of the slots if certain elements are provided by the user. In
+order to get a fully functional object at least the following slots should be provided:
 
 \itemize{
   \item \code{type}: "partitional", "hierarchical", "fuzzy" or "tadpole".
@@ -53,6 +54,8 @@ pc_obj <- create_dtwclust(type = "p", datalist = CharTraj, centroids = centroids
 fc_obj <- create_dtwclust(type = "f", datalist = CharTraj, centroids = centroids,
                           control = control, cluster = cluster,
                           distance = "sbd", centroid = "fcm")
+
+fc_obj
 
 }
 
