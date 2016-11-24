@@ -11,8 +11,8 @@ using namespace std;
 using namespace Rcpp;
 
 void envelop_cpp(const NumericVector& array, unsigned int width,
-                 NumericVector& minvalues, NumericVector& maxvalues) {
-
+                 NumericVector& minvalues, NumericVector& maxvalues)
+{
     unsigned int constraint = (width - 1) / 2;
     unsigned int array_size = static_cast<unsigned int>(array.size());
     deque<int> maxfifo, minfifo;

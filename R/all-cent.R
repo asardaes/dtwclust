@@ -3,6 +3,8 @@
 # ========================================================================================================
 
 all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALSE) {
+    ## --------------------------------------------------------------------------------------------
+    ## pam
     pam_cent <- function(x, x_split, cl_id, id_changed, ...) {
         if (is.null(distmat)) {
             new_cent <- lapply(x_split, function(xsub) {
@@ -33,6 +35,8 @@ all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALS
         new_cent
     }
 
+    ## --------------------------------------------------------------------------------------------
+    ## shape
     shape_cent <- function(x_split, cent, ...) {
         x_split <- split_parallel(x_split)
         cent <- split_parallel(cent)
@@ -56,6 +60,8 @@ all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALS
         new_cent
     }
 
+    ## --------------------------------------------------------------------------------------------
+    ## dba
     dba_cent <- function(x, x_split, cent, id_changed, cl_id, ...) {
         ## not all arguments are used, but I want them to be isolated from ...
         dots <- list(...)
@@ -91,6 +97,8 @@ all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALS
         new_cent
     }
 
+    ## --------------------------------------------------------------------------------------------
+    ## mean
     mean_cent <- function(x_split, ...) {
         new_cent <- lapply(x_split, function(xx) {
             if (is_multivariate(xx)) {
@@ -113,6 +121,8 @@ all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALS
         new_cent
     }
 
+    ## --------------------------------------------------------------------------------------------
+    ## median
     median_cent <- function(x_split, ...) {
         new_cent <- lapply(x_split, function(xx) {
             if (is_multivariate(xx)) {
@@ -135,10 +145,11 @@ all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALS
         new_cent
     }
 
+    ## --------------------------------------------------------------------------------------------
+    ## fcm
     fcm_cent <- function(x, u, k) {
         ## utils.R
         if (is_multivariate(x)) {
-            ## multivariate
             mv <- reshape_multviariate(x, NULL)
 
             cent <- lapply(mv$series, fcm_cent, u = u)
@@ -156,13 +167,14 @@ all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALS
     }
 
     if (fuzzy) {
+        ## function created here to capture objects of this environment (closure)
         allcent <- function(x, cl_id, k, cent, cl_old, ...) {
             ## cent and cl_old are unused here, but R complains if signatures don't match
             u <- cl_id ^ control@fuzziness
 
             cent <- fcm_cent(x, u, k)
 
-            # Coerce back to list
+            ## coerce back to list
             any2list(cent)
         }
     } else {
