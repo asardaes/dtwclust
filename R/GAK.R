@@ -133,13 +133,13 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE, l
 }
 
 GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = NULL,
-                      pairwise = FALSE)
+                      error.check = TRUE, pairwise = FALSE)
 {
     if (!normalize)
         warning("The proxy version of GAK is always normalized.")
 
     x <- any2list(x)
-    check_consistency(x, "vltslist")
+    if (error.check) check_consistency(x, "vltslist")
 
     dots <- list(...)
 
@@ -152,7 +152,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
 
     } else {
         y <- any2list(y)
-        check_consistency(y, "vltslist")
+        if (error.check) check_consistency(y, "vltslist")
 
         symmetric <- FALSE
     }
@@ -246,6 +246,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
                          })
                      }
 
+        ## normalize
         D <- 1 - exp(D - 0.5 * (gak_x + gak_y))
 
         names(D) <- NULL
@@ -280,6 +281,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
         D <- t(D)
         D[upper.tri(D)] <- d
 
+        ## normalize
         D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
         diag(D) <- 0
 
@@ -304,6 +306,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
                          do.call(cbind, ret)
                      }
 
+        ## normalize
         D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
     }
 
