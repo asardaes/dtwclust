@@ -39,12 +39,12 @@
 #' control <- new("dtwclustControl", window.size = 8L, norm = "L2")
 #' cluster <- unclass(CharTrajLabels)
 #'
-#' pc_obj <- create_dtwclust(type = "p", datalist = CharTraj, centroids = centroids,
+#' pc_obj <- create_dtwclust(type = "partitional", datalist = CharTraj, centroids = centroids,
 #'                           control = control, cluster = cluster,
 #'                           distance = "sbd", centroid = "dba",
 #'                           dots = list(step.pattern = symmetric1))
 #'
-#' fc_obj <- create_dtwclust(type = "f", datalist = CharTraj, centroids = centroids,
+#' fc_obj <- create_dtwclust(type = "fuzzy", datalist = CharTraj, centroids = centroids,
 #'                           control = control, cluster = cluster,
 #'                           distance = "sbd", centroid = "fcm")
 #'
@@ -61,8 +61,7 @@ create_dtwclust <- function(..., override.family = TRUE) {
     ## some minor checks
     if (!is.null(dots$datalist)) dots$datalist <- any2list(dots$datalist)
     if (!is.null(dots$centroids)) dots$centroids <- any2list(dots$centroids)
-    if (!is.null(dots$type)) dots$type <- match.arg(dots$type, c("partitional", "hierarchical",
-                                                                 "fuzzy", "tadpole"))
+
     ## avoid infinite recursion
     if (is.null(dots$call)) {
         call <- match.call()
