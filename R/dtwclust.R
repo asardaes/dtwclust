@@ -425,6 +425,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     } else stop("Invalid preprocessing")
 
+    check_consistency(data, "vltslist")
+
     ## ----------------------------------------------------------------------------------------------------------
     ## Further options
     ## ----------------------------------------------------------------------------------------------------------
