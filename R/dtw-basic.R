@@ -19,6 +19,7 @@
 #'   for the global cost matrix calculations. Used internally for memory optimization. If provided,
 #'   it \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel version
 #'   in \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.
+#' @param error.check Check data inconsistencies?
 #'
 #' @details
 #'
@@ -45,10 +46,12 @@
 #'
 dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
                       step.pattern = symmetric2, backtrack = FALSE,
-                      normalize = FALSE, ..., gcm = NULL)
+                      normalize = FALSE, ..., gcm = NULL, error.check = TRUE)
 {
-    check_consistency(x, "ts")
-    check_consistency(y, "ts")
+    if (error.check) {
+        check_consistency(x, "ts")
+        check_consistency(y, "ts")
+    }
 
     backtrack <- as.logical(backtrack)
 
@@ -107,6 +110,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
 
     dots <- list(...)
     dots$backtrack <- FALSE
+    dots$error.check <- FALSE
 
     if (is.null(y)) {
         y <- x

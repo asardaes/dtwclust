@@ -7,6 +7,7 @@
 #'
 #' @param x,y A time series.
 #' @param znorm Logical. Should each series be z-normalized before calculating the distance?
+#' @param error.check Check data inconsistencies?
 #'
 #' @details
 #'
@@ -58,15 +59,14 @@
 #' # cross-distance matrix for series subset (notice the two-list input)
 #' sbD <- proxy::dist(CharTraj[1:10], CharTraj[1:10], method = "SBD", znorm = TRUE)
 #'
-SBD <- function(x, y, znorm = FALSE) {
+SBD <- function(x, y, znorm = FALSE, error.check = TRUE) {
     if (is_multivariate(list(x, y)))
         stop("SBD does not support multivariate series.")
 
-    x <- as.numeric(x)
-    y <- as.numeric(y)
-
-    check_consistency(x, "ts")
-    check_consistency(y, "ts")
+    if (error.check) {
+        check_consistency(x, "ts")
+        check_consistency(y, "ts")
+    }
 
     nx <- length(x)
     ny <- length(y)

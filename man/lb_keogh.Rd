@@ -5,7 +5,7 @@
 \title{Keogh's DTW lower bound}
 \usage{
 lb_keogh(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
-  upper.env = NULL, force.symmetry = FALSE)
+  upper.env = NULL, force.symmetry = FALSE, error.check = TRUE)
 }
 \arguments{
 \item{x}{A time series (reference).}
@@ -25,6 +25,8 @@ lb_keogh(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
 \item{force.symmetry}{If \code{TRUE}, a second lower bound is calculated by swapping \code{x} and
 \code{y}, and whichever result has a \emph{higher} distance value is returned. The proxy
 version can only work if a square matrix is obtained, but use carefully.}
+
+\item{error.check}{Check data inconsistencies?}
 }
 \value{
 A list with:

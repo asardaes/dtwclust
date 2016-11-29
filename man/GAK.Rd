@@ -5,7 +5,7 @@
 \title{Fast global alignment kernels}
 \usage{
 GAK(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
-  logs = NULL)
+  logs = NULL, error.check = TRUE)
 }
 \arguments{
 \item{x, y}{Time series. A multivariate series should have time spanning the rows and variables
@@ -25,6 +25,8 @@ details.}
 for the logarithm calculations. Used internally for memory optimization. If provided, it
 \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel version in
 \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.}
+
+\item{error.check}{Check data inconsistencies?}
 }
 \value{
 The logarithm of the GAK if \code{normalize = FALSE}, otherwise 1 minus the normalized

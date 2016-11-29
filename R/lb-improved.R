@@ -16,6 +16,7 @@
 #' @param force.symmetry If \code{TRUE}, a second lower bound is calculated by swapping \code{x} and
 #'   \code{y}, and whichever result has a \emph{higher} distance value is returned. The proxy
 #'   version can only work if a square matrix is obtained, but use carefully.
+#' @param error.check Check data inconsistencies?
 #'
 #' @details
 #'
@@ -77,12 +78,15 @@
 #' D.lbi <= D.dtw
 #'
 lb_improved <- function(x, y, window.size = NULL, norm = "L1",
-                        lower.env = NULL, upper.env = NULL, force.symmetry = FALSE)
+                        lower.env = NULL, upper.env = NULL,
+                        force.symmetry = FALSE, error.check = TRUE)
 {
     norm <- match.arg(norm, c("L1", "L2"))
 
-    check_consistency(x, "ts")
-    check_consistency(y, "ts")
+    if (error.check) {
+        check_consistency(x, "ts")
+        check_consistency(y, "ts")
+    }
 
     if (length(x) != length(y))
         stop("The series must have the same length")
@@ -206,7 +210,8 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                                                 window.size = window.size,
                                                 norm = norm,
                                                 lower.env = l,
-                                                upper.env = u)
+                                                upper.env = u,
+                                                error.check = FALSE)
                                 })
                      }
 
@@ -228,7 +233,8 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                                                                   window.size = window.size,
                                                                   norm = norm,
                                                                   lower.env = l,
-                                                                  upper.env = u)
+                                                                  upper.env = u,
+                                                                  error.check = FALSE)
                                                   })
                                        })
 

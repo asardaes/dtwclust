@@ -16,6 +16,7 @@
 #'   for the logarithm calculations. Used internally for memory optimization. If provided, it
 #'   \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel version in
 #'   \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.
+#' @param error.check Check data inconsistencies?
 #'
 #' @details
 #'
@@ -72,12 +73,16 @@
 #'                         window.size = 18L))
 #' }
 #'
-GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE, logs = NULL) {
+GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
+                logs = NULL, error.check = TRUE)
+{
     x <- cbind(x)
     y <- cbind(y)
 
-    check_consistency(x, "ts")
-    check_consistency(y, "ts")
+    if (error.check) {
+        check_consistency(x, "ts")
+        check_consistency(y, "ts")
+    }
 
     ## check dimension consistency
     is_multivariate(list(x,y))
@@ -142,6 +147,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
     if (error.check) check_consistency(x, "vltslist")
 
     dots <- list(...)
+    dots$error.check <- FALSE
 
     ## normalization will be done manually to avoid multiple calculations of gak_x and gak_y
     dots$normalize <- FALSE

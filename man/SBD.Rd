@@ -4,12 +4,14 @@
 \alias{SBD}
 \title{Shape-based distance}
 \usage{
-SBD(x, y, znorm = FALSE)
+SBD(x, y, znorm = FALSE, error.check = TRUE)
 }
 \arguments{
 \item{x, y}{A time series.}
 
 \item{znorm}{Logical. Should each series be z-normalized before calculating the distance?}
+
+\item{error.check}{Check data inconsistencies?}
 }
 \value{
 A list with:

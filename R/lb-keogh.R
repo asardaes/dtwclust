@@ -16,6 +16,7 @@
 #' @param force.symmetry If \code{TRUE}, a second lower bound is calculated by swapping \code{x} and
 #'   \code{y}, and whichever result has a \emph{higher} distance value is returned. The proxy
 #'   version can only work if a square matrix is obtained, but use carefully.
+#' @param error.check Check data inconsistencies?
 #'
 #' @details
 #'
@@ -80,17 +81,18 @@
 #' D.lbk <= D.dtw
 #'
 lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
-                     lower.env = NULL, upper.env = NULL, force.symmetry = FALSE)
+                     lower.env = NULL, upper.env = NULL,
+                     force.symmetry = FALSE, error.check = TRUE)
 {
     norm <- match.arg(norm, c("L1", "L2"))
 
-    check_consistency(x, "ts")
+    if (error.check) check_consistency(x, "ts")
 
     if (is_multivariate(list(x)))
         stop("lb_keogh does not support multivariate series.")
 
     if (is.null(lower.env) || is.null(upper.env)) {
-        check_consistency(y, "ts")
+        if (error.check) check_consistency(y, "ts")
 
         if (is_multivariate(list(y)))
             stop("lb_keogh does not support multivariate series.")
@@ -200,7 +202,8 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                                     lb_keogh(x,
                                              norm = norm,
                                              lower.env = l,
-                                             upper.env = u)$d
+                                             upper.env = u,
+                                             error.check = FALSE)$d
                                 })
                      }
 
@@ -221,7 +224,8 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                                                            lb_keogh(x,
                                                                     norm = norm,
                                                                     lower.env = l,
-                                                                    upper.env = u)$d
+                                                                    upper.env = u,
+                                                                    error.check = FALSE)$d
                                                        })
                                            D
                                        })

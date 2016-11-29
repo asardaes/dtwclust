@@ -6,7 +6,7 @@
 \usage{
 dtw_basic(x, y, window.size = NULL, norm = "L1",
   step.pattern = symmetric2, backtrack = FALSE, normalize = FALSE, ...,
-  gcm = NULL)
+  gcm = NULL, error.check = TRUE)
 }
 \arguments{
 \item{x, y}{Time series. Multivariate series must have time spanning the rows and variables
@@ -29,6 +29,8 @@ here. See \code{\link[dtw]{stepPattern}}.}
 for the global cost matrix calculations. Used internally for memory optimization. If provided,
 it \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel version
 in \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.}
+
+\item{error.check}{Check data inconsistencies?}
 }
 \value{
 The DTW distance. For \code{backtrack} \code{=} \code{TRUE}, a list with:
