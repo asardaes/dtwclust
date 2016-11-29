@@ -1,42 +1,23 @@
-context("Test included centroids")
+context("\tCentroids")
+
+# =================================================================================================
+# setup
+# =================================================================================================
+
+## Original objects in env
+ols <- ls()
 
 ctrl <- new("dtwclustControl", window.size = 18L)
-x <- data_reinterpolated[1L:20L]
+x <- data_reinterpolated_subset
 k <- 2L
 cl_id <- rep(c(1L, 2L), each = length(x) / 2L)
-
-# =================================================================================================
-# invalid centroid
-# =================================================================================================
-
-test_that("Errors in centroid argument are correctly detected.", {
-    expect_error(dtwclust(data, centroid = "mean"),
-                 "different length", "mean")
-
-    expect_error(dtwclust(data, centroid = "mean"),
-                 "different length", "median")
-
-    expect_error(dtwclust(data, centroid = "fcm"),
-                 "arg", info = "FCM is for fuzzy")
-
-    expect_error(dtwclust(data, centroid = "goku"),
-                 "arg", info = "Unknown centroid")
-
-    expect_error(dtwclust(data, centroid = NULL),
-                 "definition", info = "NULL centroid")
-
-    expect_error(dtwclust(data, centroid = NA),
-                 "definition", info = "NA centroid")
-
-    expect_error(dtwclust(data, centroid = function(x, ...) { x }),
-                 "centroid.*arguments")
-})
+x_mv <- reinterpolate(data_multivariate, 205L)
 
 # =================================================================================================
 # mean
 # =================================================================================================
 
-test_that("Operations with mean centroid give same results as references.", {
+test_that("Operations with mean centroid complete successfully.", {
     ## ---------------------------------------------------------- univariate
     family <- new("dtwclustFamily",
                   control = ctrl,
@@ -51,28 +32,26 @@ test_that("Operations with mean centroid give same results as references.", {
     expect_identical(length(cent_mean), k)
 
     ## ---------------------------------------------------------- multivariate
-    cent_mv_mean <- family@allcent(data_multivariate,
+    cent_mv_mean <- family@allcent(x_mv,
                                    cl_id = cl_id,
                                    k = k,
-                                   cent = data_multivariate[c(1L,20L)],
+                                   cent = x_mv[c(1L,20L)],
                                    cl_old = 0L)
 
     expect_identical(length(cent_mv_mean), k)
 
-    expect_identical(dim(cent_mv_mean[[1L]]), dim(data_multivariate[[1L]]))
+    expect_identical(dim(cent_mv_mean[[1L]]), dim(x_mv[[1L]]))
 
     ## ---------------------------------------------------------- refs
-    skip_on_cran()
-
-    expect_equal_to_reference(cent_mean, file_name(cent_mean), info = "Univariate")
-    expect_equal_to_reference(cent_mv_mean, file_name(cent_mv_mean), info = "Multivariate")
+    assign("cent_mean", cent_mean, persistent)
+    assign("cent_mv_mean", cent_mv_mean, persistent)
 })
 
 # =================================================================================================
 # median
 # =================================================================================================
 
-test_that("Operations with median centroid give same results as references.", {
+test_that("Operations with median centroid complete successfully.", {
     ## ---------------------------------------------------------- univariate
     family <- new("dtwclustFamily",
                   control = ctrl,
@@ -87,28 +66,26 @@ test_that("Operations with median centroid give same results as references.", {
     expect_identical(length(cent_median), k)
 
     ## ---------------------------------------------------------- multivariate
-    cent_mv_median <- family@allcent(data_multivariate,
+    cent_mv_median <- family@allcent(x_mv,
                                      cl_id = cl_id,
                                      k = k,
-                                     cent = data_multivariate[c(1L,20L)],
+                                     cent = x_mv[c(1L,20L)],
                                      cl_old = 0L)
 
     expect_identical(length(cent_mv_median), k)
 
-    expect_identical(dim(cent_mv_median[[1L]]), dim(data_multivariate[[1L]]))
+    expect_identical(dim(cent_mv_median[[1L]]), dim(x_mv[[1L]]))
 
     ## ---------------------------------------------------------- refs
-    skip_on_cran()
-
-    expect_equal_to_reference(cent_median, file_name(cent_median), info = "Univariate")
-    expect_equal_to_reference(cent_mv_median, file_name(cent_mv_median), info = "Multivariate")
+    assign("cent_median", cent_median, persistent)
+    assign("cent_mv_median", cent_mv_median, persistent)
 })
 
 # =================================================================================================
 # shape
 # =================================================================================================
 
-test_that("Operations with shape centroid give same results as references.", {
+test_that("Operations with shape centroid complete successfully.", {
     ## ---------------------------------------------------------- univariate
     family <- new("dtwclustFamily",
                   control = ctrl,
@@ -123,28 +100,26 @@ test_that("Operations with shape centroid give same results as references.", {
     expect_identical(length(cent_shape), k)
 
     ## ---------------------------------------------------------- multivariate
-    cent_mv_shape <- family@allcent(data_multivariate,
+    cent_mv_shape <- family@allcent(x_mv,
                                     cl_id = cl_id,
                                     k = k,
-                                    cent = data_multivariate[c(1L,20L)],
+                                    cent = x_mv[c(1L,20L)],
                                     cl_old = 0L)
 
     expect_identical(length(cent_mv_shape), k)
 
-    expect_identical(dim(cent_mv_shape[[1L]]), dim(data_multivariate[[1L]]))
+    expect_identical(dim(cent_mv_shape[[1L]]), dim(x_mv[[1L]]))
 
     ## ---------------------------------------------------------- refs
-    skip_on_cran()
-
-    expect_equal_to_reference(cent_shape, file_name(cent_shape), info = "Univariate")
-    expect_equal_to_reference(cent_mv_shape, file_name(cent_mv_shape), info = "Multivariate")
+    assign("cent_shape", cent_shape, persistent)
+    assign("cent_mv_shape", cent_mv_shape, persistent)
 })
 
 # =================================================================================================
 # pam
 # =================================================================================================
 
-test_that("Operations with pam centroid give same results as references.", {
+test_that("Operations with pam centroid complete successfully.", {
     ## ---------------------------------------------------------- univariate without distmat
     family <- new("dtwclustFamily",
                   control = ctrl,
@@ -186,30 +161,26 @@ test_that("Operations with pam centroid give same results as references.", {
                   dist = "dtw_basic",
                   allcent = "pam")
 
-    cent_mv_pam <- family@allcent(data_multivariate,
+    cent_mv_pam <- family@allcent(x_mv,
                                   cl_id = cl_id,
                                   k = k,
-                                  cent = data_multivariate[c(1L,20L)],
+                                  cent = x_mv[c(1L,20L)],
                                   cl_old = 0L)
 
     expect_identical(length(cent_mv_pam), k)
 
-    expect_identical(dim(cent_mv_pam[[1L]]), dim(data_multivariate[[1L]]))
+    expect_identical(dim(cent_mv_pam[[1L]]), dim(x_mv[[1L]]))
 
     ## ---------------------------------------------------------- refs
-    skip_on_cran()
-
-    expect_equal_to_reference(cent_pam, file_name(cent_pam), info = "Univariate without distmat")
-    expect_equal_to_reference(cent_mv_pam, file_name(cent_mv_pam), info = "Multivariate")
+    assign("cent_pam", cent_pam, persistent)
+    assign("cent_mv_pam", cent_mv_pam, persistent)
 })
 
 # =================================================================================================
 # dba
 # =================================================================================================
 
-test_that("Operations with dba centroid give same results as references.", {
-    skip_on_cran()
-
+test_that("Operations with dba centroid complete successfully.", {
     ## ---------------------------------------------------------- univariate
     family <- new("dtwclustFamily",
                   control = ctrl,
@@ -229,26 +200,26 @@ test_that("Operations with dba centroid give same results as references.", {
                    control = ctrl,
                    allcent = "dba")
 
-    cent_mv_dba <- family2@allcent(data_multivariate,
+    cent_mv_dba <- family2@allcent(x_mv,
                                    cl_id = cl_id,
                                    k = k,
-                                   cent = data_multivariate[c(1L,20L)],
+                                   cent = x_mv[c(1L,20L)],
                                    cl_old = 0L)
 
     expect_identical(length(cent_mv_dba), k)
 
-    expect_identical(dim(cent_mv_dba[[1L]]), dim(data_multivariate[[1L]]))
+    expect_identical(dim(cent_mv_dba[[1L]]), dim(x_mv[[1L]]))
 
     ## ---------------------------------------------------------- refs
-    expect_equal_to_reference(cent_dba, file_name(cent_dba, x32 = TRUE), info = "Univariate")
-    expect_equal_to_reference(cent_mv_dba, file_name(cent_mv_dba, x32 = TRUE), info = "Multivariate")
+    assign("cent_dba", cent_dba, persistent)
+    assign("cent_mv_dba", cent_mv_dba, persistent)
 })
 
 # =================================================================================================
 # custom
 # =================================================================================================
 
-test_that("Operations with custom centroid give same results as references.", {
+test_that("Operations with custom centroid complete successfully.", {
     ## ---------------------------------------------------------- with dots
     mycent <- function(x, cl_id, k, cent, cl_old, ...) {
         x_split <- split(x, cl_id)
@@ -284,9 +255,11 @@ test_that("Operations with custom centroid give same results as references.", {
     cent_colMeans_nd <- reset_nondeterministic(cent_colMeans)
 
     ## ---------------------------------------------------------- refs
-    skip_on_cran()
-
-    ## notice files are the same, results should be equal
-    expect_equal_to_reference(cent_colMeans, file_name(cent_colMeans), info = "Custom colMeans")
-    expect_equal_to_reference(cent_colMeans_nd, file_name(cent_colMeans), info = "Custom colMeans")
+    assign("cent_colMeans", cent_colMeans, persistent)
+    assign("cent_colMeans_nd", cent_colMeans_nd, persistent)
 })
+
+# =================================================================================================
+# clean
+# =================================================================================================
+rm(list = setdiff(ls(), ols))

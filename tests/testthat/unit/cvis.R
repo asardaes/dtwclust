@@ -1,10 +1,20 @@
-context("Test CVIs")
+context("\tCVIs")
+
+# =================================================================================================
+# setup
+# =================================================================================================
+
+## Original objects in env
+ols <- ls()
+
+internal_cvis <- c("Sil", "D", "DB", "DBstar", "CH", "SF", "COP")
+external_cvis <- c("RI", "ARI", "J", "FM", "VI")
 
 # =================================================================================================
 # both internal and external
 # =================================================================================================
 
-test_that("dtwclust CVI calculations are consistent regardless of quantity or order of CVIs computed", {
+test_that("CVI calculations are consistent regardless of quantity or order of CVIs computed", {
     pc_mv <- dtwclust(data_multivariate, type = "partitional", k = 4L,
                       distance = "dtw_basic", centroid = "pam",
                       preproc = NULL, control = list(window.size = 18L), seed = 123,
@@ -35,9 +45,7 @@ test_that("dtwclust CVI calculations are consistent regardless of quantity or or
     expect_true(all(base_cvis[considered_cvis] == this_cvis))
 
     ## refs
-    skip_on_cran()
-
-    expect_equal_to_reference(base_cvis, file_name(base_cvis))
+    assign("base_cvis", base_cvis, persistent)
 })
 
 # =================================================================================================
@@ -63,19 +71,25 @@ test_that("external CVI calculations are consistent regardless of quantity or or
 test_that("CVIs work also for hierarchical and TADPole", {
     skip_on_cran()
 
-    tadp <- dtwclust(data_reinterpolated[1L:20L], type = "t", k = 4L,
+    tadp <- dtwclust(data_reinterpolated_subset, type = "t", k = 4L,
                      dc = 1.5, control = list(window.size = 18L))
 
-    hc <- dtwclust(data_reinterpolated[1L:20L], type = "h", k = 4L,
+    hc <- dtwclust(data_reinterpolated_subset, type = "h", k = 4L,
                    distance = "gak", sigma = 100,
                    control = list(window.size = 18L))
 
-    fc <- dtwclust(data_reinterpolated[1L:20L], type = "f", k = 4L, distance = "L2")
+    fc <- dtwclust(data_reinterpolated_subset, type = "f", k = 4L, distance = "L2")
 
     expect_error(cvi(fc, labels_subset))
     cvis_tadp <- cvi(tadp, labels_subset)
     cvis_hc <- cvi(hc, labels_subset)
 
-    expect_equal_to_reference(cvis_tadp, file_name(cvis_tadp))
-    expect_equal_to_reference(cvis_hc, file_name(cvis_hc))
+    ## refs
+    assign("cvis_tadp", cvis_tadp, persistent)
+    assign("cvis_hc", cvis_hc, persistent)
 })
+
+# =================================================================================================
+# clean
+# =================================================================================================
+rm(list = setdiff(ls(), ols))

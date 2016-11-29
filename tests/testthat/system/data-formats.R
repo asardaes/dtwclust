@@ -1,27 +1,11 @@
-context("Test data types")
+context("\tData formats")
 
 # =================================================================================================
-# data errors
+# setup
 # =================================================================================================
 
-test_that("Errors in input data are detected", {
-    expect_error(dtwclust(NULL), "No data")
-    expect_error(dtwclust(NA), "type")
-    expect_error(dtwclust(mean), "type")
-    expect_error(dtwclust("data"), "type")
-
-    expect_error(dtwclust(as.logical(data_matrix)), "type")
-
-    temp <- data[[1L]]
-    temp[2L] <- NA
-    data[[1L]] <- temp
-
-    expect_error(dtwclust(data), "missing values")
-
-    data[[1L]] <- numeric()
-
-    expect_error(dtwclust(data), "one point")
-})
+## Original objects in env
+ols <- ls()
 
 # =================================================================================================
 # data formats
@@ -34,18 +18,16 @@ test_that("Results are the same regardless of data format, as long as supported.
 
     pc_matrix <- reset_nondeterministic(pc_matrix)
 
-    pc_list <- dtwclust(data_reinterpolated[1L:20L], type = "partitional", k = 4L,
+    pc_list <- dtwclust(data_reinterpolated_subset, type = "partitional", k = 4L,
                         distance = "L2", centroid = "pam",
                         seed = 939)
 
     pc_list <- reset_nondeterministic(pc_list)
 
-    suppressMessages(
-        pc_df<- dtwclust(as.data.frame(data_matrix[1L:20L, ]),
-                         type = "partitional", k = 4L,
-                         distance = "L2", centroid = "pam",
-                         seed = 939)
-    )
+    pc_df<- dtwclust(as.data.frame(data_matrix[1L:20L, ]),
+                     type = "partitional", k = 4L,
+                     distance = "L2", centroid = "pam",
+                     seed = 939)
 
     pc_df <- reset_nondeterministic(pc_df)
 
@@ -66,14 +48,6 @@ test_that("Results are the same regardless of data format, as long as supported.
 })
 
 # =================================================================================================
-# control formats
+# clean
 # =================================================================================================
-
-test_that("Errors in control argument are detected correctly.", {
-    expect_error(dtwclust(data, control = NA), "control")
-    expect_error(dtwclust(data, control = mean), "control")
-    expect_error(dtwclust(data, control = TRUE), "control")
-    expect_error(dtwclust(data, control = c(window.size = 15L, iter.max = 15L)), "control")
-    expect_error(dtwclust(data, control = list(window.size = c(13L, 14L))),
-                 "control", ignore.case = TRUE)
-})
+rm(list = setdiff(ls(), ols))

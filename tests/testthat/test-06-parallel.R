@@ -1,8 +1,9 @@
-context("Test parallel")
+context("Parallel tests")
 
 # =================================================================================================
 # run all tests with a parallel backend
 # =================================================================================================
+
 chk <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
 
 if (nzchar(chk) && chk == "TRUE") {
@@ -31,7 +32,7 @@ test_that("Parallel computation gives the same results as sequential", {
     registerDoParallel(cl)
 
     ## Filter excludes files that have "parallel" in them, otherwise it would be recursive
-    test_dir("./", filter = "^(?!.*parallel).*$", perl = TRUE)
+    test_dir("./", filter = "parallel", invert = TRUE)
 
     stopCluster(cl)
     stopImplicitCluster()
@@ -55,7 +56,7 @@ test_that("Parallel FORK computation gives the same results as sequential", {
     registerDoParallel(cl)
 
     ## Filter excludes files that have "parallel" in them, otherwise it would be recursive
-    test_dir("./", filter = "^(?!.*parallel).*$", perl = TRUE)
+    test_dir("./", filter = "parallel", invert = TRUE)
 
     stopCluster(cl)
     stopImplicitCluster()

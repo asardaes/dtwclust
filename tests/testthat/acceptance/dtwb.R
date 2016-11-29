@@ -1,4 +1,15 @@
-context("Test dtw_basic consistency")
+context("\tConsistency of dtw_basic")
+
+# =================================================================================================
+# setup
+# =================================================================================================
+
+## Original objects in env
+ols <- ls()
+
+# =================================================================================================
+# consistency of dtwb
+# =================================================================================================
 
 test_that("dtw_basic gives the same results as dtw/dtw2", {
     for (rep in 1L:100L) {
@@ -63,9 +74,9 @@ test_that("dtw_basic gives the same results as dtw/dtw2", {
 
     expect_equal(D1_L1, D2_L1, tolerance = 0, check.attributes = FALSE,
                  info = "dtw2 vs dtw_basic")
-
-    skip_on_cran()
-
-    expect_equal_to_reference(D2_L1, "rds/dtwb_l1.rds")
-    expect_equal_to_reference(D2_L2, "rds/dtwb_l2.rds")
 })
+
+# =================================================================================================
+# clean
+# =================================================================================================
+rm(list = setdiff(ls(), ols))

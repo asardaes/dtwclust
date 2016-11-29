@@ -1,22 +1,11 @@
-context("Test partitional")
+context("\tPartitional")
 
 # =================================================================================================
-# invalid combinations
+# setup
 # =================================================================================================
 
-test_that("Invalid combinations in partitional clustering are detected.", {
-    expect_error(dtwclust(data, k = 101L), "more clusters")
-
-    expect_error(dtwclust(data, distance = "lbk"), "different length")
-    expect_error(dtwclust(data, distance = "lbi"), "different length")
-    expect_error(dtwclust(data, distance = "dtw_lb"), "different length")
-
-    expect_error(dtwclust(data, centroid = "mean"), "different length")
-    expect_error(dtwclust(data, centroid = "median"), "different length")
-    expect_error(dtwclust(data, centroid = "fcm"), "arg")
-
-    expect_error(dtwclust(data, preproc = "zscore"), "preprocessing")
-})
+## Original objects in env
+ols <- ls()
 
 # =================================================================================================
 # multiple k and repetitions
@@ -55,11 +44,10 @@ test_that("Multiple k and multiple repetitions work as expected.", {
 
     expect_identical(pc_rep[1L:2L], pc_krep[1L:2L])
 
-    skip_on_cran()
-
-    expect_equal_to_reference(pc_k, file_name(pc_k))
-    expect_equal_to_reference(pc_rep, file_name(pc_rep))
-    expect_equal_to_reference(pc_krep, file_name(pc_krep))
+    ## refs
+    assign("pc_k", pc_k, persistent)
+    assign("pc_rep", pc_rep, persistent)
+    assign("pc_krep", pc_krep, persistent)
 })
 
 # =================================================================================================
@@ -68,21 +56,21 @@ test_that("Multiple k and multiple repetitions work as expected.", {
 
 test_that("Partitional clustering works as expected.", {
     ## ---------------------------------------------------------- dtw
-    pc_dtwb <- dtwclust(data_reinterpolated[1L:20L], type = "p", k = 4L,
+    pc_dtwb <- dtwclust(data_reinterpolated_subset, type = "p", k = 4L,
                         distance = "dtw_basic", centroid = "pam",
                         seed = 938, control = list(window.size = 20L))
 
-    pc_dtwb_npampre <- dtwclust(data_reinterpolated[1L:20L], type = "p", k = 4L,
+    pc_dtwb_npampre <- dtwclust(data_reinterpolated_subset, type = "p", k = 4L,
                                 distance = "dtw_basic", centroid = "pam",
                                 seed = 938, control = list(window.size = 20L,
                                                            pam.precompute = FALSE))
 
-    pc_dtwb_distmat <- dtwclust(data_reinterpolated[1L:20L], type = "p", k = 4L,
+    pc_dtwb_distmat <- dtwclust(data_reinterpolated_subset, type = "p", k = 4L,
                                 distance = "dtw_basic", centroid = "pam",
                                 seed = 938, control = list(window.size = 20L),
                                 distmat = pc_dtwb@distmat)
 
-    pc_dtwlb <- dtwclust(data_reinterpolated[1L:20L], type = "p", k = 4L,
+    pc_dtwlb <- dtwclust(data_reinterpolated_subset, type = "p", k = 4L,
                          distance = "dtw_lb", centroid = "pam",
                          seed = 938, control = list(window.size = 20L,
                                                     pam.precompute = FALSE))
@@ -91,17 +79,15 @@ test_that("Partitional clustering works as expected.", {
     expect_identical(pc_dtwb@cluster, pc_dtwb_distmat@cluster, info = "distmat supplied")
     expect_identical(pc_dtwb@cluster, pc_dtwlb@cluster, info = "dtw_basic vs dtw_lb")
 
-    skip_on_cran()
-
     pc_dtwb <- reset_nondeterministic(pc_dtwb)
     pc_dtwb_npampre <- reset_nondeterministic(pc_dtwb_npampre)
     pc_dtwb_distmat <- reset_nondeterministic(pc_dtwb_distmat)
     pc_dtwlb <- reset_nondeterministic(pc_dtwlb)
 
-    expect_equal_to_reference(pc_dtwb, file_name(pc_dtwb))
-    expect_equal_to_reference(pc_dtwb_npampre, file_name(pc_dtwb_npampre))
-    expect_equal_to_reference(pc_dtwb_distmat, file_name(pc_dtwb_distmat))
-    expect_equal_to_reference(pc_dtwlb, file_name(pc_dtwlb))
+    assign("pc_dtwb", pc_dtwb, persistent)
+    assign("pc_dtwb_npampre", pc_dtwb_npampre, persistent)
+    assign("pc_dtwb_distmat", pc_dtwb_distmat, persistent)
+    assign("pc_dtwlb", pc_dtwlb, persistent)
 
     ## ---------------------------------------------------------- k-Shape
     pc_kshape <- dtwclust(data_subset, type = "p", k = 4L,
@@ -110,7 +96,7 @@ test_that("Partitional clustering works as expected.", {
 
     pc_kshape <- reset_nondeterministic(pc_kshape)
 
-    expect_equal_to_reference(pc_kshape, file_name(pc_kshape))
+    assign("pc_kshape", pc_kshape, persistent)
 
     ## ---------------------------------------------------------- dba
     pc_dba <- dtwclust(data_subset, type = "p", k = 4L,
@@ -119,25 +105,25 @@ test_that("Partitional clustering works as expected.", {
 
     pc_dba <- reset_nondeterministic(pc_dba)
 
-    expect_equal_to_reference(pc_dba, file_name(pc_dba))
+    assign("pc_dba", pc_dba, persistent)
 
     ## ---------------------------------------------------------- multivariate pam
-    pc_mv_pam <- dtwclust(data_multivariate[1L:20L], type = "p", k = 4L,
+    pc_mv_pam <- dtwclust(data_multivariate, type = "p", k = 4L,
                           distance = "dtw_basic", centroid = "pam",
                           seed = 938)
 
     pc_mv_pam <- reset_nondeterministic(pc_mv_pam)
 
-    expect_equal_to_reference(pc_mv_pam, file_name(pc_mv_pam))
+    assign("pc_mv_pam", pc_mv_pam, persistent)
 
     ## ---------------------------------------------------------- multivariate dba
-    pc_mv_dba <- dtwclust(data_multivariate[1L:20L], type = "p", k = 4L,
+    pc_mv_dba <- dtwclust(data_multivariate, type = "p", k = 4L,
                           distance = "dtw_basic", centroid = "dba",
                           seed = 938)
 
     pc_mv_dba <- reset_nondeterministic(pc_mv_dba)
 
-    expect_equal_to_reference(pc_mv_dba, file_name(pc_mv_dba, x32 = TRUE))
+    assign("pc_mv_dba", pc_mv_dba, persistent)
 })
 
 # =================================================================================================
@@ -145,40 +131,33 @@ test_that("Partitional clustering works as expected.", {
 # =================================================================================================
 
 test_that("TADPole works as expected", {
-    expect_error(dtwclust(data, type = "t", k = 20, control = list(window.size = 20L)), "dc")
-    expect_error(dtwclust(data, type = "t", k = 20, dc = 1.5), "window.size")
-    expect_error(dtwclust(data, type = "t", k = 20, dc = 1.5, control = list(window.size = 20L)),
-                 "same length")
-
-    skip_on_cran()
-
     ## ---------------------------------------------------------- TADPole
-    pc_tadp <- dtwclust(data_reinterpolated[1L:20L], type = "t", k = 4L,
+    pc_tadp <- dtwclust(data_reinterpolated_subset, type = "t", k = 4L,
                         dc = 1.5, control = list(window.size = 20L),
                         seed = 938)
 
     pc_tadp <- reset_nondeterministic(pc_tadp)
 
-    expect_equal_to_reference(pc_tadp, file_name(pc_tadp))
+    assign("pc_tadp", pc_tadp, persistent)
 
     ## ---------------------------------------------------------- TADPole with LBI
-    pc_tadp_lbi <- dtwclust(data_reinterpolated[1L:20L], type = "t", k = 4L,
+    pc_tadp_lbi <- dtwclust(data_reinterpolated_subset, type = "t", k = 4L,
                             dc = 1.5, control = list(window.size = 20L),
                             lb = "lbi", seed = 938)
 
     pc_tadp_lbi <- reset_nondeterministic(pc_tadp_lbi)
 
-    expect_equal_to_reference(pc_tadp_lbi, file_name(pc_tadp_lbi))
+    assign("pc_tadp_lbi", pc_tadp_lbi, persistent)
 
     ## ---------------------------------------------------------- TADPole with custom centroid
-    pc_tadp_cent <- dtwclust(data_reinterpolated[1L:20L], type = "t", k = 4L,
+    pc_tadp_cent <- dtwclust(data_reinterpolated_subset, type = "t", k = 4L,
                              preproc = zscore, centroid = shape_extraction,
                              dc = 1.5, control = list(window.size = 20L),
                              seed = 938)
 
     pc_tadp_cent <- reset_nondeterministic(pc_tadp_cent)
 
-    expect_equal_to_reference(pc_tadp_cent, file_name(pc_tadp_cent))
+    assign("pc_tadp_cent", pc_tadp_cent, persistent)
 })
 
 # =================================================================================================
@@ -195,8 +174,11 @@ test_that("Cluster reinitialization in partitional dtwclust works.", {
 
     expect_false(pc_cr@converged)
 
-    skip_on_cran()
-
     pc_cr <- reset_nondeterministic(pc_cr)
-    expect_equal_to_reference(pc_cr, file_name(pc_cr))
+    assign("pc_cr", pc_cr, persistent)
 })
+
+# =================================================================================================
+# clean
+# =================================================================================================
+rm(list = setdiff(ls(), ols))

@@ -1,23 +1,11 @@
-context("Test hierarchical")
+context("\tHierarchical")
 
 # =================================================================================================
-# invalid combinations
+# setup
 # =================================================================================================
 
-test_that("Invalid combinations in hierarchical clustering are detected.", {
-    expect_error(dtwclust(data, type = "h", k = 101L), "more clusters")
-
-    expect_error(dtwclust(data, type = "h", distance = "lbk"), "different length")
-    expect_error(dtwclust(data, type = "h", distance = "lbi"), "different length")
-    expect_error(dtwclust(data, type = "h", distance = "dtw_lb"), "different length")
-
-    expect_error(dtwclust(data, type = "h", preproc = "zscore"), "preprocessing")
-
-    expect_error(dtwclust(data_matrix, type = "h", distance = mean), "proxy", info = "Function")
-    expect_error(dtwclust(data_matrix, type = "h", distance = NULL), "proxy", info = "NULL")
-    expect_error(dtwclust(data_matrix, type = "h", distance = NA), "proxy", info = "NA")
-    expect_error(dtwclust(data_matrix, type = "h", distance = "dummy"), "proxy", info = "Unregistered")
-})
+## Original objects in env
+ols <- ls()
 
 # =================================================================================================
 # multiple k
@@ -32,7 +20,7 @@ test_that("Multiple k works as expected.", {
     skip_on_cran()
 
     hc_k <- lapply(hc_k, reset_nondeterministic)
-    expect_equal_to_reference(hc_k, file_name(hc_k))
+    assign("hc_k", hc_k, persistent)
 })
 
 # =================================================================================================
@@ -40,15 +28,13 @@ test_that("Multiple k works as expected.", {
 # =================================================================================================
 
 test_that("Hierarchical clustering works as expected.", {
-    skip_on_cran()
-
     ## ---------------------------------------------------------- all
     hc_all <- dtwclust(data, type = "hierarchical", k = 20L,
                        distance = "sbd", method = "all")
 
     hc_all <- lapply(hc_all, reset_nondeterministic)
 
-    expect_equal_to_reference(hc_all, file_name(hc_all, x32 = TRUE))
+    assign("hc_all", hc_all, persistent)
 
     ## ---------------------------------------------------------- non-symmetric
     hc_lbi <- dtwclust(data_reinterpolated, type = "hierarchical", k = 20L,
@@ -57,7 +43,7 @@ test_that("Hierarchical clustering works as expected.", {
 
     hc_lbi <- lapply(hc_lbi, reset_nondeterministic)
 
-    expect_equal_to_reference(hc_lbi, file_name(hc_lbi))
+    assign("hc_lbi", hc_lbi, persistent)
 
     ## ---------------------------------------------------------- custom centroid
     hc_cent <- dtwclust(data, type = "hierarchical", k = 20L,
@@ -67,7 +53,7 @@ test_that("Hierarchical clustering works as expected.", {
 
     hc_cent <- lapply(hc_cent, reset_nondeterministic)
 
-    expect_equal_to_reference(hc_cent, file_name(hc_cent))
+    assign("hc_cent", hc_cent, persistent)
 })
 
 # =================================================================================================
@@ -75,8 +61,6 @@ test_that("Hierarchical clustering works as expected.", {
 # =================================================================================================
 
 test_that("A valid custom hierarchical function works as expected.", {
-    skip_on_cran()
-
     require(cluster)
 
     hc_diana <- dtwclust(data, type = "hierarchical", k = 20L,
@@ -85,5 +69,10 @@ test_that("A valid custom hierarchical function works as expected.", {
     hc_diana <- reset_nondeterministic(hc_diana)
     hc_diana$call <- NULL
 
-    expect_equal_to_reference(hc_diana, file_name(hc_diana, x32 = TRUE))
+    assign("hc_diana", hc_diana, persistent)
 })
+
+# =================================================================================================
+# clean
+# =================================================================================================
+rm(list = setdiff(ls(), ols))

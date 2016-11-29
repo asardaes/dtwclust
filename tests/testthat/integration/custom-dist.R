@@ -1,4 +1,11 @@
-context("Test custom proxy distances in dtwclust")
+context("\tCustom proxy distances and dtwclust")
+
+# =================================================================================================
+# setup
+# =================================================================================================
+
+## Original objects in env
+ols <- ls()
 
 # =================================================================================================
 # Registered with proxy
@@ -46,9 +53,12 @@ test_that("Calling dtwclust after registering a custom distance works as expecte
                  tolerance = 0,
                  check.attributes = FALSE)
 
-    skip_on_cran()
-
-    expect_equal_to_reference(pc_ndtw, file_name(pc_ndtw), info = "nDTW")
-    expect_equal_to_reference(pc_ndtw_sym, file_name(pc_ndtw_sym), info = "Symmetric nDTW")
-    expect_equal_to_reference(pc_ndtw_par, file_name(pc_ndtw_par), info = "Params with nDTW")
+    assign("pc_ndtw", pc_ndtw, persistent)
+    assign("pc_ndtw_sym", pc_ndtw_sym, persistent)
+    assign("pc_ndtw_par", pc_ndtw_par, persistent)
 })
+
+# =================================================================================================
+# clean
+# =================================================================================================
+rm(list = setdiff(ls(), ols))
