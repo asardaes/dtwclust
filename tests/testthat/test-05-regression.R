@@ -1,12 +1,12 @@
 context("Regression tests")
 
 if (identical(Sys.getenv("NOT_CRAN"), "true")) {
-    source("regression/proxy.R")
-    source("regression/dtwb.R")
-    source("regression/family-distmat.R")
-    source("regression/family-centroids.R")
-    source("regression/custom-dist.R")
-    source("regression/cvis.R")
-    source("regression/methods.R")
-    source("regression/clusterings.R")
+    source("regression/proxy.R", TRUE)
+    source("regression/dtwb.R", TRUE)
+    source("regression/family-distmat.R", TRUE)
+    source("regression/family-centroids.R", TRUE)
+    source("regression/custom-dist.R", TRUE)
+    source("regression/cvis.R", TRUE)
+    source("regression/methods.R", TRUE)
+    source("regression/clusterings.R", TRUE)
 }

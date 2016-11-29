@@ -1,5 +1,5 @@
 context("Integration tests")
 
-source("integration/proxy.R")
-source("integration/families.R")
-source("integration/custom-dist.R")
+source("integration/proxy.R", TRUE)
+source("integration/families.R", TRUE)
+source("integration/custom-dist.R", TRUE)
