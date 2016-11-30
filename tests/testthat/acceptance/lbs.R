@@ -1,4 +1,4 @@
-context("Consistency of DTW lower bounds")
+context("\tConsistency of DTW lower bounds")
 
 # =================================================================================================
 # setup
