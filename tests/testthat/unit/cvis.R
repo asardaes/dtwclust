@@ -27,11 +27,13 @@ test_that("CVI calculations are consistent regardless of quantity or order of CV
 
     cvis <- c(internal_cvis, external_cvis)
 
-    expect_true(all(replicate(100L, {
-        considered_cvis <- sample(cvis, sample(length(cvis), 1L))
-        this_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), considered_cvis)
-        all(base_cvis[considered_cvis] == this_cvis[considered_cvis])
-    })))
+    expect_true(all(
+        times(100L) %dopar% {
+            considered_cvis <- sample(cvis, sample(length(cvis), 1L))
+            this_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), considered_cvis)
+            all(base_cvis[considered_cvis] == this_cvis[considered_cvis])
+        }
+    ))
 
     ## when missing elements
     pc_mv@distmat <- NULL
@@ -57,11 +59,15 @@ test_that("external CVI calculations are consistent regardless of quantity or or
 
     base_cvis <- cvi(labels_shuffled, CharTrajLabels, "external")
 
-    expect_true(all(replicate(1000L, {
-        considered_cvis <- sample(external_cvis, sample(length(external_cvis), 1L))
-        this_cvis <- cvi(labels_shuffled, CharTrajLabels, considered_cvis)
-        all(base_cvis[considered_cvis] == this_cvis[considered_cvis])
-    })))
+    export <- c("external_cvis", "labels_shuffled", "CharTrajLabels")
+
+    expect_true(all(
+        foreach(iterators::icount(1000L), .combine = c, .export = export) %dopar% {
+            considered_cvis <- sample(external_cvis, sample(length(external_cvis), 1L))
+            this_cvis <- cvi(labels_shuffled, CharTrajLabels, considered_cvis)
+            all(base_cvis[considered_cvis] == this_cvis[considered_cvis])
+        }
+    ))
 })
 
 # =================================================================================================
