@@ -156,7 +156,7 @@ test_that("Valid inputs provide a result greater than zero", {
 test_that("GAK can estimate sigma.", {
     dgak <- GAK(data[[1L]], data[[100L]])
 
-    expect_gt(dgak, 0)
+    expect_gt(attr(dgak, "sigma"), 0)
 })
 
 # =================================================================================================
