@@ -101,49 +101,47 @@ test_that("Invalid inputs are detected correctly in the distance functions.", {
 
 test_that("Valid inputs provide a result greater than zero", {
     for (foo in functions) {
-        for (input in names(invalid_inputs)) {
-            for (arg in args[[foo]]) {
+        for (arg in args[[foo]]) {
+            d <- do.call(foo,
+                         c(list(x = x_uv,
+                                y = y_uv_same_length),
+                           arg))
+
+            if (foo == "lb_keogh") d <- d$d
+
+            expect_gt(d, 0, label = paste0("d_", foo))
+
+            if (mv <- foo %in% supports_mv) {
                 d <- do.call(foo,
-                             c(list(x = x_uv,
-                                    y = y_uv_same_length),
+                             c(list(x = x_mv,
+                                    y = y_mv_same_length),
                                arg))
 
                 if (foo == "lb_keogh") d <- d$d
 
-                expect_gt(d, 0, label = paste0("d_", foo))
+                expect_gt(d, 0, label = paste0("d_mv_", foo))
+            }
 
-                if (mv <- foo %in% supports_mv) {
-                    d <- do.call(foo,
-                                 c(list(x = x_mv,
-                                        y = y_mv_same_length),
-                                   arg))
+            if (dl <- foo %in% supports_diff_lengths) {
+                d <- do.call(foo,
+                             c(list(x = x_uv,
+                                    y = y_uv_diff_length),
+                               arg))
 
-                    if (foo == "lb_keogh") d <- d$d
+                if (foo == "lb_keogh") d <- d$d
 
-                    expect_gt(d, 0, label = paste0("d_mv_", foo))
-                }
+                expect_gt(d, 0, label = paste0("d_dl_", foo))
+            }
 
-                if (dl <- foo %in% supports_diff_lengths) {
-                    d <- do.call(foo,
-                                 c(list(x = x_uv,
-                                        y = y_uv_diff_length),
-                                   arg))
+            if (mv && dl) {
+                d <- do.call(foo,
+                             c(list(x = x_mv,
+                                    y = y_mv_diff_length),
+                               arg))
 
-                    if (foo == "lb_keogh") d <- d$d
+                if (foo == "lb_keogh") d <- d$d
 
-                    expect_gt(d, 0, label = paste0("d_dl_", foo))
-                }
-
-                if (mv && dl) {
-                    d <- do.call(foo,
-                                 c(list(x = x_mv,
-                                        y = y_mv_diff_length),
-                                   arg))
-
-                    if (foo == "lb_keogh") d <- d$d
-
-                    expect_gt(d, 0, label = paste0("d_mvdl_", foo))
-                }
+                expect_gt(d, 0, label = paste0("d_mvdl_", foo))
             }
         }
     }
