@@ -1,10 +1,4 @@
-## Update to version 3.0.0
-* Removed deprecated arguments/slots
-* Added support for more hierarchical methods
-* Added support for functions in package clue
-* Added a new distance measure
-* Added another sample dataset
-* Optimizations and bug fixes
+## Update to version 3.0.1
 
 ## Test environments
 * Local GNU/Linux, R 3.3.2

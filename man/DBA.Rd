@@ -16,7 +16,8 @@ and the variables span the columns.}
 \code{X} if \code{NULL}. For multivariate series, this should be a matrix with the same
 characteristics as the matrices in \code{X}.}
 
-\item{...}{Currently ignored.}
+\item{...}{Further arguments for \code{\link{dtw_basic}}, however, the following are already pre-
+specified: \code{window.size}, \code{norm} (passed along), \code{backtrack} and \code{gcm}.}
 
 \item{window.size}{Window constraint for the DTW calculations. \code{NULL} means no constraint. A
 slanted band is used by default.}
