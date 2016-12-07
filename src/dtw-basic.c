@@ -143,7 +143,7 @@ double dtw_basic_c(double const *x, double const *y, int const w,
                 i--;
 
             } else {
-                error("dtw_basic: Invalid direction matrix computed. Indices %d and %d.", i+1, j+1); // nocov
+                error("dtw_basic: Invalid direction matrix computed. Indices %d and %d.", i+1, j+1);
             }
 
             index1[*path] = i + 1;
