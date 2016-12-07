@@ -138,8 +138,7 @@ call_envelop <- function(series, window.size) {
 
 # Create combinations of all possible pairs
 call_pairs <- function(n = 2L, lower = TRUE) {
-    if (n < 2L)
-        stop("At least two elements are needed to create pairs.")
+    if (n < 2L) stop("At least two elements are needed to create pairs.")
 
     .Call("pairs", n, lower, PACKAGE = "dtwclust")
 }
@@ -216,9 +215,7 @@ split_parallel <- function(obj, margin = NULL) {
 
 ## tasks created based on getDoParWorkers() could be larger than tasks based on objects
 allocate_matrices <- function(mat = NULL, ..., target.size) {
-    num_workers <- foreach::getDoParWorkers()
-
-    if (num_workers > 1L) {
+    if (foreach::getDoParWorkers() > 1L) {
         MAT <- lapply(1L:target.size, function(dummy) {
             matrix(0, ...)
         })
@@ -248,7 +245,7 @@ lnorm <- function(x, n = 2) {
         sum(abs(x) ^ n) ^ (1 / n)
 }
 
-# PREFUN for some of my proxy distances so that they support 'pairwise' direclty
+# PREFUN for some of my proxy distances so that they support 'pairwise' directly
 proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
     params$pairwise <- pairwise
 
