@@ -424,7 +424,7 @@ plot.dtwclust <- function(x, y, ...,
         ggdata <- data.frame(cl = rep(1L:x@k, each = (nc - 1L)),
                              vbreaks = as.numeric(1L:(nc - 1L) %o% sapply(centroids, NROW)))
 
-        gg <- gg + ggplot2::geom_vline(data = ggdata,
+        gg <- gg + ggplot2::geom_vline(data = ggdata[ggdata$cl %in% clus, , drop = FALSE],
                                        colour = "black", linetype = "longdash",
                                        aes_string(xintercept = "vbreaks"))
     }

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Version 3.0.1
+* Fixed subsetting of multivariate plots
 
 ## Version 3.0.0
 * Bear in mind that the `DTW/SBD` algorithms (and hence the functions that depend on them) might give different results in installations with 32-bit architectures.
