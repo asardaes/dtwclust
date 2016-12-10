@@ -13,7 +13,7 @@
 #' @param pairwise Calculate pairwise distances?
 #' @param dtw.func Which function to use for core DTW the calculations, either "dtw" or "dtw_basic".
 #'   See \code{\link[dtw]{dtw}} and \code{\link{dtw_basic}}.
-#' @param force.symmetry Force symmetry of the distance matrix. Only supported for \code{y = NULL}.
+#' @param force.symmetry Deprecated.
 #' @param ... Further arguments for \code{dtw.func} or \code{\link{lb_improved}}.
 #'
 #' @details
@@ -113,6 +113,11 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                    error.check = TRUE, pairwise = FALSE,
                    dtw.func = "dtw_basic", force.symmetry = FALSE, ...)
 {
+    if (!missing(force.symmetry)) { # nocov start
+        warning("'force.symmetry' is deprecated since it serves no real purpose here. ",
+                "Use LB_Improved with proxy::dist and force symmetry there if you wish.")
+    } # nocov end
+
     norm <- match.arg(norm, c("L1", "L2"))
     dtw.func <- match.arg(dtw.func, c("dtw", "dtw_basic"))
 
@@ -125,13 +130,8 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
     if (is.null(y))
         Y <- X
-    else {
+    else
         Y <- any2list(y)
-
-        if (force.symmetry && !pairwise && length(X) != length(Y)) {
-            warning("Unable to force symmetry. Resulting distance matrix is not square.")
-        }
-    }
 
     if (is_multivariate(X) || is_multivariate(Y))
         stop("dtw_lb does not support multivariate series.")
@@ -182,14 +182,13 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                      window.size = window.size,
                      norm = norm,
                      error.check = error.check,
-                     force.symmetry = force.symmetry,
                      ...)
 
     ## Update with DTW
     new.indNN <- apply(D, 1L, which.min) # index of nearest neighbors
     indNN <- new.indNN + 1L # initialize all different
 
-    while (any(new.indNN != indNN)) {
+    while (!is.null(y) && any(new.indNN != indNN)) {
         indNew <- which(new.indNN != indNN)
         indNN <- new.indNN
 
@@ -215,8 +214,6 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
         idd <- cbind(1L:length(X), indNN)[indNew, , drop = FALSE]
 
         D[idd] <- dSub
-
-        if (force.symmetry) D[idd[ , 2L:1L]] <- dSub
 
         new.indNN <- apply(D, 1L, which.min)
     }

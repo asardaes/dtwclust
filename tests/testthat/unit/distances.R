@@ -31,10 +31,8 @@ args <- list(
     ),
 
     dtw_lb = list(
-        list(window.size = 15L, norm = "L1", force.symmetry = FALSE),
-        list(window.size = 15L, norm = "L1", force.symmetry = TRUE),
-        list(window.size = 15L, norm = "L2", force.symmetry = FALSE),
-        list(window.size = 15L, norm = "L2", force.symmetry = TRUE)
+        list(window.size = 15L, norm = "L1"),
+        list(window.size = 15L, norm = "L2")
     ),
 
     SBD = list(),

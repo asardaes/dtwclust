@@ -22,7 +22,7 @@ Euclidean.}
 \item{dtw.func}{Which function to use for core DTW the calculations, either "dtw" or "dtw_basic".
 See \code{\link[dtw]{dtw}} and \code{\link{dtw_basic}}.}
 
-\item{force.symmetry}{Force symmetry of the distance matrix. Only supported for \code{y = NULL}.}
+\item{force.symmetry}{Deprecated.}
 
 \item{...}{Further arguments for \code{dtw.func} or \code{\link{lb_improved}}.}
 }
