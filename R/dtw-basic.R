@@ -15,10 +15,11 @@
 #' @param backtrack Also compute the warping path between series? See details.
 #' @param normalize Should the distance be normalized? Only supported for \code{symmetric2}.
 #' @param ... Currently ignored.
-#' @param gcm Optionally, a matrix with \code{NROW(x)+1} rows and \code{NROW(y)+1} columns to use
-#'   for the global cost matrix calculations. Used internally for memory optimization. If provided,
-#'   it \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel version
-#'   in \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.
+#' @param gcm Optionally, a matrix to use for the global cost matrix calculations. It should have
+#'   \code{NROW(y)+1} columns and \code{NROW(x)+1} rows for \code{backtrack = TRUE} \strong{or}
+#'   \code{2} rows for \code{backtrack = FALSE}. Used internally for memory optimization. If
+#'   provided, it \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel
+#'   version in \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.
 #' @param error.check Check data inconsistencies?
 #'
 #' @details
@@ -53,7 +54,7 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
         check_consistency(y, "ts")
     }
 
-    backtrack <- as.logical(backtrack)
+    backtrack <- isTRUE(backtrack)
 
     if (NCOL(x) != NCOL(y))
         stop("Multivariate series must have the same number of variables.")
@@ -76,11 +77,20 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
     if (normalize && step.pattern == 1)
         stop("Unable to normalize with chosen step pattern.")
 
-    if (is.null(gcm))
-        gcm <- matrix(0, NROW(x) + 1L, NROW(y) + 1L)
-    else if (!is.matrix(gcm) || nrow(gcm) < (NROW(x) + 1L) || ncol(gcm) < (NROW(y) + 1L))
-        stop("dtw_basic: Dimension inconsistency in 'gcm'")
-    else if (storage.mode(gcm) != "double")
+    if (backtrack) {
+        if (is.null(gcm))
+            gcm <- matrix(0, NROW(x) + 1L, NROW(y) + 1L)
+        else if (!is.matrix(gcm) || nrow(gcm) < (NROW(x) + 1L) || ncol(gcm) < (NROW(y) + 1L))
+            stop("dtw_basic: Dimension inconsistency in 'gcm'")
+
+    } else {
+        if (is.null(gcm))
+            gcm <- matrix(0, 2L, NROW(y) + 1L)
+        else if (!is.matrix(gcm) || nrow(gcm) < 2L || ncol(gcm) < (NROW(y) + 1L))
+            stop("dtw_basic: Dimension inconsistency in 'gcm'")
+    }
+
+    if (storage.mode(gcm) != "double")
         stop("dtw_basic: If provided, 'gcm' must have 'double' storage mode.")
 
     d <- .Call("dtw_basic", x, y, window.size,
@@ -126,8 +136,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
     retclass <- "crossdist"
 
     ## to pre-allocate GCMs
-    L1 <- max(sapply(x, NROW)) + 1L
-    L2 <- max(sapply(y, NROW)) + 1L
+    nc <- max(sapply(y, NROW)) + 1L
 
     ## Calculate distance matrix
     if (pairwise) {
@@ -136,7 +145,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
 
         validate_pairwise(X, Y)
 
-        GCM <- allocate_matrices(gcm, nrow = L1, ncol = L2, target.size = length(X))
+        GCM <- allocate_matrices(gcm, nrow = 2L, ncol = nc, target.size = length(X))
 
         D <- foreach(x = X, y = Y, gcm = GCM,
                      .combine = c,
@@ -159,7 +168,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
         pairs <- call_pairs(length(x), lower = FALSE)
         pairs <- split_parallel(pairs, 1L)
 
-        GCM <- allocate_matrices(gcm, nrow = L1, ncol = L2, target.size = length(pairs))
+        GCM <- allocate_matrices(gcm, nrow = 2L, ncol = nc, target.size = length(pairs))
 
         dots$pairwise <- TRUE
 
@@ -188,7 +197,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
     } else {
         Y <- split_parallel(y)
 
-        GCM <- allocate_matrices(gcm, nrow = L1, ncol = L2, target.size = length(Y))
+        GCM <- allocate_matrices(gcm, nrow = 2L, ncol = nc, target.size = length(Y))
 
         D <- foreach(y = Y, gcm = GCM,
                      .combine = cbind,

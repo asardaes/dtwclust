@@ -15,16 +15,14 @@
 // the matrix for lcm/gcm/steps
 double *D;
 
-// to avoid comparison problems in which_min
+// to avoid some comparison problems in which_min
 double volatile *tuple;
-// also for which_min but used in main function too
-int direction = -1;
 
 // double to single index, matrices are always vectors in R
-int inline d2s(int const i, int const j, int const nx) __attribute__((always_inline));
+int inline d2s(int const i, int const j, int const nx, int const backtrack) __attribute__((always_inline));
 
-int inline d2s(int const i, int const j, int const nx) {
-    return i + j * (nx + 1);
+int inline d2s(int const i, int const j, int const nx, int const backtrack) {
+    return backtrack ? (i + j * (nx + 1)) : ((i % 2) + j * 2);
 }
 
 // vector norm
@@ -50,37 +48,70 @@ double lnorm(double const *x, double const *y, double const norm,
 }
 
 // which direction to take in the cost matrix
-void which_min(int const i, int const j, int const nx,
-               double const step, double volatile const local_cost)
+int which_min(int const i, int const j, int const nx, int const backtrack,
+              double const step, double volatile const local_cost)
 {
     // DIAG, LEFT, UP
-    tuple[0] = (D[d2s(i-1, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j-1, nx)] + step * local_cost;
-    tuple[1] = (D[d2s(i, j-1, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i, j-1, nx)] + local_cost;
-    tuple[2] = (D[d2s(i-1, j, nx)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j, nx)] + local_cost;
+    tuple[0] = (D[d2s(i-1, j-1, nx, backtrack)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j-1, nx, backtrack)] + step * local_cost;
+    tuple[1] = (D[d2s(i, j-1, nx, backtrack)] == NOT_VISITED) ? DBL_MAX : D[d2s(i, j-1, nx, backtrack)] + local_cost;
+    tuple[2] = (D[d2s(i-1, j, nx, backtrack)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j, nx, backtrack)] + local_cost;
 
-    direction = (tuple[1] < tuple[0]) ? 1 : 0;
+    int direction = (tuple[1] < tuple[0]) ? 1 : 0;
     direction = (tuple[2] < tuple[direction]) ? 2 : direction;
+    return direction;
+}
+
+// backtrack step matrix
+int backtrack_steps(int const nx, int const ny,
+                    int *index1, int *index2)
+{
+    int i = nx - 1;
+    int j = ny - 1;
+    int path = 1;
+
+    // always start at end of series
+    index1[0] = nx;
+    index2[0] = ny;
+
+    while(!(i == 0 && j == 0)) {
+        if (D[d2s(i, j, nx, 1)] == 0) {
+            i--;
+            j--;
+
+        } else if (D[d2s(i, j, nx, 1)] == 1) {
+            j--;
+
+        } else if (D[d2s(i, j, nx, 1)] == 2) {
+            i--;
+
+        } else {
+            error("dtw_basic: Invalid direction matrix computed. Indices %d and %d.", ++i, ++j);
+        }
+
+        index1[path] = i + 1;
+        index2[path] = j + 1;
+        path++;
+    }
+
+    return path;
 }
 
 // the C code
 double dtw_basic_c(double const *x, double const *y, int const w,
                    int const nx, int const ny, int const dim,
                    double const norm, double const step,
-                   int const backtrack,
-                   int *index1, int *index2, int *path)
+                   int const backtrack)
 {
-    int i, j;
+    int i, j, direction;
     double volatile local_cost;
 
-    // initialization
-    for (i = 0; i <= nx; i++) {
-        for (j = 0; j <= ny; j++)
-            D[d2s(i, j, nx)] = NOT_VISITED;
-    }
+    // initialization (first row and first column)
+    for (j = 0; j <= ny; j++) D[d2s(0, j, nx, backtrack)] = NOT_VISITED;
+    for (i = 0; i <= (backtrack ? nx : 2); i++) D[d2s(i, 0, nx, backtrack)] = NOT_VISITED;
 
     // first value, must set here to avoid multiplying by step
-    D[d2s(1, 1, nx)] = lnorm(x, y, norm, nx, ny, dim, 0, 0);
-    if (norm == 2) D[d2s(1, 1, nx)] = D[d2s(1, 1, nx)] * D[d2s(1, 1, nx)];
+    D[d2s(1, 1, nx, backtrack)] = lnorm(x, y, norm, nx, ny, dim, 0, 0);
+    if (norm == 2) D[d2s(1, 1, nx, backtrack)] = D[d2s(1, 1, nx, backtrack)] * D[d2s(1, 1, nx, backtrack)];
 
     // dynamic programming
     for (i = 1; i <= nx; i++) {
@@ -99,15 +130,21 @@ double dtw_basic_c(double const *x, double const *y, int const w,
             j2 = j2 < ny ? j2 : ny;
         }
 
-        for (j = j1; j <= j2; j++) {
+        for (j = 1; j <= ny; j++) {
             // very first value already set above
             if (i == 1 && j == 1) continue;
+
+            if (j < j1 || j > j2) {
+                // cell outside of window
+                D[d2s(i, j, nx, backtrack)] = NOT_VISITED;
+                continue;
+            }
 
             local_cost = lnorm(x, y, norm, nx, ny, dim, i-1, j-1);
             if (norm == 2) local_cost = local_cost * local_cost;
 
             // set the value of 'direction'
-            which_min(i, j, nx, step, local_cost);
+            direction = which_min(i, j, nx, backtrack, step, local_cost);
 
             /*
              * I can use the same matrix to save both cost values and steps taken by shifting
@@ -116,43 +153,12 @@ double dtw_basic_c(double const *x, double const *y, int const w,
              * replaced by steps along the way.
              */
 
-            D[d2s(i, j, nx)] = tuple[direction];
-            if (backtrack) D[d2s(i-1, j-1, nx)] = (double) direction;
+            D[d2s(i, j, nx, backtrack)] = tuple[direction];
+            if (backtrack) D[d2s(i-1, j-1, nx, backtrack)] = (double) direction;
         }
     }
 
-    // backtrack
-    if (backtrack) {
-        i = nx - 1;
-        j = ny - 1;
-
-        // always start at end of series
-        index1[0] = nx;
-        index2[0] = ny;
-        *path = 1;
-
-        while(!(i == 0 && j == 0)) {
-            if (D[d2s(i, j, nx)] == 0) {
-                i--;
-                j--;
-
-            } else if (D[d2s(i, j, nx)] == 1) {
-                j--;
-
-            } else if (D[d2s(i, j, nx)] == 2) {
-                i--;
-
-            } else {
-                error("dtw_basic: Invalid direction matrix computed. Indices %d and %d.", i+1, j+1);
-            }
-
-            index1[*path] = i + 1;
-            index2[*path] = j + 1;
-            (*path)++;
-        }
-    }
-
-    return (norm == 1) ? D[(nx+1) * (ny+1) - 1] : sqrt(D[(nx+1) * (ny+1) - 1]);
+    return (norm == 1) ? D[d2s(nx, ny, nx, backtrack)] : sqrt(D[d2s(nx, ny, nx, backtrack)]);
 }
 
 // the gateway function
@@ -172,14 +178,13 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
         SEXP index1 = PROTECT(allocVector(INTSXP, nx + ny));
         SEXP index2 = PROTECT(allocVector(INTSXP, nx + ny));
 
-        // actual length holder
-        int path = 0;
-
         // calculate distance
         d = dtw_basic_c(REAL(x), REAL(y), asInteger(window),
                         nx, ny, asInteger(dim),
-                        asReal(norm), asReal(step), 1,
-                        INTEGER(index1), INTEGER(index2), &path);
+                        asReal(norm), asReal(step), 1);
+
+        // actual length of path
+        int path = backtrack_steps(nx, ny, INTEGER(index1), INTEGER(index2));
 
         // put results in a list
         SEXP list_names = PROTECT(allocVector(STRSXP, 4));
@@ -203,8 +208,7 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
         // calculate distance
         d = dtw_basic_c(REAL(x), REAL(y), asInteger(window),
                         nx, ny, asInteger(dim),
-                        asReal(norm), asReal(step), 0,
-                        NULL, NULL, NULL);
+                        asReal(norm), asReal(step), 0);
 
         SEXP ret = PROTECT(ScalarReal(d));
 

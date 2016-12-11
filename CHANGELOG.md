@@ -2,6 +2,7 @@
 
 ## Version 3.0.1
 * Fixed subsetting of multivariate plots
+* Implemented the memory-saving version of DTW in `dtw_basic` when `backtrack = FALSE`.
 * The `force.symmetry` in `dtw_lb` is deprecated since it didn't serve any real purpose.
 
 ## Version 3.0.0

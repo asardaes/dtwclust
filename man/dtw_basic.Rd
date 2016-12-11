@@ -25,10 +25,11 @@ here. See \code{\link[dtw]{stepPattern}}.}
 
 \item{...}{Currently ignored.}
 
-\item{gcm}{Optionally, a matrix with \code{NROW(x)+1} rows and \code{NROW(y)+1} columns to use
-for the global cost matrix calculations. Used internally for memory optimization. If provided,
-it \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel version
-in \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.}
+\item{gcm}{Optionally, a matrix to use for the global cost matrix calculations. It should have
+\code{NROW(y)+1} columns and \code{NROW(x)+1} rows for \code{backtrack = TRUE} \strong{or}
+\code{2} rows for \code{backtrack = FALSE}. Used internally for memory optimization. If
+provided, it \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel
+version in \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.}
 
 \item{error.check}{Check data inconsistencies?}
 }
