@@ -153,14 +153,13 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
     dots$normalize <- FALSE
 
     if (is.null(y)) {
-        y <- x
         symmetric <- TRUE
+        y <- x
 
     } else {
+        symmetric <- FALSE
         y <- any2list(y)
         if (error.check) check_consistency(y, "vltslist")
-
-        symmetric <- FALSE
     }
 
     if (is.null(sigma)) {
@@ -185,6 +184,16 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
         stop("Parameter 'sigma' must be positive.")
 
     dots$sigma <- sigma
+
+    ## parallel chunks are made column-wise, so flip x and y if necessary
+    flip <- NULL
+    num_workers <- foreach::getDoParWorkers()
+
+    if (!pairwise && !symmetric && length(y) < num_workers && length(x) >= num_workers) {
+        flip <- y
+        y <- x
+        x <- flip
+    }
 
     retclass <- "crossdist"
 
@@ -316,6 +325,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
         D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
     }
 
+    if (!is.null(flip)) D <- t(D)
     class(D) <- retclass
     attr(D, "method") <- "GAK"
     attr(D, "sigma") <- sigma
