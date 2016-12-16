@@ -13,7 +13,6 @@
 #' @param pairwise Calculate pairwise distances?
 #' @param dtw.func Which function to use for core DTW the calculations, either "dtw" or "dtw_basic".
 #'   See \code{\link[dtw]{dtw}} and \code{\link{dtw_basic}}.
-#' @param force.symmetry Deprecated.
 #' @param ... Further arguments for \code{dtw.func} or \code{\link{lb_improved}}.
 #'
 #' @details
@@ -111,13 +110,8 @@
 #'
 dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                    error.check = TRUE, pairwise = FALSE,
-                   dtw.func = "dtw_basic", force.symmetry = FALSE, ...)
+                   dtw.func = "dtw_basic", ...)
 {
-    if (!missing(force.symmetry)) { # nocov start
-        warning("'force.symmetry' is deprecated since it serves no real purpose here. ",
-                "Use LB_Improved with proxy::dist and force symmetry there if you wish.")
-    } # nocov end
-
     norm <- match.arg(norm, c("L1", "L2"))
     dtw.func <- match.arg(dtw.func, c("dtw", "dtw_basic"))
 
@@ -141,6 +135,13 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     dots$norm <- norm
     dots$window.size <- window.size
     dots$pairwise <- TRUE
+
+    if (!is.null(dots$force.symmetry)) { # nocov start
+        warning("'force.symmetry' was removed since it served no real purpose here. ",
+                "Use LB_Improved with proxy::dist and force symmetry there if you wish.")
+
+        dots$force.symmetry <- NULL
+    } # nocov end
 
     if (pairwise) {
         check_consistency(X, "tslist")

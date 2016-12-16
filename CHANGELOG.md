@@ -3,7 +3,7 @@
 ## Version 3.0.1
 * Fixed subsetting of multivariate plots
 * Implemented the memory-saving version of DTW in `dtw_basic` when `backtrack = FALSE`.
-* The `force.symmetry` argument in `dtw_lb` is deprecated since it didn't serve any real purpose.
+* The `force.symmetry` argument in `dtw_lb` was removed since it didn't serve any real purpose.
 
 ## Version 3.0.0
 * Bear in mind that the `DTW/SBD` algorithms (and hence the functions that depend on them) might give different results in installations with 32-bit architectures.
