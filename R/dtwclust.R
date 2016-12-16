@@ -38,13 +38,13 @@
 #' Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering
 #' is done with \code{\link[stats]{hclust}}. TADPole clustering uses the \code{\link{TADPole}}
 #' function. Specifying \code{type} = \code{"partitional"}, \code{distance} = \code{"sbd"} and
-#' \code{centroid} = \code{"shape"} is equivalent to the k-Shape algorithm (Paparrizos and Gravano,
+#' \code{centroid} = \code{"shape"} is equivalent to the k-Shape algorithm (Paparrizos and Gravano
 #' 2015).
 #'
 #' The \code{data} may be a matrix, a data frame or a list. Matrices and data frames are coerced to
 #' a list, both row-wise. Only lists can have series with different lengths or multiple dimensions.
 #' Most of the optimizations require series to have the same length, so consider reinterpolating
-#' them to save some time (see Ratanamahatana and Keogh, 2004; \code{\link{reinterpolate}}). No
+#' them to save some time (see Ratanamahatana and Keogh 2004; \code{\link{reinterpolate}}). No
 #' missing values are allowed.
 #'
 #' In the case of multivariate time series, they should be provided as a list of matrices, where
@@ -101,7 +101,7 @@
 #'   the clustering can be controlled by means of the fuzziness exponent*. Bear in mind that the
 #'   centroid definition of fuzzy c-means requires equal dimensions, which means that all series
 #'   must have the same length. This problem can be circumvented by applying transformations to the
-#'   series (see for example D'Urso and Maharaj, 2009).
+#'   series (see for example D'Urso and Maharaj (2009)).
 #'
 #'   Note that the fuzzy clustering could be transformed to a crisp one by finding the highest
 #'   membership coefficient. Some of the slots of the object returned by this function assume this,

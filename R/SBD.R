@@ -1,7 +1,7 @@
 #' Shape-based distance
 #'
-#' Distance based on coefficient-normalized cross-correlation as proposed by Paparrizos and Gravano,
-#' 2015, for the k-Shape clustering algorithm.
+#' Distance based on coefficient-normalized cross-correlation as proposed by Paparrizos and Gravano
+#' (2015), for the k-Shape clustering algorithm.
 #'
 #' @export
 #'

@@ -31,7 +31,7 @@ A list with:
 }
 }
 \description{
-Time-series Anytime Density Peaks Clustering as proposed by Begum et al., 2015.
+Time-series Anytime Density Peaks Clustering as proposed by Begum et al. (2015).
 }
 \details{
 This function can be called either directly or through \code{\link{dtwclust}}.

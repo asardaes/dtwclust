@@ -1,7 +1,7 @@
 #' Shape average of several time series
 #'
-#' Time-series shape extraction based on optimal alignments as proposed by Paparrizos and Gravano,
-#' 2015, for the k-Shape clustering algorithm.
+#' Time-series shape extraction based on optimal alignments as proposed by Paparrizos and Gravano
+#' (2015), for the k-Shape clustering algorithm.
 #'
 #' @export
 #'

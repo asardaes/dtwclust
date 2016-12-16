@@ -25,11 +25,12 @@
 #' Most optimizations require equal dimensionality, which means time series should have equal
 #' length. DTW itself does not require this, but it is relatively expensive to compute. Other
 #' distance definitions may be used, or series could be reinterpolated to a matching length
-#' (Ratanamahatana and Keogh, 2004).
+#' (Ratanamahatana and Keogh 2004).
 #'
 #' Other packages that are particularly leveraged here are the \code{proxy} package for distance
-#' matrix calculations and the \code{dtw} package for the core DTW calculations. The main clustering
-#' function and entry point for this package is \code{\link{dtwclust}}.
+#' matrix calculations and the \code{dtw} package for some of the core DTW calculations.
+#'
+#' The main clustering function and entry point for this package is \code{\link{dtwclust}}.
 #'
 #' Please note the random number generator is set to L'Ecuyer-CMRG when \code{dtwclust} is attached
 #' in an attempt to preserve reproducibility. You are free to change this afterwards if you wish.

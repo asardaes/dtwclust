@@ -38,7 +38,6 @@ pass-through \code{preproc} function.
 
 \dontrun{
 data(uciCT)
-ctrl <- new("dtwclustControl", window.size = 18L, symmetric = TRUE)
 fam <- new("dtwclustFamily", dist = "gak",
            control = list(symmetric = TRUE, window.size = 18L))
 fam@dist(CharTraj)

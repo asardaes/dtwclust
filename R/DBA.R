@@ -1,6 +1,6 @@
 #' DTW Barycenter Averaging
 #'
-#' A global averaging method for time series under DTW (Petitjean, Ketterlin and Gancarski, 2011).
+#' A global averaging method for time series under DTW (Petitjean, Ketterlin and Gancarski 2011).
 #'
 #' @export
 #'

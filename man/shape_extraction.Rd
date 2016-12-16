@@ -21,8 +21,8 @@ characteristics as the matrices in \code{X}. \emph{It will be z-normalized}.}
 Centroid time series (z-normalized).
 }
 \description{
-Time-series shape extraction based on optimal alignments as proposed by Paparrizos and Gravano,
-2015, for the k-Shape clustering algorithm.
+Time-series shape extraction based on optimal alignments as proposed by Paparrizos and Gravano
+(2015), for the k-Shape clustering algorithm.
 }
 \details{
 This works only if the series are \emph{z-normalized}, since the output will also have this

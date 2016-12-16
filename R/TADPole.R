@@ -1,6 +1,6 @@
 #' TADPole clustering
 #'
-#' Time-series Anytime Density Peaks Clustering as proposed by Begum et al., 2015.
+#' Time-series Anytime Density Peaks Clustering as proposed by Begum et al. (2015).
 #'
 #' @export
 #'

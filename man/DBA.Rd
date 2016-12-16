@@ -38,7 +38,7 @@ Euclidean distance.}
 The average time series.
 }
 \description{
-A global averaging method for time series under DTW (Petitjean, Ketterlin and Gancarski, 2011).
+A global averaging method for time series under DTW (Petitjean, Ketterlin and Gancarski 2011).
 }
 \details{
 This function tries to find the optimum average series between a group of time series in DTW

@@ -48,7 +48,7 @@ Most optimizations require equal dimensionality, which means time series should 
 
 The latest version from CRAN can be installed with `install.packages("dtwclust")`.
 
-If you want to test the latest version from github, first install the [prerequisites for R package development](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites) as well as the [devtools package](https://cran.r-project.org/package=devtools), and then type `devtools::install_github("asardaes/dtwclust")`. If you want the vignette to be installed, set the `build_vignettes` parameter to `TRUE`, it will take a couple of minutes.
+If you want to test the latest version from github, first install the [prerequisites for R package development](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites) (LaTeX is probably only neccesary if you want to build the vignette) as well as the [devtools package](https://cran.r-project.org/package=devtools), and then type `devtools::install_github("asardaes/dtwclust")`. If you want the vignette to be installed, set the `build_vignettes` parameter to `TRUE`, it will take a couple of minutes.
 
 If you're wondering about which version to install, take a look at the [CHANGELOG](CHANGELOG.md) file, I try to keep it updated.
 
