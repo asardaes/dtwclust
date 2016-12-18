@@ -103,6 +103,8 @@ create_dtwclust <- function(..., override.family = TRUE) {
                 }
             else if (.Object@type == "tadpole" && length(centroids))
                 allcent <- function(dummy) { centroids[1L] } # for CVI's global_cent
+            else if (.Object@type == "fuzzy")
+                allcent <- .Object@centroid
             else
                 allcent <- .Object@family@allcent
 
