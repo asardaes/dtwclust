@@ -734,8 +734,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                 if (is.function(centroid)) {
                     allcent <- centroid
-
                     centroids <- lapply(1L:k, function(kcent) { centroid(data[cluster == kcent]) })
+                    cent_char <- as.character(substitute(centroid))[1L]
 
                 } else {
                     allcent <- function() {}
@@ -751,6 +751,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                     })
 
                     centroids <- data[centroids]
+                    cent_char <- "PAM (Hierarchical)"
                 }
 
                 create_dtwclust(stats::as.hclust(hc),
@@ -765,7 +766,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                 type = type,
                                 method = if (!is.null(hc$method)) hc$method else method,
                                 distance = distance,
-                                centroid = as.character(substitute(centroid))[1L],
+                                centroid = cent_char,
                                 preproc = preproc_char,
 
                                 centroids = centroids,

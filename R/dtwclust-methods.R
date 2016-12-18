@@ -92,9 +92,8 @@ setMethod("show", "dtwclust",
 
               cat(object@type, "clustering with", object@k, "clusters\n")
               cat("Using", object@distance, "distance\n")
+              cat("Using", object@centroid, "centroids\n")
 
-              if (object@type == "partitional")
-                  cat("Using", object@centroid, "centroids\n")
               if (object@type == "hierarchical")
                   cat("Using method", object@method, "\n")
               if (object@preproc != "none")
