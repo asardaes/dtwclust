@@ -439,7 +439,7 @@ Both the distance and centroid functions were implemented in \dtwclust{} as indi
 
 The previous procedures result in what is known as a crisp or hard partition, although hierarchical clustering only indirectly when the dendrogram is cut. In crisp partitions, each member of the data belongs to only one cluster, and clusters are mutually exclusive. By contrast, fuzzy clustering creates a fuzzy or soft partition in which each member belongs to each cluster to a certain degree. For each member of the data, the degree of belongingness is constrained so that its sum equals 1. Therefore, if there are $N$ objects in the data and $k$ clusters are desired, an $N \times k$ membership matrix $u$ can be created, where all the rows must sum to 1.
 
-One of the most widely used versions of the algorithm is fuzzy c-means, which is described in \citet{bezdek1981}, and it is the algorithm implemented in \dtwclust{}. It tries to create a fuzzy partition by minimizing the function in \cref{eq:fuzzy-objective} under the constraints given in \cref{eq:fuzzy-constraints}. The membership matrix $u$ is initialized randomly in such a way that the constraints are fulfilled. The exponent $m$ is known as the fuzziness exponent and should be greater than 1, with a common default value of 2. Originally, the distance $d_{p,c}$ was defined as the Euclidean distance between the $p$-th object and the $c$-th fuzzy centroid, so that the objective was written in terms of the squared Euclidean distance. However, the definition of this distance can change (see, e.g., \citet{durso2009}), and doing so in \dtwclust{} is straightforward, since it only entails registering the corresponding distance function with \pkg{proxy}.
+One of the most widely used versions of the algorithm is fuzzy c-means, which is described in \citet{bezdek1981}, which is implemented in \dtwclust{}. It tries to create a fuzzy partition by minimizing the function in \cref{eq:fuzzy-objective} under the constraints given in \cref{eq:fuzzy-constraints}. The membership matrix $u$ is initialized randomly in such a way that the constraints are fulfilled. The exponent $m$ is known as the fuzziness exponent and should be greater than 1, with a common default value of 2. Originally, the distance $d_{p,c}$ was defined as the Euclidean distance between the $p$-th object and the $c$-th fuzzy centroid, so that the objective was written in terms of the squared Euclidean distance. However, the definition of this distance can change (see, e.g., \citet{durso2009}), and doing so in \dtwclust{} is straightforward, since it only entails registering the corresponding distance function with \pkg{proxy}.
 
 \begin{subequations}
 \begin{gather}
@@ -448,12 +448,22 @@ One of the most widely used versions of the algorithm is fuzzy c-means, which is
 \end{gather}
 \end{subequations}
 
-The centroid function used by fuzzy c-means calculates the mean for each point across all members in the data, weighted by their degree of belongingness. If we define $\mu_{c,i}$ as the $i$-th element of the $c$-th centroid, and $x_{p,i}$ as the $i$-th element of the $p$-th object in the data, the centroid calculation can be expressed with \cref{eq:fuzzy-centroid}. It follows that all members of the data must have the same dimensionality in this case. As with the normal mean prototype, this centroid function might not be suitable for time-series, and it is common to first apply a transformation to the data and cluster in the resulting space. For instance, \citet{durso2009} used the autocorrelation function to extract a certain amount of coefficients, resulting in data with equal dimensionality, and performed fuzzy clustering on the autocorrelation coefficients. See \cref{app:fuzzy} for an example.
+The centroid function used by fuzzy c-means calculates the mean for each point across all members in the data, weighted by their degree of belongingness. If we define $\mu_{c,i}$ as the $i$-th element of the $c$-th centroid, and $x_{p,i}$ as the $i$-th element of the $p$-th object in the data, the centroid calculation can be expressed with \cref{eq:fcm-centroid}. It follows that all members of the data must have the same dimensionality in this case. As with the normal mean prototype, this centroid function might not be suitable for time-series, and it is common to first apply a transformation to the data and cluster in the resulting space. For instance, \citet{durso2009} used the autocorrelation function to extract a certain amount of coefficients, resulting in data with equal dimensionality, and performed fuzzy clustering on the autocorrelation coefficients. See \cref{app:fuzzy} for an example.
 
 \begin{equation}
-\label{eq:fuzzy-centroid}
+\label{eq:fcm-centroid}
 \mu_{c,i} = \frac{\sum^N_{p = 1} u^m_{p,c} x_{p,i}}{\sum^N_{p = 1} u^m_{p,c}}
 \end{equation}
+
+Another option is to use fuzzy c-medoids (FCMdd) as the centroid function \citep{krishnapuram2001, izakian2015}, whereby the centroids are selected according to \cref{eq:fcmdd-centroid}. Similar to PAM, this centroid function does not alter the data, so the centroids are always elements of the original set. This centroid function was implemented in \dtwclust{} in version 3.0.1.
+
+\begin{subequations}
+\label{eq:fcmdd-centroid}
+\begin{gather}
+\mu_c = x_q \\
+q = \arg \min \sum^N_{p = 1} u^m_{p,c} d^2_{p,c}
+\end{gather}
+\end{subequations}
 
 Finally, the objective is minimized iteratively by applying \cref{eq:fuzzy-update} a certain number of iterations or until convergence is assumed. In \cref{eq:fuzzy-update}, $d_{p,c}$ represents the distance between the $p$-th member of the data and the $c$-th fuzzy centroid, so great care must be given to the shown indices $p$, $c$ and $q$. It is clear from the equation that this update only depends on the chosen fuzziness exponent and the distance measure.
 
@@ -513,6 +523,7 @@ As previously mentioned, most time-series clustering algorithms use existing fun
 
 Other clustering algorithms that make significant modifications would be harder to integrate by the user. However, it would still be possible, thanks to the open-source nature of \R{} and the fact that \dtwclust{} is hosted on GitHub\footnote{\url{https://github.com/asardaes/dtwclust}}.
 
+\newpage
 \section{Conclusion}
 \label{sec:conclusion}
 
