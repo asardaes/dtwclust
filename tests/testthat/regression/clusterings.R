@@ -15,9 +15,11 @@ with(persistent, {
     test_that("Fuzzy clustering gives the same results as references.", {
         skip_on_cran()
 
-        expect_equal_to_reference(fc, file_name(fc))
         expect_equal_to_reference(fc_k, file_name(fc_k))
-        expect_equal_to_reference(fc_mv, file_name(fc_mv))
+        expect_equal_to_reference(fcm, file_name(fcm))
+        expect_equal_to_reference(fcmdd, file_name(fcmdd))
+        expect_equal_to_reference(fcm_mv, file_name(fcm_mv))
+        expect_equal_to_reference(fcmdd_mv, file_name(fcmdd_mv))
     })
 })
 

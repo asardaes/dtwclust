@@ -117,30 +117,25 @@ test_that("Invalid combinations in fuzzy clustering are detected.", {
     expect_error(dtwclust(data_matrix, type = "f", distance = NA), "proxy", info = "NA")
     expect_error(dtwclust(data_matrix, type = "f", distance = "dummy"), "proxy", info = "Unregistered")
 
-    expect_warning(dtwclust(data_subset, type = "f",
-                            preproc = reinterpolate, new.length = 205L,
-                            distance = "L2", centroid = "mean"),
-                   "centroid.*fcm")
+    expect_error(dtwclust(data_subset, type = "f",
+                          preproc = reinterpolate, new.length = 205L,
+                          distance = "L2", centroid = "mean"))
 
-    expect_warning(dtwclust(data_subset, type = "f",
-                            preproc = reinterpolate, new.length = 205L,
-                            distance = "L2", centroid = "median"),
-                   "centroid.*fcm")
+    expect_error(dtwclust(data_subset, type = "f",
+                          preproc = reinterpolate, new.length = 205L,
+                          distance = "L2", centroid = "median"))
 
-    expect_warning(dtwclust(data_subset, type = "f",
-                            preproc = reinterpolate, new.length = 205L,
-                            distance = "L2", centroid = "shape"),
-                   "centroid.*fcm")
+    expect_error(dtwclust(data_subset, type = "f",
+                          preproc = reinterpolate, new.length = 205L,
+                          distance = "L2", centroid = "shape"))
 
-    expect_warning(dtwclust(data_subset, type = "f",
-                            preproc = reinterpolate, new.length = 205L,
-                            distance = "L2", centroid = "dba"),
-                   "centroid.*fcm")
+    expect_error(dtwclust(data_subset, type = "f",
+                          preproc = reinterpolate, new.length = 205L,
+                          distance = "L2", centroid = "dba"))
 
-    expect_warning(dtwclust(data_subset, type = "f",
-                            preproc = reinterpolate, new.length = 205L,
-                            distance = "L2", centroid = "pam"),
-                   "centroid.*fcm")
+    expect_error(dtwclust(data_subset, type = "f",
+                          preproc = reinterpolate, new.length = 205L,
+                          distance = "L2", centroid = "pam"))
 })
 
 # =================================================================================================

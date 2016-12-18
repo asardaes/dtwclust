@@ -32,25 +32,44 @@ test_that("Multiple k works as expected.", {
 # =================================================================================================
 
 test_that("Fuzzy clustering works as expected.", {
-    ## ---------------------------------------------------------- univariate
-    fc <- dtwclust(data_subset, type = "fuzzy", k = 4L,
-                   preproc = acf_fun, distance = "L2",
-                   seed = 123)
+    ## ---------------------------------------------------------- univariate fcm
+    fcm <- dtwclust(data_subset, type = "fuzzy", k = 4L,
+                    preproc = acf_fun, distance = "L2",
+                    seed = 123)
 
-    fc <- reset_nondeterministic(fc)
+    fcm <- reset_nondeterministic(fcm)
 
-    assign("fc", fc, persistent)
+    assign("fcm", fcm, persistent)
 
-    ## ---------------------------------------------------------- multivariate
-    dmv <- reinterpolate(data_multivariate, new.length = max(sapply(data_multivariate, NROW)))
-
-    fc_mv <- dtwclust(dmv, type = "fuzzy", k = 4L,
-                      distance = "dtw_basic",
+    ## ---------------------------------------------------------- univariate fcmdd
+    fcmdd <- dtwclust(data_subset, type = "fuzzy", k = 4L,
+                      preproc = acf_fun, distance = "L2",
+                      centroid = "fcmdd",
                       seed = 123)
 
-    fc_mv <- reset_nondeterministic(fc_mv)
+    fcmdd <- reset_nondeterministic(fcmdd)
 
-    assign("fc_mv", fc_mv, persistent)
+    assign("fcmdd", fcmdd, persistent)
+
+    ## ---------------------------------------------------------- multivariate fcm
+    dmv <- reinterpolate(data_multivariate, new.length = max(sapply(data_multivariate, NROW)))
+
+    fcm_mv <- dtwclust(dmv, type = "fuzzy", k = 4L,
+                       distance = "dtw_basic",
+                       seed = 123)
+
+    fcm_mv <- reset_nondeterministic(fcm_mv)
+
+    assign("fcm_mv", fcm_mv, persistent)
+
+    ## ---------------------------------------------------------- multivariate fcmdd
+    fcmdd_mv <- dtwclust(data_multivariate, type = "fuzzy", k = 4L,
+                         distance = "dtw_basic", centroid = "fcmdd",
+                         seed = 123)
+
+    fcmdd_mv <- reset_nondeterministic(fcmdd_mv)
+
+    assign("fcmdd_mv", fcmdd_mv, persistent)
 })
 
 # =================================================================================================
