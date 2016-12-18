@@ -3,6 +3,8 @@
 ## Version 3.0.1
 * Fixed subsetting of multivariate plots
 * Implemented the memory-saving version of DTW in `dtw_basic` when `backtrack = FALSE`.
+* Implemented fuzzy c-medoids.
+* Seeds were not being set in hierarchical/TADPole clustering, which could affect reproducibility of preprocessing/centroid functions.
 * The `force.symmetry` argument in `dtw_lb` was removed since it didn't serve any real purpose.
 
 ## Version 3.0.0

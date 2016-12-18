@@ -7,6 +7,8 @@
     \itemize{
         \item Fixed subsetting of multivariate plots.
         \item Implemented the memory-saving version of DTW in \code{dtw_basic} when \code{backtrack = FALSE}.
+        \item Implemented fuzzy c-medoids.
+        \item Seeds were not being set in hierarchical/TADPole clustering, which could affect reproducibility of preprocessing/centroid functions.
         \item The \code{force.symmetry} argument in \code{dtw_lb} was removed since it didn't serve any real purpose.
     }
 }
