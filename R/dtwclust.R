@@ -363,6 +363,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     tic <- proc.time()
 
+    set.seed(seed)
+
     if (is.null(data))
         stop("No data provided")
 
