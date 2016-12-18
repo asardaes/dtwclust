@@ -3,7 +3,7 @@
 
 \title{News for package \pkg{dtwclust}}
 
-\section{Changes in version 3.0.1}{
+\section{Changes in version 3.1.0}{
     \itemize{
         \item Fixed subsetting of multivariate plots.
         \item Implemented the memory-saving version of DTW in \code{dtw_basic} when \code{backtrack = FALSE}.
