@@ -2,7 +2,7 @@
 # Modified version of flexclust::kcca to use lists of time series and/or support fuzzy clustering
 # ========================================================================================================
 
-kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...) {
+kcca.list <- function (x, k, family, control, fuzzy = FALSE, cent, ...) {
     N <- length(x)
     k <- as.integer(k)
     dots <- list(...)
@@ -13,7 +13,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...) {
     if (is.null(names(x)))
         names(x) <- paste0("series_", 1:N) # used by custom PAM centroids
 
-    if (fuzzy) {
+    if (fuzzy && cent == "fcm") {
         cluster <- matrix(0, N, k)
         cluster[ , -1L] <- stats::runif(N *(k - 1)) / (k - 1)
         cluster[ , 1L] <- 1 - apply(cluster[ , -1L, drop = FALSE], 1L, sum)
@@ -39,7 +39,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...) {
     objective_old <- Inf
 
     while (iter <= control@iter.max) {
-        clustold <- cluster
+        clustold <- if (cent != "fcmdd") cluster else attr(centroids, "id_cent")
 
         distmat <- family@dist(x, centroids, ...)
 
@@ -52,7 +52,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...) {
                                     cl_old = clustold,
                                     ...)
 
-        if (fuzzy) {
+        if (fuzzy && cent == "fcm") {
             # fuzzy.R
             objective <- fuzzy_objective(cluster, distmat = distmat, m = control@fuzziness)
 
@@ -71,7 +71,10 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, ...) {
             objective_old <- objective
 
         } else {
-            changes <- sum(cluster != clustold)
+            if (cent != "fcmdd")
+                changes <- sum(cluster != clustold)
+            else
+                changes <- sum(attr(centroids, "id_cent") != clustold)
 
             if (control@trace) {
                 td <- sum(distmat[cbind(1L:N, cluster)])

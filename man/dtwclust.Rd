@@ -209,8 +209,9 @@ are those that can be adjutsed with this argument.
       are always one of the time series in the data. In this case, the distance matrix can be
       pre-computed once using all time series in the data and then re-used at each iteration. It
       usually saves overhead overall.
-    \item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and always used for that type
-     of clustering if a string is provided in \code{centroid}.
+    \item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and used by default in that
+      case.
+    \item "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering.
 }
 
   These check for the special cases where parallelization might be desired. Note that only

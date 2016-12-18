@@ -51,7 +51,7 @@ setMethod("initialize", "dtwclustFamily",
 
               if (fuzzy) {
                   dots$cluster <- fcm_cluster # fuzzy.R
-                  allcent <- "fcm"
+                  if (!missing(allcent)) allcent <- match.arg(allcent, c("fcm", "fcmdd"))
               }
 
               if (!missing(allcent)) {

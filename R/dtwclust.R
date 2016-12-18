@@ -183,8 +183,9 @@
 #'       are always one of the time series in the data. In this case, the distance matrix can be
 #'       pre-computed once using all time series in the data and then re-used at each iteration. It
 #'       usually saves overhead overall.
-#'     \item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and always used for that type
-#'      of clustering if a string is provided in \code{centroid}.
+#'     \item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and used by default in that
+#'       case.
+#'     \item "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering.
 #' }
 #'
 #'   These check for the special cases where parallelization might be desired. Note that only
@@ -375,11 +376,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     if (any(k > length(data)))
         stop("Cannot have more clusters than series in the data")
 
-    if (type == "fuzzy" && !missing(centroid) && is.character(centroid) && centroid != "fcm") {
-        warning("The 'centroid' argument was provided but was different than 'fcm', so it was ignored.")
-        centroid <- "fcm"
-    }
-
     MYCALL <- match.call(expand.dots = TRUE)
 
     ## ----------------------------------------------------------------------------------------------------------
@@ -468,21 +464,24 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         ## Partitional or fuzzy
         ## =================================================================================================================
 
-        ## replace any given distmat if centroid != "pam"
+        ## fuzzy default
+        if (type == "fuzzy" && missing(centroid)) centroid <- "fcm"
+
         if (is.character(centroid)) {
             if (type == "fuzzy")
-                centroid <- "fcm"
+                centroid <- match.arg(centroid, c("fcm", "fcmdd"))
             else
                 centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
 
-            if (centroid != "pam") distmat <- NULL
+            ## replace any given distmat if centroid not "pam" or "fcmdd"
+            if (!(centroid %in% c("pam", "fcmdd"))) distmat <- NULL
 
         } else {
             distmat <- NULL
         }
 
         if (diff_lengths) {
-            if (type == "fuzzy")
+            if (type == "fuzzy" && is.character(centroid) && centroid == "fcm")
                 stop("Fuzzy c-means does not support series with different length.")
 
             check_consistency(centroid, "cent", trace = control@trace)
@@ -515,7 +514,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         distmat_provided <- FALSE
 
         ## precompute distance matrix?
-        if (is.character(centroid) && centroid == "pam") {
+        if (cent_char %in% c("pam", "fmcdd")) {
             ## check if distmat was not provided and should be precomputed
             if (!is.null(distmat)) {
                 if ( nrow(distmat) != length(data) || ncol(distmat) != length(data) )
@@ -526,7 +525,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
                 if (control@trace) cat("\n\tDistance matrix provided...\n\n")
 
-            } else if (control@pam.precompute) {
+            } else if (control@pam.precompute || cent_char == "fcmdd") {
                 if (tolower(distance) == "dtw_lb")
                     warning("Using dtw_lb with control@pam.precompute = TRUE is not advised.")
 
@@ -556,6 +555,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                            family = family,
                                            control = control,
                                            fuzzy = isTRUE(type == "fuzzy"),
+                                           cent = cent_char,
                                            dots = dots)))
 
         } else {
@@ -594,6 +594,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                                  family = family,
                                                  control = control,
                                                  fuzzy = isTRUE(type == "fuzzy"),
+                                                 cent = cent_char,
                                                  dots = dots))
 
                             gc(FALSE)

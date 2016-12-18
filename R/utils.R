@@ -63,12 +63,12 @@ check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
 
     } else if (case == "cent") {
         ## only checking for different lengths
-        included <- c("mean", "median", "shape", "dba", "pam", "fcm")
-        valid <- c("dba", "pam", "shape")
+        included <- c("mean", "median", "shape", "dba", "pam", "fcm", "fcmdd")
+        valid <- c("dba", "pam", "shape", "fcmdd")
 
         if (is.character(obj) && (obj %in% included) && !(obj %in% valid))
             stop("Only the following centroids are supported for series with different lengths:",
-                 "\n\tdba\tpam\tshape")
+                 "\n\tdba\tpam\tshape\tfcmdd")
 
     }
 

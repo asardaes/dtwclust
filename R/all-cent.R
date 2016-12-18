@@ -147,7 +147,7 @@ all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALS
 
     ## --------------------------------------------------------------------------------------------
     ## fcm
-    fcm_cent <- function(x, u, k) {
+    fcm_cent <- function(x, u, k, ...) {
         ## utils.R
         if (is_multivariate(x)) {
             mv <- reshape_multviariate(x, NULL)
@@ -166,13 +166,33 @@ all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALS
         }
     }
 
+    ## --------------------------------------------------------------------------------------------
+    ## fcmdd
+    fcmdd_cent <- function(x, u, k, ...) {
+        if (is.null(distmat)) distmat <<- distfun(x, centroids = NULL, ...)
+
+        q <- distmat %*% u
+        idc <- apply(q, 2L, which.min)
+
+        cent <- x[idc]
+        attr(cent, "id_cent") <- idc
+
+        cent
+    }
+
+    ## --------------------------------------------------------------------------------------------
+    ## allcent
     if (fuzzy) {
         ## function created here to capture objects of this environment (closure)
         allcent <- function(x, cl_id, k, cent, cl_old, ...) {
             ## cent and cl_old are unused here, but R complains if signatures don't match
             u <- cl_id ^ control@fuzziness
 
-            cent <- fcm_cent(x, u, k)
+            cent <- do.call(paste0(case, "_cent"),
+                            enlist(x = x,
+                                   u = u,
+                                   k = k,
+                                   dots = list(...)))
 
             ## coerce back to list
             any2list(cent)
