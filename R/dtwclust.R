@@ -185,7 +185,8 @@
 #'       usually saves overhead overall.
 #'     \item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and used by default in that
 #'       case.
-#'     \item "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering.
+#'     \item "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering. It \strong{always}
+#'       precomputes the whole cross-distance matrix.
 #' }
 #'
 #'   These check for the special cases where parallelization might be desired. Note that only
@@ -516,7 +517,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         distmat_provided <- FALSE
 
         ## precompute distance matrix?
-        if (cent_char %in% c("pam", "fmcdd")) {
+        if (cent_char %in% c("pam", "fcmdd")) {
             ## check if distmat was not provided and should be precomputed
             if (!is.null(distmat)) {
                 if ( nrow(distmat) != length(data) || ncol(distmat) != length(data) )

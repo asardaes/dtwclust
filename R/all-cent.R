@@ -169,8 +169,6 @@ all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALS
     ## --------------------------------------------------------------------------------------------
     ## fcmdd
     fcmdd_cent <- function(x, u, k, ...) {
-        if (is.null(distmat)) distmat <<- distfun(x, centroids = NULL, ...)
-
         q <- distmat %*% u
         idc <- apply(q, 2L, which.min)
 

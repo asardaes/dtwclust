@@ -211,7 +211,8 @@ are those that can be adjutsed with this argument.
       usually saves overhead overall.
     \item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and used by default in that
       case.
-    \item "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering.
+    \item "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering. It \strong{always}
+      precomputes the whole cross-distance matrix.
 }
 
   These check for the special cases where parallelization might be desired. Note that only
