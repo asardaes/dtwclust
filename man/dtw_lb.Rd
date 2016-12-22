@@ -53,6 +53,8 @@ This function uses a lower bound that is only defined for time series of equal l
 
 A considerably large dataset is probably necessary before this is faster than using
 \code{\link{dtw_basic}} with \code{proxy::\link[proxy]{dist}}.
+
+Nearest neighbors are found row-wise.
 }
 \section{Parallel Computing}{
 

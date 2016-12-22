@@ -158,7 +158,7 @@ DTW is computationally expensive. If $x$ has length $n$ and $y$ has length $m$, 
 
 The DTW distance is considered a more robust distance measure for time-series \citep{wang2013}, and can potentially deal with series of different length directly. This is not necessarily an advantage, as it has been shown before that performing linear reinterpolation to obtain equal length may be appropriate if $m$ and $n$ do not vary significantly \citep{keogh2004}. For a more detailed explanation of the DTW algorithm, see, e.g., \citet{giorgino2009}. However, there are some aspects that are worth discussing here.
 
-The first step in DTW involves creating a local cost matrix (LCM  or $lcm$), which has $n \times m$ dimensions. Such a matrix must be created for every pair of distances compared, meaning that memory requirements may grow quickly as the dataset size grows. Considering $x$ and $y$ as the input series, for each element $(i,j)$ of the LCM, the $l_p$ norm between $x_i$ and $y_j$ must be computed. This is defined in \cref{eq:lcm}, explicitly denoting that multivariate series are supported as long as they have the same number of variables (note that for univariate series, the LCM will be identical regardless of the norm used). Thus, it makes sense to speak of a $\dtwp{}$ distance, where $p$ corresponds to the $l_p$ norm that was used to construct the LCM. However, this norm also plays an important role in the next step of DTW.
+The first step in DTW involves creating a local cost matrix (LCM  or $lcm$), which has $n \times m$ dimensions. Such a matrix must be created for every pair of distances compared, meaning that memory requirements may grow quickly as the dataset size grows. Considering $x$ and $y$ as the input series, for each element $(i,j)$ of the LCM, the $l_p$ norm between $x_i$ and $y_j$ must be computed. This is defined in \cref{eq:lcm}, explicitly denoting that multivariate series are supported as long as they have the same number of variables (note that for univariate series, the LCM will be identical regardless of the used norm). Thus, it makes sense to speak of a $\dtwp{}$ distance, where $p$ corresponds to the $l_p$ norm that was used to construct the LCM. However, this norm also plays an important role in the next step of DTW.
 
 \begin{equation}
 \label{eq:lcm}
@@ -208,7 +208,7 @@ It should be noted that, when reported, window sizes are always integers greater
 
 Due to the fact that DTW itself is expensive to compute, lower bounds (LBs) for the DTW distance have been developed. These lower bounds guarantee being less than or equal to the corresponding DTW distance. They have been exploited when indexing time-series databases, classification of time-series, clustering, etc. \citep{keogh2005, begum2015}. Out of the existing DTW LBs, the two most effective are termed \code{LB_Keogh} \citep{keogh2005} and \code{LB_Improved} \citep{lemire2009}, and they have been implemented in \dtwclust{} in the functions \code{lb_keogh} and \code{lb_improved}. The reader is referred to the respective articles for a detailed definition and proof of the LBs, however some important considerations will be further discussed here.
 
-Each LB can be computed with a specific $l_p$ norm. Therefore, it follows that the $l_p$ norms used for DTW and LB calculations must match, such that $\text{LB}_p \leq \dtwp{}$. Moreover, $\text{LB\_Keogh}_p \leq \text{LB\_Improved}_p \leq \dtwp{}$, meaning that \code{LB_Improved} can provide a tighter LB. It must be noted that the LBs are only defined for series of equal length, and similar to DTW, are not symmetric regardless of the $l_p$ norm used to compute them. Also note that the choice of step pattern affects the value of the DTW distance, changing the tightness of a given LB.
+Each LB can be computed with a specific $l_p$ norm. Therefore, it follows that the $l_p$ norms used for DTW and LB calculations must match, such that $\text{LB}_p \leq \dtwp{}$. Moreover, $\text{LB\_Keogh}_p \leq \text{LB\_Improved}_p \leq \dtwp{}$, meaning that \code{LB_Improved} can provide a tighter LB. It must be noted that the LBs are only defined for series of equal length and, similar to DTW, are not symmetric regardless of the $l_p$ norm used to compute them. Also note that the choice of step pattern affects the value of the DTW distance, changing the tightness of a given LB.
 
 One crucial step when calculating the LBs is the computation of the so-called envelops. These envelops require a window constraint, and thus are dependent on both the type and size of the window. Based on these, a running minimum and maximum are computed and, respectively, a lower and upper envelop are generated. \Cref{fig:envelop-plot} depicts a sample time-series with its corresponding envelops for a Sakoe-Chiba window of size 15.
 
@@ -226,7 +226,7 @@ When calculating the LBs between $x$ and $y$, a copy of the reference series is 
 \label{eq:lb-envelop}
 \begin{gather}
 H_i = UE_i, \quad \forall x_i > UE_i \\
-H_j = LE_j \quad \forall x_j < LE_j
+H_j = LE_j, \quad \forall x_j < LE_j
 \end{gather}
 \end{subequations}
 
@@ -657,7 +657,7 @@ classify_series <- function(query) {
     database <- data[-100L]
 
     # Nearest neighbor
-    nn <- which.min(dtw_lb(database, query,
+    nn <- which.min(dtw_lb(query, database,
                            window.size = 18L))
 
     # Return a label
