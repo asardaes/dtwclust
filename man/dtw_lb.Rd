@@ -50,6 +50,9 @@ in \code{10(2) + 1 = 21} observations falling within the window.
 }
 \note{
 This function uses a lower bound that is only defined for time series of equal length.
+
+A considerably large dataset is probably necessary before this is faster than using
+\code{\link{dtw_basic}} with \code{proxy::\link[proxy]{dist}}.
 }
 \section{Parallel Computing}{
 
@@ -72,17 +75,25 @@ data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 system.time(d <- dtw_lb(data[1:5], data[6:50], window.size = 20))
 
 # Nearest neighbors
-NN1 <- apply(d, 1, which.min)
+NN1 <- apply(d, 1L, which.min)
 
-# Calculate the DTW distances between all elements (about three times slower)
+# Calculate the DTW distances between all elements (slower)
 system.time(d2 <- proxy::dist(data[1:5], data[6:50], method = "DTW",
                               window.type = "slantedband", window.size = 20))
 
 # Nearest neighbors
-NN2 <- apply(d2, 1, which.min)
+NN2 <- apply(d2, 1L, which.min)
+
+# Calculate the DTW distances between all elements using dtw_basic (actually faster)
+system.time(d3 <- proxy::dist(data[1:5], data[6:50], method = "DTW_BASIC",
+                              window.size = 20))
+
+# Nearest neighbors
+NN3 <- apply(d3, 1L, which.min)
 
 # Same results?
 all(NN1 == NN2)
+all(NN1 == NN3)
 
 \dontrun{
 #### Running DTW_LB with parallel support
