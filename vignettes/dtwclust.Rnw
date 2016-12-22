@@ -474,7 +474,7 @@ u_{p,c} = \frac{1}{d_{p,c} ^ \frac{2}{m - 1} \sum^k_{q=1} \left( \frac{1}{d_{p,q
 
 Technically, fuzzy clustering can be repeated several times with different random starts, since $u$ is initialized randomly. However, comparing the results would be difficult, since it could be that the values within $u$ are shuffled but the overall fuzzy grouping remains the same, or changes very slightly, once the algorithm has converged.
 
-Note that it is straightforward to change the fuzzy partition to a crisp one by taking the argument of the row-wise maxima of $u$ and assigning the respective series to the corresponding cluster only.
+Note that it is straightforward to change the fuzzy partition to a crisp one by taking the argument of the row-wise maxima of $u$ or the row-wise minima of $d_{p,c}$ for all $p$, and assigning the respective series to the corresponding cluster only.
 
 \section{Parallel computation}
 \label{sec:parallel}

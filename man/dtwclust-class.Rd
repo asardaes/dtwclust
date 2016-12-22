@@ -29,7 +29,9 @@ value of \code{k}.
 
 \item{\code{k}}{Integer indicating the number of desired clusters.}
 
-\item{\code{cluster}}{Integer vector indicating which cluster a series belongs to (crisp partition).}
+\item{\code{cluster}}{Integer vector indicating which cluster a series belongs to (crisp partition). For
+fuzzy clustering, this is based on \strong{distance}, not on \code{fcluster}. For hierarchical,
+this is obtained by calling \code{\link[stats]{cutree}} with the given value of \code{k}.}
 
 \item{\code{fcluster}}{Numeric matrix that contains membership of fuzzy clusters. It has one row for each
 series and one column for each cluster. The rows must sum to 1. Only relevant for fuzzy
