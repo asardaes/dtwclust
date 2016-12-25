@@ -86,7 +86,7 @@
 #' # Nearest neighbors
 #' NN2 <- apply(d2, 1L, which.min)
 #'
-#' # Calculate the DTW distances between all elements using dtw_basic (actually faster)
+#' # Calculate the DTW distances between all elements using dtw_basic (actually faster, see notes)
 #' system.time(d3 <- proxy::dist(data[1:5], data[6:50], method = "DTW_BASIC",
 #'                               window.size = 20))
 #'
@@ -198,39 +198,38 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                      error.check = error.check,
                      ...)
 
-    ## Update with DTW
-    new.indNN <- apply(D, 1L, which.min) # index of nearest neighbors
-    indNN <- new.indNN + 1L # initialize all different
+    D <- split_parallel(D, 1L)
+    X <- split_parallel(X)
 
-    while (!is.null(y) && any(new.indNN != indNN)) {
-        indNew <- which(new.indNN != indNN)
-        indNN <- new.indNN
+    ## Update with DTW in parallel
+    D <- foreach(X = X,
+                 distmat = D,
+                 .combine = rbind,
+                 .multicombine = TRUE,
+                 .packages = "dtwclust",
+                 .export = "enlist") %op% {
+                     id_nn <- apply(distmat, 1L, which.min) # index of nearest neighbors
+                     id_nn_prev <- id_nn + 1L # initialize all different
+                     id_mat <- cbind(1L:nrow(distmat), id_nn) # to index the distance matrix
 
-        indNew <- split_parallel(indNew)
+                     while (!is.null(y) && any(id_nn_prev != id_nn)) {
+                         id_changed <- which(id_nn_prev != id_nn)
+                         id_nn_prev <- id_nn
 
-        exclude <- setdiff(ls(), c("X", "Y", "method", "dots", "indNew", "indNN"))
+                         d_sub <- do.call(proxy::dist,
+                                          enlist(x = X[id_changed],
+                                                 y = Y[id_nn[id_changed]],
+                                                 method = method,
+                                                 dots = dots))
 
-        dSub <- foreach(indNew = indNew,
-                        .combine = c,
-                        .multicombine = TRUE,
-                        .packages = "dtwclust",
-                        .noexport = exclude,
-                        .export = "enlist") %op% {
-                            do.call(proxy::dist,
-                                    enlist(x = X[indNew],
-                                           y = Y[indNN[indNew]],
-                                           method = method,
-                                           dots = dots))
-                        }
+                         distmat[id_mat[id_changed, , drop = FALSE]] <- d_sub
 
-        indNew <- unlist(indNew)
+                         id_nn <- apply(distmat, 1L, which.min)
+                         id_mat[ , 2L] <- id_nn
+                     }
 
-        idd <- cbind(1L:length(X), indNN)[indNew, , drop = FALSE]
-
-        D[idd] <- dSub
-
-        new.indNN <- apply(D, 1L, which.min)
-    }
+                     distmat
+                 }
 
     class(D) <- "crossdist"
     attr(D, "method") <- "DTW_LB"

@@ -86,7 +86,7 @@ system.time(d2 <- proxy::dist(data[1:5], data[6:50], method = "DTW",
 # Nearest neighbors
 NN2 <- apply(d2, 1L, which.min)
 
-# Calculate the DTW distances between all elements using dtw_basic (actually faster)
+# Calculate the DTW distances between all elements using dtw_basic (actually faster, see notes)
 system.time(d3 <- proxy::dist(data[1:5], data[6:50], method = "DTW_BASIC",
                               window.size = 20))
 
