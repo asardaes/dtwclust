@@ -4,12 +4,14 @@
 \alias{compute_envelop}
 \title{Time series warping envelops}
 \usage{
-compute_envelop(x, window.size)
+compute_envelop(x, window.size, error.check = TRUE)
 }
 \arguments{
 \item{x}{A univariate time series.}
 
 \item{window.size}{Window size for envelop calculation. See details.}
+
+\item{error.check}{Check data inconsistencies?}
 }
 \value{
 A list with two elements (lower and upper envelops): \code{lower} and \code{upper}.

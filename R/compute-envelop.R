@@ -7,6 +7,7 @@
 #'
 #' @param x A univariate time series.
 #' @param window.size Window size for envelop calculation. See details.
+#' @param error.check Check data inconsistencies?
 #'
 #' @details
 #'
@@ -29,8 +30,8 @@
 #' \url{http://dx.doi.org/10.1016/j.patcog.2008.11.030},
 #' \url{http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
 #'
-compute_envelop <- function(x, window.size) {
-    check_consistency(x, "ts")
+compute_envelop <- function(x, window.size, error.check = TRUE) {
+    if (error.check) check_consistency(x, "ts")
     window.size <- check_consistency(window.size, "window")
     window.size <- window.size * 2L + 1L
 

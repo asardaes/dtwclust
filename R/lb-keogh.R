@@ -105,7 +105,7 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
 
     ## NOTE: the 'window.size' definition varies betwen dtw/call_envelop and runmin/max
     if (is.null(lower.env) && is.null(upper.env)) {
-        envelopes <- compute_envelop(y, window.size)
+        envelopes <- compute_envelop(y, window.size = window.size, error.check = FALSE)
         lower.env <- envelopes$lower
         upper.env <- envelopes$upper
 
@@ -180,7 +180,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 
     retclass <- "crossdist"
 
-    envelops <- lapply(y, function(s) { compute_envelop(s, window.size) })
+    envelops <- lapply(y, function(s) { compute_envelop(s, window.size, error.check = FALSE) })
 
     lower.env <- lapply(envelops, "[[", "lower")
     upper.env <- lapply(envelops, "[[", "upper")
