@@ -49,6 +49,7 @@ Collate:
     'SBD.R'
     'TADPole.R'
     'all-cent.R'
+    'compute-envelop.R'
     'create-dtwclust.R'
     'cvi.R'
     'ddist.R'

@@ -6,6 +6,7 @@
 * Implemented fuzzy c-medoids.
 * Seeds were not being set in hierarchical/TADPole clustering, which could affect reproducibility of preprocessing/centroid functions.
 * The `force.symmetry` argument in `dtw_lb` was removed since it didn't serve any real purpose.
+* Exported the function to compute envelops.
 * Minor vignette updates.
 
 ## Version 3.0.0

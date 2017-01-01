@@ -7,11 +7,11 @@
 #'
 #' @param x A time series (reference).
 #' @param y A time series with the same length as \code{x} (query).
-#' @param window.size Window size for envelope calculation. See details.
+#' @param window.size Window size for envelop calculation. See details.
 #' @param norm Vector norm. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.
-#' @param lower.env Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided
+#' @param lower.env Optionally, a pre-computed lower envelop for \strong{\code{y}} can be provided
 #'   (non-proxy version only).
-#' @param upper.env Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided
+#' @param upper.env Optionally, a pre-computed upper envelop for \strong{\code{y}} can be provided
 #'   (non-proxy version only).
 #' @param force.symmetry If \code{TRUE}, a second lower bound is calculated by swapping \code{x} and
 #'   \code{y}, and whichever result has a \emph{higher} distance value is returned. The proxy
@@ -100,7 +100,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
 
     ## NOTE: the 'window.size' definition varies betwen dtw/call_envelop and runmin/max
     if (is.null(lower.env) && is.null(upper.env)) {
-        envelopes <- call_envelop(y, window.size)
+        envelopes <- compute_envelop(y, window.size)
         lower.env <- envelopes$lower
         upper.env <- envelopes$upper
 
@@ -112,10 +112,10 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
     }
 
     if (length(lower.env) != length(x))
-        stop("Length mismatch between 'x' and the lower envelope")
+        stop("Length mismatch between 'x' and the lower envelop")
 
     if (length(upper.env) != length(x))
-        stop("Length mismatch between 'x' and the upper envelope")
+        stop("Length mismatch between 'x' and the upper envelop")
 
     ind1 <- x > upper.env
     ind2 <- x < lower.env
@@ -127,7 +127,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
     d1 <- abs(x - H)
 
     ## From here on is Lemire's improvement
-    EH <- call_envelop(H, window.size)
+    EH <- compute_envelop(H, window.size)
 
     ind3 <- y > EH$upper
     ind4 <- y < EH$lower
@@ -156,7 +156,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
 }
 
 # ========================================================================================================
-# Loop without using native 'proxy' looping (to avoid multiple calculations of the envelope)
+# Loop without using native 'proxy' looping (to avoid multiple calculations of the envelop)
 # ========================================================================================================
 
 lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
@@ -186,7 +186,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 
     retclass <- "crossdist"
 
-    envelops <- lapply(y, function(s) { call_envelop(s, window.size) })
+    envelops <- lapply(y, function(s) { compute_envelop(s, window.size) })
 
     lower.env <- lapply(envelops, "[[", "lower")
     upper.env <- lapply(envelops, "[[", "upper")
