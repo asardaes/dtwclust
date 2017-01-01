@@ -419,6 +419,7 @@ plot.dtwclust <- function(x, y, ...,
                                       aes_string(colour = "color"))
     }
 
+    ## add vertical lines to separate variables of multivariate series
     if (mv) {
         ggdata <- data.frame(cl = rep(1L:x@k, each = (nc - 1L)),
                              vbreaks = as.numeric(1L:(nc - 1L) %o% sapply(centroids, NROW)))

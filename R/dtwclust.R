@@ -673,6 +673,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         if (tolower(distance) == "dtw_lb")
             warning("Using dtw_lb with hierarchical clustering is not advised.")
 
+        ## ----------------------------------------------------------------------------------------------------------
+        ## Calculate distance matrix
+        ## ----------------------------------------------------------------------------------------------------------
+
         ## Take advantage of the function I defined for the partitional methods
         ## Which can do calculations in parallel if appropriate
         distfun <- ddist(distance = distance,
@@ -698,6 +702,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             ## single argument is to calculate whole distance matrix
             distmat <- do.call(distfun, enlist(x = data, centroids = NULL, dots = dots))
         }
+
+        ## ----------------------------------------------------------------------------------------------------------
+        ## Cluster
+        ## ----------------------------------------------------------------------------------------------------------
 
         if (control@trace)
             cat("\n\tPerforming hierarchical clustering...\n\n")
@@ -727,6 +735,10 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             warning("The 'centroid' argument was provided but it wasn't a function, so it was ignored.")
         if (!is.function(centroid))
             centroid <- NA
+
+        ## ----------------------------------------------------------------------------------------------------------
+        ## Prepare results
+        ## ----------------------------------------------------------------------------------------------------------
 
         RET <- lapply(k, function(k) {
             lapply(hc, function(hc) {
