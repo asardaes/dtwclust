@@ -72,7 +72,7 @@ Alexis Sard\'a-Espinosa\\
 }
 
 \Abstract{%
-Most clustering strategies have not changed considerably since their initial definition. Most of the improvements are either related to the distance measure used to assess dissimilarity, or the function used to calculate prototypes or centroids. Time-series clustering is no exception, with the Dynamic Time Warping distance being particularly popular in that context. This distance is computationally expensive, so many related optimizations have been developed over the years. Since no single clustering algorithm can be said to perform best on all datasets, different strategies must be tested and compared, so a common infrastructure can be advantageous. In this paper, a general overview of time-series clustering is given, including many specifics related to Dynamic Time Warping and other recently proposed techniques. At the same time, a description of the \dtwclust{} package for the \R{} statistical software is provided, showcasing how it can be used to evaluate many different time-series clustering procedures.
+Most clustering strategies have not changed considerably since their initial definition. Most of the improvements are either related to the distance measure used to assess dissimilarity, or the function used to calculate prototypes or centroids. Time-series clustering is no exception, with the Dynamic Time Warping distance being particularly popular in that context. This distance is computationally expensive, so many related optimizations have been developed over the years. Since no single clustering algorithm can be said to perform best on all datasets, different strategies must be tested and compared, so a common infrastructure can be advantageous. In this manuscript, a general overview of time-series clustering is given, including many specifics related to Dynamic Time Warping and other recently proposed techniques. At the same time, a description of the \dtwclust{} package for the \R{} statistical software is provided, showcasing how it can be used to evaluate many different time-series clustering procedures.
 }
 
 \Keywords{time-series, clustering, \R{}, dynamic time warping, lower bound, cluster validity}
@@ -137,7 +137,9 @@ Calculating distances, as well as cross-distance matrices, between time-series o
 
 The $l_1$ and $l_2$ vector norms, also known as Manhattan and Euclidean distances respectively, are the most commonly used distance measures, and are arguably the only competitive $l_p$ norms when measuring dissimilarity \citep{aggarwal2001, lemire2009}. They can be efficiently computed, but are only defined for series of equal length and are sensitive to noise, scale and time shifts. Thus, many other distance measures tailored to time-series have been developed in order to overcome this limitations as well as other challenges associated with the structure of time-series, such as multiple variables, serial correlation, etc.
 
-In the following sections, a description of the distance functions included in \dtwclust{} will be provided. Refer to \cref{app:custom-dist} for examples on how to use the \pkg{proxy} package with \dtwclust{} and exploit custom distance measures, as well as those defined in other \R{} packages. To facilitate notation, we define a time-series as a vector (or set of vectors in case of multivariate series) $x$. Each vector has length $n$. In general, $x^v_i$ represents the $i$-th element of the $v$-th variable of the (possibly multivariate) time-series $x$. We will assume that all elements are equally spaced in time in order to avoid the time index explicitly.
+In the following sections a description of the distance functions included in \dtwclust{} will be provided; these functions are associated with shape-based time-series clustering, and either support DTW or provide an alternative to it. However, there are many other distance measures that can be used for time-series \citep{montero2014, tsdist}. Refer to \cref{app:custom-dist} for examples on how to use the \pkg{proxy} package with \dtwclust{} and exploit custom distance measures, as well as those defined in other \R{} packages.
+
+To facilitate notation, we define a time-series as a vector (or set of vectors in case of multivariate series) $x$. Each vector has length $n$. In general, $x^v_i$ represents the $i$-th element of the $v$-th variable of the (possibly multivariate) time-series $x$. We will assume that all elements are equally spaced in time in order to avoid the time index explicitly.
 
 \subsection{Dynamic time warping distance}
 \label{sec:dtw}
@@ -154,7 +156,7 @@ plot(dtw_example, type = "two",
      xlab = "Time", ylab = "Series")
 @
 
-DTW is computationally expensive. If $x$ has length $n$ and $y$ has length $m$, the DTW distance between them can be computed in $O(nm)$ time, which is almost quadratic if $m$ and $n$ are similar. Additionally, DTW is prone to implementation bias since its calculations are not easily vectorized and tend to be very slow in non-compiled programming languages. The \pkg{dtw} package \citep{giorgino2009} includes a \proglang{C} implementation of the dynamic programming step of the algorithm, which should be very fast; its level of generality may sacrifice some performance, but in most situations it will be negligible. Optionally, a basic custom implementation of the DTW algorithm is included with \pkg{dtwclust} in the \code{dtw_basic} function, which has less functionality but still supports the most common options, it has a \proglang{C} core as well, and it should be faster.
+DTW is computationally expensive. If $x$ has length $n$ and $y$ has length $m$, the DTW distance between them can be computed in $O(nm)$ time, which is almost quadratic if $m$ and $n$ are similar. Additionally, DTW is prone to implementation bias since its calculations are not easily vectorized and tend to be very slow in non-compiled programming languages. The \pkg{dtw} package \citep{giorgino2009} includes a \proglang{C} implementation of the dynamic programming step of the algorithm, which should be very fast; its level of generality may sacrifice some performance, but in most situations it will be negligible. Optionally, a basic custom implementation of the DTW algorithm is included with \pkg{dtwclust} in the \code{dtw_basic} function, which has less functionality but still supports the most common options, it has a \proglang{C} core as well, implements some memory optimizations, and it should be faster.
 
 The DTW distance is considered a more robust distance measure for time-series \citep{wang2013}, and can potentially deal with series of different length directly. This is not necessarily an advantage, as it has been shown before that performing linear reinterpolation to obtain equal length may be appropriate if $m$ and $n$ do not vary significantly \citep{keogh2004}. For a more detailed explanation of the DTW algorithm, see, e.g., \citet{giorgino2009}. However, there are some aspects that are worth discussing here.
 
@@ -455,7 +457,7 @@ The centroid function used by fuzzy c-means calculates the mean for each point a
 \mu_{c,i} = \frac{\sum^N_{p = 1} u^m_{p,c} x_{p,i}}{\sum^N_{p = 1} u^m_{p,c}}
 \end{equation}
 
-Another option is to use fuzzy c-medoids (FCMdd) as the centroid function \citep{krishnapuram2001, izakian2015}, whereby the centroids are selected according to \cref{eq:fcmdd-centroid}. Similar to PAM, this centroid function does not alter the data, so the centroids are always elements of the original set. This centroid function was implemented in \dtwclust{} in version 3.0.1.
+Another option is to use fuzzy c-medoids (FCMdd) as the centroid function \citep{krishnapuram2001, izakian2015}, whereby the centroids are selected according to \cref{eq:fcmdd-centroid}. Similar to PAM, this centroid function does not alter the data, so the centroids are always elements of the original set. This centroid function was implemented in \dtwclust{} in version 3.1.0.
 
 \begin{subequations}
 \label{eq:fcmdd-centroid}
@@ -523,7 +525,6 @@ As previously mentioned, most time-series clustering algorithms use existing fun
 
 Other clustering algorithms that make significant modifications would be harder to integrate by the user. However, it would still be possible, thanks to the open-source nature of \R{} and the fact that \dtwclust{} is hosted on GitHub\footnote{\url{https://github.com/asardaes/dtwclust}}.
 
-\newpage
 \section{Conclusion}
 \label{sec:conclusion}
 

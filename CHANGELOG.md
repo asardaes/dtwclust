@@ -6,6 +6,7 @@
 * Implemented fuzzy c-medoids.
 * Seeds were not being set in hierarchical/TADPole clustering, which could affect reproducibility of preprocessing/centroid functions.
 * The `force.symmetry` argument in `dtw_lb` was removed since it didn't serve any real purpose.
+* Minor vignette updates.
 
 ## Version 3.0.0
 * Bear in mind that the `DTW/SBD` algorithms (and hence the functions that depend on them) might give different results in installations with 32-bit architectures.
