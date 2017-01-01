@@ -77,7 +77,7 @@ ddist <- function(distance, control = new("dtwclustControl"), distmat = NULL) {
             ## variables/functions from the parent environments that should be exported
             export <- c("distance", "check_consistency", "enlist")
 
-            if (is.null(centroids) && control@symmetric) {
+            if (is.null(centroids) && control@symmetric && !isTRUE(dots$pairwise)) {
                 if (dist_entry$loop) {
                     ## WHOLE SYMMETRIC DISTMAT WITH proxy LOOP
                     ## Only half of it is computed
@@ -140,7 +140,7 @@ ddist <- function(distance, control = new("dtwclustControl"), distmat = NULL) {
 
                 x <- split_parallel(x)
 
-                if (!is.null(dots$pairwise) && dots$pairwise) {
+                if (isTRUE(dots$pairwise)) {
                     centroids <- split_parallel(centroids)
                     validate_pairwise(x, centroids)
                     combine <- c

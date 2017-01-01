@@ -26,6 +26,12 @@ test_that("Operations with dtwclustFamily@dist give expected results", {
 
     whole_distmat <- family@dist(x)
     sub_distmat <- family@dist(x, centroids)
+    pdist <- family@dist(x, pairwise = TRUE)
+
+    class(pdist) <- NULL
+
+    expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
+                 check.attributes = FALSE)
 
     expect_equal(whole_distmat, distmat, info = "Whole, NULL distmat",
                  tolerance = 0, check.attributes = FALSE)
@@ -60,6 +66,12 @@ test_that("Operations with dtwclustFamily@dist give expected results", {
 
     whole_distmat <- family@dist(x)
     sub_distmat <- family@dist(x, centroids)
+    pdist <- family@dist(x, pairwise = TRUE)
+
+    class(pdist) <- NULL
+
+    expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
+                 check.attributes = FALSE)
 
     expect_equal(whole_distmat, distmat, info = "Whole, NULL distmat",
                  tolerance = 0, check.attributes = FALSE)
@@ -94,6 +106,12 @@ test_that("Operations with dtwclustFamily@dist give expected results", {
 
     whole_distmat <- family@dist(x)
     sub_distmat <- family@dist(x, centroids)
+    pdist <- family@dist(x, pairwise = TRUE)
+
+    class(pdist) <- NULL
+
+    expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
+                 check.attributes = FALSE)
 
     expect_equal(whole_distmat, distmat, info = "Whole, NULL distmat",
                  tolerance = 0, check.attributes = FALSE)
@@ -128,6 +146,12 @@ test_that("Operations with dtwclustFamily@dist give expected results", {
 
     whole_distmat <- family@dist(x)
     sub_distmat <- family@dist(x, centroids)
+    pdist <- family@dist(x, pairwise = TRUE)
+
+    class(pdist) <- NULL
+
+    expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
+                 check.attributes = FALSE)
 
     expect_equal(whole_distmat, distmat, info = "Whole, NULL distmat",
                  tolerance = 0, check.attributes = FALSE)
@@ -161,6 +185,12 @@ test_that("Operations with dtwclustFamily@dist give expected results", {
 
     whole_distmat <- family@dist(x)
     sub_distmat <- family@dist(x, centroids)
+    pdist <- family@dist(x, pairwise = TRUE)
+
+    class(pdist) <- NULL
+
+    expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
+                 check.attributes = FALSE)
 
     expect_equal(whole_distmat, distmat, info = "Whole, NULL distmat",
                  tolerance = 0, check.attributes = FALSE)
@@ -195,6 +225,12 @@ test_that("Operations with dtwclustFamily@dist give expected results", {
 
     whole_distmat <- family@dist(x)
     sub_distmat <- family@dist(x, centroids)
+    pdist <- family@dist(x, pairwise = TRUE)
+
+    class(pdist) <- NULL
+
+    expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
+                 check.attributes = FALSE)
 
     expect_equal(whole_distmat, distmat, info = "Whole, NULL distmat",
                  tolerance = 0, check.attributes = FALSE)
@@ -229,6 +265,12 @@ test_that("Operations with dtwclustFamily@dist give expected results", {
 
     whole_distmat <- family@dist(x)
     sub_distmat <- family@dist(x, centroids)
+    pdist <- family@dist(x, pairwise = TRUE)
+
+    class(pdist) <- NULL
+
+    expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
+                 check.attributes = FALSE)
 
     expect_equal(whole_distmat, distmat, info = "Whole, NULL distmat",
                  tolerance = 0, check.attributes = FALSE)
@@ -265,6 +307,12 @@ test_that("Operations with dtwclustFamily@dist give expected results", {
 
     whole_distmat <- family@dist(x, sigma = 100)
     sub_distmat <- family@dist(x, centroids, sigma = 100)
+    pdist <- family@dist(x, sigma = 100, pairwise = TRUE)
+
+    class(pdist) <- NULL
+
+    expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
+                 check.attributes = FALSE)
 
     expect_equal(whole_distmat, distmat, info = "Whole, NULL distmat",
                  tolerance = 0, check.attributes = FALSE)
