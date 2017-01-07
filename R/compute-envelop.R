@@ -31,7 +31,13 @@
 #' \url{http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
 #'
 compute_envelop <- function(x, window.size, error.check = TRUE) {
-    if (error.check) check_consistency(x, "ts")
+    if (error.check) {
+        if (is_multivariate(list(x)))
+            stop("The envelop can conly be computed for univariate series.")
+
+        check_consistency(x, "ts")
+    }
+
     window.size <- check_consistency(window.size, "window")
     window.size <- window.size * 2L + 1L
 
