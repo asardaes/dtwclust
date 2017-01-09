@@ -13,6 +13,8 @@ all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALS
                 d <- apply(distmat, 1L, sum)
 
                 i_cent <- xsub[[which.min(d)]]
+
+                ## update indices, aggregated at the end of main allcent function
                 attr(i_cent, "id_cent") <- pmatch(names(xsub[which.min(d)]), names(x))
 
                 i_cent
@@ -25,6 +27,8 @@ all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALS
                 d <- apply(distmat[i_x, i_x, drop = FALSE], 1L, sum)
 
                 i_cent <- x[[i_x[which.min(d)]]]
+
+                ## update indices, aggregated at the end of main allcent function
                 attr(i_cent, "id_cent") <- i_x[which.min(d)]
 
                 i_cent
@@ -261,6 +265,7 @@ all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALS
                 cent[empty_clusters] <- extra_cent
             }
 
+            ## aggregate updated indices
             if (case == "pam")
                 attr(cent, "id_cent") <- sapply(cent, attr, which = "id_cent")
 

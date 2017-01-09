@@ -1,7 +1,4 @@
-## Update to version 3.1.0
-* Added new fuzzy centroid
-* Vignette updates
-* Bug fixes and optimizations
+## Update to version 3.1.1
 
 ## Test environments
 * Local GNU/Linux, R 3.3.2

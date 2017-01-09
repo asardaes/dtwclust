@@ -17,29 +17,12 @@ ddist <- function(distance, control = new("dtwclustControl"), distmat = NULL) {
     distfun <- function(x, centroids = NULL, ...) {
         if (!is.null(distmat)) {
             if (is.null(centroids)) {
+                ## return whole distmat
                 d <- distmat
 
             } else {
                 ## distmat matrix already calculated, just subset it
-                id_XC <- attr(centroids, "id_cent")
-
-                ## in case I messed up something when assigning id_cent
-                # if (is.null(id_XC) || any(is.na(id_XC)))
-                #     id_XC <- sapply(centroids, FUN = function(i.c) {
-                #         i.row <- sapply(x, function(i.x) {
-                #             if (length(i.x) == length(i.c))
-                #                 ret <- all(i.x == i.c)
-                #             else
-                #                 ret <- FALSE
-                #
-                #             ret
-                #         })
-                #
-                #         ## Take the first one in case a series is repeated in the dataset
-                #         which(i.row)[1L]
-                #     })
-
-                d <- distmat[ , id_XC, drop = FALSE]
+                d <- distmat[ , attr(centroids, "id_cent"), drop = FALSE]
             }
 
         } else {

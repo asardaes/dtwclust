@@ -1,5 +1,7 @@
 # Changelog
 
+## Version 3.1.1
+
 ## Version 3.1.0
 * Fixed subsetting of multivariate plots
 * Implemented the memory-saving version of DTW in `dtw_basic` when `backtrack = FALSE`.

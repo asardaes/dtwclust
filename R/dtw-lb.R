@@ -149,13 +149,6 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     dots$window.size <- window.size
     dots$pairwise <- TRUE
 
-    if (!is.null(dots$force.symmetry)) { # nocov start
-        warning("'force.symmetry' was removed since it served no real purpose here. ",
-                "Use LB_Improved with proxy::dist and force symmetry there if you wish.")
-
-        dots$force.symmetry <- NULL
-    } # nocov end
-
     if (pairwise) {
         check_consistency(X, "tslist")
         check_consistency(Y, "tslist")

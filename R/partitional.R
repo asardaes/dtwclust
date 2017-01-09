@@ -7,9 +7,6 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, cent, ...) {
     k <- as.integer(k)
     dots <- list(...)
 
-    if (N < k)
-        stop("Number of clusters cannot be greater than number of observations in the data")
-
     if (is.null(names(x)))
         names(x) <- paste0("series_", 1:N) # used by custom PAM centroids
 
@@ -31,7 +28,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, cent, ...) {
     } else {
         id_cent <- sample(N, k)
         centroids <- x[id_cent]
-        attr(centroids, "id_cent") <- id_cent
+        attr(centroids, "id_cent") <- id_cent # also used by PAM
         cluster <- integer(N)
     }
 
