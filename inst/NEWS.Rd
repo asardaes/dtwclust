@@ -5,6 +5,6 @@
 
 \section{Changes in version 3.1.1}{
     \itemize{
-        \item TBD.
+        \item Seeds are now set when calling TADPole through \code{dtwclust} with a parallel backend and multiple values of \code{k}, in case the centroid function has randomness associated.
     }
 }

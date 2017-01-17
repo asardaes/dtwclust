@@ -1,6 +1,7 @@
 # Changelog
 
 ## Version 3.1.1
+* Seeds are now set when calling TADPole through `dtwclust` with a parallel backend and multiple values of `k`, in case the centroid function has randomness associated.
 
 ## Version 3.1.0
 * Fixed subsetting of multivariate plots

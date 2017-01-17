@@ -358,9 +358,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                      dc = NULL, control = NULL, seed = NULL, distmat = NULL,
                      ...)
 {
-    ## =================================================================================================================
+    ## =============================================================================================
     ## Start
-    ## =================================================================================================================
+    ## =============================================================================================
 
     tic <- proc.time()
 
@@ -381,9 +381,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     MYCALL <- match.call(expand.dots = TRUE)
 
-    ## ----------------------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------------------------
     ## Control parameters
-    ## ----------------------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------------------------
 
     if (is.null(control) || is.list(control)) {
         control <- as(control, "dtwclustControl")
@@ -397,9 +397,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     dots <- list(...)
 
-    ## ----------------------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------------------------
     ## Preprocess
-    ## ----------------------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------------------------
 
     if (!is.null(preproc) && is.function(preproc)) {
         if (has_dots(preproc)) {
@@ -426,9 +426,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     check_consistency(data, "vltslist")
 
-    ## ----------------------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------------------------
     ## Further options
-    ## ----------------------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------------------------
 
     if (control@save.data)
         datalist <- data
@@ -463,9 +463,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     if (type %in% c("partitional", "fuzzy")) {
 
-        ## =================================================================================================================
+        ## =========================================================================================
         ## Partitional or fuzzy
-        ## =================================================================================================================
+        ## =========================================================================================
 
         ## fuzzy default
         if (type == "fuzzy" && missing(centroid)) centroid <- "fcm"
@@ -490,9 +490,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             check_consistency(centroid, "cent", trace = control@trace)
         }
 
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
         ## Family creation, see initialization in dtwclust-methods.R
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
 
         family <- new("dtwclustFamily",
                       dist = distance,
@@ -509,9 +509,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
         cent_char <- as.character(substitute(centroid))[1L]
 
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
         ## PAM precompute?
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
 
         ## for a check near the end, changed if appropriate
         distmat_provided <- FALSE
@@ -544,9 +544,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             }
         }
 
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
         ## Cluster
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
 
         if (length(k) == 1L && control@nrep == 1L) {
             rngtools::setRNG(rngtools::RNGseq(1L, seed = seed, simplify = TRUE))
@@ -606,9 +606,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                         }
         }
 
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
         ## Prepare results
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
 
         ## Replace distmat with NULL so that, if the distance function is called again, it won't subset it
         assign("distmat", NULL, envir = environment(family@dist))
@@ -652,9 +652,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     } else if (type == "hierarchical") {
 
-        ## =================================================================================================================
+        ## =========================================================================================
         ## Hierarchical
-        ## =================================================================================================================
+        ## =========================================================================================
 
         if (is.character(method)) {
             hclust_methods <- match.arg(method,
@@ -673,9 +673,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         if (tolower(distance) == "dtw_lb")
             warning("Using dtw_lb with hierarchical clustering is not advised.")
 
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
         ## Calculate distance matrix
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
 
         ## Take advantage of the function I defined for the partitional methods
         ## Which can do calculations in parallel if appropriate
@@ -703,9 +703,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             distmat <- do.call(distfun, enlist(x = data, centroids = NULL, dots = dots))
         }
 
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
         ## Cluster
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
 
         if (control@trace)
             cat("\n\tPerforming hierarchical clustering...\n\n")
@@ -736,9 +736,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         if (!is.function(centroid))
             centroid <- NA
 
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
         ## Prepare results
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
 
         RET <- lapply(k, function(k) {
             lapply(hc, function(hc) {
@@ -798,9 +798,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     } else if (type == "tadpole") {
 
-        ## =================================================================================================================
+        ## =========================================================================================
         ## TADPole
-        ## =================================================================================================================
+        ## =========================================================================================
 
         control@window.size <- check_consistency(control@window.size, "window")
         control@norm <- "L2"
@@ -810,9 +810,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
         if (dc < 0)
             stop("The cutoff distance 'dc' must be positive")
 
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
         ## Cluster
-        ## ----------------------------------------------------------------------------------------------------------
+        ## -----------------------------------------------------------------------------------------
 
         if (control@trace) cat("\nEntering TADPole...\n\n")
 
@@ -830,58 +830,71 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
         lb <- if (is.null(dots$lb)) "lbk" else dots$lb
 
-        RET <- foreach(k = k, .combine = list, .multicombine = TRUE, .packages = "dtwclust", .export = "enlist") %op% {
-            R <- TADPole(data, k = k, dc = dc, window.size = control@window.size, lb = lb)
+        rng <- rngtools::RNGseq(length(k), seed = seed, simplify = FALSE)
 
-            if (control@trace) {
-                cat("TADPole completed, pruning percentage = ",
-                    formatC(100 - R$distCalcPercentage, digits = 3L, width = -1L, format = "fg"),
-                    "%\n\n",
-                    sep = "")
-            }
+        RET <- foreach(k = k, rng = rng,
+                       .combine = list, .multicombine = TRUE,
+                       .packages = "dtwclust", .export = "enlist") %op%
+                       {
+                           rngtools::setRNG(rng)
 
-            ## ----------------------------------------------------------------------------------------------------------
-            ## Prepare results
-            ## ----------------------------------------------------------------------------------------------------------
+                           R <- TADPole(data, k = k, dc = dc,
+                                        window.size = control@window.size, lb = lb)
 
-            if (is.function(centroid)) {
-                allcent <- centroid
-                centroids <- lapply(1L:k, function(kcent) { centroid(data[R$cl == kcent]) })
+                           if (control@trace) {
+                               cat("TADPole completed, pruning percentage = ",
+                                   formatC(100 - R$distCalcPercentage,
+                                           digits = 3L,
+                                           width = -1L,
+                                           format = "fg"),
+                                   "%\n\n",
+                                   sep = "")
+                           }
 
-            } else {
-                allcent <- function() {}
-                centroids <- data[R$centroids]
-            }
+                           ## ----------------------------------------------------------------------
+                           ## Prepare results
+                           ## ----------------------------------------------------------------------
 
-            obj <- create_dtwclust(call = MYCALL,
-                                   control = control,
-                                   family = new("dtwclustFamily",
-                                                dist = distfun,
-                                                allcent = allcent,
-                                                preproc = preproc),
-                                   distmat = NULL,
+                           if (is.function(centroid)) {
+                               allcent <- centroid
+                               centroids <- lapply(1L:k, function(kcent) {
+                                   centroid(data[R$cl == kcent])
+                               })
 
-                                   type = type,
-                                   distance = "dtw_lb",
-                                   centroid = cent_char,
-                                   preproc = preproc_char,
+                           } else {
+                               allcent <- function(x) {}
+                               centroids <- data[R$centroids]
+                           }
 
-                                   centroids = centroids,
-                                   k = as.integer(k),
-                                   cluster = as.integer(R$cl),
+                           obj <- create_dtwclust(call = MYCALL,
+                                                  control = control,
+                                                  family = new("dtwclustFamily",
+                                                               dist = distfun,
+                                                               allcent = allcent,
+                                                               preproc = preproc),
+                                                  distmat = NULL,
 
-                                   datalist = datalist,
-                                   dots = dots,
-                                   override.family = !is.function(centroid))
+                                                  type = type,
+                                                  distance = "dtw_lb",
+                                                  centroid = cent_char,
+                                                  preproc = preproc_char,
 
-            obj@distance <- "LB_Keogh+DTW2"
-            obj
-        }
+                                                  centroids = centroids,
+                                                  k = as.integer(k),
+                                                  cluster = as.integer(R$cl),
+
+                                                  datalist = datalist,
+                                                  dots = dots,
+                                                  override.family = !is.function(centroid))
+
+                           obj@distance <- "LB_Keogh+DTW2"
+                           obj
+                       }
     }
 
-    ## =================================================================================================================
+    ## =============================================================================================
     ## Finish
-    ## =================================================================================================================
+    ## =============================================================================================
 
     toc <- proc.time() - tic
 
@@ -899,9 +912,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     if (type %in% c("partitional", "fuzzy") && (control@nrep > 1L || length(k) > 1L))
         attr(RET, "rng") <- unlist(rng0, recursive = FALSE, use.names = FALSE)
 
-    if (control@trace) {
+    if (control@trace)
         cat("\tElapsed time is", toc["elapsed"], "seconds.\n\n")
-    }
 
     RET
 }
