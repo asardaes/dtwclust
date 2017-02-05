@@ -154,7 +154,7 @@ setMethod("initialize", "PartitionalTSClusters",
                   dm <- do.call(.Object@family@dist,
                                 enlist(.Object@datalist,
                                        .Object@centroids,
-                                       dots = .Object@dots))
+                                       dots = .Object@args$dist))
 
                   .Object@cldist <- as.matrix(dm[cbind(1L:length(.Object@datalist), .Object@cluster)])
 
@@ -184,7 +184,7 @@ setMethod("initialize", "HierarchicalTSClusters",
                   dm <- do.call(.Object@family@dist,
                                 enlist(.Object@datalist,
                                        .Object@centroids,
-                                       dots = .Object@dots))
+                                       dots = .Object@args$dist))
 
                   .Object@cldist <- as.matrix(dm[cbind(1L:length(.Object@datalist), .Object@cluster)])
 
@@ -219,9 +219,9 @@ setMethod("initialize", "FuzzyTSClusters",
                       dm <- do.call(.Object@family@dist,
                                     enlist(.Object@datalist,
                                            .Object@centroids,
-                                           dots = .Object@dots))
+                                           dots = .Object@args$dist))
 
-                      .Object@fcluster <- .Object@family@cluster(dm, m = .Object@control@fuzziness)
+                      .Object@fcluster <- .Object@family@cluster(dm, m = .Object@control$fuzziness)
                       colnames(.Object@fcluster) <- paste0("cluster_", 1:.Object@k)
 
                   } else
@@ -347,12 +347,12 @@ predict.TSClusters <- function(object, newdata = NULL, ...) {
 
         newdata <- do.call(object@family@preproc,
                            args = enlist(newdata,
-                                         dots = object@dots))
+                                         dots = object@args$preproc))
 
         distmat <- do.call(object@family@dist,
                            args = enlist(x = newdata,
                                          centroids = object@centroids,
-                                         dots = object@dots))
+                                         dots = object@args$dist))
 
         ret <- object@family@cluster(distmat = distmat, m = object@control$fuzziness)
 
@@ -658,7 +658,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                     distmat <- do.call(a@family@dist,
                                        args = enlist(x = a@datalist,
                                                      centroids = NULL,
-                                                     dots = a@dots))
+                                                     dots = a@args$dist))
                 }
             } else {
                 distmat <- a@distmat
@@ -677,7 +677,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
             distcent <- do.call(a@family@dist,
                                 args = enlist(x = a@centroids,
                                               centroids = NULL,
-                                              dots = a@dots))
+                                              dots = a@args$dist))
         }
 
         ## calculate global centroids if needed
@@ -691,7 +691,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                                                      k = 1L,
                                                      cent = a@datalist[sample(N, 1L)],
                                                      cl_old = rep(0L, N),
-                                                     dots = a@dots))
+                                                     dots = a@args$cent))
             } else {
                 global_cent <- a@family@allcent(a@datalist)
             }
@@ -699,7 +699,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
             dist_global_cent <- do.call(a@family@dist,
                                         args = enlist(x = a@centroids,
                                                       centroids = global_cent,
-                                                      dots = a@dots))
+                                                      dots = a@args$dist))
 
             dim(dist_global_cent) <- NULL
         }

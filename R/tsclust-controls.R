@@ -29,7 +29,7 @@ partitional_control <- function(pam.precompute = TRUE,
              symmetric = as.logical(symmetric),
              packages = c("dtwclust", as.character(packages)),
              distmat = distmat),
-        "class" = c("list", "PtCtrl")
+        "class" = c("PtCtrl")
     )
 }
 
@@ -67,7 +67,7 @@ hierarchical_control <- function(method = "average",
              symmetric = as.logical(symmetric),
              packages = c("dtwclust", as.character(packages)),
              distmat = distmat),
-        "class" = c("list", "HcCtrl")
+        "class" = c("HcCtrl")
     )
 }
 
@@ -95,7 +95,7 @@ fuzzy_control <- function(fuzziness = 2,
              iter.max = as.integer(iter.max),
              delta = delta,
              packages = c("dtwclust", as.character(packages))),
-        "class" = c("list", "FzCtrl")
+        "class" = c("FzCtrl")
     )
 }
 
@@ -121,6 +121,25 @@ tadpole_control <- function(dc,
         list(dc = dc,
              window.size = window.size,
              lb = lb),
-        "class" = c("list", "TpCtrl")
+        "class" = c("TpCtrl")
     )
 }
+
+#' @rdname tsclust-controls
+#' @aliases tsclust-controls
+#' @export
+#'
+#' @details
+#'
+#' Function arguments
+#'
+tsclust_args <- function(preproc = list(), dist = list(), cent = list())
+{
+    structure(
+        list(preproc = preproc,
+             dist = dist,
+             cent = cent),
+        "class" = c("TscArgs")
+    )
+}
+

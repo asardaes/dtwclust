@@ -140,10 +140,9 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, cent, ...) {
 # Partitional/fuzzy clustering
 # ==================================================================================================
 
-pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, ...) {
+pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, args) {
     N <- length(x)
     k <- as.integer(k)
-    dots <- list(...)
 
     if (is.null(names(x)))
         names(x) <- paste0("series_", 1:N) # used by custom PAM centroids
@@ -153,15 +152,12 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         cluster[ , -1L] <- stats::runif(N *(k - 1)) / (k - 1)
         cluster[ , 1L] <- 1 - apply(cluster[ , -1L, drop = FALSE], 1L, sum)
 
-        if (has_dots(family@allcent))
-            centroids <- family@allcent(x = x, cl_id = cluster, k = k, cl_old = cluster, ...)
-        else
-            centroids <- do.call(family@allcent,
-                                 enlist(x = x,
-                                        cl_id = cluster,
-                                        k = k,
-                                        cl_old = cluster,
-                                        dots = subset_dots(dots, family@allcent)))
+        centroids <- do.call(family@allcent,
+                             enlist(x = x,
+                                    cl_id = cluster,
+                                    k = k,
+                                    cl_old = cluster,
+                                    dots = subset_dots(args$cent, family@allcent)))
 
     } else {
         id_cent <- sample(N, k)
@@ -176,16 +172,20 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
     while (iter <= control$iter.max) {
         clustold <- if (cent != "fcmdd") cluster else attr(centroids, "id_cent")
 
-        distmat <- family@dist(x, centroids, ...)
+        distmat <- do.call(family@dist,
+                           enlist(x = x,
+                                  centroids = centroids,
+                                  dots = subset_dots(args$dist, family@dist)))
 
         cluster <- family@cluster(distmat = distmat, m = control$fuzziness)
 
-        centroids <- family@allcent(x = x,
+        centroids <- do.call(family@allcent,
+                             enlist(x = x,
                                     cl_id = cluster,
                                     k = k,
                                     cent = centroids,
-                                    cl_old = clustold,
-                                    ...)
+                                    cl_old = cluster,
+                                    dots = subset_dots(args$cent, family@allcent)))
 
         if (fuzzy && cent == "fcm") {
             # fuzzy.R
@@ -239,7 +239,11 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         converged <- TRUE
     }
 
-    distmat <- family@dist(x, centroids, ...)
+    distmat <- do.call(family@dist,
+                       enlist(x = x,
+                              centroids = centroids,
+                              dots = subset_dots(args$dist, family@dist)))
+
     cluster <- family@cluster(distmat = distmat, m = control$fuzziness)
 
     if (fuzzy) {

@@ -1,7 +1,7 @@
 #' Time series clustering
 #'
 #' This is the new experimental main function to perform time series clustering. It should provide
-#' the same functionality as \code{\link{dtwclust}}, but it is hopefully more consistent in general.
+#' the same functionality as \code{\link{dtwclust}}, but it is hopefully more coherent in general.
 #' \strong{For now, it is subject to change}. Feedback is appreciated at
 #' \url{https://github.com/asardaes/dtwclust/issues}.
 #'
@@ -11,6 +11,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                     preproc = NULL, distance = "dtw_basic",
                     centroid = ifelse(type == "fuzzy", "fcm", "pam"),
                     control = do.call(paste0(type, "_control"), list()),
+                    args = tsclust_args(),
                     seed = NULL, trace = FALSE)
 {
     ## =============================================================================================
@@ -43,21 +44,18 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     ## ---------------------------------------------------------------------------------------------
 
     if (!is.null(preproc) && is.function(preproc)) {
-        if (has_dots(preproc)) {
-            series <- preproc(series, ...)
-
-        } else {
-            series <- do.call(preproc,
-                              enlist(series,
-                                     dots = subset_dots(dots, preproc)))
-        }
+        series <- do.call(preproc,
+                          enlist(series,
+                                 dots = subset_dots(args$preproc, preproc)))
 
         preproc_char <- as.character(substitute(preproc))[1L]
 
     } else if (type == "partitional" && is.character(centroid) && centroid == "shape") {
         preproc <- zscore
         preproc_char <- "zscore"
-        series <- zscore(series, ...)
+        series <- do.call(zscore,
+                          enlist(series,
+                                 dots = subset_dots(args$preproc, zscore)))
 
     } else if (is.null(preproc)) {
         preproc <- function(x, ...) { x }
@@ -176,7 +174,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                            if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
 
                            distmat <- do.call(family@dist,
-                                              enlist(x = series, centroids = NULL, dots = dots))
+                                              enlist(x = series,
+                                                     centroids = NULL,
+                                                     dots = args$dist))
 
                            ## Redefine new distmat
                            assign("distmat", distmat, environment(family@dist))
@@ -202,7 +202,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                                       fuzzy = isTRUE(type == "fuzzy"),
                                                       cent = cent_char,
                                                       trace = trace,
-                                                      dots = dots)))
+                                                      args = args)))
 
                    } else {
                        if ((foreach::getDoParName() != "doSEQ") && trace)
@@ -245,7 +245,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                                             fuzzy = isTRUE(type == "fuzzy"),
                                                             cent = cent_char,
                                                             trace = trace,
-                                                            dots = dots))
+                                                            args = args))
 
                                        gc(FALSE)
 
@@ -289,6 +289,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                distmat = distmat,
 
                                dots = dots,
+                               args = args,
 
                                iter = pc$iter,
                                converged = pc$converged,
@@ -315,6 +316,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                distmat = distmat,
 
                                dots = dots,
+                               args = args,
 
                                iter = pc$iter,
                                converged = pc$converged,
@@ -353,7 +355,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                      distmat = NULL)
 
                    if (!is.null(distmat)) {
-                       if ( nrow(distmat) != length(series) || ncol(distmat) != length(series) )
+                       if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
                            stop("Dimensions of provided cross-distance matrix don't correspond to ",
                                 "length of provided data")
 
@@ -370,7 +372,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                            cat("\n\tCalculating distance matrix...\n")
 
                        ## single argument is to calculate whole distance matrix
-                       distmat <- do.call(distfun, enlist(x = series, centroids = NULL, dots = dots))
+                       distmat <- do.call(distfun, enlist(x = series,
+                                                          centroids = NULL,
+                                                          dots = args$dist))
                    }
 
                    ## ------------------------------------------------------------------------------
@@ -383,7 +387,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                    if (is.character(method)) {
                        ## Using hclust
                        hc <- lapply(method, function(method) {
-                           stats::hclust(stats::as.dist(distmat), method)
+                           stats::hclust(stats::as.dist(distmat), method, members = dots$members)
                        })
 
                    } else {
@@ -419,7 +423,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                            if (is.function(centroid)) {
                                allcent <- centroid
                                centroids <- lapply(1L:k, function(kcent) {
-                                   centroid(series[cluster == kcent])
+                                   do.call(centroid,
+                                           enlist(series[cluster == kcent],
+                                                  dots = subset_dots(args$cent, centroid)))
                                })
                                cent_char <- as.character(substitute(centroid))[1L]
 
@@ -461,6 +467,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                distmat = distmat,
 
                                dots = dots,
+                               args = args,
 
                                method = if (!is.null(hc$method)) hc$method else method,
 
@@ -501,8 +508,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                        cent_char <- "PAM (TADPole)"
 
                    ## for family@dist
-                   if (is.null(dots$window.size)) dots$window.size <- control$window.size
-                   if (is.null(dots$norm)) dots$norm <- "L2"
+                   args$dist$window.size <- control$window.size
+                   args$dist$norm <- "L2"
 
                    ## seeds
                    rng <- rngtools::RNGseq(length(k), seed = seed, simplify = FALSE)
@@ -565,6 +572,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                                  distmat = NULL,
 
                                                  dots = dots,
+                                                 args = args,
 
                                                  override.family = !is.function(centroid))
 

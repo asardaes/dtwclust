@@ -6,12 +6,12 @@
 \usage{
 tsclust(series = NULL, type = "partitional", k = 2L, ...,
   preproc = NULL, distance = "dtw_basic", centroid = ifelse(type ==
-  "fuzzy", "fcm", "pam"), control = do.call(paste0(type, "_control")),
-  seed = NULL, trace = FALSE)
+  "fuzzy", "fcm", "pam"), control = do.call(paste0(type, "_control"), list()),
+  args = tsclust_args(), seed = NULL, trace = FALSE)
 }
 \description{
 This is the new experimental main function to perform time series clustering. It should provide
-the same functionality as \code{\link{dtwclust}}, but it is hopefully more consistent in general.
+the same functionality as \code{\link{dtwclust}}, but it is hopefully more coherent in general.
 \strong{For now, it is subject to change}. Feedback is appreciated at
 \url{https://github.com/asardaes/dtwclust/issues}.
 }

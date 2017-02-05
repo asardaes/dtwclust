@@ -105,7 +105,9 @@ has_dots <- function(foo) { is.function(foo) && !is.null(formals(foo)$`...`) }
 
 # Subset dots for do.calls of functions without ellipsis
 subset_dots <- function(dots = list(), foo) {
-    if (length(dots) > 0L)
+    if (has_dots(foo))
+        dots
+    else if (length(dots) > 0L)
         dots[intersect(names(dots), names(formals(foo)))]
     else
         list()

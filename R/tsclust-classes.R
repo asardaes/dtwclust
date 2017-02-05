@@ -58,7 +58,7 @@ setClass("tsclustFamily",
 setClass("TSClusters",
          slots = c(call = "call",
                    family = "tsclustFamily",
-                   control = "list",
+                   control = "ANY",
                    datalist = "list",
 
                    type = "character",
@@ -72,7 +72,8 @@ setClass("TSClusters",
                    distmat = "ANY",
 
                    proctime = "proc_time",
-                   dots = "list"))
+                   dots = "list",
+                   args = "ANY"))
 
 #' @rdname TSClusters-class
 #' @exportClass PartitionalTSClusters

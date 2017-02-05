@@ -9,6 +9,8 @@
 \alias{tsclust-controls}
 \alias{tadpole_control}
 \alias{tsclust-controls}
+\alias{tsclust_args}
+\alias{tsclust-controls}
 \title{Control parameters for clusterings with \code{\link{tsclust}}}
 \usage{
 partitional_control(pam.precompute = TRUE, iter.max = 100L, nrep = 1L,
@@ -21,6 +23,8 @@ fuzzy_control(fuzziness = 2, iter.max = 100L, delta = 0.001,
   packages = character(0L))
 
 tadpole_control(dc, window.size, lb = "lbk")
+
+tsclust_args(preproc = list(), dist = list(), cent = list())
 }
 \description{
 Control parameters
@@ -33,4 +37,6 @@ Hierarchical
 Fuzzy
 
 TADPole
+
+Function arguments
 }
