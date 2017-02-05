@@ -21,6 +21,10 @@ matrix:
       r: release
       sudo: required
 
+branches:
+  only:
+    - master
+
 before_install:
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then sudo tlmgr install placeins cleveref; fi
 
