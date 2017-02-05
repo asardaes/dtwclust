@@ -9,9 +9,68 @@ tsclust(series = NULL, type = "partitional", k = 2L, ...,
   "fuzzy", "fcm", "pam"), control = do.call(paste0(type, "_control"), list()),
   args = tsclust_args(), seed = NULL, trace = FALSE)
 }
+\arguments{
+\item{series}{A list of series, a numeric matrix or a data frame. Matrices and data frames are
+coerced row-wise.}
+
+\item{type}{What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"},
+\code{"tadpole"} or \code{"fuzzy"}.}
+
+\item{k}{Number of desired clusters. It may be a numeric vector with different values.}
+
+\item{...}{Arguments for other functions. Currently passed to \code{method} from
+\code{\link{hierarchical_control}} if it happens to be a function.}
+
+\item{preproc}{Function to preprocess data. Defaults to \code{\link{zscore}} \emph{only} if
+\code{centroid} \code{=} \code{"shape"}, but will be replaced by a custom function if provided.}
+
+\item{distance}{A supported distance from \code{proxy}'s \code{\link[proxy]{dist}}. Ignored for
+\code{type} \code{=} \code{"tadpole"}.}
+
+\item{centroid}{Either a supported string or an appropriate function to calculate centroids when
+using partitional or prototypes for hierarchical/tadpole methods.}
+
+\item{control}{An appropriate list of controls. See \code{\link{tsclust-controls}}}
+
+\item{args}{An appropriate list of arguments for preprocessing, distance and centroid functions.
+See \code{\link{tsclust_args}}}
+
+\item{seed}{Random seed for reproducibility.}
+
+\item{trace}{Logical flag. If \code{TRUE}, more output regarding the progress is printed to
+screen.}
+}
+\value{
+An object with an appropriate class from \code{\link{TSClusters-class}}.
+
+If \code{control@nrep > 1} and a partitional procedure is used, \code{length(method)} \code{> 1}
+and hierarchical procedures are used, or \code{length(k)} \code{>} \code{1}, a list of objects is
+returned.
+}
 \description{
 This is the new experimental main function to perform time series clustering. It should provide
 the same functionality as \code{\link{dtwclust}}, but it is hopefully more coherent in general.
 \strong{For now, it is subject to change}. Feedback is appreciated at
 \url{https://github.com/asardaes/dtwclust/issues}.
+}
+\details{
+Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering
+is done with \code{\link[stats]{hclust}}. TADPole clustering uses the \code{\link{TADPole}}
+function. Specifying \code{type} = \code{"partitional"}, \code{distance} = \code{"sbd"} and
+\code{centroid} = \code{"shape"} is equivalent to the k-Shape algorithm (Paparrizos and Gravano
+2015).
+
+The \code{data} may be a matrix, a data frame or a list. Matrices and data frames are coerced to
+a list, both row-wise. Only lists can have series with different lengths or multiple dimensions.
+Most of the optimizations require series to have the same length, so consider reinterpolating
+them to save some time (see Ratanamahatana and Keogh 2004; \code{\link{reinterpolate}}). No
+missing values are allowed.
+
+In the case of multivariate time series, they should be provided as a list of matrices, where
+time spans the rows of each matrix and the variables span the columns. At the moment, only
+\code{DTW}, \code{DTW2} and \code{GAK} suppport such series, which means only partitional and
+hierarchical procedures using those distances will work. You can of course create your own custom
+distances. All included centroid functions should work with the aforementioned format, although
+\code{shape} is \strong{not} recommended. Note that the \code{plot} method will simply append all
+dimensions (columns) one after the other.
 }

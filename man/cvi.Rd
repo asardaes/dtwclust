@@ -23,8 +23,8 @@ cvi(a, b = NULL, type = "valid", ..., log.base = 10)
   log.base = 10)
 }
 \arguments{
-\item{a}{An object returned by the \code{\link{dtwclust}} function, or a vector that can be
-coerced to integers which indicate the cluster memeberships.}
+\item{a}{An object returned by the \code{\link{dtwclust}} or \code{\link{tsclust}} function, or a
+vector that can be coerced to integers which indicate the cluster memeberships.}
 
 \item{b}{If needed, a vector that can be coerced to integers which indicate the cluster
 memeberships. The ground truth (if known) should be provided here.}

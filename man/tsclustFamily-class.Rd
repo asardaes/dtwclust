@@ -36,6 +36,16 @@ pass-through \code{preproc} function.
 # use the function more or less directly, but provide a control argument when
 # creating the family.
 
-TODO
+\dontrun{
+data(uciCT)
+fam <- new("tsclustFamily", dist = "gak",
+           control = partitional_control(symmetric = TRUE))
+
+crossdist <- fam@dist(CharTraj, window.size = 18L)
+}
+
+# If you want the fuzzy family, use fuzzy = TRUE
+ffam <- new("tsclustFamily", control = fuzzy_control(), fuzzy = TRUE)
+
 
 }

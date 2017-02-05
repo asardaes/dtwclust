@@ -26,17 +26,54 @@ tadpole_control(dc, window.size, lb = "lbk")
 
 tsclust_args(preproc = list(), dist = list(), cent = list())
 }
+\arguments{
+\item{pam.precompute}{Logical flag. Precompute the whole distance matrix once and reuse it on
+each iteration if using PAM centroids. Otherwise calculate distances at every iteration.}
+
+\item{iter.max}{Integer. Maximum number of allowed iterations for partitional/fuzzy clustering.}
+
+\item{nrep}{Integer. How many times to repeat clustering with different starting points.}
+
+\item{symmetric}{Logical flag. Is the distance function symmetric? In other words, is
+\code{dist(x,y)} == \code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be
+computed. Overridden if the function detects an invalid user-provided value.}
+
+\item{packages}{Character vector with the names of any packages required for custom \code{proxy}
+functions. Since the distance entries are re-registered in each parallel worker if needed, this
+slot is probably useless, but just in case.}
+
+\item{distmat}{If available, the cross-distance matrix can be provided here. Only relevant for
+partitional with PAM centroids or hierarchical procedures.}
+
+\item{method}{Character vector with one or more linkage methods to use in hierarchical procedures
+(see \code{\link[stats]{hclust}}) or a function that performs hierarchical clustering based on
+distance matrices (e.g. \code{\link[cluster]{diana}}).}
+
+\item{fuzziness}{Numeric. Exponent used for fuzzy clustering. Commonly termed \code{m} in the
+literature.}
+
+\item{delta}{Numeric. Convergence criterion for fuzzy clustering.}
+
+\item{dc}{The cutoff distance for the TADPole algorithm.}
+
+\item{window.size}{The window.size specifically for the TADPole algorithm.}
+
+\item{lb}{The lower bound to use with TADPole. Either \code{"lbk"} or \code{"lbi"}.}
+
+\item{preproc}{A list of arguments for a preprocessing function to be used in
+\code{\link{tsclust}}.}
+
+\item{dist}{A list of arguments for a distance function to be used in \code{\link{tsclust}}.}
+
+\item{cent}{A list of arguments for a centroid function to be used in \code{\link{tsclust}}.}
+}
 \description{
-Control parameters
+Control parameters for \code{\link{tsclust}}.
 }
 \details{
-Partitional
+The functions essentially return their function arguments in a classed list, although some checks
+are performed.
 
-Hierarchical
-
-Fuzzy
-
-TADPole
-
-Function arguments
+When using TADPole, the \code{dist} argument list includes the \code{window.size} and specifies
+\code{norm = "L2"}.
 }

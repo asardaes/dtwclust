@@ -6,8 +6,8 @@
 #' @export
 #' @exportMethod cvi
 #'
-#' @param a An object returned by the \code{\link{dtwclust}} function, or a vector that can be
-#'   coerced to integers which indicate the cluster memeberships.
+#' @param a An object returned by the \code{\link{dtwclust}} or \code{\link{tsclust}} function, or a
+#'   vector that can be coerced to integers which indicate the cluster memeberships.
 #' @param b If needed, a vector that can be coerced to integers which indicate the cluster
 #'   memeberships. The ground truth (if known) should be provided here.
 #' @param type Character vector indicating which indices are to be computed. See supported values
