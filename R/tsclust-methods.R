@@ -1,0 +1,873 @@
+#' Methods for \code{TSClusters}
+#'
+#' Methods associated with \code{\link{TSClusters-class}} objects.
+#'
+#' @name tsclusters-methods
+#' @rdname tsclusters-methods
+#' @include tsclust-classes.R
+#'
+#' @details
+#'
+#' TODO
+#'
+#' @seealso
+#'
+NULL
+
+# ==================================================================================================
+# Custom initialize
+# ==================================================================================================
+
+## for tsclustFamily
+setMethod("initialize", "tsclustFamily",
+          function(.Object, dist, allcent, ..., distmat = NULL, control = NULL, fuzzy = FALSE) {
+              dots <- list(...)
+              dots$.Object <- .Object
+
+              if (!missing(dist)) {
+                  if (is.character(dist))
+                      dots$dist <- ddist2(dist, control, distmat)
+                  else
+                      dots$dist <- dist
+              }
+
+              if (fuzzy) {
+                  dots$cluster <- fcm_cluster # fuzzy.R
+                  if (!missing(allcent)) allcent <- match.arg(allcent, c("fcm", "fcmdd"))
+              }
+
+              if (!missing(allcent)) {
+                  if (is.character(allcent))
+                      dots$allcent <- all_cent2(allcent,
+                                                distmat = distmat,
+                                                distfun = dots$dist,
+                                                control = control,
+                                                fuzzy = fuzzy)
+                  else if (is.function(allcent))
+                      dots$allcent <- allcent
+                  else
+                      stop("Centroid definition must be either a function or a character")
+              }
+
+              do.call(callNextMethod, dots)
+          })
+
+#' @name tsclusters-methods
+#' @rdname tsclusters-methods
+#' @aliases tsclusters-methods
+#' @export
+#'
+#' @details
+#'
+#' Initialize (constructor)
+#'
+TSClusters <- function(.Object, ..., override.family = TRUE) {
+    tic <- proc.time()
+
+    dots <- list(...)
+
+    ## some minor checks
+    if (!is.null(dots$datalist)) dots$datalist <- any2list(dots$datalist)
+    if (!is.null(dots$centroids)) dots$centroids <- any2list(dots$centroids)
+
+    ## avoid infinite recursion (see https://bugs.r-project.org/bugzilla/show_bug.cgi?id=16629)
+    if (is.null(dots$call)) {
+        call <- match.call()
+
+    } else {
+        call <- dots$call
+        dots$call <- NULL
+    }
+
+    .Object <- do.call(methods::callNextMethod, enlist(.Object = .Object, dots = dots))
+    .Object@call <- call
+
+    ## some "defaults"
+    if (is.null(dots$preproc)) .Object@preproc <- "none"
+    if (is.null(dots$k)) .Object@k <- length(.Object@centroids)
+
+    ## more helpful for hierarchical/tadpole
+    if (override.family) {
+        if (length(.Object@type) == 0L)
+            warning("Could not override family, 'type' slot is missing.")
+        else if (length(.Object@distance) == 0L)
+            warning("Could not override family, 'distance' slot is missing.")
+        else {
+            centroids <- .Object@centroids
+            datalist <- .Object@datalist
+
+            if (.Object@type == "partitional" && length(.Object@centroid))
+                allcent <- all_cent(.Object@centroid,
+                                    distmat = .Object@distmat,
+                                    control = .Object@control,
+                                    fuzzy = isTRUE(.Object@type == "fuzzy"))
+            else if (.Object@type == "hierarchical" && length(formals(.Object@family@allcent)))
+                allcent <- .Object@family@allcent
+            else if (.Object@type == "hierarchical" && length(centroids))
+                allcent <- function(dummy) {
+                    datalist[which.min(apply(.Object@distmat, 1L, sum))] # for CVI's global_cent
+                }
+            else if (.Object@type == "tadpole" && length(centroids))
+                allcent <- function(dummy) { centroids[1L] } # for CVI's global_cent
+            else if (.Object@type == "fuzzy")
+                allcent <- .Object@centroid
+            else
+                allcent <- .Object@family@allcent
+
+            .Object@family <- new("tsclustFamily",
+                                  dist = .Object@distance,
+                                  allcent = allcent,
+                                  preproc = .Object@family@preproc,
+                                  distmat = NULL,
+                                  control = .Object@control,
+                                  fuzzy = isTRUE(.Object@type == "fuzzy"))
+
+            assign("distfun", .Object@family@dist, environment(.Object@family@allcent))
+
+            if (.Object@type == "partitional" && .Object@centroid == "shape") {
+                .Object@family@preproc <- zscore
+                .Object@preproc <- "zscore"
+            }
+        }
+    }
+
+    ## just a filler
+    if (!length(.Object@proctime)) .Object@proctime <- proc.time() - tic
+
+    ## return
+    .Object
+}
+
+setMethod("initialize", "TSClusters", TSClusters)
+
+## for derived classes
+setMethod("initialize", "PartitionalTSClusters",
+          function(.Object, ...) {
+              .Object <- methods::callNextMethod()
+
+              ## some "defaults"
+              if (!length(.Object@iter)) .Object@iter <- 1L
+              if (!length(.Object@converged)) .Object@converged <- TRUE
+
+              if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
+                  ## no cldist available, but dist and cluster can be used to calculate it
+                  dm <- do.call(.Object@family@dist,
+                                enlist(.Object@datalist,
+                                       .Object@centroids,
+                                       dots = .Object@dots))
+
+                  .Object@cldist <- as.matrix(dm[cbind(1L:length(.Object@datalist), .Object@cluster)])
+
+                  dimnames(.Object@cldist) <- NULL
+              }
+
+              if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
+                  ## no clusinfo available, but cluster and cldist can be used to calculate it
+                  size <- as.vector(table(.Object@cluster))
+                  clusinfo <- data.frame(size = size, av_dist = 0)
+                  clusinfo[clusinfo$size > 0L, "av_dist"] <-
+                      as.vector(tapply(.Object@cldist[ , 1L], .Object@cluster, mean))
+
+                  .Object@clusinfo <- clusinfo
+              }
+
+              ## return
+              .Object
+          })
+
+setMethod("initialize", "HierarchicalTSClusters",
+          function(.Object, ...) {
+              .Object <- methods::callNextMethod()
+
+              if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
+                  ## no cldist available, but dist and cluster can be used to calculate it
+                  dm <- do.call(.Object@family@dist,
+                                enlist(.Object@datalist,
+                                       .Object@centroids,
+                                       dots = .Object@dots))
+
+                  .Object@cldist <- as.matrix(dm[cbind(1L:length(.Object@datalist), .Object@cluster)])
+
+                  dimnames(.Object@cldist) <- NULL
+              }
+
+              if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
+                  ## no clusinfo available, but cluster and cldist can be used to calculate it
+                  size <- as.vector(table(.Object@cluster))
+                  clusinfo <- data.frame(size = size, av_dist = 0)
+                  clusinfo[clusinfo$size > 0L, "av_dist"] <-
+                      as.vector(tapply(.Object@cldist[ , 1L], .Object@cluster, mean))
+
+                  .Object@clusinfo <- clusinfo
+              }
+
+              ## return
+              .Object
+          })
+
+setMethod("initialize", "FuzzyTSClusters",
+          function(.Object, ...) {
+              .Object <- methods::callNextMethod()
+
+              ## some "defaults"
+              if (!length(.Object@iter)) .Object@iter <- 1L
+              if (!length(.Object@converged)) .Object@converged <- TRUE
+
+              if (any(is.na(.Object@fcluster))) {
+                  if (length(formals(.Object@family@dist))) {
+                      ## no fcluster available, but dist and cluster function can be used to calculate it
+                      dm <- do.call(.Object@family@dist,
+                                    enlist(.Object@datalist,
+                                           .Object@centroids,
+                                           dots = .Object@dots))
+
+                      .Object@fcluster <- .Object@family@cluster(dm, m = .Object@control@fuzziness)
+                      colnames(.Object@fcluster) <- paste0("cluster_", 1:.Object@k)
+
+                  } else
+                      .Object@fcluster <- matrix(NA_real_)
+              }
+
+              ## return
+              .Object
+          })
+
+# ==================================================================================================
+# Show
+# ==================================================================================================
+
+#' @rdname tsclusters-methods
+#' @aliases show,TSClusters
+#' @exportMethod show
+#'
+setMethod("show", "TSClusters",
+          function(object) {
+              print(object@call)
+              cat("\n")
+
+              cat(object@type, "clustering with", object@k, "clusters\n")
+              cat("Using", object@distance, "distance\n")
+              cat("Using", object@centroid, "centroids\n")
+
+              if (inherits(object, "HierarchicalTSClusters"))
+                  cat("Using method", object@method, "\n")
+              if (object@preproc != "none")
+                  cat("Using", object@preproc, "preprocessing\n")
+
+              cat("\nTime required for analysis:\n")
+              print(object@proctime)
+
+              if (inherits(object, "FuzzyTSClusters")) {
+                  cat("\nHead of fuzzy memberships:\n\n")
+                  print(utils::head(object@fcluster))
+
+              } else if (!is.null(attr(object, "clusinfo"))) {
+                  cat("\nCluster sizes with average intra-cluster distance:\n\n")
+                  print(object@clusinfo)
+              }
+
+              invisible(NULL)
+          })
+
+# ==================================================================================================
+# update from stats
+# ==================================================================================================
+
+#' @rdname tsclusters-methods
+#' @method update TSClusters
+#' @export
+#'
+#' @param evaluate Logical. Defaults to \code{TRUE} and evaluates the updated call, which will
+#'   result in a new \code{TSClusters} object. Otherwise, it returns the unevaluated call.
+#'
+#' @details
+#'
+#' The \code{update} method takes the original function call, replaces any provided argument and
+#' optionally evaluates the call again. Use \code{evaluate = FALSE} if you want to get the
+#' unevaluated call.
+#'
+update.TSClusters <- function(object, ..., evaluate = TRUE) {
+    args <- as.pairlist(list(...))
+
+    if (length(args) == 0L) {
+        message("Nothing to be updated")
+
+        if (evaluate)
+            return(object)
+        else
+            return(object@call)
+    }
+
+    new_call <- object@call
+    new_call[names(args)] <- args
+
+    if (evaluate)
+        ret <- eval.parent(new_call, n = 2L)
+    else
+        ret <- new_call
+
+    ret
+}
+
+#' @rdname tsclusters-methods
+#' @aliases update,TSClusters
+#' @exportMethod update
+#'
+setMethod("update", signature(object = "TSClusters"), update.TSClusters)
+
+# ==================================================================================================
+# predict from stats
+# ==================================================================================================
+
+#' @rdname tsclusters-methods
+#' @method predict TSClusters
+#' @export
+#'
+#' @param newdata New data to be assigned to a cluster. It can take any of the supported formats of
+#'   \code{\link{tsclust}}. Note that for multivariate series, this means that it \strong{must} be
+#'   a list of matrices, even if the list has only one element.
+#'
+#' @details
+#'
+#' The \code{predict} generic can take the usual \code{newdata} argument and it returns the
+#' cluster(s) to which the data belongs; if \code{NULL}, it simply returns the obtained cluster
+#' indices. It preprocesses the data with the corresponding function if available.
+#'
+predict.TSClusters <- function(object, newdata = NULL, ...) {
+    if (is.null(newdata)) {
+        if (inherits(object, "FuzzyTSClusters"))
+            ret <- object@fcluster
+        else
+            ret <- object@cluster
+
+    } else {
+        newdata <- any2list(newdata)
+        check_consistency(newdata, "vltslist")
+        nm <- names(newdata)
+
+        newdata <- do.call(object@family@preproc,
+                           args = enlist(newdata,
+                                         dots = object@dots))
+
+        distmat <- do.call(object@family@dist,
+                           args = enlist(x = newdata,
+                                         centroids = object@centroids,
+                                         dots = object@dots))
+
+        ret <- object@family@cluster(distmat = distmat, m = object@control$fuzziness)
+
+        if (inherits(object, "FuzzyTSClusters"))
+            dimnames(ret) <- list(nm, paste0("cluster_", 1L:ncol(ret)))
+        else
+            names(ret) <- nm
+    }
+
+    ret
+}
+
+#' @rdname tsclusters-methods
+#' @aliases predict,TSClusters
+#' @exportMethod predict
+#'
+setMethod("predict", signature(object = "TSClusters"), predict.TSClusters)
+
+# ==================================================================================================
+# Plot
+# ==================================================================================================
+
+#' @rdname tsclusters-methods
+#' @method plot TSClusters
+#' @export
+#'
+#' @param y Ignored.
+#' @param ... For \code{plot}, further arguments to pass to \code{\link[ggplot2]{geom_line}} for the
+#'   plotting of the \emph{cluster centroids}, or to \code{\link[stats]{plot.hclust}}. See details.
+#'   For \code{update}, any supported argument. Otherwise ignored.
+#' @param clus A numeric vector indicating which clusters to plot.
+#' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}}
+#'   for more information
+#' @param time Optional values for the time axis. If series have different lengths, provide the time
+#'   values of the longest series.
+#' @param plot Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot
+#'   object without printing anything to screen
+#' @param type What to plot. \code{NULL} means default. See details.
+#'
+#' @section Plotting:
+#'
+#'   The plot method uses the \code{ggplot2} plotting system (see \code{\link[ggplot2]{ggplot}}).
+#'
+#'   The default depends on whether a hierarchical method was used or not. In those cases, the
+#'   dendrogram is plotted by default; you can pass any extra parameters to
+#'   \code{\link[stats]{plot.hclust}} via \code{...}.
+#'
+#'   Otherwise, the function plots the time series of each cluster along with the obtained centroid.
+#'   The default values for cluster centroids are: \code{linetype = "dashed"}, \code{size = 1.5},
+#'   \code{colour = "black"}, \code{alpha = 0.5}. You can change this by means of \code{...}.
+#'
+#'   You can choose what to plot with the \code{type} parameter. Possible options are:
+#'
+#'   \itemize{
+#'     \item \code{"dendrogram"}: Only available for hierarchical clustering.
+#'     \item \code{"series"}: Plot the time series divided into clusters without including
+#'       centroids.
+#'     \item \code{"centroids"}: Plot the obtained centroids only.
+#'     \item \code{"sc"}: Plot both series and centroids
+#'   }
+#'
+#'   If created, the function returns the \code{gg} object invisibly, in case you want to modify it
+#'   to your liking. You might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the
+#'   case.
+#'
+#'   If you want to free the scale of the X axis, you can do the following:
+#'
+#'   \code{plot(object, plot = FALSE)} \code{+} \code{facet_wrap(~cl, scales = "free")}
+#'
+#' @return
+#'
+#' The plot method returns a \code{gg} object (or \code{NULL} for dendrogram plot) invisibly.
+#'
+plot.TSClusters <- function(x, y, ...,
+                            clus = seq_len(x@k), labs.arg = NULL,
+                            data = NULL, time = NULL,
+                            plot = TRUE, type = NULL)
+{
+    ## set default type if none was provided
+    if (!is.null(type))
+        type <- match.arg(type, c("dendrogram", "series", "centroids", "sc"))
+    else if (x@type == "hierarchical")
+        type <- "dendrogram"
+    else
+        type <- "sc"
+
+    ## plot dendrogram?
+    if (inherits(x, "HierarchicalTSClusters") && type == "dendrogram") {
+        x <- S3Part(x, strictS3 = TRUE)
+        if (plot) graphics::plot(x, ...)
+        return(invisible(NULL))
+
+    } else if (x@type != "hierarchical" && type == "dendrogram") {
+        stop("Dendrogram plot only applies to hierarchical clustering.")
+    }
+
+    ## Obtain data, the priority is: provided data > included data list
+    if (length(x@datalist) < 1L)
+        stop("Provided object has no data. Please re-run the algorithm with save.data = TRUE ",
+             "or provide the data manually.")
+
+    data <- x@datalist
+
+    ## centroids consistency
+    check_consistency(centroids <- x@centroids, "vltslist")
+
+    ## force same length for all multivariate series/centroids in the same cluster by
+    ## adding NAs
+    if (mv <- is_multivariate(data)) {
+        clusters <- split(data, factor(x@cluster, levels = 1L:x@k), drop = FALSE)
+
+        for (id_clus in 1L:x@k) {
+            cluster <- clusters[[id_clus]]
+            if (length(cluster) < 1L) next ## empty cluster
+
+            nc <- NCOL(cluster[[1L]])
+            len <- sapply(cluster, NROW)
+            L <- max(len, NROW(centroids[[id_clus]]))
+            trail <- L - len
+
+            clusters[[id_clus]] <- mapply(cluster, trail,
+                                          SIMPLIFY = FALSE,
+                                          FUN = function(mvs, trail) {
+                                              rbind(mvs, matrix(NA, trail, nc))
+                                          })
+
+            trail <- L - NROW(centroids[[id_clus]])
+
+            centroids[[id_clus]] <- rbind(centroids[[id_clus]], matrix(NA, trail, nc))
+        }
+
+        ## split returns the result in order of the factor levels,
+        ## but I want to keep the original order as returned from clustering
+        ido <- sort(sort(x@cluster, index.return=T)$ix, index.return = TRUE)$ix
+        data <- unlist(clusters, recursive = FALSE)[ido]
+    }
+
+    ## helper values
+    L1 <- lengths(data)
+    L2 <- lengths(centroids)
+
+    ## timestamp consistency
+    if (!is.null(time) && length(time) < max(L1, L2))
+        stop("Length mismatch between values and timestamps")
+
+    ## Check if data was z-normalized
+    if (x@preproc == "zscore")
+        title_str <- "Clusters' members (z-normalized)"
+    else
+        title_str <- "Clusters' members"
+
+    ## transform to data frames
+    dfm <- reshape2::melt(data)
+    dfcm <- reshape2::melt(centroids)
+
+    ## time, cluster and colour indices
+    color_ids <- integer(x@k)
+
+    dfm_tcc <- mapply(x@cluster, L1, USE.NAMES = FALSE, SIMPLIFY = FALSE,
+                      FUN = function(clus, len) {
+                          t <- if (is.null(time)) seq_len(len) else time[1L:len]
+                          cl <- rep(clus, len)
+                          color <- rep(color_ids[clus], len)
+
+                          color_ids[clus] <<- color_ids[clus] + 1L
+
+                          data.frame(t = t, cl = cl, color = color)
+                      })
+
+    dfcm_tc <- mapply(1L:x@k, L2, USE.NAMES = FALSE, SIMPLIFY = FALSE,
+                      FUN = function(clus, len) {
+                          t <- if (is.null(time)) seq_len(len) else time[1L:len]
+                          cl <- rep(clus, len)
+
+                          data.frame(t = t, cl = cl)
+                      })
+
+    ## bind
+    dfm <- data.frame(dfm, do.call(rbind, dfm_tcc))
+    dfcm <- data.frame(dfcm, do.call(rbind, dfcm_tc))
+
+    ## make factor
+    dfm$cl <- factor(dfm$cl)
+    dfcm$cl <- factor(dfcm$cl)
+    dfm$color <- factor(dfm$color)
+
+    ## create gg object
+    gg <- ggplot2::ggplot(data.frame(t = integer(),
+                                     variable = factor(),
+                                     value = numeric(),
+                                     cl = factor(),
+                                     color = factor()),
+                          aes_string(x = "t",
+                                     y = "value",
+                                     group = "L1"))
+
+    ## add centroids first if appropriate, so that they are at the very back
+    if (type %in% c("sc", "centroids")) {
+        if (length(list(...)) == 0L)
+            gg <- gg + ggplot2::geom_line(data = dfcm[dfcm$cl %in% clus, ],
+                                          linetype = "dashed",
+                                          size = 1.5,
+                                          colour = "black",
+                                          alpha = 0.5)
+        else
+            gg <- gg + ggplot2::geom_line(data = dfcm[dfcm$cl %in% clus, ], ...)
+    }
+
+    ## add series next if appropriate
+    if (type %in% c("sc", "series")) {
+        gg <- gg + ggplot2::geom_line(data = dfm[dfm$cl %in% clus, ],
+                                      aes_string(colour = "color"))
+    }
+
+    ## add vertical lines to separate variables of multivariate series
+    if (mv) {
+        ggdata <- data.frame(cl = rep(1L:x@k, each = (nc - 1L)),
+                             vbreaks = as.numeric(1L:(nc - 1L) %o% sapply(centroids, NROW)))
+
+        gg <- gg + ggplot2::geom_vline(data = ggdata[ggdata$cl %in% clus, , drop = FALSE],
+                                       colour = "black", linetype = "longdash",
+                                       aes_string(xintercept = "vbreaks"))
+    }
+
+    ## add facets, remove legend, apply kinda black-white theme
+    gg <- gg +
+        ggplot2::facet_wrap(~cl, scales = "free_y") +
+        ggplot2::guides(colour = FALSE) +
+        ggplot2::theme_bw()
+
+    ## labels
+    if (!is.null(labs.arg))
+        gg <- gg + ggplot2::labs(labs.arg)
+    else
+        gg <- gg + ggplot2::labs(title = title_str)
+
+    ## plot without warnings in case I added NAs for multivariate cases
+    if (plot) suppressWarnings(graphics::plot(gg))
+
+    invisible(gg)
+}
+
+#' @rdname tsclusters-methods
+#' @aliases plot,TSClusters,missing
+#' @exportMethod plot
+#'
+setMethod("plot", signature(x = "TSClusters", y = "missing"), plot.TSClusters)
+
+# ==================================================================================================
+# Cluster validity indices
+# ==================================================================================================
+
+cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
+    type <- match.arg(type, several.ok = TRUE,
+                      c("RI", "ARI", "J", "FM", "VI",
+                        "Sil", "SF", "CH", "DB", "DBstar", "D", "COP",
+                        "valid", "internal", "external"))
+
+    dots <- list(...)
+
+    internal <- c("Sil", "SF", "CH", "DB", "DBstar", "D", "COP")
+    external <- c("RI", "ARI", "J", "FM", "VI")
+
+    if (any(type == "valid")) {
+        type <- if (is.null(b)) internal else c(internal, external)
+
+    } else if (any(type == "internal")) {
+        type <- internal
+
+    } else if (any(type == "external")) {
+        type <- external
+    }
+
+    which_internal <- type %in% internal
+    which_external <- type %in% external
+
+    if (any(which_external))
+        CVIs <- cvi(a@cluster, b = b, type = type[which_external], ...)
+    else
+        CVIs <- numeric()
+
+    type <- type[which_internal]
+
+    if (any(which_internal)) {
+        if (length(a@datalist) == 0L && any(type %in% c("SF", "CH"))) {
+            warning("Internal CVIs: the original data must be in object to calculate ",
+                    "the following indices:",
+                    "\n\tSF\tCH")
+
+            type <- setdiff(type, c("SF", "CH"))
+        }
+
+        ## calculate distmat if needed
+        if (any(type %in% c("Sil", "D", "COP"))) {
+            if (is.null(a@distmat)) {
+                if (length(a@datalist) == 0L) {
+                    warning("Internal CVIs: distmat OR original data needed for indices:",
+                            "\n\tSil\tD\tCOP")
+
+                    type <- setdiff(type, c("Sil", "D", "COP"))
+
+                } else {
+                    distmat <- do.call(a@family@dist,
+                                       args = enlist(x = a@datalist,
+                                                     centroids = NULL,
+                                                     dots = a@dots))
+                }
+            } else {
+                distmat <- a@distmat
+            }
+        }
+
+        ## are valid indices still left?
+        if (length(type) == 0L)
+            return(CVIs)
+
+        ## calculate some values that both Davies-Bouldin indices use
+        if (any(type %in% c("DB", "DBstar"))) {
+            S <- a@clusinfo$av_dist
+
+            ## distance between centroids
+            distcent <- do.call(a@family@dist,
+                                args = enlist(x = a@centroids,
+                                              centroids = NULL,
+                                              dots = a@dots))
+        }
+
+        ## calculate global centroids if needed
+        if (any(type %in% c("SF", "CH"))) {
+            N <- length(a@datalist)
+
+            if (a@type == "partitional") {
+                global_cent <- do.call(a@family@allcent,
+                                       args = enlist(x = a@datalist,
+                                                     cl_id = rep(1L, N),
+                                                     k = 1L,
+                                                     cent = a@datalist[sample(N, 1L)],
+                                                     cl_old = rep(0L, N),
+                                                     dots = a@dots))
+            } else {
+                global_cent <- a@family@allcent(a@datalist)
+            }
+
+            dist_global_cent <- do.call(a@family@dist,
+                                        args = enlist(x = a@centroids,
+                                                      centroids = global_cent,
+                                                      dots = a@dots))
+
+            dim(dist_global_cent) <- NULL
+        }
+
+        CVIs <- c(CVIs, sapply(type, function(CVI) {
+            switch(EXPR = CVI,
+                   ## Silhouette
+                   Sil = {
+                       c_k <- as.numeric(table(a@cluster)[a@cluster])
+
+                       ab <- lapply(unique(a@cluster), function(k) {
+                           idx <- a@cluster == k
+
+                           this_a <- rowSums(distmat[idx, idx, drop = FALSE]) / c_k[idx]
+
+                           this_b <- apply(distmat[idx, !idx, drop = FALSE], 1L, function(row) {
+                               ret <- row / c_k[!idx]
+                               ret <- min(tapply(ret, a@cluster[!idx], sum))
+                               ret
+                           })
+
+                           data.frame(a = this_a, b = this_b)
+                       })
+
+                       ab <- do.call(rbind, ab)
+
+                       sum((ab$b - ab$a) / apply(ab, 1L, max)) / nrow(distmat)
+                   },
+
+                   ## Dunn
+                   D = {
+                       pairs <- call_pairs(a@k)
+
+                       deltas <- mapply(pairs[ , 1L], pairs[ , 2L],
+                                        USE.NAMES = FALSE, SIMPLIFY = TRUE,
+                                        FUN = function(i, j) {
+                                            min(distmat[a@cluster == i,
+                                                        a@cluster == j,
+                                                        drop = TRUE])
+                                        })
+
+                       Deltas <- sapply(1L:a@k, function(k) {
+                           max(distmat[a@cluster == k, a@cluster == k, drop = TRUE])
+                       })
+
+                       min(deltas) / max(Deltas)
+                   },
+
+                   ## Davies-Bouldin
+                   DB = {
+                       mean(sapply(1L:a@k, function(k) {
+                           max((S[k] + S[-k]) / distcent[k, -k])
+                       }))
+                   },
+
+                   ## Modified DB -> DB*
+                   DBstar = {
+                       mean(sapply(1L:a@k, function(k) {
+                           max(S[k] + S[-k]) / min(distcent[k, -k, drop = TRUE])
+                       }))
+                   },
+
+                   ## Calinski-Harabasz
+                   CH = {
+                       (N - a@k) /
+                           (a@k - 1) *
+                           sum(a@clusinfo$size * dist_global_cent) /
+                           sum(a@cldist[ , 1L, drop = TRUE])
+                   },
+
+                   ## Score function
+                   SF = {
+                       bcd <- sum(a@clusinfo$size * dist_global_cent) / (N * a@k)
+                       wcd <- sum(a@clusinfo$av_dist)
+                       1 - 1 / exp(exp(bcd - wcd))
+                   },
+
+                   ## COP
+                   COP = {
+                       1 / nrow(distmat) * sum(sapply(1L:a@k, function(k) {
+                           sum(a@cldist[a@cluster == k, 1L]) / min(apply(distmat[a@cluster != k,
+                                                                                 a@cluster == k,
+                                                                                 drop = FALSE],
+                                                                         2L,
+                                                                         max))
+                       }))
+                   })
+        }))
+    }
+
+    CVIs
+}
+
+#' @rdname cvi
+#' @aliases cvi,PartitionalTSClusters
+#' @exportMethod cvi
+#'
+setMethod("cvi", signature(a = "PartitionalTSClusters"), cvi_TSClusters)
+
+#' @rdname cvi
+#' @aliases cvi,HierarchicalTSClusters
+#' @exportMethod cvi
+#'
+setMethod("cvi", signature(a = "HierarchicalTSClusters"), cvi_TSClusters)
+
+# ==================================================================================================
+# Functions to support package 'clue'
+# ==================================================================================================
+
+#' @method n_of_classes TSClusters
+#' @export
+#'
+n_of_classes.TSClusters <- function(x) {
+    x@k
+}
+
+#' @method n_of_objects TSClusters
+#' @export
+#'
+n_of_objects.TSClusters <- function(x) {
+    length(x@cluster)
+}
+
+#' @method cl_class_ids TSClusters
+#' @export
+#'
+cl_class_ids.TSClusters <- function(x) {
+    as.cl_class_ids(x@cluster)
+}
+
+#' @method as.cl_membership TSClusters
+#' @export
+#'
+as.cl_membership.TSClusters <- function(x) {
+    as.cl_membership(x@cluster)
+}
+
+#' @method cl_membership TSClusters
+#' @export
+#'
+cl_membership.TSClusters <- function(x, k = n_of_classes(x)) {
+    as.cl_membership(x)
+}
+
+#' @method is.cl_partition TSClusters
+#' @export
+#'
+is.cl_partition.TSClusters <- function(x) {
+    TRUE
+}
+
+#' @method is.cl_hard_partition TSClusters
+#' @export
+#'
+is.cl_hard_partition.TSClusters <- function(x) {
+    x@type != "fuzzy"
+}
+
+#' @method is.cl_hierarchy TSClusters
+#' @export
+#'
+is.cl_hierarchy.TSClusters <- function(x) {
+    x@type == "hierarchical"
+}
+
+#' @method is.cl_dendrogram TSClusters
+#' @export
+#'
+is.cl_dendrogram.TSClusters <- function(x) {
+    x@type == "hierarchical"
+}

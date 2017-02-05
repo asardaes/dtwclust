@@ -90,4 +90,3 @@ Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower b
 \url{http://dx.doi.org/10.1016/j.patcog.2008.11.030},
 \url{http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
 }
-

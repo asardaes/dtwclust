@@ -25,4 +25,3 @@ series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9,
 \seealso{
 \code{\link{SBD}}
 }
-

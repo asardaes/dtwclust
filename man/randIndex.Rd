@@ -3,12 +3,12 @@
 \docType{methods}
 \name{randIndex}
 \alias{randIndex}
-\alias{randIndex,ANY,dtwclust}
-\alias{randIndex,ANY,dtwclust-method}
-\alias{randIndex,dtwclust,ANY}
 \alias{randIndex,dtwclust,ANY-method}
-\alias{randIndex,dtwclust,dtwclust}
+\alias{randIndex,dtwclust,ANY}
+\alias{randIndex,ANY,dtwclust-method}
+\alias{randIndex,ANY,dtwclust}
 \alias{randIndex,dtwclust,dtwclust-method}
+\alias{randIndex,dtwclust,dtwclust}
 \title{Compare partitions}
 \usage{
 \S4method{randIndex}{dtwclust,ANY}(x, y, correct = TRUE,
@@ -30,4 +30,3 @@ This generic is included in the \code{flexclust} package.
 \seealso{
 \code{\link[flexclust]{randIndex}}
 }
-

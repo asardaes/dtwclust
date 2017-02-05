@@ -36,4 +36,3 @@ series <- reinterpolate(CharTrajMV, 205L)
 series <- reinterpolate(CharTrajMV[[1L]], 205L, TRUE)
 
 }
-

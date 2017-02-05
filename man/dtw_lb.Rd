@@ -65,6 +65,7 @@ Nearest neighbors are found row-wise.
   The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to
   attempt to speed up the calculations (see the examples).
 }
+
 \examples{
 
 # Load data
@@ -122,9 +123,6 @@ cbind(names(data[1:50]), names(data[51:100][NN]))
 }
 
 }
-\author{
-Alexis Sarda-Espinosa
-}
 \references{
 Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .''
 \emph{Pattern Recognition}, \strong{42}(9), pp. 2169 - 2180. ISSN 0031-3203,
@@ -134,4 +132,6 @@ Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower b
 \seealso{
 \code{\link{lb_keogh}}, \code{\link{lb_improved}}
 }
-
+\author{
+Alexis Sarda-Espinosa
+}

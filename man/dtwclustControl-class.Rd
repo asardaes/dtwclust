@@ -2,8 +2,8 @@
 % Please edit documentation in R/dtwclust-classes.R
 \docType{class}
 \name{dtwclustControl-class}
-\alias{dtwclustControl}
 \alias{dtwclustControl-class}
+\alias{dtwclustControl}
 \title{Class definition for \code{dtwclustControl}}
 \description{
 Formal S4 class with several control parameters used in \code{\link{dtwclust}}.
@@ -52,6 +52,7 @@ literature.}
 \item{\code{nrep}}{Integer. How many times to repeat clustering with different starting points. See
 section Repetitions in \code{\link{dtwclust}}.}
 }}
+
 \section{Common parameters}{
 
 

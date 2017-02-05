@@ -19,4 +19,3 @@ clusters are implemented. This generic is included in the \pkg{flexclust} packag
 \seealso{
 \code{\link[flexclust]{clusterSim}}
 }
-

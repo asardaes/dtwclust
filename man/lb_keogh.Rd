@@ -93,4 +93,3 @@ D.lbk <= D.dtw
 Keogh E and Ratanamahatana CA (2005). ``Exact indexing of dynamic time warping.'' \emph{Knowledge
 and information systems}, \strong{7}(3), pp. 358-386.
 }
-

@@ -41,7 +41,7 @@ BugReports: https://github.com/asardaes/dtwclust/issues
 License: GPL-3
 LazyData: TRUE
 NeedsCompilation: yes
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.0.9000
 Collate:
     'DBA.R'
     'GAK.R'
@@ -49,10 +49,12 @@ Collate:
     'SBD.R'
     'TADPole.R'
     'all-cent.R'
+    'all-cent2.R'
     'compute-envelop.R'
     'create-dtwclust.R'
     'cvi.R'
     'ddist.R'
+    'ddist2.R'
     'dtw-basic.R'
     'dtw-lb.R'
     'dtw2.R'
@@ -67,6 +69,10 @@ Collate:
     'pkg.R'
     'reinterpolate.R'
     'shape-extraction.R'
+    'tsclust-classes.R'
+    'tsclust-controls.R'
+    'tsclust-methods.R'
+    'tsclust.R'
     'uciCT.R'
     'zscore.R'
 VignetteBuilder: knitr

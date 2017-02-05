@@ -85,4 +85,3 @@ dtwclust(CharTraj, k = 20L,
 Cuturi, M. (2011). Fast global alignment kernels. In \emph{Proceedings of the 28th international
 conference on machine learning (ICML-11)} (pp. 929-936).
 }
-

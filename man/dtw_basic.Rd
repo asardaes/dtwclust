@@ -60,4 +60,3 @@ in \code{10(2) + 1 = 21} observations falling within the window.
 The DTW algorithm (and the functions that depend on it) might return different values in 32 bit
 installations compared to 64 bit ones.
 }
-

@@ -39,13 +39,12 @@ See \code{\link[base]{RNGkind}}.
 For more information, please read the included package vignette, which can be accessed by typing
 \code{vignette("dtwclust")}.
 }
-\author{
-Alexis Sarda-Espinosa
-}
 \references{
 Please refer to the package vignette references.
 }
 \seealso{
 \code{\link{dtwclust}}, \code{\link[proxy]{dist}}, \code{\link[dtw]{dtw}}
 }
-
+\author{
+Alexis Sarda-Espinosa
+}

@@ -66,6 +66,7 @@ in \code{10*2 + 1 = 21} observations falling within the window.
   The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to
   attempt to speed up the calculations (see the examples).
 }
+
 \examples{
 
 \dontrun{
@@ -103,4 +104,3 @@ with a Novel Admissible Pruning Strategy.'' In \emph{Conference on Knowledge Dis
 Mining}, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{
 http://dx.doi.org/10.1145/2783258.2783286}.
 }
-

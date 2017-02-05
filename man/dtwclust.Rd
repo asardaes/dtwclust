@@ -54,10 +54,10 @@ and hierarchical procedures are used, or \code{length(k)} \code{>} \code{1}, a l
 returned.
 }
 \description{
-This is the main function to perform time series clustering. It supports partitional,
+This is the original main function to perform time series clustering. It supports partitional,
 hierarchical, fuzzy, k-Shape and TADPole clustering. See the details and the examples for more
 information, as well as the included package vignette (which can be loaded by typing
-\code{vignette("dtwclust")}).
+\code{vignette("dtwclust")}). See \code{\link{tsclust}} for the new interface.
 }
 \details{
 Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering
@@ -378,6 +378,7 @@ are those that can be adjutsed with this argument.
 
   The lower bounds are \strong{not} symmetric, and \code{DTW} is not symmetric in general.
 }
+
 \examples{
 #' NOTE: More examples are available in the vignette. Here are just some miscellaneous
 #' examples that might come in handy. They should all work, but some don't run
@@ -541,9 +542,6 @@ stopCluster(cl)
 registerDoSEQ()
 }
 }
-\author{
-Alexis Sarda-Espinosa
-}
 \references{
 Please refer to the package vignette references.
 }
@@ -551,4 +549,6 @@ Please refer to the package vignette references.
 \code{\link{dtwclust-methods}}, \code{\link{dtwclust-class}}, \code{\link{dtwclustControl}},
 \code{\link{dtwclustFamily}}.
 }
-
+\author{
+Alexis Sarda-Espinosa
+}

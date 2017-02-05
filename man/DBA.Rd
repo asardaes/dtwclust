@@ -67,6 +67,7 @@ The indices of the DTW alignment are obtained by calling \code{\link{dtw_basic}}
   The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to
   attempt to speed up the calculations (see the examples).
 }
+
 \examples{
 
 # Sample data
@@ -112,4 +113,3 @@ warping, with applications to clustering.'' \emph{Pattern Recognition}, \strong{
 693. ISSN 0031-3203, \url{http://dx.doi.org/10.1016/j.patcog.2010.09.013},
 \url{http://www.sciencedirect.com/science/article/pii/S003132031000453X}.
 }
-

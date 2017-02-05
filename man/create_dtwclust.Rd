@@ -58,4 +58,3 @@ fc_obj <- create_dtwclust(type = "fuzzy", datalist = CharTraj, centroids = centr
 fc_obj
 
 }
-

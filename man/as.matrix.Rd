@@ -16,4 +16,3 @@ version and add some coercion methods for \code{pairdist} and \code{crossdist}.
 \seealso{
 \code{\link[base]{as.matrix}}
 }
-
