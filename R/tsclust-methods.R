@@ -909,3 +909,125 @@ is.cl_hierarchy.TSClusters <- function(x) {
 is.cl_dendrogram.TSClusters <- function(x) {
     x@type == "hierarchical"
 }
+
+# ==================================================================================================
+# Coercion methods for dtwclust classes
+# ==================================================================================================
+
+setAs("dtwclustFamily", "tsclustFamily",
+      function(from, to) {
+          methods::new(to,
+                       preproc = from@preproc,
+                       cluster = from@cluster,
+                       dist = from@dist,
+                       allcent = from@allcent,
+                       control = get("control", environment(from@dist)))
+      })
+
+setAs("dtwclust", "TSClusters",
+      function(from, to) {
+          validObject(from)
+
+          base <- methods::new(to, override.family = FALSE)
+          exclude_slots <- c("control", "family", "args")
+
+          to <- switch(from@type,
+                       partitional = {
+                           to <- methods::new("PartitionalTSClusters", base, override.family = FALSE)
+
+                           for (sl in slotNames(to)) {
+                               if (sl %in% exclude_slots) next
+
+                               slot(to, sl) <- slot(from, sl)
+                           }
+
+                           to@family <- as(from@family, "tsclustFamily")
+
+                           to@control <- partitional_control(pam.precompute = from@control@pam.precompute,
+                                                             iter.max = from@control@iter.max,
+                                                             nrep = from@control@nrep,
+                                                             symmetric = from@control@symmetric,
+                                                             packages = from@control@packages,
+                                                             distmat = from@call$distmat)
+
+                           to
+                       },
+
+                       hierarchical = {
+                           to <- methods::new("HierarchicalTSClusters", base, override.family = FALSE)
+
+                           for (sl in slotNames(to)) {
+                               if (sl %in% exclude_slots) next
+
+                               slot(to, sl) <- slot(from, sl)
+                           }
+
+                           to@family <- as(from@family, "tsclustFamily")
+
+                           to@control <- hierarchical_control(symmetric = from@control@symmetric,
+                                                              packages = from@control@packages,
+                                                              distmat = from@call$distmat)
+
+                           to@method <- from@method
+
+                           to
+                       },
+
+                       fuzzy = {
+                           to <- methods::new("FuzzyTSClusters", base, override.family = FALSE)
+
+                           for (sl in slotNames(to)) {
+                               if (sl %in% exclude_slots) next
+
+                               slot(to, sl) <- slot(from, sl)
+                           }
+
+                           to@family <- as(from@family, "tsclustFamily")
+
+                           to@control <- fuzzy_control(fuzziness = from@control@fuzziness,
+                                                       iter.max = from@control@iter.max,
+                                                       delta = from@control@delta,
+                                                       packages = from@control@packages)
+
+                           to
+                       },
+
+                       tadpole = {
+                           to <- methods::new("PartitionalTSClusters", base, override.family = FALSE)
+
+                           for (sl in slotNames(to)) {
+                               if (sl %in% exclude_slots) next
+
+                               slot(to, sl) <- slot(from, sl)
+                           }
+
+                           to@family <- as(from@family, "tsclustFamily")
+
+                           lb <- if (is.null(from@dots$lb)) "lbk" else from@dots$lb
+
+                           to@control <- partitional_control(dc = from@call$dc,
+                                                             window.size = from@control@window.size,
+                                                             lb = lb)
+
+                           to
+                       })
+
+          to@args <- tsclust_args()
+          to@args$preproc <- from@dots[names(from@dots) %in% names(formals(to@family@preproc))]
+
+          if (tolower(to@distance) %in% c("dtw", "dtw2", "dtw_basic", "dtw_lb", "lbk", "lbi", "gak")) {
+              to@args$dist <- list(window.size = from@control@window.size,
+                                   norm = from@control@norm)
+
+              to@args$dist$window.type <- if (is.null(to@args$dist$window.size)) "none" else "slantedband"
+          }
+
+          if (tolower(to@centroid) == "dba") {
+              to@args$cent <- list(window.size = from@control@window.size,
+                                   norm = from@control@norm,
+                                   max.iter = from@control@dba.iter,
+                                   delta = from@control@delta)
+          }
+
+          to
+      })
