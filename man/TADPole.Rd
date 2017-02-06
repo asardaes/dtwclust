@@ -34,7 +34,8 @@ A list with:
 Time-series Anytime Density Peaks Clustering as proposed by Begum et al. (2015).
 }
 \details{
-This function can be called either directly or through \code{\link{dtwclust}}.
+This function can be called either directly or through \code{\link{dtwclust}} and
+\code{\link{tsclust}}.
 
 TADPole clustering adopts a relatively new clustering framework and adapts it to time series
 clustering with DTW. See the cited article for the details of the algorithm.

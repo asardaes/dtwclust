@@ -74,3 +74,358 @@ distances. All included centroid functions should work with the aforementioned f
 \code{shape} is \strong{not} recommended. Note that the \code{plot} method will simply append all
 dimensions (columns) one after the other.
 }
+\section{Centroid Calculation}{
+
+
+  In the case of partitional/fuzzy algorithms, a suitable function should calculate the cluster
+  centroids at every iteration. In this case, the centroids are themselves time series. Fuzzy
+  clustering uses the standard fuzzy c-means centroid by default.
+
+  In either case, a custom function can be provided. If one is provided, it will receive the
+  following parameters with the shown names (examples for partitional clustering are shown in
+  parenthesis):
+
+  \itemize{
+    \item \code{"x"}: The \emph{whole} data list (\code{list(ts1, ts2, ts3)})
+    \item \code{"cl_id"}: A numeric vector with length equal to the number of series in
+      \code{data}, indicating which cluster a series belongs to (\code{c(1L, 2L, 2L)})
+    \item \code{"k"}: The desired number of total clusters (\code{2L})
+    \item \code{"cent"}: The current centroids in order, in a list (\code{list(centroid1,
+      centroid2)})
+    \item \code{"cl_old"}: The membership vector of the \emph{previous} iteration (\code{c(1L,
+      1L, 2L)})
+    \item The elements of \code{args$cent} that match its formal arguments
+  }
+
+  In case of fuzzy clustering, the membership vectors (2nd and 5th elements above) are matrices
+  with number of rows equal to amount of elements in the data, and number of columns equal to the
+  number of desired clusters. Each row must sum to 1.
+
+  The other option is to provide a character string for the custom implementations. The following
+  options are available:
+
+  \itemize{
+    \item "mean": The average along each dimension. In other words, the average of all
+      \eqn{x^j_i} among the \eqn{j} series that belong to the same cluster for all time points
+      \eqn{t_i}.
+    \item "median": The median along each dimension. Similar to mean.
+    \item "shape": Shape averaging. By default, all series are z-normalized in this case, since
+      the resulting centroids will also have this normalization. See
+      \code{\link{shape_extraction}} for more details.
+    \item "dba": DTW Barycenter Averaging. See \code{\link{DBA}} for more details.
+    \item "pam": Partition around medoids (PAM). This basically means that the cluster centroids
+      are always one of the time series in the data. In this case, the distance matrix can be
+      pre-computed once using all time series in the data and then re-used at each iteration. It
+      usually saves overhead overall.
+    \item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and used by default in that
+      case.
+    \item "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering. It \strong{always}
+      precomputes the whole cross-distance matrix.
+  }
+
+  These check for the special cases where parallelization might be desired. Note that only
+  \code{shape}, \code{dba} and \code{pam} support series of different length. Also note that, for
+  \code{shape} and \code{dba}, this support has a caveat: the final centroids' length will depend
+  on the length of those series that were randomly chosen at the beginning of the clustering
+  algorithm. For example, if the series in the dataset have a length of either 10 or 15, 2
+  clusters are desired, and the initial choice selects two series with length of 10, the final
+  centroids will have this same length.
+
+  As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid
+  function that takes a list of series as only input and returns a single centroid series. These
+  centroids are returned in the \code{centroids} slot. By default, a type of PAM centroid
+  function is used.
+}
+
+\section{Distance Measures}{
+
+
+  The distance measure to be used with partitional, hierarchical and fuzzy clustering can be
+  modified with the \code{distance} parameter. The supported option is to provide a string, which
+  must represent a compatible distance registered with \code{proxy}'s \code{\link[proxy]{dist}}.
+  Registration is done via \code{\link[proxy]{pr_DB}}, and extra parameters can be provided in
+  \code{args$dist}.
+
+  Note that you are free to create your own distance functions and register them. Optionally, you
+  can use one of the following custom implementations (all registered with \code{proxy}):
+
+  \itemize{
+    \item \code{"dtw"}: DTW, optionally with a Sakoe-Chiba/Slanted-band constraint*.
+    \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint*.
+      Read details below.
+    \item \code{"dtw_basic"}: A custom version of DTW with less functionality, but slightly
+      faster. See \code{\link{dtw_basic}}.
+    \item \code{"dtw_lb"}: DTW with L1 or L2 norm* and optionally a Sakoe-Chiba constraint*. Some
+      computations are avoided by first estimating the distance matrix with Lemire's lower bound
+      and then iteratively refining with DTW. See \code{\link{dtw_lb}}. Not suitable for
+      \code{pam.precompute}* = \code{TRUE}.
+    \item \code{"lbk"}: Keogh's lower bound with either L1 or L2 norm* for the Sakoe-Chiba
+      constraint*.
+    \item \code{"lbi"}: Lemire's lower bound with either L1 or L2 norm* for the Sakoe-Chiba
+      constraint*.
+    \item \code{"sbd"}: Shape-based distance. See \code{\link{SBD}} for more details.
+    \item \code{"gak"}: Global alignment kernels. See \code{\link{GAK}} for more details.
+  }
+
+  DTW2 is done with \code{\link[dtw]{dtw}}, but it differs from the result you would obtain if
+  you specify \code{L2} as \code{dist.method}: with \code{DTW2}, pointwise distances (the local
+  cost matrix) are calculated with \code{L1} norm, \emph{each} element of the matrix is squared
+  and the result is fed into \code{\link[dtw]{dtw}}, which finds the optimum warping path. The
+  square root of the resulting distance is \emph{then} computed. See \code{\link{dtw2}}.
+
+  Only \code{dtw}, \code{dtw2}, \code{sbd} and \code{gak} support series of different length. The
+  lower bounds are probably unsuitable for direct clustering unless series are very easily
+  distinguishable.
+
+  If you know that the distance function is symmetric, and you use a hierarchical algorithm, or a
+  partitional algorithm with PAM centroids and \code{pam.precompute} = \code{TRUE}, some time
+  can be saved by calculating only half the distance matrix. Therefore, consider setting the
+  symmetric control parameter to \code{TRUE} if this is the case.
+}
+
+\section{Preprocessing}{
+
+
+  It is strongly advised to use z-normalization in case of \code{centroid = "shape"}, because the
+  resulting series have this normalization (see \code{\link{shape_extraction}}). Therefore,
+  \code{\link{zscore}} is the default in this case. The user can, however, specify a custom
+  function that performs any transformation on the data, but the user must make sure that the
+  format stays consistent, i.e. a list of time series.
+
+  Setting to \code{NULL} means no preprocessing (except for \code{centroid = "shape"}). A
+  provided function will receive the data as first argument, followed by the contents of
+  \code{args$preproc} that match its formal arguments.
+
+  It is convenient to provide this function if you're planning on using the
+  \code{\link[stats]{predict}} generic.
+}
+
+\section{Repetitions}{
+
+
+  Due to their stochastic nature, partitional clustering is usually repeated* several times with
+  different random seeds to allow for different starting points. This function uses
+  \code{\link[rngtools]{RNGseq}} to obtain different seed streams for each repetition, utilizing
+  the \code{seed} parameter (if provided) to initialize it. If more than one repetition is made,
+  the streams are returned in an attribute called \code{rng}.
+
+  Multiple values of \code{k} can also be provided to get different partitions using any
+  \code{type} of clustering.
+
+  Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is
+  precomputed, since said matrix is reused for every repetition, and can be comptued in parallel
+  (see Parallel section).
+}
+
+\section{Parallel Computing}{
+
+
+  Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
+  overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+
+  The user can register a parallel backend, for eample with the \code{doParallel} package, in
+  order to do the repetitions in parallel, as well as distance and some centroid calculations.
+
+  Unless each repetition requires a few seconds, parallel computing probably isn't worth it. As
+  such, I would only use this feature with \code{shape} and \code{DBA} centroids, or an expensive
+  distance function like \code{DTW}.
+
+  If you register a parallel backend, the function will also try to do the calculation of the
+  distance matrices in parallel. This should work with any function registered with
+  \code{\link[proxy]{dist}} via \code{\link[proxy]{pr_DB}} whose \code{loop} flag is set to
+  \code{TRUE}. If the function requires special packages to be loaded, provide their names in the
+  \code{packages}* slot of \code{control}. Note that "dtwclust" is always loaded in each parallel
+  worker, so that doesn't need to be included. Alternatively, you may want to pre-load
+  \code{dtwclust} in each worker with \code{\link[parallel]{clusterEvalQ}}.
+
+  In case of multiple repetitions, each worker gets a repetition task. Otherwise, the tasks
+  (which can be a distance matrix or a centroid calculation) are usually divided into chunks
+  according to the number of workers available.
+}
+
+\section{Notes}{
+
+
+  The lower bounds are defined only for time series of equal length. \code{DTW} and \code{DTW2}
+  don't require this, but they are much slower to compute.
+
+  The lower bounds are \strong{not} symmetric, and \code{DTW} is not symmetric in general.
+}
+
+\examples{
+#' NOTE: More examples are available in the vignette. Here are just some miscellaneous
+#' examples that might come in handy. They should all work, but some don't run
+#' automatically.
+
+# Load data
+data(uciCT)
+
+# ====================================================================================
+# Simple partitional clustering with Euclidean distance and PAM centroids
+# ====================================================================================
+
+# Reinterpolate to same length
+series <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
+
+# Subset for speed
+series <- series[1:20]
+labels <- CharTrajLabels[1:20]
+
+# Making many repetitions
+pc.l2 <- tsclust(series, k = 4L,
+                 distance = "L2", centroid = "pam",
+                 seed = 3247, trace = TRUE,
+                 control = partitional_control(nrep = 10L))
+
+# Cluster validity indices
+sapply(pc.l2, cvi, b = labels)
+
+# ====================================================================================
+# Hierarchical clustering with Euclidean distance
+# ====================================================================================
+
+# Re-use the distance matrix from the previous example (all matrices are the same)
+# Use all available linkage methods for function hclust
+hc.l2 <- tsclust(series, type = "hierarchical",
+                 k = 4L, trace = TRUE,
+                 control = hierarchical_control(method = "all",
+                                                distmat = pc.l2[[1L]]@distmat))
+
+# Plot the best dendrogram according to variation of information
+plot(hc.l2[[which.min(sapply(hc.l2, cvi, b = labels, type = "VI"))]])
+
+# ====================================================================================
+# Multivariate time series
+# ====================================================================================
+
+# Multivariate series, provided as a list of matrices
+mv <- CharTrajMV[1L:20L]
+
+# Using GAK distance
+mvc <- tsclust(mv, k = 4L, distance = "gak", seed = 390)
+
+# Note how the variables of each series are appended one after the other in the plot
+plot(mvc)
+
+\dontrun{
+# ====================================================================================
+# Registering a custom distance with the 'proxy' package and using it
+# ====================================================================================
+
+# Normalized asymmetric DTW distance
+ndtw <- function(x, y, ...) {
+    dtw::dtw(x, y, step.pattern = asymmetric,
+             distance.only = TRUE, ...)$normalizedDistance
+}
+
+# Registering the function with 'proxy'
+if (!pr_DB$entry_exists("nDTW"))
+    proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
+                           loop = TRUE, type = "metric", distance = TRUE,
+                           description = "Normalized asymmetric DTW")
+
+# Subset of (original) data for speed
+pc.ndtw <- tsclust(series[-1L], k = 4L,
+                   distance = "nDTW",
+                   seed = 8319,
+                   trace = TRUE,
+                   args = tsclust_args(dist = list(window.size = 18L)))
+
+# Which cluster would the first series belong to?
+# Notice that newdata is provided as a list
+predict(pc.ndtw, newdata = series[1L])
+
+# ====================================================================================
+# Custom hierarchical clustering
+# ====================================================================================
+
+require(cluster)
+
+hc.diana <- tsclust(series, type = "h", k = 4L,
+                    distance = "L2", trace = TRUE,
+                    control = hierarchical_control(method = diana))
+
+plot(hc.diana, type = "sc")
+
+# ====================================================================================
+# TADPole clustering
+# ====================================================================================
+
+pc.tadp <- tsclust(series, type = "tadpole", k = 4L,
+                   control = tadpole_control(dc = 1.5,
+                                             window.size = 18L))
+
+# Modify plot, show only clusters 3 and 4
+plot(pc.tadp, clus = 3:4,
+     labs.arg = list(title = "TADPole, clusters 3 and 4",
+                     x = "time", y = "series"))
+
+# Saving and modifying the ggplot object with custom time labels
+require(scales)
+t <- seq(Sys.Date(), len = length(series[[1L]]), by = "day")
+gpc <- plot(pc.tadp, time = t, plot = FALSE)
+
+gpc + scale_x_date(labels = date_format("\%b-\%Y"),
+                   breaks = date_breaks("2 months"))
+
+# ====================================================================================
+# Specifying a centroid function for prototype extraction in hierarchical clustering
+# ====================================================================================
+
+# Seed is due to possible randomness in shape_extraction when selecting a basis series
+hc.sbd <- tsclust(CharTraj, type = "hierarchical",
+                  k = 20L, distance = "sbd",
+                  preproc = zscore, centroid = shape_extraction,
+                  seed = 320L)
+
+plot(hc.sbd, type = "sc")
+
+# ====================================================================================
+# Using parallel computation to optimize several random repetitions
+# and distance matrix calculation
+# ====================================================================================
+require(doParallel)
+
+# Create parallel workers
+cl <- makeCluster(detectCores())
+invisible(clusterEvalQ(cl, library(dtwclust)))
+registerDoParallel(cl)
+
+## Use constrained DTW and PAM (less than a second with 8 cores)
+pc.dtw <- tsclust(CharTraj, k = 20L, seed = 3251, trace = TRUE,
+                  args = tsclust_args(dist = list(window.size = 18L)))
+
+## Use constrained DTW with DBA centroids (~3 seconds with 8 cores)
+pc.dba <- tsclust(CharTraj, k = 20L, centroid = "dba",
+                  seed = 3251, trace = TRUE,
+                  args = tsclust_args(dist = list(window.size = 18L),
+                                      cent = list(window.size = 18L)))
+
+#' Using distance based on global alignment kernels
+#' (~35 seconds with 8 cores for all repetitions)
+pc.gak <- tsclust(CharTraj, k = 20L,
+                  distance = "gak",
+                  centroid = "dba",
+                  seed = 8319,
+                  trace = TRUE,
+                  control = partitional_control(nrep = 8L),
+                  args = tsclust_args(dist = list(window.size = 18L),
+                                      cent = list(window.size = 18L)))
+
+# Stop parallel workers
+stopCluster(cl)
+
+# Return to sequential computations. This MUST be done after stopCluster()
+registerDoSEQ()
+}
+}
+\references{
+Please refer to the package vignette references.
+}
+\seealso{
+\code{\link{TSClusters-class}}, \code{\link{tsclusters-methods}},
+\code{\link{tsclustFamily-class}}.
+}
+\author{
+Alexis Sarda-Espinosa
+}

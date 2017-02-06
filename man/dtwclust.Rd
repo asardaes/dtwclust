@@ -213,7 +213,7 @@ are those that can be adjutsed with this argument.
       case.
     \item "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering. It \strong{always}
       precomputes the whole cross-distance matrix.
-}
+  }
 
   These check for the special cases where parallelization might be desired. Note that only
   \code{shape}, \code{dba} and \code{pam} support series of different length. Also note that, for

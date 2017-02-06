@@ -27,12 +27,12 @@ length. DTW itself does not require this, but it is relatively expensive to comp
 distance definitions may be used, or series could be reinterpolated to a matching length
 (Ratanamahatana and Keogh 2004).
 
-Other packages that are particularly leveraged here are the \code{proxy} package for distance
-matrix calculations and the \code{dtw} package for some of the core DTW calculations.
+Other packages that are particularly leveraged here are the \pkg{proxy} package for distance
+matrix calculations and the \pkg{dtw} package for some of the core DTW calculations.
 
-The main clustering function and entry point for this package is \code{\link{dtwclust}}.
+The main clustering function and entry point for this package is \code{\link{tsclust}}.
 
-Please note the random number generator is set to L'Ecuyer-CMRG when \code{dtwclust} is attached
+Please note the random number generator is set to L'Ecuyer-CMRG when \pkg{dtwclust} is attached
 in an attempt to preserve reproducibility. You are free to change this afterwards if you wish.
 See \code{\link[base]{RNGkind}}.
 
@@ -43,7 +43,7 @@ For more information, please read the included package vignette, which can be ac
 Please refer to the package vignette references.
 }
 \seealso{
-\code{\link{dtwclust}}, \code{\link[proxy]{dist}}, \code{\link[dtw]{dtw}}
+\code{\link{tsclust}}, \code{\link[proxy]{dist}}, \code{\link[dtw]{dtw}}
 }
 \author{
 Alexis Sarda-Espinosa
