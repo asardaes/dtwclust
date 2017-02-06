@@ -184,7 +184,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
                                     cl_id = cluster,
                                     k = k,
                                     cent = centroids,
-                                    cl_old = cluster,
+                                    cl_old = clustold,
                                     dots = subset_dots(args$cent, family@allcent)))
 
         if (fuzzy && cent == "fcm") {
