@@ -14,7 +14,7 @@ NULL
 
 ## for tsclustFamily
 setMethod("initialize", "tsclustFamily",
-          function(.Object, dist, allcent, ..., distmat = NULL, control = NULL, fuzzy = FALSE) {
+          function(.Object, dist, allcent, ..., distmat = NULL, control = list(), fuzzy = FALSE) {
               dots <- list(...)
               dots$.Object <- .Object
 
@@ -920,8 +920,7 @@ setAs("dtwclustFamily", "tsclustFamily",
                        preproc = from@preproc,
                        cluster = from@cluster,
                        dist = from@dist,
-                       allcent = from@allcent,
-                       control = get("control", environment(from@dist)))
+                       allcent = from@allcent)
       })
 
 setAs("dtwclust", "TSClusters",
@@ -1011,6 +1010,9 @@ setAs("dtwclust", "TSClusters",
 
                            to
                        })
+
+          assign("control", to@control, environment(to@family@dist))
+          assign("control", to@control, environment(to@family@allcent))
 
           to@args <- tsclust_args()
           to@args$preproc <- from@dots[names(from@dots) %in% names(formals(to@family@preproc))]
