@@ -41,7 +41,7 @@ partitional_control <- function(pam.precompute = TRUE,
              iter.max = as.integer(iter.max),
              nrep = as.integer(nrep),
              symmetric = as.logical(symmetric),
-             packages = c("dtwclust", as.character(packages)),
+             packages = unique(c("dtwclust", as.character(packages))),
              distmat = distmat),
         "class" = c("PtCtrl")
     )
@@ -79,7 +79,7 @@ hierarchical_control <- function(method = "average",
     structure(
         list(method = method,
              symmetric = as.logical(symmetric),
-             packages = c("dtwclust", as.character(packages)),
+             packages = unique(c("dtwclust", as.character(packages))),
              distmat = distmat),
         "class" = c("HcCtrl")
     )
@@ -108,7 +108,7 @@ fuzzy_control <- function(fuzziness = 2,
         list(fuzziness = fuzziness,
              iter.max = as.integer(iter.max),
              delta = delta,
-             packages = c("dtwclust", as.character(packages))),
+             packages = unique(c("dtwclust", as.character(packages)))),
         "class" = c("FzCtrl")
     )
 }
