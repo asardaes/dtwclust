@@ -166,6 +166,9 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         cluster <- integer(N)
     }
 
+    if (cent == "pam" && !control$pam.precompute)
+        args$cent <- c(args$cent, args$dist)
+
     iter <- 1L
     objective_old <- Inf
 
