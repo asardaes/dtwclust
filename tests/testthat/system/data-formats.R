@@ -11,7 +11,7 @@ ols <- ls()
 # data formats
 # =================================================================================================
 
-test_that("Results are the same regardless of data format, as long as supported.", {
+test_that("Results are the same regardless of data format, as long as supported by dtwclust.", {
     pc_matrix <- dtwclust(data_matrix[1L:20L, ], type = "partitional", k = 4L,
                           distance = "L2", centroid = "pam",
                           seed = 939)
@@ -24,24 +24,42 @@ test_that("Results are the same regardless of data format, as long as supported.
 
     pc_list <- reset_nondeterministic(pc_list)
 
-    pc_df<- dtwclust(as.data.frame(data_matrix[1L:20L, ]),
-                     type = "partitional", k = 4L,
+    df <- as.data.frame(data_matrix[1L:20L, ])
+    colnames(df) <- NULL
+    pc_df<- dtwclust(df, type = "partitional", k = 4L,
                      distance = "L2", centroid = "pam",
                      seed = 939)
 
     pc_df <- reset_nondeterministic(pc_df)
 
-    pc_matrix <- lapply(pc_matrix, function(obj) {
-        obj@call <- as.call(list("zas", a = 1))
-    })
+    pc_matrix@call <- pc_list@call <- pc_df@call <- as.call(list("zas", a = 1))
 
-    pc_list <- lapply(pc_list, function(obj) {
-        obj@call <- as.call(list("zas", a = 1))
-    })
+    expect_identical(pc_matrix, pc_list)
+    expect_identical(pc_matrix, pc_df)
+})
 
-    pc_df <- lapply(pc_df, function(obj) {
-        obj@call <- as.call(list("zas", a = 1))
-    })
+test_that("Results are the same regardless of data format, as long as supported by tsclust.", {
+    pc_matrix <- tsclust(data_matrix[1L:20L, ], type = "partitional", k = 4L,
+                         distance = "L2", centroid = "pam",
+                         seed = 939)
+
+    pc_matrix <- reset_nondeterministic(pc_matrix)
+
+    pc_list <- tsclust(data_reinterpolated_subset, type = "partitional", k = 4L,
+                       distance = "L2", centroid = "pam",
+                       seed = 939)
+
+    pc_list <- reset_nondeterministic(pc_list)
+
+    df <- as.data.frame(data_matrix[1L:20L, ])
+    colnames(df) <- NULL
+    pc_df<- tsclust(df, type = "partitional", k = 4L,
+                    distance = "L2", centroid = "pam",
+                    seed = 939)
+
+    pc_df <- reset_nondeterministic(pc_df)
+
+    pc_matrix@call <- pc_list@call <- pc_df@call <- as.call(list("zas", a = 1))
 
     expect_identical(pc_matrix, pc_list)
     expect_identical(pc_matrix, pc_df)

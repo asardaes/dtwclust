@@ -8,6 +8,7 @@ context("\tCentroids")
 ols <- ls()
 
 ctrl <- new("dtwclustControl", window.size = 18L)
+pt_ctrl <- partitional_control()
 x <- data_reinterpolated_subset
 k <- 2L
 cl_id <- rep(c(1L, 2L), each = length(x) / 2L)
@@ -45,6 +46,23 @@ test_that("Operations with mean centroid complete successfully.", {
     ## ---------------------------------------------------------- refs
     assign("cent_mean", cent_mean, persistent)
     assign("cent_mv_mean", cent_mv_mean, persistent)
+
+    ## ---------------------------------------------------------- tsclustFamily
+    family <- new("tsclustFamily", control = pt_ctrl, allcent = "mean")
+
+    expect_identical(cent_mean,
+                     family@allcent(x,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = x[c(1L,20L)],
+                                    cl_old = 0L))
+
+    expect_identical(cent_mv_mean,
+                     family@allcent(x_mv,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = x_mv[c(1L,20L)],
+                                    cl_old = 0L))
 })
 
 # =================================================================================================
@@ -79,6 +97,23 @@ test_that("Operations with median centroid complete successfully.", {
     ## ---------------------------------------------------------- refs
     assign("cent_median", cent_median, persistent)
     assign("cent_mv_median", cent_mv_median, persistent)
+
+    ## ---------------------------------------------------------- tsclustFamily
+    family <- new("tsclustFamily", control = pt_ctrl, allcent = "median")
+
+    expect_identical(cent_median,
+                     family@allcent(x,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = x[c(1L,20L)],
+                                    cl_old = 0L))
+
+    expect_identical(cent_mv_median,
+                     family@allcent(x_mv,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = x_mv[c(1L,20L)],
+                                    cl_old = 0L))
 })
 
 # =================================================================================================
@@ -113,6 +148,23 @@ test_that("Operations with shape centroid complete successfully.", {
     ## ---------------------------------------------------------- refs
     assign("cent_shape", cent_shape, persistent)
     assign("cent_mv_shape", cent_mv_shape, persistent)
+
+    ## ---------------------------------------------------------- tsclustFamily
+    family <- new("tsclustFamily", control = pt_ctrl, allcent = "shape")
+
+    expect_identical(cent_shape,
+                     family@allcent(x,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = x[c(1L,20L)],
+                                    cl_old = 0L))
+
+    expect_identical(cent_mv_shape,
+                     family@allcent(x_mv,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = x_mv[c(1L,20L)],
+                                    cl_old = 0L))
 })
 
 # =================================================================================================
@@ -174,6 +226,44 @@ test_that("Operations with pam centroid complete successfully.", {
     ## ---------------------------------------------------------- refs
     assign("cent_pam", cent_pam, persistent)
     assign("cent_mv_pam", cent_mv_pam, persistent)
+
+    ## ---------------------------------------------------------- tsclustFamily
+    family <- new("tsclustFamily", control = pt_ctrl, dist = "sbd", allcent = "pam")
+    expect_null(as.list(environment(family@allcent))$distmat)
+
+    expect_identical(cent_pam,
+                     family@allcent(x,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = x[c(1L,20L)],
+                                    cl_old = 0L))
+
+    family <- new("tsclustFamily",
+                  control = pt_ctrl,
+                  dist = "sbd",
+                  allcent = "pam",
+                  distmat = proxy::dist(x, method = "sbd"))
+    expect_false(is.null(as.list(environment(family@allcent))$distmat))
+
+    expect_identical(cent_pam_distmat,
+                     family@allcent(x,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = x[c(1L,20L)],
+                                    cl_old = 0L))
+
+    family <- new("tsclustFamily",
+                  control = pt_ctrl,
+                  dist = "dtw_basic",
+                  allcent = "pam")
+
+    expect_identical(cent_mv_pam,
+                     family@allcent(x_mv,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = x_mv[c(1L,20L)],
+                                    cl_old = 0L,
+                                    window.size = 18L))
 })
 
 # =================================================================================================
@@ -213,6 +303,28 @@ test_that("Operations with dba centroid complete successfully.", {
     ## ---------------------------------------------------------- refs
     assign("cent_dba", cent_dba, persistent)
     assign("cent_mv_dba", cent_mv_dba, persistent)
+
+    ## ---------------------------------------------------------- tsclustFamily
+    family <- new("tsclustFamily", control = pt_ctrl, allcent = "dba")
+
+    expect_identical(cent_dba,
+                     family@allcent(x,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = x[c(1L,20L)],
+                                    cl_old = 0L,
+                                    window.size = 18L,
+                                    max.iter = ctrl@dba.iter))
+
+    expect_identical(cent_mv_dba,
+                     family@allcent(x_mv,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = x_mv[c(1L,20L)],
+                                    cl_old = 0L,
+                                    window.size = 18L,
+                                    max.iter = ctrl@dba.iter,
+                                    norm = "L2"))
 })
 
 # =================================================================================================
@@ -248,7 +360,7 @@ test_that("Operations with custom centroid complete successfully.", {
         new_cent
     }
 
-    cent_colMeans_nd <- dtwclust(data_matrix, type = "partitional", k = 20,
+    cent_colMeans_nd <- dtwclust(data_matrix, type = "partitional", k = 20L,
                                  distance = "sbd", centroid = mycent,
                                  preproc = NULL, control = ctrl, seed = 123)
 
@@ -257,6 +369,14 @@ test_that("Operations with custom centroid complete successfully.", {
     ## ---------------------------------------------------------- refs
     assign("cent_colMeans", cent_colMeans, persistent)
     assign("cent_colMeans_nd", cent_colMeans_nd, persistent)
+
+    ## ---------------------------------------------------------- tsclustFamily
+    pc <- tsclust(data_matrix, k = 20L,
+                  distance = "sbd", centroid = mycent,
+                  seed = 123,
+                  args = tsclust_args(dist = list(window.size = 18L)))
+
+    expect_identical(cent_colMeans_nd@centroids, pc@centroids)
 })
 
 # =================================================================================================

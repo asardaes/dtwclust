@@ -24,6 +24,12 @@ reset_nondeterministic <- function(obj, clear.data = TRUE) {
         obj@proctime[1L:5L] <- 0
 
         if (clear.data) obj@datalist <- list()
+
+    } else if (inherits(obj, "TSClusters") && validObject(obj)) {
+        obj@family <- new("tsclustFamily")
+        obj@proctime[1L:5L] <- 0
+
+        if (clear.data) obj@datalist <- list()
     }
 
     obj

@@ -59,6 +59,46 @@ test_that("Methods for dtwclust objects are dispatched correctly.", {
     assign("method_update", method_update, persistent)
 })
 
+test_that("Methods for TSClusters objects are dispatched correctly.", {
+    mute <- capture.output(pc <- tsclust(data_subset[-1L], type = "partitional", k = 4L,
+                                         distance = "sbd", preproc = zscore,
+                                         trace = TRUE))
+
+    expect_error(plot(pc, type = "dendrogram"), "dendrogram.*hierarchical", ignore.case = TRUE)
+
+    ## fuzzy
+    mute <- capture.output(fc <- tsclust(data_reinterpolated_subset[-1L], type = "fuzzy",
+                                         k = 4L, distance = "sbd", preproc = zscore,
+                                         trace = TRUE))
+
+    expect_error(plot(fc, type = "dendrogram"), "dendrogram.*hierarchical", ignore.case = TRUE)
+
+    ## extra argument for preproc so that it is used in predict
+    mute <- capture.output(hc <- tsclust(data_subset[-1L], type = "hierarchical", k = 4L,
+                                         distance = "sbd", preproc = zscore,
+                                         trace = TRUE,
+                                         args = tsclust_args(preproc = list(center = FALSE))))
+
+    mute <- capture.output(show_return <- show(pc))
+    expect_null(show_return, info = "show")
+    mute <- capture.output(show_return <- show(hc))
+    expect_null(show_return, info = "show")
+    mute <- capture.output(show_return <- show(fc))
+    expect_null(show_return, info = "show")
+
+    expect_null(plot(hc), info = "plot dendrogram")
+    expect_true(inherits(plot(hc, type = "sc", plot = FALSE), "ggplot"), info = "plot sc")
+    expect_true(inherits(plot(hc, type = "sc", series = data_subset[-1L], plot = FALSE), "ggplot"),
+                info = "plot sc with data")
+
+    expect_true(predict(hc)[1L] == predict(hc, newdata = data_subset[1L]), info = "predict")
+
+    suppressMessages(method_update <- update(hc))
+    expect_identical(hc, method_update)
+    mute <- capture.output(method_update <- update(hc, method = "complete", distmat = hc@distmat))
+    expect_true(inherits(method_update, "TSClusters") & validObject(method_update), info = "update")
+})
+
 # =================================================================================================
 # clean
 # =================================================================================================

@@ -23,6 +23,15 @@ test_that("Multiple k works as expected.", {
 
     expect_identical(length(fc_k), 4L)
 
+    fc_k2 <- tsclust(data_subset, type = "f", k = 2L:5L,
+                     preproc = acf_fun, distance = "L2",
+                     seed = 123)
+
+    for (i in seq_along(fc_k)) {
+        expect_identical(fc_k[[i]]@fcluster, fc_k2[[i]]@fcluster)
+        expect_identical(fc_k[[i]]@centroids, fc_k2[[i]]@centroids)
+    }
+
     fc_k <- lapply(fc_k, reset_nondeterministic)
     assign("fc_k", fc_k, persistent)
 })
@@ -37,6 +46,13 @@ test_that("Fuzzy clustering works as expected.", {
                     preproc = acf_fun, distance = "L2",
                     seed = 123)
 
+    fcm2 <- tsclust(data_subset, type = "fuzzy", k = 4L,
+                    preproc = acf_fun, distance = "L2",
+                    seed = 123)
+
+    expect_identical(fcm@fcluster, fcm2@fcluster)
+    expect_identical(fcm@centroids, fcm2@centroids)
+
     fcm <- reset_nondeterministic(fcm)
 
     assign("fcm", fcm, persistent)
@@ -44,8 +60,14 @@ test_that("Fuzzy clustering works as expected.", {
     ## ---------------------------------------------------------- univariate fcmdd
     fcmdd <- dtwclust(data_subset, type = "fuzzy", k = 4L,
                       preproc = acf_fun, distance = "L2",
-                      centroid = "fcmdd",
-                      seed = 123)
+                      centroid = "fcmdd", seed = 123)
+
+    fcmdd2 <- tsclust(data_subset, type = "fuzzy", k = 4L,
+                      preproc = acf_fun, distance = "L2",
+                      centroid = "fcmdd", seed = 123)
+
+    expect_identical(fcmdd@fcluster, fcmdd2@fcluster)
+    expect_identical(fcmdd@centroids, fcmdd2@centroids)
 
     fcmdd <- reset_nondeterministic(fcmdd)
 
@@ -58,6 +80,13 @@ test_that("Fuzzy clustering works as expected.", {
                        distance = "dtw_basic",
                        seed = 123)
 
+    fcm_mv2 <- tsclust(dmv, type = "fuzzy", k = 4L,
+                       distance = "dtw_basic",
+                       seed = 123)
+
+    expect_identical(fcm_mv@fcluster, fcm_mv2@fcluster)
+    expect_identical(fcm_mv@centroids, fcm_mv2@centroids)
+
     fcm_mv <- reset_nondeterministic(fcm_mv)
 
     assign("fcm_mv", fcm_mv, persistent)
@@ -66,6 +95,13 @@ test_that("Fuzzy clustering works as expected.", {
     fcmdd_mv <- dtwclust(data_multivariate, type = "fuzzy", k = 4L,
                          distance = "dtw_basic", centroid = "fcmdd",
                          seed = 123)
+
+    fcmdd_mv2 <- tsclust(data_multivariate, type = "fuzzy", k = 4L,
+                         distance = "dtw_basic", centroid = "fcmdd",
+                         seed = 123)
+
+    expect_identical(fcmdd_mv@fcluster, fcmdd_mv2@fcluster)
+    expect_identical(fcmdd_mv@centroids, fcmdd_mv2@centroids)
 
     fcmdd_mv <- reset_nondeterministic(fcmdd_mv)
 

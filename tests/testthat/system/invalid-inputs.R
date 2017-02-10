@@ -11,7 +11,7 @@ ols <- ls()
 # invalid data
 # =================================================================================================
 
-test_that("Errors in input data are detected", {
+test_that("Errors in input data are detected by dtwclust", {
     expect_error(dtwclust(NULL), "No data")
     expect_error(dtwclust(NA), "type")
     expect_error(dtwclust(mean), "type")
@@ -30,11 +30,30 @@ test_that("Errors in input data are detected", {
     expect_error(dtwclust(data), "one point")
 })
 
+test_that("Errors in input data are detected by tsclust", {
+    expect_error(tsclust(NULL), "No data")
+    expect_error(tsclust(NA), "type")
+    expect_error(tsclust(mean), "type")
+    expect_error(tsclust("data"), "type")
+
+    expect_error(tsclust(as.logical(data_matrix)), "type")
+
+    temp <- data[[1L]]
+    temp[2L] <- NA
+    data[[1L]] <- temp
+
+    expect_error(tsclust(data), "missing values")
+
+    data[[1L]] <- numeric()
+
+    expect_error(tsclust(data), "one point")
+})
+
 # =================================================================================================
 # invalid distance
 # =================================================================================================
 
-test_that("Errors in distance argument are correctly detected.", {
+test_that("Errors in distance argument are correctly detected by dtwclust.", {
     expect_error(dtwclust(data_matrix, k = 20, distance = mean), "proxy", info = "Function")
 
     expect_error(dtwclust(data_matrix, k = 20, distance = NULL), "proxy", info = "NULL")
@@ -43,13 +62,35 @@ test_that("Errors in distance argument are correctly detected.", {
 
     expect_error(dtwclust(data_matrix, k = 20, distance = "dummy"), "proxy", info = "Unregistered")
 
-    expect_error(dtwclust(data, k = 20, distance = "lbi", control = list(window.size = 18L)),
+    expect_error(dtwclust(data, k = 20, distance = "lbk", control = list(window.size = 18L)),
                  "different length", info = "LBK")
 
     expect_error(dtwclust(data, k = 20, distance = "lbi", control = list(window.size = 18L)),
                  "different length", info = "LBI")
 
-    expect_error(dtwclust(data, k = 20, distance = "lbi", control = list(window.size = 18L)),
+    expect_error(dtwclust(data, k = 20, distance = "dtw_lb", control = list(window.size = 18L)),
+                 "different length", info = "DTW_LB")
+})
+
+test_that("Errors in distance argument are correctly detected by tsclust.", {
+    expect_error(tsclust(data_matrix, k = 20, distance = mean), "proxy", info = "Function")
+
+    expect_error(tsclust(data_matrix, k = 20, distance = NULL), "proxy", info = "NULL")
+
+    expect_error(tsclust(data_matrix, k = 20, distance = NA), "proxy", info = "NA")
+
+    expect_error(tsclust(data_matrix, k = 20, distance = "dummy"), "proxy", info = "Unregistered")
+
+    expect_error(tsclust(data, k = 20, distance = "lbk",
+                         args = tsclust_args(dist = list(window.size = 18L))),
+                 "different length", info = "LBK")
+
+    expect_error(tsclust(data, k = 20, distance = "lbi",
+                         args = tsclust_args(dist = list(window.size = 18L))),
+                 "different length", info = "LBK")
+
+    expect_error(tsclust(data, k = 20, distance = "dtw_lb",
+                         args = tsclust_args(dist = list(window.size = 18L))),
                  "different length", info = "DTW_LB")
 })
 
@@ -57,7 +98,7 @@ test_that("Errors in distance argument are correctly detected.", {
 # invalid centroid
 # =================================================================================================
 
-test_that("Errors in centroid argument are correctly detected.", {
+test_that("Errors in centroid argument are correctly detected by dtwclust.", {
     expect_error(dtwclust(data, centroid = "mean"),
                  "different length", "mean")
 
@@ -80,11 +121,34 @@ test_that("Errors in centroid argument are correctly detected.", {
                  "centroid.*arguments")
 })
 
+test_that("Errors in centroid argument are correctly detected by tsclust.", {
+    expect_error(tsclust(data, centroid = "mean"),
+                 "different length", "mean")
+
+    expect_error(tsclust(data, centroid = "mean"),
+                 "different length", "median")
+
+    expect_error(tsclust(data, centroid = "fcm"),
+                 "arg", info = "FCM is for fuzzy")
+
+    expect_error(tsclust(data, centroid = "goku"),
+                 "arg", info = "Unknown centroid")
+
+    expect_error(tsclust(data, centroid = NULL),
+                 "definition", info = "NULL centroid")
+
+    expect_error(tsclust(data, centroid = NA),
+                 "definition", info = "NA centroid")
+
+    expect_error(tsclust(data, centroid = function(x, ...) { x }),
+                 "centroid.*arguments")
+})
+
 # =================================================================================================
 # invalid control
 # =================================================================================================
 
-test_that("Errors in control argument are detected correctly.", {
+test_that("Errors in control argument are detected correctly by dtwclust.", {
     expect_error(dtwclust(data, control = NA), "control")
     expect_error(dtwclust(data, control = mean), "control")
     expect_error(dtwclust(data, control = TRUE), "control")
@@ -93,11 +157,17 @@ test_that("Errors in control argument are detected correctly.", {
                  "control", ignore.case = TRUE)
 })
 
+test_that("Errors in control argument are detected correctly by tsclust.", {
+    expect_error(tsclust(data, control = NA), "control")
+    expect_error(tsclust(data, control = mean), "control")
+    expect_error(tsclust(data, control = TRUE), "control")
+})
+
 # =================================================================================================
 # fuzzy clustering
 # =================================================================================================
 
-test_that("Invalid combinations in fuzzy clustering are detected.", {
+test_that("Invalid combinations in fuzzy clustering are detected by dtwclust.", {
     expect_error(dtwclust(data_matrix, type = "f", k = 101L), "more clusters")
 
     ctrl <- list(window.size = 15L)
@@ -138,6 +208,47 @@ test_that("Invalid combinations in fuzzy clustering are detected.", {
                           distance = "L2", centroid = "pam"))
 })
 
+test_that("Invalid combinations in fuzzy clustering are detected by tsclust.", {
+    expect_error(tsclust(data_matrix, type = "f", k = 101L), "more clusters")
+
+    args <- tsclust_args(dist = list(window.size = 15L))
+
+    expect_error(tsclust(data, type = "f", distance = "lbk", args = args), "different length")
+    expect_error(tsclust(data, type = "f", distance = "lbi", args = args()), "different length")
+    expect_error(tsclust(data, type = "f", distance = "dtw_lb", args = args), "different length")
+    expect_error(tsclust(data, type = "f", distance = "dtw"), "different length")
+    expect_error(tsclust(data, type = "f", distance = "dtw2"), "different length")
+    expect_error(tsclust(data, type = "f", distance = "dtw_basic"), "different length")
+    expect_error(tsclust(data, type = "f", distance = "sbd"), "different length")
+
+    expect_error(tsclust(data, type = "f", preproc = "zscore"), "preprocessing")
+
+    expect_error(tsclust(data_matrix, type = "f", distance = mean), "proxy", info = "Function")
+    expect_error(tsclust(data_matrix, type = "f", distance = NULL), "proxy", info = "NULL")
+    expect_error(tsclust(data_matrix, type = "f", distance = NA), "proxy", info = "NA")
+    expect_error(tsclust(data_matrix, type = "f", distance = "dummy"), "proxy", info = "Unregistered")
+
+    expect_error(tsclust(data_subset, type = "f",
+                         preproc = reinterpolate, new.length = 205L,
+                         distance = "L2", centroid = "mean"))
+
+    expect_error(tsclust(data_subset, type = "f",
+                         preproc = reinterpolate, new.length = 205L,
+                         distance = "L2", centroid = "median"))
+
+    expect_error(tsclust(data_subset, type = "f",
+                         preproc = reinterpolate, new.length = 205L,
+                         distance = "L2", centroid = "shape"))
+
+    expect_error(tsclust(data_subset, type = "f",
+                         preproc = reinterpolate, new.length = 205L,
+                         distance = "L2", centroid = "dba"))
+
+    expect_error(tsclust(data_subset, type = "f",
+                         preproc = reinterpolate, new.length = 205L,
+                         distance = "L2", centroid = "pam"))
+})
+
 # =================================================================================================
 # hierarchical clustering
 # =================================================================================================
@@ -157,11 +268,26 @@ test_that("Invalid combinations in hierarchical clustering are detected.", {
     expect_error(dtwclust(data_matrix, type = "h", distance = "dummy"), "proxy", info = "Unregistered")
 })
 
+test_that("Invalid combinations in hierarchical clustering are detected.", {
+    expect_error(tsclust(data, type = "h", k = 101L), "more clusters")
+
+    expect_error(tsclust(data, type = "h", distance = "lbk"), "different length")
+    expect_error(tsclust(data, type = "h", distance = "lbi"), "different length")
+    expect_error(tsclust(data, type = "h", distance = "dtw_lb"), "different length")
+
+    expect_error(tsclust(data, type = "h", preproc = "zscore"), "preprocessing")
+
+    expect_error(tsclust(data_matrix, type = "h", distance = mean), "proxy", info = "Function")
+    expect_error(tsclust(data_matrix, type = "h", distance = NULL), "proxy", info = "NULL")
+    expect_error(tsclust(data_matrix, type = "h", distance = NA), "proxy", info = "NA")
+    expect_error(tsclust(data_matrix, type = "h", distance = "dummy"), "proxy", info = "Unregistered")
+})
+
 # =================================================================================================
 # partitional clustering
 # =================================================================================================
 
-test_that("Invalid combinations in partitional clustering are detected.", {
+test_that("Invalid combinations in partitional clustering are detected by dtwclust.", {
     expect_error(dtwclust(data, k = 101L), "more clusters")
 
     expect_error(dtwclust(data, distance = "lbk"), "different length")
@@ -175,14 +301,38 @@ test_that("Invalid combinations in partitional clustering are detected.", {
     expect_error(dtwclust(data, preproc = "zscore"), "preprocessing")
 })
 
+test_that("Invalid combinations in partitional clustering are detected by tsclust.", {
+    expect_error(tsclust(data, k = 101L), "more clusters")
+
+    expect_error(tsclust(data, distance = "lbk"), "different length")
+    expect_error(tsclust(data, distance = "lbi"), "different length")
+    expect_error(tsclust(data, distance = "dtw_lb"), "different length")
+
+    expect_error(tsclust(data, centroid = "mean"), "different length")
+    expect_error(tsclust(data, centroid = "median"), "different length")
+    expect_error(tsclust(data, centroid = "fcm"), "arg")
+
+    expect_error(tsclust(data, preproc = "zscore"), "preprocessing")
+})
+
 # =================================================================================================
 # TADPole clustering
 # =================================================================================================
 
-test_that("Invalid combinations in tadpole clustering are detected.", {
+test_that("Invalid combinations in tadpole clustering are detected by dtwclust.", {
     expect_error(dtwclust(data, type = "t", k = 20, control = list(window.size = 20L)), "dc")
     expect_error(dtwclust(data, type = "t", k = 20, dc = 1.5), "window.size")
     expect_error(dtwclust(data, type = "t", k = 20, dc = 1.5, control = list(window.size = 20L)),
+                 "same length")
+})
+
+test_that("Invalid combinations in tadpole clustering are detected by tsclust.", {
+    expect_error(tsclust(data, type = "t", k = 20, control = tadpole_control(window.size = 20L)),
+                 "dc")
+    expect_error(tsclust(data, type = "t", k = 20, control = tadpole_control(dc = 1.5)),
+                 "window.size")
+    expect_error(tsclust(data, type = "t", k = 20,
+                         control = tadpole_control(dc = 1.5, window.size = 20L)),
                  "same length")
 })
 

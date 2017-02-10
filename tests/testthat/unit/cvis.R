@@ -20,6 +20,8 @@ test_that("CVI calculations are consistent regardless of quantity or order of CV
                       preproc = NULL, control = list(window.size = 18L), seed = 123,
                       dist.method = "L1")
 
+    pc_mv2 <- as(pc_mv, "TSClusters")
+
     base_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), "valid")
     i_cvis <- cvi(pc_mv, type = "internal")
     e_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), type = "external")
@@ -28,23 +30,29 @@ test_that("CVI calculations are consistent regardless of quantity or order of CV
     cvis <- c(internal_cvis, external_cvis)
 
     expect_true(all(
-        times(100L) %dopar% {
+        times(50L) %dopar% {
             considered_cvis <- sample(cvis, sample(length(cvis), 1L))
             this_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), considered_cvis)
-            all(base_cvis[considered_cvis] == this_cvis[considered_cvis])
+            this_cvis2 <- cvi(pc_mv2, rep(1L:4L, each = 5L), considered_cvis)
+            all(base_cvis[considered_cvis] == this_cvis[considered_cvis]) &&
+                identical(this_cvis, this_cvis2)
         }
     ))
 
     ## when missing elements
-    pc_mv@distmat <- NULL
+    pc_mv2@distmat <- pc_mv@distmat <- NULL
     this_cvis <- cvi(pc_mv, type = "internal")
+    this_cvis2 <- cvi(pc_mv2, type = "internal")
     considered_cvis <- names(this_cvis)
     expect_true(all(base_cvis[considered_cvis] == this_cvis))
+    expect_identical(this_cvis, this_cvis2)
 
-    pc_mv@datalist <- list()
+    pc_mv2@datalist <- pc_mv@datalist <- list()
     expect_warning(this_cvis <- cvi(pc_mv, type = "internal"))
+    expect_warning(this_cvis2 <- cvi(pc_mv2, type = "internal"))
     considered_cvis <- names(this_cvis)
     expect_true(all(base_cvis[considered_cvis] == this_cvis))
+    expect_identical(this_cvis, this_cvis2)
 
     ## refs
     assign("base_cvis", base_cvis, persistent)
@@ -89,6 +97,10 @@ test_that("CVIs work also for hierarchical and TADPole", {
     expect_error(cvi(fc, labels_subset))
     cvis_tadp <- cvi(tadp, labels_subset)
     cvis_hc <- cvi(hc, labels_subset)
+
+    expect_error(cvi(as(fc, "TSClusters"), labels_subset))
+    expect_identical(cvi(as(tadp, "TSClusters"), labels_subset), cvis_tadp)
+    expect_identical(cvi(as(hc, "TSClusters"), labels_subset), cvis_hc)
 
     ## refs
     assign("cvis_tadp", cvis_tadp, persistent)
