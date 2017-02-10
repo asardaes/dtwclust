@@ -15,6 +15,9 @@ Please note that not all slots will contain valid information for all clustering
 cases, for example for fuzzy and hierarchical clustering, some results are computed assuming a
 hard partition is created based on the fuzzy memberships or dendrogram tree, and the provided
 value of \code{k}.
+
+If you want to transform a dtwclust-class object to \code{\link{TSClusters-class}}, just use
+\code{as(dtwclust_obj, "TSClusters")}, althouh it may not work perfectly.
 }
 \section{Slots}{
 

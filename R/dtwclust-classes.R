@@ -187,6 +187,9 @@ methods::removeClass("hclust4")
 #' hard partition is created based on the fuzzy memberships or dendrogram tree, and the provided
 #' value of \code{k}.
 #'
+#' If you want to transform a dtwclust-class object to \code{\link{TSClusters-class}}, just use
+#' \code{as(dtwclust_obj, "TSClusters")}, althouh it may not work perfectly.
+#'
 #' @slot call The function call.
 #' @slot control An object of class \code{\link{dtwclustControl}}.
 #' @slot family An object of class \code{\link{dtwclustFamily}}.

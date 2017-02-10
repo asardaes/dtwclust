@@ -14,6 +14,9 @@ bottom.
 \details{
 The base class is \code{TSClusters}. The 3 classes that inherit from it are:
 \code{PartitionalTSClusters}, \code{HierarchicalTSClusters} and \code{FuzzyTSClusters}.
+
+If you want to transform a \code{\link{dtwclust-class}} object to TSClusters, just use
+\code{as(dtwclust_obj, "TSClusters")}, althouh it may not work perfectly.
 }
 \section{Slots}{
 

@@ -44,12 +44,9 @@ setClass("tsclustFamily",
                    allcent = "function",
                    cluster = "function",
                    preproc = "function"),
-         prototype = prototype(preproc = function(x, ...) x,
+         prototype = prototype(preproc = function(x, ...) { x },
 
                                cluster = function(distmat = NULL, ...) {
-                                   if (is.null(distmat))
-                                       stop("Something is wrong, couldn't calculate distances.")
-
                                    max.col(-distmat, "first")
                                })
 )
@@ -66,6 +63,9 @@ setClass("tsclustFamily",
 #'
 #' The base class is \code{TSClusters}. The 3 classes that inherit from it are:
 #' \code{PartitionalTSClusters}, \code{HierarchicalTSClusters} and \code{FuzzyTSClusters}.
+#'
+#' If you want to transform a \code{\link{dtwclust-class}} object to TSClusters, just use
+#' \code{as(dtwclust_obj, "TSClusters")}, althouh it may not work perfectly.
 #'
 #' @slot call The function call.
 #' @slot family An object of class \code{\link{tsclustFamily-class}}.
