@@ -5,10 +5,10 @@
 all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALSE) {
     ## --------------------------------------------------------------------------------------------
     ## pam
-    pam_cent <- function(x, x_split, cl_id, id_changed, ...) {
+    pam_cent <- function(x, x_split, cent, cl_id, id_changed, ...) {
         if (is.null(distmat)) {
             new_cent <- lapply(x_split, function(xsub) {
-                distmat <- distfun(xsub, xsub)
+                distmat <- distfun(xsub, xsub, ...)
 
                 d <- apply(distmat, 1L, sum)
 
@@ -78,7 +78,7 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
                             .combine = c,
                             .multicombine = TRUE,
                             .packages = "dtwclust",
-                            .export = c("control", "enlist")) %op% {
+                            .export = c("enlist")) %op% {
                                 mapply(x_split, cent,
                                        SIMPLIFY = FALSE,
                                        FUN = function(x, c) {
