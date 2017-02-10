@@ -263,6 +263,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
         stop("At least two clusters must be defined")
     if (any(k > length(series)))
         stop("Cannot have more clusters than series in the data")
+    if (!is.list(control))
+        stop("Invalid control argument")
 
     MYCALL <- match.call(expand.dots = TRUE)
 
