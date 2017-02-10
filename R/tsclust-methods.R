@@ -220,6 +220,11 @@ setMethod("initialize", "HierarchicalTSClusters",
           function(.Object, ...) {
               .Object <- methods::callNextMethod()
 
+              ## Replace distmat with NULL so that, if the distance function is called again,
+              ## it won't subset it
+              if (length(formals(.Object@family@dist)))
+                eval(quote(control$distmat <- NULL), environment(.Object@family@dist))
+
               if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
                   ## no cldist available, but dist and cluster can be used to calculate it
                   dm <- do.call(.Object@family@dist,

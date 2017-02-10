@@ -410,8 +410,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                                      dots = args$dist))
 
                            ## Redefine new distmat
-                           assign("distmat", distmat, environment(family@dist))
-                           assign("distmat", distmat, environment(family@allcent))
+                           environment(family@dist)$control$distmat <- distmat
+                           environment(family@allcent)$distmat <- distmat
 
                            gc(FALSE)
                        }
@@ -490,7 +490,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                    ## Replace distmat with NULL so that, if the distance function is called again,
                    ## it won't subset it
-                   assign("distmat", NULL, envir = environment(family@dist))
+                   eval(quote(control$distmat <- NULL), environment(family@dist))
+                   eval(quote(distmat <- NULL), environment(family@allcent))
 
                    ## If distmat was provided, let it be shown in the results
                    if (distmat_provided) {
