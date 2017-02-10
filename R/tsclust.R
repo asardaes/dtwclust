@@ -555,7 +555,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                        }
                    })
 
-                   if (class(RET) != "dtwclust" && length(RET) == 1L) RET <- RET[[1L]]
+                   if (!inherits(RET, "TSClusters") && length(RET) == 1L) RET <- RET[[1L]]
 
                    RET
                },

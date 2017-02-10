@@ -254,18 +254,21 @@ setMethod("initialize", "FuzzyTSClusters",
               if (!length(.Object@iter)) .Object@iter <- 1L
               if (!length(.Object@converged)) .Object@converged <- TRUE
 
-              if (!nrow(.Object@fcluster) && length(formals(.Object@family@dist))) {
-                  ## no fcluster available, but dist and cluster function can be used to calculate it
-                  dm <- do.call(.Object@family@dist,
-                                enlist(.Object@datalist,
-                                       .Object@centroids,
-                                       dots = .Object@args$dist))
+              if (!nrow(.Object@fcluster)) {
+                  if (length(formals(.Object@family@dist))) {
+                      ## no fcluster available, but dist and cluster function can be used to calculate it
+                      dm <- do.call(.Object@family@dist,
+                                    enlist(.Object@datalist,
+                                           .Object@centroids,
+                                           dots = .Object@args$dist))
 
-                  .Object@fcluster <- .Object@family@cluster(dm, m = .Object@control$fuzziness)
-                  colnames(.Object@fcluster) <- paste0("cluster_", 1:.Object@k)
+                      .Object@fcluster <- .Object@family@cluster(dm, m = .Object@control$fuzziness)
+                      colnames(.Object@fcluster) <- paste0("cluster_", 1:.Object@k)
 
-              } else
-                  .Object@fcluster <- matrix(NA_real_)
+                  } else {
+                      .Object@fcluster <- matrix(NA_real_)
+                  }
+              }
 
               ## return
               .Object
