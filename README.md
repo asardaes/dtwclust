@@ -38,30 +38,27 @@ Examples
 # Load series
 data(uciCT)
 
-# Reinterpolate series to equal length
+# Reinterpolate series to equal length and normalize
 series <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 series <- zscore(series)
-
-# Common controls (they are only used if appropriate)
-ctrl <- new("dtwclustControl", window.size = 20L, trace = TRUE)
 ```
 
 ### Partitional
 
 ``` r
 # Using DTW with help of lower bounds and PAM centroids
-ctrl@pam.precompute <- FALSE
-
-pc.dtwlb <- dtwclust(series, k = 20L, 
-                     distance = "dtw_lb", centroid = "pam", 
-                     seed = 3247, control = ctrl)
+pc.dtwlb <- tsclust(series, k = 20L, 
+                    distance = "dtw_lb", centroid = "pam", 
+                    seed = 3247, trace = TRUE,
+                    control = partitional_control(pam.precompute = FALSE),
+                    args = tsclust_args(dist = list(window.size = 20L)))
 #> Iteration 1: Changes / Distsum = 100 / 3214.899
 #> Iteration 2: Changes / Distsum = 18 / 2786.523
 #> Iteration 3: Changes / Distsum = 7 / 2700.449
 #> Iteration 4: Changes / Distsum = 3 / 2630.285
 #> Iteration 5: Changes / Distsum = 0 / 2630.285
 #> 
-#>  Elapsed time is 4.789 seconds.
+#>  Elapsed time is 4.714 seconds.
 
 plot(pc.dtwlb)
 ```
@@ -72,15 +69,16 @@ plot(pc.dtwlb)
 
 ``` r
 # Based on shape-based distance
-hc.sbd <- dtwclust(CharTraj, type = "hierarchical", k = 20L, 
-                   distance = "sbd", method = "all",
-                   preproc = zscore, control = ctrl)
+hc.sbd <- tsclust(CharTraj, type = "hierarchical", k = 20L, 
+                  distance = "sbd", preproc = zscore,
+                  control = hierarchical_control(method = "all"),
+                  trace = TRUE)
 #> 
 #>  Calculating distance matrix...
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.759 seconds.
+#>  Elapsed time is 1.904 seconds.
 
 # CVIs for HC+SBD
 print(cvis <- sapply(hc.sbd, cvi, b = CharTrajLabels))
@@ -120,14 +118,15 @@ plot(hc.sbd[[which.min(cvis["VI", ])]])
 ### TADPole
 
 ``` r
-pc.tadp <- dtwclust(series, type = "tadpole", k = 20L,
-                    dc = 1.5, control = ctrl)
+pc.tadp <- tsclust(series, type = "tadpole", k = 20L,
+                   trace = TRUE,
+                   control = tadpole_control(dc = 1.5, window.size = 20L))
 #> 
 #> Entering TADPole...
 #> 
 #> TADPole completed, pruning percentage = 77.8%
 #> 
-#>  Elapsed time is 1.533 seconds.
+#>  Elapsed time is 1.912 seconds.
 
 plot(pc.tadp, clus = 1L:4L)
 ```
@@ -143,21 +142,22 @@ acf_fun <- function(dat, ...) {
 }
 
 # Autocorrelation-based fuzzy c-means
-fc <- dtwclust(series[1L:25L], type = "fuzzy", k = 5L,
-               preproc = acf_fun, distance = "L2",
-               seed = 123)
+fc <- tsclust(series[1L:25L], type = "fuzzy", k = 5L,
+              preproc = acf_fun, distance = "L2",
+              seed = 123)
 
 fc
-#> dtwclust(data = series[1L:25L], type = "fuzzy", k = 5L, distance = "L2", 
-#>     preproc = acf_fun, seed = 123)
+#> tsclust(series = series[1L:25L], type = "fuzzy", k = 5L, preproc = acf_fun, 
+#>     distance = "L2", seed = 123)
 #> 
 #> fuzzy clustering with 5 clusters
 #> Using L2 distance
+#> Using fcm centroids
 #> Using acf_fun preprocessing
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.228   0.000   0.225 
+#>   0.252   0.000   0.250 
 #> 
 #> Head of fuzzy memberships:
 #> 
@@ -177,7 +177,7 @@ fc
 mv <- CharTrajMV[1L:20L]
 
 # Using GAK distance
-mvc <- dtwclust(mv, k = 4L, distance = "gak", seed = 390)
+mvc <- tsclust(mv, k = 4L, distance = "gak", seed = 390)
 
 # Note how the variables of each series are appended one after the other in the plot
 plot(mvc)
@@ -189,21 +189,27 @@ plot(mvc)
 
 ``` r
 require(doParallel)
+#> Loading required package: doParallel
+#> Loading required package: foreach
+#> Loading required package: iterators
 
 # Create and register parallel workers
 cl <- makeCluster(detectCores(), "FORK")
 registerDoParallel(cl)
 
 # Parallel backend detected automatically
-hc <- dtwclust(CharTraj, k = 20L,
-               distance = "dtw_basic", centroid = "dba",
-               seed = 9421, control = list(trace = TRUE, window.size = 20L))
+hc <- tsclust(CharTraj, k = 20L,
+              distance = "dtw_basic", centroid = "dba",
+              seed = 9421, trace = TRUE,
+              args = tsclust_args(dist = list(window.size = 20L),
+                                  cent = list(window.size = 20L,
+                                              max.iter = 15L)))
 #> Iteration 1: Changes / Distsum = 100 / 1531.018
-#> Iteration 2: Changes / Distsum = 3 / 886.4655
-#> Iteration 3: Changes / Distsum = 2 / 873.7322
-#> Iteration 4: Changes / Distsum = 0 / 864.1761
+#> Iteration 2: Changes / Distsum = 3 / 886.4657
+#> Iteration 3: Changes / Distsum = 2 / 873.7465
+#> Iteration 4: Changes / Distsum = 0 / 864.1764
 #> 
-#>  Elapsed time is 5.099 seconds.
+#>  Elapsed time is 5.467 seconds.
 
 ## Returning to sequential calculations
 stopCluster(cl)
