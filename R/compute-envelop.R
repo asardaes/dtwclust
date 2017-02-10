@@ -30,6 +30,15 @@
 #' \url{http://dx.doi.org/10.1016/j.patcog.2008.11.030},
 #' \url{http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
 #'
+#' @examples
+#'
+#' data(uciCT)
+#'
+#' H <- compute_envelop(CharTraj[[1L]], 18L)
+#'
+#' matplot(do.call(cbind, H), type = "l", col = 2:3)
+#' lines(CharTraj[[1L]])
+#'
 compute_envelop <- function(x, window.size, error.check = TRUE) {
     if (error.check) {
         if (is_multivariate(list(x)))

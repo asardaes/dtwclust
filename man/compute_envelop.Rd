@@ -30,6 +30,16 @@ in \code{10(2) + 1 = 21} observations falling within the window.
 \note{
 This envelop is calculated assuming a Sakoe-Chiba constraint for DTW.
 }
+\examples{
+
+data(uciCT)
+
+H <- compute_envelop(CharTraj[[1L]], 18L)
+
+matplot(do.call(cbind, H), type = "l", col = 2:3)
+lines(CharTraj[[1L]])
+
+}
 \references{
 Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .''
 \emph{Pattern Recognition}, \strong{42}(9), pp. 2169 - 2180. ISSN 0031-3203,
