@@ -31,10 +31,11 @@
 \S4method{predict}{TSClusters}(object, newdata = NULL, ...)
 
 \method{plot}{TSClusters}(x, y, ..., clus = seq_len(x@k), labs.arg = NULL,
-  time = NULL, plot = TRUE, type = NULL)
+  series = NULL, time = NULL, plot = TRUE, type = NULL)
 
 \S4method{plot}{TSClusters,missing}(x, y, ..., clus = seq_len(x@k),
-  labs.arg = NULL, time = NULL, plot = TRUE, type = NULL)
+  labs.arg = NULL, series = NULL, time = NULL, plot = TRUE,
+  type = NULL)
 }
 \arguments{
 \item{.Object}{A \code{TSClusters} prototype. You shouldn't use this, see Initialize section and
@@ -64,6 +65,9 @@ a list of matrices, even if the list has only one element.}
 
 \item{labs.arg}{Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}}
 for more information}
+
+\item{series}{Optionally, the data in the same format as it was provided to
+\code{\link{dtwclust}}.}
 
 \item{time}{Optional values for the time axis. If series have different lengths, provide the time
 values of the longest series.}

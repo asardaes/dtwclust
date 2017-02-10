@@ -580,8 +580,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                    ## Take advantage of the function I defined for the partitional methods
                    ## Which can do calculations in parallel if appropriate
                    distfun <- ddist2(distance = distance,
-                                     control = control,
-                                     distmat = NULL)
+                                     control = control)
 
                    if (!is.null(distmat)) {
                        if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
@@ -724,7 +723,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                    ## ------------------------------------------------------------------------------
 
                    ## mainly for predict generic
-                   distfun <- ddist2("dtw_lb", control = control, distmat = NULL)
+                   distfun <- ddist2("dtw_lb", control = control)
 
                    ## Invalid centroid specifier provided?
                    if (!missing(centroid) && !is.function(centroid))

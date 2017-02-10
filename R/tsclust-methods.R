@@ -20,7 +20,7 @@ setMethod("initialize", "tsclustFamily",
 
               if (!missing(dist)) {
                   if (is.character(dist))
-                      dots$dist <- ddist2(dist, control, distmat)
+                      dots$dist <- ddist2(dist, control)
                   else
                       dots$dist <- dist
               }
@@ -425,6 +425,8 @@ setMethod("predict", signature(object = "TSClusters"), predict.TSClusters)
 #' @param clus A numeric vector indicating which clusters to plot.
 #' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}}
 #'   for more information
+#' @param series Optionally, the data in the same format as it was provided to
+#'   \code{\link{dtwclust}}.
 #' @param time Optional values for the time axis. If series have different lengths, provide the time
 #'   values of the longest series.
 #' @param plot Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot
@@ -467,7 +469,8 @@ setMethod("predict", signature(object = "TSClusters"), predict.TSClusters)
 #'
 plot.TSClusters <- function(x, y, ...,
                             clus = seq_len(x@k), labs.arg = NULL,
-                            time = NULL, plot = TRUE, type = NULL)
+                            series = NULL, time = NULL,
+                            plot = TRUE, type = NULL)
 {
     ## set default type if none was provided
     if (!is.null(type))
@@ -492,7 +495,16 @@ plot.TSClusters <- function(x, y, ...,
         stop("Provided object has no data. Please re-run the algorithm with save.data = TRUE ",
              "or provide the data manually.")
 
-    data <- x@datalist
+    ## Obtain data, the priority is: provided data > included data list
+    if (!is.null(series)) {
+        data <- any2list(series)
+
+    } else {
+        if (length(x@datalist) < 1L)
+            stop("Provided object has no data. Please provide the data manually.")
+
+        data <- x@datalist
+    }
 
     ## centroids consistency
     check_consistency(centroids <- x@centroids, "vltslist")
@@ -914,15 +926,6 @@ is.cl_dendrogram.TSClusters <- function(x) {
 # Coercion methods for dtwclust classes
 # ==================================================================================================
 
-setAs("dtwclustFamily", "tsclustFamily",
-      function(from, to) {
-          methods::new(to,
-                       preproc = from@preproc,
-                       cluster = from@cluster,
-                       dist = from@dist,
-                       allcent = from@allcent)
-      })
-
 setAs("dtwclust", "TSClusters",
       function(from, to) {
           validObject(from)
@@ -939,8 +942,6 @@ setAs("dtwclust", "TSClusters",
 
                                slot(to, sl) <- slot(from, sl)
                            }
-
-                           to@family <- as(from@family, "tsclustFamily")
 
                            to@control <- partitional_control(pam.precompute = from@control@pam.precompute,
                                                              iter.max = from@control@iter.max,
@@ -961,8 +962,6 @@ setAs("dtwclust", "TSClusters",
                                slot(to, sl) <- slot(from, sl)
                            }
 
-                           to@family <- as(from@family, "tsclustFamily")
-
                            to@control <- hierarchical_control(symmetric = from@control@symmetric,
                                                               packages = from@control@packages,
                                                               distmat = from@call$distmat)
@@ -981,8 +980,6 @@ setAs("dtwclust", "TSClusters",
                                slot(to, sl) <- slot(from, sl)
                            }
 
-                           to@family <- as(from@family, "tsclustFamily")
-
                            to@control <- fuzzy_control(fuzziness = from@control@fuzziness,
                                                        iter.max = from@control@iter.max,
                                                        delta = from@control@delta,
@@ -1000,29 +997,48 @@ setAs("dtwclust", "TSClusters",
                                slot(to, sl) <- slot(from, sl)
                            }
 
-                           to@family <- as(from@family, "tsclustFamily")
-
                            lb <- if (is.null(from@dots$lb)) "lbk" else from@dots$lb
 
-                           to@control <- partitional_control(dc = from@call$dc,
-                                                             window.size = from@control@window.size,
-                                                             lb = lb)
+                           to@control <- tadpole_control(dc = from@call$dc,
+                                                         window.size = from@control@window.size,
+                                                         lb = lb)
 
                            to
                        })
+
+          to@family <- methods::new("tsclustFamily",
+                                    preproc = from@family@preproc,
+                                    cluster = from@family@cluster,
+                                    dist = ifelse(from@type == "tadpole", "dtw_lb", from@distance),
+                                    allcent = if (is.null(from@call$centroid)) from@centroid else from@call$centroid)
+
+          centroids <- from@centroids
+          datalist <- from@datalist
+
+          if (to@type == "hierarchical" && length(centroids))
+              to@family@allcent <- function(dummy) {
+                  datalist[which.min(apply(to@distmat, 1L, sum))] # for CVI's global_cent
+              }
+          else if (to@type == "tadpole" && length(centroids))
+              to@family@allcent <- function(dummy) { centroids[1L] } # for CVI's global_cent
 
           assign("control", to@control, environment(to@family@dist))
           assign("control", to@control, environment(to@family@allcent))
 
           to@args <- tsclust_args()
-          to@args$preproc <- from@dots[names(from@dots) %in% names(formals(to@family@preproc))]
+          to@args$preproc <- subset_dots(from@dots, to@family@preproc)
 
-          if (tolower(to@distance) %in% c("dtw", "dtw2", "dtw_basic", "dtw_lb", "lbk", "lbi", "gak")) {
+          if (tolower(to@distance) %in% c("dtw", "dtw2", "dtw_basic", "dtw_lb", "lbk", "lbi", "gak", "lb_keogh+dtw2")) {
               to@args$dist <- list(window.size = from@control@window.size,
                                    norm = from@control@norm)
 
               to@args$dist$window.type <- if (is.null(to@args$dist$window.size)) "none" else "slantedband"
           }
+
+          pr_entry <- pr_DB$get_entry(ifelse(from@type == "tadpole", "dtw_lb", from@distance))
+
+          if (is.function(pr_entry$FUN))
+            to@args$dist <- c(to@args$dist, subset_dots(from@dots, pr_entry$FUN))
 
           if (tolower(to@centroid) == "dba") {
               to@args$cent <- list(window.size = from@control@window.size,
