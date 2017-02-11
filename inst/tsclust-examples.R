@@ -54,6 +54,21 @@ plot(mvc)
 
 \dontrun{
 # ====================================================================================
+# This function is more verbose but allows for more explicit fine-grained control
+# ====================================================================================
+
+tsc <- tsclust(series, k = 4L,
+               distance = "gak", centroid = "dba",
+               preproc = zscore, seed = 382L, trace = TRUE,
+               control = partitional_control(iter.max = 30L),
+               args = tsclust_args(preproc = list(center = FALSE),
+                                   dist = list(window.size = 20L,
+                                               sigma = 100),
+                                   cent = list(window.size = 15L,
+                                               norm = "L2",
+                                               trace = TRUE)))
+
+# ====================================================================================
 # Registering a custom distance with the 'proxy' package and using it
 # ====================================================================================
 
