@@ -71,8 +71,7 @@ setMethod("initialize", "tsclustFamily",
 #'     \item \code{datalist}: The data in one of the supported formats.
 #'     \item \code{centroids}: The time series centroids in one of the supported formats.
 #'     \item \code{cluster}: The cluster indices for each series in the \code{datalist}.
-#'     \item \code{control*}: A \code{dtwclustControl} object (or a named list) with the desired
-#'       parameters.
+#'     \item \code{control*}: A \code{\link{tsclust-controls}} object with the desired parameters.
 #'     \item \code{distance*}: A string indicating the distance that should be used.
 #'     \item \code{centroid*}: A string indicating the centroid to use (only necessary for
 #'       partitional clustering).
@@ -434,7 +433,7 @@ setMethod("predict", signature(object = "TSClusters"), predict.TSClusters)
 #' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}}
 #'   for more information
 #' @param series Optionally, the data in the same format as it was provided to
-#'   \code{\link{dtwclust}}.
+#'   \code{\link{tsclust}}.
 #' @param time Optional values for the time axis. If series have different lengths, provide the time
 #'   values of the longest series.
 #' @param plot Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot

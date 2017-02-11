@@ -46,8 +46,9 @@ slot is probably useless, but just in case.}
 partitional with PAM centroids or hierarchical procedures.}
 
 \item{method}{Character vector with one or more linkage methods to use in hierarchical procedures
-(see \code{\link[stats]{hclust}}) or a function that performs hierarchical clustering based on
-distance matrices (e.g. \code{\link[cluster]{diana}}).}
+(see \code{\link[stats]{hclust}}), the character \code{"all"} to use all of the available ones,
+or a function that performs hierarchical clustering based on distance matrices (e.g.
+\code{\link[cluster]{diana}}).}
 
 \item{fuzziness}{Numeric. Exponent used for fuzzy clustering. Commonly termed \code{m} in the
 literature.}

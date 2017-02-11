@@ -67,7 +67,7 @@ a list of matrices, even if the list has only one element.}
 for more information}
 
 \item{series}{Optionally, the data in the same format as it was provided to
-\code{\link{dtwclust}}.}
+\code{\link{tsclust}}.}
 
 \item{time}{Optional values for the time axis. If series have different lengths, provide the time
 values of the longest series.}
@@ -106,8 +106,7 @@ indices. It preprocesses the data with the corresponding function if available.
     \item \code{datalist}: The data in one of the supported formats.
     \item \code{centroids}: The time series centroids in one of the supported formats.
     \item \code{cluster}: The cluster indices for each series in the \code{datalist}.
-    \item \code{control*}: A \code{dtwclustControl} object (or a named list) with the desired
-      parameters.
+    \item \code{control*}: A \code{\link{tsclust-controls}} object with the desired parameters.
     \item \code{distance*}: A string indicating the distance that should be used.
     \item \code{centroid*}: A string indicating the centroid to use (only necessary for
       partitional clustering).
