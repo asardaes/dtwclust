@@ -15,6 +15,10 @@ bottom.
 The base class is \code{TSClusters}. The 3 classes that inherit from it are:
 \code{PartitionalTSClusters}, \code{HierarchicalTSClusters} and \code{FuzzyTSClusters}.
 
+\code{HierarchicalTSClusters} also contain \code{\link[stats]{hclust}} as parent class. Package
+\pkg{clue} is also supported, but generics from \pkg{flexclust} are not. See
+\code{\link{tsclusters-methods}} also.
+
 If you want to transform a \code{\link{dtwclust-class}} object to TSClusters, just use
 \code{as(dtwclust_obj, "TSClusters")}, althouh it may not work perfectly.
 }
