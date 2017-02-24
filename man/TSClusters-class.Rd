@@ -20,7 +20,7 @@ The base class is \code{TSClusters}. The 3 classes that inherit from it are:
 \code{\link{tsclusters-methods}} also.
 
 If you want to transform a \code{\link{dtwclust-class}} object to TSClusters, just use
-\code{as(dtwclust_obj, "TSClusters")}, althouh it may not work perfectly.
+\code{as(dtwclust_obj, "TSClusters")}, although it may not work perfectly.
 }
 \section{Slots}{
 

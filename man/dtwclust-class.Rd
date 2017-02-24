@@ -17,7 +17,7 @@ hard partition is created based on the fuzzy memberships or dendrogram tree, and
 value of \code{k}.
 
 If you want to transform a dtwclust-class object to \code{\link{TSClusters-class}}, just use
-\code{as(dtwclust_obj, "TSClusters")}, althouh it may not work perfectly.
+\code{as(dtwclust_obj, "TSClusters")}, although it may not work perfectly.
 }
 \section{Slots}{
 

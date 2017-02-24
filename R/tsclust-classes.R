@@ -69,7 +69,7 @@ setClass("tsclustFamily",
 #' \code{\link{tsclusters-methods}} also.
 #'
 #' If you want to transform a \code{\link{dtwclust-class}} object to TSClusters, just use
-#' \code{as(dtwclust_obj, "TSClusters")}, althouh it may not work perfectly.
+#' \code{as(dtwclust_obj, "TSClusters")}, although it may not work perfectly.
 #'
 #' @slot call The function call.
 #' @slot family An object of class \code{\link{tsclustFamily-class}}.
