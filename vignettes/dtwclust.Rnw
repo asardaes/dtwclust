@@ -68,7 +68,10 @@
 
 \Address{
 Alexis Sard\'a-Espinosa\\
-\email{alexis.sarda@gmail.com}
+\email{alexis.sarda@gmail.com}\\
+Disclaimer: The software package was developed\\
+independently of any organization or institution\\
+that is or has been associated with the author.
 }
 
 \Abstract{%
@@ -215,8 +218,8 @@ Each LB can be computed with a specific $l_p$ norm. Therefore, it follows that t
 One crucial step when calculating the LBs is the computation of the so-called envelops. These envelops require a window constraint, and thus are dependent on both the type and size of the window. Based on these, a running minimum and maximum are computed and, respectively, a lower and upper envelop are generated. \Cref{fig:envelop-plot} depicts a sample time-series with its corresponding envelops for a Sakoe-Chiba window of size 15.
 
 <<envelop-plot, out.width = "0.75\\linewidth", fig.cap = "Visual representation of a time-series (shown as a solid black line) and its corresponding envelops based on a Sakoe-Chiba window of size 15. The green dashed line represents the upper envelop, while the red dashed line represents the lower envelop.">>=
-lbk <- lb_keogh(CharTraj[[1L]], CharTraj[[2L]], window.size = 15)
-matplot(cbind(lbk$lower.env, lbk$upper.env),
+envelops <- compute_envelop(CharTraj[[2L]], window.size = 15)
+matplot(cbind(envelops$lower, envelops$upper),
         type = "l", lty = 2, col = 2:3,
         xlab = "Time", ylab = "Series")
 lines(CharTraj[[2L]])
@@ -395,7 +398,8 @@ The intergroup dissimilarity is also known as linkage. As an example, single lin
 The created hierarchy can be visualized as a binary tree where the height of each node is proportional to the value of the intergroup dissimilarity between its two daughter nodes \citep{hastie2009}. Such a plot is called a dendrogram, and an example can be seen in \cref{fig:dendrogram}. These plots can be a useful way of summarizing the whole data in an interpretable way, although it may be deceptive, as the algorithms impose the hierarchical structure even if such structure is not inherent to the data \citep{hastie2009}.
 
 <<dendrogram, fig.width = 12, fig.cap = "Sample dendrogram created by using SBD and average linkage.">>=
-hc <- dtwclust(CharTraj, type = "h", method = "average", distance = "sbd")
+hc <- tsclust(CharTraj, type = "h", distance = "sbd",
+              control = hierarchical_control(method = "average"))
 plot(hc)
 @
 
@@ -552,9 +556,11 @@ Choosing a specific clustering algorithm for a given application is not an easy 
 \section{Technical notes}
 \label{app:notes}
 
-The main clustering function in \dtwclust{} has the same name, i.e., \code{dtwclust}. It returns objects of type \code{S4}, which are one way in which \R{} implements classes. The formal elements of the class are called \code{slots}, and can be accessed with the \code{@} operator (instead of the usual \code{$}). All documented information about the slots can be found by typing \code{?"dtwclust-class"} in the console. The associated methods can be found with \code{?"dtwclust-methods"}. Note that the \code{dtwclust} class contains the \code{S3} class \code{hclust} as a superclass. This can lead to some unexpected behavior, such as \code{is.list(new("dtwclust"))} being \code{TRUE}.
+The original main clustering function in \dtwclust{} had the same name, i.e., \code{dtwclust}. As of version 3.1.1, a new main function \code{tsclust} was added, which is hopefully more coherent in general. Both return objects of type \code{S4}, which are one way in which \R{} implements classes. The formal elements of the class are called \code{slots}, and can be accessed with the \code{@} operator (instead of the usual \code{$}).
 
-Many control parameters can be modified by using the \code{control} argument, which should have a \code{dtwclustControl} class. A named list is also accepted. The documentation of all control parameters, as well as their default values, can be accessed by typing \code{?"dtwclustControl"} in the console.
+With regard to the original \code{dtwclust} function, all documented information about the slots of the returned objects can be found by typing \code{?"dtwclust-class"} in the console. The associated methods can be found with \code{?"dtwclust-methods"}. Note that the \code{dtwclust} class contains the \code{S3} class \code{hclust} as a superclass. This can lead to some unexpected behavior, such as \code{is.list(new("dtwclust"))} being \code{TRUE}. Many control parameters can be modified by using the \code{control} argument, which should have a \code{dtwclustControl} class. A named list is also accepted. The documentation of all control parameters, as well as their default values, can be accessed by typing \code{?"dtwclustControl"} in the console.
+
+For the new \code{tsclust} function, the documentation of the slots for the objects returned can be found with \code{?"TSClusters-class"}, and the methods with \code{?"tsclusters-methods"}. Controls are now set via intermediary functions whose documentation can be found with \code{?"tsclust-controls"}.
 
 The random number generator of \R{} is set to L'Ecuyer-CMRG when \dtwclust{} is attached in an attempt to preserve reproducibility. The user is free to change this afterwards by using the \code{RNGkind} function.
 
@@ -598,8 +604,8 @@ proxy::pr_DB$set_entry(FUN = FourierDistance, names = c("fourier"),
 data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 
 # Partitional clustering
-dtwclust(data[1L:10L], k = 2L,
-         distance = "fourier", seed = 838)
+tsclust(data[1L:10L], k = 2L,
+        distance = "fourier", seed = 838)
 @
 
 The user is also free to modify or create distance functions and use them. For instance, a wrapper to the \code{dtw} function in \pkg{dtw} can be created in order to use the asymmetric step pattern and the normalized distance.
@@ -618,14 +624,14 @@ proxy::pr_DB$set_entry(FUN = ndtw, names = c("nDTW"),
                        description = "Normalized, asymmetric DTW")
 
 # Partitional clustering
-dtwclust(CharTraj[1L:10L], k = 2L,
-         distance = "nDTW", seed = 838)
+tsclust(CharTraj[1L:10L], k = 2L,
+        distance = "nDTW", seed = 838)
 @
 
 \section{Finding nearest neighbors in DTW space}
 \label{app:dtw-lb}
 
-In the following example, the nearest neighbors in DTW space of the first 5 time-series are found in two different ways, first calculating all DTW distances, and then using \code{dtw_lb} to leverage \code{LB_Improved}. Since the LB is only defined for series of equal length, reinterpolation is performed.
+In the following example, the nearest neighbors in DTW space of the first 5 time-series are found in two different ways, first calculating all DTW distances, and then using \code{dtw_lb} to leverage \code{LB_Improved}. Since the LB is only defined for series of equal length, reinterpolation is performed. For such a small dataset, using \code{dtw_lb} instead of \code{dtw_basic} is probably slower.
 
 <<example-dtw-lb, echo = TRUE>>=
 # Reinterpolate to same length
@@ -675,10 +681,10 @@ classify_series(data[100L])
 In the following call to \dtwclust{}, specifying the value of \code{k} indicates the number of desired clusters, so that the \code{cutree} function is called internally. Additionally, the shape extraction function is provided in the \code{centroid} argument so that, once the \code{k} clusters are obtained, their prototypes are extracted. Therefore, the data is \textit{z}-normalized by means of the \code{zscore} function. The seed is provided because of the randomness in shape extraction when choosing a reference series (see \cref{sec:shape}).
 
 <<example-hc, echo = TRUE, fig.cap = c("Resulting dendrogram after hierarchical clustering.", "Obtained clusters and their respective prototypes (centroids) shown as dashed lines.")>>=
-hc_sbd <- dtwclust(CharTraj, type = "h", k = 20L,
-                   method = "average", preproc = zscore,
-                   distance = "sbd", centroid = shape_extraction,
-                   seed = 899, control = list(trace = TRUE))
+hc_sbd <- tsclust(CharTraj, type = "h", k = 20L,
+                  preproc = zscore, seed = 899, trace = TRUE,
+                  distance = "sbd", centroid = shape_extraction,
+                  control = hierarchical_control(method = "average"))
 
 # Cluster sizes
 table(hc_sbd@cluster)
@@ -705,9 +711,10 @@ As of \dtwclust{} version 3.0.0, it is also possible to use other functions for 
 <<example-hc-3, echo = TRUE, message = FALSE>>=
 require("cluster")
 
-dtwclust(CharTraj[1L:20L], type = "h", k = 4L,
-         distance = "dtw_basic", method = diana,
-         control = list(window.size = 18L))
+tsclust(CharTraj[1L:20L], type = "h", k = 4L,
+        distance = "dtw_basic",
+        control = hierarchical_control(method = diana),
+        args = tsclust_args(dist = list(window.size = 18L)))
 @
 
 \section{Partitional clustering examples}
@@ -722,29 +729,26 @@ data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 # z-normalization
 data <- zscore(data[60L:100L])
 
-# Extra 'trace' is for DBA
-pc_dtw <- dtwclust(data, k = 4L,
-                   distance = "dtw_basic", centroid = "dba",
-                   trace = TRUE, seed = 8,
-                   control = list(window.size = 20L,
-                                  norm = "L2",
-                                  trace = TRUE))
+pc_dtw <- tsclust(data, k = 4L,
+                  distance = "dtw_basic", centroid = "dba",
+                  trace = TRUE, seed = 8,
+                  norm = "L2", window.size = 20L,
+                  args = tsclust_args(cent = list(trace = TRUE)))
 
-pc_dtwlb <- dtwclust(data, k = 4L,
-                     distance = "dtw_lb", centroid = "dba",
-                     trace = TRUE, seed = 8,
-                     control = list(window.size = 20L,
-                                    norm = "L2",
-                                    trace = TRUE))
+pc_dtwlb <- tsclust(data, k = 4L,
+                    distance = "dtw_lb", centroid = "dba",
+                    trace = TRUE, seed = 8,
+                    norm = "L2", window.size = 20L,
+                    args = tsclust_args(cent = list(trace = TRUE)))
 
-pc_ks <- dtwclust(data, k = 4L,
-                  distance = "sbd", centroid = "shape",
-                  seed = 8, control = list(trace = TRUE))
+pc_ks <- tsclust(data, k = 4L,
+                 distance = "sbd", centroid = "shape",
+                 seed = 8, trace = TRUE)
 
-pc_tp <-dtwclust(data, k = 4L,
-                 type = "tadpole", dc = 1.5,
-                 seed = 8, control = list(window.size = 20L,
-                                          trace = TRUE))
+pc_tp <-tsclust(data, k = 4L, type = "t",
+                seed = 8, trace = TRUE,
+                control = tadpole_control(dc = 1.5,
+                                          window.size = 20L))
 
 sapply(list(DTW = pc_dtw, DTW_LB = pc_dtwlb, kShape = pc_ks, TADPole = pc_tp),
        cvi, b = CharTrajLabels[60L:100L], type = "VI")
@@ -764,9 +768,9 @@ acf_fun <- function(dat, ...) {
 }
 
 # Fuzzy c-means
-fc <- dtwclust(CharTraj[1:20], type = "f", k = 4L,
-               preproc = acf_fun, distance = "L2",
-               seed = 42)
+fc <- tsclust(CharTraj[1:20], type = "f", k = 4L,
+              preproc = acf_fun, distance = "L2",
+              seed = 42)
 
 # Fuzzy membership matrix
 fc@fcluster
@@ -775,7 +779,7 @@ fc@fcluster
 all.equal(rep(1, 20), rowSums(fc@fcluster), check.attributes = FALSE)
 
 # Plot crisp partition in the original space
-plot(fc, data = CharTraj[1:20], type = "series")
+plot(fc, series = CharTraj[1:20], type = "series")
 @
 
 \section[Using the doParallel package for parallel computation]{Using the \pkg{doParallel} package for parallel computation}
@@ -796,10 +800,10 @@ invisible(clusterEvalQ(workers, library("dtwclust")))
 registerDoParallel(workers)
 
 # Calling dtwclust
-pc_par <- dtwclust(CharTraj[1L:20L], k = 4L,
-                   distance = "dtw_basic", centroid = "dba",
-                   seed = 938, control = list(trace = TRUE,
-                                              window.size = 15L))
+pc_par <- tsclust(CharTraj[1L:20L], k = 4L,
+                  distance = "dtw_basic", centroid = "dba",
+                  window.size = 15L,
+                  seed = 938, trace = TRUE)
 
 # Stop parallel workers
 stopCluster(workers)
@@ -817,9 +821,10 @@ The easiest way to evaluate partitional and hierarchical clustering results is w
 # z-normalization
 data <- zscore(CharTraj[1L:20L])
 
-pc_k <- dtwclust(data, type = "p", k = 2L:6L,
-                 distance = "dtw_basic", centroid = "pam",
-                 seed = 93, control = list(window.size = 20L))
+pc_k <- tsclust(data, type = "p", k = 2L:6L,
+                distance = "dtw_basic", centroid = "pam",
+                args = tsclust_args(dist = list(window.size = 20L)),
+                seed = 93)
 
 names(pc_k) <- paste0("k_", 2L:6L)
 
@@ -829,10 +834,11 @@ sapply(pc_k, cvi, type = "internal")
 If we choose the value of $k = 4$, we could then compare results among different random repetitions with help of the \pkg{clue} package (or with CVIs again).
 
 <<example-clue-p, echo = TRUE>>=
-pc_4 <- dtwclust(data, type = "p", k = 4L,
-                 distance = "dtw_basic", centroid = "pam",
-                 seed = 93, control = list(window.size = 20L,
-                                           nrep = 5L))
+pc_4 <- tsclust(data, type = "p", k = 4L,
+                distance = "dtw_basic", centroid = "pam",
+                args = tsclust_args(dist = list(window.size = 20L)),
+                control = partitional_control(nrep = 5L),
+                seed = 93)
 
 names(pc_4) <- paste0("r_", 1L:5L)
 
@@ -850,9 +856,9 @@ The same could be done for hierarchical procedures, as the next example shows. A
 <<example-clue-h, echo = TRUE>>=
 hclust_methods <-  c("single", "complete", "average", "mcquitty")
 
-hc <- dtwclust(data, type = "h", k = 4L,
-               method = hclust_methods,
-               distmat = pc_4[[1L]]@distmat)
+hc <- tsclust(data, type = "h", k = 4L,
+              control = hierarchical_control(method = hclust_methods,
+                                             distmat = pc_4[[1L]]@distmat))
 
 names(hc) <- hclust_methods
 
@@ -869,7 +875,8 @@ In this example, a weighted mean centroid is desired and implemented as follows.
 <<example-custom-cent, echo = TRUE>>=
 # Formal arguments before ... must be the same
 weighted_mean_cent <- function(x, cl_id, k, cent, cl_old, ...,
-                               weights = rep(1, length(x))) {
+                               weights)
+{
     x <- mapply(x, weights,
                 SIMPLIFY = FALSE,
                 FUN = function(ts, w) { w * ts })
@@ -886,27 +893,30 @@ weighted_mean_cent <- function(x, cl_id, k, cent, cl_old, ...,
 
 data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 
-dtwclust(data[1L:10L], type = "p", k = 2L,
-         distance = "Manhattan",
-         centroid = weighted_mean_cent,
-         seed = 123,
-         weights = rep(c(0.9,1.1), each = 5L))
+weights <- rep(c(0.9,1.1), each = 5L)
+
+tsclust(data[1L:10L], type = "p", k = 2L,
+        distance = "Manhattan",
+        centroid = weighted_mean_cent,
+        seed = 123,
+        args = tsclust_args(cent = list(weights = weights)))
 @
 
-Other clustering algorithms that significantly alter the workflow in \dtwclust{} are harder to integrate by the user, although the provided formal class can still be of use. Formal objects can be created with the \code{create_dtwclust} function. For instance, the following would reproduce the result of TADPole clustering, enabling the usage of the \code{cvi} function (and any other generic that has methods for \code{dtwclust} objects).
+Other clustering algorithms that significantly alter the workflow in \dtwclust{} are harder to integrate by the user, although the provided formal class can still be of use. Formal objects can be created with the \code{new} function, which has a custom constructor registered. For instance, the following would reproduce the result of TADPole clustering, enabling the usage of the \code{cvi} function (and any other generic that has methods for appropriate \code{TSClusters} objects).
 
 <<example-manual-tadpole, echo = TRUE>>=
 tadp <- TADPole(data[1L:20L], k = 4L,
                 dc = 1.5, window.size = 15L)
 
-tp_obj <- create_dtwclust(type = "tadpole",
-                          datalist = data[1L:20L],
-                          centroids = data[tadp$centroids],
-                          cluster = tadp$cl,
-                          control = list(window.size = 15L,
-                                         norm = "L2"),
-                          distance = "dtw_lb",
-                          centroid = "PAM_TADPole")
+tp_obj <- new("PartitionalTSClusters",
+              type = "tadpole",
+              datalist = data[1L:20L],
+              centroids = data[tadp$centroids],
+              cluster = tadp$cl,
+              dots = list(window.size = 15L,
+                          norm = "L2"),
+              distance = "dtw_lb",
+              centroid = "PAM_TADPole")
 
 cbind(cvi(tp_obj, CharTrajLabels[1L:20L]))
 @
@@ -914,12 +924,13 @@ cbind(cvi(tp_obj, CharTrajLabels[1L:20L]))
 Assuming the following results were obtained by applying \kshape{} independently of \dtwclust{}, the following would reproduce the values in a formal class, which can then be used, for example, to predict cluster membership of new data.
 
 <<example-manual-kshape, echo = TRUE>>=
-ks_obj <- create_dtwclust(type = "partitional",
-                          datalist = zscore(CharTraj)[-100L],
-                          centroids = zscore(CharTraj[seq(1L, 100L, 5L)]),
-                          cluster = unclass(CharTrajLabels)[-100L],
-                          distance = "sbd",
-                          centroid = "shape")
+ks_obj <- new("PartitionalTSClusters",
+              type = "partitional",
+              datalist = zscore(CharTraj)[-100L],
+              centroids = zscore(CharTraj[seq(1L, 100L, 5L)]),
+              cluster = unclass(CharTrajLabels)[-100L],
+              distance = "sbd",
+              centroid = "shape")
 
 ## Preprocessing is performed by ks_obj@family@preproc
 predict(ks_obj, newdata = CharTraj[100L])
