@@ -127,6 +127,12 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
     ## some "defaults"
     if (is.null(dots$preproc)) .Object@preproc <- "none"
     if (is.null(dots$k)) .Object@k <- length(.Object@centroids)
+    if (is.null(dots$args))
+        .Object@args <- tsclust_args(preproc = .Object@dots,
+                                     dist = .Object@dots,
+                                     cent = .Object@dots)
+    else
+        .Object@args <- lapply(.Object@args, function(args) { c(args, .Object@dots) })
 
     ## more helpful for hierarchical/tadpole
     if (override.family) {
