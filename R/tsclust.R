@@ -12,8 +12,9 @@
 #' @param type What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"},
 #'   \code{"tadpole"} or \code{"fuzzy"}.
 #' @param k Number of desired clusters. It may be a numeric vector with different values.
-#' @param ... Arguments for other functions. Currently passed to \code{method} from
-#'   \code{\link{hierarchical_control}} if it happens to be a function.
+#' @param ... Arguments to pass to preprocessing, centroid \strong{and} distance functions (added to
+#'   \code{args}). Also passed to \code{method} from \code{\link{hierarchical_control}} if it
+#'   happens to be a function.
 #' @param preproc Function to preprocess data. Defaults to \code{\link{zscore}} \emph{only} if
 #'   \code{centroid} \code{=} \code{"shape"}, but will be replaced by a custom function if provided.
 #' @param distance  A supported distance from \code{proxy}'s \code{\link[proxy]{dist}}. Ignored for
@@ -269,6 +270,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     MYCALL <- match.call(expand.dots = TRUE)
 
     dots <- list(...)
+    args <- lapply(args, function(args) { c(args, dots) })
 
     ## ---------------------------------------------------------------------------------------------
     ## Preprocess

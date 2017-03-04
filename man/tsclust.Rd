@@ -18,8 +18,9 @@ coerced row-wise.}
 
 \item{k}{Number of desired clusters. It may be a numeric vector with different values.}
 
-\item{...}{Arguments for other functions. Currently passed to \code{method} from
-\code{\link{hierarchical_control}} if it happens to be a function.}
+\item{...}{Arguments to pass to preprocessing, centroid \strong{and} distance functions (added to
+\code{args}). Also passed to \code{method} from \code{\link{hierarchical_control}} if it
+happens to be a function.}
 
 \item{preproc}{Function to preprocess data. Defaults to \code{\link{zscore}} \emph{only} if
 \code{centroid} \code{=} \code{"shape"}, but will be replaced by a custom function if provided.}

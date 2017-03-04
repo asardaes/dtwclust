@@ -214,7 +214,7 @@ test_that("Invalid combinations in fuzzy clustering are detected by tsclust.", {
     args <- tsclust_args(dist = list(window.size = 15L))
 
     expect_error(tsclust(data, type = "f", distance = "lbk", args = args), "different length")
-    expect_error(tsclust(data, type = "f", distance = "lbi", args = args()), "different length")
+    expect_error(tsclust(data, type = "f", distance = "lbi", args = args), "different length")
     expect_error(tsclust(data, type = "f", distance = "dtw_lb", args = args), "different length")
     expect_error(tsclust(data, type = "f", distance = "dtw"), "different length")
     expect_error(tsclust(data, type = "f", distance = "dtw2"), "different length")

@@ -3,9 +3,8 @@
 
 \title{News for package \pkg{dtwclust}}
 
-\section{Changes in version 3.1.1}{
+\section{Changes in version 3.1.2}{
     \itemize{
-        \item Seeds are now set when calling TADPole through \code{dtwclust} with a parallel backend and multiple values of \code{k}, in case the centroid function has randomness associated.
-        \item Added a new experimental function \code{tsclust} that should be functionally equivalent to \code{dtwclust} but is hopefully more coherent in general.
+        \item The arguments in \code{tsclust}'s ellipsis are now passed to all preprocessing, centroid and distance functions.
     }
 }
