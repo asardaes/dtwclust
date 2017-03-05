@@ -310,12 +310,12 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
         ## symmetric versions of dtw that I know of
         ## unconstrained and with symmetric1/symmetric2 is always symmetric, regardless of lengths
         ## constrained and same lengths with symmetric1/symmetric2 is also symmetric
-        symmetric_pattern <- is.null(dots$step.pattern) ||
-            identical(dots$step.pattern, symmetric1) ||
-            identical(dots$step.pattern, symmetric2)
+        symmetric_pattern <- is.null(args$dist$step.pattern) ||
+            identical(args$dist$step.pattern, symmetric1) ||
+            identical(args$dist$step.pattern, symmetric2)
 
         if (tolower(distance) %in% c("dtw", "dtw2", "dtw_basic")) {
-            control$symmetric <- symmetric_pattern && (is.null(dots$window.size) || !diff_lengths)
+            control$symmetric <- symmetric_pattern && (is.null(args$dist$window.size) || !diff_lengths)
 
         } else if (tolower(distance) %in% c("lbk", "lbi")) {
             control$symmetric <- FALSE
