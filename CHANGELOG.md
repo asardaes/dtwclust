@@ -2,6 +2,7 @@
 
 ## Version 3.1.2
 * The arguments in `tsclust`'s ellipsis are now passed to all preprocessing, centroid and distance functions.
+* Updated vignette to use `tsclust` in the examples.
 
 ## Version 3.1.1
 * Seeds are now set when calling TADPole through `dtwclust` with a parallel backend and multiple values of `k`, in case the centroid function has randomness associated.
