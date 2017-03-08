@@ -93,7 +93,7 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
     if (storage.mode(gcm) != "double")
         stop("dtw_basic: If provided, 'gcm' must have 'double' storage mode.")
 
-    d <- .Call("dtw_basic", x, y, window.size,
+    d <- .Call(C_dtw_basic, x, y, window.size,
                NROW(x), NROW(y), NCOL(x),
                norm, step.pattern, backtrack,
                gcm, PACKAGE = "dtwclust")

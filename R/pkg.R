@@ -49,7 +49,7 @@
 #'
 #' \code{\link{tsclust}}, \code{\link[proxy]{dist}}, \code{\link[dtw]{dtw}}
 #'
-#' @useDynLib dtwclust
+#' @useDynLib dtwclust, .registration = TRUE
 #'
 #' @import clue
 #' @import foreach

@@ -129,7 +129,7 @@ validate_pairwise <- function(x, y) {
 call_pairs <- function(n = 2L, lower = TRUE) {
     if (n < 2L) stop("At least two elements are needed to create pairs.")
 
-    .Call("pairs", n, lower, PACKAGE = "dtwclust")
+    .Call(C_pairs, n, lower, PACKAGE = "dtwclust")
 }
 
 # ========================================================================================================

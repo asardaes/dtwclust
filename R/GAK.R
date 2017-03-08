@@ -113,18 +113,18 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
     else
         window.size <- check_consistency(window.size, "window")
 
-    logGAK <- .Call("logGAK", x, y,
+    logGAK <- .Call(C_logGAK, x, y,
                     NROW(x), NROW(y), NCOL(x),
                     sigma, window.size, logs,
                     PACKAGE = "dtwclust")
 
     if (normalize) {
-        gak_x <- .Call("logGAK", x, x,
+        gak_x <- .Call(C_logGAK, x, x,
                        NROW(x), NROW(x), NCOL(x),
                        sigma, window.size, logs,
                        PACKAGE = "dtwclust")
 
-        gak_y <- .Call("logGAK", y, y,
+        gak_y <- .Call(C_logGAK, y, y,
                        NROW(y), NROW(y), NCOL(y),
                        sigma, window.size, logs,
                        PACKAGE = "dtwclust")
