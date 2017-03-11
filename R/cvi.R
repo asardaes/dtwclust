@@ -86,7 +86,7 @@
 #'     \item \code{"valid"}: Returns all valid indices depending on the type of \code{a} and whether
 #'       \code{b} was provided or not.
 #'     \item \code{"internal"}: Returns all internal CVIs. Only supported for
-#'       \code{\link{dtwclust-class}} objects.
+#'       \code{\link{dtwclust-class}} and \code{\link{TSClusters-class}} objects.
 #'     \item \code{"external"}: Returns all external CVIs. Requires \code{b} to be provided.
 #'   }
 #'
@@ -98,6 +98,9 @@
 #'
 #' Some internal indices require the original data for calculations, so the control flag
 #' \code{save.data} must be set to \code{TRUE} when running the clustering algorithm.
+#'
+#' The formula for the SF index in Saitta et al. (2007) does not correspond to the one in Arbelaitz
+#' et al. (2013). The one specified in the former is used here.
 #'
 #' @references
 #'
@@ -122,12 +125,11 @@ setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10
     a <- as.integer(a)
     b <- as.integer(b)
 
-    if (length(a) != length(b))
-        stop("External CVIs: the length of 'a' and 'b' must match.")
+    if (length(a) != length(b)) stop("External CVIs: the length of 'a' and 'b' must match.")
 
     type <- match.arg(type, several.ok = TRUE,
-                      c("RI", "ARI", "J", "FM", "VI",
-                        "valid", "external"))
+                      choices = c("RI", "ARI", "J", "FM", "VI",
+                                  "valid", "external"))
 
     if (any(type %in% c("valid", "external")))
         type <- c("RI", "ARI", "J", "FM", "VI")

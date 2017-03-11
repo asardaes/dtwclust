@@ -74,6 +74,9 @@ during clustering.
 
 Some internal indices require the original data for calculations, so the control flag
 \code{save.data} must be set to \code{TRUE} when running the clustering algorithm.
+
+The formula for the SF index in Saitta et al. (2007) does not correspond to the one in Arbelaitz
+et al. (2013). The one specified in the former is used here.
 }
 \section{External CVIs}{
 
@@ -124,7 +127,7 @@ Some internal indices require the original data for calculations, so the control
     \item \code{"valid"}: Returns all valid indices depending on the type of \code{a} and whether
       \code{b} was provided or not.
     \item \code{"internal"}: Returns all internal CVIs. Only supported for
-      \code{\link{dtwclust-class}} objects.
+      \code{\link{dtwclust-class}} and \code{\link{TSClusters-class}} objects.
     \item \code{"external"}: Returns all external CVIs. Requires \code{b} to be provided.
   }
 }
