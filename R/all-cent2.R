@@ -1,9 +1,9 @@
-# ========================================================================================================
+# ==================================================================================================
 # Custom functions to calculate centroids
-# ========================================================================================================
+# ==================================================================================================
 
 all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALSE) {
-    ## --------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------------------------
     ## pam
     pam_cent <- function(x, x_split, cent, cl_id, id_changed, ...) {
         if (is.null(distmat)) {
@@ -39,7 +39,7 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
         new_cent
     }
 
-    ## --------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------------------------
     ## shape
     shape_cent <- function(x_split, cent, ...) {
         x_split <- split_parallel(x_split)
@@ -64,11 +64,12 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
         new_cent
     }
 
-    ## --------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------------------------
     ## dba
     dba_cent <- function(x, x_split, cent, id_changed, cl_id, ...) {
-        ## not all arguments are used, but I want them to be isolated from ...
+        ## not all arguments are used, but I want them to be isolated from ellipsis
         dots <- list(...)
+        dots$error.check <- FALSE
 
         x_split <- split_parallel(x_split)
         cent <- split_parallel(cent)
@@ -85,7 +86,6 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
                                            new_c <- do.call(DBA,
                                                             enlist(X = x,
                                                                    centroid = c,
-                                                                   error.check = FALSE,
                                                                    dots = dots))
 
                                            ## return
@@ -97,7 +97,7 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
         new_cent
     }
 
-    ## --------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------------------------
     ## mean
     mean_cent <- function(x_split, ...) {
         new_cent <- lapply(x_split, function(xx) {
@@ -113,7 +113,7 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
             } else {
                 ## univariate
                 xx <- do.call(rbind, xx)
-                colMeans(xx)
+                colMeans(xx) # utils.R
             }
         })
 
@@ -121,7 +121,7 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
         new_cent
     }
 
-    ## --------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------------------------
     ## median
     median_cent <- function(x_split, ...) {
         new_cent <- lapply(x_split, function(xx) {
@@ -137,7 +137,7 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
             } else {
                 ## univariate
                 xx <- do.call(rbind, xx)
-                colMedians(xx)
+                colMedians(xx) # utils.R
             }
         })
 
@@ -145,7 +145,7 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
         new_cent
     }
 
-    ## --------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------------------------
     ## fcm
     fcm_cent <- function(x, u, k, ...) {
         ## utils.R
@@ -154,7 +154,7 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
 
             cent <- lapply(mv$series, fcm_cent, u = u)
             cent <- lapply(1L:k, function(idc) {
-                sapply(cent, function(c) { c[idc, , drop = TRUE] })
+                sapply(cent, function(cent) { cent[idc, , drop = TRUE] })
             })
             cent <- lapply(cent, "dimnames<-", NULL)
 
@@ -166,7 +166,7 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
         }
     }
 
-    ## --------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------------------------
     ## fcmdd
     fcmdd_cent <- function(x, u, k, ...) {
         q <- distmat %*% u
@@ -178,7 +178,7 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
         cent
     }
 
-    ## --------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------------------------------------------
     ## allcent
     if (fuzzy) {
         ## function created here to capture objects of this environment (closure)
@@ -232,34 +232,8 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
             num_empty <- length(empty_clusters)
 
             ## If so, initialize new clusters
-            if (num_empty > 0L) {
-                ## Make sure no centroid is repeated (especially in case of PAM)
-                any_rep <- logical(num_empty)
-
-                while(TRUE) {
-                    id_cent_extra <- sample(length(x), num_empty)
-                    extra_cent <- x[id_cent_extra]
-
-                    for (id_extra in 1L:num_empty) {
-                        any_rep[id_extra] <- any(sapply(cent, function(i.centroid) {
-                            if (length(i.centroid) != length(extra_cent[[id_extra]]))
-                                ret <- FALSE
-                            else
-                                ret <- all(i.centroid == extra_cent[[id_extra]])
-
-                            ret
-                        }))
-
-                        if (case == "pam")
-                            attr(extra_cent[[id_extra]], "id_cent") <- id_cent_extra[id_extra]
-                    }
-
-                    if (all(!any_rep))
-                        break
-                }
-
-                cent[empty_clusters] <- extra_cent
-            }
+            if (num_empty > 0L)
+                cent[empty_clusters] <- reinitalize_clusters(x, cent, case, num_empty)
 
             ## aggregate updated indices
             if (case == "pam")

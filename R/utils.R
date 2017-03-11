@@ -121,6 +121,30 @@ validate_pairwise <- function(x, y) {
     invisible(NULL)
 }
 
+# Reinitialize empty clusters
+reinitalize_clusters <- function(x, cent, cent_case, num_empty) {
+    ## Make sure no centroid is repeated (especially in case of PAM)
+    any_rep <- logical(num_empty)
+
+    while(TRUE) {
+        id_cent_extra <- sample(length(x), num_empty)
+        extra_cent <- x[id_cent_extra]
+
+        for (id_extra in 1L:num_empty) {
+            any_rep[id_extra] <- any(sapply(cent, function(i.centroid) {
+                identical(i.centroid, extra_cent[[id_extra]])
+            }))
+
+            if (cent_case == "pam")
+                attr(extra_cent[[id_extra]], "id_cent") <- id_cent_extra[id_extra]
+        }
+
+        if (all(!any_rep)) break
+    }
+
+    extra_cent
+}
+
 # ========================================================================================================
 # Helper C/C++ functions
 # ========================================================================================================
