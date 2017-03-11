@@ -4,9 +4,9 @@
 #'
 #' @export
 #'
-#' @param X A data matrix where each row is a time series, or a list where each element is a time
-#'   series. Multivariate series should be provided as a list of matrices where time spans the rows
-#'   and the variables span the columns.
+#' @param X A matrix or data frame where each row is a time series, or a list where each element is
+#'   a time series. Multivariate series should be provided as a list of matrices where time spans
+#'   the rows and the variables span the columns of each matrix.
 #' @param centroid Optionally, a time series to use as reference. Defaults to a random series of
 #'   \code{X} if \code{NULL}. For multivariate series, this should be a matrix with the same
 #'   characteristics as the matrices in \code{X}.
@@ -20,7 +20,7 @@
 #' @param delta At iteration \code{i}, if \code{all(abs(centroid_{i}} \code{ - centroid_{i-1})}
 #'   \code{ < delta)}, convergence is assumed.
 #' @param error.check Should inconsistencies in the data be checked?
-#' @param trace If \code{TRUE}, the current iteration is printed to screen.
+#' @param trace If \code{TRUE}, the current iteration is printed to output.
 #'
 #' @details
 #'
@@ -104,8 +104,7 @@ DBA <- function(X, centroid = NULL, ...,
 {
     X <- any2list(X)
 
-    if (is.null(centroid))
-        centroid <- X[[sample(length(X), 1L)]] # Random choice
+    if (is.null(centroid)) centroid <- X[[sample(length(X), 1L)]] # Random choice
 
     if (error.check) {
         check_consistency(X, "vltslist")
@@ -114,7 +113,6 @@ DBA <- function(X, centroid = NULL, ...,
 
     ## utils.R
     if (is_multivariate(X)) {
-        ## multivariate
         mv <- reshape_multviariate(X, centroid) # utils.R
 
         new_c <- mapply(mv$series, mv$cent, SIMPLIFY = FALSE,
@@ -133,8 +131,7 @@ DBA <- function(X, centroid = NULL, ...,
 
     norm <- match.arg(norm, c("L1", "L2"))
 
-    if (!is.null(window.size))
-        window.size <- check_consistency(window.size, "window")
+    if (!is.null(window.size)) window.size <- check_consistency(window.size, "window")
 
     dots <- list(...)
 
@@ -154,8 +151,9 @@ DBA <- function(X, centroid = NULL, ...,
     if (trace) cat("\tDBA Iteration:")
 
     while(iter <= max.iter) {
-        ## Return the coordinates of each series in X grouped by the coordinate they match to in the centroid time series
-        ## Also return the number of coordinates used in each case (for averaging below)
+        ## Return the coordinates of each series in X grouped by the coordinate they match to in the
+        ## centroid time series.
+        ## Also return the number of coordinates used in each case (for averaging below).
         xg <- foreach(X = Xs, GCM = GCMs,
                       .combine = c,
                       .multicombine = TRUE,
@@ -183,13 +181,13 @@ DBA <- function(X, centroid = NULL, ...,
         ## Put everything in one big data frame
         xg <- reshape2::melt(xg)
 
-        ## Aggregate according to index of centroid time series (Var1) and also the variable type (Var2)
+        ## Aggregate according to index of centroid time series (Var1) and the variable type (Var2)
         xg <- stats::aggregate(xg$value, by = list(xg$Var1, xg$Var2), sum)
 
         ## Average
         centroid <- xg$x[xg$Group.2 == "sum"] / xg$x[xg$Group.2 == "n"]
 
-        if (isTRUE(all.equal(abs(centroid), abs(centroid_old), tolerance = delta))) {
+        if (isTRUE(all.equal(centroid, centroid_old, tolerance = delta))) {
             if (trace) cat("", iter ,"- Converged!\n")
 
             break
@@ -206,8 +204,7 @@ DBA <- function(X, centroid = NULL, ...,
         }
     }
 
-    if (iter > max.iter && trace)
-        cat(" Did not 'converge'\n")
+    if (iter > max.iter && trace) cat(" Did not 'converge'\n")
 
     as.numeric(centroid)
 }

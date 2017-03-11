@@ -8,9 +8,9 @@ DBA(X, centroid = NULL, ..., window.size = NULL, norm = "L1",
   max.iter = 20L, delta = 0.001, error.check = TRUE, trace = FALSE)
 }
 \arguments{
-\item{X}{A data matrix where each row is a time series, or a list where each element is a time
-series. Multivariate series should be provided as a list of matrices where time spans the rows
-and the variables span the columns.}
+\item{X}{A matrix or data frame where each row is a time series, or a list where each element is
+a time series. Multivariate series should be provided as a list of matrices where time spans
+the rows and the variables span the columns of each matrix.}
 
 \item{centroid}{Optionally, a time series to use as reference. Defaults to a random series of
 \code{X} if \code{NULL}. For multivariate series, this should be a matrix with the same
@@ -32,7 +32,7 @@ Euclidean distance.}
 
 \item{error.check}{Should inconsistencies in the data be checked?}
 
-\item{trace}{If \code{TRUE}, the current iteration is printed to screen.}
+\item{trace}{If \code{TRUE}, the current iteration is printed to output.}
 }
 \value{
 The average time series.
