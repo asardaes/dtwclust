@@ -3,6 +3,11 @@
 # ========================================================================================================
 
 ddist2 <- function(distance, control) {
+    symmetric <- if (is.null(control$symmetric)) FALSE else control$symmetric
+
+    ## I need to re-register any custom distances in each parallel worker
+    dist_entry <- proxy::pr_DB$get_entry(distance)
+
     ## Closures capture the values of the objects from the environment where they're created
     distfun <- function(x, centroids = NULL, ...) {
         if (!is.null(control$distmat)) {
@@ -30,11 +35,6 @@ ddist2 <- function(distance, control) {
 
             dots$error.check <- FALSE
 
-            symmetric <- if (is.null(control$symmetric)) FALSE else control$symmetric
-
-            ## I need to re-register any custom distances in each parallel worker
-            dist_entry <- proxy::pr_DB$get_entry(distance)
-
             ## dtw uses L2 by default, but in dtwclust I want dtw to use L1 by default
             ## Important for multivariate series
             if (toupper(dist_entry$names[1L]) == "DTW" && is.null(dots$dist.method))
@@ -54,15 +54,15 @@ ddist2 <- function(distance, control) {
             dots <- dots[intersect(names(dots), valid_args)]
 
             ## variables/functions from the parent environments that should be exported
-            export <- c("distance", "check_consistency", "enlist")
+            export <- c("distance", "dist_entry", "check_consistency", "enlist")
 
             if (is.null(centroids) && symmetric && !isTRUE(dots$pairwise)) {
-                if (dist_entry$loop) {
-                    ## WHOLE SYMMETRIC DISTMAT WITH proxy LOOP
+                if (dist_entry$loop && foreach::getDoParWorkers() > 1L && isTRUE(foreach::getDoParName() != "doSEQ")) {
+                    ## WHOLE SYMMETRIC DISTMAT WITH proxy LOOP IN PARALLEL
                     ## Only half of it is computed
                     ## I think proxy can do this if y = NULL, but not in parallel
 
-                    ## strict pairwise as in proxy::dist doesn't make sense here, but this case needs it
+                    ## strict pairwise as in proxy::dist doesn't make sense here, it's pairwise between pairs
                     dots$pairwise <- TRUE
 
                     pairs <- call_pairs(length(x), lower = FALSE)
@@ -101,13 +101,15 @@ ddist2 <- function(distance, control) {
                     rm("D")
 
                 } else {
-                    ## WHOLE SYMMETRIC DISTMAT WITH CUSTOM LOOP
-                    ## most likely one of my distances, let it handle parallelization
-                    d <- do.call(proxy::dist,
-                                 enlist(x = x,
-                                        y = NULL,
-                                        method = distance,
-                                        dots = dots))
+                    ## WHOLE SYMMETRIC DISTMAT WITH CUSTOM LOOP OR SEQUENTIAL proxy LOOP
+                    ## maybe one of my distances, or one included in proxy by default, let it handle parallelization
+                    d <- as.matrix(do.call(proxy::dist,
+                                           enlist(x = x,
+                                                  y = NULL,
+                                                  method = distance,
+                                                  dots = dots)))
+
+                    class(d) <- "crossdist"
                 }
 
             } else {
@@ -148,7 +150,7 @@ ddist2 <- function(distance, control) {
                                  dd
                              }
 
-                if (!is.null(dots$pairwise) && dots$pairwise) {
+                if (isTRUE(dots$pairwise)) {
                     attr(d, "class") <- "pairdist"
 
                 } else {

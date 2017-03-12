@@ -2,8 +2,8 @@
 * Optimizations
 
 ## Test environments
-* Local GNU/Linux, R 3.3.2
-* Local Windows 10, R 3.3.2
+* Local GNU/Linux, R 3.3.3
+* Local Windows 10, R 3.3.3
 * win-builder (devel and release)
 * Travis CI
   + Linux: devel and release
