@@ -28,7 +28,7 @@ knitr::opts_chunk$set(
 
 Time series clustering with a wide variety of strategies and a series of optimizations specific to the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs). There are implementations of both traditional clustering algorithms, and more recent procedures such as k-Shape and TADPole clustering. Functionality can be easily extended with custom distance measures and centroid definitions.
 
-Many of the algorithms implemented in this package are specifically tailored to time series and DTW, hence its name. However, the main clustering function is flexible so that one can test many different clustering approaches, using either the time series directly, or by applying suitable transformations and then clustering in the resulting space.
+Many of the algorithms implemented in this package are specifically tailored to DTW, hence its name. However, the main clustering function is flexible so that one can test many different clustering approaches, using either the time series directly, or by applying suitable transformations and then clustering in the resulting space. Other implementations included in the package provide some alternatives to DTW.
 
 DTW is a dynamic programming algorithm that tries to find the optimum warping path between two series. Over the years, several variations have appeared in order to make the procedure faster or more efficient. Please refer to the included references for more information, especially Giorgino
 (2009), which is a good practical introduction.
@@ -51,6 +51,16 @@ The latest version from CRAN can be installed with `install.packages("dtwclust")
 If you want to test the latest version from github, first install the [prerequisites for R package development](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites) (LaTeX is probably only neccesary if you want to build the vignette) as well as the [devtools package](https://cran.r-project.org/package=devtools), and then type `devtools::install_github("asardaes/dtwclust")`. If you want the vignette to be installed, set the `build_vignettes` parameter to `TRUE`, it will take a couple of minutes.
 
 If you're wondering about which version to install, take a look at the [CHANGELOG](CHANGELOG.md) file, I try to keep it updated.
+
+## Dependencies
+
+* Partitional procedures are inspired by the `flexclust` package.
+* Hierarchical procedures use the native `hclust` function by default.
+* Cross-distance matrix calculations make use of the `proxy` package.
+* The core DTW calculations can be done by the `dtw` package or the included `dtw_basic` function.
+* Plotting is done with the `ggplot2` package.
+* Parallel computation depends on the `foreach` package.
+* Cluster evaluation can be done with package `clue` or the `cvi` function.
 
 ## Examples
 
@@ -156,12 +166,6 @@ registerDoSEQ()
 plot(hc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
 ```
 
-## Dependencies
+### Disclaimer
 
-* Partitional procedures are inspired by the `flexclust` package.
-* Hierarchical procedures use the native `hclust` function by default.
-* Cross-distance matrix calculations make use of the `proxy` package.
-* The core DTW calculations can be done by the `dtw` package or the `dtw_basic` function.
-* Plotting is done with the `ggplot2` package.
-* Parallel computation depends on the `foreach` package.
-* Cluster evaluation can be done with package `clue` or the `cvi` function.
+This software package was developed independently of any organization or institution that is or has been associated with the author.
