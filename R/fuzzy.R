@@ -9,7 +9,7 @@ fcm_cluster <- function(distmat, m) {
 
     if (is.null(dim(u))) u <- rbind(u) # for predict generic
 
-    u[is.nan(u)] <- 1
+    u[is.nan(u)] <- 1 # in case fcmdd is used
 
     u
 }

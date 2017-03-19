@@ -1,6 +1,6 @@
 #' Control parameters for clusterings with \code{\link{tsclust}}
 #'
-#' Control parameters for \code{\link{tsclust}}.
+#' Control parameters for fine-grained control.
 #'
 #' @name tsclust-controls
 #' @rdname tsclust-controls
@@ -16,7 +16,7 @@
 #'   computed. Overridden if the function detects an invalid user-provided value.
 #' @param packages Character vector with the names of any packages required for custom \code{proxy}
 #'   functions. Since the distance entries are re-registered in each parallel worker if needed, this
-#'   slot is probably useless, but just in case.
+#'   is probably useless, but just in case.
 #' @param distmat If available, the cross-distance matrix can be provided here. Only relevant for
 #'   partitional with PAM centroids or hierarchical procedures.
 #'

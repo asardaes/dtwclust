@@ -177,8 +177,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     } else {
         y <- any2list(y)
 
-        if (error.check)
-            check_consistency(y, "tslist")
+        if (error.check) check_consistency(y, "tslist")
     }
 
     if (is_multivariate(x) || is_multivariate(y))
@@ -226,7 +225,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                                        MoreArgs = list(x = x),
                                        SIMPLIFY = FALSE,
                                        FUN = function(y, U, L, x) {
-                                           ## This will return one row of the distance matrix
+                                           ## This will return one column of the distance matrix
                                            sapply(x, y = y, l = L, u = U,
                                                   FUN = function(x, y, l, u) {
                                                       lb_improved(x, y,

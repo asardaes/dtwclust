@@ -8,7 +8,7 @@ dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
   pairwise = FALSE, dtw.func = "dtw_basic", ...)
 }
 \arguments{
-\item{x, y}{A matrix where rows are time series, or a list of time series.}
+\item{x, y}{A matrix or data frame where rows are time series, or a list of time series.}
 
 \item{window.size}{Window size to use with the LB and DTW calculation. See details.}
 

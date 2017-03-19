@@ -112,7 +112,7 @@ indices. It preprocesses the data with the corresponding function if available.
       partitional clustering).
   }
 
-  *Necessary when overriding the default family for the calculation of other slots, CVIs or
+  * Necessary when overriding the default family for the calculation of other slots, CVIs or
   prediction. Maybe not always needed, e.g. for plotting.
 }
 

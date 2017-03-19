@@ -7,7 +7,7 @@
 #'
 #' @format
 #'
-#' A list with 100 elements. Each element is a time series. Labels included as factor vector.
+#' Lists with 100 elements each. Each element is a time series. Labels included as factor vector.
 #'
 #' @details
 #'

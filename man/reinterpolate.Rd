@@ -8,7 +8,7 @@ reinterpolate(x, new.length, multivariate = FALSE)
 }
 \arguments{
 \item{x}{Data to reinterpolate. Either a vector, a matrix/data.frame where each row is to be
-reinterpolated, or a list of vectors.}
+reinterpolated, or a list of vectors/matrices.}
 
 \item{new.length}{Desired length of the output series.}
 
@@ -20,7 +20,10 @@ Reinterpolated time series
 }
 \description{
 This function is just a wrapper for the native function \code{\link[stats]{approx}} to do simple
-linear reinterpolation.
+linear reinterpolation. It also supports matrices, data frames, and lists of time series.
+}
+\details{
+Multivariate series must have time spanning the rows and variables spanning the columns.
 }
 \examples{
 

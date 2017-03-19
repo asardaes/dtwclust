@@ -64,16 +64,18 @@ setClass("tsclustFamily",
 #' The base class is \code{TSClusters}. The 3 classes that inherit from it are:
 #' \code{PartitionalTSClusters}, \code{HierarchicalTSClusters} and \code{FuzzyTSClusters}.
 #'
-#' \code{HierarchicalTSClusters} also contain \code{\link[stats]{hclust}} as parent class. Package
-#' \pkg{clue} is also supported, but generics from \pkg{flexclust} are not. See
-#' \code{\link{tsclusters-methods}} also.
+#' \code{HierarchicalTSClusters} also contain \code{\link[stats]{hclust}} as parent class.
+#'
+#' Package \pkg{clue} is supported, but generics from \pkg{flexclust} are not. See also
+#' \code{\link{tsclusters-methods}}.
 #'
 #' If you want to transform a \code{\link{dtwclust-class}} object to TSClusters, just use
 #' \code{as(dtwclust_obj, "TSClusters")}, although it may not work perfectly.
 #'
 #' @slot call The function call.
 #' @slot family An object of class \code{\link{tsclustFamily-class}}.
-#' @slot control An appropriate control object for \code{\link{tsclust}}.
+#' @slot control An appropriate control object for \code{\link{tsclust}}. See
+#'   \code{\link{tsclust-controls}}.
 #' @slot datalist The provided data in the form of a list, where each element is a time series.
 #' @slot type A string indicating one of the supported clustering types of \code{\link{tsclust}}.
 #' @slot distance A string indicating the distance used.

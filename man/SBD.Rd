@@ -7,7 +7,7 @@
 SBD(x, y, znorm = FALSE, error.check = TRUE)
 }
 \arguments{
-\item{x, y}{A time series.}
+\item{x, y}{Univariate time series.}
 
 \item{znorm}{Logical. Should each series be z-normalized before calculating the distance?}
 
@@ -18,16 +18,16 @@ A list with:
 \itemize{
   \item \code{dist}: The shape-based distance between \code{x} and \code{y}.
   \item \code{yshift}: A shifted version of \code{y} so that it optimally matches \code{x} (based
-    on correlation).
+    on \code{\link{NCCc}}).
 }
 }
 \description{
 Distance based on coefficient-normalized cross-correlation as proposed by Paparrizos and Gravano
-(2015), for the k-Shape clustering algorithm.
+(2015) for the k-Shape clustering algorithm.
 }
 \details{
 This distance works best if the series are \emph{z-normalized}. If not, at least they should have
-corresponding amplitudes, since the values of the signals \strong{do} affect the outcome.
+appropriate amplitudes, since the values of the signals \strong{do} affect the outcome.
 
 If \code{x} and \code{y} do \strong{not} have the same length, it would be best if the longer
 sequence is provided in \code{y}, because it will be shifted to match \code{x}. After matching,

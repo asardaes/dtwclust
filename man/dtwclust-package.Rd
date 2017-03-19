@@ -12,10 +12,11 @@ k-Shape and TADPole clustering. Functionality can be easily extended with custom
 measures and centroid definitions.
 }
 \details{
-Many of the algorithms implemented in this package are specifically tailored to time series and
-DTW, hence its name. However, the main clustering function is flexible so that one can test many
-different clustering approaches, using either the time series directly, or by applying suitable
-transformations and then clustering in the resulting space.
+Many of the algorithms implemented in this package are specifically tailored to DTW, hence its
+name. However, the main clustering function is flexible so that one can test many different
+clustering approaches, using either the time series directly, or by applying suitable
+transformations and then clustering in the resulting space. Other implementations included in the
+package provide some alternatives to DTW.
 
 DTW is a dynamic programming algorithm that tries to find the optimum warping path between two
 series. Over the years, several variations have appeared in order to make the procedure faster or
@@ -38,6 +39,10 @@ See \code{\link[base]{RNGkind}}.
 
 For more information, please read the included package vignette, which can be accessed by typing
 \code{vignette("dtwclust")}.
+}
+\note{
+This software package was developed independently of any organization or institution that is or
+has been associated with the author.
 }
 \references{
 Please refer to the package vignette references.

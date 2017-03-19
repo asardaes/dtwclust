@@ -8,7 +8,7 @@ zscore(x, ..., multivariate = FALSE, keep.attributes = FALSE)
 }
 \arguments{
 \item{x}{Data to normalize. Either a vector, a matrix/data.frame where each row is to be
-normalized, or a list of vectors.}
+normalized, or a list of vectors/matrices.}
 
 \item{...}{Further arguments to pass to \code{\link[base]{scale}}.}
 
@@ -23,5 +23,8 @@ Normalized data in the same format as provided.
 }
 \description{
 Wrapper for function \code{\link[base]{scale}} that returns zeros instead of \code{NaN}. It also
-supports a list of vectors and a matrix input.
+supports matrices, data frames, and lists of time series.
+}
+\details{
+Multivariate series must have time spanning the rows and variables spanning the columns.
 }

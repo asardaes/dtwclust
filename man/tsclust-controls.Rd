@@ -40,7 +40,7 @@ computed. Overridden if the function detects an invalid user-provided value.}
 
 \item{packages}{Character vector with the names of any packages required for custom \code{proxy}
 functions. Since the distance entries are re-registered in each parallel worker if needed, this
-slot is probably useless, but just in case.}
+is probably useless, but just in case.}
 
 \item{distmat}{If available, the cross-distance matrix can be provided here. Only relevant for
 partitional with PAM centroids or hierarchical procedures.}
@@ -69,7 +69,7 @@ literature.}
 \item{cent}{A list of arguments for a centroid function to be used in \code{\link{tsclust}}.}
 }
 \description{
-Control parameters for \code{\link{tsclust}}.
+Control parameters for fine-grained control.
 }
 \details{
 The functions essentially return their function arguments in a classed list, although some checks

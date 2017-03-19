@@ -5,9 +5,9 @@
 #'
 #' @export
 #'
-#' @param X A data matrix where each row is a time series, or a list where each element is a time
-#'   series. Multivariate series should be provided as a list of matrices where time spans the rows
-#'   and the variables span the columns.
+#' @param X A matrix or data frame where each row is a time series, or a list where each element is
+#'   a time series. Multivariate series should be provided as a list of matrices where time spans
+#'   the rows and the variables span the columns.
 #' @param centroid Optionally, a time series to use as reference. Defaults to a random series of
 #'   \code{X} if \code{NULL}. For multivariate series, this should be a matrix with the same
 #'   characteristics as the matrices in \code{X}. \emph{It will be z-normalized}.
@@ -66,7 +66,8 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
         ## multivariate
         mv <- reshape_multviariate(X, centroid) # utils.R
 
-        new_c <- mapply(mv$series, mv$cent, SIMPLIFY = FALSE,
+        new_c <- mapply(mv$series, mv$cent,
+                        SIMPLIFY = FALSE,
                         FUN = function(xx, cc) {
                             new_c <- shape_extraction(xx, cc, znorm = znorm)
                         })
@@ -81,12 +82,10 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
 
     ## make sure at least one series is not just a flat line at zero
     if (all(sapply(Xz, sum) == 0)) {
-        if (is.null(centroid)) {
+        if (is.null(centroid))
             return(rep(0, sample(lengths(Xz), 1L)))
-
-        } else {
+        else
             return(centroid)
-        }
     }
 
     if (is.null(centroid)) {
@@ -127,8 +126,7 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
     d1 <- lnorm(A[1L, , drop = TRUE] - ksc, 2)
     d2 <- lnorm(A[1L, , drop = TRUE] + ksc, 2)
 
-    if (d1 >= d2)
-        ksc <- -ksc
+    if (d1 >= d2) ksc <- -ksc
 
     ksc <- zscore(ksc)
 

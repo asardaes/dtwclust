@@ -1,23 +1,22 @@
 #' Time series clustering
 #'
-#' This is the new experimental main function to perform time series clustering. It should provide
-#' the same functionality as \code{\link{dtwclust}}, but it is hopefully more coherent in general.
-#' \strong{For now, it is subject to change}. Feedback is appreciated at
-#' \url{https://github.com/asardaes/dtwclust/issues}.
+#' This is the new main function to perform time series clustering. It should provide the same
+#' functionality as \code{\link{dtwclust}}, but it is hopefully more coherent in general.
 #'
 #' @export
 #'
 #' @param series A list of series, a numeric matrix or a data frame. Matrices and data frames are
-#'   coerced row-wise.
+#'   coerced to a list row-wise.
 #' @param type What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"},
 #'   \code{"tadpole"} or \code{"fuzzy"}.
 #' @param k Number of desired clusters. It may be a numeric vector with different values.
 #' @param ... Arguments to pass to preprocessing, centroid \strong{and} distance functions (added to
 #'   \code{args}). Also passed to \code{method} from \code{\link{hierarchical_control}} if it
-#'   happens to be a function.
+#'   happens to be a function, and to \code{\link[stats]{hclust}} if it contains the \code{members}
+#'   parameter.
 #' @param preproc Function to preprocess data. Defaults to \code{\link{zscore}} \emph{only} if
 #'   \code{centroid} \code{=} \code{"shape"}, but will be replaced by a custom function if provided.
-#' @param distance  A supported distance from \code{proxy}'s \code{\link[proxy]{dist}}. Ignored for
+#' @param distance A supported distance from \code{proxy}'s \code{\link[proxy]{dist}}. Ignored for
 #'   \code{type} \code{=} \code{"tadpole"}.
 #' @param centroid Either a supported string or an appropriate function to calculate centroids when
 #'   using partitional or prototypes for hierarchical/tadpole methods.
@@ -31,24 +30,25 @@
 #' @details
 #'
 #' Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering
-#' is done with \code{\link[stats]{hclust}}. TADPole clustering uses the \code{\link{TADPole}}
-#' function. Specifying \code{type} = \code{"partitional"}, \code{distance} = \code{"sbd"} and
-#' \code{centroid} = \code{"shape"} is equivalent to the k-Shape algorithm (Paparrizos and Gravano
-#' 2015).
+#' is done with \code{\link[stats]{hclust}} by default. TADPole clustering uses the
+#' \code{\link{TADPole}} function. Specifying \code{type} = \code{"partitional"}, \code{preproc} =
+#' \code{zscore}, \code{distance} = \code{"sbd"} and \code{centroid} = \code{"shape"} is equivalent
+#' to the k-Shape algorithm (Paparrizos and Gravano 2015).
 #'
-#' The \code{data} may be a matrix, a data frame or a list. Matrices and data frames are coerced to
-#' a list, both row-wise. Only lists can have series with different lengths or multiple dimensions.
-#' Most of the optimizations require series to have the same length, so consider reinterpolating
-#' them to save some time (see Ratanamahatana and Keogh 2004; \code{\link{reinterpolate}}). No
-#' missing values are allowed.
+#' The \code{series} may be porovided as a matrix, a data frame or a list. Matrices and data frames
+#' are coerced to a list, both row-wise. Only lists can have series with different lengths or
+#' multiple dimensions. Most of the optimizations require series to have the same length, so
+#' consider reinterpolating them to save some time (see Ratanamahatana and Keogh 2004;
+#' \code{\link{reinterpolate}}). No missing values are allowed.
 #'
 #' In the case of multivariate time series, they should be provided as a list of matrices, where
-#' time spans the rows of each matrix and the variables span the columns. At the moment, only
-#' \code{DTW}, \code{DTW2} and \code{GAK} suppport such series, which means only partitional and
-#' hierarchical procedures using those distances will work. You can of course create your own custom
-#' distances. All included centroid functions should work with the aforementioned format, although
-#' \code{shape} is \strong{not} recommended. Note that the \code{plot} method will simply append all
-#' dimensions (columns) one after the other.
+#' time spans the rows of each matrix and the variables span the columns (see
+#' \code{\link{CharTrajMV}} for an example). At the moment, only \code{DTW}, \code{DTW2} and
+#' \code{GAK} suppport such series, which means only partitional and hierarchical procedures using
+#' those distances will work. You can of course create your own custom distances. All included
+#' centroid functions should work with the aforementioned format, although \code{shape} is
+#' \strong{not} recommended. Note that the \code{plot} method will simply append all dimensions
+#' (columns) one after the other.
 #'
 #' @return
 #'
@@ -66,7 +66,7 @@
 #'
 #'   In either case, a custom function can be provided. If one is provided, it will receive the
 #'   following parameters with the shown names (examples for partitional clustering are shown in
-#'   parenthesis):
+#'   parentheses):
 #'
 #'   \itemize{
 #'     \item \code{"x"}: The \emph{whole} data list (\code{list(ts1, ts2, ts3)})
@@ -107,12 +107,12 @@
 #'   }
 #'
 #'   These check for the special cases where parallelization might be desired. Note that only
-#'   \code{shape}, \code{dba} and \code{pam} support series of different length. Also note that, for
-#'   \code{shape} and \code{dba}, this support has a caveat: the final centroids' length will depend
-#'   on the length of those series that were randomly chosen at the beginning of the clustering
-#'   algorithm. For example, if the series in the dataset have a length of either 10 or 15, 2
-#'   clusters are desired, and the initial choice selects two series with length of 10, the final
-#'   centroids will have this same length.
+#'   \code{shape}, \code{dba}, \code{pam} and \code{fcmdd} support series of different length. Also
+#'   note that, for \code{shape} and \code{dba}, this support has a caveat: the final centroids'
+#'   length will depend on the length of those series that were randomly chosen at the beginning of
+#'   the clustering algorithm. For example, if the series in the dataset have a length of either 10
+#'   or 15, 2 clusters are desired, and the initial choice selects two series with length of 10, the
+#'   final centroids will have this same length.
 #'
 #'   As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid
 #'   function that takes a list of series as only input and returns a single centroid series. These
@@ -125,25 +125,25 @@
 #'   modified with the \code{distance} parameter. The supported option is to provide a string, which
 #'   must represent a compatible distance registered with \code{proxy}'s \code{\link[proxy]{dist}}.
 #'   Registration is done via \code{\link[proxy]{pr_DB}}, and extra parameters can be provided in
-#'   \code{args$dist}.
+#'   \code{args$dist} (see the examples).
 #'
 #'   Note that you are free to create your own distance functions and register them. Optionally, you
 #'   can use one of the following custom implementations (all registered with \code{proxy}):
 #'
 #'   \itemize{
-#'     \item \code{"dtw"}: DTW, optionally with a Sakoe-Chiba/Slanted-band constraint*.
-#'     \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint*.
-#'       Read details below.
+#'     \item \code{"dtw"}: DTW with L1 norm (by default), optionally with a slanted-band constraint.
+#'     \item \code{"dtw2"}: DTW with L2 norm and optionally a slanted-band constraint. Read details
+#'       below.
 #'     \item \code{"dtw_basic"}: A custom version of DTW with less functionality, but slightly
 #'       faster. See \code{\link{dtw_basic}}.
-#'     \item \code{"dtw_lb"}: DTW with L1 or L2 norm* and optionally a Sakoe-Chiba constraint*. Some
+#'     \item \code{"dtw_lb"}: DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some
 #'       computations are avoided by first estimating the distance matrix with Lemire's lower bound
 #'       and then iteratively refining with DTW. See \code{\link{dtw_lb}}. Not suitable for
-#'       \code{pam.precompute}* = \code{TRUE}.
-#'     \item \code{"lbk"}: Keogh's lower bound with either L1 or L2 norm* for the Sakoe-Chiba
-#'       constraint*.
-#'     \item \code{"lbi"}: Lemire's lower bound with either L1 or L2 norm* for the Sakoe-Chiba
-#'       constraint*.
+#'       \code{pam.precompute} = \code{TRUE}.
+#'     \item \code{"lbk"}: Keogh's DTW lower bound with either L1 or L2 norm for the Sakoe-Chiba
+#'       constraint.
+#'     \item \code{"lbi"}: Lemire's DTW lower bound with either L1 or L2 norm for the Sakoe-Chiba
+#'       constraint.
 #'     \item \code{"sbd"}: Shape-based distance. See \code{\link{SBD}} for more details.
 #'     \item \code{"gak"}: Global alignment kernels. See \code{\link{GAK}} for more details.
 #'   }
@@ -176,11 +176,11 @@
 #'   \code{args$preproc} that match its formal arguments.
 #'
 #'   It is convenient to provide this function if you're planning on using the
-#'   \code{\link[stats]{predict}} generic.
+#'   \code{\link[stats]{predict}} generic (see also \code{\link{tsclusters-methods}}).
 #'
 #' @section Repetitions:
 #'
-#'   Due to their stochastic nature, partitional clustering is usually repeated* several times with
+#'   Due to their stochastic nature, partitional clustering is usually repeated several times with
 #'   different random seeds to allow for different starting points. This function uses
 #'   \code{\link[rngtools]{RNGseq}} to obtain different seed streams for each repetition, utilizing
 #'   the \code{seed} parameter (if provided) to initialize it. If more than one repetition is made,
@@ -209,9 +209,9 @@
 #'   distance matrices in parallel. This should work with any function registered with
 #'   \code{\link[proxy]{dist}} via \code{\link[proxy]{pr_DB}} whose \code{loop} flag is set to
 #'   \code{TRUE}. If the function requires special packages to be loaded, provide their names in the
-#'   \code{packages}* slot of \code{control}. Note that "dtwclust" is always loaded in each parallel
+#'   \code{packages} slot of \code{control}. Note that "dtwclust" is always loaded in each parallel
 #'   worker, so that doesn't need to be included. Alternatively, you may want to pre-load
-#'   \code{dtwclust} in each worker with \code{\link[parallel]{clusterEvalQ}}.
+#'   \pkg{dtwclust} in each worker with \code{\link[parallel]{clusterEvalQ}}.
 #'
 #'   In case of multiple repetitions, each worker gets a repetition task. Otherwise, the tasks
 #'   (which can be a distance matrix or a centroid calculation) are usually divided into chunks
@@ -219,8 +219,7 @@
 #'
 #' @section Notes:
 #'
-#'   The lower bounds are defined only for time series of equal length. \code{DTW} and \code{DTW2}
-#'   don't require this, but they are much slower to compute.
+#'   The lower bounds are defined only for time series of equal length.
 #'
 #'   The lower bounds are \strong{not} symmetric, and \code{DTW} is not symmetric in general.
 #'
@@ -228,12 +227,13 @@
 #'
 #' @references
 #'
-#' Please refer to the package vignette references.
+#' Please refer to the package vignette references (which can be loaded by typing
+#' \code{vignette("dtwclust")}).
 #'
 #' @seealso
 #'
 #' \code{\link{TSClusters-class}}, \code{\link{tsclusters-methods}},
-#' \code{\link{tsclustFamily-class}}.
+#' \code{\link{tsclustFamily-class}}, \code{\link{tsclust-controls}}.
 #'
 #' @example inst/tsclust-examples.R
 #'
@@ -252,25 +252,26 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
     set.seed(seed)
 
-    if (is.null(series))
-        stop("No data provided")
+    if (is.null(series)) stop("No data provided")
 
     type <- match.arg(type, c("partitional", "hierarchical", "tadpole", "fuzzy"))
 
     ## coerce to list if necessary
     series <- any2list(series)
 
-    if (any(k < 2L))
-        stop("At least two clusters must be defined")
-    if (any(k > length(series)))
-        stop("Cannot have more clusters than series in the data")
-    if (!is.list(control))
-        stop("Invalid control argument")
+    if (any(k < 2L)) stop("At least two clusters must be defined")
+    if (any(k > length(series))) stop("Cannot have more clusters than series in the dataset")
+    if (!is.list(control)) stop("Invalid control argument")
 
     MYCALL <- match.call(expand.dots = TRUE)
 
     dots <- list(...)
-    args <- lapply(args, function(args) { c(args, dots) })
+
+    args <- lapply(args, function(args) {
+        new_args <- c(args, dots)
+        unique_args <- unique(match(names(new_args), names(new_args))) ## remove duplicates
+        new_args[unique_args]
+    })
 
     ## ---------------------------------------------------------------------------------------------
     ## Preprocess
@@ -314,15 +315,12 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             identical(args$dist$step.pattern, symmetric1) ||
             identical(args$dist$step.pattern, symmetric2)
 
-        if (tolower(distance) %in% c("dtw", "dtw2", "dtw_basic")) {
+        if (tolower(distance) %in% c("dtw", "dtw2", "dtw_basic"))
             control$symmetric <- symmetric_pattern && (is.null(args$dist$window.size) || !diff_lengths)
-
-        } else if (tolower(distance) %in% c("lbk", "lbi")) {
+        else if (tolower(distance) %in% c("lbk", "lbi"))
             control$symmetric <- FALSE
-
-        } else if (tolower(distance) %in% c("sbd", "gak")) {
+        else if (tolower(distance) %in% c("sbd", "gak"))
             control$symmetric <- TRUE
-        }
     }
 
     RET <-
@@ -390,7 +388,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                    if (cent_char %in% c("pam", "fcmdd")) {
                        ## check if distmat was not provided and should be precomputed
                        if (!is.null(distmat)) {
-                           if ( nrow(distmat) != length(series) || ncol(distmat) != length(series) )
+                           if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
                                stop("Dimensions of provided cross-distance matrix don't correspond ",
                                     "to length of provided data")
 
@@ -411,7 +409,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                                      centroids = NULL,
                                                      dots = args$dist))
 
-                           ## Redefine new distmat
+                           ## Redefine new distmat in closures
                            environment(family@dist)$control$distmat <- distmat
                            environment(family@allcent)$distmat <- distmat
 
@@ -447,10 +445,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                        export <- c("pfclust", "check_consistency", "enlist")
 
-                       rng <- rngtools::RNGseq(length(k) * nrep,
-                                               seed = seed, simplify = FALSE)
+                       rng <- rngtools::RNGseq(length(k) * nrep, seed = seed, simplify = FALSE)
                        rng0 <- lapply(parallel::splitIndices(length(rng), length(k)),
-                                      function(i) rng[i])
+                                      function(i) { rng[i] })
 
                        ## if %do% is used, the outer loop replaces value of k in this envir
                        k0 <- k
@@ -458,16 +455,20 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                        i <- integer() # CHECK complains about non-initialization now
 
-                       pc.list <- foreach(k = k0, rng = rng0, .combine = comb0, .multicombine = TRUE,
-                                          .packages = control$packages, .export = export) %:%
-                           foreach(i = 1L:nrep, .combine = list, .multicombine = TRUE,
-                                   .packages = control$packages, .export = export) %op%
+                       pc.list <- foreach(k = k0, rng = rng0,
+                                          .combine = comb0, .multicombine = TRUE,
+                                          .packages = control$packages,
+                                          .export = export) %:%
+                           foreach(i = 1L:nrep,
+                                   .combine = list, .multicombine = TRUE,
+                                   .packages = control$packages,
+                                   .export = export) %op%
                                    {
                                        if (trace) message("Repetition ", i, " for k = ", k)
 
                                        rngtools::setRNG(rng[[i]])
 
-                                       if (!check_consistency(dist_entry$names[1], "dist"))
+                                       if (!check_consistency(dist_entry$names[1L], "dist"))
                                            do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                        pc <- do.call(pfclust,
@@ -584,16 +585,14 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                    ## Take advantage of the function I defined for the partitional methods
                    ## Which can do calculations in parallel if appropriate
-                   distfun <- ddist2(distance = distance,
-                                     control = control)
+                   distfun <- ddist2(distance = distance, control = control)
 
                    if (!is.null(distmat)) {
                        if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
                            stop("Dimensions of provided cross-distance matrix don't correspond to ",
                                 "length of provided data")
 
-                       if (trace)
-                           cat("\n\tDistance matrix provided...\n")
+                       if (trace) cat("\n\tDistance matrix provided...\n")
 
                        if (is.null(attr(distmat, "method")))
                            distance <- "unknown"
@@ -601,10 +600,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                            distance <- attr(distmat, "method")
 
                    } else {
-                       if (trace)
-                           cat("\n\tCalculating distance matrix...\n")
+                       if (trace) cat("\n\tCalculating distance matrix...\n")
 
-                       ## single argument is to calculate whole distance matrix
                        distmat <- do.call(distfun, enlist(x = series,
                                                           centroids = NULL,
                                                           dots = args$dist))
@@ -614,8 +611,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                    ## Cluster
                    ## ------------------------------------------------------------------------------
 
-                   if (trace)
-                       cat("\n\tPerforming hierarchical clustering...\n\n")
+                   if (trace) cat("\n\tPerforming hierarchical clustering...\n\n")
 
                    if (is.character(method)) {
                        ## Using hclust
@@ -625,14 +621,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                    } else {
                        ## Using provided function
-                       if (has_dots(method)) {
-                           hc <- list(method(stats::as.dist(distmat), ...))
-
-                       } else {
-                           hc <- list(do.call(method,
-                                              args = enlist(stats::as.dist(distmat),
-                                                            dots = subset_dots(dots, method))))
-                       }
+                       hc <- list(do.call(method,
+                                          args = enlist(stats::as.dist(distmat),
+                                                        dots = subset_dots(dots, method))))
 
                        method <- attr(method, "name")
                    }
@@ -743,13 +734,15 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                    ## for family@dist
                    args$dist$window.size <- control$window.size
                    args$dist$norm <- "L2"
+                   args$dist$window.type <- "sakoechiba"
 
                    ## seeds
                    rng <- rngtools::RNGseq(length(k), seed = seed, simplify = FALSE)
 
                    RET <- foreach(k = k, rng = rng,
                                   .combine = list, .multicombine = TRUE,
-                                  .packages = "dtwclust", .export = "enlist") %op%
+                                  .packages = "dtwclust",
+                                  .export = "enlist") %op%
                                   {
                                       rngtools::setRNG(rng)
 
@@ -834,8 +827,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     if (type %in% c("partitional", "fuzzy") && (nrep > 1L || length(k) > 1L))
         attr(RET, "rng") <- unlist(rng0, recursive = FALSE, use.names = FALSE)
 
-    if (trace)
-        cat("\tElapsed time is", toc["elapsed"], "seconds.\n\n")
+    if (trace) cat("\tElapsed time is", toc["elapsed"], "seconds.\n\n")
 
     RET
 }

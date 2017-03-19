@@ -7,14 +7,14 @@
 TADPole(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk")
 }
 \arguments{
-\item{data}{The data matrix where each row is a time series. Optionally a list with each time
-series.}
+\item{data}{A matrix or data frame where each row is a time series, or a list where each element
+is a time series. Multivariate series are not supported.}
 
 \item{k}{The number of desired clusters.}
 
 \item{dc}{The cutoff distance.}
 
-\item{window.size}{Window size constraint for DTW. See details.}
+\item{window.size}{Window size constraint for DTW (Sakoe-Chiba). See details.}
 
 \item{error.check}{Should the data be checked for inconsistencies?}
 
@@ -50,7 +50,8 @@ to find series with many close neighbors (in DTW space). Anything below the cuto
 prune as many DTW calculations as possible in order to accelerate the clustering procedure. The
 series that lie in dense areas (i.e. that have lots of neighbors) are taken as cluster centroids.
 
-The algorithm relies on the DTW bounds, which are only defined for time series of equal length.
+The algorithm relies on the DTW bounds, which are only defined for univariate time series of
+equal length.
 
 The windowing constraint uses a centered window. The calculations expect a value in
 \code{window.size} that represents the distance between the point considered and one of the edges

@@ -171,8 +171,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     } else {
         y <- any2list(y)
 
-        if (error.check)
-            check_consistency(y, "tslist")
+        if (error.check) check_consistency(y, "tslist")
     }
 
     if (is_multivariate(x) || is_multivariate(y))
@@ -218,7 +217,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                                        MoreArgs = list(x = x),
                                        SIMPLIFY = FALSE,
                                        FUN = function(U, L, x) {
-                                           ## This will return one row of the distance matrix
+                                           ## This will return one column of the distance matrix
                                            D <- sapply(x, u = U, l = L,
                                                        FUN = function(x, u, l) {
                                                            lb_keogh(x,

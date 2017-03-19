@@ -50,7 +50,7 @@ compute_envelop <- function(x, window.size, error.check = TRUE) {
     window.size <- check_consistency(window.size, "window")
     window.size <- window.size * 2L + 1L
 
-    ## NOTE: window.size in this function is window.size*2 + 1, thus the 2L below
+    ## NOTE: window.size is now window.size*2 + 1, thus the 2L below
     if (window.size > (2L * length(x)))
         stop("Window cannot be greater or equal than the series' length.")
 

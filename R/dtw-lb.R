@@ -5,7 +5,7 @@
 #'
 #' @export
 #'
-#' @param x,y A matrix where rows are time series, or a list of time series.
+#' @param x,y A matrix or data frame where rows are time series, or a list of time series.
 #' @param window.size Window size to use with the LB and DTW calculation. See details.
 #' @param norm Pointwise distance. Either \code{"L1"} for Manhattan distance or \code{"L2"} for
 #'   Euclidean.

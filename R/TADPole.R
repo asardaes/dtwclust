@@ -4,9 +4,9 @@
 #'
 #' @export
 #'
-#' @param data The data matrix where each row is a time series. Optionally a list with each time
-#'   series.
-#' @param window.size Window size constraint for DTW. See details.
+#' @param data A matrix or data frame where each row is a time series, or a list where each element
+#'   is a time series. Multivariate series are not supported.
+#' @param window.size Window size constraint for DTW (Sakoe-Chiba). See details.
 #' @param k The number of desired clusters.
 #' @param dc The cutoff distance.
 #' @param error.check Should the data be checked for inconsistencies?
@@ -31,7 +31,8 @@
 #' prune as many DTW calculations as possible in order to accelerate the clustering procedure. The
 #' series that lie in dense areas (i.e. that have lots of neighbors) are taken as cluster centroids.
 #'
-#' The algorithm relies on the DTW bounds, which are only defined for time series of equal length.
+#' The algorithm relies on the DTW bounds, which are only defined for univariate time series of
+#' equal length.
 #'
 #' The windowing constraint uses a centered window. The calculations expect a value in
 #' \code{window.size} that represents the distance between the point considered and one of the edges
@@ -93,26 +94,22 @@
 #' }
 #'
 TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk") {
-    if (missing(window.size))
-        stop("Please provide a positive window size")
-    if (missing(dc))
-        stop("Please provide the 'dc' parameter")
-    if (dc < 0)
-        stop("The cutoff distance 'dc' must be positive")
+    if (missing(window.size)) stop("Please provide a positive window size")
+    if (missing(dc)) stop("Please provide the 'dc' parameter")
+    if (dc < 0) stop("The cutoff distance 'dc' must be positive")
 
     x <- any2list(data)
 
     n <- length(x)
 
-    if (n < 2L)
-        stop("data should have more than one time series")
-    if (k > n)
-        stop("Number of clusters should be less than the number of time series")
+    if (n < 2L) stop("data should have more than one time series")
+    if (k > n) stop("Number of clusters should be less than the number of time series")
 
     lb <- match.arg(lb, c("lbk", "lbi"))
 
     ## Calculate matrices with bounds
-    LBM <- proxy::dist(x, x, method = lb,
+    LBM <- proxy::dist(x, x,
+                       method = lb,
                        window.size = window.size,
                        force.symmetry = TRUE,
                        norm = "L2",
@@ -139,9 +136,9 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     ## Calculate values for the upper triangular part of the flag matrix (column-wise)
     utv <- unlist(lapply(2L:n, function(j) {
         sapply(1L:(j-1L), function(i) {
-            if (LBM[i,j]<=dc && UBM[i,j]>dc)
+            if (LBM[i,j] <= dc && UBM[i,j] > dc)
                 f <- 1L
-            else if (LBM[i,j]<=dc && UBM[i,j]<dc)
+            else if (LBM[i,j] <= dc && UBM[i,j] < dc)
                 f <- 2L
             else if (LBM[i,j] > dc)
                 f <- 3L
@@ -303,8 +300,7 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
 
     ## Do the assignment (must be a loop)
     for (i in seq_along(indCl)) {
-        if (cl[indCl[i]] == -1L)
-            cl[indCl[i]] <- cl[NN[i]]
+        if (cl[indCl[i]] == -1L) cl[indCl[i]] <- cl[NN[i]]
     }
 
     ## How many calculations were actually performed

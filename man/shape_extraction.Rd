@@ -7,9 +7,9 @@
 shape_extraction(X, centroid = NULL, znorm = FALSE)
 }
 \arguments{
-\item{X}{A data matrix where each row is a time series, or a list where each element is a time
-series. Multivariate series should be provided as a list of matrices where time spans the rows
-and the variables span the columns.}
+\item{X}{A matrix or data frame where each row is a time series, or a list where each element is
+a time series. Multivariate series should be provided as a list of matrices where time spans
+the rows and the variables span the columns.}
 
 \item{centroid}{Optionally, a time series to use as reference. Defaults to a random series of
 \code{X} if \code{NULL}. For multivariate series, this should be a matrix with the same

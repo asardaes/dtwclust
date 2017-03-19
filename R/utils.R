@@ -6,34 +6,20 @@ check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
     case <- match.arg(case, c("ts", "tslist", "vltslist", "window", "dist", "cent"))
 
     if (case == "ts") {
-        if (!is.numeric(obj)) {
-            stop("The series must be numeric")
-        }
-        if (length(obj) < 1L) {
-            stop("The series must have at least one point")
-        }
-        if (any(is.na(obj))) {
-            stop("There are missing values in the series")
-        }
+        if (!is.numeric(obj)) stop("The series must be numeric")
+        if (length(obj) < 1L) stop("The series must have at least one point")
+        if (any(is.na(obj))) stop("There are missing values in the series")
 
     } else if (case %in% c("tslist", "vltslist")) {
-        if (!is.list(obj))
-            stop("Oops, data should already be a list by this point...")
-
-        if (length(obj) < 1L)
-            stop("Data is empty")
-
-        if (case == "tslist" && different_lengths(obj))
-            stop("All series must have the same length")
+        if (!is.list(obj)) stop("Oops, data should already be a list by this point...")
+        if (length(obj) < 1L) stop("Data is empty")
+        if (case == "tslist" && different_lengths(obj)) stop("All series must have the same length")
 
         sapply(obj, check_consistency, case = "ts", ...)
 
     } else if (case == "window") {
-        if (is.null(obj))
-            stop("Please provide the 'window.size' parameter")
-
-        if (obj <= 0L)
-            stop("Window width must be larger than 0")
+        if (is.null(obj)) stop("Please provide the 'window.size' parameter")
+        if (obj <= 0L) stop("Window width must be larger than 0")
 
         return(as.integer(obj))
 
@@ -201,16 +187,14 @@ call_pairs <- function(n = 2L, lower = TRUE) {
 split_parallel <- function(obj, margin = NULL) {
     num_workers <- foreach::getDoParWorkers()
 
-    if (num_workers == 1L)
-        return(list(obj))
+    if (num_workers == 1L) return(list(obj))
 
     if (is.null(margin))
         num_tasks <- length(obj)
     else
         num_tasks <- dim(obj)[margin]
 
-    if (is.na(num_tasks))
-        stop("Invalid attempt to split an object into parallel tasks")
+    if (is.na(num_tasks)) stop("Invalid attempt to split an object into parallel tasks")
 
     num_tasks <- parallel::splitIndices(num_tasks, num_workers)
     num_tasks <- num_tasks[lengths(num_tasks, use.names = FALSE) > 0L]
@@ -220,8 +204,7 @@ split_parallel <- function(obj, margin = NULL) {
     else
         ret <- switch(EXPR = margin,
                       lapply(num_tasks, function(id) obj[id, , drop = FALSE]),
-                      lapply(num_tasks, function(id) obj[ , id, drop = FALSE])
-        )
+                      lapply(num_tasks, function(id) obj[ , id, drop = FALSE]))
 
     ret
 }
@@ -275,8 +258,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
 is_multivariate <- function(x) {
     ncols <- sapply(x, NCOL)
 
-    if (any(diff(ncols) != 0L))
-        stop("Inconsistent dimensions across series.")
+    if (any(diff(ncols) != 0L)) stop("Inconsistent dimensions across series.")
 
     any(ncols > 1L)
 }

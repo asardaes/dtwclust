@@ -1,18 +1,18 @@
 #' Shape-based distance
 #'
 #' Distance based on coefficient-normalized cross-correlation as proposed by Paparrizos and Gravano
-#' (2015), for the k-Shape clustering algorithm.
+#' (2015) for the k-Shape clustering algorithm.
 #'
 #' @export
 #'
-#' @param x,y A time series.
+#' @param x,y Univariate time series.
 #' @param znorm Logical. Should each series be z-normalized before calculating the distance?
 #' @param error.check Check data inconsistencies?
 #'
 #' @details
 #'
 #' This distance works best if the series are \emph{z-normalized}. If not, at least they should have
-#' corresponding amplitudes, since the values of the signals \strong{do} affect the outcome.
+#' appropriate amplitudes, since the values of the signals \strong{do} affect the outcome.
 #'
 #' If \code{x} and \code{y} do \strong{not} have the same length, it would be best if the longer
 #' sequence is provided in \code{y}, because it will be shifted to match \code{x}. After matching,
@@ -24,7 +24,7 @@
 #' \itemize{
 #'   \item \code{dist}: The shape-based distance between \code{x} and \code{y}.
 #'   \item \code{yshift}: A shifted version of \code{y} so that it optimally matches \code{x} (based
-#'     on correlation).
+#'     on \code{\link{NCCc}}).
 #' }
 #'
 #' @note
@@ -60,8 +60,7 @@
 #' sbD <- proxy::dist(CharTraj[1:10], CharTraj[1:10], method = "SBD", znorm = TRUE)
 #'
 SBD <- function(x, y, znorm = FALSE, error.check = TRUE) {
-    if (is_multivariate(list(x, y)))
-        stop("SBD does not support multivariate series.")
+    if (is_multivariate(list(x, y))) stop("SBD does not support multivariate series.")
 
     if (error.check) {
         check_consistency(x, "ts")
@@ -120,8 +119,7 @@ SBD <- function(x, y, znorm = FALSE, error.check = TRUE) {
 SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairwise = FALSE) {
     x <- any2list(x)
 
-    if (error.check)
-        check_consistency(x, "vltslist")
+    if (error.check) check_consistency(x, "vltslist")
 
     if (znorm) x <- zscore(x)
 
@@ -137,8 +135,7 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         if (znorm) y <- zscore(y)
     }
 
-    if (is_multivariate(x) || is_multivariate(y))
-        stop("SBD does not support multivariate series.")
+    if (is_multivariate(x) || is_multivariate(y)) stop("SBD does not support multivariate series.")
 
     retclass <- "crossdist"
 
@@ -168,7 +165,8 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
                          mapply(y, ffty, x, fftx,
                                 FUN = function(y, ffty, x, fftx) {
                                     ## Manually normalize by length
-                                    CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) / length(fftx)
+                                    CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) /
+                                        length(fftx)
 
                                     ## Truncate to correct length
                                     CCseq <- c(CCseq[(length(ffty) - length(y) + 2L):length(CCseq)],
@@ -199,7 +197,8 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
                                                   FUN = function(x, fftx, y, ffty) {
                                                       ## Manually normalize by length
                                                       CCseq <- Re(stats::fft(fftx * Conj(ffty),
-                                                                             inverse = TRUE)) / length(fftx)
+                                                                             inverse = TRUE)) /
+                                                          length(fftx)
 
                                                       ## Truncate to correct length
                                                       CCseq <- c(CCseq[(length(ffty) - length(y) + 2L):length(CCseq)],
