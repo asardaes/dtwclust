@@ -73,11 +73,11 @@ GAKd <- proxy::dist(zscore(CharTraj), method = "gak",
 sigma <- attr(GAKd, "sigma")
 
 # Use value for clustering
-dtwclust(CharTraj, k = 20L,
-         distance = "gak", centroid = "shape",
-         sigma = sigma,
-         control = list(trace = TRUE,
-                        window.size = 18L))
+tsclust(CharTraj, k = 20L,
+        distance = "gak", centroid = "shape",
+        trace = TRUE,
+        args = tsclust_args(dist = list(sigma = sigma,
+                                        window.size = 18L)))
 }
 
 }
