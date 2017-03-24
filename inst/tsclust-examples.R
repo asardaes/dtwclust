@@ -175,6 +175,6 @@ pc.gak <- tsclust(CharTraj, k = 20L,
 # Stop parallel workers
 stopCluster(cl)
 
-# Return to sequential computations. This MUST be done after stopCluster()
+# Return to sequential computations. This MUST be done if stopCluster() was called
 registerDoSEQ()
 }
