@@ -1,5 +1,5 @@
 ## Update to version 3.1.2
-* Optimizations
+* Minor optimizations and documentation updates.
 
 ## Test environments
 * Local GNU/Linux, R 3.3.3

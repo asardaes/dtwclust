@@ -2,6 +2,7 @@
 
 ## Version 3.1.2
 * The arguments in `tsclust`'s ellipsis are now passed to all preprocessing, centroid and distance functions.
+* Fixed some symmetry detection in `tsclust` when using DTW.
 * Updated vignette to use `tsclust` in the examples.
 
 ## Version 3.1.1
