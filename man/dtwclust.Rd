@@ -55,9 +55,8 @@ returned.
 }
 \description{
 This is the original main function to perform time series clustering. It supports partitional,
-hierarchical, fuzzy, k-Shape and TADPole clustering. See the details and the examples for more
-information, as well as the included package vignette (which can be loaded by typing
-\code{vignette("dtwclust")}). See \code{\link{tsclust}} for the new interface.
+hierarchical, fuzzy, k-Shape and TADPole clustering. See \code{\link{tsclust}} for the new
+interface. Please note that possible updates will only be implemented in the new function.
 }
 \details{
 Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering

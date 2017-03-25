@@ -51,7 +51,9 @@ returned.
 }
 \description{
 This is the new main function to perform time series clustering. It should provide the same
-functionality as \code{\link{dtwclust}}, but it is hopefully more coherent in general.
+functionality as \code{\link{dtwclust}}, but it is hopefully more coherent in general. See the
+details and the examples for more information, as well as the included package vignette (which
+can be loaded by typing \code{vignette("dtwclust")}).
 }
 \details{
 Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering
