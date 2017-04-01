@@ -3,7 +3,7 @@ Type: Package
 Title: Time Series Clustering Along with Optimizations for the Dynamic Time
     Warping Distance
 Version: 3.1.2
-Date: 2017-03-04
+Date: 2017-04-01
 Depends:
     R (>= 3.2.0),
     proxy (>= 0.4-16),
