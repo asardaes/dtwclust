@@ -1,5 +1,6 @@
 ## Update to version 3.1.2
 * Minor optimizations and documentation updates.
+* Now using required C registration routines.
 
 ## Test environments
 * Local GNU/Linux, R 3.3.3
