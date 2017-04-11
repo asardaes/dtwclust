@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 3.1.3
+* Fixed an error in `tsclust` that prevented CVIs to be calculated for hierarchical/TADPole cases if a custom centroid function was used.
+
 ## Version 3.1.2
 * The arguments in `tsclust`'s ellipsis are now passed to all preprocessing, centroid and distance functions.
 * Fixed some symmetry detection in `tsclust` when using DTW.

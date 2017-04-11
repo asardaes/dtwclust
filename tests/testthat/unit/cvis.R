@@ -83,8 +83,6 @@ test_that("external CVI calculations are consistent regardless of quantity or or
 # =================================================================================================
 
 test_that("CVIs work also for hierarchical and TADPole", {
-    skip_on_cran()
-
     tadp <- dtwclust(data_reinterpolated_subset, type = "t", k = 4L,
                      dc = 1.5, control = list(window.size = 18L))
 
@@ -105,6 +103,22 @@ test_that("CVIs work also for hierarchical and TADPole", {
     ## refs
     assign("cvis_tadp", cvis_tadp, persistent)
     assign("cvis_hc", cvis_hc, persistent)
+})
+
+test_that("CVIs work also for hierarchical and TADPole with custom centroid", {
+    tadp <- tsclust(data_reinterpolated_subset, type = "t", k = 4L,
+                    centroid = shape_extraction,
+                    control = tadpole_control(dc = 1.5, window.size = 18L))
+
+    hc <- tsclust(data_reinterpolated_subset, type = "h", k = 4L,
+                  distance = "sbd", centroid = shape_extraction)
+
+    cvis_tadp_cent <- cvi(tadp, labels_subset)
+    cvis_hc_cent <- cvi(hc, labels_subset)
+
+    ## refs
+    assign("cvis_tadp_cent", cvis_tadp_cent, persistent)
+    assign("cvis_hc_cent", cvis_hc_cent, persistent)
 })
 
 # =================================================================================================

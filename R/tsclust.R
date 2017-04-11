@@ -647,7 +647,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                            cluster <- stats::cutree(stats::as.hclust(hc), k)
 
                            if (is.function(centroid)) {
-                               allcent <- centroid
+                               allcent <- function(...) { list(centroid(...)) }
                                centroids <- lapply(1L:k, function(kcent) {
                                    do.call(centroid,
                                            enlist(series[cluster == kcent],
@@ -770,7 +770,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                       ## -----------------------------------------------------------
 
                                       if (is.function(centroid)) {
-                                          allcent <- centroid
+                                          allcent <- function(...) { list(centroid(...)) }
                                           centroids <- lapply(1L:k, function(kcent) {
                                               centroid(series[R$cl == kcent])
                                           })
