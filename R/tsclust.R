@@ -648,11 +648,15 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                            if (is.function(centroid)) {
                                allcent <- function(...) { list(centroid(...)) }
+                               environment(allcent) <- new.env(parent = .GlobalEnv)
+                               assign("centroid", centroid, environment(allcent))
+
                                centroids <- lapply(1L:k, function(kcent) {
                                    do.call(centroid,
                                            enlist(series[cluster == kcent],
                                                   dots = subset_dots(args$cent, centroid)))
                                })
+
                                cent_char <- as.character(substitute(centroid))[1L]
 
                            } else {
@@ -771,6 +775,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                                       if (is.function(centroid)) {
                                           allcent <- function(...) { list(centroid(...)) }
+                                          environment(allcent) <- new.env(parent = .GlobalEnv)
+                                          assign("centroid", centroid, environment(allcent))
+
                                           centroids <- lapply(1L:k, function(kcent) {
                                               centroid(series[R$cl == kcent])
                                           })
