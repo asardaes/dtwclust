@@ -660,7 +660,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                cent_char <- as.character(substitute(centroid))[1L]
 
                            } else {
-                               allcent <- function() {}
+                               allcent <- function(...) {}
 
                                centroids <- sapply(1L:k, function(kcent) {
                                    id_k <- cluster == kcent
@@ -783,7 +783,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                           })
 
                                       } else {
-                                          allcent <- function(x) {}
+                                          allcent <- function(...) {}
                                           centroids <- series[R$centroids]
                                       }
 
