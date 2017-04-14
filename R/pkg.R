@@ -31,7 +31,8 @@
 #' Other packages that are particularly leveraged here are the \pkg{proxy} package for distance
 #' matrix calculations and the \pkg{dtw} package for some of the core DTW calculations.
 #'
-#' The main clustering function and entry point for this package is \code{\link{tsclust}}.
+#' The main clustering function and entry point for this package is \code{\link{tsclust}}, with a
+#' convenience wrapper for multiple tests in \code{\link{compare_clusterings}}.
 #'
 #' Please note the random number generator is set to L'Ecuyer-CMRG when \pkg{dtwclust} is attached
 #' in an attempt to preserve reproducibility. You are free to change this afterwards if you wish.
@@ -76,6 +77,8 @@
 #' @importFrom graphics plot
 #'
 #' @importFrom parallel splitIndices
+#'
+#' @importFrom plyr rbind.fill
 #'
 #' @importFrom proxy dist
 #' @importFrom proxy pr_DB

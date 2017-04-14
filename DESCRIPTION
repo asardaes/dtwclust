@@ -18,6 +18,7 @@ Imports:
     caTools,
     flexclust,
     foreach,
+    plyr,
     Rcpp,
     reshape2,
     rngtools
@@ -42,7 +43,7 @@ License: GPL-3
 LazyData: TRUE
 NeedsCompilation: yes
 RoxygenNote: 6.0.1
-Collate:
+Collate: 
     'DBA.R'
     'GAK.R'
     'NCCc.R'
@@ -50,6 +51,7 @@ Collate:
     'TADPole.R'
     'all-cent.R'
     'all-cent2.R'
+    'compare-clusterings.R'
     'compute-envelop.R'
     'create-dtwclust.R'
     'cvi.R'

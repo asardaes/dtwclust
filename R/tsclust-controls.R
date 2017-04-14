@@ -32,9 +32,9 @@ partitional_control <- function(pam.precompute = TRUE,
                                 packages = character(0L),
                                 distmat = NULL)
 {
-    if (iter.max <= 0L) stop("Maximum iterations must be positive")
+    if (any(iter.max <= 0L)) stop("Maximum iterations must be positive")
 
-    if (nrep < 1L) stop("Number of repetitions must be at least one")
+    if (any(nrep < 1L)) stop("Number of repetitions must be at least one")
 
     structure(
         list(pam.precompute = as.logical(pam.precompute),
@@ -99,11 +99,11 @@ fuzzy_control <- function(fuzziness = 2,
                           delta = 1e-3,
                           packages = character(0L))
 {
-    if (fuzziness <= 1) stop("Fuzziness exponent should be greater than one")
+    if (any(fuzziness <= 1)) stop("Fuzziness exponent should be greater than one")
 
-    if (iter.max <= 0L) stop("Maximum iterations must be positive")
+    if (any(iter.max <= 0L)) stop("Maximum iterations must be positive")
 
-    if (delta < 0) stop("Delta should be positive")
+    if (any(delta < 0)) stop("Delta should be positive")
 
     structure(
         list(fuzziness = fuzziness,
@@ -126,11 +126,11 @@ tadpole_control <- function(dc,
                             window.size,
                             lb = "lbk")
 {
-    if (dc <= 0) stop("Cutoff distance 'dc' must be positive")
+    if (any(dc <= 0)) stop("Cutoff distance 'dc' must be positive")
 
     window.size <- check_consistency(window.size, "window")
 
-    lb <- match.arg(lb, c("lbk", "lbi"))
+    lb <- match.arg(lb, c("lbk", "lbi"), several.ok = TRUE)
 
     structure(
         list(dc = dc,

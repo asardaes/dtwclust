@@ -1,5 +1,5 @@
-## Update to version 3.1.3
-* Bug fixes
+## Update to version 3.2.0
+* Bug fixes and new functionality.
 
 ## Test environments
 * Local GNU/Linux, R 3.3.3

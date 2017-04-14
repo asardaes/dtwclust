@@ -19,7 +19,7 @@ check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
 
     } else if (case == "window") {
         if (is.null(obj)) stop("Please provide the 'window.size' parameter")
-        if (obj <= 0L) stop("Window width must be larger than 0")
+        if (any(obj <= 0L)) stop("Window width must be larger than 0")
 
         return(as.integer(obj))
 

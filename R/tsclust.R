@@ -235,7 +235,8 @@
 #' @seealso
 #'
 #' \code{\link{TSClusters-class}}, \code{\link{tsclusters-methods}},
-#' \code{\link{tsclustFamily-class}}, \code{\link{tsclust-controls}}.
+#' \code{\link{tsclustFamily-class}}, \code{\link{tsclust-controls}},
+#' \code{\link{compare_clusterings}}.
 #'
 #' @example inst/tsclust-examples.R
 #'

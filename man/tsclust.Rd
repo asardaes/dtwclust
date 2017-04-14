@@ -442,7 +442,8 @@ Please refer to the package vignette references (which can be loaded by typing
 }
 \seealso{
 \code{\link{TSClusters-class}}, \code{\link{tsclusters-methods}},
-\code{\link{tsclustFamily-class}}, \code{\link{tsclust-controls}}.
+\code{\link{tsclustFamily-class}}, \code{\link{tsclust-controls}},
+\code{\link{compare_clusterings}}.
 }
 \author{
 Alexis Sarda-Espinosa
