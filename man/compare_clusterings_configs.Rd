@@ -5,8 +5,8 @@
 \title{Create configurations for \code{\link{compare_clusterings}}}
 \usage{
 compare_clusterings_configs(types = c("p", "h", "f", "t"), k = 2L,
-  controls = NULL, preprocs = preproc_configs(),
-  distances = distance_configs(), centroids = centroid_configs())
+  controls = NULL, preprocs = pdc_configs("preproc"),
+  distances = pdc_configs("distance"), centroids = pdc_configs("centroid"))
 }
 \arguments{
 \item{types}{Clustering types. It must be one of (possibly abbreviated): partitional,
@@ -34,8 +34,8 @@ Create clustering configurations.
 \details{
 This function is based on \code{\link[base]{expand.grid}} and \code{\link[base]{merge}}.
 
-Preprocessing, distance and centroid configurations are specified with the helper functions in
-\code{\link{config-helpers}}, but using the example in \code{\link{compare_clusterings}} as basis
+Preprocessing, distance and centroid configurations are specified with the helper function
+\code{\link{pdc_configs}}, but using the example in \code{\link{compare_clusterings}} as basis
 might be easier to understand.
 
 The controls list must have one nested list of controls for the desired clustering types. Each

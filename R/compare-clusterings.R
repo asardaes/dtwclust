@@ -1,12 +1,11 @@
 #' Helper functions for \code{\link{compare_clusterings_configs}}
 #'
 #' Create preprocessing, distance and centroid configurations for
-#' \code{\link{compare_clusterings_configs}}. All functions are based on
-#' \code{\link[base]{expand.grid}}.
+#' \code{\link{compare_clusterings_configs}}. All functions use \code{\link[base]{expand.grid}}.
 #'
-#' @name config-helpers
-#' @rdname config-helpers
+#' @export
 #'
+#' @param type Which type of function is being targeted by this configuration.
 #' @param ... Any number of named nested lists with functions and arguments that will be shared by
 #'   all clusterings. See details.
 #' @param partitional A named list of lists with functions and arguments for partitional
@@ -34,272 +33,106 @@
 #'
 #' @return
 #'
-#' A list for each clustering type, each of which includes a data frame with the computed
-#' configurations.
+#' A list for each clustering, each of which includes a data frame with the computed configurations.
 #'
-NULL
-
-#' @rdname config-helpers
-#'
-#' @export
-#'
-preproc_configs <- function(..., partitional, hierarchical, fuzzy, tadpole,
-                            share.config = c("p", "h", "f", "t"))
+pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
+                        partitional = NULL, hierarchical = NULL, fuzzy = NULL, tadpole = NULL,
+                        share.config = c("p", "h", "f", "t"))
 {
-    share.config <- match.arg(share.config,
-                              c("partitional", "hierarchical", "fuzzy", "tadpole"),
-                              TRUE)
-
     this_call <- match.call(expand.dots = FALSE)
-    this_call <- this_call[nzchar(names(this_call))]
-    this_call$share.config <- NULL
-    this_call$`...` <- NULL
+    type <- match.arg(type)
+
+    shared <- list(...)
+
+    specific <- list(partitional = partitional,
+                     hierarchical = hierarchical,
+                     fuzzy = fuzzy,
+                     tadpole = tadpole)
+
+    specific <- specific[!sapply(specific, is.null)]
+
+    if (type == "distance") {
+        if (!is.null(specific$tadpole)) warning("TADPole ignores distance configurations.")
+        specific$tadpole <- NULL
+    }
 
     ## =============================================================================================
     ## Shared configs
     ## =============================================================================================
 
-    shared <- list(...)
-
     if (length(shared) > 0L) {
+        share.config <- match.arg(share.config,
+                                  c("partitional", "hierarchical", "fuzzy", "tadpole"),
+                                  TRUE)
+
         shared_names <- names(shared)
 
-        shared_cfgs <- mapply(shared, shared_names, SIMPLIFY = FALSE,
-                              FUN = function(shared_args, preproc) {
-                                  do.call(expand.grid,
-                                          enlist(preproc = preproc,
-                                                 stringsAsFactors = FALSE,
-                                                 dots = shared_args))
-                              })
+        shared_cfg <- mapply(shared, shared_names, SIMPLIFY = FALSE,
+                             FUN = function(shared_args, fun) {
+                                 cfg <- do.call(expand.grid,
+                                                enlist(foo = fun,
+                                                       dots = shared_args,
+                                                       stringsAsFactors = FALSE))
 
-        shared_cfgs <- plyr::rbind.fill(shared_cfgs)
+                                 names(cfg)[1L] <- type
 
-        shared_cfgs <- list(partitional = shared_cfgs,
-                            hierarchical = shared_cfgs,
-                            fuzzy = shared_cfgs,
-                            tadpole = shared_cfgs)
+                                 cfg
+                             })
+
+        shared_cfg <- plyr::rbind.fill(shared_cfg)
+
+        shared_cfgs <- lapply(share.config, function(dummy) { shared_cfg })
+        names(shared_cfgs) <- share.config
+        shared_cfgs <- shared_cfgs[setdiff(share.config, names(specific))]
 
     } else {
-        shared_cfgs <- list(partitional = NULL,
-                            hierarchical = NULL,
-                            fuzzy = NULL,
-                            tadpole = NULL)
+        shared_cfg <- NULL
+        shared_cfgs <- list()
     }
 
     ## =============================================================================================
     ## Specific configs
     ## =============================================================================================
 
-    if (length(this_call) > 0L) {
-        preproc_cfgs <- mapply(this_call, names(this_call),
-                               SIMPLIFY = FALSE,
-                               FUN = function(config, type)
-                               {
-                                   config <- eval(config)
-                                   config_names <- names(config)
+    if (length(specific) > 0L) {
+        cfgs <- mapply(specific, names(specific),
+                       SIMPLIFY = FALSE,
+                       FUN = function(config, clus_type)
+                       {
+                           config_names <- names(config)
 
-                                   if (!is.list(config) || is.null(config_names))
-                                       stop("All parameters must be named lists.")
+                           if (!is.list(config) || is.null(config_names))
+                               stop("All parameters must be named lists.")
 
-                                   cfg <- mapply(config, config_names, SIMPLIFY = FALSE,
-                                                 FUN = function(config_args, preproc) {
-                                                     do.call(expand.grid,
-                                                             enlist(preproc = preproc,
-                                                                    stringsAsFactors = FALSE,
-                                                                    dots = config_args))
-                                                 })
+                           cfg <- mapply(config, config_names, SIMPLIFY = FALSE,
+                                         FUN = function(config_args, fun) {
+                                             cfg <- do.call(expand.grid,
+                                                            enlist(foo = fun,
+                                                                   stringsAsFactors = FALSE,
+                                                                   dots = config_args))
 
-                                   cfg <- plyr::rbind.fill(cfg)
+                                             names(cfg)[1L] <- type
 
-                                   if (type %in% share.config)
-                                       cfg <- plyr::rbind.fill(shared_cfgs[[type]], cfg)
+                                             cfg
+                                         })
 
-                                   ## return
-                                   cfg
-                               })
+                           cfg <- plyr::rbind.fill(cfg)
 
-        names(preproc_cfgs) <- names(this_call)
+                           if (clus_type %in% share.config)
+                               cfg <- plyr::rbind.fill(shared_cfg, cfg)
 
-        shared_cfgs[names(preproc_cfgs)] <- preproc_cfgs
-    }
+                           ## return
+                           cfg
+                       })
 
-    ## return
-    shared_cfgs
-}
-
-#' @rdname config-helpers
-#'
-#' @export
-#'
-distance_configs <- function(..., partitional, hierarchical, fuzzy,
-                             share.config = c("p", "h", "f"))
-{
-    share.config <- match.arg(share.config,
-                              c("partitional", "hierarchical", "fuzzy"),
-                              TRUE)
-
-    this_call <- match.call(expand.dots = FALSE)
-    this_call <- this_call[nzchar(names(this_call))]
-    this_call$share.config <- NULL
-    this_call$`...` <- NULL
-
-    ## =============================================================================================
-    ## Shared configs
-    ## =============================================================================================
-
-    shared <- list(...)
-
-    if (length(shared) > 0L) {
-        shared_names <- names(shared)
-
-        shared_cfgs <- mapply(shared, shared_names, SIMPLIFY = FALSE,
-                              FUN = function(shared_args, distance) {
-                                  do.call(expand.grid,
-                                          enlist(distance = distance,
-                                                 stringsAsFactors = FALSE,
-                                                 dots = shared_args))
-                              })
-
-        shared_cfgs <- plyr::rbind.fill(shared_cfgs)
-
-        shared_cfgs <- list(partitional = shared_cfgs,
-                            hierarchical = shared_cfgs,
-                            fuzzy = shared_cfgs)
+        cfgs <- c(cfgs, shared_cfgs)
 
     } else {
-        shared_cfgs <- list(partitional = NULL,
-                            hierarchical = NULL,
-                            fuzzy = NULL)
-    }
-
-    ## =============================================================================================
-    ## Specific configs
-    ## =============================================================================================
-
-    if (length(this_call) > 0L) {
-        dist_cfgs <- mapply(this_call, names(this_call),
-                            SIMPLIFY = FALSE,
-                            FUN = function(config, type)
-                            {
-                                config <- eval(config)
-                                config_names <- names(config)
-
-                                if (!is.list(config) || is.null(config_names))
-                                    stop("All parameters must be named lists.")
-
-                                cfg <- mapply(config, config_names, SIMPLIFY = FALSE,
-                                              FUN = function(config_args, distance) {
-                                                  do.call(expand.grid,
-                                                          enlist(distance = distance,
-                                                                 stringsAsFactors = FALSE,
-                                                                 dots = config_args))
-                                              })
-
-                                cfg <- plyr::rbind.fill(cfg)
-
-                                if (type %in% share.config)
-                                    cfg <- plyr::rbind.fill(shared_cfgs[[type]], cfg)
-
-                                ## return
-                                cfg
-                            })
-
-        names(dist_cfgs) <- names(this_call)
-
-        shared_cfgs[names(dist_cfgs)] <- dist_cfgs
+        cfgs <- shared_cfgs
     }
 
     ## return
-    shared_cfgs
-}
-
-#' @rdname config-helpers
-#'
-#' @export
-#'
-centroid_configs <- function(..., partitional, hierarchical, fuzzy, tadpole,
-                             share.config = c("p", "h", "f", "t"))
-{
-    share.config <- match.arg(share.config,
-                              c("partitional", "hierarchical", "fuzzy", "tadpole"),
-                              TRUE)
-
-    this_call <- match.call(expand.dots = FALSE)
-    this_call <- this_call[nzchar(names(this_call))]
-    this_call$share.config <- NULL
-    this_call$`...` <- NULL
-
-    ## =============================================================================================
-    ## Shared configs
-    ## =============================================================================================
-
-    shared <- list(...)
-
-    if (length(shared) > 0L) {
-        shared_names <- names(shared)
-
-        shared_cfgs <- mapply(shared, shared_names, SIMPLIFY = FALSE,
-                              FUN = function(shared_args, centroid) {
-                                  do.call(expand.grid,
-                                          enlist(centroid = centroid,
-                                                 stringsAsFactors = FALSE,
-                                                 dots = shared_args))
-                              })
-
-        shared_cfgs <- plyr::rbind.fill(shared_cfgs)
-
-        shared_cfgs <- list(partitional = shared_cfgs,
-                            hierarchical = shared_cfgs,
-                            fuzzy = shared_cfgs,
-                            tadpole = shared_cfgs)
-
-    } else {
-        shared_cfgs <- list(partitional = NULL,
-                            hierarchical = NULL,
-                            fuzzy = NULL,
-                            tadpole = NULL)
-    }
-
-    ## =============================================================================================
-    ## Specific configs
-    ## =============================================================================================
-
-    if (length(this_call) > 0L) {
-        centroid_cfgs <- mapply(this_call, names(this_call),
-                                SIMPLIFY = FALSE,
-                                FUN = function(config, type)
-                                {
-                                    config <- eval(config)
-                                    config_names <- names(config)
-
-                                    if (!is.list(config) || is.null(config_names))
-                                        stop("All parameters must be named lists.")
-
-                                    cfg <- mapply(config, config_names, SIMPLIFY = FALSE,
-                                                  FUN = function(config_args, centroid) {
-                                                      do.call(expand.grid,
-                                                              enlist(centroid = centroid,
-                                                                     stringsAsFactors = FALSE,
-                                                                     dots = config_args))
-                                                  })
-
-                                    cfg <- plyr::rbind.fill(cfg)
-
-                                    if (type %in% share.config)
-                                        cfg <- plyr::rbind.fill(shared_cfgs[[type]], cfg)
-
-                                    ## return
-                                    cfg
-                                })
-
-        names(centroid_cfgs) <- names(this_call)
-
-        shared_cfgs[names(centroid_cfgs)] <- centroid_cfgs
-
-    }
-
-    ## return
-    shared_cfgs
+    cfgs
 }
 
 #' Create configurations for \code{\link{compare_clusterings}}
@@ -321,8 +154,8 @@ centroid_configs <- function(..., partitional, hierarchical, fuzzy, tadpole,
 #'
 #' This function is based on \code{\link[base]{expand.grid}} and \code{\link[base]{merge}}.
 #'
-#' Preprocessing, distance and centroid configurations are specified with the helper functions in
-#' \code{\link{config-helpers}}, but using the example in \code{\link{compare_clusterings}} as basis
+#' Preprocessing, distance and centroid configurations are specified with the helper function
+#' \code{\link{pdc_configs}}, but using the example in \code{\link{compare_clusterings}} as basis
 #' might be easier to understand.
 #'
 #' The controls list must have one nested list of controls for the desired clustering types. Each
@@ -336,9 +169,9 @@ centroid_configs <- function(..., partitional, hierarchical, fuzzy, tadpole,
 #' number of configurations.
 #'
 compare_clusterings_configs <- function(types = c("p", "h", "f", "t"), k = 2L, controls = NULL,
-                                        preprocs = preproc_configs(),
-                                        distances = distance_configs(),
-                                        centroids = centroid_configs())
+                                        preprocs = pdc_configs("preproc"),
+                                        distances = pdc_configs("distance"),
+                                        centroids = pdc_configs("centroid"))
 {
     ## =============================================================================================
     ## Start
@@ -445,7 +278,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f", "t"), k = 2L, c
                                          enlist(k = list(k),
                                                 pam.precompute = control$pam.precompute,
                                                 iter.max = control$iter.max,
-                                                nrep = control$nrep,
+                                                nrep = control$nrep[1L],
                                                 stringsAsFactors = FALSE))
                              },
 
@@ -540,7 +373,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f", "t"), k = 2L, c
 #'   hierarchical, fuzzy, tadpole.
 #' @param ... Further arguments for \code{\link{tsclust}}, \code{score.clus} or \code{pick.clus}.
 #' @param configs The list of data frames with the desired configurations to run. See
-#'   \code{\link{compare_clusterings_configs}} and \code{\link{config-helpers}}.
+#'   \code{\link{compare_clusterings_configs}} and \code{\link{pdc_configs}}.
 #' @param seed Seed for random reproducibility.
 #' @param trace Logical indicating that more output should be printed to screen.
 #' @param packages A character vector with the names of any packages needed for any functions used

@@ -26,7 +26,8 @@ cfgs <- compare_clusterings_configs(k = 19L:20L,
                                             window.size = 19L:20L
                                         )
                                     ),
-                                    preprocs = preproc_configs(
+                                    preprocs = pdc_configs(
+                                        type = "preproc",
                                         ## shared
                                         none = list(),
                                         zscore = list(center = c(FALSE)),
@@ -41,14 +42,16 @@ cfgs <- compare_clusterings_configs(k = 19L:20L,
                                         ## specify which should consider the shared ones
                                         share.config = c("p", "h")
                                     ),
-                                    distances = distance_configs(
+                                    distances = pdc_configs(
+                                        type = "distance",
                                         sbd = list(),
                                         fuzzy = list(
                                             L2 = list()
                                         ),
                                         share.config = c("p", "h")
                                     ),
-                                    centroids = centroid_configs(
+                                    centroids = pdc_configs(
+                                        type = "centroid",
                                         partitional = list(
                                             pam = list()
                                         ),
@@ -189,18 +192,21 @@ p_cfgs <- compare_clusterings_configs(types = "p", k = 19L:21L,
                                               nrep = 8L
                                           )
                                       ),
-                                      preprocs = preproc_configs(
+                                      preprocs = pdc_configs(
+                                          "preproc",
                                           none = list(),
                                           zscore = list(center = c(FALSE, TRUE))
                                       ),
-                                      distances = distance_configs(
+                                      distances = pdc_configs(
+                                          "distance",
                                           sbd = list(),
                                           dtw_basic = list(window.size = 19L:20L,
                                                            norm = c("L1", "L2")),
                                           gak = list(window.size = 19L:20L,
                                                      sigma = 100)
                                       ),
-                                      centroids = centroid_configs(
+                                      centroids = pdc_configs(
+                                          "centroid",
                                           partitional = list(
                                               pam = list(),
                                               shape = list()
