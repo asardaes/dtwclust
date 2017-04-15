@@ -14,7 +14,8 @@ hierarchical, fuzzy, tadpole.}
 
 \item{k}{A numeric vector with one or more elements specifying the number of clusters to test.}
 
-\item{controls}{A list of \code{\link{tsclust-controls}}. See details.}
+\item{controls}{A list of \code{\link{tsclust-controls}}. \code{NULL} means defaults. See
+details.}
 
 \item{preprocs}{Preprocessing configurations. See details.}
 

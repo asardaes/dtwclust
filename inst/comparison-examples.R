@@ -52,6 +52,7 @@ cfgs <- compare_clusterings_configs(k = 19L:20L,
                                         partitional = list(
                                             pam = list()
                                         ),
+                                        ## special name 'default'
                                         hierarchical = list(
                                             default = list()
                                         ),
@@ -139,7 +140,7 @@ p_cfgs <- compare_clusterings_configs(types = "p", k = 19L:21L,
 id_redundant <- p_cfgs$partitional$preproc == "zscore" & p_cfgs$partitional$centroid == "shape"
 p_cfgs$partitional <- p_cfgs$partitional[!id_redundant, ]
 
-# LONG! 1 hour or so, sequentially
+# LONG! 30 minutes or so, sequentially
 comparison_partitional <- compare_clusterings(CharTraj, types = "p", configs = p_cfgs,
                                               seed = 32903L, trace = TRUE,
                                               score.clus = score_fun, pick.clus = pick_fun)

@@ -1,5 +1,4 @@
 * compare_clusterings
-    + optimize preprocessing
     + flatten config
     + add results data frame
     + names

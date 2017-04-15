@@ -51,8 +51,7 @@ be vectors that specify different values to be tested.
 
 For preprocessing, the special name \code{none} signifies no preprocessing.
 
-For centroids, the special name \code{default} leaves the default for hierarchical and tadpole
-clustering.
+For centroids, the special name \code{default} leaves the centroid unspecified.
 
 Please see the example in \code{\link{compare_clusterings}} to see how this is used.
 }

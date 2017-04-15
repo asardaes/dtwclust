@@ -7,7 +7,8 @@
 compare_clusterings(series = NULL, types = c("p", "h", "f", "t"), ...,
   configs = compare_clusterings_configs(types), seed = NULL,
   trace = FALSE, packages = character(0L), score.clus = function(...) {   
-   NULL }, pick.clus = function(...) {     NULL }, return.objects = FALSE)
+   stop("No scoring") }, pick.clus = function(...) {     stop("No picking") },
+  return.objects = FALSE)
 }
 \arguments{
 \item{series}{A list of series, a numeric matrix or a data frame. Matrices and data frames are
@@ -29,7 +30,8 @@ hierarchical, fuzzy, tadpole.}
 (distance, centroid, preprocessing, etc.). The name "dtwclust" is added automatically. Relevant
 for parallel computation.}
 
-\item{score.clus}{A function that gets the list of results (and \code{...}) and scores each one.}
+\item{score.clus}{A function that gets the list of results (and \code{...}) and scores each one.
+It may also be a named list of functions, one for each type of clustering.}
 
 \item{pick.clus}{A function that gets the result from \code{score.clus} as first argument, as
 well as the objects returned by \code{\link{tsclust}} (and elements of \code{...}) and picks
@@ -55,6 +57,9 @@ This function calls \code{\link{tsclust}} with different configurations and eval
 with the provided functions. Parallel support is included. See the examples.
 
 Parameters specified in \code{configs} whose values are \code{NA} will be ignored automatically.
+
+The scoring and picking functions are for convenience, if they are not specified, the
+\code{scores} and \code{pick} elements of the result will be \code{NULL}.
 }
 \examples{
 ## Fuzzy preprocessing: calculate autocorrelation up to 50th lag
@@ -111,6 +116,7 @@ cfgs <- compare_clusterings_configs(k = 19L:20L,
                                         partitional = list(
                                             pam = list()
                                         ),
+                                        ## special name 'default'
                                         hierarchical = list(
                                             default = list()
                                         ),
@@ -198,7 +204,7 @@ p_cfgs <- compare_clusterings_configs(types = "p", k = 19L:21L,
 id_redundant <- p_cfgs$partitional$preproc == "zscore" & p_cfgs$partitional$centroid == "shape"
 p_cfgs$partitional <- p_cfgs$partitional[!id_redundant, ]
 
-# LONG! 1 hour or so, sequentially
+# LONG! 30 minutes or so, sequentially
 comparison_partitional <- compare_clusterings(CharTraj, types = "p", configs = p_cfgs,
                                               seed = 32903L, trace = TRUE,
                                               score.clus = score_fun, pick.clus = pick_fun)
