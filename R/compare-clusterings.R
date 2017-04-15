@@ -56,34 +56,48 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
         specific$tadpole <- NULL
     }
 
+    share_missing <- missing(share.config)
+    share.config <- match.arg(share.config,
+                              c("partitional", "hierarchical", "fuzzy", "tadpole"),
+                              TRUE)
+
+    if (type == "distance") {
+        if (!share_missing && "tadpole" %in% share.config)
+            warning("TADPole ignores distance configurations.")
+
+        share.config <- setdiff(share.config, "tadpole")
+    }
+
     ## =============================================================================================
     ## Shared configs
     ## =============================================================================================
 
     if (length(shared) > 0L) {
-        share.config <- match.arg(share.config,
-                                  c("partitional", "hierarchical", "fuzzy", "tadpole"),
-                                  TRUE)
+        if (length(share.config) > 0L) {
+            shared_names <- names(shared)
 
-        shared_names <- names(shared)
+            shared_cfg <- mapply(shared, shared_names, SIMPLIFY = FALSE,
+                                 FUN = function(shared_args, fun) {
+                                     cfg <- do.call(expand.grid,
+                                                    enlist(foo = fun,
+                                                           dots = shared_args,
+                                                           stringsAsFactors = FALSE))
 
-        shared_cfg <- mapply(shared, shared_names, SIMPLIFY = FALSE,
-                             FUN = function(shared_args, fun) {
-                                 cfg <- do.call(expand.grid,
-                                                enlist(foo = fun,
-                                                       dots = shared_args,
-                                                       stringsAsFactors = FALSE))
+                                     names(cfg)[1L] <- type
 
-                                 names(cfg)[1L] <- type
+                                     cfg
+                                 })
 
-                                 cfg
-                             })
+            shared_cfg <- plyr::rbind.fill(shared_cfg)
 
-        shared_cfg <- plyr::rbind.fill(shared_cfg)
+            shared_cfgs <- lapply(share.config, function(dummy) { shared_cfg })
+            names(shared_cfgs) <- share.config
+            shared_cfgs <- shared_cfgs[setdiff(share.config, names(specific))]
 
-        shared_cfgs <- lapply(share.config, function(dummy) { shared_cfg })
-        names(shared_cfgs) <- share.config
-        shared_cfgs <- shared_cfgs[setdiff(share.config, names(specific))]
+        } else {
+            shared_cfg <- NULL
+            shared_cfgs <- list()
+        }
 
     } else {
         shared_cfg <- NULL
@@ -144,7 +158,7 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
 #' @param k A numeric vector with one or more elements specifying the number of clusters to test.
 #' @param types Clustering types. It must be one of (possibly abbreviated): partitional,
 #'   hierarchical, fuzzy, tadpole.
-#' @param controls A list of \code{\link{tsclust-controls}}. \code{NULL} means defaults. See
+#' @param controls A named list of \code{\link{tsclust-controls}}. \code{NULL} means defaults. See
 #'   details.
 #' @param preprocs Preprocessing configurations. See details.
 #' @param distances Distance configurations. See details.
@@ -159,7 +173,8 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
 #' might be easier to understand.
 #'
 #' The controls list must have one nested list of controls for the desired clustering types. Each
-#' nested list may be specified with the usual \code{\link{tsclust-controls}} functions. Again,
+#' nested list may be specified with the usual \code{\link{tsclust-controls}} functions. The names
+#' must correspond to "partitional", "hierarchical", "fuzzy" or "tadpole" clustering. Again,
 #' please refer to the example in \code{\link{compare_clusterings}}.
 #'
 #' @return
@@ -168,10 +183,10 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
 #' merged configurations. Each data frame has an extra attribute \code{num.configs} specifying the
 #' number of configurations.
 #'
-compare_clusterings_configs <- function(types = c("p", "h", "f", "t"), k = 2L, controls = NULL,
-                                        preprocs = pdc_configs("preproc"),
-                                        distances = pdc_configs("distance"),
-                                        centroids = pdc_configs("centroid"))
+compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, controls = NULL,
+                                        preprocs = pdc_configs("preproc", none = list()),
+                                        distances = pdc_configs("distance", default = list()),
+                                        centroids = pdc_configs("centroid", default = list()))
 {
     ## =============================================================================================
     ## Start
@@ -192,6 +207,9 @@ compare_clusterings_configs <- function(types = c("p", "h", "f", "t"), k = 2L, c
 
     } else if (!all(types %in% names(controls))) {
         stop("The names of the 'controls' argument do not correspond to the provided 'types'")
+
+    } else {
+        controls <- controls[intersect(names(controls), types)]
     }
 
     ## ---------------------------------------------------------------------------------------------
@@ -200,14 +218,15 @@ compare_clusterings_configs <- function(types = c("p", "h", "f", "t"), k = 2L, c
 
     if (missing(preprocs)) {
         force(preprocs)
-        preprocs <- preprocs[intersect(names(preprocs), types)]
 
     } else if (!is.list(preprocs) || is.null(names(preprocs))) {
-        stop("The 'preprocs' argument must be NULL or a named list")
+        stop("The 'preprocs' argument must be a named list")
 
     } else if (!all(types %in% names(preprocs))) {
         stop("The names of the 'preprocs' argument do not correspond to the provided 'types'")
     }
+
+    preprocs <- preprocs[intersect(names(preprocs), types)]
 
     ## ---------------------------------------------------------------------------------------------
     ## Check distance specification
@@ -215,14 +234,15 @@ compare_clusterings_configs <- function(types = c("p", "h", "f", "t"), k = 2L, c
 
     if (missing(distances)) {
         force(distances)
-        distances <- distances[intersect(names(distances), types)]
 
     } else if (!is.list(distances) || is.null(names(distances))) {
-        stop("The 'distances' argument must be NULL or a named list")
+        stop("The 'distances' argument must be a named list")
 
     } else if (!all(setdiff(types, "tadpole") %in% names(distances))) {
         stop("The names of the 'distances' argument do not correspond to the provided 'types'")
     }
+
+    distances <- distances[intersect(names(distances), types)]
 
     ## ---------------------------------------------------------------------------------------------
     ## Check centroids specification
@@ -230,19 +250,21 @@ compare_clusterings_configs <- function(types = c("p", "h", "f", "t"), k = 2L, c
 
     if (missing(centroids)) {
         force(centroids)
-        centroids <- centroids[intersect(names(centroids), types)]
 
     } else if (!is.list(centroids) || is.null(names(centroids))) {
-        stop("The 'centroids' argument must be NULL or a named list")
+        stop("The 'centroids' argument must be a named list")
 
     } else if (!all(types %in% names(centroids))) {
         stop("The names of the 'centroids' argument do not correspond to the provided 'types'")
     }
 
+    centroids <- centroids[intersect(names(centroids), types)]
+
     ## =============================================================================================
     ## Create configs
     ## =============================================================================================
 
+    ## return here
     mapply(types,
            controls[types],
            preprocs[types],
@@ -268,11 +290,9 @@ compare_clusterings_configs <- function(types = c("p", "h", "f", "t"), k = 2L, c
                ## ----------------------------------------------------------------------------------
 
                cfg <- switch(type,
-
                              ## --------------------------------------------------------------------
                              ## Partitional configs
                              ## --------------------------------------------------------------------
-
                              partitional = {
                                  do.call(expand.grid,
                                          enlist(k = list(k),
@@ -281,22 +301,18 @@ compare_clusterings_configs <- function(types = c("p", "h", "f", "t"), k = 2L, c
                                                 nrep = control$nrep[1L],
                                                 stringsAsFactors = FALSE))
                              },
-
                              ## --------------------------------------------------------------------
                              ## Hierarchical configs
                              ## --------------------------------------------------------------------
-
                              hierarchical = {
                                  do.call(expand.grid,
                                          enlist(k = list(k),
                                                 method = list(control$method),
                                                 stringsAsFactors = FALSE))
                              },
-
                              ## --------------------------------------------------------------------
                              ## Fuzzy configs
                              ## --------------------------------------------------------------------
-
                              fuzzy = {
                                  do.call(expand.grid,
                                          enlist(k = list(k),
@@ -305,11 +321,9 @@ compare_clusterings_configs <- function(types = c("p", "h", "f", "t"), k = 2L, c
                                                 delta = control$delta,
                                                 stringsAsFactors = FALSE))
                              },
-
                              ## --------------------------------------------------------------------
                              ## TADPole configs
                              ## --------------------------------------------------------------------
-
                              tadpole = {
                                  do.call(expand.grid,
                                          enlist(k = list(k),
@@ -457,6 +471,9 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     dots <- list(...)
 
     configs <- configs[types]
+
+    if (any(sapply(configs, is.null)))
+        stop("The configuration for one of the chosen clustering types is missing.")
 
     ## ---------------------------------------------------------------------------------------------
     ## Obtain random seeds
@@ -627,33 +644,27 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                 ## call tsclust
                                 ## -----------------------------------------------------------------
 
+                                this_args <- enlist(series = this_series,
+                                                    type = type,
+                                                    k = cfg$k[[i]],
+                                                    distance = distance,
+                                                    seed = seed[[i]],
+                                                    trace = trace,
+                                                    args = args,
+                                                    control = control,
+                                                    dots = dots)
+
+                                if (type == "tadpole") this_args$distance <- NULL
+
                                 if (centroid_char == "default") {
                                     ## do not specify centroid
-                                    tsc <- do.call(tsclust,
-                                                   enlist(series = this_series,
-                                                          type = type,
-                                                          k = cfg$k[[i]],
-                                                          distance = distance,
-                                                          seed = seed[[i]],
-                                                          trace = trace,
-                                                          args = args,
-                                                          control = control,
-                                                          dots = dots),
-                                                   quote = TRUE)
+                                    tsc <- do.call(tsclust, this_args, quote = TRUE)
 
                                 } else if (centroid_char %in% included_centroids) {
                                     ## with included centroid
                                     tsc <- do.call(tsclust,
-                                                   enlist(series = this_series,
-                                                          type = type,
-                                                          k = cfg$k[[i]],
-                                                          distance = distance,
-                                                          centroid = centroid_char,
-                                                          seed = seed[[i]],
-                                                          trace = trace,
-                                                          args = args,
-                                                          control = control,
-                                                          dots = dots),
+                                                   enlist(centroid = centroid_char,
+                                                          dots = this_args),
                                                    quote = TRUE)
 
                                 } else {
@@ -661,16 +672,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                     delayedAssign("centroid", get0(centroid_char))
 
                                     tsc <- do.call(tsclust,
-                                                   enlist(series = this_series,
-                                                          type = type,
-                                                          k = cfg$k[[i]],
-                                                          distance = distance,
-                                                          centroid = centroid,
-                                                          seed = seed[[i]],
-                                                          trace = trace,
-                                                          args = args,
-                                                          control = control,
-                                                          dots = dots),
+                                                   enlist(centroid = centroid,
+                                                          dots = this_args),
                                                    quote = TRUE)
                                 }
 

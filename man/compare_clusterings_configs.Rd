@@ -4,9 +4,10 @@
 \alias{compare_clusterings_configs}
 \title{Create configurations for \code{\link{compare_clusterings}}}
 \usage{
-compare_clusterings_configs(types = c("p", "h", "f", "t"), k = 2L,
-  controls = NULL, preprocs = pdc_configs("preproc"),
-  distances = pdc_configs("distance"), centroids = pdc_configs("centroid"))
+compare_clusterings_configs(types = c("p", "h", "f"), k = 2L,
+  controls = NULL, preprocs = pdc_configs("preproc", none = list()),
+  distances = pdc_configs("distance", default = list()),
+  centroids = pdc_configs("centroid", default = list()))
 }
 \arguments{
 \item{types}{Clustering types. It must be one of (possibly abbreviated): partitional,
@@ -14,7 +15,7 @@ hierarchical, fuzzy, tadpole.}
 
 \item{k}{A numeric vector with one or more elements specifying the number of clusters to test.}
 
-\item{controls}{A list of \code{\link{tsclust-controls}}. \code{NULL} means defaults. See
+\item{controls}{A named list of \code{\link{tsclust-controls}}. \code{NULL} means defaults. See
 details.}
 
 \item{preprocs}{Preprocessing configurations. See details.}
@@ -39,6 +40,7 @@ Preprocessing, distance and centroid configurations are specified with the helpe
 might be easier to understand.
 
 The controls list must have one nested list of controls for the desired clustering types. Each
-nested list may be specified with the usual \code{\link{tsclust-controls}} functions. Again,
+nested list may be specified with the usual \code{\link{tsclust-controls}} functions. The names
+must correspond to "partitional", "hierarchical", "fuzzy" or "tadpole" clustering. Again,
 please refer to the example in \code{\link{compare_clusterings}}.
 }

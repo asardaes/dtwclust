@@ -6,7 +6,7 @@ acf_fun <- function(dat, ...) {
 }
 
 ## Define overall configuration
-cfgs <- compare_clusterings_configs(k = 19L:20L,
+cfgs <- compare_clusterings_configs(c("p", "h", "f", "t"), k = 19L:20L,
                                     controls = list(
                                         partitional = partitional_control(
                                             iter.max = 30L,
