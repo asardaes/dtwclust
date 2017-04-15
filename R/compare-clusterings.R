@@ -567,6 +567,8 @@ compare_clusterings_configs <- function(types = c("p", "h", "f", "t"), k = 2L, c
 #' @return
 #'
 #' A list with: \itemize{
+#'   \item \code{results}: A list of data frames with the flattened configs and the corresponding
+#'     scores returned by \code{score.clus}.
 #'   \item \code{scores}: The scores given by \code{score.clus}.
 #'   \item \code{pick}: The object returned by \code{pick.clus}.
 #'   \item \code{proc_time}: The measured function time, using \code{\link[base]{proc.time}}.
@@ -900,7 +902,105 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         }
     }
 
-    results <- list(scores = scores, pick = pick, proc_time = proc.time() - tic)
+    ## =============================================================================================
+    ## Data frame with results
+    ## =============================================================================================
+
+    k <- unlist(configs[[1L]]$k[1L])
+
+    flatten_configs <- sapply(types, function(type) {
+        switch(type,
+               partitional = length(k) > 1L || any(configs$partitional$nrep > 1L),
+               hierarchical = length(k) > 1L || any(lengths(configs$hierarchical$method) > 1L),
+               fuzzy =, tadpole = length(k) > 1L)
+    })
+
+    if (any(flatten_configs)) {
+        configs_out <- mapply(configs[flatten_configs], types[flatten_configs],
+                              SIMPLIFY = FALSE,
+                              FUN = function(config, type) {
+                                  switch(type,
+                                         partitional = {
+                                             dfs <- lapply(seq_len(nrow(config)), function(i) {
+                                                 this_config <- config[i, , drop = FALSE]
+                                                 rep <- 1L:this_config$nrep
+                                                 this_config <- this_config[setdiff(
+                                                     names(this_config), c("k", "nrep")
+                                                 )]
+
+                                                 df <- expand.grid(rep = rep, k = k)
+                                                 rownames(this_config) <- NULL
+                                                 cbind(df, this_config)
+                                             })
+
+                                             ## return
+                                             plyr::rbind.fill(dfs)
+                                         },
+                                         hierarchical = {
+                                             dfs <- lapply(seq_len(nrow(config)), function(i) {
+                                                 this_config <- config[i, , drop = FALSE]
+                                                 method <- unlist(this_config$method)
+                                                 this_config <- this_config[setdiff(
+                                                     names(this_config), c("k", "method")
+                                                 )]
+
+                                                 df <- expand.grid(k = k, method = method)
+                                                 rownames(this_config) <- NULL
+                                                 cbind(df, this_config)
+                                             })
+
+                                             ## return
+                                             plyr::rbind.fill(dfs)
+                                         },
+                                         fuzzy =, tadpole = {
+                                             dfs <- lapply(seq_len(nrow(config)), function(i) {
+                                                 this_config <- config[i, , drop = FALSE]
+                                                 this_config <- this_config[setdiff(
+                                                     names(this_config), c("k")
+                                                 )]
+
+                                                 df <- expand.grid(k = k)
+                                                 rownames(this_config) <- NULL
+                                                 cbind(df, this_config)
+                                             })
+
+                                             ## return
+                                             plyr::rbind.fill(dfs)
+                                         })
+                              })
+
+        configs_out[types[!flatten_configs]] <- configs[types[!flatten_configs]]
+
+    } else {
+        configs_out <- configs
+    }
+
+    ## ---------------------------------------------------------------------------------------------
+    ## Add scores
+    ## ---------------------------------------------------------------------------------------------
+
+    if (!is.null(scores)) {
+        results <- try(mapply(configs_out, scores,
+                              SIMPLIFY = FALSE,
+                              FUN = function(config, score) {
+                                  cbind(config, as.data.frame(score))
+                              }),
+                       silent = TRUE)
+
+        if (inherits(results, "try-error")) {
+            warning("The scores could not be appended to the results data frame.")
+            results <- configs_out
+        }
+
+    } else {
+        results <- configs_out
+    }
+
+    ## =============================================================================================
+    ## List with all results
+    ## =============================================================================================
+
+    results <- list(results = results, scores = scores, pick = pick, proc_time = proc.time() - tic)
     if (return.objects) results <- c(results, objects = types_objs)
 
     ## return results

@@ -42,6 +42,8 @@ the best result.}
 }
 \value{
 A list with: \itemize{
+  \item \code{results}: A list of data frames with the flattened configs and the corresponding
+    scores returned by \code{score.clus}.
   \item \code{scores}: The scores given by \code{score.clus}.
   \item \code{pick}: The object returned by \code{pick.clus}.
   \item \code{proc_time}: The measured function time, using \code{\link[base]{proc.time}}.
@@ -155,25 +157,97 @@ pick_fun <- function(scores, obj_lists, ...) {
     best_obj
 }
 
-## Short run with only fuzzy
+# ====================================================================================
+# Short run with only fuzzy clustering
+# ====================================================================================
+
 comparison_short <- compare_clusterings(CharTraj, types = c("f"), configs = cfgs,
                                         seed = 293L, trace = TRUE,
                                         score.clus = score_fun, pick.clus = pick_fun,
                                         return.objects = TRUE)
 
 \dontrun{
-## Parallel run with all comparisons
+# ====================================================================================
+# Parallel run with all comparisons
+# ====================================================================================
+
 require(doParallel)
 registerDoParallel(cl <- makeCluster(detectCores()))
 
-comparison_long <- compare_clusterings(CharTraj, types = c("p", "h", "f", "t"), configs = cfgs,
+comparison_long <- compare_clusterings(CharTraj, types = c("p", "h", "f", "t"),
+                                       configs = cfgs,
                                        seed = 293L, trace = TRUE,
-                                       score.clus = score_fun, pick.clus = pick_fun,
+                                       score.clus = score_fun,
+                                       pick.clus = pick_fun,
                                        return.objects = TRUE)
+
+# ------------------------------------------------------------------------------------
+# Using all external CVIs and majority vote
+# ------------------------------------------------------------------------------------
+
+score_external <- function(obj_list, ...) {
+    scores <- lapply(obj_list, function(obj) {
+        indices <- cvi(obj@cluster, CharTrajLabels, type = "external")
+
+        ## invert VI to consider maximization
+        indices["VI"] <- 1 / indices["VI"]
+
+        ## return
+        indices
+    })
+
+    ## return
+    do.call(rbind, scores)
+}
+
+pick_majority <- function(scores, obj_lists, ...) {
+    majority <- function(x) {
+        ux <- unique(x)
+        ux[which.max(tabulate(match(x, ux)))]
+    }
+
+    best_considering_type <- sapply(scores, function(score) {
+        best_by_cvi <- apply(score, 2L, which.max)
+        majority(best_by_cvi)
+    })
+
+    best_cvis_overall <- do.call(rbind,
+                                 mapply(scores, best_considering_type,
+                                        SIMPLIFY = FALSE,
+                                        FUN = function(score, row_id) {
+                                            score[row_id, , drop = FALSE]
+                                        }))
+
+    best_overall <- majority(apply(best_cvis_overall, 2L, which.max))
+
+    best_obj <- obj_lists[[best_overall]][[best_considering_type[best_overall]]]
+
+    ## to find config later, see 'best config' below
+    attr(best_obj, "config_id") <- c(best_overall,
+                                     best_considering_type[best_overall])
+
+    ## return
+    best_obj
+}
+
+comparison_majority <- compare_clusterings(CharTraj, types = c("p", "h", "f", "t"),
+                                           configs = cfgs,
+                                           seed = 293L, trace = TRUE,
+                                           score.clus = score_external,
+                                           pick.clus = pick_majority)
+
+plot(comparison_majority$pick)
+
+## best config
+config_id <- attr(comparison_majority$pick, "config_id")
+print(comparison_majority$results[[config_id[1L]]][config_id[2L], , drop = FALSE])
 
 stopCluster(cl); registerDoSEQ()
 
-## Only partitional
+# ====================================================================================
+# A run with only partitional clusterings
+# ====================================================================================
+
 p_cfgs <- compare_clusterings_configs(types = "p", k = 19L:21L,
                                       controls = list(
                                           partitional = partitional_control(
@@ -201,13 +275,16 @@ p_cfgs <- compare_clusterings_configs(types = "p", k = 19L:21L,
 )
 
 # Remove redundant (shape centroid always uses zscore preprocessing)
-id_redundant <- p_cfgs$partitional$preproc == "zscore" & p_cfgs$partitional$centroid == "shape"
+id_redundant <- p_cfgs$partitional$preproc == "zscore" &
+    p_cfgs$partitional$centroid == "shape"
 p_cfgs$partitional <- p_cfgs$partitional[!id_redundant, ]
 
-# LONG! 30 minutes or so, sequentially
-comparison_partitional <- compare_clusterings(CharTraj, types = "p", configs = p_cfgs,
+# LONG! 20 minutes or so, sequentially
+comparison_partitional <- compare_clusterings(CharTraj, types = "p",
+                                              configs = p_cfgs,
                                               seed = 32903L, trace = TRUE,
-                                              score.clus = score_fun, pick.clus = pick_fun)
+                                              score.clus = score_fun,
+                                              pick.clus = pick_fun)
 }
 }
 \seealso{
