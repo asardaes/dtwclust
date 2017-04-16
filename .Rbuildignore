@@ -4,6 +4,7 @@
 ^appveyor\.yml$
 
 .*\.md
+codecov\.R
 
 vignettes/.*\.gz
 vignettes/.*\.bbl
