@@ -9,4 +9,5 @@ if (identical(Sys.getenv("NOT_CRAN"), "true")) {
     source("regression/cvis.R", TRUE)
     source("regression/methods.R", TRUE)
     source("regression/clusterings.R", TRUE)
+    source("regression/comparisons.R", TRUE)
 }
