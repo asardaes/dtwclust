@@ -557,11 +557,23 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         ## -----------------------------------------------------------------------------------------
 
         included_centroids <- c("mean", "median", "shape", "dba", "pam", "fcm", "fcmdd")
+        custom_preprocs <- setdiff(unique(config$preproc), "none")
+        custom_centroids <- setdiff(unique(config$centroid), c("default", included_centroids))
+
+        for (custom_preproc in custom_preprocs)
+            assign(custom_preproc,
+                   get_from_callers(custom_preproc,
+                                    "function"))
+
+        for (custom_centroid in custom_centroids)
+            assign(custom_centroid,
+                   get_from_callers(custom_centroid,
+                                    "function"))
 
         export <- c("dots", "trace",
-                    "check_consistency", "enlist", "subset_dots", "get_config_args",
-                    setdiff(unique(config$preproc), "none"),
-                    setdiff(unique(config$centroid), c("default", included_centroids)))
+                    "check_consistency", "enlist", "subset_dots",
+                    "get_config_args", "get_from_callers",
+                    custom_preprocs, custom_centroids)
 
         ## -----------------------------------------------------------------------------------------
         ## perform clusterings
@@ -680,7 +692,9 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                                    quote = TRUE)
                                 }
 
-                                if (inherits(tsc, "TSClusters")) {
+                                if (inherits(tsc, "TSClusters")) tsc <- list(tsc)
+
+                                tsc <- lapply(tsc, function(tsc) {
                                     tsc@preproc <- preproc_char
 
                                     if (preproc_char != "none")
@@ -689,21 +703,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                     if (centroid_char != "default")
                                         tsc@centroid <- centroid_char
 
-                                    tsc <- list(tsc)
-
-                                } else {
-                                    tsc <- lapply(tsc, function(tsc) {
-                                        tsc@preproc <- preproc_char
-
-                                        if (preproc_char != "none")
-                                            tsc@family@preproc <- get_from_callers(preproc_char,
-                                                                                   "function")
-                                        if (centroid_char != "default")
-                                            tsc@centroid <- centroid_char
-
-                                        tsc
-                                    })
-                                }
+                                    tsc
+                                })
 
                                 tsc
                             })
