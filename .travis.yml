@@ -30,7 +30,7 @@ before_install:
 
 after_success:
   - if [[ ("$TRAVIS_R_VERSION" != "devel") && ("$TRAVIS_OS_NAME" == "linux") ]]; then
-      travis_wait Rscript -e 'library(covr); codecov(type = "all", line_exclusions = list("R/pkg.R"), quiet = FALSE)';
+      travis_wait 20 Rscript -e 'covr::codecov(type = "all", line_exclusions = list("R/pkg.R"))';
     fi
 
 notifications:
