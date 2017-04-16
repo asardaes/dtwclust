@@ -122,6 +122,7 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                                                   lbls = labels_subset))
 
     all_comparisons$pick <- reset_nondeterministic(all_comparisons$pick)
+    all_comparisons$pick@call <- call("zas", foo = "bar")
     all_comparisons$proc_time <- NULL
 
     assign("all_comp", all_comparisons, persistent)
