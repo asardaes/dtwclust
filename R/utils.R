@@ -133,15 +133,17 @@ reinitalize_clusters <- function(x, cent, cent_case, num_empty) {
 
 # Like dynGet() I assume, but that one is supposed to be experimental...
 get_from_callers <- function(obj_name, mode = "any") {
-    for (env in sys.frames()) {
-        ret <- get0(obj_name, env, mode = mode)
+    ret <- get0(obj_name, mode = mode, inherits = TRUE)
 
-        if (!is.null(ret)) break
+    if (!is.null(ret)) return(ret)
+
+    for (env in sys.frames()) {
+        ret <- get0(obj_name, env, mode = mode, inherits = FALSE)
+
+        if (!is.null(ret)) return(ret)
     }
 
-    if (is.null(ret)) stop("Could not find object '", obj_name, "' of mode '", mode, "'.")
-
-    ret
+    if (is.null(ret)) stop("Could not find object '", obj_name, "' of mode '", mode, "'")
 }
 
 # ========================================================================================================
