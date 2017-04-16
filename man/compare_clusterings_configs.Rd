@@ -2,11 +2,11 @@
 % Please edit documentation in R/compare-clusterings.R
 \name{compare_clusterings_configs}
 \alias{compare_clusterings_configs}
-\title{Create configurations for \code{\link{compare_clusterings}}}
+\title{Create clustering configurations.}
 \usage{
 compare_clusterings_configs(types = c("p", "h", "f"), k = 2L,
   controls = NULL, preprocs = pdc_configs("preproc", none = list()),
-  distances = pdc_configs("distance", default = list()),
+  distances = pdc_configs("distance", dtw_basic = list()),
   centroids = pdc_configs("centroid", default = list()))
 }
 \arguments{
@@ -30,17 +30,17 @@ merged configurations. Each data frame has an extra attribute \code{num.configs}
 number of configurations.
 }
 \description{
-Create clustering configurations.
+Create configurations for \code{\link{compare_clusterings}}
 }
 \details{
-This function is based on \code{\link[base]{expand.grid}} and \code{\link[base]{merge}}.
+This function uses \code{\link[base]{expand.grid}} and \code{\link[base]{merge}}.
 
 Preprocessing, distance and centroid configurations are specified with the helper function
-\code{\link{pdc_configs}}, but using the example in \code{\link{compare_clusterings}} as basis
+\code{\link{pdc_configs}}, but using the examples in \code{\link{compare_clusterings}} as basis
 might be easier to understand.
 
 The controls list must have one nested list of controls for the desired clustering types. Each
 nested list may be specified with the usual \code{\link{tsclust-controls}} functions. The names
 must correspond to "partitional", "hierarchical", "fuzzy" or "tadpole" clustering. Again,
-please refer to the example in \code{\link{compare_clusterings}}.
+please refer to the examples in \code{\link{compare_clusterings}}.
 }

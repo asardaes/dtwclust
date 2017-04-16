@@ -6,8 +6,8 @@
 \usage{
 compare_clusterings(series = NULL, types = c("p", "h", "f", "t"), ...,
   configs = compare_clusterings_configs(types), seed = NULL,
-  trace = FALSE, packages = character(0L), score.clus = function(...) {   
-   stop("No scoring") }, pick.clus = function(...) {     stop("No picking") },
+  trace = FALSE, packages = character(0L), score.clus = function(...)
+  stop("No scoring"), pick.clus = function(...) stop("No picking"),
   return.objects = FALSE)
 }
 \arguments{

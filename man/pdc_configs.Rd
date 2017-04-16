@@ -2,7 +2,7 @@
 % Please edit documentation in R/compare-clusterings.R
 \name{pdc_configs}
 \alias{pdc_configs}
-\title{Helper functions for \code{\link{compare_clusterings_configs}}}
+\title{Helper function for \code{\link{compare_clusterings_configs}}}
 \usage{
 pdc_configs(type = c("preproc", "distance", "centroid"), ...,
   partitional = NULL, hierarchical = NULL, fuzzy = NULL, tadpole = NULL,
@@ -45,5 +45,5 @@ For preprocessing, the special name \code{none} signifies no preprocessing.
 
 For centroids, the special name \code{default} leaves the centroid unspecified.
 
-Please see the example in \code{\link{compare_clusterings}} to see how this is used.
+Please see the examples in \code{\link{compare_clusterings}} to see how this is used.
 }

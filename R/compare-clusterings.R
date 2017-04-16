@@ -1,4 +1,4 @@
-#' Helper functions for \code{\link{compare_clusterings_configs}}
+#' Helper function for \code{\link{compare_clusterings_configs}}
 #'
 #' Create preprocessing, distance and centroid configurations for
 #' \code{\link{compare_clusterings_configs}}. All functions use \code{\link[base]{expand.grid}}.
@@ -29,7 +29,7 @@
 #'
 #' For centroids, the special name \code{default} leaves the centroid unspecified.
 #'
-#' Please see the example in \code{\link{compare_clusterings}} to see how this is used.
+#' Please see the examples in \code{\link{compare_clusterings}} to see how this is used.
 #'
 #' @return
 #'
@@ -149,9 +149,9 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
     cfgs
 }
 
-#' Create configurations for \code{\link{compare_clusterings}}
-#'
 #' Create clustering configurations.
+#'
+#' Create configurations for \code{\link{compare_clusterings}}
 #'
 #' @export
 #'
@@ -166,16 +166,16 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
 #'
 #' @details
 #'
-#' This function is based on \code{\link[base]{expand.grid}} and \code{\link[base]{merge}}.
+#' This function uses \code{\link[base]{expand.grid}} and \code{\link[base]{merge}}.
 #'
 #' Preprocessing, distance and centroid configurations are specified with the helper function
-#' \code{\link{pdc_configs}}, but using the example in \code{\link{compare_clusterings}} as basis
+#' \code{\link{pdc_configs}}, but using the examples in \code{\link{compare_clusterings}} as basis
 #' might be easier to understand.
 #'
 #' The controls list must have one nested list of controls for the desired clustering types. Each
 #' nested list may be specified with the usual \code{\link{tsclust-controls}} functions. The names
 #' must correspond to "partitional", "hierarchical", "fuzzy" or "tadpole" clustering. Again,
-#' please refer to the example in \code{\link{compare_clusterings}}.
+#' please refer to the examples in \code{\link{compare_clusterings}}.
 #'
 #' @return
 #'
@@ -185,7 +185,7 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
 #'
 compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, controls = NULL,
                                         preprocs = pdc_configs("preproc", none = list()),
-                                        distances = pdc_configs("distance", default = list()),
+                                        distances = pdc_configs("distance", dtw_basic = list()),
                                         centroids = pdc_configs("centroid", default = list()))
 {
     ## =============================================================================================
@@ -434,8 +434,8 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ...,
                                 configs = compare_clusterings_configs(types),
                                 seed = NULL, trace = FALSE, packages = character(0L),
-                                score.clus = function(...) { stop("No scoring") },
-                                pick.clus = function(...) { stop("No picking") },
+                                score.clus = function(...) stop("No scoring"),
+                                pick.clus = function(...) stop("No picking"),
                                 return.objects = FALSE)
 {
     ## =============================================================================================
@@ -504,7 +504,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
         lapply(seq_len(nrow(preproc_df)), function(i) {
             if (preproc_df$preproc[i] != "none") {
-                preproc_fun <- get0(preproc_df$preproc[i])
+                preproc_fun <- get_from_callers(preproc_df$preproc[i], "function")
 
                 this_config <- preproc_df[i, , drop = FALSE]
                 names(this_config) <- gsub("_preproc", "", names(this_config))
@@ -579,8 +579,10 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                         .export = export) %op%
                         {
                             chunk <- lapply(seq_len(nrow(cfg)), function(i) {
-                                message("-------------- Using configuration: --------------")
-                                print(cfg[i, , drop = FALSE])
+                                if (trace) {
+                                    message("-------------- Using configuration: --------------")
+                                    print(cfg[i, , drop = FALSE])
+                                }
 
                                 ## -----------------------------------------------------------------
                                 ## obtain args from configuration
@@ -669,7 +671,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
                                 } else {
                                     ## with centroid function
-                                    delayedAssign("centroid", get0(centroid_char))
+                                    delayedAssign("centroid", get_from_callers(centroid_char,
+                                                                               "function"))
 
                                     tsc <- do.call(tsclust,
                                                    enlist(centroid = centroid,
@@ -681,7 +684,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                     tsc@preproc <- preproc_char
 
                                     if (preproc_char != "none")
-                                        tsc@family@preproc <- get0(preproc_char)
+                                        tsc@family@preproc <- get_from_callers(preproc_char,
+                                                                               "function")
                                     if (centroid_char != "default")
                                         tsc@centroid <- centroid_char
 
@@ -692,7 +696,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                         tsc@preproc <- preproc_char
 
                                         if (preproc_char != "none")
-                                            tsc@family@preproc <- get0(preproc_char)
+                                            tsc@family@preproc <- get_from_callers(preproc_char,
+                                                                                   "function")
                                         if (centroid_char != "default")
                                             tsc@centroid <- centroid_char
 
@@ -704,7 +709,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                             })
 
                             ## return chunk
-                            unlist(chunk, recursive = FALSE, use.names = TRUE)
+                            unlist(chunk, recursive = FALSE, use.names = FALSE)
                         }
 
         ## return TSClusters
@@ -730,7 +735,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         pick <- NULL
 
     } else {
-        pick <- try(pick.clus(scores, types_objs, ...), silent = FALSE)
+        pick <- try(pick.clus(scores, types_objs, ...), silent = TRUE)
 
         if (inherits(pick, "try-error")) {
             warning("The pick.clus function did not execute successfully.")
