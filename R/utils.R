@@ -143,7 +143,7 @@ get_from_callers <- function(obj_name, mode = "any") {
         if (!is.null(ret)) return(ret)
     }
 
-    if (is.null(ret)) stop("Could not find object '", obj_name, "' of mode '", mode, "'")
+    stop("Could not find object '", obj_name, "' of mode '", mode, "'")
 }
 
 # ========================================================================================================
