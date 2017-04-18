@@ -51,6 +51,7 @@ Collate:
     'TADPole.R'
     'all-cent.R'
     'all-cent2.R'
+    'as-methods.R'
     'compare-clusterings.R'
     'compute-envelop.R'
     'create-dtwclust.R'
