@@ -91,6 +91,7 @@ setClass("tsclustFamily",
 #' @slot dots The contents of the original call's ellipsis (...).
 #' @slot args The contents of the original call's \code{args} parameter. See
 #'   \code{\link{tsclust_args}}.
+#' @slot seed The random seed that was used.
 #'
 #' @section TSClusters:
 #'
@@ -112,6 +113,7 @@ setClass("tsclustFamily",
 #'     \item \code{proctime}
 #'     \item \code{dots}
 #'     \item \code{args}
+#'     \item \code{seed}
 #'   }
 #'
 #' @seealso
@@ -136,7 +138,8 @@ setClass("TSClusters",
 
                    proctime = "proc_time",
                    dots = "list",
-                   args = "ANY"))
+                   args = "ANY",
+                   seed = "integer"))
 
 #' @rdname TSClusters-class
 #' @exportClass PartitionalTSClusters

@@ -3,6 +3,7 @@
 ## Version 3.2.0
 * Added functions `compare_clusterings` and helpers to compare many clustering configurations, possibly in parallel.
 * Fixed an error in `tsclust` that prevented CVIs to be calculated for hierarchical/TADPole cases if a custom centroid function was used.
+* Added slot `seed` to the objects returned by `tsclust`.
 
 ## Version 3.1.2
 * The arguments in `tsclust`'s ellipsis are now passed to all preprocessing, centroid and distance functions.

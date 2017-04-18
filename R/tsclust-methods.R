@@ -943,7 +943,7 @@ setAs("dtwclust", "TSClusters",
           validObject(from)
 
           base <- methods::new(to, override.family = FALSE)
-          exclude_slots <- c("control", "family", "args")
+          exclude_slots <- c("control", "family", "args", "seed")
 
           to <- switch(from@type,
                        partitional = {
@@ -1060,6 +1060,8 @@ setAs("dtwclust", "TSClusters",
                                    max.iter = from@control@dba.iter,
                                    delta = from@control@delta)
           }
+
+          to@seed <- as.integer(from@call$seed)
 
           to
       })

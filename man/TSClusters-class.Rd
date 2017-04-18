@@ -60,6 +60,8 @@ this is obtained by calling \code{\link[stats]{cutree}} with the given value of 
 \item{\code{args}}{The contents of the original call's \code{args} parameter. See
 \code{\link{tsclust_args}}.}
 
+\item{\code{seed}}{The random seed that was used.}
+
 \item{\code{iter}}{The number of iterations used.}
 
 \item{\code{converged}}{A logical indicating whether the function converged.}
@@ -99,6 +101,7 @@ clustering.}
     \item \code{proctime}
     \item \code{dots}
     \item \code{args}
+    \item \code{seed}
   }
 }
 

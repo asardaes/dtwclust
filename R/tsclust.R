@@ -825,10 +825,12 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
     if (inherits(RET, "TSClusters")) {
         RET@proctime <- toc
+        RET@seed <- as.integer(seed)
 
     } else {
         RET <- lapply(RET, function(ret) {
             ret@proctime <- toc
+            ret@seed <- as.integer(seed)
 
             ret
         })
