@@ -16,8 +16,8 @@ Implementations
 ---------------
 
 -   Partitional, hierarchical and fuzzy clustering
--   k-Shape clustering
--   TADPole clustering
+    -   k-Shape clustering
+    -   TADPole clustering
 -   DTW Barycenter Averaging
 -   Keogh's and Lemire's DTW lower bounds
 -   Global alignment kernel distance
@@ -232,6 +232,7 @@ plot(hc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
 
 ![](README-parallel-1.png)
 
-### Disclaimer
+Disclaimer
+==========
 
 This software package was developed independently of any organization or institution that is or has been associated with the author.

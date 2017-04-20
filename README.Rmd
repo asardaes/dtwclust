@@ -38,8 +38,8 @@ Most optimizations require equal dimensionality, which means time series should 
 ## Implementations
 
 * Partitional, hierarchical and fuzzy clustering
-* k-Shape clustering
-* TADPole clustering
+    + k-Shape clustering
+    + TADPole clustering
 * DTW Barycenter Averaging
 * Keogh's and Lemire's DTW lower bounds
 * Global alignment kernel distance
@@ -166,6 +166,6 @@ registerDoSEQ()
 plot(hc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
 ```
 
-### Disclaimer
+# Disclaimer
 
 This software package was developed independently of any organization or institution that is or has been associated with the author.
