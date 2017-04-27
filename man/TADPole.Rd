@@ -18,24 +18,21 @@ is a time series. Multivariate series are not supported.}
 
 \item{error.check}{Should the data be checked for inconsistencies?}
 
-\item{lb}{Which lower bound to use, "lbk" for \code{\link{lb_keogh}} or "lbi" for
-\code{\link{lb_improved}}.}
+\item{lb}{Which lower bound to use, "lbk" for \code{\link[=lb_keogh]{lb_keogh()}} or "lbi" for \code{\link[=lb_improved]{lb_improved()}}.}
 }
 \value{
 A list with:
 \itemize{
-  \item \code{cl}: Cluster indices.
-  \item \code{centroids}: Indices of the centroids.
-  \item \code{distCalcPercentage}: Percentage of distance calculations that were actually
-    performed.
+\item \code{cl}: Cluster indices.
+\item \code{centroids}: Indices of the centroids.
+\item \code{distCalcPercentage}: Percentage of distance calculations that were actually performed.
 }
 }
 \description{
 Time-series Anytime Density Peaks Clustering as proposed by Begum et al. (2015).
 }
 \details{
-This function can be called either directly or through \code{\link{dtwclust}} and
-\code{\link{tsclust}}.
+This function can be called either directly or through \code{\link[=dtwclust]{dtwclust()}} and \code{\link[=tsclust]{tsclust()}}.
 
 TADPole clustering adopts a relatively new clustering framework and adapts it to time series
 clustering with DTW. See the cited article for the details of the algorithm.
@@ -46,27 +43,27 @@ this algorithm is deterministic, depending on the value of \code{dc}.
 
 The algorithm first uses the DTW's upper and lower bounds (Euclidean and LB_Keogh respectively)
 to find series with many close neighbors (in DTW space). Anything below the cutoff distance
-(\code{dc}) is considered a neighbor. Aided with this information, the algorithm then tries to
-prune as many DTW calculations as possible in order to accelerate the clustering procedure. The
-series that lie in dense areas (i.e. that have lots of neighbors) are taken as cluster centroids.
+(\code{dc}) is considered a neighbor. Aided with this information, the algorithm then tries to prune
+as many DTW calculations as possible in order to accelerate the clustering procedure. The series
+that lie in dense areas (i.e. that have lots of neighbors) are taken as cluster centroids.
 
 The algorithm relies on the DTW bounds, which are only defined for univariate time series of
 equal length.
 
-The windowing constraint uses a centered window. The calculations expect a value in
-\code{window.size} that represents the distance between the point considered and one of the edges
-of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
-observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
-in \code{10*2 + 1 = 21} observations falling within the window.
+The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
+that represents the distance between the point considered and one of the edges of the window.
+Therefore, if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i}
+considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10*2 + 1 = 21}
+observations falling within the window.
 }
 \section{Parallel Computing}{
 
 
-  Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
-  overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
+overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 
-  The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to
-  attempt to speed up the calculations (see the examples).
+The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to
+attempt to speed up the calculations (see the examples).
 }
 
 \examples{

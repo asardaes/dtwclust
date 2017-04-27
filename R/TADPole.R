@@ -10,57 +10,53 @@
 #' @param k The number of desired clusters.
 #' @param dc The cutoff distance.
 #' @param error.check Should the data be checked for inconsistencies?
-#' @param lb Which lower bound to use, "lbk" for \code{\link{lb_keogh}} or "lbi" for
-#'   \code{\link{lb_improved}}.
+#' @param lb Which lower bound to use, "lbk" for [lb_keogh()] or "lbi" for [lb_improved()].
 #'
 #' @details
 #'
-#' This function can be called either directly or through \code{\link{dtwclust}} and
-#' \code{\link{tsclust}}.
+#' This function can be called either directly or through [dtwclust()] and [tsclust()].
 #'
 #' TADPole clustering adopts a relatively new clustering framework and adapts it to time series
 #' clustering with DTW. See the cited article for the details of the algorithm.
 #'
 #' Because of the way the algorithm works, it can be considered a kind of Partitioning Around
 #' Medoids (PAM). This means that the cluster centroids are always elements of the data. However,
-#' this algorithm is deterministic, depending on the value of \code{dc}.
+#' this algorithm is deterministic, depending on the value of `dc`.
 #'
 #' The algorithm first uses the DTW's upper and lower bounds (Euclidean and LB_Keogh respectively)
 #' to find series with many close neighbors (in DTW space). Anything below the cutoff distance
-#' (\code{dc}) is considered a neighbor. Aided with this information, the algorithm then tries to
-#' prune as many DTW calculations as possible in order to accelerate the clustering procedure. The
-#' series that lie in dense areas (i.e. that have lots of neighbors) are taken as cluster centroids.
+#' (`dc`) is considered a neighbor. Aided with this information, the algorithm then tries to prune
+#' as many DTW calculations as possible in order to accelerate the clustering procedure. The series
+#' that lie in dense areas (i.e. that have lots of neighbors) are taken as cluster centroids.
 #'
 #' The algorithm relies on the DTW bounds, which are only defined for univariate time series of
 #' equal length.
 #'
-#' The windowing constraint uses a centered window. The calculations expect a value in
-#' \code{window.size} that represents the distance between the point considered and one of the edges
-#' of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
-#' observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
-#' in \code{10*2 + 1 = 21} observations falling within the window.
+#' The windowing constraint uses a centered window. The calculations expect a value in `window.size`
+#' that represents the distance between the point considered and one of the edges of the window.
+#' Therefore, if, for example, `window.size = 10`, the warping for an observation \eqn{x_i}
+#' considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in `10*2 + 1 = 21`
+#' observations falling within the window.
 #'
 #' @return A list with:
-#' \itemize{
-#'   \item \code{cl}: Cluster indices.
-#'   \item \code{centroids}: Indices of the centroids.
-#'   \item \code{distCalcPercentage}: Percentage of distance calculations that were actually
-#'     performed.
-#' }
+#'
+#'   - `cl`: Cluster indices.
+#'   - `centroids`: Indices of the centroids.
+#'   - `distCalcPercentage`: Percentage of distance calculations that were actually performed.
 #'
 #' @section Parallel Computing:
 #'
-#'   Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
+#'   Please note that running tasks in parallel does **not** guarantee faster computations. The
 #'   overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 #'
-#'   The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to
+#'   The user can register a parallel backend, e.g. with the `doParallel` package, in order to
 #'   attempt to speed up the calculations (see the examples).
 #'
 #' @references
 #'
 #' Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering
-#' with a Novel Admissible Pruning Strategy.'' In \emph{Conference on Knowledge Discovery and Data
-#' Mining}, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{
+#' with a Novel Admissible Pruning Strategy.'' In *Conference on Knowledge Discovery and Data
+#' Mining*, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{
 #' http://dx.doi.org/10.1145/2783258.2783286}.
 #'
 #' @examples
@@ -118,9 +114,9 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     ## NOTE: Euclidean is only valid as upper bound if 'symmetric1' step pattern is used
     UBM <- proxy::dist(x, x, method = "L2")
 
-    ## ============================================================================================================================
+    ## =============================================================================================
     ## Pruning during local density calculation
-    ## ============================================================================================================================
+    ## =============================================================================================
 
     ## Flag definition
     # 0 - DTW calculated, and it lies below dc
@@ -195,9 +191,9 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     else
         Rho <- (Rho - min(Rho)) / (max(Rho) - min(Rho))
 
-    ## ============================================================================================================================
+    ## =============================================================================================
     ## Pruning during NN distance calculation from higher density list (phase 1)
-    ## ============================================================================================================================
+    ## =============================================================================================
 
     RhoSorted <- sort(Rho, decreasing = TRUE, index.return = TRUE)
 
@@ -224,9 +220,9 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     ## New order
     TADPorder <- sort(Rho * deltaUB, decreasing = TRUE, index.return = TRUE)
 
-    ## ============================================================================================================================
+    ## =============================================================================================
     ## Pruning during NN distance calculation from higher density list (phase 2)
-    ## ============================================================================================================================
+    ## =============================================================================================
 
     # start at two
     i <- split_parallel(2L:n)
@@ -246,12 +242,14 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
                            ## If the distance was already computed before, don't do it again
                            indPre <- Flags[ii, indHDN] == 0L | Flags[ii, indHDN] == 1L
 
-                           ## 'delta' will have the distances to neighbors with higher densities. Initially filled with upper bound
+                           ## 'delta' will have the distances to neighbors with higher densities.
+                           ## Initially filled with upper bound
                            delta <- UBM[ii, indHDN]
                            ## If some distances were already computed, put them here
                            delta[indPre] <- D[ii, indHDN[indPre]]
 
-                           ## If the distance is not to be pruned nor previously calculated, compute it now
+                           ## If the distance is not to be pruned nor previously calculated,
+                           ## compute it now
                            indCompute <- !(indPrune | indPre)
 
                            if (any(indCompute)) {
@@ -277,9 +275,9 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
 
     NN <- c(-1L, DNN[ , 2L])
 
-    ## ============================================================================================================================
+    ## =============================================================================================
     ## Cluster assignment
-    ## ============================================================================================================================
+    ## =============================================================================================
 
     ## Normalize
     if (max(delta) == min(delta))
@@ -294,8 +292,8 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     cl <- rep(-1L, n)
     cl[C] <- 1L:k
 
-    ## Which elements don't have a label yet (this is ordered according to the density values of TADPorder,
-    ## because the assignment is sequential)
+    ## Which elements don't have a label yet (this is ordered according to the density values of
+    ## TADPorder, because the assignment is sequential)
     indCl <- TADPorder$ix
 
     ## Do the assignment (must be a loop)

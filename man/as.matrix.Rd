@@ -7,12 +7,12 @@
 as.matrix(x, ...)
 }
 \arguments{
-\item{x, ...}{See \code{\link[base]{as.matrix}}.}
+\item{x, ...}{See \code{\link[base:as.matrix]{base::as.matrix()}}.}
 }
 \description{
-\pkg{proxy} exported a non-generic \code{as.matrix} function. This is to re-export the base
-version and add some coercion methods for \code{pairdist} and \code{crossdist}.
+\pkg{proxy} exported a non-generic \code{as.matrix} function. This is to re-export the base version
+and add some coercion methods for \code{pairdist} and \code{crossdist}.
 }
 \seealso{
-\code{\link[base]{as.matrix}}
+\code{\link[base:as.matrix]{base::as.matrix()}}
 }

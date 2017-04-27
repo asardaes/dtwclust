@@ -1,4 +1,4 @@
-#' Control parameters for clusterings with \code{\link{tsclust}}
+#' Control parameters for clusterings with [tsclust()]
 #'
 #' Control parameters for fine-grained control.
 #'
@@ -11,10 +11,10 @@
 #'   each iteration if using PAM centroids. Otherwise calculate distances at every iteration.
 #' @param iter.max Integer. Maximum number of allowed iterations for partitional/fuzzy clustering.
 #' @param nrep Integer. How many times to repeat clustering with different starting points.
-#' @param symmetric Logical flag. Is the distance function symmetric? In other words, is
-#'   \code{dist(x,y)} == \code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be
-#'   computed. Overridden if the function detects an invalid user-provided value.
-#' @param packages Character vector with the names of any packages required for custom \code{proxy}
+#' @param symmetric Logical flag. Is the distance function symmetric? In other words, is `dist(x,y)`
+#'   == `dist(y,x)`? If `TRUE`, only half the distance matrix needs to be computed. Overridden if
+#'   the function detects an invalid user-provided value.
+#' @param packages Character vector with the names of any packages required for custom `proxy`
 #'   functions. Since the distance entries are re-registered in each parallel worker if needed, this
 #'   is probably useless, but just in case.
 #' @param distmat If available, the cross-distance matrix can be provided here. Only relevant for
@@ -52,9 +52,8 @@ partitional_control <- function(pam.precompute = TRUE,
 #' @export
 #'
 #' @param method Character vector with one or more linkage methods to use in hierarchical procedures
-#'   (see \code{\link[stats]{hclust}}), the character \code{"all"} to use all of the available ones,
-#'   or a function that performs hierarchical clustering based on distance matrices (e.g.
-#'   \code{\link[cluster]{diana}}).
+#'   (see [stats::hclust()]), the character `"all"` to use all of the available ones, or a function
+#'   that performs hierarchical clustering based on distance matrices (e.g. [cluster::diana()]).
 #'
 hierarchical_control <- function(method = "average",
                                  symmetric = FALSE,
@@ -90,7 +89,7 @@ hierarchical_control <- function(method = "average",
 #' @aliases tsclust-controls
 #' @export
 #'
-#' @param fuzziness Numeric. Exponent used for fuzzy clustering. Commonly termed \code{m} in the
+#' @param fuzziness Numeric. Exponent used for fuzzy clustering. Commonly termed `m` in the
 #'   literature.
 #' @param delta Numeric. Convergence criterion for fuzzy clustering.
 #'
@@ -120,7 +119,7 @@ fuzzy_control <- function(fuzziness = 2,
 #'
 #' @param dc The cutoff distance for the TADPole algorithm.
 #' @param window.size The window.size specifically for the TADPole algorithm.
-#' @param lb The lower bound to use with TADPole. Either \code{"lbk"} or \code{"lbi"}.
+#' @param lb The lower bound to use with TADPole. Either `"lbk"` or `"lbi"`.
 #'
 tadpole_control <- function(dc,
                             window.size,
@@ -144,15 +143,14 @@ tadpole_control <- function(dc,
 #' @aliases tsclust-controls
 #' @export
 #'
-#' @param preproc A list of arguments for a preprocessing function to be used in
-#'   \code{\link{tsclust}}.
-#' @param dist A list of arguments for a distance function to be used in \code{\link{tsclust}}.
-#' @param cent A list of arguments for a centroid function to be used in \code{\link{tsclust}}.
+#' @param preproc A list of arguments for a preprocessing function to be used in [tsclust()].
+#' @param dist A list of arguments for a distance function to be used in [tsclust()].
+#' @param cent A list of arguments for a centroid function to be used in [tsclust()].
 #'
 #' @details
 #'
-#' When using TADPole, the \code{dist} argument list includes the \code{window.size} and specifies
-#' \code{norm = "L2"}.
+#' When using TADPole, the `dist` argument list includes the `window.size` and specifies `norm =
+#' "L2"`.
 #'
 tsclust_args <- function(preproc = list(), dist = list(), cent = list())
 {

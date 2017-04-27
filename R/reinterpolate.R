@@ -1,15 +1,15 @@
 #' Wrapper for simple linear reinterpolation
 #'
-#' This function is just a wrapper for the native function \code{\link[stats]{approx}} to do simple
-#' linear reinterpolation. It also supports matrices, data frames, and lists of time series.
+#' This function is just a wrapper for the native function [stats::approx()] to do simple linear
+#' reinterpolation. It also supports matrices, data frames, and lists of time series.
 #'
 #' @export
 #'
 #' @param x Data to reinterpolate. Either a vector, a matrix/data.frame where each row is to be
 #'   reinterpolated, or a list of vectors/matrices.
 #' @param new.length Desired length of the output series.
-#' @param multivariate Is \code{x} a multivariate time series? It will be detected automatically if
-#'   a list is provided in \code{x}.
+#' @param multivariate Is `x` a multivariate time series? It will be detected automatically if a
+#'   list is provided in `x`.
 #'
 #' @details
 #'

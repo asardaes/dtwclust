@@ -12,15 +12,15 @@ reinterpolated, or a list of vectors/matrices.}
 
 \item{new.length}{Desired length of the output series.}
 
-\item{multivariate}{Is \code{x} a multivariate time series? It will be detected automatically if
-a list is provided in \code{x}.}
+\item{multivariate}{Is \code{x} a multivariate time series? It will be detected automatically if a
+list is provided in \code{x}.}
 }
 \value{
 Reinterpolated time series
 }
 \description{
-This function is just a wrapper for the native function \code{\link[stats]{approx}} to do simple
-linear reinterpolation. It also supports matrices, data frames, and lists of time series.
+This function is just a wrapper for the native function \code{\link[stats:approx]{stats::approx()}} to do simple linear
+reinterpolation. It also supports matrices, data frames, and lists of time series.
 }
 \details{
 Multivariate series must have time spanning the rows and variables spanning the columns.

@@ -14,13 +14,13 @@ compare_clusterings(series = NULL, types = c("p", "h", "f", "t"), ...,
 \item{series}{A list of series, a numeric matrix or a data frame. Matrices and data frames are
 coerced to a list row-wise.}
 
-\item{types}{Clustering types. It must be one of (possibly abbreviated): partitional,
+\item{types}{Clustering types. It must be any combination of (possibly abbreviated): partitional,
 hierarchical, fuzzy, tadpole.}
 
-\item{...}{Further arguments for \code{\link{tsclust}}, \code{score.clus} or \code{pick.clus}.}
+\item{...}{Further arguments for \code{\link[=tsclust]{tsclust()}}, \code{score.clus} or \code{pick.clus}.}
 
 \item{configs}{The list of data frames with the desired configurations to run. See
-\code{\link{compare_clusterings_configs}} and \code{\link{pdc_configs}}.}
+\code{\link[=pdc_configs]{pdc_configs()}} and \code{\link[=compare_clusterings_configs]{compare_clusterings_configs()}}.}
 
 \item{seed}{Seed for random reproducibility.}
 
@@ -30,23 +30,23 @@ hierarchical, fuzzy, tadpole.}
 (distance, centroid, preprocessing, etc.). The name "dtwclust" is added automatically. Relevant
 for parallel computation.}
 
-\item{score.clus}{A function that gets the list of results (and \code{...}) and scores each one.
-It may also be a named list of functions, one for each type of clustering.}
+\item{score.clus}{A function that gets the list of results (and \code{...}) and scores each one. It
+may also be a named list of functions, one for each type of clustering. See Scoring section.}
 
-\item{pick.clus}{A function that gets the result from \code{score.clus} as first argument, as
-well as the objects returned by \code{\link{tsclust}} (and elements of \code{...}) and picks
-the best result.}
+\item{pick.clus}{A function that gets the result from \code{score.clus} as first argument, as well as
+the objects returned by \code{\link[=tsclust]{tsclust()}} (and elements of \code{...}) and picks the best result.}
 
-\item{return.objects}{Logical indicating whether the objects from returned by
-\code{\link{tsclust}} should be given in the result.}
+\item{return.objects}{Logical indicating whether the objects from returned by \code{\link[=tsclust]{tsclust()}} should
+be given in the result.}
 }
 \value{
-A list with: \itemize{
-  \item \code{results}: A list of data frames with the flattened configs and the corresponding
-    scores returned by \code{score.clus}.
-  \item \code{scores}: The scores given by \code{score.clus}.
-  \item \code{pick}: The object returned by \code{pick.clus}.
-  \item \code{proc_time}: The measured function time, using \code{\link[base]{proc.time}}.
+A list with:
+\itemize{
+\item \code{results}: A list of data frames with the flattened configs and the corresponding scores
+returned by \code{score.clus}.
+\item \code{scores}: The scores given by \code{score.clus}.
+\item \code{pick}: The object returned by \code{pick.clus}.
+\item \code{proc_time}: The measured execution time, using \code{\link[base:proc.time]{base::proc.time()}}.
 }
 
 The cluster objects are also returned if \code{return.objects} \code{=} \code{TRUE}.
@@ -55,14 +55,55 @@ The cluster objects are also returned if \code{return.objects} \code{=} \code{TR
 Compare many different clustering algorithms with support for parallelization.
 }
 \details{
-This function calls \code{\link{tsclust}} with different configurations and evaluates the results
-with the provided functions. Parallel support is included. See the examples.
+This function calls \code{\link[=tsclust]{tsclust()}} with different configurations and evaluates the results with the
+provided functions. Parallel support is included. See the examples.
 
 Parameters specified in \code{configs} whose values are \code{NA} will be ignored automatically.
 
-The scoring and picking functions are for convenience, if they are not specified, the
-\code{scores} and \code{pick} elements of the result will be \code{NULL}.
+The scoring and picking functions are for convenience, if they are not specified, the \code{scores}
+and \code{pick} elements of the result will be \code{NULL}.
 }
+\section{Scoring}{
+
+
+The clustering results are organized in a \emph{list of lists} in the following way (where only
+applicable \code{types} exist; first-level list names in bold):
+\itemize{
+\item \strong{partitional} - list with
+\itemize{
+\item Clustering results from first partitional config
+\item etc.
+}
+\item \strong{hierarchical} - list with
+\itemize{
+\item Clustering results from first hierarchical config
+\item etc.
+}
+\item \strong{fuzzy} - list with
+\itemize{
+\item Clustering results from first fuzzy config
+\item etc.
+}
+\item \strong{tadpole} - list with
+\itemize{
+\item Clustering results from first tadpole config
+\item etc.
+}
+}
+
+If \code{score.clus} is a function, it will be applied to the available partitional, hierarchical,
+fuzzy and/or tadpole results via:\preformatted{scores <- lapply(list_of_lists, score.clus, ...)
+}
+
+Otherwise, \code{score.clus} should be a list of functions with the same names as the list above,
+so that \code{score.clus$partitional} is used to score \code{list_of_lists$partitional} and so on (via
+\code{\link[base:mapply]{base::mapply()}} with \code{SIMPLIFY} \code{=} \code{FALSE}).
+
+Therefore, the scores returned shall always be a list of lists with first-level names as above.
+These scores and the list of clustering results are given to \code{pick.clus} as first and second
+arguments respectively, followed by \code{...}.
+}
+
 \examples{
 ## Fuzzy preprocessing: calculate autocorrelation up to 50th lag
 acf_fun <- function(dat, ...) {
@@ -294,7 +335,7 @@ comparison_partitional <- compare_clusterings(CharTraj, types = "p",
 }
 }
 \seealso{
-\code{\link{compare_clusterings_configs}}, \code{\link{tsclust}}
+\code{\link[=compare_clusterings_configs]{compare_clusterings_configs()}}, \code{\link[=tsclust]{tsclust()}}
 }
 \author{
 Alexis Sarda-Espinosa

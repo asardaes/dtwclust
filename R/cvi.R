@@ -6,8 +6,8 @@
 #' @export
 #' @exportMethod cvi
 #'
-#' @param a An object returned by the \code{\link{dtwclust}} or \code{\link{tsclust}} function, or a
-#'   vector that can be coerced to integers which indicate the cluster memeberships.
+#' @param a An object returned by the [dtwclust()] or [tsclust()] function, or a vector that can be
+#'   coerced to integers which indicate the cluster memeberships.
 #' @param b If needed, a vector that can be coerced to integers which indicate the cluster
 #'   memeberships. The ground truth (if known) should be provided here.
 #' @param type Character vector indicating which indices are to be computed. See supported values
@@ -44,16 +44,13 @@
 #'
 #' @section External CVIs:
 #'
-#'   The first 4 CVIs are calculated via \code{\link[flexclust]{comPart}}, so please refer to that
-#'   function.
+#'   The first 4 CVIs are calculated via [flexclust::comPart()], so please refer to that function.
 #'
-#'   \itemize{
-#'     \item \code{"RI"}: Rand Index (to be maximized).
-#'     \item \code{"ARI"}: Adjusted Rand Index (to be maximized).
-#'     \item \code{"J"}: Jaccard Index (to be maximized).
-#'     \item \code{"FM"}: Fowlkes-Mallows (to be maximized).
-#'     \item \code{"VI"}: Variation of Information (Meila (2003); to be minimized).
-#'   }
+#'   * `"RI"`: Rand Index (to be maximized).
+#'   * `"ARI"`: Adjusted Rand Index (to be maximized).
+#'   * `"J"`: Jaccard Index (to be maximized).
+#'   * `"FM"`: Fowlkes-Mallows (to be maximized).
+#'   * `"VI"`: Variation of Information (Meila (2003); to be minimized).
 #'
 #' @section Internal CVIs:
 #'
@@ -63,32 +60,28 @@
 #'
 #'   The indices marked with a question mark (?) depend on the extracted centroids, so bear that in
 #'   mind if a hierarchical procedure was used and/or the centroid function has associated
-#'   randomness (such as \code{\link{shape_extraction}} with series of different length).
+#'   randomness (such as [shape_extraction()] with series of different length).
 #'
-#'   The indices marked with a tilde (~) require the calculation of a global centroid. Since
-#'   \code{\link{DBA}} and \code{\link{shape_extraction}} (for series of different length) have some
-#'   randomness associated, these indices might not be appropriate for those centroids.
+#'   The indices marked with a tilde (~) require the calculation of a global centroid. Since [DBA()]
+#'   and [shape_extraction()] (for series of different length) have some randomness associated,
+#'   these indices might not be appropriate for those centroids.
 #'
-#'   \itemize{
-#'     \item \code{"Sil"} (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
-#'     \item \code{"D"} (!): Dunn index (Arbelaitz et al. (2013); to be maximized).
-#'     \item \code{"COP"} (!): COP index (Arbelaitz et al. (2013); to be minimized).
-#'     \item \code{"DB"} (?): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
-#'     \item \code{"DBstar"} (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005);
-#'     to be minimized).
-#'     \item \code{"CH"} (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
-#'     \item \code{"SF"} (~): Score Function (Saitta et al. (2007); to be maximized).
-#'   }
+#'   - `"Sil"` (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
+#'   - `"D"` (!): Dunn index (Arbelaitz et al. (2013); to be maximized).
+#'   - `"COP"` (!): COP index (Arbelaitz et al. (2013); to be minimized).
+#'   - `"DB"` (?): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
+#'   - `"DBstar"` (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005); to be
+#'     minimized).
+#'   - `"CH"` (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
+#'   - `"SF"` (~): Score Function (Saitta et al. (2007); to be maximized).
 #'
 #' @section Additionally:
 #'
-#'   \itemize{
-#'     \item \code{"valid"}: Returns all valid indices depending on the type of \code{a} and whether
-#'       \code{b} was provided or not.
-#'     \item \code{"internal"}: Returns all internal CVIs. Only supported for
-#'       \code{\link{dtwclust-class}} and \code{\link{TSClusters-class}} objects.
-#'     \item \code{"external"}: Returns all external CVIs. Requires \code{b} to be provided.
-#'   }
+#'   - `"valid"`: Returns all valid indices depending on the type of `a` and whether `b` was
+#'     provided or not.
+#'   - `"internal"`: Returns all internal CVIs. Only supported for [dtwclust-class] and
+#'     [TSClusters-class] objects.
+#'   - `"external"`: Returns all external CVIs. Requires `b` to be provided.
 #'
 #' @note
 #'
@@ -96,8 +89,8 @@
 #' used. The implementations here change this, making use of whatever distance/centroid was chosen
 #' during clustering.
 #'
-#' Some internal indices require the original data for calculations, so the control flag
-#' \code{save.data} must be set to \code{TRUE} when running the clustering algorithm.
+#' Some internal indices require the original data for calculations, so the control flag `save.data`
+#' must be set to `TRUE` when running the clustering algorithm.
 #'
 #' The formula for the SF index in Saitta et al. (2007) does not correspond to the one in Arbelaitz
 #' et al. (2013). The one specified in the former is used here.

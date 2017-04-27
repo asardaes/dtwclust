@@ -11,13 +11,13 @@
 #'
 #' @details
 #'
-#' The windowing constraint uses a centered window. The calculations expect a value in
-#' \code{window.size} that represents the distance between the point considered and one of the edges
-#' of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
-#' observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
-#' in \code{10(2) + 1 = 21} observations falling within the window.
+#' The windowing constraint uses a centered window. The calculations expect a value in `window.size`
+#' that represents the distance between the point considered and one of the edges of the window.
+#' Therefore, if, for example, `window.size = 10`, the warping for an observation \eqn{x_i}
+#' considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in `10(2) + 1 = 21`
+#' observations falling within the window.
 #'
-#' @return A list with two elements (lower and upper envelops): \code{lower} and \code{upper}.
+#' @return A list with two elements (lower and upper envelops): `lower` and `upper`.
 #'
 #' @note
 #'
@@ -25,8 +25,8 @@
 #'
 #' @references
 #'
-#' Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .''
-#' \emph{Pattern Recognition}, \strong{42}(9), pp. 2169 - 2180. ISSN 0031-3203,
+#' Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .'' *Pattern
+#' Recognition*, **42**(9), pp. 2169 - 2180. ISSN 0031-3203,
 #' \url{http://dx.doi.org/10.1016/j.patcog.2008.11.030},
 #' \url{http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
 #'

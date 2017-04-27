@@ -10,12 +10,12 @@
   "centers"), symmetric = FALSE, ...)
 }
 \arguments{
-\item{object, data, method, symmetric, ...}{See \code{\link[flexclust]{clusterSim}}.}
+\item{object, data, method, symmetric, ...}{See \code{\link[flexclust:clusterSim]{flexclust::clusterSim()}}.}
 }
 \description{
 Returns a matrix of cluster similarities. Currently two methods for computing similarities of
 clusters are implemented. This generic is included in the \pkg{flexclust} package.
 }
 \seealso{
-\code{\link[flexclust]{clusterSim}}
+\code{\link[flexclust:clusterSim]{flexclust::clusterSim()}}
 }

@@ -5,16 +5,16 @@
 \alias{tsclustFamily-class}
 \title{Class definition for \code{tsclustFamily}}
 \description{
-Formal S4 class with a family of functions used in \code{\link{tsclust}}.
+Formal S4 class with a family of functions used in \code{\link[=tsclust]{tsclust()}}.
 }
 \details{
 The custom implementations also handle parallelization.
 
-Since the distance function makes use of \code{proxy}, it also supports any extra
-\code{\link[proxy]{dist}} parameters in \code{...}.
+Since the distance function makes use of \code{proxy}, it also supports any extra \code{\link[proxy:dist]{proxy::dist()}}
+parameters in \code{...}.
 
-The prototype includes the \code{cluster} function for partitional methods, as well as a
-pass-through \code{preproc} function.
+The prototype includes the \code{cluster} function for partitional methods, as well as a pass-through
+\code{preproc} function.
 }
 \section{Slots}{
 
@@ -25,8 +25,7 @@ pass-through \code{preproc} function.
 
 \item{\code{cluster}}{The function used to assign a series to a cluster.}
 
-\item{\code{preproc}}{The function used to preprocess the data (relevant for
-\code{\link[stats]{predict}}).}
+\item{\code{preproc}}{The function used to preprocess the data (relevant for \code{\link[stats:predict]{stats::predict()}}).}
 }}
 
 \examples{

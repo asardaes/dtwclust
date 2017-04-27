@@ -7,56 +7,55 @@
 #' @param X A matrix or data frame where each row is a time series, or a list where each element is
 #'   a time series. Multivariate series should be provided as a list of matrices where time spans
 #'   the rows and the variables span the columns of each matrix.
-#' @param centroid Optionally, a time series to use as reference. Defaults to a random series of
-#'   \code{X} if \code{NULL}. For multivariate series, this should be a matrix with the same
-#'   characteristics as the matrices in \code{X}.
-#' @param ... Further arguments for \code{\link{dtw_basic}}. However, the following are already pre-
-#'   specified: \code{window.size}, \code{norm} (passed along), \code{backtrack} and \code{gcm}.
-#' @param window.size Window constraint for the DTW calculations. \code{NULL} means no constraint. A
+#' @param centroid Optionally, a time series to use as reference. Defaults to a random series of `X`
+#'   if `NULL`. For multivariate series, this should be a matrix with the same characteristics as
+#'   the matrices in `X`.
+#' @param ... Further arguments for [dtw_basic()]. However, the following are already pre-
+#'   specified: `window.size`, `norm` (passed along), `backtrack` and `gcm`.
+#' @param window.size Window constraint for the DTW calculations. `NULL` means no constraint. A
 #'   slanted band is used by default.
 #' @param norm Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for
 #'   Euclidean distance.
 #' @param max.iter Maximum number of iterations allowed.
-#' @param delta At iteration \code{i}, if \code{all(abs(centroid_{i}} \code{ - centroid_{i-1})}
-#'   \code{ < delta)}, convergence is assumed.
+#' @param delta At iteration `i`, if `all(abs(centroid_{i}` `-` `centroid_{i-1})` `< delta)`,
+#'   convergence is assumed.
 #' @param error.check Should inconsistencies in the data be checked?
-#' @param trace If \code{TRUE}, the current iteration is printed to output.
+#' @param trace If `TRUE`, the current iteration is printed to output.
 #'
 #' @details
 #'
 #' This function tries to find the optimum average series between a group of time series in DTW
 #' space. Refer to the cited article for specific details on the algorithm.
 #'
-#' If a given series reference is provided in \code{centroid}, the algorithm should always converge
-#' to the same result provided the elements of \code{X} keep the same values, although their order
-#' may change.
+#' If a given series reference is provided in `centroid`, the algorithm should always converge to
+#' the same result provided the elements of `X` keep the same values, although their order may
+#' change.
 #'
-#' The windowing constraint uses a centered window. The calculations expect a value in
-#' \code{window.size} that represents the distance between the point considered and one of the edges
-#' of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
-#' observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
-#' in \code{10(2) + 1 = 21} observations falling within the window.
+#' The windowing constraint uses a centered window. The calculations expect a value in `window.size`
+#' that represents the distance between the point considered and one of the edges of the window.
+#' Therefore, if, for example, `window.size = 10`, the warping for an observation \eqn{x_i}
+#' considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in `10(2) + 1 = 21`
+#' observations falling within the window.
 #'
 #' @return The average time series.
 #'
 #' @section Parallel Computing:
 #'
-#'   Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
+#'   Please note that running tasks in parallel does **not** guarantee faster computations. The
 #'   overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 #'
-#'   The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to
+#'   The user can register a parallel backend, e.g. with the `doParallel` package, in order to
 #'   attempt to speed up the calculations (see the examples).
 #'
 #' @note
 #'
-#' The indices of the DTW alignment are obtained by calling \code{\link{dtw_basic}} with
-#' \code{backtrack = TRUE}.
+#' The indices of the DTW alignment are obtained by calling [dtw_basic()] with `backtrack = TRUE`.
 #'
 #' @references
 #'
 #' Petitjean F, Ketterlin A and Gancarski P (2011). ``A global averaging method for dynamic time
-#' warping, with applications to clustering.'' \emph{Pattern Recognition}, \strong{44}(3), pp. 678 -
-#' 693. ISSN 0031-3203, \url{http://dx.doi.org/10.1016/j.patcog.2010.09.013},
+#' warping, with applications to clustering.'' *Pattern Recognition*, **44**(3), pp. 678 - 693. ISSN
+#' 0031-3203, \url{http://dx.doi.org/10.1016/j.patcog.2010.09.013},
 #' \url{http://www.sciencedirect.com/science/article/pii/S003132031000453X}.
 #'
 #' @examples

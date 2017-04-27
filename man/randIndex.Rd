@@ -21,12 +21,12 @@
   original = !correct)
 }
 \arguments{
-\item{x, y, correct, original}{See \code{\link[flexclust]{randIndex}}.}
+\item{x, y, correct, original}{See \code{\link[flexclust:randIndex]{flexclust::randIndex()}}.}
 }
 \description{
 Compute the (adjusted) Rand, Jaccard and Fowlkes-Mallows index for agreement of two partitions.
 This generic is included in the \code{flexclust} package.
 }
 \seealso{
-\code{\link[flexclust]{randIndex}}
+\code{\link[flexclust:randIndex]{flexclust::randIndex()}}
 }

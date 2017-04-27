@@ -1,6 +1,6 @@
-#' Class definition for \code{tsclustFamily}
+#' Class definition for `tsclustFamily`
 #'
-#' Formal S4 class with a family of functions used in \code{\link{tsclust}}.
+#' Formal S4 class with a family of functions used in [tsclust()].
 #'
 #' @exportClass tsclustFamily
 #'
@@ -8,17 +8,16 @@
 #'
 #' The custom implementations also handle parallelization.
 #'
-#' Since the distance function makes use of \code{proxy}, it also supports any extra
-#' \code{\link[proxy]{dist}} parameters in \code{...}.
+#' Since the distance function makes use of `proxy`, it also supports any extra [proxy::dist()]
+#' parameters in `...`.
 #'
-#' The prototype includes the \code{cluster} function for partitional methods, as well as a
-#' pass-through \code{preproc} function.
+#' The prototype includes the `cluster` function for partitional methods, as well as a pass-through
+#' `preproc` function.
 #'
 #' @slot dist The function to calculate the distance matrices.
 #' @slot allcent The function to calculate centroids on each iteration.
 #' @slot cluster The function used to assign a series to a cluster.
-#' @slot preproc The function used to preprocess the data (relevant for
-#'   \code{\link[stats]{predict}}).
+#' @slot preproc The function used to preprocess the data (relevant for [stats::predict()]).
 #'
 #' @examples
 #'
@@ -51,7 +50,7 @@ setClass("tsclustFamily",
                                })
 )
 
-#' Class definition for \code{TSClusters} and derived classes
+#' Class definition for `TSClusters` and derived classes
 #'
 #' Formal S4 classes for time-series clusters. See class hierarchy and slot organization at the
 #' bottom.
@@ -61,64 +60,63 @@ setClass("tsclustFamily",
 #'
 #' @details
 #'
-#' The base class is \code{TSClusters}. The 3 classes that inherit from it are:
-#' \code{PartitionalTSClusters}, \code{HierarchicalTSClusters} and \code{FuzzyTSClusters}.
+#' The base class is `TSClusters`. The 3 classes that inherit from it are: `PartitionalTSClusters`,
+#' `HierarchicalTSClusters` and `FuzzyTSClusters`.
 #'
-#' \code{HierarchicalTSClusters} also contain \code{\link[stats]{hclust}} as parent class.
+#' `HierarchicalTSClusters` also contain [stats::hclust()] as parent class.
 #'
 #' Package \pkg{clue} is supported, but generics from \pkg{flexclust} are not. See also
-#' \code{\link{tsclusters-methods}}.
+#' [tsclusters-methods].
 #'
-#' If you want to transform a \code{\link{dtwclust-class}} object to TSClusters, just use
-#' \code{as(dtwclust_obj, "TSClusters")}, although it may not work perfectly.
+#' If you want to transform a [dtwclust-class] object to TSClusters, just use:
+#'
+#' `as(dtwclust_obj, "TSClusters")`
+#'
+#' although it may not work perfectly.
 #'
 #' @slot call The function call.
-#' @slot family An object of class \code{\link{tsclustFamily-class}}.
-#' @slot control An appropriate control object for \code{\link{tsclust}}. See
-#'   \code{\link{tsclust-controls}}.
+#' @slot family An object of class [tsclustFamily-class].
+#' @slot control An appropriate control object for [tsclust()]. See [tsclust-controls].
 #' @slot datalist The provided data in the form of a list, where each element is a time series.
-#' @slot type A string indicating one of the supported clustering types of \code{\link{tsclust}}.
+#' @slot type A string indicating one of the supported clustering types of [tsclust()].
 #' @slot distance A string indicating the distance used.
 #' @slot centroid A string indicating the centroid used.
 #' @slot preproc A string indicating the preprocessing used.
 #' @slot k Integer indicating the number of desired clusters.
 #' @slot cluster Integer vector indicating which cluster a series belongs to (crisp partition). For
-#'   fuzzy clustering, this is based on \strong{distance}, not on \code{fcluster}. For hierarchical,
-#'   this is obtained by calling \code{\link[stats]{cutree}} with the given value of \code{k}.
+#'   fuzzy clustering, this is based on **distance**, not on `fcluster`. For hierarchical, this is
+#'   obtained by calling [stats::cutree()] with the given value of `k`.
 #' @slot centroids A list with the centroid time series.
 #' @slot distmat If computed, the cross-distance matrix.
-#' @slot proctime Time during function execution, as measured with \code{\link[base]{proc.time}}.
+#' @slot proctime Time during function execution, as measured with [base::proc.time()].
 #' @slot dots The contents of the original call's ellipsis (...).
-#' @slot args The contents of the original call's \code{args} parameter. See
-#'   \code{\link{tsclust_args}}.
+#' @slot args The contents of the original call's `args` parameter. See [tsclust_args()].
 #' @slot seed The random seed that was used.
 #'
 #' @section TSClusters:
 #'
 #'   The base class contains the following slots:
 #'
-#'   \itemize{
-#'     \item \code{call}
-#'     \item \code{family}
-#'     \item \code{control}
-#'     \item \code{datalist}
-#'     \item \code{type}
-#'     \item \code{distance}
-#'     \item \code{centroid}
-#'     \item \code{preproc}
-#'     \item \code{k}
-#'     \item \code{cluster}
-#'     \item \code{centroids}
-#'     \item \code{distmat}
-#'     \item \code{proctime}
-#'     \item \code{dots}
-#'     \item \code{args}
-#'     \item \code{seed}
-#'   }
+#'   - `call`
+#'   - `family`
+#'   - `control`
+#'   - `datalist`
+#'   - `type`
+#'   - `distance`
+#'   - `centroid`
+#'   - `preproc`
+#'   - `k`
+#'   - `cluster`
+#'   - `centroids`
+#'   - `distmat`
+#'   - `proctime`
+#'   - `dots`
+#'   - `args`
+#'   - `seed`
 #'
 #' @seealso
 #'
-#' \code{\link{tsclusters-methods}}
+#' [tsclusters-methods]
 #'
 setClass("TSClusters",
          slots = c(call = "call",
@@ -146,9 +144,9 @@ setClass("TSClusters",
 #'
 #' @slot iter The number of iterations used.
 #' @slot converged A logical indicating whether the function converged.
-#' @slot clusinfo A data frame with two columns: \code{size} indicates the number of series each
-#'   cluster has, and \code{av_dist} indicates, for each cluster, the average distance between
-#'   series and their respective centroids (crisp partition).
+#' @slot clusinfo A data frame with two columns: `size` indicates the number of series each cluster
+#'   has, and `av_dist` indicates, for each cluster, the average distance between series and their
+#'   respective centroids (crisp partition).
 #' @slot cldist A column vector with the distance between each series in the data and its
 #'   corresponding centroid (crisp partition).
 #'
@@ -156,12 +154,10 @@ setClass("TSClusters",
 #'
 #'   This class adds the following slots to the base class:
 #'
-#'   \itemize{
-#'     \item \code{iter}
-#'     \item \code{converged}
-#'     \item \code{clusinfo}
-#'     \item \code{cldist}
-#'   }
+#'   - `iter`
+#'   - `converged`
+#'   - `clusinfo`
+#'   - `cldist`
 #'
 setClass("PartitionalTSClusters", contains = c("TSClusters"),
          slots = c(iter = "integer",
@@ -178,11 +174,9 @@ setClass("PartitionalTSClusters", contains = c("TSClusters"),
 #'
 #'   This class adds the following slots to the base class:
 #'
-#'   \itemize{
-#'     \item \code{method}
-#'     \item \code{clusinfo}
-#'     \item \code{cldist}
-#'   }
+#'   - `method`
+#'   - `clusinfo`
+#'   - `cldist`
 #'
 setClass("HierarchicalTSClusters", contains = c("TSClusters", "hclust"),
          slots = c(method = "character",
@@ -200,11 +194,9 @@ setClass("HierarchicalTSClusters", contains = c("TSClusters", "hclust"),
 #'
 #'   This class adds the following slots to the base class:
 #'
-#'   \itemize{
-#'     \item \code{iter}
-#'     \item \code{converged}
-#'     \item \code{fcluster}
-#'   }
+#'   - `iter`
+#'   - `converged`
+#'   - `fcluster`
 #'
 setClass("FuzzyTSClusters", contains = c("TSClusters"),
          slots = c(iter = "integer",

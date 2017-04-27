@@ -16,9 +16,8 @@ SBD(x, y, znorm = FALSE, error.check = TRUE)
 \value{
 A list with:
 \itemize{
-  \item \code{dist}: The shape-based distance between \code{x} and \code{y}.
-  \item \code{yshift}: A shifted version of \code{y} so that it optimally matches \code{x} (based
-    on \code{\link{NCCc}}).
+\item \code{dist}: The shape-based distance between \code{x} and \code{y}.
+\item \code{yshift}: A shifted version of \code{y} so that it optimally matches \code{x} (based on \code{\link[=NCCc]{NCCc()}}).
 }
 }
 \description{
@@ -29,16 +28,16 @@ Distance based on coefficient-normalized cross-correlation as proposed by Paparr
 This distance works best if the series are \emph{z-normalized}. If not, at least they should have
 appropriate amplitudes, since the values of the signals \strong{do} affect the outcome.
 
-If \code{x} and \code{y} do \strong{not} have the same length, it would be best if the longer
-sequence is provided in \code{y}, because it will be shifted to match \code{x}. After matching,
-the series may have to be truncated or extended and padded with zeros if needed.
+If \code{x} and \code{y} do \strong{not} have the same length, it would be best if the longer sequence is
+provided in \code{y}, because it will be shifted to match \code{x}. After matching, the series may have to
+be truncated or extended and padded with zeros if needed.
 
 The output values lie between 0 and 2, with 0 indicating perfect similarity.
 }
 \note{
 If you wish to calculate the distance between several time series, it would be better to use the
-version registered with the \code{proxy} package, since it includes some small optimizations. See
-the examples.
+version registered with the \code{proxy} package, since it includes some small optimizations. See the
+examples.
 
 This distance is calculated with help of the Fast Fourier Transform, so it can be sensitive to
 numerical precision. Thus, this function (and the functions that depend on it) might return
@@ -58,10 +57,9 @@ sbD <- proxy::dist(CharTraj[1:10], CharTraj[1:10], method = "SBD", znorm = TRUE)
 }
 \references{
 Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.''
-In \emph{Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data},
-series SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9,
-\url{http://doi.org/10.1145/2723372.2737793}.
+In \emph{Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data}, series
+SIGMOD '15, pp. 1855-1870. ISBN 978-1-4503-2758-9, \url{http://doi.org/10.1145/2723372.2737793}.
 }
 \seealso{
-\code{\link{NCCc}}, \code{\link{shape_extraction}}
+\code{\link[=NCCc]{NCCc()}}, \code{\link[=shape_extraction]{shape_extraction()}}
 }

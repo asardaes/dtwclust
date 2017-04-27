@@ -10,13 +10,12 @@ compare_clusterings_configs(types = c("p", "h", "f"), k = 2L,
   centroids = pdc_configs("centroid", default = list()))
 }
 \arguments{
-\item{types}{Clustering types. It must be one of (possibly abbreviated): partitional,
+\item{types}{Clustering types. It must be any combination of (possibly abbreviated): partitional,
 hierarchical, fuzzy, tadpole.}
 
 \item{k}{A numeric vector with one or more elements specifying the number of clusters to test.}
 
-\item{controls}{A named list of \code{\link{tsclust-controls}}. \code{NULL} means defaults. See
-details.}
+\item{controls}{A named list of \link{tsclust-controls}. \code{NULL} means defaults. See details.}
 
 \item{preprocs}{Preprocessing configurations. See details.}
 
@@ -25,22 +24,20 @@ details.}
 \item{centroids}{Centroid configurations. See details.}
 }
 \value{
-A list for each clustering type, each of which includes a data frame with the computed and
-merged configurations. Each data frame has an extra attribute \code{num.configs} specifying the
-number of configurations.
+A list for each clustering type, each of which includes a data frame with the computed and merged
+configurations. Each data frame has an extra attribute \code{num.configs} specifying the number of
+configurations.
 }
 \description{
-Create configurations for \code{\link{compare_clusterings}}
+Create configurations for \code{\link[=compare_clusterings]{compare_clusterings()}}
 }
 \details{
-This function uses \code{\link[base]{expand.grid}} and \code{\link[base]{merge}}.
+This function uses \code{\link[base:expand.grid]{base::expand.grid()}} and \code{\link[base:merge]{base::merge()}}.
 
 Preprocessing, distance and centroid configurations are specified with the helper function
-\code{\link{pdc_configs}}, but using the examples in \code{\link{compare_clusterings}} as basis
-might be easier to understand.
+\code{\link[=pdc_configs]{pdc_configs()}}, refer to the examples in \code{\link[=compare_clusterings]{compare_clusterings()}} to see how this is used.
 
-The controls list must have one nested list of controls for the desired clustering types. Each
-nested list may be specified with the usual \code{\link{tsclust-controls}} functions. The names
-must correspond to "partitional", "hierarchical", "fuzzy" or "tadpole" clustering. Again,
-please refer to the examples in \code{\link{compare_clusterings}}.
+The controls list may be specified with the usual \link{tsclust-controls} functions. The names  of
+the list must correspond to "partitional", "hierarchical", "fuzzy" or "tadpole" clustering.
+Again, please refer to the examples in \code{\link[=compare_clusterings]{compare_clusterings()}}.
 }

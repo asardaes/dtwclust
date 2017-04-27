@@ -1,17 +1,17 @@
 #' Wrapper for z-normalization
 #'
-#' Wrapper for function \code{\link[base]{scale}} that returns zeros instead of \code{NaN}. It also
-#' supports matrices, data frames, and lists of time series.
+#' Wrapper for function [base::scale()] that returns zeros instead of `NaN`. It also supports
+#' matrices, data frames, and lists of time series.
 #'
 #' @export
 #'
 #' @param x Data to normalize. Either a vector, a matrix/data.frame where each row is to be
 #'   normalized, or a list of vectors/matrices.
-#' @param ... Further arguments to pass to \code{\link[base]{scale}}.
-#' @param multivariate Is \code{x} a multivariate time series? It will be detected automatically if
-#'   a list is provided in \code{x}.
-#' @param keep.attributes Should the mean and standard deviation returned by
-#'   \code{\link[base]{scale}} be preserved?
+#' @param ... Further arguments to pass to [base::scale()].
+#' @param multivariate Is `x` a multivariate time series? It will be detected automatically if a
+#'   list is provided in `x`.
+#' @param keep.attributes Should the mean and standard deviation returned by [base::scale()] be
+#'   preserved?
 #'
 #' @details
 #'

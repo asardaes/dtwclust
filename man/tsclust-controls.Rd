@@ -11,7 +11,7 @@
 \alias{tsclust-controls}
 \alias{tsclust_args}
 \alias{tsclust-controls}
-\title{Control parameters for clusterings with \code{\link{tsclust}}}
+\title{Control parameters for clusterings with \code{\link[=tsclust]{tsclust()}}}
 \usage{
 partitional_control(pam.precompute = TRUE, iter.max = 100L, nrep = 1L,
   symmetric = FALSE, packages = character(0L), distmat = NULL)
@@ -34,9 +34,9 @@ each iteration if using PAM centroids. Otherwise calculate distances at every it
 
 \item{nrep}{Integer. How many times to repeat clustering with different starting points.}
 
-\item{symmetric}{Logical flag. Is the distance function symmetric? In other words, is
-\code{dist(x,y)} == \code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be
-computed. Overridden if the function detects an invalid user-provided value.}
+\item{symmetric}{Logical flag. Is the distance function symmetric? In other words, is \code{dist(x,y)}
+== \code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be computed. Overridden if
+the function detects an invalid user-provided value.}
 
 \item{packages}{Character vector with the names of any packages required for custom \code{proxy}
 functions. Since the distance entries are re-registered in each parallel worker if needed, this
@@ -46,9 +46,8 @@ is probably useless, but just in case.}
 partitional with PAM centroids or hierarchical procedures.}
 
 \item{method}{Character vector with one or more linkage methods to use in hierarchical procedures
-(see \code{\link[stats]{hclust}}), the character \code{"all"} to use all of the available ones,
-or a function that performs hierarchical clustering based on distance matrices (e.g.
-\code{\link[cluster]{diana}}).}
+(see \code{\link[stats:hclust]{stats::hclust()}}), the character \code{"all"} to use all of the available ones, or a function
+that performs hierarchical clustering based on distance matrices (e.g. \code{\link[cluster:diana]{cluster::diana()}}).}
 
 \item{fuzziness}{Numeric. Exponent used for fuzzy clustering. Commonly termed \code{m} in the
 literature.}
@@ -61,12 +60,11 @@ literature.}
 
 \item{lb}{The lower bound to use with TADPole. Either \code{"lbk"} or \code{"lbi"}.}
 
-\item{preproc}{A list of arguments for a preprocessing function to be used in
-\code{\link{tsclust}}.}
+\item{preproc}{A list of arguments for a preprocessing function to be used in \code{\link[=tsclust]{tsclust()}}.}
 
-\item{dist}{A list of arguments for a distance function to be used in \code{\link{tsclust}}.}
+\item{dist}{A list of arguments for a distance function to be used in \code{\link[=tsclust]{tsclust()}}.}
 
-\item{cent}{A list of arguments for a centroid function to be used in \code{\link{tsclust}}.}
+\item{cent}{A list of arguments for a centroid function to be used in \code{\link[=tsclust]{tsclust()}}.}
 }
 \description{
 Control parameters for fine-grained control.
@@ -75,6 +73,5 @@ Control parameters for fine-grained control.
 The functions essentially return their function arguments in a classed list, although some checks
 are performed.
 
-When using TADPole, the \code{dist} argument list includes the \code{window.size} and specifies
-\code{norm = "L2"}.
+When using TADPole, the \code{dist} argument list includes the \code{window.size} and specifies \code{norm = "L2"}.
 }

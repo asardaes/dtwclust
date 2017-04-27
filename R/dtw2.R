@@ -1,13 +1,13 @@
 #' DTW distance with L2 norm
 #'
-#' Wrapper for the \code{\link[dtw]{dtw}} function using L2 norm for both the local cost matrix
-#' (LCM) creation as well as the final cost aggregation step.
+#' Wrapper for the [dtw::dtw()] function using L2 norm for both the local cost matrix (LCM) creation
+#' as well as the final cost aggregation step.
 #'
 #' @export
 #'
 #' @param x,y A time series. A multivariate series should have time spanning the rows and variables
 #'   spanning the columns.
-#' @param ... Further arguments for \code{\link[dtw]{dtw}}.
+#' @param ... Further arguments for [dtw::dtw()].
 #'
 #' @details
 #'
@@ -18,19 +18,19 @@
 #' the L-norm used. After the warping path is found by DTW, the final distance is calculated as the
 #' L-norm of all \eqn{(i,j)} elements of the LCM that fall on the warping path.
 #'
-#' The \code{\link[dtw]{dtw}} function allows changing the norm by means of its \code{dist.method}
-#' parameter, but it only uses it when creating the LCM, and not when calculating the final
-#' aggregated cost, i.e. the DTW distance.
+#' The [dtw::dtw()] function allows changing the norm by means of its `dist.method` parameter, but
+#' it only uses it when creating the LCM, and not when calculating the final aggregated cost, i.e.
+#' the DTW distance.
 #'
 #' This wrapper simply returns the appropriate DTW distance using L2 norm (Euclidean norm).
 #'
-#' The windowing constraint uses a centered window. The calculations expect a value in
-#' \code{window.size} that represents the distance between the point considered and one of the edges
-#' of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
-#' observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
-#' in \code{10(2) + 1 = 21} observations falling within the window.
+#' The windowing constraint uses a centered window. The calculations expect a value in `window.size`
+#' that represents the distance between the point considered and one of the edges of the window.
+#' Therefore, if, for example, `window.size = 10`, the warping for an observation \eqn{x_i}
+#' considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in `10(2) + 1 = 21`
+#' observations falling within the window.
 #'
-#' @return An object of class \code{dtw}.
+#' @return An object of class `dtw`.
 #'
 dtw2 <- function(x, y, ...) {
     lcm <- proxy::dist(x, y, method = "L1")

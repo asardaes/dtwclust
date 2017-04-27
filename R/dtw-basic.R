@@ -1,44 +1,42 @@
 #' Basic DTW distance
 #'
 #' This is a custom implementation of the DTW algorithm without all the functionality included in
-#' \code{\link[dtw]{dtw}}. Because of that, it should be slightly faster, while still supporting the
-#' most common options.
+#' [dtw::dtw()]. Because of that, it should be slightly faster, while still supporting the most
+#' common options.
 #'
 #' @export
 #'
 #' @param x,y Time series. Multivariate series must have time spanning the rows and variables
 #'   spanning the columns.
-#' @param window.size Size for slanted band window. \code{NULL} means no constraint.
+#' @param window.size Size for slanted band window. `NULL` means no constraint.
 #' @param norm Norm for the DTW calculation, "L1" for Manhattan or "L2" for Euclidean.
-#' @param step.pattern Step pattern for DTW. Only \code{symmetric1} or \code{symmetric2} supported
-#'   here. See \code{\link[dtw]{stepPattern}}.
+#' @param step.pattern Step pattern for DTW. Only `symmetric1` or `symmetric2` supported here. Note
+#'   that these are *not* characters. See [dtw::stepPattern].
 #' @param backtrack Also compute the warping path between series? See details.
-#' @param normalize Should the distance be normalized? Only supported for \code{symmetric2}.
+#' @param normalize Should the distance be normalized? Only supported for `symmetric2`.
 #' @param ... Currently ignored.
 #' @param gcm Optionally, a matrix to use for the global cost matrix calculations. It should have
-#'   \code{NROW(y)+1} columns and \code{NROW(x)+1} rows for \code{backtrack = TRUE} \strong{or}
-#'   \code{2} rows for \code{backtrack = FALSE}. Used internally for memory optimization. If
-#'   provided, it \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel
-#'   version in \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.
+#'   `NROW(y)+1` columns and `NROW(x)+1` rows for `backtrack = TRUE` **or** `2` rows for `backtrack
+#'   = FALSE`. Used internally for memory optimization. If provided, it **will** be modified *in
+#'   place* by `C` code, except in the parallel version in [proxy::dist()] which ignores it for
+#'   thread-safe reasons.
 #' @param error.check Check data inconsistencies?
 #'
 #' @details
 #'
-#' If \code{backtrack} is \code{TRUE}, the mapping of indices between series is returned in a list.
+#' If `backtrack` is `TRUE`, the mapping of indices between series is returned in a list.
 #'
-#' The windowing constraint uses a centered window. The calculations expect a value in
-#' \code{window.size} that represents the distance between the point considered and one of the edges
-#' of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
-#' observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
-#' in \code{10(2) + 1 = 21} observations falling within the window.
+#' The windowing constraint uses a centered window. The calculations expect a value in `window.size`
+#' that represents the distance between the point considered and one of the edges of the window.
+#' Therefore, if, for example, `window.size = 10`, the warping for an observation \eqn{x_i}
+#' considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in `10(2) + 1 = 21`
+#' observations falling within the window.
 #'
-#' @return The DTW distance. For \code{backtrack} \code{=} \code{TRUE}, a list with:
+#' @return The DTW distance. For `backtrack` `=` `TRUE`, a list with:
 #'
-#' \itemize{
-#'   \item \code{distance}: The DTW distance.
-#'   \item \code{index1}: \code{x} indices for the matched elements in the warping path.
-#'   \item \code{index2}: \code{y} indices for the matched elements in the warping path.
-#' }
+#'   - `distance`: The DTW distance.
+#'   - `index1`: `x` indices for the matched elements in the warping path.
+#'   - `index2`: `y` indices for the matched elements in the warping path.
 #'
 #' @note
 #'

@@ -1,76 +1,70 @@
 #' Time series clustering
 #'
-#' This is the original main function to perform time series clustering. It supports partitional,
-#' hierarchical, fuzzy, k-Shape and TADPole clustering. See \code{\link{tsclust}} for the new
-#' interface. Please note that possible updates will only be implemented in the new function.
+#' This is the *old* main function to perform time series clustering. It supports partitional,
+#' hierarchical, fuzzy, k-Shape and TADPole clustering. See [tsclust()] for the new interface.
+#' Please note that possible updates will only be implemented in the new function.
 #'
 #' @export
 #'
 #' @param data A list of series, a numeric matrix or a data frame. Matrices and data frames are
 #'   coerced row-wise.
-#' @param type What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"},
-#'   \code{"tadpole"} or \code{"fuzzy"}.
+#' @param type What type of clustering method to use: `"partitional"`, `"hierarchical"`, `"tadpole"`
+#'   or `"fuzzy"`.
 #' @param k Number of desired clusters. It may be a numeric vector with different values.
 #' @param method Character vector with one or more linkage methods to use in hierarchical procedures
-#'   (see \code{\link[stats]{hclust}}) or a function that performs hierarchical clustering based on
-#'   distance matrices (e.g. \code{\link[cluster]{diana}}). See Hierarchical section for more
-#'   details.
-#' @param distance A supported distance from \code{proxy}'s \code{\link[proxy]{dist}} (see Distance
-#'   section). Ignored for \code{type} = \code{"tadpole"}.
+#'   (see [stats::hclust()]) or a function that performs hierarchical clustering based on distance
+#'   matrices (e.g. [cluster::diana()]). See Hierarchical section for more details.
+#' @param distance A supported distance from [proxy::dist()] (see Distance section). Ignored for
+#'   `type` = `"tadpole"`.
 #' @param centroid Either a supported string or an appropriate function to calculate centroids when
 #'   using partitional or prototypes for hierarchical/tadpole methods. See Centroid section.
-#' @param preproc Function to preprocess data. Defaults to \code{\link{zscore}} \emph{only} if
-#'   \code{centroid} \code{=} \code{"shape"}, but will be replaced by a custom function if provided.
-#'   See Preprocessing section.
-#' @param dc Cutoff distance for the \code{\link{TADPole}} algorithm.
-#' @param control Named list of parameters or \code{dtwclustControl} object for clustering
-#'   algorithms. See \code{\link{dtwclustControl}}. \code{NULL} means defaults.
+#' @param preproc Function to preprocess data. Defaults to [zscore()] *only* if `centroid` `=`
+#'   `"shape"`, but will be replaced by a custom function if provided. See Preprocessing section.
+#' @param dc Cutoff distance for the [TADPole()] algorithm.
+#' @param control Named list of parameters or `dtwclustControl` object for clustering algorithms.
+#'   See [dtwclustControl]. `NULL` means defaults.
 #' @param seed Random seed for reproducibility.
 #' @param distmat If a cross-distance matrix is already available, it can be provided here so it's
-#'   re-used. Only relevant if \code{centroid} = "pam" or \code{type} = "hierarchical". See
-#'   examples.
-#' @param ... Additional arguments to pass to \code{\link[proxy]{dist}} or a custom function
-#'   (preprocessing, centroid, etc.)
+#'   re-used. Only relevant if `centroid` = "pam" or `type` = "hierarchical". See examples.
+#' @param ... Additional arguments to pass to [proxy::dist()] or a custom function (preprocessing,
+#'   centroid, etc.)
 #'
 #' @details
 #'
 #' Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering
-#' is done with \code{\link[stats]{hclust}}. TADPole clustering uses the \code{\link{TADPole}}
-#' function. Specifying \code{type} = \code{"partitional"}, \code{distance} = \code{"sbd"} and
-#' \code{centroid} = \code{"shape"} is equivalent to the k-Shape algorithm (Paparrizos and Gravano
-#' 2015).
+#' is done with [stats::hclust()]. TADPole clustering uses the [TADPole()] function. Specifying
+#' `type` = `"partitional"`, `distance` = `"sbd"` and `centroid` = `"shape"` is equivalent to the
+#' k-Shape algorithm (Paparrizos and Gravano 2015).
 #'
-#' The \code{data} may be a matrix, a data frame or a list. Matrices and data frames are coerced to
-#' a list, both row-wise. Only lists can have series with different lengths or multiple dimensions.
+#' The `data` may be a matrix, a data frame or a list. Matrices and data frames are coerced to a
+#' list, both row-wise. Only lists can have series with different lengths or multiple dimensions.
 #' Most of the optimizations require series to have the same length, so consider reinterpolating
-#' them to save some time (see Ratanamahatana and Keogh 2004; \code{\link{reinterpolate}}). No
-#' missing values are allowed.
+#' them to save some time (see Ratanamahatana and Keogh 2004; [reinterpolate()]). No missing values
+#' are allowed.
 #'
 #' In the case of multivariate time series, they should be provided as a list of matrices, where
-#' time spans the rows of each matrix and the variables span the columns. At the moment, only
-#' \code{DTW}, \code{DTW2} and \code{GAK} suppport such series, which means only partitional and
-#' hierarchical procedures using those distances will work. You can of course create your own custom
-#' distances. All included centroid functions should work with the aforementioned format, although
-#' \code{shape} is \strong{not} recommended. Note that the \code{plot} method will simply append all
-#' dimensions (columns) one after the other.
+#' time spans the rows of each matrix and the variables span the columns. At the moment, only `DTW`,
+#' `DTW2` and `GAK` suppport such series, which means only partitional and hierarchical procedures
+#' using those distances will work. You can of course create your own custom distances. All included
+#' centroid functions should work with the aforementioned format, although `shape` is **not**
+#' recommended. Note that the `plot` method will simply append all dimensions (columns) one after
+#' the other.
 #'
-#' Several parameters can be adjusted with the \code{control} argument. See
-#' \code{\link{dtwclustControl}}. In the following sections, elements marked with an asterisk (*)
-#' are those that can be adjutsed with this argument.
+#' Several parameters can be adjusted with the `control` argument. See [dtwclustControl]. In the
+#' following sections, elements marked with an asterisk (*) are those that can be adjutsed with this
+#' argument.
 #'
 #' @return
 #'
-#' An object with formal class \code{\link{dtwclust-class}}.
+#' An object with formal class [dtwclust-class].
 #'
-#' If \code{control@nrep > 1} and a partitional procedure is used, \code{length(method)} \code{> 1}
-#' and hierarchical procedures are used, or \code{length(k)} \code{>} \code{1}, a list of objects is
-#' returned.
+#' If `control@nrep > 1` and a partitional procedure is used, `length(method)` `> 1` and
+#' hierarchical procedures are used, or `length(k)` `>` `1`, a list of objects is returned.
 #'
 #' @section Partitional Clustering:
 #'
-#'   Stochastic algorithm that creates a hard partition of the data into \code{k} clusters, where
-#'   each cluster has a centroid. In case of time series clustering, the centroids are also time
-#'   series.
+#'   Stochastic algorithm that creates a hard partition of the data into `k` clusters, where each
+#'   cluster has a centroid. In case of time series clustering, the centroids are also time series.
 #'
 #'   The cluster centroids are first randomly initialized by selecting some of the series in the
 #'   data. The distance between each series and each centroid is calculated, and the series are
@@ -82,10 +76,10 @@
 #'
 #'   Note that it is possible for a cluster to become empty, in which case a new cluster is
 #'   reinitialized randomly. However, if you see that the algorithm doesn't converge or the overall
-#'   distance sum increases, it could mean that the chosen value of \code{k} is too large, or the
-#'   chosen distance measure is not able to assess similarity effectively. The random
-#'   reinitialization attempts to enforce a certain number of clusters, but can result in
-#'   instability in the aforementioned cases.
+#'   distance sum increases, it could mean that the chosen value of `k` is too large, or the chosen
+#'   distance measure is not able to assess similarity effectively. The random reinitialization
+#'   attempts to enforce a certain number of clusters, but can result in instability in the
+#'   aforementioned cases.
 #'
 #' @section Fuzzy Clustering:
 #'
@@ -95,45 +89,43 @@
 #'
 #'   The default implementation uses the fuzzy c-means algorithm. In its definition, an objective
 #'   function is to be minimized. The objective is defined in terms of a squared distance, which is
-#'   usually the Euclidean (L2) distance, although the definition could be modified. The
-#'   \code{distance} parameter of this function controls the one that is utilized. The fuzziness of
-#'   the clustering can be controlled by means of the fuzziness exponent*. Bear in mind that the
-#'   centroid definition of fuzzy c-means requires equal dimensions, which means that all series
-#'   must have the same length. This problem can be circumvented by applying transformations to the
-#'   series (see for example D'Urso and Maharaj (2009)).
+#'   usually the Euclidean (L2) distance, although the definition could be modified. The `distance`
+#'   parameter of this function controls the one that is utilized. The fuzziness of the clustering
+#'   can be controlled by means of the fuzziness exponent*. Bear in mind that the centroid
+#'   definition of fuzzy c-means requires equal dimensions, which means that all series must have
+#'   the same length. This problem can be circumvented by applying transformations to the series
+#'   (see for example D'Urso and Maharaj (2009)).
 #'
 #'   Note that the fuzzy clustering could be transformed to a crisp one by finding the highest
 #'   membership coefficient. Some of the slots of the object returned by this function assume this,
-#'   so be careful with interpretation (see \code{\link{dtwclust-class}}).
+#'   so be careful with interpretation (see [dtwclust-class]).
 #'
 #' @section Hierarchical Clustering:
 #'
 #'   This is (by default) a deterministic algorithm that creates a hierarchy of groups by using
-#'   different linkage methods (see \code{\link[stats]{hclust}}). The linkage method is controlled
-#'   through the \code{method} parameter of this function, which can be a character vector with
-#'   several methods, with the additional option "all" that uses all of the available methods in
-#'   \code{\link[stats]{hclust}}. The distance to be used can be controlled with the \code{distance}
-#'   parameter.
+#'   different linkage methods (see [stats::hclust()]). The linkage method is controlled through the
+#'   `method` parameter of this function, which can be a character vector with several methods, with
+#'   the additional option "all" that uses all of the available methods in [stats::hclust()]. The
+#'   distance to be used can be controlled with the `distance` parameter.
 #'
-#'   Optionally, \code{method} may be a \strong{function} that performs the hierarchical clustering
-#'   based on a distance matrix, such as the functions included in package \pkg{cluster}. The
-#'   function will receive the \code{dist} object as first argument (see
-#'   \code{\link[stats]{as.dist}}), followed by the elements in \code{...} that match the its formal
-#'   arguments. The object it returns must support the \code{\link[stats]{as.hclust}} generic so
-#'   that \code{\link[stats]{cutree}} can be used. See the examples.
+#'   Optionally, `method` may be a **function** that performs the hierarchical clustering based on a
+#'   distance matrix, such as the functions included in package \pkg{cluster}. The function will
+#'   receive the `dist` object as first argument (see [stats::as.dist()]), followed by the elements
+#'   in `...` that match the its formal arguments. The object it returns must support the
+#'   [stats::as.hclust()] generic so that [stats::cutree()] can be used. See the examples.
 #'
 #'   The hierarchy does not imply a specific number of clusters, but one can be induced by cutting
-#'   the resulting dendrogram (see \code{\link[stats]{cutree}}). This results in a crisp partition,
-#'   and some of the slots of the returned object are calculated by cutting the dendrogram so that
-#'   \code{k} clusters are created.
+#'   the resulting dendrogram (see [stats::cutree()]). This results in a crisp partition, and some
+#'   of the slots of the returned object are calculated by cutting the dendrogram so that `k`
+#'   clusters are created.
 #'
 #' @section TADPole Clustering:
 #'
 #'   TADPole clustering adopts a relatively new clustering framework and adapts it to time series
 #'   clustering with DTW. Because of the way it works, it can be considered a kind of Partitioning
 #'   Around Medoids (PAM). This means that the cluster centroids are always elements of the data.
-#'   However, this algorithm is deterministic, depending on the value of the cutoff distance
-#'   \code{dc}, which can be controlled with the corresponding parameter of this function.
+#'   However, this algorithm is deterministic, depending on the value of the cutoff distance `dc`,
+#'   which can be controlled with the corresponding parameter of this function.
 #'
 #'   The algorithm relies on the DTW lower bounds, which are only defined for time series of equal
 #'   length. Additionally, it requires a window constraint* for DTW. See the Sakoe-Chiba constraint
@@ -150,17 +142,13 @@
 #'   following parameters with the shown names (examples for partitional clustering are shown in
 #'   parenthesis):
 #'
-#'   \itemize{
-#'     \item \code{"x"}: The \emph{whole} data list (\code{list(ts1, ts2, ts3)})
-#'     \item \code{"cl_id"}: A numeric vector with length equal to the number of series in
-#'       \code{data}, indicating which cluster a series belongs to (\code{c(1L, 2L, 2L)})
-#'     \item \code{"k"}: The desired number of total clusters (\code{2L})
-#'     \item \code{"cent"}: The current centroids in order, in a list (\code{list(centroid1,
-#'       centroid2)})
-#'     \item \code{"cl_old"}: The membership vector of the \emph{previous} iteration (\code{c(1L,
-#'       1L, 2L)})
-#'     \item The elements of \code{...} that match its formal arguments
-#'   }
+#'   - `x`: The *whole* data list (`list(ts1, ts2, ts3)`)
+#'   - `cl_id`: A numeric vector with length equal to the number of series in `data`, indicating
+#'     which cluster a series belongs to (`c(1L, 2L, 2L)`)
+#'   - `k`: The desired number of total clusters (`2L`)
+#'   - `cent`: The current centroids in order, in a list (`list(centroid1, centroid2)`)
+#'   - `cl_old`: The membership vector of the *previous* iteration (`c(1L, 1L, 2L)`)
+#'   - The elements of `...` that match its formal arguments
 #'
 #'   In case of fuzzy clustering, the membership vectors (2nd and 5th elements above) are matrices
 #'   with number of rows equal to amount of elements in the data, and number of columns equal to the
@@ -169,140 +157,127 @@
 #'   The other option is to provide a character string for the custom implementations. The following
 #'   options are available:
 #'
-#'   \itemize{
-#'     \item "mean": The average along each dimension. In other words, the average of all
-#'       \eqn{x^j_i} among the \eqn{j} series that belong to the same cluster for all time points
-#'       \eqn{t_i}.
-#'     \item "median": The median along each dimension. Similar to mean.
-#'     \item "shape": Shape averaging. By default, all series are z-normalized in this case, since
-#'       the resulting centroids will also have this normalization. See
-#'       \code{\link{shape_extraction}} for more details.
-#'     \item "dba": DTW Barycenter Averaging. See \code{\link{DBA}} for more details.
-#'     \item "pam": Partition around medoids (PAM). This basically means that the cluster centroids
-#'       are always one of the time series in the data. In this case, the distance matrix can be
-#'       pre-computed once using all time series in the data and then re-used at each iteration. It
-#'       usually saves overhead overall.
-#'     \item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and used by default in that
-#'       case.
-#'     \item "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering. It \strong{always}
-#'       precomputes the whole cross-distance matrix.
-#'   }
+#'   - "mean": The average along each dimension. In other words, the average of all \eqn{x^j_i}
+#'   among the \eqn{j} series that belong to the same cluster for all time points \eqn{t_i}.
+#'   - "median": The median along each dimension. Similar to mean.
+#'   - "shape": Shape averaging. By default, all series are z-normalized in this case, since the
+#'     resulting centroids will also have this normalization. See [shape_extraction()] for more
+#'     details.
+#'   - "dba": DTW Barycenter Averaging. See [DBA()] for more details.
+#'   - "pam": Partition around medoids (PAM). This basically means that the cluster centroids are
+#'     always one of the time series in the data. In this case, the distance matrix can be
+#'     pre-computed once using all time series in the data and then re-used at each iteration. It
+#'     usually saves overhead overall for small datasets.
+#'   - "fcm": Fuzzy c-means. Only supported for fuzzy clustering and used by default in that case.
+#'   - "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering. It **always** precomputes the
+#'     whole cross-distance matrix.
 #'
 #'   These check for the special cases where parallelization might be desired. Note that only
-#'   \code{shape}, \code{dba} and \code{pam} support series of different length. Also note that, for
-#'   \code{shape} and \code{dba}, this support has a caveat: the final centroids' length will depend
-#'   on the length of those series that were randomly chosen at the beginning of the clustering
-#'   algorithm. For example, if the series in the dataset have a length of either 10 or 15, 2
-#'   clusters are desired, and the initial choice selects two series with length of 10, the final
-#'   centroids will have this same length.
+#'   `shape`, `dba` and `pam` support series of different length. Also note that, for `shape` and
+#'   `dba`, this support has a caveat: the final centroids' length will depend on the length of
+#'   those series that were randomly chosen at the beginning of the clustering algorithm. For
+#'   example, if the series in the dataset have a length of either 10 or 15, 2 clusters are desired,
+#'   and the initial choice selects two series with length of 10, the final centroids will have this
+#'   same length.
 #'
 #'   As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid
 #'   function that takes a list of series as only input and returns a single centroid series. These
-#'   centroids are returned in the \code{centroids} slot. By default, a type of PAM centroid
-#'   function is used.
+#'   centroids are returned in the `centroids` slot. By default, a type of PAM centroid function is
+#'   used.
 #'
 #' @section Distance Measures:
 #'
 #'   The distance measure to be used with partitional, hierarchical and fuzzy clustering can be
-#'   modified with the \code{distance} parameter. The supported option is to provide a string, which
-#'   must represent a compatible distance registered with \code{proxy}'s \code{\link[proxy]{dist}}.
-#'   Registration is done via \code{\link[proxy]{pr_DB}}, and extra parameters can be provided in
-#'   \code{...}.
+#'   modified with the `distance` parameter. The supported option is to provide a string, which must
+#'   represent a compatible distance registered with `proxy`'s [proxy::dist()]. Registration is done
+#'   via [proxy::pr_DB()], and extra parameters can be provided in `...`.
 #'
 #'   Note that you are free to create your own distance functions and register them. Optionally, you
-#'   can use one of the following custom implementations (all registered with \code{proxy}):
+#'   can use one of the following custom implementations (all registered with `proxy`):
 #'
-#'   \itemize{
-#'     \item \code{"dtw"}: DTW, optionally with a Sakoe-Chiba/Slanted-band constraint*.
-#'     \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint*.
-#'       Read details below.
-#'     \item \code{"dtw_basic"}: A custom version of DTW with less functionality, but slightly
-#'       faster. See \code{\link{dtw_basic}}.
-#'     \item \code{"dtw_lb"}: DTW with L1 or L2 norm* and optionally a Sakoe-Chiba constraint*. Some
-#'       computations are avoided by first estimating the distance matrix with Lemire's lower bound
-#'       and then iteratively refining with DTW. See \code{\link{dtw_lb}}. Not suitable for
-#'       \code{pam.precompute}* = \code{TRUE}.
-#'     \item \code{"lbk"}: Keogh's lower bound with either L1 or L2 norm* for the Sakoe-Chiba
-#'       constraint*.
-#'     \item \code{"lbi"}: Lemire's lower bound with either L1 or L2 norm* for the Sakoe-Chiba
-#'       constraint*.
-#'     \item \code{"sbd"}: Shape-based distance. See \code{\link{SBD}} for more details.
-#'     \item \code{"gak"}: Global alignment kernels. See \code{\link{GAK}} for more details.
-#'   }
+#'   - `"dtw"`: DTW, optionally with a Sakoe-Chiba/Slanted-band constraint*.
+#'   - `"dtw2"`: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint*. Read
+#'     details below.
+#'   - `"dtw_basic"`: A custom version of DTW with less functionality, but slightly faster. See
+#'     [dtw_basic()].
+#'   - `"dtw_lb"`: DTW with L1 or L2 norm* and optionally a Sakoe-Chiba constraint*. Some
+#'     computations are avoided by first estimating the distance matrix with Lemire's lower bound
+#'     and then iteratively refining with DTW. See [dtw_lb()]. Not suitable for `pam.precompute`* =
+#'     `TRUE`.
+#'   - `"lbk"`: Keogh's lower bound with either L1 or L2 norm* for the Sakoe-Chiba constraint*.
+#'   - `"lbi"`: Lemire's lower bound with either L1 or L2 norm* for the Sakoe-Chiba constraint*.
+#'   - `"sbd"`: Shape-based distance. See [SBD()] for more details.
+#'   - `"gak"`: Global alignment kernels. See [GAK()] for more details.
 #'
-#'   DTW2 is done with \code{\link[dtw]{dtw}}, but it differs from the result you would obtain if
-#'   you specify \code{L2} as \code{dist.method}: with \code{DTW2}, pointwise distances (the local
-#'   cost matrix) are calculated with \code{L1} norm, \emph{each} element of the matrix is squared
-#'   and the result is fed into \code{\link[dtw]{dtw}}, which finds the optimum warping path. The
-#'   square root of the resulting distance is \emph{then} computed. See \code{\link{dtw2}}.
+#'   DTW2 is done with [dtw::dtw()], but it differs from the result you would obtain if you specify
+#'   `L2` as `dist.method`: with `DTW2`, pointwise distances (the local cost matrix) are calculated
+#'   with `L1` norm, *each* element of the matrix is squared and the result is fed into
+#'   [dtw::dtw()], which finds the optimum warping path. The square root of the resulting distance
+#'   is *then* computed. See [dtw2()].
 #'
-#'   Only \code{dtw}, \code{dtw2}, \code{sbd} and \code{gak} support series of different length. The
-#'   lower bounds are probably unsuitable for direct clustering unless series are very easily
-#'   distinguishable.
+#'   Only `dtw`, `dtw2`, `sbd` and `gak` support series of different length. The lower bounds are
+#'   probably unsuitable for direct clustering unless series are very easily distinguishable.
 #'
-#'   If you create your own distance, register it with \code{proxy}, and it includes the ellipsis
-#'   (\code{...}) in its definition, it will receive the following parameters*:
+#'   If you create your own distance, register it with `proxy`, and it includes the ellipsis (`...`)
+#'   in its definition, it will receive the following parameters*:
 #'
-#'   \itemize{
-#'     \item \code{window.type}: Either \code{"none"} for a \code{NULL} \code{window.size}, or
-#'       \code{"slantedband"} otherwise
-#'     \item \code{window.size}: The provided window size
-#'     \item \code{norm}: The provided desired norm
-#'     \item \code{...}: Any additional parameters provided in the original call's ellipsis
-#'   }
+#'   - `window.type`: Either `"none"` for a `NULL` `window.size`, or `"slantedband"` otherwise
+#'   - `window.size`: The provided window size
+#'   - `norm`: The provided desired norm
+#'   - `...`: Any additional parameters provided in the original call's ellipsis
 #'
 #'   Whether your function makes use of them or not, is up to you.
 #'
 #'   If you know that the distance function is symmetric, and you use a hierarchical algorithm, or a
-#'   partitional algorithm with PAM centroids and \code{pam.precompute}* = \code{TRUE}, some time
-#'   can be saved by calculating only half the distance matrix. Therefore, consider setting the
-#'   symmetric* control parameter to \code{TRUE} if this is the case.
+#'   partitional algorithm with PAM centroids and `pam.precompute`* = `TRUE`, some time can be saved
+#'   by calculating only half the distance matrix. Therefore, consider setting the symmetric*
+#'   control parameter to `TRUE` if this is the case.
 #'
 #' @section Sakoe-Chiba Constraint:
 #'
 #'   A global constraint to speed up the DTW calculations is the Sakoe-Chiba band (Sakoe and Chiba,
 #'   1978). To use it, a window size* must be defined.
 #'
-#'   The windowing constraint uses a centered window. The function expects a value in
-#'   \code{window.size} that represents the distance between the point considered and one of the
-#'   edges of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
-#'   observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
-#'   in \code{10(2) + 1 = 21} observations falling within the window.
+#'   The windowing constraint uses a centered window. The function expects a value in `window.size`
+#'   that represents the distance between the point considered and one of the edges of the window.
+#'   Therefore, if, for example, `window.size = 10`, the warping for an observation \eqn{x_i}
+#'   considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in `10(2) + 1 = 21`
+#'   observations falling within the window.
 #'
-#'   The computations actually use a \code{slantedband} window, which is equivalent to the
-#'   Sakoe-Chiba one if series have equal length, and stays along the diagonal of the local cost
-#'   matrix if series have different length.
+#'   The computations actually use a `slantedband` window, which is equivalent to the Sakoe-Chiba
+#'   one if series have equal length, and stays along the diagonal of the local cost matrix if
+#'   series have different length.
 #'
 #' @section Preprocessing:
 #'
-#'   It is strongly advised to use z-normalization in case of \code{centroid = "shape"}, because the
-#'   resulting series have this normalization (see \code{\link{shape_extraction}}). Therefore,
-#'   \code{\link{zscore}} is the default in this case. The user can, however, specify a custom
-#'   function that performs any transformation on the data, but the user must make sure that the
-#'   format stays consistent, i.e. a list of time series.
+#'   It is strongly advised to use z-normalization in case of `centroid = "shape"`, because the
+#'   resulting series have this normalization (see [shape_extraction()]). Therefore, [zscore()] is
+#'   the default in this case. The user can, however, specify a custom function that performs any
+#'   transformation on the data, but the user must make sure that the format stays consistent, i.e.
+#'   a list of time series.
 #'
-#'   Setting to \code{NULL} means no preprocessing (except for \code{centroid = "shape"}). A
-#'   provided function will receive the data as first argument, followed by the contents of
-#'   \code{...} that match its formal arguments.
+#'   Setting to `NULL` means no preprocessing (except for `centroid = "shape"`). A provided function
+#'   will receive the data as first argument, followed by the contents of `...` that match its
+#'   formal arguments.
 #'
-#'   It is convenient to provide this function if you're planning on using the
-#'   \code{\link[stats]{predict}} generic.
+#'   It is convenient to provide this function if you're planning on using the [stats::predict()]
+#'   generic.
 #'
 #' @section Repetitions:
 #'
 #'   Due to their stochastic nature, partitional clustering is usually repeated* several times with
 #'   different random seeds to allow for different starting points. This function uses
-#'   \code{\link[rngtools]{RNGseq}} to obtain different seed streams for each repetition, utilizing
-#'   the \code{seed} parameter (if provided) to initialize it. If more than one repetition is made,
-#'   the streams are returned in an attribute called \code{rng}.
+#'   [rngtools::RNGseq()] to obtain different seed streams for each repetition, utilizing the `seed`
+#'   parameter (if provided) to initialize it. If more than one repetition is made, the streams are
+#'   returned in an attribute called `rng`.
 #'
 #'   Technically, you can also perform random repetitions for fuzzy clustering, although it might be
 #'   difficult to evaluate the results, since they are usually evaluated relative to each other and
 #'   not in an absolute way. Ideally, the groups wouldn't change too much once the algorithm
 #'   converges.
 #'
-#'   Multiple values of \code{k} can also be provided to get different partitions using any
-#'   \code{type} of clustering.
+#'   Multiple values of `k` can also be provided to get different partitions using any `type` of
+#'   clustering.
 #'
 #'   Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is
 #'   precomputed*, since said matrix is reused for every repetition, and can be comptued in parallel
@@ -310,23 +285,23 @@
 #'
 #' @section Parallel Computing:
 #'
-#'   Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
+#'   Please note that running tasks in parallel does **not** guarantee faster computations. The
 #'   overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 #'
-#'   The user can register a parallel backend, for eample with the \code{doParallel} package, in
-#'   order to do the repetitions in parallel, as well as distance and some centroid calculations.
+#'   The user can register a parallel backend, for eample with the `doParallel` package, in order to
+#'   do the repetitions in parallel, as well as distance and some centroid calculations.
 #'
 #'   Unless each repetition requires a few seconds, parallel computing probably isn't worth it. As
-#'   such, I would only use this feature with \code{shape} and \code{DBA} centroids, or an expensive
-#'   distance function like \code{DTW}.
+#'   such, I would only use this feature with `shape` and `DBA` centroids, or an expensive distance
+#'   function like `DTW`.
 #'
 #'   If you register a parallel backend, the function will also try to do the calculation of the
 #'   distance matrices in parallel. This should work with any function registered with
-#'   \code{\link[proxy]{dist}} via \code{\link[proxy]{pr_DB}} whose \code{loop} flag is set to
-#'   \code{TRUE}. If the function requires special packages to be loaded, provide their names in the
-#'   \code{packages}* slot of \code{control}. Note that "dtwclust" is always loaded in each parallel
-#'   worker, so that doesn't need to be included. Alternatively, you may want to pre-load
-#'   \code{dtwclust} in each worker with \code{\link[parallel]{clusterEvalQ}}.
+#'   [proxy::dist()] via [proxy::pr_DB()] whose `loop` flag is set to `TRUE`. If the function
+#'   requires special packages to be loaded, provide their names in the `packages`* slot of
+#'   `control`. Note that "dtwclust" is always loaded in each parallel worker, so that doesn't need
+#'   to be included. Alternatively, you may want to pre-load `dtwclust` in each worker with
+#'   [parallel::clusterEvalQ()].
 #'
 #'   In case of multiple repetitions, each worker gets a repetition task. Otherwise, the tasks
 #'   (which can be a distance matrix or a centroid calculation) are usually divided into chunks
@@ -334,10 +309,10 @@
 #'
 #' @section Notes:
 #'
-#'   The lower bounds are defined only for time series of equal length. \code{DTW} and \code{DTW2}
-#'   don't require this, but they are much slower to compute.
+#'   The lower bounds are defined only for time series of equal length. `DTW` and `DTW2` don't
+#'   require this, but they are much slower to compute.
 #'
-#'   The lower bounds are \strong{not} symmetric, and \code{DTW} is not symmetric in general.
+#'   The lower bounds are **not** symmetric, and `DTW` is not symmetric in general.
 #'
 #' @author Alexis Sarda-Espinosa
 #'
@@ -347,8 +322,7 @@
 #'
 #' @seealso
 #'
-#' \code{\link{dtwclust-methods}}, \code{\link{dtwclust-class}}, \code{\link{dtwclustControl}},
-#' \code{\link{dtwclustFamily}}.
+#' [dtwclust-methods()], [dtwclust-class()], [dtwclustControl()], [dtwclustFamily()].
 #'
 #' @example inst/dtwclust-examples.R
 #'

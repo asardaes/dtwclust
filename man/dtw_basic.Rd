@@ -16,8 +16,8 @@ spanning the columns.}
 
 \item{norm}{Norm for the DTW calculation, "L1" for Manhattan or "L2" for Euclidean.}
 
-\item{step.pattern}{Step pattern for DTW. Only \code{symmetric1} or \code{symmetric2} supported
-here. See \code{\link[dtw]{stepPattern}}.}
+\item{step.pattern}{Step pattern for DTW. Only \code{symmetric1} or \code{symmetric2} supported here. Note
+that these are \emph{not} characters. See \link[dtw:stepPattern]{dtw::stepPattern}.}
 
 \item{backtrack}{Also compute the warping path between series? See details.}
 
@@ -26,35 +26,33 @@ here. See \code{\link[dtw]{stepPattern}}.}
 \item{...}{Currently ignored.}
 
 \item{gcm}{Optionally, a matrix to use for the global cost matrix calculations. It should have
-\code{NROW(y)+1} columns and \code{NROW(x)+1} rows for \code{backtrack = TRUE} \strong{or}
-\code{2} rows for \code{backtrack = FALSE}. Used internally for memory optimization. If
-provided, it \strong{will} be modified \emph{in place} by \code{C} code, except in the parallel
-version in \code{proxy::}\code{\link[proxy]{dist}} which ignores it for thread-safe reasons.}
+\code{NROW(y)+1} columns and \code{NROW(x)+1} rows for \code{backtrack = TRUE} \strong{or} \code{2} rows for \code{backtrack = FALSE}. Used internally for memory optimization. If provided, it \strong{will} be modified \emph{in
+place} by \code{C} code, except in the parallel version in \code{\link[proxy:dist]{proxy::dist()}} which ignores it for
+thread-safe reasons.}
 
 \item{error.check}{Check data inconsistencies?}
 }
 \value{
 The DTW distance. For \code{backtrack} \code{=} \code{TRUE}, a list with:
-
 \itemize{
-  \item \code{distance}: The DTW distance.
-  \item \code{index1}: \code{x} indices for the matched elements in the warping path.
-  \item \code{index2}: \code{y} indices for the matched elements in the warping path.
+\item \code{distance}: The DTW distance.
+\item \code{index1}: \code{x} indices for the matched elements in the warping path.
+\item \code{index2}: \code{y} indices for the matched elements in the warping path.
 }
 }
 \description{
 This is a custom implementation of the DTW algorithm without all the functionality included in
-\code{\link[dtw]{dtw}}. Because of that, it should be slightly faster, while still supporting the
-most common options.
+\code{\link[dtw:dtw]{dtw::dtw()}}. Because of that, it should be slightly faster, while still supporting the most
+common options.
 }
 \details{
 If \code{backtrack} is \code{TRUE}, the mapping of indices between series is returned in a list.
 
-The windowing constraint uses a centered window. The calculations expect a value in
-\code{window.size} that represents the distance between the point considered and one of the edges
-of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
-observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
-in \code{10(2) + 1 = 21} observations falling within the window.
+The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
+that represents the distance between the point considered and one of the edges of the window.
+Therefore, if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i}
+considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21}
+observations falling within the window.
 }
 \note{
 The DTW algorithm (and the functions that depend on it) might return different values in 32 bit

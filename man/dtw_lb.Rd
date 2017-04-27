@@ -12,17 +12,16 @@ dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
 
 \item{window.size}{Window size to use with the LB and DTW calculation. See details.}
 
-\item{norm}{Pointwise distance. Either \code{"L1"} for Manhattan distance or \code{"L2"} for
-Euclidean.}
+\item{norm}{Pointwise distance. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.}
 
 \item{error.check}{Should inconsistencies in the data be checked?}
 
 \item{pairwise}{Calculate pairwise distances?}
 
 \item{dtw.func}{Which function to use for core DTW the calculations, either "dtw" or "dtw_basic".
-See \code{\link[dtw]{dtw}} and \code{\link{dtw_basic}}.}
+See \code{\link[dtw:dtw]{dtw::dtw()}} and \code{\link[=dtw_basic]{dtw_basic()}}.}
 
-\item{...}{Further arguments for \code{dtw.func} or \code{\link{lb_improved}}.}
+\item{...}{Further arguments for \code{dtw.func} or \code{\link[=lb_improved]{lb_improved()}}.}
 }
 \value{
 The distance matrix with class \code{crossdist}.
@@ -34,36 +33,36 @@ improved lower bound (LB_Improved).
 \details{
 This function first calculates an initial estimate of a distance matrix between two sets of time
 series using LB_Improved. Afterwards, it uses the estimate to calculate the corresponding true
-DTW distance between \emph{only} the nearest neighbors of each series in \code{x} found in
-\code{y}, and it continues iteratively until no changes in the nearest neighbors occur.
+DTW distance between \emph{only} the nearest neighbors of each series in \code{x} found in \code{y}, and it
+continues iteratively until no changes in the nearest neighbors occur.
 
 If only \code{x} is provided, the distance matrix is calculated between all its time series.
 
 This could be useful in case one is interested in only the nearest neighbor of one or more series
 within a dataset.
 
-The windowing constraint uses a centered window. The calculations expect a value in
-\code{window.size} that represents the distance between the point considered and one of the edges
-of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
-observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
-in \code{10(2) + 1 = 21} observations falling within the window.
+The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
+that represents the distance between the point considered and one of the edges of the window.
+Therefore, if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i}
+considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21}
+observations falling within the window.
 }
 \note{
 This function uses a lower bound that is only defined for time series of equal length.
 
-A considerably large dataset is probably necessary before this is faster than using
-\code{\link{dtw_basic}} with \code{proxy::\link[proxy]{dist}}.
+A considerably large dataset is probably necessary before this is faster than using \code{\link[=dtw_basic]{dtw_basic()}}
+with \code{\link[proxy:dist]{proxy::dist()}}.
 
 Nearest neighbors are found row-wise.
 }
 \section{Parallel Computing}{
 
 
-  Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
-  overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
+overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 
-  The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to
-  attempt to speed up the calculations (see the examples).
+The user can register a parallel backend, e.g. with the \code{doParallel} package, in order to
+attempt to speed up the calculations (see the examples).
 }
 
 \examples{
@@ -124,13 +123,13 @@ cbind(names(data[1:50]), names(data[51:100][NN]))
 
 }
 \references{
-Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .''
-\emph{Pattern Recognition}, \strong{42}(9), pp. 2169 - 2180. ISSN 0031-3203,
+Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .'' \emph{Pattern
+Recognition}, \strong{42}(9), pp. 2169 - 2180. ISSN 0031-3203,
 \url{http://dx.doi.org/10.1016/j.patcog.2008.11.030},
 \url{http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
 }
 \seealso{
-\code{\link{lb_keogh}}, \code{\link{lb_improved}}
+\code{\link[=lb_keogh]{lb_keogh()}}, \code{\link[=lb_improved]{lb_improved()}}
 }
 \author{
 Alexis Sarda-Espinosa

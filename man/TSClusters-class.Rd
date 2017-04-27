@@ -12,30 +12,32 @@ Formal S4 classes for time-series clusters. See class hierarchy and slot organiz
 bottom.
 }
 \details{
-The base class is \code{TSClusters}. The 3 classes that inherit from it are:
-\code{PartitionalTSClusters}, \code{HierarchicalTSClusters} and \code{FuzzyTSClusters}.
+The base class is \code{TSClusters}. The 3 classes that inherit from it are: \code{PartitionalTSClusters},
+\code{HierarchicalTSClusters} and \code{FuzzyTSClusters}.
 
-\code{HierarchicalTSClusters} also contain \code{\link[stats]{hclust}} as parent class.
+\code{HierarchicalTSClusters} also contain \code{\link[stats:hclust]{stats::hclust()}} as parent class.
 
 Package \pkg{clue} is supported, but generics from \pkg{flexclust} are not. See also
-\code{\link{tsclusters-methods}}.
+\link{tsclusters-methods}.
 
-If you want to transform a \code{\link{dtwclust-class}} object to TSClusters, just use
-\code{as(dtwclust_obj, "TSClusters")}, although it may not work perfectly.
+If you want to transform a \linkS4class{dtwclust} object to TSClusters, just use:
+
+\code{as(dtwclust_obj, "TSClusters")}
+
+although it may not work perfectly.
 }
 \section{Slots}{
 
 \describe{
 \item{\code{call}}{The function call.}
 
-\item{\code{family}}{An object of class \code{\link{tsclustFamily-class}}.}
+\item{\code{family}}{An object of class \linkS4class{tsclustFamily}.}
 
-\item{\code{control}}{An appropriate control object for \code{\link{tsclust}}. See
-\code{\link{tsclust-controls}}.}
+\item{\code{control}}{An appropriate control object for \code{\link[=tsclust]{tsclust()}}. See \link{tsclust-controls}.}
 
 \item{\code{datalist}}{The provided data in the form of a list, where each element is a time series.}
 
-\item{\code{type}}{A string indicating one of the supported clustering types of \code{\link{tsclust}}.}
+\item{\code{type}}{A string indicating one of the supported clustering types of \code{\link[=tsclust]{tsclust()}}.}
 
 \item{\code{distance}}{A string indicating the distance used.}
 
@@ -46,19 +48,18 @@ If you want to transform a \code{\link{dtwclust-class}} object to TSClusters, ju
 \item{\code{k}}{Integer indicating the number of desired clusters.}
 
 \item{\code{cluster}}{Integer vector indicating which cluster a series belongs to (crisp partition). For
-fuzzy clustering, this is based on \strong{distance}, not on \code{fcluster}. For hierarchical,
-this is obtained by calling \code{\link[stats]{cutree}} with the given value of \code{k}.}
+fuzzy clustering, this is based on \strong{distance}, not on \code{fcluster}. For hierarchical, this is
+obtained by calling \code{\link[stats:cutree]{stats::cutree()}} with the given value of \code{k}.}
 
 \item{\code{centroids}}{A list with the centroid time series.}
 
 \item{\code{distmat}}{If computed, the cross-distance matrix.}
 
-\item{\code{proctime}}{Time during function execution, as measured with \code{\link[base]{proc.time}}.}
+\item{\code{proctime}}{Time during function execution, as measured with \code{\link[base:proc.time]{base::proc.time()}}.}
 
 \item{\code{dots}}{The contents of the original call's ellipsis (...).}
 
-\item{\code{args}}{The contents of the original call's \code{args} parameter. See
-\code{\link{tsclust_args}}.}
+\item{\code{args}}{The contents of the original call's \code{args} parameter. See \code{\link[=tsclust_args]{tsclust_args()}}.}
 
 \item{\code{seed}}{The random seed that was used.}
 
@@ -66,9 +67,9 @@ this is obtained by calling \code{\link[stats]{cutree}} with the given value of 
 
 \item{\code{converged}}{A logical indicating whether the function converged.}
 
-\item{\code{clusinfo}}{A data frame with two columns: \code{size} indicates the number of series each
-cluster has, and \code{av_dist} indicates, for each cluster, the average distance between
-series and their respective centroids (crisp partition).}
+\item{\code{clusinfo}}{A data frame with two columns: \code{size} indicates the number of series each cluster
+has, and \code{av_dist} indicates, for each cluster, the average distance between series and their
+respective centroids (crisp partition).}
 
 \item{\code{cldist}}{A column vector with the distance between each series in the data and its
 corresponding centroid (crisp partition).}
@@ -83,65 +84,61 @@ clustering.}
 \section{TSClusters}{
 
 
-  The base class contains the following slots:
-
-  \itemize{
-    \item \code{call}
-    \item \code{family}
-    \item \code{control}
-    \item \code{datalist}
-    \item \code{type}
-    \item \code{distance}
-    \item \code{centroid}
-    \item \code{preproc}
-    \item \code{k}
-    \item \code{cluster}
-    \item \code{centroids}
-    \item \code{distmat}
-    \item \code{proctime}
-    \item \code{dots}
-    \item \code{args}
-    \item \code{seed}
-  }
+The base class contains the following slots:
+\itemize{
+\item \code{call}
+\item \code{family}
+\item \code{control}
+\item \code{datalist}
+\item \code{type}
+\item \code{distance}
+\item \code{centroid}
+\item \code{preproc}
+\item \code{k}
+\item \code{cluster}
+\item \code{centroids}
+\item \code{distmat}
+\item \code{proctime}
+\item \code{dots}
+\item \code{args}
+\item \code{seed}
+}
 }
 
 \section{PartitionalTSClusters}{
 
 
-  This class adds the following slots to the base class:
-
-  \itemize{
-    \item \code{iter}
-    \item \code{converged}
-    \item \code{clusinfo}
-    \item \code{cldist}
-  }
+This class adds the following slots to the base class:
+\itemize{
+\item \code{iter}
+\item \code{converged}
+\item \code{clusinfo}
+\item \code{cldist}
+}
 }
 
 \section{HierarchicalTSClusters}{
 
 
-  This class adds the following slots to the base class:
-
-  \itemize{
-    \item \code{method}
-    \item \code{clusinfo}
-    \item \code{cldist}
-  }
+This class adds the following slots to the base class:
+\itemize{
+\item \code{method}
+\item \code{clusinfo}
+\item \code{cldist}
+}
 }
 
 \section{FuzzyTSClusters}{
 
 
-  This class adds the following slots to the base class:
-
-  \itemize{
-    \item \code{iter}
-    \item \code{converged}
-    \item \code{fcluster}
-  }
+This class adds the following slots to the base class:
+\itemize{
+\item \code{iter}
+\item \code{converged}
+\item \code{fcluster}
+}
 }
 
 \seealso{
-\code{\link{tsclusters-methods}}
+\link{tsclusters-methods}
 }

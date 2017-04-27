@@ -1,18 +1,18 @@
-# ========================================================================================================
+# ==================================================================================================
 # Coercion methods for cross/pair-dist
-# ========================================================================================================
+# ==================================================================================================
 
 #' as.matrix
 #'
-#' \pkg{proxy} exported a non-generic \code{as.matrix} function. This is to re-export the base
-#' version and add some coercion methods for \code{pairdist} and \code{crossdist}.
+#' \pkg{proxy} exported a non-generic `as.matrix` function. This is to re-export the base version
+#' and add some coercion methods for `pairdist` and `crossdist`.
 #'
 #' @name as.matrix
 #' @export
 #'
-#' @param x,... See \code{\link[base]{as.matrix}}.
+#' @param x,... See [base::as.matrix()].
 #'
-#' @seealso \code{\link[base]{as.matrix}}
+#' @seealso [base::as.matrix()]
 #'
 setGeneric("as.matrix", package = "base")
 

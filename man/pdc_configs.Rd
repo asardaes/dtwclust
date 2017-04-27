@@ -2,7 +2,7 @@
 % Please edit documentation in R/compare-clusterings.R
 \name{pdc_configs}
 \alias{pdc_configs}
-\title{Helper function for \code{\link{compare_clusterings_configs}}}
+\title{Helper function for \code{\link[=compare_clusterings_configs]{compare_clusterings_configs()}}}
 \usage{
 pdc_configs(type = c("preproc", "distance", "centroid"), ...,
   partitional = NULL, hierarchical = NULL, fuzzy = NULL, tadpole = NULL,
@@ -25,15 +25,15 @@ clusterings.}
 \item{tadpole}{A named list of lists with functions and arguments for TADPole clusterings.}
 
 \item{share.config}{A character vector specifying which clusterings should include the shared
-lists (the ones specified in \code{...}). It must be one of (possibly abbreviated):
-partitional, hierarchical, fuzzy, tadpole.}
+lists (the ones specified in \code{...}). It must be one of (possibly abbreviated): partitional,
+hierarchical, fuzzy, tadpole.}
 }
 \value{
 A list for each clustering, each of which includes a data frame with the computed configurations.
 }
 \description{
-Create preprocessing, distance and centroid configurations for
-\code{\link{compare_clusterings_configs}}. All functions use \code{\link[base]{expand.grid}}.
+Create preprocessing, distance and centroid configurations for \code{\link[=compare_clusterings_configs]{compare_clusterings_configs()}}.
+All functions use \code{\link[base:expand.grid]{base::expand.grid()}}.
 }
 \details{
 The named lists are interpreted in the following way: the name of each element of the list will
@@ -45,5 +45,5 @@ For preprocessing, the special name \code{none} signifies no preprocessing.
 
 For centroids, the special name \code{default} leaves the centroid unspecified.
 
-Please see the examples in \code{\link{compare_clusterings}} to see how this is used.
+Please see the examples in \code{\link[=compare_clusterings]{compare_clusterings()}} to see how this is used.
 }

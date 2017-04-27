@@ -190,9 +190,9 @@ call_pairs <- function(n = 2L, lower = TRUE) {
 #
 # @export
 #
-# @param flag \code{TRUE} to allow use of parallel backends or \code{FALSE} to prevent it.
+# @param flag `TRUE` to allow use of parallel backends or `FALSE` to prevent it.
 #
-# @return \code{flag} invisibly
+# @return `flag` invisibly
 #
 # parallel_dtwclust <- allow_parallel()
 

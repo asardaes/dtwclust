@@ -1,10 +1,10 @@
-#' Create formal \code{dtwclust} objects
+#' Create formal `dtwclust` objects
 #'
-#' Helper function to manually create formal \code{\link{dtwclust-class}} objects
+#' Helper function to manually create formal [dtwclust-class] objects
 #'
 #' @export
 #'
-#' @param ... Any valid slots of \code{\link{dtwclust-class}}.
+#' @param ... Any valid slots of [dtwclust-class].
 #' @param override.family Attempt to substitute the default family with one that conforms to the
 #'   provided elements? See details.
 #'
@@ -13,22 +13,19 @@
 #' This function can calculate some of the slots if certain elements are provided by the user. In
 #' order to get a fully functional object at least the following slots should be provided:
 #'
-#' \itemize{
-#'   \item \code{type}: "partitional", "hierarchical", "fuzzy" or "tadpole".
-#'   \item \code{datalist}: The data in one of the supported formats.
-#'   \item \code{centroids}: The time series centroids in one of the supported formats.
-#'   \item \code{cluster}: The cluster indices for each series in the \code{datalist}.
-#'   \item \code{control*}: A \code{dtwclustControl} object (or a named list) with the desired
-#'     parameters.
-#'   \item \code{distance*}: A string indicating the distance that should be used.
-#'   \item \code{centroid*}: A string indicating the centroid to use (only necessary for partitional
-#'     clustering).
-#' }
+#' - `type`: "partitional", "hierarchical", "fuzzy" or "tadpole".
+#' - `datalist`: The data in one of the supported formats.
+#' - `centroids`: The time series centroids in one of the supported formats.
+#' - `cluster`: The cluster indices for each series in the `datalist`.
+#' - `control*`: A `dtwclustControl` object (or a named list) with the desired parameters.
+#' - `distance*`: A string indicating the distance that should be used.
+#' - `centroid*`: A string indicating the centroid to use (only necessary for partitional
+#'   clustering).
 #'
 #' *Necessary when overriding the default family for the calculation of other slots, CVIs or
 #' prediction. Maybe not always needed, e.g. for plotting.
 #'
-#' @return A \code{\link{dtwclust-class}} object.
+#' @return A [dtwclust-class] object.
 #'
 #' @examples
 #'

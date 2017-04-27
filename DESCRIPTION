@@ -79,3 +79,4 @@ Collate:
     'uciCT.R'
     'zscore.R'
 VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)

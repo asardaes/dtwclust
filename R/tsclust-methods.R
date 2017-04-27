@@ -1,6 +1,6 @@
-#' Methods for \code{TSClusters}
+#' Methods for `TSClusters`
 #'
-#' Methods associated with \code{\link{TSClusters-class}} and derived objects.
+#' Methods associated with [TSClusters-class] and derived objects.
 #'
 #' @name tsclusters-methods
 #' @rdname tsclusters-methods
@@ -50,35 +50,33 @@ setMethod("initialize", "tsclustFamily",
 #' @rdname tsclusters-methods
 #' @aliases initialize,TSClusters
 #'
-#' @param .Object A \code{TSClusters} prototype. You shouldn't use this, see Initialize section and
-#'   the examples.
-#' @param ... For \code{initialize}, any valid slots. For \code{plot}, further arguments to pass to
-#'   \code{\link[ggplot2]{geom_line}} for the plotting of the \emph{cluster centroids}, or to
-#'   \code{\link[stats]{plot.hclust}}. See Plotting section. For \code{update}, any supported
-#'   argument. Otherwise ignored.
+#' @param .Object A `TSClusters` prototype. You shouldn't use this, see Initialize section and the
+#'   examples.
+#' @param ... For `initialize`, any valid slots. For `plot`, further arguments to pass to
+#'   [ggplot2::geom_line()] for the plotting of the *cluster centroids*, or to
+#'   [stats::plot.hclust()]. See Plotting section. For `update`, any supported argument. Otherwise
+#'   ignored.
 #' @param override.family Logical. Attempt to substitute the default family with one that conforms
 #'   to the provided elements? See Initialize section.
 #'
 #' @section Initialize:
 #'
-#'   The initialize method is used when calling \code{\link[methods]{new}}. The \code{family} slot
-#'   can be substituted with an appropriate one if certain elements are provided by the user. The
+#'   The initialize method is used when calling [methods::new()]. The `family` slot can be
+#'   substituted with an appropriate one if certain elements are provided by the user. The
 #'   initialize methods of derived classes also inherit the family and can use it to calculate other
 #'   slots. In order to get a fully functional object, at least the following slots should be
 #'   provided:
 #'
-#'   \itemize{
-#'     \item \code{type}: "partitional", "hierarchical", "fuzzy" or "tadpole".
-#'     \item \code{datalist}: The data in one of the supported formats.
-#'     \item \code{centroids}: The time series centroids in one of the supported formats.
-#'     \item \code{cluster}: The cluster indices for each series in the \code{datalist}.
-#'     \item \code{control*}: A \code{\link{tsclust-controls}} object with the desired parameters.
-#'     \item \code{distance*}: A string indicating the distance that should be used.
-#'     \item \code{centroid*}: A string indicating the centroid to use (only necessary for
-#'       partitional clustering).
-#'   }
+#'   - `type`: "partitional", "hierarchical", "fuzzy" or "tadpole".
+#'   - `datalist`: The data in one of the supported formats.
+#'   - `centroids`: The time series centroids in one of the supported formats.
+#'   - `cluster`: The cluster indices for each series in the `datalist`.
+#'   - `control*`: A [tsclust-controls] object with the desired parameters.
+#'   - `distance*`: A string indicating the distance that should be used.
+#'   - `centroid*`: A string indicating the centroid to use (only necessary for partitional
+#'     clustering).
 #'
-#'   * Necessary when overriding the default family for the calculation of other slots, CVIs or
+#'   *Necessary when overriding the default family for the calculation of other slots, CVIs or
 #'   prediction. Maybe not always needed, e.g. for plotting.
 #'
 #' @examples
@@ -293,8 +291,7 @@ setMethod("initialize", "FuzzyTSClusters",
 #' @aliases show,TSClusters
 #' @exportMethod show
 #'
-#' @param object,x An object that inherits from \code{\link{TSClusters-class}} as returned by
-#'   \code{\link{tsclust}}.
+#' @param object,x An object that inherits from [TSClusters-class] as returned by [tsclust()].
 #'
 setMethod("show", "TSClusters",
           function(object) {
@@ -333,14 +330,14 @@ setMethod("show", "TSClusters",
 #' @method update TSClusters
 #' @export
 #'
-#' @param evaluate Logical. Defaults to \code{TRUE} and evaluates the updated call, which will
-#'   result in a new \code{TSClusters} object. Otherwise, it returns the unevaluated call.
+#' @param evaluate Logical. Defaults to `TRUE` and evaluates the updated call, which will result in
+#'   a new `TSClusters` object. Otherwise, it returns the unevaluated call.
 #'
 #' @details
 #'
-#' The \code{update} method takes the original function call, replaces any provided argument and
-#' optionally evaluates the call again. Use \code{evaluate = FALSE} if you want to get the
-#' unevaluated call.
+#' The `update` method takes the original function call, replaces any provided argument and
+#' optionally evaluates the call again. Use `evaluate = FALSE` if you want to get the unevaluated
+#' call.
 #'
 update.TSClusters <- function(object, ..., evaluate = TRUE) {
     args <- as.pairlist(list(...))
@@ -380,14 +377,14 @@ setMethod("update", signature(object = "TSClusters"), update.TSClusters)
 #' @export
 #'
 #' @param newdata New data to be assigned to a cluster. It can take any of the supported formats of
-#'   \code{\link{tsclust}}. Note that for multivariate series, this means that it \strong{must} be
-#'   a list of matrices, even if the list has only one element.
+#'   [tsclust()]. Note that for multivariate series, this means that it **must** be a list of
+#'   matrices, even if the list has only one element.
 #'
 #' @details
 #'
-#' The \code{predict} generic can take the usual \code{newdata} argument and it returns the
-#' cluster(s) to which the data belongs; if \code{NULL}, it simply returns the obtained cluster
-#' indices. It preprocesses the data with the corresponding function if available.
+#' The `predict` generic can take the usual `newdata` argument and it returns the cluster(s) to
+#' which the data belongs; if `NULL`, it simply returns the obtained cluster indices. It
+#' preprocesses the data with the corresponding function if available.
 #'
 predict.TSClusters <- function(object, newdata = NULL, ...) {
     if (is.null(newdata)) {
@@ -437,49 +434,44 @@ setMethod("predict", signature(object = "TSClusters"), predict.TSClusters)
 #'
 #' @param y Ignored.
 #' @param clus A numeric vector indicating which clusters to plot.
-#' @param labs.arg Arguments to change the title and/or axis labels. See \code{\link[ggplot2]{labs}}
-#'   for more information
-#' @param series Optionally, the data in the same format as it was provided to
-#'   \code{\link{tsclust}}.
+#' @param labs.arg Arguments to change the title and/or axis labels. See [ggplot2::labs()] for more
+#'   information
+#' @param series Optionally, the data in the same format as it was provided to [tsclust()].
 #' @param time Optional values for the time axis. If series have different lengths, provide the time
 #'   values of the longest series.
-#' @param plot Logical flag. You can set this to \code{FALSE} in case you want to save the ggplot
-#'   object without printing anything to screen
-#' @param type What to plot. \code{NULL} means default. See details.
+#' @param plot Logical flag. You can set this to `FALSE` in case you want to save the ggplot object
+#'   without printing anything to screen
+#' @param type What to plot. `NULL` means default. See details.
 #'
 #' @section Plotting:
 #'
-#'   The plot method uses the \code{ggplot2} plotting system (see \code{\link[ggplot2]{ggplot}}).
+#'   The plot method uses the `ggplot2` plotting system (see [ggplot2::ggplot()]).
 #'
 #'   The default depends on whether a hierarchical method was used or not. In those cases, the
-#'   dendrogram is plotted by default; you can pass any extra parameters to
-#'   \code{\link[stats]{plot.hclust}} via \code{...}.
+#'   dendrogram is plotted by default; you can pass any extra parameters to [stats::plot.hclust()]
+#'   via `...`.
 #'
 #'   Otherwise, the function plots the time series of each cluster along with the obtained centroid.
-#'   The default values for cluster centroids are: \code{linetype = "dashed"}, \code{size = 1.5},
-#'   \code{colour = "black"}, \code{alpha = 0.5}. You can change this by means of \code{...}.
+#'   The default values for cluster centroids are: `linetype = "dashed"`, `size = 1.5`, `colour =
+#'   "black"`, `alpha = 0.5`. You can change this by means of `...`.
 #'
-#'   You can choose what to plot with the \code{type} parameter. Possible options are:
+#'   You can choose what to plot with the `type` parameter. Possible options are:
 #'
-#'   \itemize{
-#'     \item \code{"dendrogram"}: Only available for hierarchical clustering.
-#'     \item \code{"series"}: Plot the time series divided into clusters without including
-#'       centroids.
-#'     \item \code{"centroids"}: Plot the obtained centroids only.
-#'     \item \code{"sc"}: Plot both series and centroids
-#'   }
+#'   - `"dendrogram"`: Only available for hierarchical clustering.
+#'   - `"series"`: Plot the time series divided into clusters without including centroids.
+#'   - `"centroids"`: Plot the obtained centroids only.
+#'   - `"sc"`: Plot both series and centroids
 #'
-#'   If created, the function returns the \code{gg} object invisibly, in case you want to modify it
-#'   to your liking. You might want to look at \code{\link[ggplot2]{ggplot_build}} if that's the
-#'   case.
+#'   If created, the function returns the `gg` object invisibly, in case you want to modify it to
+#'   your liking. You might want to look at [ggplot2::ggplot_build()] if that's the case.
 #'
 #'   If you want to free the scale of the X axis, you can do the following:
 #'
-#'   \code{plot(object, plot = FALSE)} \code{+} \code{facet_wrap(~cl, scales = "free")}
+#'   `plot(object, plot = FALSE)` `+` `facet_wrap(~cl, scales = "free")`
 #'
 #' @return
 #'
-#' The plot method returns a \code{gg} object (or \code{NULL} for dendrogram plot) invisibly.
+#' The plot method returns a `gg` object (or `NULL` for dendrogram plot) invisibly.
 #'
 plot.TSClusters <- function(x, y, ...,
                             clus = seq_len(x@k), labs.arg = NULL,

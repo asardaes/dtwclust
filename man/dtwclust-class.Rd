@@ -8,33 +8,36 @@
 Formal S4 class.
 }
 \details{
-This class contains \code{\link[stats]{hclust}} as superclass and supports all its methods. Plot
-is a special case (see \code{\link{dtwclust-methods}}).
+This class contains \code{\link[stats:hclust]{stats::hclust()}} as superclass and supports all its methods. Plot is a
+special case (see \link{dtwclust-methods}).
 
 Please note that not all slots will contain valid information for all clustering types. In some
 cases, for example for fuzzy and hierarchical clustering, some results are computed assuming a
 hard partition is created based on the fuzzy memberships or dendrogram tree, and the provided
 value of \code{k}.
 
-If you want to transform a dtwclust-class object to \code{\link{TSClusters-class}}, just use
-\code{as(dtwclust_obj, "TSClusters")}, although it may not work perfectly.
+If you want to transform a dtwclust-class object to \linkS4class{TSClusters}, just use:
+
+\code{as(dtwclust_obj, "TSClusters")}
+
+although it may not work perfectly.
 }
 \section{Slots}{
 
 \describe{
 \item{\code{call}}{The function call.}
 
-\item{\code{control}}{An object of class \code{\link{dtwclustControl}}.}
+\item{\code{control}}{An object of class \link{dtwclustControl}.}
 
-\item{\code{family}}{An object of class \code{\link{dtwclustFamily}}.}
+\item{\code{family}}{An object of class \link{dtwclustFamily}.}
 
 \item{\code{distmat}}{If computed, the cross-distance matrix.}
 
 \item{\code{k}}{Integer indicating the number of desired clusters.}
 
 \item{\code{cluster}}{Integer vector indicating which cluster a series belongs to (crisp partition). For
-fuzzy clustering, this is based on \strong{distance}, not on \code{fcluster}. For hierarchical,
-this is obtained by calling \code{\link[stats]{cutree}} with the given value of \code{k}.}
+fuzzy clustering, this is based on \strong{distance}, not on \code{fcluster}. For hierarchical, this is
+obtained by calling \code{\link[stats:cutree]{stats::cutree()}} with the given value of \code{k}.}
 
 \item{\code{fcluster}}{Numeric matrix that contains membership of fuzzy clusters. It has one row for each
 series and one column for each cluster. The rows must sum to 1. Only relevant for fuzzy
@@ -44,16 +47,16 @@ clustering.}
 
 \item{\code{converged}}{A logical indicating whether the function converged.}
 
-\item{\code{clusinfo}}{A data frame with two columns: \code{size} indicates the number of series each
-cluster has, and \code{av_dist} indicates, for each cluster, the average distance between
-series and their respective centroids (crisp partition).}
+\item{\code{clusinfo}}{A data frame with two columns: \code{size} indicates the number of series each cluster
+has, and \code{av_dist} indicates, for each cluster, the average distance between series and their
+respective centroids (crisp partition).}
 
 \item{\code{centroids}}{A list with the centroid time series.}
 
 \item{\code{cldist}}{A column vector with the distance between each series in the data and its
 corresponding centroid (crisp partition).}
 
-\item{\code{type}}{A string indicating one of the supported clustering types of \code{\link{dtwclust}}.}
+\item{\code{type}}{A string indicating one of the supported clustering types of \code{\link[=dtwclust]{dtwclust()}}.}
 
 \item{\code{method}}{A string indicating which hierarchical method was used.}
 
@@ -65,7 +68,7 @@ corresponding centroid (crisp partition).}
 
 \item{\code{datalist}}{The provided data in the form of a list, where each element is a time series.}
 
-\item{\code{proctime}}{Time during function execution, as measured with \code{\link[base]{proc.time}}.}
+\item{\code{proctime}}{Time during function execution, as measured with \code{\link[base:proc.time]{base::proc.time()}}.}
 
 \item{\code{dots}}{The contents of the original call's ellipsis (...).}
 }}

@@ -1,7 +1,7 @@
-#' Helper function for \code{\link{compare_clusterings_configs}}
+#' Helper function for [compare_clusterings_configs()]
 #'
-#' Create preprocessing, distance and centroid configurations for
-#' \code{\link{compare_clusterings_configs}}. All functions use \code{\link[base]{expand.grid}}.
+#' Create preprocessing, distance and centroid configurations for [compare_clusterings_configs()].
+#' All functions use [base::expand.grid()].
 #'
 #' @export
 #'
@@ -15,8 +15,8 @@
 #' @param fuzzy A named list of lists with functions and arguments for fuzzy clusterings.
 #' @param tadpole A named list of lists with functions and arguments for TADPole clusterings.
 #' @param share.config A character vector specifying which clusterings should include the shared
-#'   lists (the ones specified in \code{...}). It must be one of (possibly abbreviated):
-#'   partitional, hierarchical, fuzzy, tadpole.
+#'   lists (the ones specified in `...`). It must be one of (possibly abbreviated): partitional,
+#'   hierarchical, fuzzy, tadpole.
 #'
 #' @details
 #'
@@ -25,11 +25,11 @@
 #' parameters for the function. Each function must have at least an empty list. The parameters may
 #' be vectors that specify different values to be tested.
 #'
-#' For preprocessing, the special name \code{none} signifies no preprocessing.
+#' For preprocessing, the special name `none` signifies no preprocessing.
 #'
-#' For centroids, the special name \code{default} leaves the centroid unspecified.
+#' For centroids, the special name `default` leaves the centroid unspecified.
 #'
-#' Please see the examples in \code{\link{compare_clusterings}} to see how this is used.
+#' Please see the examples in [compare_clusterings()] to see how this is used.
 #'
 #' @return
 #'
@@ -151,37 +151,34 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
 
 #' Create clustering configurations.
 #'
-#' Create configurations for \code{\link{compare_clusterings}}
+#' Create configurations for [compare_clusterings()]
 #'
 #' @export
 #'
 #' @param k A numeric vector with one or more elements specifying the number of clusters to test.
-#' @param types Clustering types. It must be one of (possibly abbreviated): partitional,
+#' @param types Clustering types. It must be any combination of (possibly abbreviated): partitional,
 #'   hierarchical, fuzzy, tadpole.
-#' @param controls A named list of \code{\link{tsclust-controls}}. \code{NULL} means defaults. See
-#'   details.
+#' @param controls A named list of [tsclust-controls]. `NULL` means defaults. See details.
 #' @param preprocs Preprocessing configurations. See details.
 #' @param distances Distance configurations. See details.
 #' @param centroids Centroid configurations. See details.
 #'
 #' @details
 #'
-#' This function uses \code{\link[base]{expand.grid}} and \code{\link[base]{merge}}.
+#' This function uses [base::expand.grid()] and [base::merge()].
 #'
 #' Preprocessing, distance and centroid configurations are specified with the helper function
-#' \code{\link{pdc_configs}}, but using the examples in \code{\link{compare_clusterings}} as basis
-#' might be easier to understand.
+#' [pdc_configs()], refer to the examples in [compare_clusterings()] to see how this is used.
 #'
-#' The controls list must have one nested list of controls for the desired clustering types. Each
-#' nested list may be specified with the usual \code{\link{tsclust-controls}} functions. The names
-#' must correspond to "partitional", "hierarchical", "fuzzy" or "tadpole" clustering. Again,
-#' please refer to the examples in \code{\link{compare_clusterings}}.
+#' The controls list may be specified with the usual [tsclust-controls] functions. The names  of
+#' the list must correspond to "partitional", "hierarchical", "fuzzy" or "tadpole" clustering.
+#' Again, please refer to the examples in [compare_clusterings()].
 #'
 #' @return
 #'
-#' A list for each clustering type, each of which includes a data frame with the computed and
-#' merged configurations. Each data frame has an extra attribute \code{num.configs} specifying the
-#' number of configurations.
+#' A list for each clustering type, each of which includes a data frame with the computed and merged
+#' configurations. Each data frame has an extra attribute `num.configs` specifying the number of
+#' configurations.
 #'
 compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, controls = NULL,
                                         preprocs = pdc_configs("preproc", none = list()),
@@ -383,51 +380,83 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'
 #' @param series A list of series, a numeric matrix or a data frame. Matrices and data frames are
 #'   coerced to a list row-wise.
-#' @param types Clustering types. It must be one of (possibly abbreviated): partitional,
+#' @param types Clustering types. It must be any combination of (possibly abbreviated): partitional,
 #'   hierarchical, fuzzy, tadpole.
-#' @param ... Further arguments for \code{\link{tsclust}}, \code{score.clus} or \code{pick.clus}.
+#' @param ... Further arguments for [tsclust()], `score.clus` or `pick.clus`.
 #' @param configs The list of data frames with the desired configurations to run. See
-#'   \code{\link{compare_clusterings_configs}} and \code{\link{pdc_configs}}.
+#'   [pdc_configs()] and [compare_clusterings_configs()].
 #' @param seed Seed for random reproducibility.
 #' @param trace Logical indicating that more output should be printed to screen.
 #' @param packages A character vector with the names of any packages needed for any functions used
 #'   (distance, centroid, preprocessing, etc.). The name "dtwclust" is added automatically. Relevant
 #'   for parallel computation.
-#' @param score.clus A function that gets the list of results (and \code{...}) and scores each one.
-#'   It may also be a named list of functions, one for each type of clustering.
-#' @param pick.clus A function that gets the result from \code{score.clus} as first argument, as
-#'   well as the objects returned by \code{\link{tsclust}} (and elements of \code{...}) and picks
-#'   the best result.
-#' @param return.objects Logical indicating whether the objects from returned by
-#'   \code{\link{tsclust}} should be given in the result.
+#' @param score.clus A function that gets the list of results (and `...`) and scores each one. It
+#'   may also be a named list of functions, one for each type of clustering. See Scoring section.
+#' @param pick.clus A function that gets the result from `score.clus` as first argument, as well as
+#'   the objects returned by [tsclust()] (and elements of `...`) and picks the best result.
+#' @param return.objects Logical indicating whether the objects from returned by [tsclust()] should
+#'   be given in the result.
 #'
 #' @details
 #'
-#' This function calls \code{\link{tsclust}} with different configurations and evaluates the results
-#' with the provided functions. Parallel support is included. See the examples.
+#' This function calls [tsclust()] with different configurations and evaluates the results with the
+#' provided functions. Parallel support is included. See the examples.
 #'
-#' Parameters specified in \code{configs} whose values are \code{NA} will be ignored automatically.
+#' Parameters specified in `configs` whose values are `NA` will be ignored automatically.
 #'
-#' The scoring and picking functions are for convenience, if they are not specified, the
-#' \code{scores} and \code{pick} elements of the result will be \code{NULL}.
+#' The scoring and picking functions are for convenience, if they are not specified, the `scores`
+#' and `pick` elements of the result will be `NULL`.
 #'
 #' @return
 #'
-#' A list with: \itemize{
-#'   \item \code{results}: A list of data frames with the flattened configs and the corresponding
-#'     scores returned by \code{score.clus}.
-#'   \item \code{scores}: The scores given by \code{score.clus}.
-#'   \item \code{pick}: The object returned by \code{pick.clus}.
-#'   \item \code{proc_time}: The measured function time, using \code{\link[base]{proc.time}}.
-#' }
+#' A list with:
 #'
-#' The cluster objects are also returned if \code{return.objects} \code{=} \code{TRUE}.
+#' - `results`: A list of data frames with the flattened configs and the corresponding scores
+#'   returned by `score.clus`.
+#' - `scores`: The scores given by `score.clus`.
+#' - `pick`: The object returned by `pick.clus`.
+#' - `proc_time`: The measured execution time, using [base::proc.time()].
+#'
+#' The cluster objects are also returned if `return.objects` `=` `TRUE`.
+#'
+#' @section Scoring:
+#'
+#'   The clustering results are organized in a *list of lists* in the following way (where only
+#'   applicable `types` exist; first-level list names in bold):
+#'
+#'   - **partitional** - list with
+#'     + Clustering results from first partitional config
+#'     + etc.
+#'   - **hierarchical** - list with
+#'     + Clustering results from first hierarchical config
+#'     + etc.
+#'   - **fuzzy** - list with
+#'     + Clustering results from first fuzzy config
+#'     + etc.
+#'   - **tadpole** - list with
+#'     + Clustering results from first tadpole config
+#'     + etc.
+#'
+#'   If `score.clus` is a function, it will be applied to the available partitional, hierarchical,
+#'   fuzzy and/or tadpole results via:
+#'
+#'   ```
+#'   scores <- lapply(list_of_lists, score.clus, ...)
+#'   ```
+#'
+#'   Otherwise, `score.clus` should be a list of functions with the same names as the list above,
+#'   so that `score.clus$partitional` is used to score `list_of_lists$partitional` and so on (via
+#'   [base::mapply()] with `SIMPLIFY` `=` `FALSE`).
+#'
+#'   Therefore, the scores returned shall always be a list of lists with first-level names as above.
+#'   These scores and the list of clustering results are given to `pick.clus` as first and second
+#'   arguments respectively, followed by `...`.
 #'
 #' @author Alexis Sarda-Espinosa
 #'
 #' @seealso
 #'
-#' \code{\link{compare_clusterings_configs}}, \code{\link{tsclust}}
+#' [compare_clusterings_configs()], [tsclust()]
 #'
 #' @example inst/comparison-examples.R
 #'
@@ -457,8 +486,12 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
     if (!is.function(score.clus) && !(is.list(score.clus) && all(sapply(score.clus, is.function))))
         stop("Invalid evaluation function(s)")
-    else if (is.list(score.clus) && !all(types %in% names(score.clus)))
-        stop("The names of the 'score.clus' argument do not correspond to the provided 'types'")
+    else if (is.list(score.clus)) {
+        if (!all(types %in% names(score.clus)))
+            stop("The names of the 'score.clus' argument do not correspond to the provided 'types'")
+
+        score.clus <- score.clus[types]
+    }
 
     if (!is.function(pick.clus)) stop("Invalid pick function")
 
@@ -537,7 +570,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## Clusterings
     ## =============================================================================================
 
-    types_objs <- mapply(configs, names(configs), seeds, SIMPLIFY = FALSE, FUN = function(config, type, seeds) {
+    objs_by_type <- mapply(configs, names(configs), seeds, SIMPLIFY = FALSE, FUN = function(config, type, seeds) {
         if (trace) message("=================================== Performing ",
                            type,
                            " clusterings ===================================\n")
@@ -722,9 +755,9 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## =============================================================================================
 
     if (is.function(score.clus))
-        scores <- try(lapply(types_objs, score.clus, ...), silent = TRUE)
+        scores <- try(lapply(objs_by_type, score.clus, ...), silent = TRUE)
     else
-        scores <- try(mapply(types_objs, score.clus[names(types_objs)],
+        scores <- try(mapply(objs_by_type, score.clus[names(objs_by_type)],
                              SIMPLIFY = FALSE,
                              MoreArgs = dots,
                              FUN = function(objs, score_fun, ...) { score_fun(objs, ...) }),
@@ -736,7 +769,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         pick <- NULL
 
     } else {
-        pick <- try(pick.clus(scores, types_objs, ...), silent = TRUE)
+        pick <- try(pick.clus(scores, objs_by_type, ...), silent = TRUE)
 
         if (inherits(pick, "try-error")) {
             warning("The pick.clus function did not execute successfully.")
@@ -843,7 +876,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## =============================================================================================
 
     results <- list(results = results, scores = scores, pick = pick, proc_time = proc.time() - tic)
-    if (return.objects) results <- c(results, objects = types_objs)
+    if (return.objects) results <- c(results, objects = objs_by_type)
 
     ## return results
     results

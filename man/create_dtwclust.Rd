@@ -7,31 +7,29 @@
 create_dtwclust(..., override.family = TRUE)
 }
 \arguments{
-\item{...}{Any valid slots of \code{\link{dtwclust-class}}.}
+\item{...}{Any valid slots of \linkS4class{dtwclust}.}
 
 \item{override.family}{Attempt to substitute the default family with one that conforms to the
 provided elements? See details.}
 }
 \value{
-A \code{\link{dtwclust-class}} object.
+A \linkS4class{dtwclust} object.
 }
 \description{
-Helper function to manually create formal \code{\link{dtwclust-class}} objects
+Helper function to manually create formal \linkS4class{dtwclust} objects
 }
 \details{
 This function can calculate some of the slots if certain elements are provided by the user. In
 order to get a fully functional object at least the following slots should be provided:
-
 \itemize{
-  \item \code{type}: "partitional", "hierarchical", "fuzzy" or "tadpole".
-  \item \code{datalist}: The data in one of the supported formats.
-  \item \code{centroids}: The time series centroids in one of the supported formats.
-  \item \code{cluster}: The cluster indices for each series in the \code{datalist}.
-  \item \code{control*}: A \code{dtwclustControl} object (or a named list) with the desired
-    parameters.
-  \item \code{distance*}: A string indicating the distance that should be used.
-  \item \code{centroid*}: A string indicating the centroid to use (only necessary for partitional
-    clustering).
+\item \code{type}: "partitional", "hierarchical", "fuzzy" or "tadpole".
+\item \code{datalist}: The data in one of the supported formats.
+\item \code{centroids}: The time series centroids in one of the supported formats.
+\item \code{cluster}: The cluster indices for each series in the \code{datalist}.
+\item \code{control*}: A \code{dtwclustControl} object (or a named list) with the desired parameters.
+\item \code{distance*}: A string indicating the distance that should be used.
+\item \code{centroid*}: A string indicating the centroid to use (only necessary for partitional
+clustering).
 }
 
 *Necessary when overriding the default family for the calculation of other slots, CVIs or

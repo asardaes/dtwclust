@@ -6,7 +6,7 @@
 \alias{dtwclustControl}
 \title{Class definition for \code{dtwclustControl}}
 \description{
-Formal S4 class with several control parameters used in \code{\link{dtwclust}}.
+Formal S4 class with several control parameters used in \code{\link[=dtwclust]{dtwclust()}}.
 }
 \details{
 Default values are shown at the end.
@@ -14,32 +14,30 @@ Default values are shown at the end.
 \section{Slots}{
 
 \describe{
-\item{\code{window.size}}{Integer or \code{NULL}. Window constraint for GAK, DTW, DBA and LB
-calculations. \code{NULL} means no constraint.}
+\item{\code{window.size}}{Integer or \code{NULL}. Window constraint for GAK, DTW, DBA and LB calculations.
+\code{NULL} means no constraint.}
 
-\item{\code{norm}}{Character. Pointwise distance for DTW, DBA and the LBs. Either \code{"L1"} for
-Manhattan distance or \code{"L2"} for Euclidean. Ignored for \code{distance = "DTW2"} (which
-always uses \code{"L2"}).}
+\item{\code{norm}}{Character. Pointwise distance for DTW, DBA and the LBs. Either \code{"L1"} for Manhattan
+distance or \code{"L2"} for Euclidean. Ignored for \code{distance = "DTW2"} (which always uses \code{"L2"}).}
 
-\item{\code{delta}}{Numeric. Convergence criterion for \code{\link{DBA}} centroids and fuzzy clustering.}
+\item{\code{delta}}{Numeric. Convergence criterion for \code{\link[=DBA]{DBA()}} centroids and fuzzy clustering.}
 
-\item{\code{trace}}{Logical flag. If \code{TRUE}, more output regarding the progress is printed to
-screen.}
+\item{\code{trace}}{Logical flag. If \code{TRUE}, more output regarding the progress is printed to screen.}
 
 \item{\code{save.data}}{Return a "copy" of the data in the returned object? Because of the way \code{R}
 handles things internally, all copies should point to the same memory address.}
 
-\item{\code{symmetric}}{Logical flag. Is the distance function symmetric? In other words, is
-\code{dist(x,y)} == \code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be
-computed. Only relevant for PAM centroids and hierarchical clustering. Overridden if the
-function detects an invalid user-provided value.}
+\item{\code{symmetric}}{Logical flag. Is the distance function symmetric? In other words, is \code{dist(x,y)}
+== \code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be computed. Only relevant
+for PAM centroids and hierarchical clustering. Overridden if the function detects an invalid
+user-provided value.}
 
 \item{\code{packages}}{Character vector with the names of any packages required for custom \code{proxy}
-functions. See Parallel Computing section in \code{\link{dtwclust}}. Since the distance entries
-are re-registered in each parallel worker if needed, this slot is probably useless, but just in
+functions. See Parallel Computing section in \code{\link[=dtwclust]{dtwclust()}}. Since the distance entries are
+re-registered in each parallel worker if needed, this slot is probably useless, but just in
 case.}
 
-\item{\code{dba.iter}}{Integer. Maximum number of iterations for \code{\link{DBA}} centroids.}
+\item{\code{dba.iter}}{Integer. Maximum number of iterations for \code{\link[=DBA]{DBA()}} centroids.}
 
 \item{\code{pam.precompute}}{Logical flag. Precompute the whole distance matrix once and reuse it on each
 iteration if using PAM centroids. Otherwise calculate distances at every iteration.}
@@ -50,46 +48,42 @@ literature.}
 \item{\code{iter.max}}{Integer. Maximum number of allowed iterations for partitional/fuzzy clustering.}
 
 \item{\code{nrep}}{Integer. How many times to repeat clustering with different starting points. See
-section Repetitions in \code{\link{dtwclust}}.}
+section Repetitions in \code{\link[=dtwclust]{dtwclust()}}.}
 }}
 
 \section{Common parameters}{
 
-
-  \itemize{
-    \item \code{window.size} = \code{NULL}
-    \item \code{norm} = "L1"
-    \item \code{delta} = 1e-3
-    \item \code{trace} = \code{FALSE}
-    \item \code{save.data} = \code{TRUE}
-    \item \code{symmetric} = \code{FALSE}
-    \item \code{packages} = \code{character(0)}
-  }
+\itemize{
+\item \code{window.size} = \code{NULL}
+\item \code{norm} = "L1"
+\item \code{delta} = 1e-3
+\item \code{trace} = \code{FALSE}
+\item \code{save.data} = \code{TRUE}
+\item \code{symmetric} = \code{FALSE}
+\item \code{packages} = \code{character(0)}
+}
 }
 
 \section{Only for partitional procedures}{
 
-
-  \itemize{
-    \item \code{dba.iter} = \code{15L}
-    \item \code{pam.precompute} = \code{TRUE}
-  }
+\itemize{
+\item \code{dba.iter} = \code{15L}
+\item \code{pam.precompute} = \code{TRUE}
+}
 }
 
 \section{Only for fuzzy clustering}{
 
-
-  \itemize{
-    \item \code{fuzziness} = \code{2}
-  }
+\itemize{
+\item \code{fuzziness} = \code{2}
+}
 }
 
 \section{For both partitional and fuzzy}{
 
-
-  \itemize{
-    \item \code{iter.max} = \code{100L}
-    \item \code{nrep} = \code{1L}
-  }
+\itemize{
+\item \code{iter.max} = \code{100L}
+\item \code{nrep} = \code{1L}
+}
 }
 

@@ -13,245 +13,228 @@ tsclust(series = NULL, type = "partitional", k = 2L, ...,
 \item{series}{A list of series, a numeric matrix or a data frame. Matrices and data frames are
 coerced to a list row-wise.}
 
-\item{type}{What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"},
-\code{"tadpole"} or \code{"fuzzy"}.}
+\item{type}{What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"}, \code{"tadpole"}
+or \code{"fuzzy"}.}
 
 \item{k}{Number of desired clusters. It may be a numeric vector with different values.}
 
 \item{...}{Arguments to pass to preprocessing, centroid \strong{and} distance functions (added to
-\code{args}). Also passed to \code{method} from \code{\link{hierarchical_control}} if it
-happens to be a function, and to \code{\link[stats]{hclust}} if it contains the \code{members}
-parameter.}
+\code{args}). Also passed to \code{method} from \code{\link[=hierarchical_control]{hierarchical_control()}} if it happens to be a function,
+and to \code{\link[stats:hclust]{stats::hclust()}} if it contains the \code{members} parameter.}
 
-\item{preproc}{Function to preprocess data. Defaults to \code{\link{zscore}} \emph{only} if
-\code{centroid} \code{=} \code{"shape"}, but will be replaced by a custom function if provided.}
+\item{preproc}{Function to preprocess data. Defaults to \code{\link[=zscore]{zscore()}} \emph{only} if \code{centroid} \code{=}
+\code{"shape"}, but will be replaced by a custom function if provided.}
 
-\item{distance}{A supported distance from \code{proxy}'s \code{\link[proxy]{dist}}. Ignored for
-\code{type} \code{=} \code{"tadpole"}.}
+\item{distance}{A supported distance from \code{\link[proxy:dist]{proxy::dist()}}. Ignored for \code{type} \code{=} \code{"tadpole"}.}
 
 \item{centroid}{Either a supported string or an appropriate function to calculate centroids when
 using partitional or prototypes for hierarchical/tadpole methods.}
 
-\item{control}{An appropriate list of controls. See \code{\link{tsclust-controls}}}
+\item{control}{An appropriate list of controls. See \link{tsclust-controls}}
 
 \item{args}{An appropriate list of arguments for preprocessing, distance and centroid functions.
-See \code{\link{tsclust_args}}}
+See \code{\link[=tsclust_args]{tsclust_args()}}}
 
 \item{seed}{Random seed for reproducibility.}
 
-\item{trace}{Logical flag. If \code{TRUE}, more output regarding the progress is printed to
-screen.}
+\item{trace}{Logical flag. If \code{TRUE}, more output regarding the progress is printed to screen.}
 }
 \value{
-An object with an appropriate class from \code{\link{TSClusters-class}}.
+An object with an appropriate class from \linkS4class{TSClusters}.
 
-If \code{control@nrep > 1} and a partitional procedure is used, \code{length(method)} \code{> 1}
-and hierarchical procedures are used, or \code{length(k)} \code{>} \code{1}, a list of objects is
-returned.
+If \code{control@nrep > 1} and a partitional procedure is used, \code{length(method)} \code{> 1} and
+hierarchical procedures are used, or \code{length(k)} \code{>} \code{1}, a list of objects is returned.
 }
 \description{
 This is the new main function to perform time series clustering. It should provide the same
-functionality as \code{\link{dtwclust}}, but it is hopefully more coherent in general. See the
-details and the examples for more information, as well as the included package vignette (which
-can be loaded by typing \code{vignette("dtwclust")}).
+functionality as \code{\link[=dtwclust]{dtwclust()}}, but it is hopefully more coherent in general. See the details and
+the examples for more information, as well as the included package vignette (which can be loaded
+by typing \code{vignette("dtwclust")}). A convenience wrapper is available in \code{\link[=compare_clusterings]{compare_clusterings()}}.
 }
 \details{
 Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering
-is done with \code{\link[stats]{hclust}} by default. TADPole clustering uses the
-\code{\link{TADPole}} function. Specifying \code{type} = \code{"partitional"}, \code{preproc} =
-\code{zscore}, \code{distance} = \code{"sbd"} and \code{centroid} = \code{"shape"} is equivalent
-to the k-Shape algorithm (Paparrizos and Gravano 2015).
+is done with \code{\link[stats:hclust]{stats::hclust()}} by default. TADPole clustering uses the \code{\link[=TADPole]{TADPole()}} function.
+Specifying \code{type} = \code{"partitional"}, \code{preproc} = \code{zscore}, \code{distance} = \code{"sbd"} and \code{centroid} =
+\code{"shape"} is equivalent to the k-Shape algorithm (Paparrizos and Gravano 2015).
 
-The \code{series} may be porovided as a matrix, a data frame or a list. Matrices and data frames
-are coerced to a list, both row-wise. Only lists can have series with different lengths or
-multiple dimensions. Most of the optimizations require series to have the same length, so
-consider reinterpolating them to save some time (see Ratanamahatana and Keogh 2004;
-\code{\link{reinterpolate}}). No missing values are allowed.
+The \code{series} may be porovided as a matrix, a data frame or a list. Matrices and data frames are
+coerced to a list, both row-wise. Only lists can have series with different lengths or multiple
+dimensions. Most of the optimizations require series to have the same length, so consider
+reinterpolating them to save some time (see Ratanamahatana and Keogh 2004; \code{\link[=reinterpolate]{reinterpolate()}}). No
+missing values are allowed.
 
 In the case of multivariate time series, they should be provided as a list of matrices, where
-time spans the rows of each matrix and the variables span the columns (see
-\code{\link{CharTrajMV}} for an example). At the moment, only \code{DTW}, \code{DTW2} and
-\code{GAK} suppport such series, which means only partitional and hierarchical procedures using
-those distances will work. You can of course create your own custom distances. All included
-centroid functions should work with the aforementioned format, although \code{shape} is
-\strong{not} recommended. Note that the \code{plot} method will simply append all dimensions
-(columns) one after the other.
+time spans the rows of each matrix and the variables span the columns (see \link{CharTrajMV} for an
+example). At the moment, only \code{DTW}, \code{DTW2} and \code{GAK} suppport such series, which means only
+partitional and hierarchical procedures using those distances will work. You can of course create
+your own custom distances. All included centroid functions should work with the aforementioned
+format, although \code{shape} is \strong{not} recommended. Note that the \code{plot} method will simply append
+all dimensions (columns) one after the other.
 }
 \section{Centroid Calculation}{
 
 
-  In the case of partitional/fuzzy algorithms, a suitable function should calculate the cluster
-  centroids at every iteration. In this case, the centroids are themselves time series. Fuzzy
-  clustering uses the standard fuzzy c-means centroid by default.
+In the case of partitional/fuzzy algorithms, a suitable function should calculate the cluster
+centroids at every iteration. In this case, the centroids are themselves time series. Fuzzy
+clustering uses the standard fuzzy c-means centroid by default.
 
-  In either case, a custom function can be provided. If one is provided, it will receive the
-  following parameters with the shown names (examples for partitional clustering are shown in
-  parentheses):
+In either case, a custom function can be provided. If one is provided, it will receive the
+following parameters with the shown names (examples for partitional clustering are shown in
+parentheses):
+\itemize{
+\item \code{x}: The \emph{whole} data list (\code{list(ts1, ts2, ts3)})
+\item \code{cl_id}: A numeric vector with length equal to the number of series in \code{data}, indicating
+which cluster a series belongs to (\code{c(1L, 2L, 2L)})
+\item \code{k}: The desired number of total clusters (\code{2L})
+\item \code{cent}: The current centroids in order, in a list (\code{list(centroid1, centroid2)})
+\item \code{cl_old}: The membership vector of the \emph{previous} iteration (\code{c(1L, 1L, 2L)})
+\item The elements of \code{...} that match its formal arguments
+}
 
-  \itemize{
-    \item \code{"x"}: The \emph{whole} data list (\code{list(ts1, ts2, ts3)})
-    \item \code{"cl_id"}: A numeric vector with length equal to the number of series in
-      \code{data}, indicating which cluster a series belongs to (\code{c(1L, 2L, 2L)})
-    \item \code{"k"}: The desired number of total clusters (\code{2L})
-    \item \code{"cent"}: The current centroids in order, in a list (\code{list(centroid1,
-      centroid2)})
-    \item \code{"cl_old"}: The membership vector of the \emph{previous} iteration (\code{c(1L,
-      1L, 2L)})
-    \item The elements of \code{args$cent} that match its formal arguments
-  }
+In case of fuzzy clustering, the membership vectors (2nd and 5th elements above) are matrices
+with number of rows equal to amount of elements in the data, and number of columns equal to the
+number of desired clusters. Each row must sum to 1.
 
-  In case of fuzzy clustering, the membership vectors (2nd and 5th elements above) are matrices
-  with number of rows equal to amount of elements in the data, and number of columns equal to the
-  number of desired clusters. Each row must sum to 1.
+The other option is to provide a character string for the custom implementations. The following
+options are available:
+\itemize{
+\item "mean": The average along each dimension. In other words, the average of all \eqn{x^j_i}
+among the \eqn{j} series that belong to the same cluster for all time points \eqn{t_i}.
+\item "median": The median along each dimension. Similar to mean.
+\item "shape": Shape averaging. By default, all series are z-normalized in this case, since the
+resulting centroids will also have this normalization. See \code{\link[=shape_extraction]{shape_extraction()}} for more
+details.
+\item "dba": DTW Barycenter Averaging. See \code{\link[=DBA]{DBA()}} for more details.
+\item "pam": Partition around medoids (PAM). This basically means that the cluster centroids are
+always one of the time series in the data. In this case, the distance matrix can be
+pre-computed once using all time series in the data and then re-used at each iteration. It
+usually saves overhead overall for small datasets.
+\item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and used by default in that case.
+\item "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering. It \strong{always} precomputes the
+whole cross-distance matrix.
+}
 
-  The other option is to provide a character string for the custom implementations. The following
-  options are available:
+These check for the special cases where parallelization might be desired. Note that only
+\code{shape}, \code{dba}, \code{pam} and \code{fcmdd} support series of different length. Also note that, for
+\code{shape} and \code{dba}, this support has a caveat: the final centroids' length will depend on the
+length of those series that were randomly chosen at the beginning of the clustering algorithm.
+For example, if the series in the dataset have a length of either 10 or 15, 2 clusters are
+desired, and the initial choice selects two series with length of 10, the final centroids will
+have this same length.
 
-  \itemize{
-    \item "mean": The average along each dimension. In other words, the average of all
-      \eqn{x^j_i} among the \eqn{j} series that belong to the same cluster for all time points
-      \eqn{t_i}.
-    \item "median": The median along each dimension. Similar to mean.
-    \item "shape": Shape averaging. By default, all series are z-normalized in this case, since
-      the resulting centroids will also have this normalization. See
-      \code{\link{shape_extraction}} for more details.
-    \item "dba": DTW Barycenter Averaging. See \code{\link{DBA}} for more details.
-    \item "pam": Partition around medoids (PAM). This basically means that the cluster centroids
-      are always one of the time series in the data. In this case, the distance matrix can be
-      pre-computed once using all time series in the data and then re-used at each iteration. It
-      usually saves overhead overall.
-    \item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and used by default in that
-      case.
-    \item "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering. It \strong{always}
-      precomputes the whole cross-distance matrix.
-  }
-
-  These check for the special cases where parallelization might be desired. Note that only
-  \code{shape}, \code{dba}, \code{pam} and \code{fcmdd} support series of different length. Also
-  note that, for \code{shape} and \code{dba}, this support has a caveat: the final centroids'
-  length will depend on the length of those series that were randomly chosen at the beginning of
-  the clustering algorithm. For example, if the series in the dataset have a length of either 10
-  or 15, 2 clusters are desired, and the initial choice selects two series with length of 10, the
-  final centroids will have this same length.
-
-  As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid
-  function that takes a list of series as only input and returns a single centroid series. These
-  centroids are returned in the \code{centroids} slot. By default, a type of PAM centroid
-  function is used.
+As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid
+function that takes a list of series as only input and returns a single centroid series. These
+centroids are returned in the \code{centroids} slot. By default, a type of PAM centroid function is
+used.
 }
 
 \section{Distance Measures}{
 
 
-  The distance measure to be used with partitional, hierarchical and fuzzy clustering can be
-  modified with the \code{distance} parameter. The supported option is to provide a string, which
-  must represent a compatible distance registered with \code{proxy}'s \code{\link[proxy]{dist}}.
-  Registration is done via \code{\link[proxy]{pr_DB}}, and extra parameters can be provided in
-  \code{args$dist} (see the examples).
+The distance measure to be used with partitional, hierarchical and fuzzy clustering can be
+modified with the \code{distance} parameter. The supported option is to provide a string, which must
+represent a compatible distance registered with \code{proxy}'s \code{\link[proxy:dist]{proxy::dist()}}. Registration is done
+via \code{\link[proxy:pr_DB]{proxy::pr_DB()}}, and extra parameters can be provided in \code{args$dist} (see the examples).
 
-  Note that you are free to create your own distance functions and register them. Optionally, you
-  can use one of the following custom implementations (all registered with \code{proxy}):
+Note that you are free to create your own distance functions and register them. Optionally, you
+can use one of the following custom implementations (all registered with \code{proxy}):
+\itemize{
+\item \code{"dtw"}: DTW, optionally with a Sakoe-Chiba/Slanted-band constraint.
+\item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint. Read
+details below.
+\item \code{"dtw_basic"}: A custom version of DTW with less functionality, but slightly faster. See
+\code{\link[=dtw_basic]{dtw_basic()}}.
+\item \code{"dtw_lb"}: DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some
+computations are avoided by first estimating the distance matrix with Lemire's lower bound
+and then iteratively refining with DTW. See \code{\link[=dtw_lb]{dtw_lb()}}. Not suitable for \code{pam.precompute} =
+\code{TRUE}.
+\item \code{"lbk"}: Keogh's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint.
+\item \code{"lbi"}: Lemire's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint.
+\item \code{"sbd"}: Shape-based distance. See \code{\link[=SBD]{SBD()}} for more details.
+\item \code{"gak"}: Global alignment kernels. See \code{\link[=GAK]{GAK()}} for more details..
+}
 
-  \itemize{
-    \item \code{"dtw"}: DTW with L1 norm (by default), optionally with a slanted-band constraint.
-    \item \code{"dtw2"}: DTW with L2 norm and optionally a slanted-band constraint. Read details
-      below.
-    \item \code{"dtw_basic"}: A custom version of DTW with less functionality, but slightly
-      faster. See \code{\link{dtw_basic}}.
-    \item \code{"dtw_lb"}: DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some
-      computations are avoided by first estimating the distance matrix with Lemire's lower bound
-      and then iteratively refining with DTW. See \code{\link{dtw_lb}}. Not suitable for
-      \code{pam.precompute} = \code{TRUE}.
-    \item \code{"lbk"}: Keogh's DTW lower bound with either L1 or L2 norm for the Sakoe-Chiba
-      constraint.
-    \item \code{"lbi"}: Lemire's DTW lower bound with either L1 or L2 norm for the Sakoe-Chiba
-      constraint.
-    \item \code{"sbd"}: Shape-based distance. See \code{\link{SBD}} for more details.
-    \item \code{"gak"}: Global alignment kernels. See \code{\link{GAK}} for more details.
-  }
+DTW2 is done with \code{\link[dtw:dtw]{dtw::dtw()}}, but it differs from the result you would obtain if you specify
+\code{L2} as \code{dist.method}: with \code{DTW2}, pointwise distances (the local cost matrix) are calculated
+with \code{L1} norm, \emph{each} element of the matrix is squared and the result is fed into
+\code{\link[dtw:dtw]{dtw::dtw()}}, which finds the optimum warping path. The square root of the resulting distance
+is \emph{then} computed. See \code{\link[=dtw2]{dtw2()}}.
 
-  DTW2 is done with \code{\link[dtw]{dtw}}, but it differs from the result you would obtain if
-  you specify \code{L2} as \code{dist.method}: with \code{DTW2}, pointwise distances (the local
-  cost matrix) are calculated with \code{L1} norm, \emph{each} element of the matrix is squared
-  and the result is fed into \code{\link[dtw]{dtw}}, which finds the optimum warping path. The
-  square root of the resulting distance is \emph{then} computed. See \code{\link{dtw2}}.
+Only \code{dtw}, \code{dtw2}, \code{sbd} and \code{gak} support series of different length. The lower bounds are
+probably unsuitable for direct clustering unless series are very easily distinguishable.
 
-  Only \code{dtw}, \code{dtw2}, \code{sbd} and \code{gak} support series of different length. The
-  lower bounds are probably unsuitable for direct clustering unless series are very easily
-  distinguishable.
-
-  If you know that the distance function is symmetric, and you use a hierarchical algorithm, or a
-  partitional algorithm with PAM centroids and \code{pam.precompute} = \code{TRUE}, some time
-  can be saved by calculating only half the distance matrix. Therefore, consider setting the
-  symmetric control parameter to \code{TRUE} if this is the case.
+If you know that the distance function is symmetric, and you use a hierarchical algorithm, or a
+partitional algorithm with PAM centroids and \code{pam.precompute} = \code{TRUE}, some time can be saved
+by calculating only half the distance matrix. Therefore, consider setting the symmetric control
+parameter to \code{TRUE} if this is the case.
 }
 
 \section{Preprocessing}{
 
 
-  It is strongly advised to use z-normalization in case of \code{centroid = "shape"}, because the
-  resulting series have this normalization (see \code{\link{shape_extraction}}). Therefore,
-  \code{\link{zscore}} is the default in this case. The user can, however, specify a custom
-  function that performs any transformation on the data, but the user must make sure that the
-  format stays consistent, i.e. a list of time series.
+It is strongly advised to use z-normalization in case of \code{centroid = "shape"}, because the
+resulting series have this normalization (see \code{\link[=shape_extraction]{shape_extraction()}}). Therefore, \code{\link[=zscore]{zscore()}} is
+the default in this case. The user can, however, specify a custom function that performs any
+transformation on the data, but the user must make sure that the format stays consistent, i.e.
+a list of time series.
 
-  Setting to \code{NULL} means no preprocessing (except for \code{centroid = "shape"}). A
-  provided function will receive the data as first argument, followed by the contents of
-  \code{args$preproc} that match its formal arguments.
+Setting to \code{NULL} means no preprocessing (except for \code{centroid = "shape"}). A provided function
+will receive the data as first argument, followed by the contents of \code{args$preproc} that match
+its formal arguments.
 
-  It is convenient to provide this function if you're planning on using the
-  \code{\link[stats]{predict}} generic (see also \code{\link{tsclusters-methods}}).
+It is convenient to provide this function if you're planning on using the \code{\link[stats:predict]{stats::predict()}}
+generic (see also \link{tsclusters-methods}).
 }
 
 \section{Repetitions}{
 
 
-  Due to their stochastic nature, partitional clustering is usually repeated several times with
-  different random seeds to allow for different starting points. This function uses
-  \code{\link[rngtools]{RNGseq}} to obtain different seed streams for each repetition, utilizing
-  the \code{seed} parameter (if provided) to initialize it. If more than one repetition is made,
-  the streams are returned in an attribute called \code{rng}.
+Due to their stochastic nature, partitional clustering is usually repeated several times with
+different random seeds to allow for different starting points. This function uses
+\code{\link[rngtools:RNGseq]{rngtools::RNGseq()}} to obtain different seed streams for each repetition, utilizing the \code{seed}
+parameter (if provided) to initialize it. If more than one repetition is made, the streams are
+returned in an attribute called \code{rng}.
 
-  Multiple values of \code{k} can also be provided to get different partitions using any
-  \code{type} of clustering.
+Multiple values of \code{k} can also be provided to get different partitions using any \code{type} of
+clustering.
 
-  Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is
-  precomputed, since said matrix is reused for every repetition, and can be comptued in parallel
-  (see Parallel section).
+Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is
+precomputed, since said matrix is reused for every repetition, and can be comptued in parallel
+(see Parallel section).
 }
 
 \section{Parallel Computing}{
 
 
-  Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
-  overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
+overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 
-  The user can register a parallel backend, for eample with the \code{doParallel} package, in
-  order to do the repetitions in parallel, as well as distance and some centroid calculations.
+The user can register a parallel backend, for eample with the \code{doParallel} package, in order to
+do the repetitions in parallel, as well as distance and some centroid calculations.
 
-  Unless each repetition requires a few seconds, parallel computing probably isn't worth it. As
-  such, I would only use this feature with \code{shape} and \code{DBA} centroids, or an expensive
-  distance function like \code{DTW}.
+Unless each repetition requires a few seconds, parallel computing probably isn't worth it. As
+such, I would only use this feature with \code{shape} and \code{DBA} centroids, or an expensive distance
+function like \code{DTW}.
 
-  If you register a parallel backend, the function will also try to do the calculation of the
-  distance matrices in parallel. This should work with any function registered with
-  \code{\link[proxy]{dist}} via \code{\link[proxy]{pr_DB}} whose \code{loop} flag is set to
-  \code{TRUE}. If the function requires special packages to be loaded, provide their names in the
-  \code{packages} slot of \code{control}. Note that "dtwclust" is always loaded in each parallel
-  worker, so that doesn't need to be included. Alternatively, you may want to pre-load
-  \pkg{dtwclust} in each worker with \code{\link[parallel]{clusterEvalQ}}.
+If you register a parallel backend, the function will also try to do the calculation of the
+distance matrices in parallel. This should work with any function registered with
+\code{\link[proxy:dist]{proxy::dist()}} via \code{\link[proxy:pr_DB]{proxy::pr_DB()}} whose \code{loop} flag is set to \code{TRUE}. If the function
+requires special packages to be loaded, provide their names in the \code{packages} slot of
+\code{control}. Note that "dtwclust" is always loaded in each parallel worker, so that doesn't need
+to be included. Alternatively, you may want to pre-load \pkg{dtwclust} in each worker with
+\code{\link[parallel:clusterEvalQ]{parallel::clusterEvalQ()}}.
 
-  In case of multiple repetitions, each worker gets a repetition task. Otherwise, the tasks
-  (which can be a distance matrix or a centroid calculation) are usually divided into chunks
-  according to the number of workers available.
+In case of multiple repetitions, each worker gets a repetition task. Otherwise, the tasks
+(which can be a distance matrix or a centroid calculation) are usually divided into chunks
+according to the number of workers available.
 }
 
 \section{Notes}{
 
 
-  The lower bounds are defined only for time series of equal length.
+The lower bounds are defined only for time series of equal length.
 
-  The lower bounds are \strong{not} symmetric, and \code{DTW} is not symmetric in general.
+The lower bounds are \strong{not} symmetric, and \code{DTW} is not symmetric in general.
 }
 
 \examples{
@@ -441,9 +424,8 @@ Please refer to the package vignette references (which can be loaded by typing
 \code{vignette("dtwclust")}).
 }
 \seealso{
-\code{\link{TSClusters-class}}, \code{\link{tsclusters-methods}},
-\code{\link{tsclustFamily-class}}, \code{\link{tsclust-controls}},
-\code{\link{compare_clusterings}}.
+\linkS4class{TSClusters}, \link{tsclusters-methods}, \linkS4class{tsclustFamily}, \link{tsclust-controls},
+\code{\link[=compare_clusterings]{compare_clusterings()}}.
 }
 \author{
 Alexis Sarda-Espinosa
