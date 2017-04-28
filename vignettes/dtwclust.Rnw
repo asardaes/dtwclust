@@ -1251,9 +1251,17 @@ so we hope that, if time-series clustering is required,
 \section{Technical notes}
 \label{app:notes}
 
+After installation, the package and the sample data can be loaded and attached with the following code.
+
+<<load-pkg, echo = TRUE>>=
+library("dtwclust")
+data("uciCT")
+@
+
 The original main clustering function in \dtwclust{} has the same name, i.e., \code{dtwclust}.
 As of version 3.1.1, a new main function \code{tsclust} was added,
 which is hopefully more coherent in general.
+For completeness, comments about both are given below.
 Both return objects of type \code{S4}, which are one way in which \R{} implements classes.
 The formal elements of the class are called \code{slots},
 and can be accessed with the \code{@} operator (instead of the usual \code{$}).
@@ -1279,13 +1287,6 @@ Controls are now set via intermediary functions whose documentation can be found
 The random number generator of \R{} is set to L'Ecuyer-CMRG when \dtwclust{} is attached in an attempt to preserve reproducibility.
 The user is free to change this afterwards by using the \code{RNGkind} function.
 
-After installation, the package and the sample data can be loaded and attached with the following code.
-
-<<load-pkg, echo = TRUE>>=
-library("dtwclust")
-data("uciCT")
-@
-
 The \pkg{proxy} package is one of the main dependencies of \dtwclust{}.
 It aggregates all its measures in a database object called \code{pr_DB}.
 This has the advantage that all registered functions can be used with the \code{proxy::dist} function,
@@ -1309,6 +1310,10 @@ Moreover, lists enable support for multivariate series,
 where a single multivariate time-series should be provided as a matrix where time spans the rows and the variables span the columns.
 Thus, several multivariate time-series should be provided as a list of matrices to ensure that they are correctly detected.
 Note, however, that not all distance and centroid functions support multivariate time-series.
+
+The function \code{compare_clusterings} and some helper functions were added in version 3.2.0 to test many different clustering configurations in a convenient way.
+The \code{tsclust} function is used for the calculations.
+A series of examples are included in the documentation of the function.
 
 \section[Registering a custom distance with proxy]{Registering a custom distance with \pkg{proxy}}
 \label{app:custom-dist}
