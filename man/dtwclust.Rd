@@ -325,11 +325,13 @@ precomputed*, since said matrix is reused for every repetition, and can be compt
 \section{Parallel Computing}{
 
 
-Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
-overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+  Please note that running tasks in parallel does \strong{not} guarantee faster computations.
+  The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 
-The user can register a parallel backend, for eample with the \code{doParallel} package, in order to
-do the repetitions in parallel, as well as distance and some centroid calculations.
+  The user can register a parallel backend, e.g. with the \pkg{doParallel} package, in order to
+  attempt to speed up the calculations (see the examples).
+
+
 
 Unless each repetition requires a few seconds, parallel computing probably isn't worth it. As
 such, I would only use this feature with \code{shape} and \code{DBA} centroids, or an expensive distance

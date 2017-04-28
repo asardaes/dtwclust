@@ -283,13 +283,9 @@
 #'   precomputed*, since said matrix is reused for every repetition, and can be comptued in parallel
 #'   (see Parallel section).
 #'
+#' @template parallel
+#'
 #' @section Parallel Computing:
-#'
-#'   Please note that running tasks in parallel does **not** guarantee faster computations. The
-#'   overhead introduced is sometimes too large, and it's better to run tasks sequentially.
-#'
-#'   The user can register a parallel backend, for eample with the `doParallel` package, in order to
-#'   do the repetitions in parallel, as well as distance and some centroid calculations.
 #'
 #'   Unless each repetition requires a few seconds, parallel computing probably isn't worth it. As
 #'   such, I would only use this feature with `shape` and `DBA` centroids, or an expensive distance
