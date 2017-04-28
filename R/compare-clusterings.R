@@ -764,7 +764,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                       silent = TRUE)
 
     if (inherits(scores, "try-error")) {
-        warning("The score.clus function did not execute successfully.")
+        warning("The score.clus function(s) did not execute successfully.")
         scores <- NULL
         pick <- NULL
 
@@ -782,6 +782,17 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## =============================================================================================
 
     k <- unlist(configs[[1L]]$k[1L])
+    i_cfg <- 1L
+    config_ids <- list()
+
+    for (nr in sapply(configs, nrow)) {
+        config_ids <- c(config_ids, list(seq(from = i_cfg, by = 1L, length.out = nr)))
+        i_cfg <- i_cfg + nr
+    }
+
+    configs <- mapply(configs, config_ids, SIMPLIFY = FALSE, FUN = function(config, ids) {
+        data.frame(config_id = paste0("config", ids), config)
+    })
 
     flatten_configs <- sapply(types, function(type) {
         switch(type,
@@ -804,8 +815,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                                  )]
 
                                                  df <- expand.grid(rep = rep, k = k)
-                                                 rownames(this_config) <- NULL
-                                                 cbind(df, this_config)
+                                                 make_unique_ids(df, this_config) ## see EOF
                                              })
 
                                              ## return
@@ -820,8 +830,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                                  )]
 
                                                  df <- expand.grid(k = k, method = method)
-                                                 rownames(this_config) <- NULL
-                                                 cbind(df, this_config)
+                                                 make_unique_ids(df, this_config) ## see EOF
                                              })
 
                                              ## return
@@ -835,8 +844,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                                  )]
 
                                                  df <- expand.grid(k = k)
-                                                 rownames(this_config) <- NULL
-                                                 cbind(df, this_config)
+                                                 make_unique_ids(df, this_config) ## see EOF
                                              })
 
                                              ## return
@@ -876,14 +884,23 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## =============================================================================================
 
     results <- list(results = results, scores = scores, pick = pick, proc_time = proc.time() - tic)
-    if (return.objects) results <- c(results, objects = objs_by_type)
+    if (return.objects) {
+        objs_by_type <- mapply(objs_by_type, results$results,
+                               SIMPLIFY = FALSE,
+                               FUN = function(objs, res) {
+                                   names(objs) <- res$config_id
+                                   objs
+                               })
+
+        results <- c(results, objects = objs_by_type)
+    }
 
     ## return results
     results
 }
 
 ## =================================================================================================
-## compare_clusterings helper: get_config_args
+## compare_clusterings helpers
 ## =================================================================================================
 
 get_config_args <- function(config, i) {
@@ -934,4 +951,12 @@ get_config_args <- function(config, i) {
     tsclust_args(preproc = preproc_args,
                  dist = dist_args,
                  cent = cent_args)
+}
+
+make_unique_ids <- function(df, this_config) {
+    rownames(this_config) <- NULL
+    this_config <- cbind(this_config[, 1L, drop = FALSE], df, this_config[, -1L, drop = FALSE])
+    nr <- nrow(this_config)
+    if (nr > 1L) this_config$config_id <- paste0(this_config$config_id, "_", 1L:nr)
+    this_config
 }

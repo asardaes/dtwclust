@@ -276,7 +276,7 @@ pick_majority <- function(scores, obj_lists, ...) {
 
 comparison_majority <- compare_clusterings(CharTraj, types = c("p", "h", "f", "t"),
                                            configs = cfgs,
-                                           seed = 293L, trace = TRUE,
+                                           seed = 84L, trace = TRUE,
                                            score.clus = score_external,
                                            pick.clus = pick_majority)
 
