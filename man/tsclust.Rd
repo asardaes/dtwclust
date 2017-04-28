@@ -71,6 +71,11 @@ your own custom distances. All included centroid functions should work with the 
 format, although \code{shape} is \strong{not} recommended. Note that the \code{plot} method will simply append
 all dimensions (columns) one after the other.
 }
+\note{
+The lower bounds are defined only for time series of equal length.
+
+The lower bounds are \strong{not} symmetric, and \code{DTW} is not symmetric in general.
+}
 \section{Centroid Calculation}{
 
 
@@ -229,14 +234,6 @@ to be included. Alternatively, you may want to pre-load \pkg{dtwclust} in each w
 In case of multiple repetitions, each worker gets a repetition task. Otherwise, the tasks
 (which can be a distance matrix or a centroid calculation) are usually divided into chunks
 according to the number of workers available.
-}
-
-\section{Notes}{
-
-
-The lower bounds are defined only for time series of equal length.
-
-The lower bounds are \strong{not} symmetric, and \code{DTW} is not symmetric in general.
 }
 
 \examples{

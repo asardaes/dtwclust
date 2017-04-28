@@ -195,11 +195,11 @@
 #'   (which can be a distance matrix or a centroid calculation) are usually divided into chunks
 #'   according to the number of workers available.
 #'
-#' @section Notes:
+#' @note
 #'
-#'   The lower bounds are defined only for time series of equal length.
+#' The lower bounds are defined only for time series of equal length.
 #'
-#'   The lower bounds are **not** symmetric, and `DTW` is not symmetric in general.
+#' The lower bounds are **not** symmetric, and `DTW` is not symmetric in general.
 #'
 #' @author Alexis Sarda-Espinosa
 #'
