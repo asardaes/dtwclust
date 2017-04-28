@@ -48,11 +48,11 @@ If a given series reference is provided in \code{centroid}, the algorithm should
 the same result provided the elements of \code{X} keep the same values, although their order may
 change.
 
-The windowing constraint uses a centered window. The calculations expect a value in \code{window.size}
-that represents the distance between the point considered and one of the edges of the window.
-Therefore, if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i}
-considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in \code{10(2) + 1 = 21}
-observations falling within the window.
+The windowing constraint uses a centered window. The calculations expect a value in
+\code{window.size} that represents the distance between the point considered and one of the edges
+of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
+observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
+in \code{10(2) + 1 = 21} observations falling within the window.
 }
 \note{
 The indices of the DTW alignment are obtained by calling \code{\link[=dtw_basic]{dtw_basic()}} with \code{backtrack = TRUE}.

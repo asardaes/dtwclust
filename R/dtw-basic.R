@@ -26,11 +26,7 @@
 #'
 #' If `backtrack` is `TRUE`, the mapping of indices between series is returned in a list.
 #'
-#' The windowing constraint uses a centered window. The calculations expect a value in `window.size`
-#' that represents the distance between the point considered and one of the edges of the window.
-#' Therefore, if, for example, `window.size = 10`, the warping for an observation \eqn{x_i}
-#' considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting in `10(2) + 1 = 21`
-#' observations falling within the window.
+#' @template window
 #'
 #' @return The DTW distance. For `backtrack` `=` `TRUE`, a list with:
 #'

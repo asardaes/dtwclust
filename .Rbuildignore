@@ -2,6 +2,7 @@
 ^\.Rproj\.user$
 ^\..*
 ^appveyor\.yml$
+man-roxygen
 
 .*\.md
 codecov\.R
