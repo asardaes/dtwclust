@@ -25,8 +25,8 @@ clusterings.}
 \item{tadpole}{A named list of lists with functions and arguments for TADPole clusterings.}
 
 \item{share.config}{A character vector specifying which clusterings should include the shared
-lists (the ones specified in \code{...}). It must be one of (possibly abbreviated): partitional,
-hierarchical, fuzzy, tadpole.}
+lists (the ones specified in \code{...}). It must be any combination of (possibly abbreviated):
+partitional, hierarchical, fuzzy, tadpole.}
 }
 \value{
 A list for each clustering, each of which includes a data frame with the computed configurations.

@@ -15,8 +15,8 @@
 #' @param fuzzy A named list of lists with functions and arguments for fuzzy clusterings.
 #' @param tadpole A named list of lists with functions and arguments for TADPole clusterings.
 #' @param share.config A character vector specifying which clusterings should include the shared
-#'   lists (the ones specified in `...`). It must be one of (possibly abbreviated): partitional,
-#'   hierarchical, fuzzy, tadpole.
+#'   lists (the ones specified in `...`). It must be any combination of (possibly abbreviated):
+#'   partitional, hierarchical, fuzzy, tadpole.
 #'
 #' @details
 #'
