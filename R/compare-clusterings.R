@@ -866,7 +866,9 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## Add scores
     ## ---------------------------------------------------------------------------------------------
 
-    configs_cols <- lapply(configs_out, function(config) { setdiff(colnames(config), "config_id") })
+    configs_cols <- lapply(configs_out, function(config) {
+        setdiff(colnames(config), c("config_id", "rep"))
+    })
 
     if (!is.null(scores)) {
         results <- try(mapply(configs_out, scores,
