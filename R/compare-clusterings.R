@@ -394,6 +394,8 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'   may also be a named list of functions, one for each type of clustering. See Scoring section.
 #' @param pick.clus A function that gets the result from `score.clus` as first argument, as well as
 #'   the objects returned by [tsclust()] (and elements of `...`) and picks the best result.
+#' @param shuffle.configs Randomly shuffle the order of configs, which can be useful to balance load
+#'   when using parallel computation.
 #' @param return.objects Logical indicating whether the objects from returned by [tsclust()] should
 #'   be given in the result.
 #'
@@ -465,7 +467,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                 seed = NULL, trace = FALSE, packages = character(0L),
                                 score.clus = function(...) stop("No scoring"),
                                 pick.clus = function(...) stop("No picking"),
-                                return.objects = FALSE)
+                                shuffle.configs = FALSE, return.objects = FALSE)
 {
     ## =============================================================================================
     ## Start
@@ -507,6 +509,12 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
     if (any(sapply(configs, is.null)))
         stop("The configuration for one of the chosen clustering types is missing.")
+
+    if (shuffle.configs) {
+        configs <- lapply(configs, function(config) {
+            config[sample(nrow(config)), , drop = FALSE]
+        })
+    }
 
     ## ---------------------------------------------------------------------------------------------
     ## Obtain random seeds
@@ -594,14 +602,10 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         custom_centroids <- setdiff(unique(config$centroid), c("default", included_centroids))
 
         for (custom_preproc in custom_preprocs)
-            assign(custom_preproc,
-                   get_from_callers(custom_preproc,
-                                    "function"))
+            assign(custom_preproc, get_from_callers(custom_preproc, "function"))
 
         for (custom_centroid in custom_centroids)
-            assign(custom_centroid,
-                   get_from_callers(custom_centroid,
-                                    "function"))
+            assign(custom_centroid, get_from_callers(custom_centroid, "function"))
 
         export <- c("dots", "trace",
                     "check_consistency", "enlist", "subset_dots",
@@ -862,6 +866,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## Add scores
     ## ---------------------------------------------------------------------------------------------
 
+    configs_cols <- lapply(configs_out, function(config) { setdiff(colnames(config), "config_id") })
+
     if (!is.null(scores)) {
         results <- try(mapply(configs_out, scores,
                               SIMPLIFY = FALSE,
@@ -894,6 +900,15 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
         results <- c(results, objects = objs_by_type)
     }
+
+    if (shuffle.configs)
+        results$results <- mapply(results$results, configs_cols[names(results$results)],
+                                  SIMPLIFY = FALSE,
+                                  FUN = function(result, cols) {
+                                      order_args <- as.list(result[cols])
+                                      names(order_args) <- NULL
+                                      result[do.call(order, order_args), , drop = FALSE]
+        })
 
     ## return results
     results

@@ -8,7 +8,7 @@ compare_clusterings(series = NULL, types = c("p", "h", "f", "t"), ...,
   configs = compare_clusterings_configs(types), seed = NULL,
   trace = FALSE, packages = character(0L), score.clus = function(...)
   stop("No scoring"), pick.clus = function(...) stop("No picking"),
-  return.objects = FALSE)
+  shuffle.configs = FALSE, return.objects = FALSE)
 }
 \arguments{
 \item{series}{A list of series, a numeric matrix or a data frame. Matrices and data frames are
@@ -35,6 +35,9 @@ may also be a named list of functions, one for each type of clustering. See Scor
 
 \item{pick.clus}{A function that gets the result from \code{score.clus} as first argument, as well as
 the objects returned by \code{\link[=tsclust]{tsclust()}} (and elements of \code{...}) and picks the best result.}
+
+\item{shuffle.configs}{Randomly shuffle the order of configs, which can be useful to balance load
+when using parallel computation.}
 
 \item{return.objects}{Logical indicating whether the objects from returned by \code{\link[=tsclust]{tsclust()}} should
 be given in the result.}
@@ -331,7 +334,8 @@ comparison_partitional <- compare_clusterings(CharTraj, types = "p",
                                               configs = p_cfgs,
                                               seed = 32903L, trace = TRUE,
                                               score.clus = score_fun,
-                                              pick.clus = pick_fun)
+                                              pick.clus = pick_fun,
+                                              shuffle.configs = TRUE)
 }
 }
 \seealso{

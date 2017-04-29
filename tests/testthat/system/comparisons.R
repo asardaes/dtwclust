@@ -131,6 +131,7 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                                                   trace = TRUE,
                                                                   score.clus = score_fun,
                                                                   pick.clus = pick_fun,
+                                                                  shuffle.configs = TRUE,
                                                                   lbls = labels_subset))
 
     ## rds

@@ -224,5 +224,6 @@ comparison_partitional <- compare_clusterings(CharTraj, types = "p",
                                               configs = p_cfgs,
                                               seed = 32903L, trace = TRUE,
                                               score.clus = score_fun,
-                                              pick.clus = pick_fun)
+                                              pick.clus = pick_fun,
+                                              shuffle.configs = TRUE)
 }
