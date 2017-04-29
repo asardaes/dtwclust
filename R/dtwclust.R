@@ -335,18 +335,15 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     set.seed(seed)
 
-    if (is.null(data))
-        stop("No data provided")
+    if (is.null(data)) stop("No data provided")
 
     type <- match.arg(type, c("partitional", "hierarchical", "tadpole", "fuzzy"))
 
     ## coerce to list if necessary
     data <- any2list(data)
 
-    if (any(k < 2L))
-        stop("At least two clusters must be defined")
-    if (any(k > length(data)))
-        stop("Cannot have more clusters than series in the data")
+    if (any(k < 2L)) stop("At least two clusters must be defined")
+    if (any(k > length(data))) stop("Cannot have more clusters than series in the data")
 
     MYCALL <- match.call(expand.dots = TRUE)
 
@@ -354,15 +351,11 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     ## Control parameters
     ## ---------------------------------------------------------------------------------------------
 
-    if (is.null(control) || is.list(control)) {
-        control <- as(control, "dtwclustControl")
+    if (is.null(control) || is.list(control)) control <- as(control, "dtwclustControl")
+    else if (class(control) != "dtwclustControl") stop("Invalid control argument")
+    else methods::validObject(control)
 
-    } else if (class(control) != "dtwclustControl") {
-        stop("Invalid control argument")
-
-    } else {
-        methods::validObject(control)
-    }
+    if (control@trace) message("Consider using the 'tsclust' function instead.\n")
 
     dots <- list(...)
 
