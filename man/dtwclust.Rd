@@ -526,7 +526,7 @@ registerDoSEQ()
 Please refer to the package vignette references.
 }
 \seealso{
-\code{\link[=dtwclust-methods]{dtwclust-methods()}}, \code{\link[=dtwclust-class]{dtwclust-class()}}, \code{\link[=dtwclustControl]{dtwclustControl()}}, \code{\link[=dtwclustFamily]{dtwclustFamily()}}.
+\link{dtwclust-methods}, \linkS4class{dtwclust}, \link{dtwclustControl}, \link{dtwclustFamily}.
 }
 \author{
 Alexis Sarda-Espinosa

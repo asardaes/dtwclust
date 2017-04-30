@@ -318,7 +318,7 @@
 #'
 #' @seealso
 #'
-#' [dtwclust-methods()], [dtwclust-class()], [dtwclustControl()], [dtwclustFamily()].
+#' [dtwclust-methods], [dtwclust-class], [dtwclustControl], [dtwclustFamily].
 #'
 #' @example inst/dtwclust-examples.R
 #'
