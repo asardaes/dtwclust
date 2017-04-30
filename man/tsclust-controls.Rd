@@ -47,7 +47,8 @@ partitional with PAM centroids or hierarchical procedures.}
 
 \item{method}{Character vector with one or more linkage methods to use in hierarchical procedures
 (see \code{\link[stats:hclust]{stats::hclust()}}), the character \code{"all"} to use all of the available ones, or a function
-that performs hierarchical clustering based on distance matrices (e.g. \code{\link[cluster:diana]{cluster::diana()}}).}
+that performs hierarchical clustering based on distance matrices (e.g. \code{\link[cluster:diana]{cluster::diana()}}). See
+details.}
 
 \item{fuzziness}{Numeric. Exponent used for fuzzy clustering. Commonly termed \code{m} in the
 literature.}
@@ -72,6 +73,12 @@ Control parameters for fine-grained control.
 \details{
 The functions essentially return their function arguments in a classed list, although some checks
 are performed.
+
+There are some limitations when using a custom hierarchical function in \code{method}: it will receive
+the lower triangular of the distance matrix as first argument (see \code{\link[stats:as.dist]{stats::as.dist()}}) and the
+result should support the \code{\link[stats:as.hclust]{stats::as.hclust()}} generic. This functionality was added with the
+\pkg{cluster} in mind, since its functions follow this convention, but other functions could be
+used if they are adapted to work similarly.
 
 When using TADPole, the \code{dist} argument list includes the \code{window.size} and specifies \code{norm = "L2"}.
 }

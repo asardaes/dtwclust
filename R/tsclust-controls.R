@@ -33,7 +33,6 @@ partitional_control <- function(pam.precompute = TRUE,
                                 distmat = NULL)
 {
     if (any(iter.max <= 0L)) stop("Maximum iterations must be positive")
-
     if (any(nrep < 1L)) stop("Number of repetitions must be at least one")
 
     structure(
@@ -53,7 +52,16 @@ partitional_control <- function(pam.precompute = TRUE,
 #'
 #' @param method Character vector with one or more linkage methods to use in hierarchical procedures
 #'   (see [stats::hclust()]), the character `"all"` to use all of the available ones, or a function
-#'   that performs hierarchical clustering based on distance matrices (e.g. [cluster::diana()]).
+#'   that performs hierarchical clustering based on distance matrices (e.g. [cluster::diana()]). See
+#'   details.
+#'
+#' @details
+#'
+#' There are some limitations when using a custom hierarchical function in `method`: it will receive
+#' the lower triangular of the distance matrix as first argument (see [stats::as.dist()]) and the
+#' result should support the [stats::as.hclust()] generic. This functionality was added with the
+#' \pkg{cluster} in mind, since its functions follow this convention, but other functions could be
+#' used if they are adapted to work similarly.
 #'
 hierarchical_control <- function(method = "average",
                                  symmetric = FALSE,
@@ -67,7 +75,7 @@ hierarchical_control <- function(method = "average",
                               "all"),
                             several.ok = TRUE)
 
-        if (any(method == "all"))
+        if ("all" %in% method)
             method <- c("ward.D", "ward.D2", "single", "complete",
                         "average", "mcquitty", "median", "centroid")
 
@@ -99,9 +107,7 @@ fuzzy_control <- function(fuzziness = 2,
                           packages = character(0L))
 {
     if (any(fuzziness <= 1)) stop("Fuzziness exponent should be greater than one")
-
     if (any(iter.max <= 0L)) stop("Maximum iterations must be positive")
-
     if (any(delta < 0)) stop("Delta should be positive")
 
     structure(
@@ -126,9 +132,7 @@ tadpole_control <- function(dc,
                             lb = "lbk")
 {
     if (any(dc <= 0)) stop("Cutoff distance 'dc' must be positive")
-
     window.size <- check_consistency(window.size, "window")
-
     lb <- match.arg(lb, c("lbk", "lbi"), several.ok = TRUE)
 
     structure(
