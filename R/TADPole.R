@@ -7,10 +7,11 @@
 #' @param data A matrix or data frame where each row is a time series, or a list where each element
 #'   is a time series. Multivariate series are not supported.
 #' @param window.size Window size constraint for DTW (Sakoe-Chiba). See details.
-#' @param k The number of desired clusters.
-#' @param dc The cutoff distance.
+#' @param k The number of desired clusters. Can be a vector with several values
+#' @param dc The cutoff distance(s).
 #' @param error.check Should the data be checked for inconsistencies?
 #' @param lb Which lower bound to use, "lbk" for [lb_keogh()] or "lbi" for [lb_improved()].
+#' @param trace Logical flag. If `TRUE`, more output regarding the progress is printed to screen.
 #'
 #' @details
 #'
@@ -79,17 +80,16 @@
 #' cat("VI index for TADPole:", cvi(kc.tadp$cl, CharTrajLabels, "VI"), "\n\n")
 #' }
 #'
-TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk") {
+TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk", trace = FALSE) {
     if (missing(window.size)) stop("Please provide a positive window size")
     if (missing(dc)) stop("Please provide the 'dc' parameter")
-    if (dc < 0) stop("The cutoff distance 'dc' must be positive")
+    if (any(dc < 0)) stop("The cutoff distance 'dc' must be positive")
 
     x <- any2list(data)
-
     n <- length(x)
 
     if (n < 2L) stop("data should have more than one time series")
-    if (k > n) stop("Number of clusters should be less than the number of time series")
+    if (any(k > n)) stop("Number of clusters should be less than the number of time series")
 
     lb <- match.arg(lb, c("lbk", "lbi"))
 
@@ -104,202 +104,236 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     ## NOTE: Euclidean is only valid as upper bound if 'symmetric1' step pattern is used
     UBM <- proxy::dist(x, x, method = "L2")
 
-    ## =============================================================================================
-    ## Pruning during local density calculation
-    ## =============================================================================================
-
-    ## Flag definition
-    # 0 - DTW calculated, and it lies below dc
-    # 1 - calculate DTW
-    # 2 - within dc, prune
-    # 3 - not within dc, prune
-    # 4 - identical series
-
-    ## Initialize matrices
-    D <- matrix(NA_real_, n, n)
-    Flags <- matrix(-1L, n, n)
-
-    ## Calculate values for the upper triangular part of the flag matrix (column-wise)
-    utv <- unlist(lapply(2L:n, function(j) {
-        sapply(1L:(j-1L), function(i) {
-            if (LBM[i,j] <= dc && UBM[i,j] > dc)
-                f <- 1L
-            else if (LBM[i,j] <= dc && UBM[i,j] < dc)
-                f <- 2L
-            else if (LBM[i,j] > dc)
-                f <- 3L
-            else
-                f <- 4L
-
-            f
-        })
-    }))
-
-    ## NOTE: only the upper triangular is filled here to avoid unnecessary calculations of DTW
-    Flags[upper.tri(Flags)] <- utv
-
-    ## Calculate full DTW for those entries whose lower bounds lie around 'dc'
-    ind1 <- which(Flags == 1L, arr.ind = TRUE)
-
-    if (nrow(ind1) > 0L) {
-        ind1 <- split_parallel(ind1, 1L)
-
-        exclude <- setdiff(ls(), c("x", "window.size"))
-
-        d1 <- foreach(ind1 = ind1,
-                      .combine = c,
-                      .multicombine = TRUE,
-                      .packages = "dtwclust",
-                      .noexport = exclude) %op% {
-                          proxy::dist(x[ind1[ , 1L]], x[ind1[ , 2L]],
-                                      method = "dtw_basic",
-                                      window.size = window.size,
-                                      step.pattern = symmetric1,
-                                      norm = "L2",
-                                      pairwise = TRUE)
-                      }
-
-        if (is.list(ind1)) ind1 <- do.call(rbind, ind1)
-
-        ## Fill distance matrix where necessary
-        D[ind1] <- d1
-        Flags[ind1[d1 <= dc, ]] <- 0L # For 'Rho' calculation
-    }
-
-    ## Force symmetry
-    D[lower.tri(D)] <- t(D)[lower.tri(D)]
-    Flags[lower.tri(Flags)] <- t(Flags)[lower.tri(Flags)]
-
-    ## Calculate local density vector
-    Rho <- apply(Flags, 1L, function(i) sum(i == 0L | i == 2L))
-
-    if (all(Rho == 0L))
-        stop("No density peaks detected, choose a different value for cutoff distance 'dc'")
-
-    if (max(Rho) == min(Rho))
-        Rho <- rep(1L, length(Rho))
-    else
-        Rho <- (Rho - min(Rho)) / (max(Rho) - min(Rho))
-
-    ## =============================================================================================
-    ## Pruning during NN distance calculation from higher density list (phase 1)
-    ## =============================================================================================
-
-    RhoSorted <- sort(Rho, decreasing = TRUE, index.return = TRUE)
-
-    deltaUB <- t(sapply(2L:n, function (i) {
-        ## Index of higher density neighbors
-        indHDN <- RhoSorted$ix[1L:(i-1L)]
-        ## Index of current object
-        ii <- RhoSorted$ix[i]
-
-        ## Use existing distance if available, otherwise use the upper bound
-        ub.i <- D[ii, indHDN]
-        indDNA <- is.na(ub.i)
-        ub.i[indDNA] <- UBM[ii, indHDN[indDNA]]
-
-        min(ub.i)
-    }))
-
-    deltaUB <- c(max(deltaUB), deltaUB)
-
-    ## Reorder the values
-    indOrig <- sort(RhoSorted$ix, index.return = TRUE)$ix
-    deltaUB <- deltaUB[indOrig]
-
-    ## New order
-    TADPorder <- sort(Rho * deltaUB, decreasing = TRUE, index.return = TRUE)
-
-    ## =============================================================================================
-    ## Pruning during NN distance calculation from higher density list (phase 2)
-    ## =============================================================================================
-
-    # start at two
-    i <- split_parallel(2L:n)
-
-    DNN <- foreach(i = i,
-                   .combine = rbind,
-                   .multicombine = TRUE,
-                   .packages = "dtwclust") %op% {
-                       t(sapply(i, function (i) {
-                           ## Index of higher density neighbors
-                           indHDN <- TADPorder$ix[1L:(i-1L)]
-                           ## Index of current object
-                           ii <- TADPorder$ix[i]
-
-                           ## If this is true, prune the calculation of the true distance
-                           indPrune <- LBM[ii, indHDN] > deltaUB[ii]
-                           ## If the distance was already computed before, don't do it again
-                           indPre <- Flags[ii, indHDN] == 0L | Flags[ii, indHDN] == 1L
-
-                           ## 'delta' will have the distances to neighbors with higher densities.
-                           ## Initially filled with upper bound
-                           delta <- UBM[ii, indHDN]
-                           ## If some distances were already computed, put them here
-                           delta[indPre] <- D[ii, indHDN[indPre]]
-
-                           ## If the distance is not to be pruned nor previously calculated,
-                           ## compute it now
-                           indCompute <- !(indPrune | indPre)
-
-                           if (any(indCompute)) {
-                               d2 <- proxy::dist(x[ii], x[indHDN[indCompute]],
-                                                 method = "dtw_basic",
-                                                 window.size = window.size,
-                                                 step.pattern = symmetric1,
-                                                 norm = "L2")
-
-                               delta[indCompute] <- d2
-                           }
-
-                           c(delta = min(delta),
-                             NN = indHDN[which.min(delta)],
-                             distCalc = sum(indCompute))
-                       }))
-                   }
-
-    ## To order according to default order
-    indOrig <- sort(TADPorder$ix, index.return = TRUE)$ix
-
-    delta <- c(max(DNN[ , 1L]), DNN[ , 1L])
-
-    NN <- c(-1L, DNN[ , 2L])
-
-    ## =============================================================================================
-    ## Cluster assignment
-    ## =============================================================================================
-
-    ## Normalize
-    if (max(delta) == min(delta))
-        zDelta <- rep(1L, length(delta))
-    else
-        zDelta <- (delta - min(delta)) / (max(delta) - min(delta))
-
-    ## Those with the most density are the cluster centroids (PAM)
-    C <- sort(sort(Rho * zDelta[indOrig], decreasing = TRUE, index.return = TRUE)$ix[1L:k])
-
-    ## Assign a unique number to each cluster centroid
-    cl <- rep(-1L, n)
-    cl[C] <- 1L:k
-
-    ## Which elements don't have a label yet (this is ordered according to the density values of
-    ## TADPorder, because the assignment is sequential)
-    indCl <- TADPorder$ix
-
-    ## Do the assignment (must be a loop)
-    for (i in seq_along(indCl)) {
-        if (cl[indCl[i]] == -1L) cl[indCl[i]] <- cl[NN[i]]
-    }
-
-    ## How many calculations were actually performed
-    distCalc <-  sum(utv == 1L) + sum(DNN[ , 3L])
-
-    if (any(cl == -1L))
-        warning(c("At least one series wasn't assigned to a cluster. ",
-                  "This shouldn't happen, please contact maintainer."))
+    `%this_op%` <- if (length(dc) >= foreach::getDoParWorkers()) `%op%` else foreach::`%do%`
 
     ## Return
-    list(cl = cl,
-         centroids = C,
-         distCalcPercentage = (distCalc / (n * (n+1) / 2 - n)) * 100)
+    RET <- foreach(dc = dc,
+                   .combine = c,
+                   .multicombine = TRUE,
+                   .packages = "dtwclust",
+                   .export = c("split_parallel", "op")) %this_op%
+                   {
+                       ## ==========================================================================
+                       ## Pruning during local density calculation
+                       ## ==========================================================================
+
+                       ## Flag definition
+                       # 0 - DTW calculated, and it lies below dc
+                       # 1 - calculate DTW
+                       # 2 - within dc, prune
+                       # 3 - not within dc, prune
+                       # 4 - identical series
+
+                       ## Initialize matrices
+                       D <- matrix(NA_real_, n, n)
+                       Flags <- matrix(-1L, n, n)
+
+                       ## Calculate values for upper triangular of the flag matrix (column-wise)
+                       utv <- unlist(lapply(2L:n, function(j) {
+                           sapply(1L:(j-1L), function(i) {
+                               if (LBM[i,j] <= dc && UBM[i,j] > dc)
+                                   f <- 1L
+                               else if (LBM[i,j] <= dc && UBM[i,j] < dc)
+                                   f <- 2L
+                               else if (LBM[i,j] > dc)
+                                   f <- 3L
+                               else
+                                   f <- 4L
+
+                               f
+                           })
+                       }))
+
+                       ## NOTE: only upper triangular to avoid unnecessary DTW calculations
+                       Flags[upper.tri(Flags)] <- utv
+
+                       ## Calculate full DTW for those entries whose lower bounds lie around 'dc'
+                       ind1 <- which(Flags == 1L, arr.ind = TRUE)
+
+                       if (nrow(ind1) > 0L) {
+                           ind1 <- split_parallel(ind1, 1L)
+
+                           exclude <- setdiff(ls(), c("x", "window.size"))
+
+                           d1 <- foreach(ind1 = ind1,
+                                         .combine = c,
+                                         .multicombine = TRUE,
+                                         .packages = "dtwclust",
+                                         .noexport = exclude) %op% {
+                                             proxy::dist(x[ind1[ , 1L]], x[ind1[ , 2L]],
+                                                         method = "dtw_basic",
+                                                         window.size = window.size,
+                                                         step.pattern = symmetric1,
+                                                         norm = "L2",
+                                                         pairwise = TRUE)
+                                         }
+
+                           if (is.list(ind1)) ind1 <- do.call(rbind, ind1)
+
+                           ## Fill distance matrix where necessary
+                           D[ind1] <- d1
+                           Flags[ind1[d1 <= dc, ]] <- 0L # For 'Rho' calculation
+                       }
+
+                       ## Force symmetry
+                       D[lower.tri(D)] <- t(D)[lower.tri(D)]
+                       Flags[lower.tri(Flags)] <- t(Flags)[lower.tri(Flags)]
+
+                       ## Calculate local density vector
+                       Rho <- apply(Flags, 1L, function(i) sum(i == 0L | i == 2L))
+
+                       if (all(Rho == 0L))
+                           stop("No density peaks detected, ",
+                                "choose a different value for cutoff distance 'dc'")
+
+                       if (max(Rho) == min(Rho))
+                           Rho <- rep(1L, length(Rho))
+                       else
+                           Rho <- (Rho - min(Rho)) / (max(Rho) - min(Rho))
+
+                       ## ==========================================================================
+                       ## Pruning during NN distance calculation from higher density list (phase 1)
+                       ## ==========================================================================
+
+                       RhoSorted <- sort(Rho, decreasing = TRUE, index.return = TRUE)
+
+                       deltaUB <- t(sapply(2L:n, function (i) {
+                           ## Index of higher density neighbors
+                           indHDN <- RhoSorted$ix[1L:(i-1L)]
+                           ## Index of current object
+                           ii <- RhoSorted$ix[i]
+
+                           ## Use existing distance if available, otherwise use the upper bound
+                           ub.i <- D[ii, indHDN]
+                           indDNA <- is.na(ub.i)
+                           ub.i[indDNA] <- UBM[ii, indHDN[indDNA]]
+
+                           min(ub.i)
+                       }))
+
+                       deltaUB <- c(max(deltaUB), deltaUB)
+
+                       ## Reorder the values
+                       indOrig <- sort(RhoSorted$ix, index.return = TRUE)$ix
+                       deltaUB <- deltaUB[indOrig]
+
+                       ## New order
+                       TADPorder <- sort(Rho * deltaUB, decreasing = TRUE, index.return = TRUE)
+
+                       ## ==========================================================================
+                       ## Pruning during NN distance calculation from higher density list (phase 2)
+                       ## ==========================================================================
+
+                       # start at two
+                       i <- split_parallel(2L:n)
+
+                       DNN <- foreach(i = i,
+                                      .combine = rbind,
+                                      .multicombine = TRUE,
+                                      .packages = "dtwclust") %op% {
+                                          t(sapply(i, function (i) {
+                                              ## Index of higher density neighbors
+                                              indHDN <- TADPorder$ix[1L:(i-1L)]
+                                              ## Index of current object
+                                              ii <- TADPorder$ix[i]
+
+                                              ## If this is true, prune the calculation of true distance
+                                              indPrune <- LBM[ii, indHDN] > deltaUB[ii]
+                                              ## If the distance was already computed, don't do it again
+                                              indPre <- Flags[ii, indHDN] == 0L |
+                                                  Flags[ii, indHDN] == 1L
+
+                                              ## 'delta' will have the distances HDN
+                                              ## Initially filled with upper bound
+                                              delta <- UBM[ii, indHDN]
+                                              ## If some distances were already computed, put them here
+                                              delta[indPre] <- D[ii, indHDN[indPre]]
+
+                                              ## If the distance is not to be pruned nor previously
+                                              ## calculated, compute it now
+                                              indCompute <- !(indPrune | indPre)
+
+                                              if (any(indCompute)) {
+                                                  d2 <- proxy::dist(x[ii], x[indHDN[indCompute]],
+                                                                    method = "dtw_basic",
+                                                                    window.size = window.size,
+                                                                    step.pattern = symmetric1,
+                                                                    norm = "L2")
+
+                                                  delta[indCompute] <- d2
+                                              }
+
+                                              c(delta = min(delta),
+                                                NN = indHDN[which.min(delta)],
+                                                distCalc = sum(indCompute))
+                                          }))
+                                      }
+
+                       ## To order according to default order
+                       indOrig <- sort(TADPorder$ix, index.return = TRUE)$ix
+
+                       delta <- c(max(DNN[ , 1L]), DNN[ , 1L])
+
+                       NN <- c(-1L, DNN[ , 2L])
+
+                       ## ==========================================================================
+                       ## Cluster assignment
+                       ## ==========================================================================
+
+                       ## How many calculations were actually performed
+                       distCalc <-  sum(utv == 1L) + sum(DNN[ , 3L])
+                       distCalc <- (distCalc / (n * (n+1) / 2 - n)) * 100
+
+                       ## Normalize
+                       if (max(delta) == min(delta))
+                           zDelta <- rep(1L, length(delta))
+                       else
+                           zDelta <- (delta - min(delta)) / (max(delta) - min(delta))
+
+                       ret <- lapply(k, function(k) {
+                           ## Those with the most density are the cluster centroids (PAM)
+                           C <- sort(sort(Rho * zDelta[indOrig],
+                                          decreasing = TRUE,
+                                          index.return = TRUE)$ix[1L:k])
+
+                           ## Assign a unique number to each cluster centroid
+                           cl <- rep(-1L, n)
+                           cl[C] <- 1L:k
+
+                           ## Which elements don't have a label yet (this is ordered according to
+                           ## the density values of TADPorder, because the assignment is sequential)
+                           indCl <- TADPorder$ix
+
+                           ## Do the assignment (must be a loop)
+                           for (i in seq_along(indCl)) {
+                               if (cl[indCl[i]] == -1L) cl[indCl[i]] <- cl[NN[i]]
+                           }
+
+                           if (any(cl == -1L))
+                               warning(c("At least one series wasn't assigned to a cluster. ",
+                                         "This shouldn't happen, please contact maintainer."))
+
+                           if (trace)
+                               cat("TADPole completed for k = ", k,
+                                   " & dc = ", dc,
+                                   ", pruning percentage = ",
+                                   formatC(100 - distCalc,
+                                           digits = 3L,
+                                           width = -1L,
+                                           format = "fg"),
+                                   "%\n\n",
+                                   sep = "")
+
+                           ## Return
+                           list(cl = cl,
+                                centroids = C,
+                                distCalcPercentage = distCalc)
+                       })
+
+                       ## return from foreach
+                       ret
+                   }
+
+    ## Return
+    if (length(RET) == 1L) RET[[1L]] else RET
 }

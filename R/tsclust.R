@@ -540,7 +540,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                    })
 
                    if (!inherits(RET, "TSClusters") && length(RET) == 1L) RET <- RET[[1L]]
-
                    RET
                },
 
@@ -682,9 +681,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                    })
 
                    RET <- unlist(RET, recursive = FALSE)
-
                    if (!inherits(RET, "TSClusters") && length(RET) == 1L) RET <- RET[[1L]]
-
                    RET
                },
 
@@ -718,78 +715,79 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                    args$dist$norm <- "L2"
                    args$dist$window.type <- "sakoechiba"
 
+                   ## ------------------------------------------------------------------------------
+                   ## Cluster
+                   ## ------------------------------------------------------------------------------
+
+                   if (trace) cat("\nEntering TADPole...\n\n")
+
+                   R <- TADPole(series,
+                                k = k,
+                                dc = control$dc,
+                                window.size = control$window.size,
+                                lb = control$lb,
+                                trace = trace)
+
+                   if (length(k) == 1L && length(control$dc) == 1L) R <- list(R)
+
+                   ## ------------------------------------------------------------------------------
+                   ## Prepare results
+                   ## ------------------------------------------------------------------------------
+
                    ## seeds
-                   rng <- rngtools::RNGseq(length(k), seed = seed, simplify = FALSE)
+                   rng <- rngtools::RNGseq(length(k) * length(control$dc),
+                                           seed = seed,
+                                           simplify = FALSE)
 
-                   RET <- foreach(k = k, rng = rng,
-                                  .combine = list, .multicombine = TRUE,
-                                  .packages = "dtwclust",
-                                  .export = "enlist") %op%
-                                  {
-                                      rngtools::setRNG(rng)
+                   RET <- mapply(R, rng, SIMPLIFY = FALSE, FUN = function(R, rng) {
+                       rngtools::setRNG(rng)
 
-                                      if (trace) cat("\nEntering TADPole...\n\n")
+                       k <- length(R$centroids)
 
-                                      R <- TADPole(series, k = k,
-                                                   dc = control$dc,
-                                                   window.size = control$window.size,
-                                                   lb = control$lb)
+                       if (is.function(centroid)) {
+                           allcent <- function(...) { list(centroid(...)) }
+                           environment(allcent) <- new.env(parent = .GlobalEnv)
+                           assign("centroid", centroid, environment(allcent))
 
-                                      if (trace) {
-                                          cat("TADPole completed, pruning percentage = ",
-                                              formatC(100 - R$distCalcPercentage,
-                                                      digits = 3L,
-                                                      width = -1L,
-                                                      format = "fg"),
-                                              "%\n\n",
-                                              sep = "")
-                                      }
+                           centroids <- lapply(1L:k, function(kcent) {
+                               centroid(series[R$cl == kcent])
+                           })
 
-                                      ## -----------------------------------------------------------
-                                      ## Prepare results
-                                      ## -----------------------------------------------------------
+                       } else {
+                           allcent <- function(...) {}
+                           centroids <- series[R$centroids]
+                       }
 
-                                      if (is.function(centroid)) {
-                                          allcent <- function(...) { list(centroid(...)) }
-                                          environment(allcent) <- new.env(parent = .GlobalEnv)
-                                          assign("centroid", centroid, environment(allcent))
+                       obj <- new("PartitionalTSClusters",
+                                  call = MYCALL,
+                                  family = new("tsclustFamily",
+                                               dist = distfun,
+                                               allcent = allcent,
+                                               preproc = preproc),
+                                  control = control,
+                                  datalist = series,
 
-                                          centroids <- lapply(1L:k, function(kcent) {
-                                              centroid(series[R$cl == kcent])
-                                          })
+                                  type = type,
+                                  distance = "dtw_lb",
+                                  centroid = cent_char,
+                                  preproc = preproc_char,
 
-                                      } else {
-                                          allcent <- function(...) {}
-                                          centroids <- series[R$centroids]
-                                      }
+                                  k = as.integer(k),
+                                  cluster = R$cl,
+                                  centroids = centroids,
+                                  distmat = NULL,
 
-                                      obj <- new("PartitionalTSClusters",
-                                                 call = MYCALL,
-                                                 family = new("tsclustFamily",
-                                                              dist = distfun,
-                                                              allcent = allcent,
-                                                              preproc = preproc),
-                                                 control = control,
-                                                 datalist = series,
+                                  dots = dots,
+                                  args = args,
 
-                                                 type = type,
-                                                 distance = "dtw_lb",
-                                                 centroid = cent_char,
-                                                 preproc = preproc_char,
+                                  override.family = !is.function(centroid))
 
-                                                 k = as.integer(k),
-                                                 cluster = R$cl,
-                                                 centroids = centroids,
-                                                 distmat = NULL,
+                       obj@distance <- "LB+DTW2"
+                       obj
+                   })
 
-                                                 dots = dots,
-                                                 args = args,
-
-                                                 override.family = !is.function(centroid))
-
-                                      obj@distance <- "LB+DTW2"
-                                      obj
-                                  }
+                   if (!inherits(RET, "TSClusters") && length(RET) == 1L) RET <- RET[[1L]]
+                   RET
                })
 
     ## =============================================================================================

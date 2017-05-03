@@ -4,21 +4,24 @@
 \alias{TADPole}
 \title{TADPole clustering}
 \usage{
-TADPole(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk")
+TADPole(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk",
+  trace = FALSE)
 }
 \arguments{
 \item{data}{A matrix or data frame where each row is a time series, or a list where each element
 is a time series. Multivariate series are not supported.}
 
-\item{k}{The number of desired clusters.}
+\item{k}{The number of desired clusters. Can be a vector with several values}
 
-\item{dc}{The cutoff distance.}
+\item{dc}{The cutoff distance(s).}
 
 \item{window.size}{Window size constraint for DTW (Sakoe-Chiba). See details.}
 
 \item{error.check}{Should the data be checked for inconsistencies?}
 
 \item{lb}{Which lower bound to use, "lbk" for \code{\link[=lb_keogh]{lb_keogh()}} or "lbi" for \code{\link[=lb_improved]{lb_improved()}}.}
+
+\item{trace}{Logical flag. If \code{TRUE}, more output regarding the progress is printed to screen.}
 }
 \value{
 A list with:
