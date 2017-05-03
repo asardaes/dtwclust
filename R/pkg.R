@@ -175,7 +175,8 @@ NULL
                           'Please see news(package = "dtwclust") for important information.\n')
 
     if (grepl("\\.9000$", utils::packageVersion("dtwclust")))
-        packageStartupMessage("This is a developer version of 'dtwclust'. Using devtools::test() is currently broken.")
+        packageStartupMessage("This is a developer version of 'dtwclust'.\n",
+                              "Using devtools::test() is currently broken, see tests/testthat.R")
 }
 
 .onUnload <- function(libpath) {
