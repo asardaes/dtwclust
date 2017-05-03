@@ -810,89 +810,73 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         i_cfg <- i_cfg + nr
     }
 
-    configs <- mapply(configs, config_ids, SIMPLIFY = FALSE, FUN = function(config, ids) {
-        data.frame(config_id = paste0("config", ids), config)
-    })
+    configs_out <- mapply(configs, config_ids, types, SIMPLIFY = FALSE, FUN = function(config, ids, type) {
+        config <- data.frame(config_id = paste0("config", ids), config)
 
-    flatten_configs <- sapply(types, function(type) {
-        switch(type,
-               partitional = length(k) > 1L || any(configs$partitional$nrep > 1L),
-               hierarchical = length(k) > 1L || any(lengths(configs$hierarchical$method) > 1L),
-               fuzzy = length(k) > 1L,
-               tadpole = length(k) > 1L || any(lengths(configs$tadpole$dc) > 1L))
-    })
+        dfs <- switch(type,
+                      partitional = {
+                          if (length(k) > 1L || any(config$nrep > 1L))
+                              lapply(seq_len(nrow(config)), function(i) {
+                                  this_config <- config[i, , drop = FALSE]
+                                  rep <- 1L:this_config$nrep
+                                  this_config <- this_config[setdiff(
+                                      names(this_config), c("k", "nrep")
+                                  )]
 
-    if (any(flatten_configs)) {
-        configs_out <- mapply(configs[flatten_configs], types[flatten_configs],
-                              SIMPLIFY = FALSE,
-                              FUN = function(config, type) {
-                                  switch(type,
-                                         partitional = {
-                                             dfs <- lapply(seq_len(nrow(config)), function(i) {
-                                                 this_config <- config[i, , drop = FALSE]
-                                                 rep <- 1L:this_config$nrep
-                                                 this_config <- this_config[setdiff(
-                                                     names(this_config), c("k", "nrep")
-                                                 )]
-
-                                                 df <- expand.grid(rep = rep, k = k)
-                                                 make_unique_ids(df, this_config) ## see EOF
-                                             })
-
-                                             ## return
-                                             plyr::rbind.fill(dfs)
-                                         },
-                                         hierarchical = {
-                                             dfs <- lapply(seq_len(nrow(config)), function(i) {
-                                                 this_config <- config[i, , drop = FALSE]
-                                                 method <- unlist(this_config$method)
-                                                 this_config <- this_config[setdiff(
-                                                     names(this_config), c("k", "method")
-                                                 )]
-
-                                                 df <- expand.grid(k = k, method = method)
-                                                 make_unique_ids(df, this_config) ## see EOF
-                                             })
-
-                                             ## return
-                                             plyr::rbind.fill(dfs)
-                                         },
-                                         fuzzy = {
-                                             dfs <- lapply(seq_len(nrow(config)), function(i) {
-                                                 this_config <- config[i, , drop = FALSE]
-                                                 this_config <- this_config[setdiff(
-                                                     names(this_config), c("k")
-                                                 )]
-
-                                                 df <- expand.grid(k = k)
-                                                 make_unique_ids(df, this_config) ## see EOF
-                                             })
-
-                                             ## return
-                                             plyr::rbind.fill(dfs)
-                                         },
-                                         tadpole = {
-                                             dfs <- lapply(seq_len(nrow(config)), function(i) {
-                                                 this_config <- config[i, , drop = FALSE]
-                                                 dc <- unlist(this_config$dc)
-                                                 this_config <- this_config[setdiff(
-                                                     names(this_config), c("k", "dc")
-                                                 )]
-
-                                                 df <- expand.grid(k = k, dc = dc)
-                                                 make_unique_ids(df, this_config) ## see EOF
-                                             })
-
-                                             ## return
-                                             plyr::rbind.fill(dfs)
-                                         })
+                                  df <- expand.grid(rep = rep, k = k)
+                                  make_unique_ids(df, this_config) ## see EOF
                               })
+                          else
+                              config
+                      },
+                      hierarchical = {
+                          if (length(k) > 1L || any(lengths(config$method) > 1L))
+                              lapply(seq_len(nrow(config)), function(i) {
+                                  this_config <- config[i, , drop = FALSE]
+                                  method <- unlist(this_config$method)
+                                  this_config <- this_config[setdiff(
+                                      names(this_config), c("k", "method")
+                                  )]
 
-        configs_out[types[!flatten_configs]] <- configs[types[!flatten_configs]]
+                                  df <- expand.grid(k = k, method = method)
+                                  make_unique_ids(df, this_config) ## see EOF
+                              })
+                          else
+                              config
+                      },
+                      fuzzy = {
+                          if (length(k) > 1L)
+                              lapply(seq_len(nrow(config)), function(i) {
+                                  this_config <- config[i, , drop = FALSE]
+                                  this_config <- this_config[setdiff(
+                                      names(this_config), c("k")
+                                  )]
 
-    } else {
-        configs_out <- configs
-    }
+                                  df <- expand.grid(k = k)
+                                  make_unique_ids(df, this_config) ## see EOF
+                              })
+                          else
+                              config
+                      },
+                      tadpole = {
+                          if (length(k) > 1L || any(lengths(config$dc) > 1L))
+                              lapply(seq_len(nrow(config)), function(i) {
+                                  this_config <- config[i, , drop = FALSE]
+                                  dc <- unlist(this_config$dc)
+                                  this_config <- this_config[setdiff(
+                                      names(this_config), c("k", "dc")
+                                  )]
+
+                                  df <- expand.grid(k = k, dc = dc)
+                                  make_unique_ids(df, this_config) ## see EOF
+                              })
+                          else
+                              config
+                      })
+
+        ## return mapply
+        plyr::rbind.fill(dfs)
+    })
 
     ## ---------------------------------------------------------------------------------------------
     ## Add scores
@@ -926,6 +910,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## =============================================================================================
 
     results <- list(results = results, scores = scores, pick = pick, proc_time = proc.time() - tic)
+
     if (return.objects) {
         objs_by_type <- mapply(objs_by_type, results$results,
                                SIMPLIFY = FALSE,
@@ -944,7 +929,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                       order_args <- as.list(result[cols])
                                       names(order_args) <- NULL
                                       result[do.call(order, order_args), , drop = FALSE]
-        })
+                                  })
 
     ## return results
     results
