@@ -39,7 +39,6 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
                         partitional = NULL, hierarchical = NULL, fuzzy = NULL, tadpole = NULL,
                         share.config = c("p", "h", "f", "t"))
 {
-    this_call <- match.call(expand.dots = FALSE)
     type <- match.arg(type)
 
     shared <- list(...)
@@ -72,32 +71,26 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
     ## Shared configs
     ## =============================================================================================
 
-    if (length(shared) > 0L) {
-        if (length(share.config) > 0L) {
-            shared_names <- names(shared)
+    if (length(shared) > 0L && length(share.config) > 0L) {
+        shared_names <- names(shared)
 
-            shared_cfg <- mapply(shared, shared_names, SIMPLIFY = FALSE,
-                                 FUN = function(shared_args, fun) {
-                                     cfg <- do.call(expand.grid,
-                                                    enlist(foo = fun,
-                                                           dots = shared_args,
-                                                           stringsAsFactors = FALSE))
+        shared_cfg <- mapply(shared, shared_names, SIMPLIFY = FALSE,
+                             FUN = function(shared_args, fun) {
+                                 cfg <- do.call(expand.grid,
+                                                enlist(foo = fun,
+                                                       dots = shared_args,
+                                                       stringsAsFactors = FALSE))
 
-                                     names(cfg)[1L] <- type
+                                 names(cfg)[1L] <- type
 
-                                     cfg
-                                 })
+                                 cfg
+                             })
 
-            shared_cfg <- plyr::rbind.fill(shared_cfg)
+        shared_cfg <- plyr::rbind.fill(shared_cfg)
 
-            shared_cfgs <- lapply(share.config, function(dummy) { shared_cfg })
-            names(shared_cfgs) <- share.config
-            shared_cfgs <- shared_cfgs[setdiff(share.config, names(specific))]
-
-        } else {
-            shared_cfg <- NULL
-            shared_cfgs <- list()
-        }
+        shared_cfgs <- lapply(share.config, function(dummy) { shared_cfg })
+        names(shared_cfgs) <- share.config
+        shared_cfgs <- shared_cfgs[setdiff(share.config, names(specific))]
 
     } else {
         shared_cfg <- NULL
