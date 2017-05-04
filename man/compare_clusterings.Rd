@@ -325,7 +325,7 @@ p_cfgs <- compare_clusterings_configs(types = "p", k = 19L:21L,
 )
 
 # Remove redundant (shape centroid always uses zscore preprocessing)
-id_redundant <- p_cfgs$partitional$preproc == "zscore" &
+id_redundant <- p_cfgs$partitional$preproc == "none" &
     p_cfgs$partitional$centroid == "shape"
 p_cfgs$partitional <- p_cfgs$partitional[!id_redundant, ]
 
