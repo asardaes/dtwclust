@@ -275,13 +275,15 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                                          enlist(k = list(k),
                                                 pam.precompute = control$pam.precompute,
                                                 iter.max = control$iter.max,
-                                                nrep = control$nrep[1L],
+                                                nrep = control$nrep,
+                                                symmetric = control$symmetric,
                                                 stringsAsFactors = FALSE))
                              },
                              hierarchical = {
                                  do.call(expand.grid,
                                          enlist(k = list(k),
                                                 method = list(control$method),
+                                                symmetric = control$symmetric,
                                                 stringsAsFactors = FALSE))
                              },
                              fuzzy = {

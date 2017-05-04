@@ -38,8 +38,8 @@ partitional_control <- function(pam.precompute = TRUE,
     structure(
         list(pam.precompute = as.logical(pam.precompute),
              iter.max = as.integer(iter.max),
-             nrep = as.integer(nrep),
-             symmetric = as.logical(symmetric),
+             nrep = as.integer(nrep)[1L],
+             symmetric = as.logical(symmetric)[1L],
              packages = unique(c("dtwclust", as.character(packages))),
              distmat = distmat),
         "class" = c("PtCtrl")
