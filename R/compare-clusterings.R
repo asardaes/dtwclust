@@ -206,15 +206,12 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
     ## Check preprocessings specification
     ## ---------------------------------------------------------------------------------------------
 
-    if (missing(preprocs)) {
+    if (missing(preprocs))
         force(preprocs)
-
-    } else if (!is.list(preprocs) || is.null(names(preprocs))) {
+    else if (!is.list(preprocs) || is.null(names(preprocs)))
         stop("The 'preprocs' argument must be a named list")
-
-    } else if (!all(types %in% names(preprocs))) {
+    else if (!all(types %in% names(preprocs)))
         stop("The names of the 'preprocs' argument do not correspond to the provided 'types'")
-    }
 
     preprocs <- preprocs[intersect(names(preprocs), types)]
 
@@ -222,15 +219,12 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
     ## Check distance specification
     ## ---------------------------------------------------------------------------------------------
 
-    if (missing(distances)) {
+    if (missing(distances))
         force(distances)
-
-    } else if (!is.list(distances) || is.null(names(distances))) {
+    else if (!is.list(distances) || is.null(names(distances)))
         stop("The 'distances' argument must be a named list")
-
-    } else if (!all(setdiff(types, "tadpole") %in% names(distances))) {
+    else if (!all(setdiff(types, "tadpole") %in% names(distances)))
         stop("The names of the 'distances' argument do not correspond to the provided 'types'")
-    }
 
     distances <- distances[intersect(names(distances), types)]
 
@@ -238,15 +232,12 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
     ## Check centroids specification
     ## ---------------------------------------------------------------------------------------------
 
-    if (missing(centroids)) {
+    if (missing(centroids))
         force(centroids)
-
-    } else if (!is.list(centroids) || is.null(names(centroids))) {
+    else if (!is.list(centroids) || is.null(names(centroids)))
         stop("The 'centroids' argument must be a named list")
-
-    } else if (!all(types %in% names(centroids))) {
+    else if (!all(types %in% names(centroids)))
         stop("The names of the 'centroids' argument do not correspond to the provided 'types'")
-    }
 
     centroids <- centroids[intersect(names(centroids), types)]
 
@@ -272,17 +263,13 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                                                 fuzzy = "FzCtrl",
                                                 tadpole = "TpCtrl")
 
-               if (class(control) != expected_control_class)
-                   stop("Invalid ", type, " control")
+               if (class(control) != expected_control_class) stop("Invalid ", type, " control")
 
                ## ----------------------------------------------------------------------------------
                ## Control configs
                ## ----------------------------------------------------------------------------------
 
                cfg <- switch(type,
-                             ## --------------------------------------------------------------------
-                             ## Partitional configs
-                             ## --------------------------------------------------------------------
                              partitional = {
                                  do.call(expand.grid,
                                          enlist(k = list(k),
@@ -291,18 +278,12 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                                                 nrep = control$nrep[1L],
                                                 stringsAsFactors = FALSE))
                              },
-                             ## --------------------------------------------------------------------
-                             ## Hierarchical configs
-                             ## --------------------------------------------------------------------
                              hierarchical = {
                                  do.call(expand.grid,
                                          enlist(k = list(k),
                                                 method = list(control$method),
                                                 stringsAsFactors = FALSE))
                              },
-                             ## --------------------------------------------------------------------
-                             ## Fuzzy configs
-                             ## --------------------------------------------------------------------
                              fuzzy = {
                                  do.call(expand.grid,
                                          enlist(k = list(k),
@@ -311,9 +292,6 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                                                 delta = control$delta,
                                                 stringsAsFactors = FALSE))
                              },
-                             ## --------------------------------------------------------------------
-                             ## TADPole configs
-                             ## --------------------------------------------------------------------
                              tadpole = {
                                  do.call(expand.grid,
                                          enlist(k = list(k),
@@ -327,6 +305,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                ## Merge configs
                ## ----------------------------------------------------------------------------------
 
+               ## preproc
                if (!is.null(preproc) && nrow(preproc)) {
                    nms <- names(preproc)
                    nms_args <- nms != "preproc"
@@ -337,6 +316,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                    cfg <- merge(cfg, preproc, all = TRUE)
                }
 
+               ## distance
                if (type != "tadpole" && !is.null(distance) && nrow(distance)) {
                    nms <- names(distance)
                    nms_args <- nms != "distance"
@@ -347,6 +327,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                    cfg <- merge(cfg, distance, all = TRUE)
                }
 
+               ## centroid
                if (!is.null(centroid) && nrow(centroid)) {
                    nms <- names(centroid)
                    nms_args <- nms != "centroid"
@@ -357,10 +338,13 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                    cfg <- merge(cfg, centroid, all = TRUE)
                }
 
+               ## for info
                attr(cfg, "num.configs") <- switch(type,
                                                   partitional = length(k) * sum(cfg$nrep),
                                                   hierarchical = length(k) * length(cfg$method[[1L]]) * nrow(cfg),
-                                                  fuzzy =, tadpole = length(k) * nrow(cfg))
+                                                  fuzzy = length(k) * nrow(cfg),
+                                                  tadpole = length(k) * length(cfg$dc[[1L]]) * nrow(cfg))
+               ## return mapply
                cfg
            })
 }
