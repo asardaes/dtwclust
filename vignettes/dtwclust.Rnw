@@ -91,7 +91,6 @@ Most clustering strategies have not changed considerably since their initial def
 <<setup, include = FALSE, cache = FALSE>>=
 library("knitr")
 library("dtwclust")
-library("clue")
 
 data("uciCT")
 
@@ -1642,6 +1641,8 @@ If we choose the value of $k = 4$,
 we could then compare results among different random repetitions with help of the \pkg{clue} package (or with CVIs again).
 
 <<example-clue-p, echo = TRUE>>=
+library("clue")
+
 pc_4 <- tsclust(data, type = "p", k = 4L,
                 distance = "dtw_basic", centroid = "pam",
                 args = tsclust_args(dist = list(window.size = 20L)),
