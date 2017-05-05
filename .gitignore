@@ -14,6 +14,7 @@ vignettes/*.gz
 vignettes/*.bbl
 vignettes/*.log
 vignettes/*.tex
+vignettes/*.pdf
 vignettes/**/
 
 # Windows image file caches
