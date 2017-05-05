@@ -141,9 +141,9 @@
 #'   probably unsuitable for direct clustering unless series are very easily distinguishable.
 #'
 #'   If you know that the distance function is symmetric, and you use a hierarchical algorithm, or a
-#'   partitional algorithm with PAM centroids and `pam.precompute` = `TRUE`, some time can be saved
-#'   by calculating only half the distance matrix. Therefore, consider setting the symmetric control
-#'   parameter to `TRUE` if this is the case.
+#'   partitional algorithm with PAM centroids, some time can be saved by calculating only half the
+#'   distance matrix. Therefore, consider setting the symmetric control parameter to `TRUE` if this
+#'   is the case.
 #'
 #' @section Preprocessing:
 #'
@@ -392,6 +392,18 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                            environment(family@allcent)$distmat <- distmat
 
                            gc(FALSE)
+
+                       } else if (!isTRUE(control$pam.precompute) &&
+                                  type != "fuzzy" &&
+                                  tolower(distance) != "dtw_lb")
+                       {
+                           distmat <- Matrix::sparseMatrix(i = 1L:length(series),
+                                                           j = 1L:length(series),
+                                                           x = 0,
+                                                           symmetric = control$symmetric)
+
+                           ## Redefine new distmat in allcent closure
+                           environment(family@allcent)$distmat <- distmat
                        }
                    }
 
@@ -469,10 +481,14 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                    ## Prepare results
                    ## ------------------------------------------------------------------------------
 
+                   ## Get updated sparse matrix (only updated if done sequentially)
+                   if (!isTRUE(control$pam.precompute) && cent_char == "pam")
+                       distmat <- environment(family@allcent)$distmat
+
                    ## Replace distmat with NULL so that, if the distance function is called again,
                    ## it won't subset it
-                   eval(quote(control$distmat <- NULL), environment(family@dist))
-                   eval(quote(distmat <- NULL), environment(family@allcent))
+                   environment(family@dist)$control$distmat <- NULL
+                   environment(family@allcent)$distmat <- NULL
 
                    ## If distmat was provided, let it be shown in the results
                    if (distmat_provided) {

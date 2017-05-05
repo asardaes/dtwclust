@@ -9,13 +9,43 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
         if (is.null(distmat)) {
             new_cent <- lapply(x_split, function(xsub) {
                 distmat <- distfun(xsub, xsub, ...)
-
                 d <- apply(distmat, 1L, sum)
-
                 i_cent <- xsub[[which.min(d)]]
 
                 ## update indices, aggregated at the end of main allcent function
                 attr(i_cent, "id_cent") <- pmatch(names(xsub[which.min(d)]), names(x))
+
+                i_cent
+            })
+
+        } else if (inherits(distmat, "sparseMatrix")) {
+            id_x <- lapply(id_changed, function(cl_num) which(cl_id == cl_num))
+
+            new_cent <- lapply(id_x, function(i_x) {
+                id_dm <- Matrix::summary(distmat)[c("i", "j")] ## indices of existing values
+                rows <- nrow(id_dm)
+                id_dm <- rbind(id_dm, expand.grid(i = i_x, j = i_x)) ## add indices of needed vals
+                id_duplicated <- duplicated(id_dm)
+
+                ## extract only indices of needed values that don't exist yet
+                rows <- (rows + 1L):nrow(id_dm)
+                id_dm <- id_dm[rows, , drop = FALSE][!id_duplicated[rows], , drop = FALSE]
+                id_dm <- base::as.matrix(id_dm)
+
+                ## update distmat if necessary
+                if (nrow(id_dm) > 0L)
+                    distmat[id_dm] <<- as.numeric(distfun(x[id_dm[, 1L]],
+                                                          x[id_dm[, 2L]],
+                                                          pairwise = TRUE,
+                                                          ...))
+
+                ## same as below (in 'else' case)
+                d <- Matrix::rowSums(distmat[i_x, i_x, drop = FALSE])
+                id_cent <- i_x[which.min(d)]
+                i_cent <- x[[id_cent]]
+
+                ## update indices, aggregated at the end of main allcent function
+                attr(i_cent, "id_cent") <- id_cent
 
                 i_cent
             })
@@ -25,11 +55,11 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
 
             new_cent <- lapply(id_x, function(i_x) {
                 d <- apply(distmat[i_x, i_x, drop = FALSE], 1L, sum)
-
-                i_cent <- x[[i_x[which.min(d)]]]
+                id_cent <- i_x[which.min(d)]
+                i_cent <- x[[id_cent]]
 
                 ## update indices, aggregated at the end of main allcent function
-                attr(i_cent, "id_cent") <- i_x[which.min(d)]
+                attr(i_cent, "id_cent") <- id_cent
 
                 i_cent
             })

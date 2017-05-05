@@ -47,7 +47,8 @@ plot(hc.l2[[which.min(sapply(hc.l2, cvi, b = labels, type = "VI"))]])
 mv <- CharTrajMV[1L:20L]
 
 # Using GAK distance
-mvc <- tsclust(mv, k = 4L, distance = "gak", seed = 390)
+mvc <- tsclust(mv, k = 4L, distance = "gak", seed = 390,
+               args = tsclust_args(dist = list(sigma = 100)))
 
 # Note how the variables of each series are appended one after the other in the plot
 plot(mvc)

@@ -8,7 +8,8 @@
 #' @export
 #'
 #' @param pam.precompute Logical flag. Precompute the whole distance matrix once and reuse it on
-#'   each iteration if using PAM centroids. Otherwise calculate distances at every iteration.
+#'   each iteration if using PAM centroids. Otherwise calculate distances at every iteration. See
+#'   details.
 #' @param iter.max Integer. Maximum number of allowed iterations for partitional/fuzzy clustering.
 #' @param nrep Integer. How many times to repeat clustering with different starting points.
 #' @param symmetric Logical flag. Is the distance function symmetric? In other words, is `dist(x,y)`
@@ -24,6 +25,10 @@
 #'
 #' The functions essentially return their function arguments in a classed list, although some checks
 #' are performed.
+#'
+#' As of version 3.2.1, using `pam.precompute = FALSE` is optimized by defining a sparse matrix (see
+#' [Matrix::sparseMatrix()]) and updating it every iteration (except for `"dtw_lb"` distance). For
+#' smaller datasets, precomputing the whole distance matrix is still probably faster.
 #'
 partitional_control <- function(pam.precompute = TRUE,
                                 iter.max = 100L,

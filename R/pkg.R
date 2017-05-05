@@ -76,6 +76,10 @@
 #'
 #' @importFrom graphics plot
 #'
+#' @importFrom Matrix rowSums
+#' @importFrom Matrix sparseMatrix
+#' @importFrom Matrix summary
+#'
 #' @importFrom parallel splitIndices
 #'
 #' @importFrom plyr rbind.fill

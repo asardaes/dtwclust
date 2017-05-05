@@ -28,7 +28,8 @@ tsclust_args(preproc = list(), dist = list(), cent = list())
 }
 \arguments{
 \item{pam.precompute}{Logical flag. Precompute the whole distance matrix once and reuse it on
-each iteration if using PAM centroids. Otherwise calculate distances at every iteration.}
+each iteration if using PAM centroids. Otherwise calculate distances at every iteration. See
+details.}
 
 \item{iter.max}{Integer. Maximum number of allowed iterations for partitional/fuzzy clustering.}
 
@@ -73,6 +74,10 @@ Control parameters for fine-grained control.
 \details{
 The functions essentially return their function arguments in a classed list, although some checks
 are performed.
+
+As of version 3.2.1, using \code{pam.precompute = FALSE} is optimized by defining a sparse matrix (see
+\code{\link[Matrix:sparseMatrix]{Matrix::sparseMatrix()}}) and updating it every iteration (except for \code{"dtw_lb"} distance). For
+smaller datasets, precomputing the whole distance matrix is still probably faster.
 
 There are some limitations when using a custom hierarchical function in \code{method}: it will receive
 the lower triangular of the distance matrix as first argument (see \code{\link[stats:as.dist]{stats::as.dist()}}) and the
