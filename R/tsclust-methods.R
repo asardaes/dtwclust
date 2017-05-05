@@ -295,9 +295,6 @@ setMethod("initialize", "FuzzyTSClusters",
 #'
 setMethod("show", "TSClusters",
           function(object) {
-              print(object@call)
-              cat("\n")
-
               cat(object@type, "clustering with", object@k, "clusters\n")
               cat("Using", object@distance, "distance\n")
               cat("Using", object@centroid, "centroids\n")
