@@ -21,6 +21,9 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
         } else if (inherits(distmat, "sparseMatrix")) {
             id_x <- lapply(id_changed, function(cl_num) which(cl_id == cl_num))
 
+            ## avoid CHECK NOTE regarding undefined global, this should not execute
+            if (!exists("id_dm")) id_dm <- base::as.matrix(Matrix::summary(distmat)[c("i", "j")])
+
             new_cent <- lapply(id_x, function(i_x) {
                 ## number of rows of existing indices (id_dm assigned in tsclust())
                 rows <- nrow(id_dm)
