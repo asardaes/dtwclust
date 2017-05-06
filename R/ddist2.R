@@ -3,7 +3,7 @@
 # ========================================================================================================
 
 ddist2 <- function(distance, control) {
-    symmetric <- if (is.null(control$symmetric)) FALSE else control$symmetric
+    symmetric <- isTRUE(control$symmetric)
 
     ## I need to re-register any custom distances in each parallel worker
     dist_entry <- proxy::pr_DB$get_entry(distance)
@@ -11,16 +11,20 @@ ddist2 <- function(distance, control) {
     ## Closures capture the values of the objects from the environment where they're created
     distfun <- function(x, centroids = NULL, ...) {
         if (!is.null(control$distmat)) {
-            ## distmat pre-computed
-            if (is.null(centroids)) {
-                ## return whole distmat
-                d <- control$distmat
+            if (is.function(control$distmat)) {
+                ## PAM's sparse distmat
+                if (is.null(centroids))
+                    d <- control$distmat(1L:length(x), 1L:length(x), ...)
+                else
+                    d <- control$distmat(1L:length(x), attr(centroids, "id_cent"), ...)
 
             } else {
-                ## distmat matrix already calculated, just subset it
-                d <- control$distmat[ , attr(centroids, "id_cent"), drop = FALSE]
+                ## non-sparse distmat pre-computed
+                if (is.null(centroids))
+                    d <- control$distmat ## return whole distmat
+                else
+                    d <- control$distmat[ , attr(centroids, "id_cent"), drop = FALSE] ## subset
             }
-
         } else {
             ## distmat not available, calculate it
             ## Extra distance parameters in case of parallel computation

@@ -386,30 +386,19 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                               enlist(x = series,
                                                      centroids = NULL,
                                                      dots = args$dist))
-
-                           ## Redefine new distmat in closures
-                           environment(family@dist)$control$distmat <- distmat
-                           environment(family@allcent)$distmat <- distmat
-
                            gc(FALSE)
 
                        } else if (!isTRUE(control$pam.precompute) &&
                                   type != "fuzzy" &&
                                   tolower(distance) != "dtw_lb")
                        {
-                           distmat <- Matrix::sparseMatrix(i = 1L:length(series),
-                                                           j = 1L:length(series),
-                                                           x = 0,
-                                                           symmetric = control$symmetric)
-
-                           if (control$symmetric && distmat@uplo != "L") distmat <- t(distmat)
-
-                           ## Redefine new distmat in allcent closure
-                           environment(family@allcent)$distmat <- distmat
-                           ## Used by sparse routine
-                           assign("id_dm", base::as.matrix(Matrix::summary(distmat)[c("i", "j")]),
-                                  environment(family@allcent))
+                           ## closure, utils.R
+                           distmat <- sparse_distmat(series, control, distance)
                        }
+
+                       ## Redefine new distmat in closures
+                       environment(family@dist)$control$distmat <- distmat
+                       environment(family@allcent)$distmat <- distmat
                    }
 
                    ## ------------------------------------------------------------------------------
@@ -488,7 +477,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                    ## Get updated sparse matrix (only updated if done sequentially)
                    if (!isTRUE(control$pam.precompute) && cent_char == "pam")
-                       distmat <- environment(family@allcent)$distmat
+                       distmat <- environment(environment(family@allcent)$distmat)$distmat
 
                    ## Replace distmat with NULL so that, if the distance function is called again,
                    ## it won't subset it
