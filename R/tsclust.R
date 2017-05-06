@@ -402,8 +402,13 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                                            x = 0,
                                                            symmetric = control$symmetric)
 
+                           if (control$symmetric && distmat@uplo != "L") distmat <- t(distmat)
+
                            ## Redefine new distmat in allcent closure
                            environment(family@allcent)$distmat <- distmat
+                           ## Used by sparse routine
+                           assign("id_dm", base::as.matrix(Matrix::summary(distmat)[c("i", "j")]),
+                                  environment(family@allcent))
                        }
                    }
 

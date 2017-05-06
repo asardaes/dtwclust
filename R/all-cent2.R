@@ -22,22 +22,33 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
             id_x <- lapply(id_changed, function(cl_num) which(cl_id == cl_num))
 
             new_cent <- lapply(id_x, function(i_x) {
-                id_dm <- Matrix::summary(distmat)[c("i", "j")] ## indices of existing values
+                ## number of rows of existing indices (id_dm assigned in tsclust())
                 rows <- nrow(id_dm)
-                id_dm <- rbind(id_dm, expand.grid(i = i_x, j = i_x)) ## add indices of needed vals
-                id_duplicated <- duplicated(id_dm)
+                ## indices of needed vals
+                id_new <- base::as.matrix(expand.grid(i = i_x, j = i_x))
+
+                ## modify indices to lower triangular if necessary (symmetric only)
+                if (isTRUE(control$symmetric))
+                    id_new <- t(apply(id_new, 1L, function(this_row) {
+                        if (this_row[2L] > this_row[1L]) this_row[2L:1L] else this_row
+                    }))
 
                 ## extract only indices of needed values that don't exist yet
-                rows <- (rows + 1L):nrow(id_dm)
-                id_dm <- id_dm[rows, , drop = FALSE][!id_duplicated[rows], , drop = FALSE]
-                id_dm <- base::as.matrix(id_dm)
+                id_new <- rbind(id_dm, id_new)
+                id_duplicated <- duplicated(id_new)
+                rows <- (rows + 1L):nrow(id_new)
+                id_new <- id_new[rows, , drop = FALSE][!id_duplicated[rows], , drop = FALSE]
 
                 ## update distmat if necessary
-                if (nrow(id_dm) > 0L)
-                    distmat[id_dm] <<- as.numeric(distfun(x[id_dm[, 1L]],
-                                                          x[id_dm[, 2L]],
-                                                          pairwise = TRUE,
-                                                          ...))
+                if (nrow(id_new) > 0L) {
+                    distmat[id_new] <<- as.numeric(distfun(x[id_new[, 1L]],
+                                                           x[id_new[, 2L]],
+                                                           pairwise = TRUE,
+                                                           ...))
+
+                    distmat <<- Matrix::forceSymmetric(distmat, "L")
+                    id_dm <<- rbind(id_dm, id_new)
+                }
 
                 ## same as below (in 'else' case)
                 d <- Matrix::rowSums(distmat[i_x, i_x, drop = FALSE])
