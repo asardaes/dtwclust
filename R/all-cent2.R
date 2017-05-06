@@ -18,15 +18,14 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, fuzziness) {
                 i_cent
             })
 
-        } else if (is.function(distmat)) { ## sparse distance matrix
+        } else if (inherits(distmat, "SparseDistmat")) {
             id_x <- lapply(id_changed, function(cl_num) which(cl_id == cl_num))
 
             new_cent <- lapply(id_x, function(i_x) {
-                ## id_dm assigned in tsclust()
-                dm <- distmat(i_x, i_x, ...)
+                d <- distmat[i_x, i_x, ..., drop = FALSE]
 
                 ## same as below (in 'else' case)
-                d <- Matrix::rowSums(dm)
+                d <- Matrix::rowSums(d)
                 id_cent <- i_x[which.min(d)]
                 i_cent <- x[[id_cent]]
 

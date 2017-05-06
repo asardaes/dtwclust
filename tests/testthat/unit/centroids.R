@@ -269,8 +269,11 @@ test_that("Operations with pam centroid complete successfully.", {
                                     window.size = 18L))
 
     ## sparse symmetric
-    dm <- dtwclust:::sparse_distmat(x, pt_ctrl, "sbd")
     pt_ctrl$symmetric <- TRUE
+    dm <- dtwclust:::SparseDistmat$new(series = x,
+                                       control = pt_ctrl,
+                                       distance = "sbd",
+                                       dist_args = list())
     pt_ctrl$distmat <- dm
     family <- new("tsclustFamily",
                   control = pt_ctrl,
@@ -286,8 +289,11 @@ test_that("Operations with pam centroid complete successfully.", {
                                     cl_old = 0L))
 
     ## sparse non-symmetric
-    dm <- dtwclust:::sparse_distmat(x_mv, pt_ctrl, "dtw_basic")
     pt_ctrl$symmetric <- FALSE
+    dm <- dtwclust:::SparseDistmat$new(series = x_mv,
+                                       control = pt_ctrl,
+                                       distance = "dtw_basic",
+                                       dist_args = list(window.size = 18L))
     pt_ctrl$distmat <- dm
     family <- new("tsclustFamily",
                   control = pt_ctrl,
@@ -300,8 +306,7 @@ test_that("Operations with pam centroid complete successfully.", {
                                     cl_id = cl_id,
                                     k = k,
                                     cent = x_mv[c(1L,20L)],
-                                    cl_old = 0L,
-                                    window.size = 18L))
+                                    cl_old = 0L))
 })
 
 # =================================================================================================

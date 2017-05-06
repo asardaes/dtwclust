@@ -11,12 +11,12 @@ ddist2 <- function(distance, control) {
     ## Closures capture the values of the objects from the environment where they're created
     distfun <- function(x, centroids = NULL, ...) {
         if (!is.null(control$distmat)) {
-            if (is.function(control$distmat)) {
+            if (inherits(control$distmat, "SparseDistmat")) {
                 ## PAM's sparse distmat
-                if (is.null(centroids))
-                    d <- control$distmat(1L:length(x), 1L:length(x), ...)
-                else
-                    d <- control$distmat(1L:length(x), attr(centroids, "id_cent"), ...)
+                i <- 1L:length(x)
+                j <- if (is.null(centroids)) i else attr(centroids, "id_cent")
+
+                d <- control$distmat[i, j, ..., drop = FALSE]
 
             } else {
                 ## non-sparse distmat pre-computed

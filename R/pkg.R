@@ -76,6 +76,7 @@
 #'
 #' @importFrom graphics plot
 #'
+#' @importClassesFrom Matrix sparseMatrix
 #' @importFrom Matrix forceSymmetric
 #' @importFrom Matrix rowSums
 #' @importFrom Matrix sparseMatrix

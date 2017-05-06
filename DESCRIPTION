@@ -49,6 +49,7 @@ Collate:
     'GAK.R'
     'NCCc.R'
     'SBD.R'
+    'SparseDistmat.R'
     'TADPole.R'
     'all-cent.R'
     'all-cent2.R'

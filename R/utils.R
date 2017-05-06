@@ -249,58 +249,6 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
          reg_entry = reg_entry)
 }
 
-# Function that will handle sparse distance matrix when needed
-sparse_distmat <- function(series, control, distance) {
-    distmat <- Matrix::sparseMatrix(i = 1L:length(series),
-                                    j = 1L:length(series),
-                                    x = 0,
-                                    symmetric = control$symmetric)
-
-    if (isTRUE(control$symmetric) && distmat@uplo != "L") distmat <- t(distmat)
-
-    existing_ids <- base::as.matrix(Matrix::summary(distmat)[c("i", "j")])
-
-    ## need another dist closure, otherwise it would be recursive
-    control$distmat <- NULL
-    distfun <- ddist2(distance, control)
-
-    update_distmat <- function(needed_i, needed_j, ...) {
-        ## number of rows of existing indices
-        rows <- nrow(existing_ids)
-
-        ## indices of needed vals
-        id_new <- base::as.matrix(expand.grid(i = needed_i, j = needed_j))
-
-        ## modify indices to lower triangular if necessary (symmetric only)
-        if (isTRUE(control$symmetric))
-            id_new <- t(apply(id_new, 1L, function(this_row) {
-                if (this_row[2L] > this_row[1L]) this_row[2L:1L] else this_row
-            }))
-
-        ## extract only indices of needed values that don't exist yet
-        id_new <- rbind(existing_ids, id_new)
-        id_duplicated <- duplicated(id_new)
-        rows <- (rows + 1L):nrow(id_new)
-        id_new <- id_new[rows, , drop = FALSE][!id_duplicated[rows], , drop = FALSE]
-
-        ## update distmat if necessary
-        if (nrow(id_new) > 0L) {
-            distmat[id_new] <<- as.numeric(distfun(series[id_new[, 1L]],
-                                                   series[id_new[, 2L]],
-                                                   pairwise = TRUE,
-                                                   ...))
-
-            if (control$symmetric) distmat <<- Matrix::forceSymmetric(distmat, "L")
-            existing_ids <<- rbind(existing_ids, id_new)
-        }
-
-        distmat[needed_i, needed_j, drop = FALSE]
-    }
-
-    ## return
-    update_distmat
-}
-
 # ==================================================================================================
 # Multviariate helpers
 # ==================================================================================================
