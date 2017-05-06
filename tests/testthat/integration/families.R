@@ -93,6 +93,25 @@ test_that("Operations with dtwclustFamily@dist and lbk give expected results", {
 
     ## ---------------------------------------------------------- ref
     assign("distmat_lbk", whole_distmat, persistent)
+
+    ## ---------------------------------------------------------- tsclustFamily, sparse distmat
+    ts_ctrl$symmetric <- FALSE
+    dm <- dtwclust:::sparse_distmat(x, ts_ctrl, "lbk")
+    ts_ctrl$distmat <- dm
+
+    family <- new("tsclustFamily",
+                  control = ts_ctrl,
+                  dist = "lbk")
+
+    sub_distmat <- base::as.matrix(family@dist(x, centroids, window.size = ctrl@window.size))
+    whole_distmat <- base::as.matrix(family@dist(x, window.size = ctrl@window.size))
+
+    expect_equal(whole_distmat, base::as.matrix(distmat), info = "Whole, sparse distmat",
+                 tolerance = 0, check.attributes = FALSE)
+
+    expect_equal(sub_distmat, base::as.matrix(distmat[ , c(1L, 15L), drop = FALSE]),
+                 info = "Sub, sparse distmat",
+                 tolerance = 0, check.attributes = FALSE)
 })
 
 # ==================================================================================================
@@ -175,6 +194,25 @@ test_that("Operations with dtwclustFamily@dist and lbi give expected results", {
 
     ## ---------------------------------------------------------- ref
     assign("distmat_lbi", whole_distmat, persistent)
+
+    ## ---------------------------------------------------------- tsclustFamily, sparse distmat
+    ts_ctrl$symmetric <- FALSE
+    dm <- dtwclust:::sparse_distmat(x, ts_ctrl, "lbi")
+    ts_ctrl$distmat <- dm
+
+    family <- new("tsclustFamily",
+                  control = ts_ctrl,
+                  dist = "lbi")
+
+    sub_distmat <- base::as.matrix(family@dist(x, centroids, window.size = ctrl@window.size))
+    whole_distmat <- base::as.matrix(family@dist(x, window.size = ctrl@window.size))
+
+    expect_equal(whole_distmat, base::as.matrix(distmat), info = "Whole, sparse distmat",
+                 tolerance = 0, check.attributes = FALSE)
+
+    expect_equal(sub_distmat, base::as.matrix(distmat[ , c(1L, 15L), drop = FALSE]),
+                 info = "Sub, sparse distmat",
+                 tolerance = 0, check.attributes = FALSE)
 })
 
 # ==================================================================================================
@@ -257,6 +295,24 @@ test_that("Operations with dtwclustFamily@dist and sbd give expected results", {
 
     ## ---------------------------------------------------------- ref
     assign("distmat_sbd", whole_distmat, persistent)
+
+    ## ---------------------------------------------------------- tsclustFamily, sparse distmat
+    ts_ctrl$symmetric <- TRUE
+    dm <- dtwclust:::sparse_distmat(x, ts_ctrl, "sbd")
+    ts_ctrl$distmat <- dm
+
+    family <- new("tsclustFamily",
+                  control = ts_ctrl,
+                  dist = "sbd")
+
+    sub_distmat <- base::as.matrix(family@dist(x, centroids))
+    whole_distmat <- base::as.matrix(family@dist(x))
+
+    expect_equal(whole_distmat, base::as.matrix(distmat), info = "Whole, sparse distmat",
+                 check.attributes = FALSE)
+
+    expect_equal(sub_distmat, base::as.matrix(distmat[ , c(1L, 15L), drop = FALSE]),
+                 info = "Sub, sparse distmat", check.attributes = FALSE)
 })
 
 # ==================================================================================================
@@ -586,6 +642,25 @@ test_that("Operations with dtwclustFamily@dist and dtw_basic give expected resul
 
     ## ---------------------------------------------------------- ref
     assign("distmat_dtwb", whole_distmat, persistent)
+
+    ## ---------------------------------------------------------- tsclustFamily, sparse distmat
+    ts_ctrl$symmetric <- FALSE
+    dm <- dtwclust:::sparse_distmat(x, ts_ctrl, "dtw_basic")
+    ts_ctrl$distmat <- dm
+
+    family <- new("tsclustFamily",
+                  control = ts_ctrl,
+                  dist = "dtw_basic")
+
+    sub_distmat <- base::as.matrix(family@dist(x, centroids, window.size = ctrl@window.size))
+    whole_distmat <- base::as.matrix(family@dist(x, window.size = ctrl@window.size))
+
+    expect_equal(whole_distmat, base::as.matrix(distmat), info = "Whole, sparse distmat",
+                 tolerance = 0, check.attributes = FALSE)
+
+    expect_equal(sub_distmat, base::as.matrix(distmat[ , c(1L, 15L), drop = FALSE]),
+                 info = "Sub, sparse distmat",
+                 tolerance = 0, check.attributes = FALSE)
 })
 
 # ==================================================================================================
@@ -670,6 +745,25 @@ test_that("Operations with dtwclustFamily@dist and gak give expected results", {
 
     ## ---------------------------------------------------------- ref
     assign("distmat_gak", whole_distmat, persistent)
+
+    ## ---------------------------------------------------------- tsclustFamily, sparse distmat
+    ts_ctrl$symmetric <- TRUE
+    dm <- dtwclust:::sparse_distmat(x, ts_ctrl, "gak")
+    ts_ctrl$distmat <- dm
+
+    family <- new("tsclustFamily",
+                  control = ts_ctrl,
+                  dist = "gak")
+
+    sub_distmat <- base::as.matrix(family@dist(x, centroids, window.size = ctrl@window.size, sigma = 100))
+    whole_distmat <- base::as.matrix(family@dist(x, window.size = ctrl@window.size, sigma = 100))
+
+    expect_equal(whole_distmat, base::as.matrix(distmat), info = "Whole, sparse distmat",
+                 tolerance = 0, check.attributes = FALSE)
+
+    expect_equal(sub_distmat, base::as.matrix(distmat[ , c(1L, 15L), drop = FALSE]),
+                 info = "Sub, sparse distmat",
+                 tolerance = 0, check.attributes = FALSE)
 })
 
 # =================================================================================================

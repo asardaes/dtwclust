@@ -231,6 +231,7 @@ test_that("Operations with pam centroid complete successfully.", {
     family <- new("tsclustFamily", control = pt_ctrl, dist = "sbd", allcent = "pam")
     expect_null(as.list(environment(family@allcent))$distmat)
 
+    ## no distmat
     expect_identical(cent_pam,
                      family@allcent(x,
                                     cl_id = cl_id,
@@ -238,6 +239,7 @@ test_that("Operations with pam centroid complete successfully.", {
                                     cent = x[c(1L,20L)],
                                     cl_old = 0L))
 
+    ## with distmat
     family <- new("tsclustFamily",
                   control = pt_ctrl,
                   dist = "sbd",
@@ -252,10 +254,46 @@ test_that("Operations with pam centroid complete successfully.", {
                                     cent = x[c(1L,20L)],
                                     cl_old = 0L))
 
+    ## multivariate
     family <- new("tsclustFamily",
                   control = pt_ctrl,
                   dist = "dtw_basic",
                   allcent = "pam")
+
+    expect_identical(cent_mv_pam,
+                     family@allcent(x_mv,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = x_mv[c(1L,20L)],
+                                    cl_old = 0L,
+                                    window.size = 18L))
+
+    ## sparse symmetric
+    dm <- dtwclust:::sparse_distmat(x, pt_ctrl, "sbd")
+    pt_ctrl$symmetric <- TRUE
+    pt_ctrl$distmat <- dm
+    family <- new("tsclustFamily",
+                  control = pt_ctrl,
+                  dist = "sbd",
+                  allcent = "pam",
+                  distmat = dm)
+
+    expect_identical(cent_pam,
+                     family@allcent(x,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = x[c(1L,20L)],
+                                    cl_old = 0L))
+
+    ## sparse non-symmetric
+    dm <- dtwclust:::sparse_distmat(x_mv, pt_ctrl, "dtw_basic")
+    pt_ctrl$symmetric <- FALSE
+    pt_ctrl$distmat <- dm
+    family <- new("tsclustFamily",
+                  control = pt_ctrl,
+                  dist = "dtw_basic",
+                  allcent = "pam",
+                  distmat = dm)
 
     expect_identical(cent_mv_pam,
                      family@allcent(x_mv,
