@@ -390,6 +390,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                        } else if (!isTRUE(control$pam.precompute) &&
                                   type != "fuzzy" &&
+                                  isTRUE(control$pam.sparse) &&
                                   tolower(distance) != "dtw_lb")
                        {
                            ## see SparseDistmat.R
@@ -442,6 +443,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                        i <- integer() # CHECK complains about non-initialization now
 
+                       ## sequential allows the matrix to be updated iteratively
+                       `%this_op%` <- if (inherits(distmat, "SparseDistmat")) `%do%` else `%op%`
+
                        pc.list <- foreach(k = k0, rng = rng0,
                                           .combine = comb0, .multicombine = TRUE,
                                           .packages = control$packages,
@@ -449,7 +453,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                            foreach(i = 1L:nrep,
                                    .combine = list, .multicombine = TRUE,
                                    .packages = control$packages,
-                                   .export = export) %op%
+                                   .export = export) %this_op%
                                    {
                                        if (trace) message("Repetition ", i, " for k = ", k)
 

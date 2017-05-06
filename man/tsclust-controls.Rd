@@ -14,7 +14,8 @@
 \title{Control parameters for clusterings with \code{\link[=tsclust]{tsclust()}}}
 \usage{
 partitional_control(pam.precompute = TRUE, iter.max = 100L, nrep = 1L,
-  symmetric = FALSE, packages = character(0L), distmat = NULL)
+  symmetric = FALSE, packages = character(0L), distmat = NULL,
+  pam.sparse = !pam.precompute)
 
 hierarchical_control(method = "average", symmetric = FALSE,
   packages = character(0L), distmat = NULL)
@@ -46,6 +47,8 @@ is probably useless, but just in case.}
 \item{distmat}{If available, the cross-distance matrix can be provided here. Only relevant for
 partitional with PAM centroids or hierarchical procedures.}
 
+\item{pam.sparse}{Attempt to use a sparse matrix for PAM centroids. See details.}
+
 \item{method}{Character vector with one or more linkage methods to use in hierarchical procedures
 (see \code{\link[stats:hclust]{stats::hclust()}}), the character \code{"all"} to use all of the available ones, or a function
 that performs hierarchical clustering based on distance matrices (e.g. \code{\link[cluster:diana]{cluster::diana()}}). See
@@ -74,16 +77,45 @@ Control parameters for fine-grained control.
 \details{
 The functions essentially return their function arguments in a classed list, although some checks
 are performed.
+}
+\section{Partitional}{
 
-As of version 3.2.1, using \code{pam.precompute = FALSE} is optimized by defining a sparse matrix (see
-\code{\link[Matrix:sparseMatrix]{Matrix::sparseMatrix()}}) and updating it every iteration (except for \code{"dtw_lb"} distance). For
-smaller datasets, precomputing the whole distance matrix is still probably faster.
 
-There are some limitations when using a custom hierarchical function in \code{method}: it will receive
-the lower triangular of the distance matrix as first argument (see \code{\link[stats:as.dist]{stats::as.dist()}}) and the
-result should support the \code{\link[stats:as.hclust]{stats::as.hclust()}} generic. This functionality was added with the
-\pkg{cluster} in mind, since its functions follow this convention, but other functions could be
-used if they are adapted to work similarly.
+As of version 3.3.0, using \code{pam.precompute = FALSE} is optimized by defining a sparse matrix
+(see \code{\link[Matrix:sparseMatrix]{Matrix::sparseMatrix()}}) and updating it every iteration (except for \code{"dtw_lb"}
+distance). For smaller datasets, precomputing the whole distance matrix is still probably
+faster.
+
+Explicitly setting both \code{pam.precompute} and \code{pam.sparse} to \code{FALSE} will reproduce previous
+behavior, and might be faster if the distance matrix is very big but the distance function is
+very quick.
+
+Parallel computations for PAM centroids have the following considerations:
+\itemize{
+\item If \code{pam.precompute} is \code{TRUE}, both distance matrix calculations and repetitions are done in
+parallel, regardless of \code{pam.sparse}.
+\item If \code{pam.precompute} is \code{FALSE} and \code{pam.sparse} is \code{TRUE}, repetitions are done sequentially,
+so that the distance calculations can be done in parallel and the sparse matrix updated
+iteratively.
+\item If both \code{pam.precompute} and \code{pam.sparse} are \code{FALSE}, repetitions are done in parallel, and
+each repetition performs distance calculations sequentially, but the sparse matrix cannot be
+updated iteratively.
+}
+}
+
+\section{Hierarchical}{
+
+
+There are some limitations when using a custom hierarchical function in \code{method}: it will
+receive the lower triangular of the distance matrix as first argument (see \code{\link[stats:as.dist]{stats::as.dist()}})
+and the result should support the \code{\link[stats:as.hclust]{stats::as.hclust()}} generic. This functionality was added
+with the \pkg{cluster} in mind, since its functions follow this convention, but other functions
+could be used if they are adapted to work similarly.
+}
+
+\section{TADPole}{
+
 
 When using TADPole, the \code{dist} argument list includes the \code{window.size} and specifies \code{norm = "L2"}.
 }
+
