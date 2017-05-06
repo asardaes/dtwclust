@@ -172,30 +172,6 @@ call_pairs <- function(n = 2L, lower = TRUE) {
 # Parallel helper functions
 # ==================================================================================================
 
-# allow_parallel <- function() {
-#     do_par <- TRUE
-#
-#     function(flag) {
-#         if (!missing(flag))
-#             do_par <<- as.logical(flag)[1L]
-#
-#         invisible(do_par)
-#     }
-# }
-#
-# Allow parallel computation with \pkg{dtwclust} functions
-#
-# Set an internal flag that is checked by the functions that support parallel computation and
-# determines if they should attempt to use a parallel backend if one is registered.
-#
-# @export
-#
-# @param flag `TRUE` to allow use of parallel backends or `FALSE` to prevent it.
-#
-# @return `flag` invisibly
-#
-# parallel_dtwclust <- allow_parallel()
-
 # Custom binary operator for %dopar% to avoid unnecessary warnings
 `%op%` <- function(obj, ex) {
     withCallingHandlers({
