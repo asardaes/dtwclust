@@ -84,7 +84,8 @@ Methods associated with \linkS4class{TSClusters} and derived objects.
 \details{
 The \code{update} method takes the original function call, replaces any provided argument and
 optionally evaluates the call again. Use \code{evaluate = FALSE} if you want to get the unevaluated
-call.
+call. If no arguments are provided, the object is updated to a new version if necessary (this is
+due to changes in the internal functions of the package, here for backward compatibility).
 
 The \code{predict} generic can take the usual \code{newdata} argument and it returns the cluster(s) to
 which the data belongs; if \code{NULL}, it simply returns the obtained cluster indices. It

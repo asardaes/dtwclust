@@ -36,8 +36,7 @@ setMethod("initialize", "tsclustFamily",
                       dots$allcent <- all_cent2(allcent,
                                                 distmat = distmat,
                                                 distfun = dots$dist,
-                                                control = control,
-                                                fuzzy = fuzzy)
+                                                fuzziness = control$fuzziness)
                   else if (is.function(allcent))
                       dots$allcent <- allcent
                   else
@@ -146,8 +145,7 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
             if (.Object@type == "partitional" && length(.Object@centroid))
                 allcent <- all_cent2(.Object@centroid,
                                      distmat = .Object@distmat,
-                                     control = .Object@control,
-                                     fuzzy = isTRUE(.Object@type == "fuzzy"))
+                                     control = .Object@control)
             else if (.Object@type == "hierarchical" && length(formals(.Object@family@allcent)))
                 allcent <- .Object@family@allcent
             else if (.Object@type == "hierarchical" && length(centroids))
@@ -334,18 +332,24 @@ setMethod("show", "TSClusters",
 #'
 #' The `update` method takes the original function call, replaces any provided argument and
 #' optionally evaluates the call again. Use `evaluate = FALSE` if you want to get the unevaluated
-#' call.
+#' call. If no arguments are provided, the object is updated to a new version if necessary (this is
+#' due to changes in the internal functions of the package, here for backward compatibility).
 #'
 update.TSClusters <- function(object, ..., evaluate = TRUE) {
     args <- as.pairlist(list(...))
 
     if (length(args) == 0L) {
-        message("Nothing to be updated")
+        if (evaluate) {
+            ## all_cent2 changed in v3.2.1, update here for backward compatibility
+            if (object@type %in% c("partitional", "fuzzy"))
+                object@family@allcent <- all_cent2(object@centroid,
+                                                   object@distmat,
+                                                   object@family@dist,
+                                                   object@control$fuzziness)
 
-        if (evaluate)
             return(object)
-        else
-            return(object@call)
+
+        } else return(object@call)
     }
 
     new_call <- object@call

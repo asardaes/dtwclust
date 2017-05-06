@@ -93,8 +93,10 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
 
     expect_true(predict(hc)[1L] == predict(hc, newdata = data_subset[1L]), info = "predict")
 
-    suppressMessages(method_update <- update(hc))
+    method_update <- update(hc)
     expect_identical(hc, method_update)
+    method_update <- update(pc)
+    expect_identical(body(pc@family@allcent), body(method_update@family@allcent))
     mute <- capture.output(method_update <- update(hc, distmat = hc@distmat,
                                                    control = hierarchical_control(method = "complete")))
     expect_true(inherits(method_update, "TSClusters") & validObject(method_update), info = "update")

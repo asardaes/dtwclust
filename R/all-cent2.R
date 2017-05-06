@@ -2,7 +2,7 @@
 # Custom functions to calculate centroids
 # ==================================================================================================
 
-all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALSE) {
+all_cent2 <- function(case = NULL, distmat = NULL, distfun, fuzziness) {
     ## ---------------------------------------------------------------------------------------------
     ## pam
     pam_cent <- function(x, x_split, cent, cl_id, id_changed, ...) {
@@ -196,11 +196,11 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FAL
 
     ## ---------------------------------------------------------------------------------------------
     ## allcent
-    if (fuzzy) {
+    if (case %in% c("fcm", "fcmdd")) {
         ## function created here to capture objects of this environment (closure)
         allcent <- function(x, cl_id, k, cent, cl_old, ...) {
             ## cent and cl_old are unused here, but R complains if signatures don't match
-            u <- cl_id ^ control$fuzziness
+            u <- cl_id ^ fuzziness
 
             cent <- do.call(paste0(case, "_cent"),
                             enlist(x = x,
