@@ -100,6 +100,15 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
     expect_true(inherits(method_update, "TSClusters") & validObject(method_update), info = "update")
 })
 
+test_that("as.* methods are dispatched correctly.", {
+    dm <- proxy::dist(data_reinterpolated_subset, data_reinterpolated_subset)
+    expect_identical(dim(base::as.matrix(dm)), dim(as.data.frame(dm)))
+
+    pd <- proxy::dist(data_reinterpolated_subset[1L:10L], data_reinterpolated_subset[11L:20L],
+                      pairwise = TRUE)
+    expect_identical(dim(base::as.matrix(pd)), dim(as.data.frame(pd)))
+})
+
 # =================================================================================================
 # clean
 # =================================================================================================
