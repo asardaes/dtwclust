@@ -478,10 +478,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                    ## Prepare results
                    ## ------------------------------------------------------------------------------
 
-                   ## Get updated sparse matrix (only updated if done sequentially)
-                   if (!isTRUE(control$pam.precompute) && cent_char == "pam")
-                       distmat <- distmat$distmat
-
                    ## Replace distmat with NULL so that, if the distance function is called again,
                    ## it won't subset it
                    environment(family@dist)$control$distmat <- NULL
