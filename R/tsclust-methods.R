@@ -339,7 +339,7 @@ update.TSClusters <- function(object, ..., evaluate = TRUE) {
 
     if (length(args) == 0L) {
         if (evaluate) {
-            ## all_cent2 changed in v3.2.1, update here for backward compatibility
+            ## all_cent2 changed in v3.3.0, update here for backward compatibility
             if (object@type %in% c("partitional", "fuzzy"))
                 object@family@allcent <- all_cent2(object@centroid,
                                                    object@distmat,

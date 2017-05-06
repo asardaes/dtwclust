@@ -727,7 +727,7 @@ it usually saves time overall,
 so it is done by default by \dtwclust{}.
 However, this is not suitable for large datasets since the whole distance matrix has to be allocated at once,
 so it is also possible to deactivate this precomputation.
-As of version 3.2.1, deactivating precomputation falls back to using a sparse matrix that is updated on each iteration,
+As of version 3.3.0, deactivating precomputation falls back to using a sparse matrix that is updated on each iteration,
 and also across repetitions if done sequentially.
 For small datasets, calculating the whole matrix beforehand is still probably faster.
 

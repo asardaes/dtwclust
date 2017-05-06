@@ -1,4 +1,4 @@
-## Update to version 3.2.1
+## Update to version 3.3.0
 * Optimizations and bug fixes
 
 ## Test environments
