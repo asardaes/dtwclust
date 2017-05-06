@@ -144,8 +144,7 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
 
             if (.Object@type == "partitional" && length(.Object@centroid))
                 allcent <- all_cent2(.Object@centroid,
-                                     distmat = .Object@distmat,
-                                     control = .Object@control)
+                                     distmat = .Object@distmat)
             else if (.Object@type == "hierarchical" && length(formals(.Object@family@allcent)))
                 allcent <- .Object@family@allcent
             else if (.Object@type == "hierarchical" && length(centroids))
