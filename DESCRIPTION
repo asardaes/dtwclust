@@ -66,6 +66,7 @@ Collate:
     'dtwclust-methods.R'
     'dtwclust.R'
     'fuzzy.R'
+    'globals-internal.R'
     'lb-improved.R'
     'lb-keogh.R'
     'partitional.R'

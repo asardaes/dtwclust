@@ -36,23 +36,19 @@ check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
         }
 
         if (Lengths) {
-            if ((obj %in% included) && !(obj %in% valid))
+            if ((obj %in% distances_included) && !(obj %in% distances_difflength))
                 stop("Only the following distances are supported for series with different length:\n\t",
                      paste(valid, collapse = "\t"))
-            else if (!(obj %in% included) && trace)
-                message("Series have different lengths. Please confirm that the provided distance ",
-                        "function supports this.")
+            else if (!(obj %in% distances_included) && trace)
+                message("Series have different lengths. ",
+                        "Please confirm that the provided distance function supports this.")
         }
 
         ## valid registered distance
         return(TRUE)
 
     } else if (case == "cent") {
-        ## only checking for different lengths
-        included <- c("mean", "median", "shape", "dba", "pam", "fcm", "fcmdd")
-        valid <- c("dba", "pam", "shape", "fcmdd")
-
-        if (is.character(obj) && (obj %in% included) && !(obj %in% valid))
+        if (is.character(obj) && (obj %in% centroids_included) && !(obj %in% centroids_difflength))
             stop("Only the following centroids are supported for series with different lengths:",
                  "\n\tdba\tpam\tshape\tfcmdd")
 
@@ -97,14 +93,6 @@ subset_dots <- function(dots = list(), foo) {
         dots[intersect(names(dots), names(formals(foo)))]
     else
         list()
-}
-
-# This only works if it's used after split_parallel()
-validate_pairwise <- function(x, y) {
-    if (!identical(lengths(x, use.names = FALSE), lengths(y, use.names = FALSE)))
-        stop("Pairwise distances require the same amount of series in 'x' and 'y'.")
-
-    invisible(NULL)
 }
 
 # Reinitialize empty clusters
@@ -209,6 +197,14 @@ split_parallel <- function(obj, margin = NULL) {
                       lapply(num_tasks, function(id) obj[ , id, drop = FALSE]))
 
     ret
+}
+
+# This only works if it's used after split_parallel()
+validate_pairwise <- function(x, y) {
+    if (!identical(lengths(x, use.names = FALSE), lengths(y, use.names = FALSE)))
+        stop("Pairwise distances require the same amount of series in 'x' and 'y'.")
+
+    invisible(NULL)
 }
 
 ## tasks created based on getDoParWorkers() could be larger than tasks based on objects
