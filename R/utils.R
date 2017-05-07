@@ -24,9 +24,6 @@ check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
         return(as.integer(obj))
 
     } else if (case == "dist") {
-        included <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd", "dtw_basic", "gak")
-        valid <- c("dtw", "dtw2", "sbd", "dtw_basic", "gak") ## for different lengths
-
         if (!is.character(obj) || !pr_DB$entry_exists(obj)) {
             if (silent)
                 return(FALSE)
@@ -38,7 +35,7 @@ check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
         if (Lengths) {
             if ((obj %in% distances_included) && !(obj %in% distances_difflength))
                 stop("Only the following distances are supported for series with different length:\n\t",
-                     paste(valid, collapse = "\t"))
+                     paste(distances_difflength, collapse = "\t"))
             else if (!(obj %in% distances_included) && trace)
                 message("Series have different lengths. ",
                         "Please confirm that the provided distance function supports this.")
@@ -49,8 +46,8 @@ check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
 
     } else if (case == "cent") {
         if (is.character(obj) && (obj %in% centroids_included) && !(obj %in% centroids_difflength))
-            stop("Only the following centroids are supported for series with different lengths:",
-                 "\n\tdba\tpam\tshape\tfcmdd")
+            stop("Only the following centroids are supported for series with different lengths:\n\t",
+                 paste(centroids_difflength, collapse = "\t"))
 
     }
 
@@ -122,12 +119,10 @@ reinit_clusters <- function(x, cent, cent_case, num_empty, empty_clusters, contr
 # Like dynGet() I assume, but that one is supposed to be experimental...
 get_from_callers <- function(obj_name, mode = "any") {
     ret <- get0(obj_name, mode = mode, inherits = TRUE)
-
     if (!is.null(ret)) return(ret)
 
     for (env in sys.frames()) {
         ret <- get0(obj_name, env, mode = mode, inherits = FALSE)
-
         if (!is.null(ret)) return(ret)
     }
 
@@ -141,7 +136,6 @@ get_from_callers <- function(obj_name, mode = "any") {
 # Create combinations of all possible pairs
 call_pairs <- function(n = 2L, lower = TRUE) {
     if (n < 2L) stop("At least two elements are needed to create pairs.")
-
     pairs <- try(.Call(C_pairs, n, lower, PACKAGE = "dtwclust"), silent = TRUE)
 
     if (inherits(pairs, "try-error")) {
@@ -164,8 +158,8 @@ call_pairs <- function(n = 2L, lower = TRUE) {
 `%op%` <- function(obj, ex) {
     withCallingHandlers({
         ret <- eval.parent(substitute(obj %dopar% ex))
-
-    }, warning = function(w) {
+    },
+    warning = function(w) {
         if (grepl("package:dtwclust", w$message, ignore.case = TRUE))
             invokeRestart("muffleWarning")
     })

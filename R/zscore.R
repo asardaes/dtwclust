@@ -48,7 +48,6 @@ zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE) {
         x[is.nan(x)] <- 0
 
         if (!multivariate) dim(x) <- NULL
-
         if (!keep.attributes) attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL
     }
 

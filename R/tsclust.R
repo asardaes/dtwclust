@@ -315,9 +315,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                    if (is.character(centroid)) {
                        if (type == "fuzzy")
-                           centroid <- match.arg(centroid, c("fcm", "fcmdd"))
+                           centroid <- match.arg(centroid, centroids_fuzzy)
                        else
-                           centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
+                           centroid <- match.arg(centroid, centroids_nonfuzzy)
 
                        ## replace any given distmat if centroid not "pam" or "fcmdd"
                        if (!(centroid %in% c("pam", "fcmdd"))) control$distmat <- NULL

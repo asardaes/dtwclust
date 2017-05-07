@@ -56,9 +56,7 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
     }
 
     share_missing <- missing(share.config)
-    share.config <- match.arg(share.config,
-                              c("partitional", "hierarchical", "fuzzy", "tadpole"),
-                              TRUE)
+    share.config <- match.arg(share.config, supported_clusterings, TRUE)
 
     if (type == "distance") {
         if (!share_missing && "tadpole" %in% share.config)
@@ -182,7 +180,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
     ## Start
     ## =============================================================================================
 
-    types <- match.arg(types, c("partitional", "hierarchical", "fuzzy", "tadpole"), TRUE)
+    types <- match.arg(types, supported_clusterings, TRUE)
 
     ## ---------------------------------------------------------------------------------------------
     ## Check controls specification
@@ -456,7 +454,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     set.seed(seed)
 
     if (is.null(series)) stop("No series provided.")
-    types <- match.arg(types, c("partitional", "hierarchical", "tadpole", "fuzzy"), TRUE)
+    types <- match.arg(types, supported_clusterings, TRUE)
 
     ## coerce to list if necessary
     series <- any2list(series)
@@ -575,9 +573,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         ## export any necessary preprocessing and centroid functions
         ## -----------------------------------------------------------------------------------------
 
-        included_centroids <- c("mean", "median", "shape", "dba", "pam", "fcm", "fcmdd")
         custom_preprocs <- setdiff(unique(config$preproc), "none")
-        custom_centroids <- setdiff(unique(config$centroid), c("default", included_centroids))
+        custom_centroids <- setdiff(unique(config$centroid), c("default", centroids_included))
 
         for (custom_preproc in custom_preprocs)
             assign(custom_preproc, get_from_callers(custom_preproc, "function"))
@@ -585,9 +582,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         for (custom_centroid in custom_centroids)
             assign(custom_centroid, get_from_callers(custom_centroid, "function"))
 
-        export <- c("dots", "trace",
-                    "check_consistency", "enlist", "subset_dots",
-                    "get_from_callers",
+        export <- c("dots", "trace", "centroids_included",
+                    "check_consistency", "enlist", "subset_dots", "get_from_callers",
                     custom_preprocs, custom_centroids)
 
         ## -----------------------------------------------------------------------------------------
@@ -706,7 +702,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                     ## do not specify centroid
                                     tsc <- do.call(tsclust, this_args, quote = TRUE)
 
-                                } else if (centroid_char %in% included_centroids) {
+                                } else if (centroid_char %in% centroids_included) {
                                     ## with included centroid
                                     tsc <- do.call(tsclust,
                                                    enlist(centroid = centroid_char,

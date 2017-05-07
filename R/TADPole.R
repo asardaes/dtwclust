@@ -237,16 +237,19 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
                                               ## Index of current object
                                               ii <- TADPorder$ix[i]
 
-                                              ## If this is true, prune the calculation of true distance
+                                              ## If this is true,
+                                              ## prune the calculation of true distance
                                               indPrune <- LBM[ii, indHDN] > deltaUB[ii]
-                                              ## If the distance was already computed, don't do it again
+                                              ## If the distance was already computed,
+                                              ## don't do it again
                                               indPre <- Flags[ii, indHDN] == 0L |
                                                   Flags[ii, indHDN] == 1L
 
                                               ## 'delta' will have the distances HDN
                                               ## Initially filled with upper bound
                                               delta <- UBM[ii, indHDN]
-                                              ## If some distances were already computed, put them here
+                                              ## If some distances were already computed,
+                                              ## put them here
                                               delta[indPre] <- D[ii, indHDN[indPre]]
 
                                               ## If the distance is not to be pruned nor previously

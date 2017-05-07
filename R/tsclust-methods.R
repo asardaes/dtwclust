@@ -200,9 +200,9 @@ setMethod("initialize", "PartitionalTSClusters",
                   ## no clusinfo available, but cluster and cldist can be used to calculate it
                   size <- as.vector(table(.Object@cluster))
                   clusinfo <- data.frame(size = size, av_dist = 0)
-                  clusinfo[clusinfo$size > 0L, "av_dist"] <-
-                      as.vector(tapply(.Object@cldist[ , 1L], .Object@cluster, mean))
-
+                  clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(.Object@cldist[ , 1L],
+                                                                              .Object@cluster,
+                                                                              mean))
                   .Object@clusinfo <- clusinfo
               }
 
@@ -1051,15 +1051,15 @@ setAs("dtwclust", "TSClusters",
           }
 
           if (to@type %in% c("partitional", "fuzzy") && to@centroid %in% c("pam", "fcmdd")) {
+              ## see Distmat.R
               if (is.null(from@distmat)) {
-                  ## see Distmat.R
                   to@control$distmat <- Distmat$new(series = to@datalist,
                                                     distance = to@distance,
                                                     control = to@control,
                                                     dist_args = to@args$dist,
                                                     error.check = FALSE)
               } else {
-                  to@control$distmat <- from@distmat
+                  to@control$distmat <- Distmat$new(distmat = from@distmat)
               }
 
               assign("control", to@control, environment(to@family@allcent))
