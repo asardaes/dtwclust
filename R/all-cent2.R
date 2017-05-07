@@ -14,7 +14,6 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, fuzziness) {
 
                 ## update indices, aggregated at the end of main allcent function
                 attr(i_cent, "id_cent") <- pmatch(names(xsub[which.min(d)]), names(x))
-
                 i_cent
             })
 
@@ -45,7 +44,6 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, fuzziness) {
 
                 ## update indices, aggregated at the end of main allcent function
                 attr(i_cent, "id_cent") <- id_cent
-
                 i_cent
             })
         }
@@ -102,7 +100,6 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, fuzziness) {
                                                             enlist(X = x,
                                                                    centroid = c,
                                                                    dots = dots))
-
                                            ## return
                                            new_c
                                        })
@@ -120,15 +117,14 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, fuzziness) {
                 ## multivariate
                 ncols <- ncol(xx[[1L]]) # number of dimensions should be equal
                 ncols <- rep(1L:ncols, length(xx))
-
                 xx <- do.call(cbind, xx)
                 xx <- split.data.frame(t(xx), ncols)
                 do.call(cbind, lapply(xx, colMeans))
 
             } else {
                 ## univariate
-                xx <- do.call(rbind, xx)
-                colMeans(xx) # utils.R
+                xx <- do.call(cbind, xx)
+                rowMeans(xx)
             }
         })
 
@@ -172,7 +168,6 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, fuzziness) {
                 sapply(cent, function(cent) { cent[idc, , drop = TRUE] })
             })
             cent <- lapply(cent, "dimnames<-", NULL)
-
             cent
 
         } else {
@@ -186,10 +181,8 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, fuzziness) {
     fcmdd_cent <- function(x, u, k, ...) {
         q <- distmat %*% u
         idc <- apply(q, 2L, which.min)
-
         cent <- x[idc]
         attr(cent, "id_cent") <- idc
-
         cent
     }
 
@@ -251,9 +244,7 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, fuzziness) {
                 cent[empty_clusters] <- reinitalize_clusters(x, cent, case, num_empty)
 
             ## aggregate updated indices
-            if (case == "pam")
-                attr(cent, "id_cent") <- sapply(cent, attr, which = "id_cent")
-
+            if (case == "pam") attr(cent, "id_cent") <- sapply(cent, attr, which = "id_cent")
             cent
         }
     }
