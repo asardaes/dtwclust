@@ -333,8 +333,16 @@ update.TSClusters <- function(object, ..., evaluate = TRUE) {
     if (length(args) == 0L) {
         if (evaluate) {
             ## all_cent2 changed in v4.0.0, update here for backward compatibility
-            if (object@type %in% c("partitional", "fuzzy"))
+            if (object@type %in% c("partitional", "fuzzy")) {
+                if (object@centroid %in% c("pam", "fcmdd") &&
+                    !is.null(object@control$distmat) &&
+                    !inherits(object@control$distmat, "Distmat"))
+                {
+                    object@control$distmat <- Distmat$new(distmat = object@control$distmat)
+                }
+
                 object@family@allcent <- all_cent2(object@centroid, object@control)
+            }
 
             return(object)
 
