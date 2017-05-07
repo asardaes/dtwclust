@@ -3,7 +3,7 @@ Type: Package
 Title: Time Series Clustering Along with Optimizations for the Dynamic Time
     Warping Distance
 Version: 3.2.0.9000
-Date: 2017-05-06
+Date: 2017-05-07
 Depends:
     R (>= 3.2.0),
     methods,
@@ -46,6 +46,7 @@ NeedsCompilation: yes
 RoxygenNote: 6.0.1
 Collate: 
     'DBA.R'
+    'Distmat.R'
     'GAK.R'
     'NCCc.R'
     'SBD.R'

@@ -1,9 +1,10 @@
 # Changelog
 
-## Version 3.3.0
+## Version 4.0.0
 * Optimized `TADPole` for multiple `k` and `dc` values.
 * Partitional and hierarchical configurations in `compare_clusterings` now take into account the `symmetric` control parameter if provided.
 * Optimized PAM centroids with `pam.precompute = FALSE` by using sparse matrices from the `Matrix` package.
+* Some internal functions changed, so older objects might no longer be compatible. Try using `update(old_obj)`.
 
 ## Version 3.2.0
 * Added functions `compare_clusterings` and helpers to compare many clustering configurations, possibly in parallel.

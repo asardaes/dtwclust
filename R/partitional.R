@@ -162,18 +162,15 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
     } else {
         id_cent <- sample(N, k)
         centroids <- x[id_cent]
-        attr(centroids, "id_cent") <- id_cent # also used by PAM
+        if (inherits(control$distmat, "Distmat")) control$distmat$id_cent <- id_cent
         cluster <- integer(N)
     }
-
-    if (cent == "pam" && !control$pam.precompute)
-        args$cent <- c(args$cent, args$dist)
 
     iter <- 1L
     objective_old <- Inf
 
     while (iter <= control$iter.max) {
-        clustold <- if (cent != "fcmdd") cluster else attr(centroids, "id_cent")
+        clustold <- if (cent != "fcmdd") cluster else control$distmat$id_cent
 
         distmat <- do.call(family@dist,
                            enlist(x = x,
@@ -212,7 +209,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
             if (cent != "fcmdd")
                 changes <- sum(cluster != clustold)
             else
-                changes <- sum(attr(centroids, "id_cent") != clustold)
+                changes <- sum(control$distmat$id_cent != clustold)
 
             if (trace) {
                 td <- sum(distmat[cbind(1L:N, cluster)])
@@ -268,8 +265,6 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
     clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(cldist[ , 1L], cluster, mean))
 
     names(centroids) <- NULL
-    attr(centroids, "id_cent") <- NULL
-    centroids <- lapply(centroids, "attr<-", which = "id_cent", value = NULL)
 
     list(k = k,
          cluster = cluster,

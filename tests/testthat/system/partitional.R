@@ -294,6 +294,26 @@ test_that("Cluster reinitialization in partitional dtwclust works.", {
 
     pc_cr <- reset_nondeterministic(pc_cr)
     assign("pc_cr", pc_cr, persistent)
+
+    ## test PAM too
+    suppressWarnings(pc_cr <- dtwclust(data_reinterpolated, k = 20,
+                                       distance = "lbk", centroid = "pam",
+                                       seed = 31231,
+                                       control = list(window.size = 19L,
+                                                      iter.max = 10L)))
+
+    expect_false(pc_cr@converged)
+
+    suppressWarnings(pc_cr2 <- tsclust(data_reinterpolated, k = 20,
+                                       distance = "lbk", centroid = "pam",
+                                       seed = 31231,
+                                       control = partitional_control(iter.max = 10L),
+                                       args = tsclust_args(dist = list(window.size = 19L))))
+
+    expect_false(pc_cr2@converged)
+
+    expect_identical(pc_cr@cluster, pc_cr2@cluster)
+    expect_identical(pc_cr@centroids, pc_cr2@centroids)
 })
 
 # =================================================================================================

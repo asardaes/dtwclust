@@ -29,6 +29,8 @@ reset_nondeterministic <- function(obj, clear.data = TRUE) {
         obj@family <- new("tsclustFamily")
         obj@proctime[1L:5L] <- 0
 
+        if (inherits(obj@control$distmat, "Distmat")) obj@control$distmat <- obj@distmat
+
         if (clear.data) obj@datalist <- list()
     }
 

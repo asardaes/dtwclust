@@ -1,41 +1,30 @@
 # ==================================================================================================
-# Sparse distmat class and methods to transparently handle PAM's pam.precompute = FALSE case
+# Sparse distmat RC and methods to transparently handle PAM's pam.precompute = FALSE case
 # ==================================================================================================
 
 #' Sparse distance matrix
 #'
 #' Reference class that is used internally for PAM centroids when `pam.precompute = FALSE`. It
-#' allows for mutable state.
+#' allows for mutable state. It contains [Distmat-class].
 #'
-#' @field series Time series list.
+#' @include Distmat.R
+#'
 #' @field distmat The sparse matrix.
-#' @field distfun The distance function to calculate the distance matrix.
 #' @field symmetric Logical indicating if the matrix is symmetric.
 #' @field existing_ids Matrix with the indices of existing values within the matrix.
-#' @field dist_args Arguments for the distance function.
 #'
 SparseDistmat <- setRefClass("SparseDistmat",
+                             contains = "Distmat",
                              fields = list(
-                                 series = "list",
                                  distmat = "sparseMatrix",
-                                 distfun = "function",
                                  symmetric = "logical",
-                                 existing_ids = "matrix",
-                                 dist_args = "list"
+                                 existing_ids = "matrix"
                              ),
                              methods = list(
-                                 initialize = function(..., series, distance, control, dist_args) {
+                                 initialize = function(..., control) {
                                      "Initialization based on needed parameters"
 
-                                     check_consistency(series, "vltslist")
-                                     check_consistency(distance,
-                                                       "dist",
-                                                       trace = FALSE,
-                                                       Lengths = different_lengths(series),
-                                                       silent = FALSE)
-
-                                     series <<- series
-                                     dist_args <<- dist_args
+                                     callSuper(..., control = control)
                                      symmetric <<- control$symmetric
 
                                      distmat <<- Matrix::sparseMatrix(i = 1L:length(series),
@@ -49,10 +38,6 @@ SparseDistmat <- setRefClass("SparseDistmat",
                                      existing_ids <<- base::as.matrix(
                                          Matrix::summary(distmat)[c("i", "j")]
                                      )
-
-                                     ## need another dist closure, otherwise it would be recursive
-                                     control$distmat <- NULL
-                                     distfun <<- ddist2(distance, control)
 
                                      invisible(NULL)
                                  }
@@ -120,3 +105,5 @@ setMethod(`[`, "SparseDistmat", function(x, i, j, ..., drop = TRUE) {
 
     x$distmat[i, j, drop = drop]
 })
+
+dim.SparseDistmat <- function(x) { dim(x$distmat) }

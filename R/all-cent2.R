@@ -2,54 +2,21 @@
 # Custom functions to calculate centroids
 # ==================================================================================================
 
-all_cent2 <- function(case = NULL, distmat = NULL, distfun, fuzziness) {
+all_cent2 <- function(case = NULL, control) {
     ## ---------------------------------------------------------------------------------------------
     ## pam
     pam_cent <- function(x, x_split, cent, cl_id, id_changed, ...) {
-        if (is.null(distmat)) {
-            new_cent <- lapply(x_split, function(xsub) {
-                distmat <- distfun(xsub, xsub, ...)
-                d <- apply(distmat, 1L, sum)
-                i_cent <- xsub[[which.min(d)]]
-
-                ## update indices, aggregated at the end of main allcent function
-                attr(i_cent, "id_cent") <- pmatch(names(xsub[which.min(d)]), names(x))
-                i_cent
-            })
-
-        } else if (inherits(distmat, "SparseDistmat")) {
-            id_x <- lapply(id_changed, function(cl_num) which(cl_id == cl_num))
-
-            new_cent <- lapply(id_x, function(i_x) {
-                d <- distmat[i_x, i_x, ..., drop = FALSE]
-
-                ## same as below (in 'else' case)
-                d <- Matrix::rowSums(d)
-                id_cent <- i_x[which.min(d)]
-                i_cent <- x[[id_cent]]
-
-                ## update indices, aggregated at the end of main allcent function
-                attr(i_cent, "id_cent") <- id_cent
-
-                i_cent
-            })
-
-        } else {
-            id_x <- lapply(id_changed, function(cl_num) which(cl_id == cl_num))
-
-            new_cent <- lapply(id_x, function(i_x) {
-                d <- apply(distmat[i_x, i_x, drop = FALSE], 1L, sum)
-                id_cent <- i_x[which.min(d)]
-                i_cent <- x[[id_cent]]
-
-                ## update indices, aggregated at the end of main allcent function
-                attr(i_cent, "id_cent") <- id_cent
-                i_cent
-            })
-        }
+        id_x <- lapply(id_changed, function(cl_num) { which(cl_id == cl_num) })
 
         ## return
-        new_cent
+        mapply(id_x, id_changed, SIMPLIFY = FALSE, FUN = function(i_x, i_cl) {
+            d <- control$distmat[i_x, i_x, drop = FALSE]
+            d <- rowSums(d)
+            id_cent <- i_x[which.min(d)]
+            i_cent <- x[[id_cent]]
+            if (inherits(control$distmat, "Distmat")) control$distmat$id_cent[i_cl] <- id_cent
+            i_cent
+        })
     }
 
     ## ---------------------------------------------------------------------------------------------
@@ -179,10 +146,10 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, fuzziness) {
     ## ---------------------------------------------------------------------------------------------
     ## fcmdd
     fcmdd_cent <- function(x, u, k, ...) {
-        q <- distmat %*% u
+        q <- control$distmat$distmat %*% u
         idc <- apply(q, 2L, which.min)
         cent <- x[idc]
-        attr(cent, "id_cent") <- idc
+        control$distmat$id_cent <- idc
         cent
     }
 
@@ -192,7 +159,7 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, fuzziness) {
         ## function created here to capture objects of this environment (closure)
         allcent <- function(x, cl_id, k, cent, cl_old, ...) {
             ## cent and cl_old are unused here, but R complains if signatures don't match
-            u <- cl_id ^ fuzziness
+            u <- cl_id ^ control$fuzziness
 
             cent <- do.call(paste0(case, "_cent"),
                             enlist(x = x,
@@ -241,10 +208,10 @@ all_cent2 <- function(case = NULL, distmat = NULL, distfun, fuzziness) {
 
             ## If so, initialize new clusters
             if (num_empty > 0L)
-                cent[empty_clusters] <- reinitalize_clusters(x, cent, case, num_empty)
+                cent[empty_clusters] <- reinit_clusters(x, cent, case, num_empty,
+                                                        empty_clusters, control)
 
-            ## aggregate updated indices
-            if (case == "pam") attr(cent, "id_cent") <- sapply(cent, attr, which = "id_cent")
+            ## return
             cent
         }
     }

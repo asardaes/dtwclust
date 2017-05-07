@@ -29,7 +29,7 @@
 #'
 #' @section Partitional:
 #'
-#'   As of version 3.3.0, using `pam.precompute = FALSE` is optimized by defining a sparse matrix
+#'   As of version 4.0.0, using `pam.precompute = FALSE` is optimized by defining a sparse matrix
 #'   (see [Matrix::sparseMatrix()]) and updating it every iteration (except for `"dtw_lb"`
 #'   distance). For smaller datasets, precomputing the whole distance matrix is still probably
 #'   faster.

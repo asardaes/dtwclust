@@ -11,19 +11,19 @@ ddist2 <- function(distance, control) {
     ## Closures capture the values of the objects from the environment where they're created
     distfun <- function(x, centroids = NULL, ...) {
         if (!is.null(control$distmat)) {
-            if (inherits(control$distmat, "SparseDistmat")) {
-                ## PAM's sparse distmat
+            if (inherits(control$distmat, "Distmat")) {
+                ## internal class, sparse or full
                 i <- 1L:length(x)
-                j <- if (is.null(centroids)) i else attr(centroids, "id_cent")
+                j <- if (is.null(centroids)) i else control$distmat$id_cent
 
-                d <- control$distmat[i, j, ..., drop = FALSE]
+                d <- control$distmat[i, j, drop = FALSE]
 
             } else {
-                ## non-sparse distmat pre-computed
+                ## normal matrix distmat pre-computed
                 if (is.null(centroids))
                     d <- control$distmat ## return whole distmat
                 else
-                    d <- control$distmat[ , attr(centroids, "id_cent"), drop = FALSE] ## subset
+                    d <- control$distmat[ , control$distmat$id_cent, drop = FALSE] ## subset
             }
         } else {
             ## distmat not available, calculate it

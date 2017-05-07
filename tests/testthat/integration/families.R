@@ -76,7 +76,8 @@ test_that("Operations with dtwclustFamily@dist and lbk give expected results", {
                  tolerance = 0, check.attributes = FALSE)
 
     ## ---------------------------------------------------------- tsclustFamily, with distmat
-    ts_ctrl$distmat <- distmat
+    ts_ctrl$distmat <- dtwclust:::Distmat$new(distmat = distmat,
+                                              id_cent = attr(centroids, "id_cent"))
 
     family <- new("tsclustFamily",
                   control = ts_ctrl,
@@ -99,7 +100,8 @@ test_that("Operations with dtwclustFamily@dist and lbk give expected results", {
     dm <- dtwclust:::SparseDistmat$new(series = x,
                                        control = ts_ctrl,
                                        distance = "lbk",
-                                       dist_args = list(window.size = ctrl@window.size))
+                                       dist_args = list(window.size = ctrl@window.size),
+                                       id_cent = attr(centroids, "id_cent"))
     ts_ctrl$distmat <- dm
 
     family <- new("tsclustFamily",
@@ -179,7 +181,8 @@ test_that("Operations with dtwclustFamily@dist and lbi give expected results", {
                  tolerance = 0, check.attributes = FALSE)
 
     ## ---------------------------------------------------------- tsclustFamily, with distmat
-    ts_ctrl$distmat <- distmat
+    ts_ctrl$distmat <- dtwclust:::Distmat$new(distmat = distmat,
+                                              id_cent = attr(centroids, "id_cent"))
 
     family <- new("tsclustFamily",
                   control = ts_ctrl,
@@ -202,7 +205,8 @@ test_that("Operations with dtwclustFamily@dist and lbi give expected results", {
     dm <- dtwclust:::SparseDistmat$new(series = x,
                                        control = ts_ctrl,
                                        distance = "lbi",
-                                       dist_args = list(window.size = ctrl@window.size))
+                                       dist_args = list(window.size = ctrl@window.size),
+                                       id_cent = attr(centroids, "id_cent"))
     ts_ctrl$distmat <- dm
 
     family <- new("tsclustFamily",
@@ -282,7 +286,8 @@ test_that("Operations with dtwclustFamily@dist and sbd give expected results", {
                  tolerance = 0, check.attributes = FALSE)
 
     ## ---------------------------------------------------------- tsclustFamily, with distmat
-    ts_ctrl$distmat <- distmat
+    ts_ctrl$distmat <- dtwclust:::Distmat$new(distmat = distmat,
+                                              id_cent = attr(centroids, "id_cent"))
 
     family <- new("tsclustFamily",
                   control = ts_ctrl,
@@ -305,7 +310,8 @@ test_that("Operations with dtwclustFamily@dist and sbd give expected results", {
     dm <- dtwclust:::SparseDistmat$new(series = x,
                                        control = ts_ctrl,
                                        distance = "sbd",
-                                       dist_args = list())
+                                       dist_args = list(),
+                                       id_cent = attr(centroids, "id_cent"))
     ts_ctrl$distmat <- dm
 
     family <- new("tsclustFamily",
@@ -382,7 +388,8 @@ test_that("Operations with dtwclustFamily@dist and dtw_lb give expected results"
                  tolerance = 0, check.attributes = FALSE)
 
     ## ---------------------------------------------------------- tsclustFamily, with distmat
-    ts_ctrl$distmat <- distmat
+    ts_ctrl$distmat <- dtwclust:::Distmat$new(distmat = distmat,
+                                              id_cent = attr(centroids, "id_cent"))
 
     family <- new("tsclustFamily",
                   control = ts_ctrl,
@@ -466,7 +473,8 @@ test_that("Operations with dtwclustFamily@dist and dtw give expected results", {
                  tolerance = 0, check.attributes = FALSE)
 
     ## ---------------------------------------------------------- tsclustFamily, with distmat
-    ts_ctrl$distmat <- distmat
+    ts_ctrl$distmat <- dtwclust:::Distmat$new(distmat = distmat,
+                                              id_cent = attr(centroids, "id_cent"))
 
     family <- new("tsclustFamily",
                   control = ts_ctrl,
@@ -550,7 +558,8 @@ test_that("Operations with dtwclustFamily@dist and dtw2 give expected results", 
                  tolerance = 0, check.attributes = FALSE)
 
     ## ---------------------------------------------------------- tsclustFamily, with distmat
-    ts_ctrl$distmat <- distmat
+    ts_ctrl$distmat <- dtwclust:::Distmat$new(distmat = distmat,
+                                              id_cent = attr(centroids, "id_cent"))
 
     family <- new("tsclustFamily",
                   control = ts_ctrl,
@@ -632,7 +641,8 @@ test_that("Operations with dtwclustFamily@dist and dtw_basic give expected resul
                  tolerance = 0, check.attributes = FALSE)
 
     ## ---------------------------------------------------------- tsclustFamily, with distmat
-    ts_ctrl$distmat <- distmat
+    ts_ctrl$distmat <- dtwclust:::Distmat$new(distmat = distmat,
+                                              id_cent = attr(centroids, "id_cent"))
 
     family <- new("tsclustFamily",
                   control = ts_ctrl,
@@ -655,7 +665,8 @@ test_that("Operations with dtwclustFamily@dist and dtw_basic give expected resul
     dm <- dtwclust:::SparseDistmat$new(series = x,
                                        control = ts_ctrl,
                                        distance = "dtw_basic",
-                                       dist_args = list(window.size = ctrl@window.size))
+                                       dist_args = list(window.size = ctrl@window.size),
+                                       id_cent = attr(centroids, "id_cent"))
     ts_ctrl$distmat <- dm
 
     family <- new("tsclustFamily",
@@ -737,7 +748,8 @@ test_that("Operations with dtwclustFamily@dist and gak give expected results", {
                  tolerance = 0, check.attributes = FALSE)
 
     ## ---------------------------------------------------------- tsclustFamily, with distmat
-    ts_ctrl$distmat <- distmat
+    ts_ctrl$distmat <- dtwclust:::Distmat$new(distmat = distmat,
+                                              id_cent = attr(centroids, "id_cent"))
 
     family <- new("tsclustFamily",
                   control = ts_ctrl,
@@ -761,7 +773,8 @@ test_that("Operations with dtwclustFamily@dist and gak give expected results", {
                                        control = ts_ctrl,
                                        distance = "gak",
                                        dist_args = list(window.size = ctrl@window.size,
-                                                        sigma = 100))
+                                                        sigma = 100),
+                                       id_cent = attr(centroids, "id_cent"))
     ts_ctrl$distmat <- dm
 
     family <- new("tsclustFamily",

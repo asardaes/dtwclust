@@ -96,7 +96,7 @@ subset_dots <- function(dots = list(), foo) {
 }
 
 # Reinitialize empty clusters
-reinitalize_clusters <- function(x, cent, cent_case, num_empty) {
+reinit_clusters <- function(x, cent, cent_case, num_empty, empty_clusters, control) {
     ## Make sure no centroid is repeated (especially in case of PAM)
     any_rep <- logical(num_empty)
 
@@ -110,7 +110,7 @@ reinitalize_clusters <- function(x, cent, cent_case, num_empty) {
             }))
 
             if (cent_case == "pam")
-                attr(extra_cent[[id_extra]], "id_cent") <- id_cent_extra[id_extra]
+                control$distmat$id_cent[empty_clusters[id_extra]] <- id_cent_extra[id_extra]
         }
 
         if (all(!any_rep)) break

@@ -14,7 +14,7 @@ NULL
 
 ## for tsclustFamily
 setMethod("initialize", "tsclustFamily",
-          function(.Object, dist, allcent, ..., distmat = NULL, control = list(), fuzzy = FALSE) {
+          function(.Object, dist, allcent, ..., control = list(), fuzzy = FALSE) {
               dots <- list(...)
               dots$.Object <- .Object
 
@@ -33,10 +33,7 @@ setMethod("initialize", "tsclustFamily",
 
               if (!missing(allcent)) {
                   if (is.character(allcent))
-                      dots$allcent <- all_cent2(allcent,
-                                                distmat = distmat,
-                                                distfun = dots$dist,
-                                                fuzziness = control$fuzziness)
+                      dots$allcent <- all_cent2(allcent, control)
                   else if (is.function(allcent))
                       dots$allcent <- allcent
                   else
@@ -143,8 +140,7 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
             datalist <- .Object@datalist
 
             if (.Object@type == "partitional" && length(.Object@centroid))
-                allcent <- all_cent2(.Object@centroid,
-                                     distmat = .Object@distmat)
+                allcent <- all_cent2(.Object@centroid, .Object@control)
             else if (.Object@type == "hierarchical" && length(formals(.Object@family@allcent)))
                 allcent <- .Object@family@allcent
             else if (.Object@type == "hierarchical" && length(centroids))
@@ -162,11 +158,8 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
                                   dist = .Object@distance,
                                   allcent = allcent,
                                   preproc = .Object@family@preproc,
-                                  distmat = NULL,
                                   control = .Object@control,
                                   fuzzy = isTRUE(.Object@type == "fuzzy"))
-
-            assign("distfun", .Object@family@dist, environment(.Object@family@allcent))
 
             if (.Object@type == "partitional" && .Object@centroid == "shape") {
                 .Object@family@preproc <- zscore
@@ -224,7 +217,7 @@ setMethod("initialize", "HierarchicalTSClusters",
               ## Replace distmat with NULL so that, if the distance function is called again,
               ## it won't subset it
               if (length(formals(.Object@family@dist)))
-                eval(quote(control$distmat <- NULL), environment(.Object@family@dist))
+                  eval(quote(control$distmat <- NULL), environment(.Object@family@dist))
 
               if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
                   ## no cldist available, but dist and cluster can be used to calculate it
@@ -339,12 +332,9 @@ update.TSClusters <- function(object, ..., evaluate = TRUE) {
 
     if (length(args) == 0L) {
         if (evaluate) {
-            ## all_cent2 changed in v3.3.0, update here for backward compatibility
+            ## all_cent2 changed in v4.0.0, update here for backward compatibility
             if (object@type %in% c("partitional", "fuzzy"))
-                object@family@allcent <- all_cent2(object@centroid,
-                                                   object@distmat,
-                                                   object@family@dist,
-                                                   object@control$fuzziness)
+                object@family@allcent <- all_cent2(object@centroid, object@control)
 
             return(object)
 
@@ -1010,11 +1000,13 @@ setAs("dtwclust", "TSClusters",
                            to
                        })
 
-          to@family <- methods::new("tsclustFamily",
-                                    preproc = from@family@preproc,
-                                    cluster = from@family@cluster,
-                                    dist = ifelse(from@type == "tadpole", "dtw_lb", from@distance),
-                                    allcent = if (is.null(from@call$centroid)) from@centroid else from@call$centroid)
+          to@family <- new("tsclustFamily",
+                           control = to@control,
+                           fuzzy = isTRUE(to@type == "fuzzy"),
+                           preproc = from@family@preproc,
+                           cluster = from@family@cluster,
+                           dist = ifelse(from@type == "tadpole", "dtw_lb", from@distance),
+                           allcent = if (is.null(from@call$centroid)) from@centroid else from@call$centroid)
 
           centroids <- from@centroids
           datalist <- from@datalist
@@ -1025,9 +1017,6 @@ setAs("dtwclust", "TSClusters",
               }
           else if (to@type == "tadpole" && length(centroids))
               to@family@allcent <- function(dummy) { centroids[1L] } # for CVI's global_cent
-
-          assign("control", to@control, environment(to@family@dist))
-          assign("control", to@control, environment(to@family@allcent))
 
           to@args <- tsclust_args()
           to@args$preproc <- subset_dots(from@dots, to@family@preproc)
@@ -1044,13 +1033,28 @@ setAs("dtwclust", "TSClusters",
           pr_entry <- pr_DB$get_entry(ifelse(from@type == "tadpole", "dtw_lb", from@distance))
 
           if (is.function(pr_entry$FUN))
-            to@args$dist <- c(to@args$dist, subset_dots(from@dots, pr_entry$FUN))
+              to@args$dist <- c(to@args$dist, subset_dots(from@dots, pr_entry$FUN))
 
           if (tolower(to@centroid) == "dba") {
               to@args$cent <- list(window.size = from@control@window.size,
                                    norm = from@control@norm,
                                    max.iter = from@control@dba.iter,
                                    delta = from@control@delta)
+          }
+
+          if (to@type %in% c("partitional", "fuzzy") && to@centroid %in% c("pam", "fcmdd")) {
+              if (is.null(from@distmat)) {
+                  ## see Distmat.R
+                  to@control$distmat <- Distmat$new(series = to@datalist,
+                                                    distance = to@distance,
+                                                    control = to@control,
+                                                    dist_args = to@args$dist,
+                                                    error.check = FALSE)
+              } else {
+                  to@control$distmat <- from@distmat
+              }
+
+              assign("control", to@control, environment(to@family@allcent))
           }
 
           to@seed <- as.integer(from@call$seed)

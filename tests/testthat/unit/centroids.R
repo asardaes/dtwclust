@@ -228,45 +228,37 @@ test_that("Operations with pam centroid complete successfully.", {
     assign("cent_mv_pam", cent_mv_pam, persistent)
 
     ## ---------------------------------------------------------- tsclustFamily
-    family <- new("tsclustFamily", control = pt_ctrl, dist = "sbd", allcent = "pam")
-    expect_null(as.list(environment(family@allcent))$distmat)
-
-    ## no distmat
-    expect_identical(cent_pam,
-                     family@allcent(x,
-                                    cl_id = cl_id,
-                                    k = k,
-                                    cent = x[c(1L,20L)],
-                                    cl_old = 0L))
 
     ## with distmat
+    pt_ctrl$distmat <- proxy::dist(x, method = "sbd")
     family <- new("tsclustFamily",
                   control = pt_ctrl,
                   dist = "sbd",
-                  allcent = "pam",
-                  distmat = proxy::dist(x, method = "sbd"))
-    expect_false(is.null(as.list(environment(family@allcent))$distmat))
+                  allcent = "pam")
+    expect_false(is.null(as.list(environment(family@allcent))$control$distmat))
 
-    expect_identical(cent_pam_distmat,
-                     family@allcent(x,
-                                    cl_id = cl_id,
-                                    k = k,
-                                    cent = x[c(1L,20L)],
-                                    cl_old = 0L))
+    expect_equal(cent_pam_distmat,
+                 family@allcent(x,
+                                cl_id = cl_id,
+                                k = k,
+                                cent = x[c(1L,20L)],
+                                cl_old = 0L),
+                 check.attributes = FALSE)
 
     ## multivariate
+    pt_ctrl$distmat <- proxy::dist(x_mv, method = "dtw_basic", window.size = 18L)
     family <- new("tsclustFamily",
                   control = pt_ctrl,
                   dist = "dtw_basic",
                   allcent = "pam")
 
-    expect_identical(cent_mv_pam,
-                     family@allcent(x_mv,
-                                    cl_id = cl_id,
-                                    k = k,
-                                    cent = x_mv[c(1L,20L)],
-                                    cl_old = 0L,
-                                    window.size = 18L))
+    expect_equal(cent_mv_pam,
+                 family@allcent(x_mv,
+                                cl_id = cl_id,
+                                k = k,
+                                cent = x_mv[c(1L,20L)],
+                                cl_old = 0L),
+                 check.attributes = FALSE)
 
     ## sparse symmetric
     pt_ctrl$symmetric <- TRUE
@@ -278,15 +270,15 @@ test_that("Operations with pam centroid complete successfully.", {
     family <- new("tsclustFamily",
                   control = pt_ctrl,
                   dist = "sbd",
-                  allcent = "pam",
-                  distmat = dm)
+                  allcent = "pam")
 
-    expect_identical(cent_pam,
-                     family@allcent(x,
-                                    cl_id = cl_id,
-                                    k = k,
-                                    cent = x[c(1L,20L)],
-                                    cl_old = 0L))
+    expect_equal(cent_pam,
+                 family@allcent(x,
+                                cl_id = cl_id,
+                                k = k,
+                                cent = x[c(1L,20L)],
+                                cl_old = 0L),
+                 check.attributes = FALSE)
 
     ## sparse non-symmetric
     pt_ctrl$symmetric <- FALSE
@@ -298,15 +290,15 @@ test_that("Operations with pam centroid complete successfully.", {
     family <- new("tsclustFamily",
                   control = pt_ctrl,
                   dist = "dtw_basic",
-                  allcent = "pam",
-                  distmat = dm)
+                  allcent = "pam")
 
-    expect_identical(cent_mv_pam,
-                     family@allcent(x_mv,
-                                    cl_id = cl_id,
-                                    k = k,
-                                    cent = x_mv[c(1L,20L)],
-                                    cl_old = 0L))
+    expect_equal(cent_mv_pam,
+                 family@allcent(x_mv,
+                                cl_id = cl_id,
+                                k = k,
+                                cent = x_mv[c(1L,20L)],
+                                cl_old = 0L),
+                 check.attributes = FALSE)
 })
 
 # =================================================================================================

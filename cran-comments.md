@@ -1,5 +1,5 @@
-## Update to version 3.3.0
-* Optimizations and bug fixes
+## Update to version 4.0.0
+* Refactor for optimizations and bug fixes
 
 ## Test environments
 * Local GNU/Linux, R 3.4.0

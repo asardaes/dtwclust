@@ -320,13 +320,10 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                            centroid <- match.arg(centroid, c("mean", "median", "shape", "dba", "pam"))
 
                        ## replace any given distmat if centroid not "pam" or "fcmdd"
-                       if (!(centroid %in% c("pam", "fcmdd")))
-                           distmat <- NULL
-                       else
-                           distmat <- control$distmat
+                       if (!(centroid %in% c("pam", "fcmdd"))) control$distmat <- NULL
 
                    } else {
-                       distmat <- NULL
+                       control$distmat <- NULL
                    }
 
                    if (diff_lengths) {
@@ -336,6 +333,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                        check_consistency(centroid, "cent", trace = trace)
                    }
 
+                   cent_char <- as.character(substitute(centroid))[1L]
+
                    ## ------------------------------------------------------------------------------
                    ## Family creation, see initialization in tsclusters-methods.R
                    ## ------------------------------------------------------------------------------
@@ -344,7 +343,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                  dist = distance,
                                  allcent = centroid,
                                  preproc = preproc,
-                                 distmat = distmat,
                                  control = control,
                                  fuzzy = isTRUE(type == "fuzzy"))
 
@@ -353,18 +351,16 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                             "arguments with the shown names:\n\t",
                             paste(c("x", "cl_id", "k", "cent", "cl_old"), collapse = ", "))
 
-                   cent_char <- as.character(substitute(centroid))[1L]
-
                    ## ------------------------------------------------------------------------------
                    ## PAM precompute?
                    ## ------------------------------------------------------------------------------
 
                    ## for a check near the end, changed if appropriate
                    distmat_provided <- FALSE
+                   distmat <- control$distmat
 
                    ## precompute distance matrix?
                    if (cent_char %in% c("pam", "fcmdd")) {
-                       ## check if distmat was not provided and should be precomputed
                        if (!is.null(distmat)) {
                            if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
                                stop("Dimensions of provided cross-distance matrix don't correspond ",
@@ -372,6 +368,11 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                            ## distmat was provided in call
                            distmat_provided <- TRUE
+                           distmat <- control$distmat
+
+                           ## see Distmat.R
+                           if (!inherits(distmat, "Distmat"))
+                               distmat <- Distmat$new(distmat = distmat)
 
                            if (trace) cat("\n\tDistance matrix provided...\n\n")
 
@@ -382,27 +383,39 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                            if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
 
-                           distmat <- do.call(family@dist,
-                                              enlist(x = series,
-                                                     centroids = NULL,
-                                                     dots = args$dist))
+                           ## see Distmat.R
+                           distmat <- Distmat$new(distmat = do.call(
+                               family@dist,
+                               enlist(x = series,
+                                      centroids = NULL,
+                                      dots = args$dist))
+                           )
+
                            gc(FALSE)
 
-                       } else if (!isTRUE(control$pam.precompute) &&
-                                  type != "fuzzy" &&
-                                  isTRUE(control$pam.sparse) &&
-                                  tolower(distance) != "dtw_lb")
-                       {
-                           ## see SparseDistmat.R
-                           distmat <- SparseDistmat$new(series = series,
-                                                        control = control,
-                                                        distance = distance,
-                                                        dist_args = args$dist)
+                       } else {
+                           if (isTRUE(control$pam.sparse) && tolower(distance) != "dtw_lb") {
+                               ## see SparseDistmat.R
+                               distmat <- SparseDistmat$new(series = series,
+                                                            distance = distance,
+                                                            control = control,
+                                                            dist_args = args$dist,
+                                                            error.check = FALSE)
+
+                           } else {
+                               ## see Distmat.R
+                               distmat <- Distmat$new(series = series,
+                                                      distance = distance,
+                                                      control = control,
+                                                      dist_args = args$dist,
+                                                      error.check = FALSE)
+                           }
                        }
 
-                       ## Redefine new distmat in closures
+                       ## Redefine new distmat
+                       control$distmat <- distmat
                        environment(family@dist)$control$distmat <- distmat
-                       environment(family@allcent)$distmat <- distmat
+                       environment(family@allcent)$control$distmat <- distmat
                    }
 
                    ## ------------------------------------------------------------------------------
@@ -444,7 +457,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                        i <- integer() # CHECK complains about non-initialization now
 
                        ## sequential allows the matrix to be updated iteratively
-                       `%this_op%` <- if (inherits(distmat, "SparseDistmat")) `%do%` else `%op%`
+                       `%this_op%` <- ifelse(inherits(control$distmat, "SparseDistmat"), `%do%`, `%op%`)
 
                        pc.list <- foreach(k = k0, rng = rng0,
                                           .combine = comb0, .multicombine = TRUE,
@@ -485,15 +498,14 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                    ## Replace distmat with NULL so that, if the distance function is called again,
                    ## it won't subset it
                    environment(family@dist)$control$distmat <- NULL
-                   environment(family@allcent)$distmat <- NULL
 
                    ## If distmat was provided, let it be shown in the results
                    if (distmat_provided) {
-                       if (is.null(attr(distmat, "method")))
-                           distance <- "unknown"
-                       else
-                           distance <- attr(distmat, "method")
+                       dist_method <- attr(distmat, "method")
+                       distance <- if (is.null(dist_method)) "unknown" else dist_method
                    }
+
+                   if (inherits(distmat, "Distmat")) distmat <- distmat$distmat
 
                    ## Create objects
                    RET <- lapply(pc.list, function(pc) {

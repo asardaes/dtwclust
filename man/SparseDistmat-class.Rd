@@ -7,27 +7,21 @@
 \title{Sparse distance matrix}
 \description{
 Reference class that is used internally for PAM centroids when \code{pam.precompute = FALSE}. It
-allows for mutable state.
+allows for mutable state. It contains \linkS4class{Distmat}.
 }
 \section{Fields}{
 
 \describe{
-\item{\code{series}}{Time series list.}
-
 \item{\code{distmat}}{The sparse matrix.}
-
-\item{\code{distfun}}{The distance function to calculate the distance matrix.}
 
 \item{\code{symmetric}}{Logical indicating if the matrix is symmetric.}
 
 \item{\code{existing_ids}}{Matrix with the indices of existing values within the matrix.}
-
-\item{\code{dist_args}}{Arguments for the distance function.}
 }}
 
 \section{Methods}{
 
 \describe{
-\item{\code{initialize(..., series, distance, control, dist_args)}}{Initialization based on needed parameters}
+\item{\code{initialize(..., distmat, series, distance, control, error.check = TRUE)}}{Initialization based on needed parameters}
 }}
 
