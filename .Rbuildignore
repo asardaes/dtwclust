@@ -2,18 +2,20 @@
 ^\.Rproj\.user$
 ^\..*
 ^appveyor\.yml$
-man-roxygen
+^man-roxygen
 
 .*\.md
-codecov\.R
+^codecov\.R
 
-vignettes/.*\.gz
-vignettes/.*\.bbl
-vignettes/.*\.log
-vignettes/.*\.tex
-vignettes/cache/.*
-vignettes/figure/.*
+^inst/.*\.R$
+
+^vignettes/.*\.gz
+^vignettes/.*\.bbl
+^vignettes/.*\.log
+^vignettes/.*\.tex
+^vignettes/cache/.*
+^vignettes/figure/.*
 
 ^README.*
 
-# tests/.*\.rds$
+# ^tests/.*\.rds$
