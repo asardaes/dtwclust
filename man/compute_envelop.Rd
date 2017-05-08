@@ -2,22 +2,22 @@
 % Please edit documentation in R/compute-envelop.R
 \name{compute_envelop}
 \alias{compute_envelop}
-\title{Time series warping envelops}
+\title{Time series warping envelopes}
 \usage{
 compute_envelop(x, window.size, error.check = TRUE)
 }
 \arguments{
 \item{x}{A univariate time series.}
 
-\item{window.size}{Window size for envelop calculation. See details.}
+\item{window.size}{Window size for envelope calculation. See details.}
 
 \item{error.check}{Check data inconsistencies?}
 }
 \value{
-A list with two elements (lower and upper envelops): \code{lower} and \code{upper}.
+A list with two elements (lower and upper envelopes): \code{lower} and \code{upper}.
 }
 \description{
-This function computes the envelops for DTW lower bound calculations with a Sakoe-Chiba band for
+This function computes the envelopes for DTW lower bound calculations with a Sakoe-Chiba band for
 a given univariate time series using the streaming algorithm proposed by Lemire (2009).
 }
 \details{
@@ -28,7 +28,7 @@ observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+
 in \code{10(2) + 1 = 21} observations falling within the window.
 }
 \note{
-This envelop is calculated assuming a Sakoe-Chiba constraint for DTW.
+This envelope is calculated assuming a Sakoe-Chiba constraint for DTW.
 }
 \examples{
 

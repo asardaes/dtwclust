@@ -470,15 +470,15 @@ are not symmetric regardless of the $l_p$ norm used to compute them.
 Also note that the choice of step pattern affects the value of the DTW distance,
 changing the tightness of a given LB.
 
-One crucial step when calculating the LBs is the computation of the so-called envelops.
-These envelops require a window constraint,
+One crucial step when calculating the LBs is the computation of the so-called envelopes.
+These envelopes require a window constraint,
 and thus are dependent on both the type and size of the window.
-Based on these, a running minimum and maximum are computed and, respectively, a lower and upper envelop are generated.
-\Cref{fig:envelop-plot} depicts a sample time-series with its corresponding envelops for a Sakoe-Chiba window of size 15.
+Based on these, a running minimum and maximum are computed and, respectively, a lower and upper envelope are generated.
+\Cref{fig:envelope-plot} depicts a sample time-series with its corresponding envelopes for a Sakoe-Chiba window of size 15.
 
-<<envelop-plot, out.width = "0.75\\linewidth", fig.cap = "Visual representation of a time-series (shown as a solid black line) and its corresponding envelops based on a Sakoe-Chiba window of size 15. The green dashed line represents the upper envelop, while the red dashed line represents the lower envelop.">>=
-envelops <- compute_envelop(CharTraj[[2L]], window.size = 15)
-matplot(cbind(envelops$lower, envelops$upper),
+<<envelope-plot, out.width = "0.75\\linewidth", fig.cap = "Visual representation of a time-series (shown as a solid black line) and its corresponding envelopes based on a Sakoe-Chiba window of size 15. The green dashed line represents the upper envelope, while the red dashed line represents the lower envelope.">>=
+envelopes <- compute_envelop(CharTraj[[2L]], window.size = 15)
+matplot(cbind(envelopes$lower, envelopes$upper),
         type = "l", lty = 2, col = 2:3,
         xlab = "Time", ylab = "Series")
 lines(CharTraj[[2L]])
@@ -487,16 +487,16 @@ lines(CharTraj[[2L]])
 When calculating the LBs between $x$ and $y$,
 a copy of the reference series is created;
 denote this copy with $H$.
-The envelops for the other series (the query) are computed:
-if $y$ is the query, then its upper and lower envelop (UE and LE respectively) are compared against $x$,
-so that the values of $H$ are updated according to \cref{eq:lb-envelop}.
+The envelopes for the other series (the query) are computed:
+if $y$ is the query, then its upper and lower envelope (UE and LE respectively) are compared against $x$,
+so that the values of $H$ are updated according to \cref{eq:lb-envelope}.
 Subsequently, \code{LB_Keogh} is defined as in \cref{eq:lbk},
 where $\left\lVert \cdot \right\rVert_p$ is the $l_p$ norm of the series.
 The improvement made by \code{LB_Improved} consists in calculating a second vector $H'$ by using $H$ as query and $y$ as reference,
 effectively defining the LB as in \cref{eq:lbi} (cf. Figure 5 in \citet{lemire2009}).
 
 \begin{subequations}
-\label{eq:lb-envelop}
+\label{eq:lb-envelope}
 \begin{gather}
 H_i = UE_i, \quad \forall x_i > UE_i \\
 H_j = LE_j, \quad \forall x_j < LE_j
@@ -515,14 +515,14 @@ H_j = LE_j, \quad \forall x_j < LE_j
 
 In order for the LBs to be worth it,
 they must be computed in significantly less time than it takes to calculate the DTW distance.
-\citet{lemire2009} developed a streaming algorithm to calculate the envelops using no more than $3n$ comparisons when using a Sakoe-Chiba window.
+\citet{lemire2009} developed a streaming algorithm to calculate the envelopes using no more than $3n$ comparisons when using a Sakoe-Chiba window.
 This algorithm is implemented in \dtwclust{} using the \proglang{C++} programming language,
 ensuring an efficient calculation.
 
-\code{LB_Keogh} requires the calculation of one set of envelops for every pair of series compared,
-whereas \code{LB_Improved} must calculate two sets of envelops for every pair of series.
+\code{LB_Keogh} requires the calculation of one set of envelopes for every pair of series compared,
+whereas \code{LB_Improved} must calculate two sets of envelopes for every pair of series.
 If the LBs must be calculated between several time-series,
-some envelops can be reused when a given series is compared against many others.
+some envelopes can be reused when a given series is compared against many others.
 This optimization is included in the LB functions registered with \pkg{proxy} by \dtwclust{}.
 
 The function \code{dtw_lb} included in \dtwclust{} (and the corresponding version registered with \pkg{proxy}) leverages \code{LB_Improved} in order to find nearest neighbors faster.

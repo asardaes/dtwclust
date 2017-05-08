@@ -7,11 +7,11 @@
 #'
 #' @param x A time series (reference).
 #' @param y A time series with the same length as `x` (query).
-#' @param window.size Window size for envelop calculation. See details.
+#' @param window.size Window size for envelope calculation. See details.
 #' @param norm Vector norm. Either `"L1"` for Manhattan distance or `"L2"` for Euclidean.
-#' @param lower.env Optionally, a pre-computed lower envelop for **`y`** can be provided (non-proxy
+#' @param lower.env Optionally, a pre-computed lower envelope for **`y`** can be provided (non-proxy
 #'   version only).
-#' @param upper.env Optionally, a pre-computed upper envelop for **`y`** can be provided (non-proxy
+#' @param upper.env Optionally, a pre-computed upper envelope for **`y`** can be provided (non-proxy
 #'   version only).
 #' @param force.symmetry If `TRUE`, a second lower bound is calculated by swapping `x` and `y`, and
 #'   whichever result has a *higher* distance value is returned. The proxy version can only work if
@@ -106,10 +106,10 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
     }
 
     if (length(lower.env) != length(x))
-        stop("Length mismatch between 'x' and the lower envelop")
+        stop("Length mismatch between 'x' and the lower envelope")
 
     if (length(upper.env) != length(x))
-        stop("Length mismatch between 'x' and the upper envelop")
+        stop("Length mismatch between 'x' and the upper envelope")
 
     ind1 <- x > upper.env
     ind2 <- x < lower.env
@@ -149,9 +149,9 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
     d
 }
 
-# ========================================================================================================
-# Loop without using native 'proxy' looping (to avoid multiple calculations of the envelop)
-# ========================================================================================================
+# ==================================================================================================
+# Loop without using native 'proxy' looping (to avoid multiple calculations of the envelope)
+# ==================================================================================================
 
 lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                               force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE)
@@ -179,10 +179,10 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 
     retclass <- "crossdist"
 
-    envelops <- lapply(y, function(s) { compute_envelop(s, window.size, error.check = FALSE) })
+    envelopes <- lapply(y, function(s) { compute_envelop(s, window.size, error.check = FALSE) })
 
-    lower.env <- lapply(envelops, "[[", "lower")
-    upper.env <- lapply(envelops, "[[", "upper")
+    lower.env <- lapply(envelopes, "[[", "lower")
+    upper.env <- lapply(envelopes, "[[", "upper")
 
     Y <- split_parallel(y)
     lower.env <- split_parallel(lower.env)

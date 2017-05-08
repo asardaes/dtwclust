@@ -16,8 +16,8 @@
 #' @return A list with:
 #'
 #'   - `d`: The lower bound of the DTW distance.
-#'   - `upper.env`: The time series of `y`'s upper envelop.
-#'   - `lower.env`: The time series of `y`'s lower envelop.
+#'   - `upper.env`: The time series of `y`'s upper envelope.
+#'   - `lower.env`: The time series of `y`'s lower envelope.
 #'
 #' @note
 #'
@@ -99,10 +99,10 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
     }
 
     if (length(lower.env) != length(x))
-        stop("Length mismatch between 'x' and the lower envelop")
+        stop("Length mismatch between 'x' and the lower envelope")
 
     if (length(upper.env) != length(x))
-        stop("Length mismatch between 'x' and the upper envelop")
+        stop("Length mismatch between 'x' and the upper envelope")
 
     D <- rep(0, length(x))
 
@@ -131,9 +131,9 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
          lower.env = lower.env)
 }
 
-# ========================================================================================================
-# Loop without using native 'proxy' looping (to avoid multiple calculations of the envelop)
-# ========================================================================================================
+# ==================================================================================================
+# Loop without using native 'proxy' looping (to avoid multiple calculations of the envelope)
+# ==================================================================================================
 
 lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                            force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE)
@@ -161,10 +161,10 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 
     retclass <- "crossdist"
 
-    envelops <- lapply(y, function(s) { compute_envelop(s, window.size, error.check = FALSE) })
+    envelopes <- lapply(y, function(s) { compute_envelop(s, window.size, error.check = FALSE) })
 
-    lower.env <- lapply(envelops, "[[", "lower")
-    upper.env <- lapply(envelops, "[[", "upper")
+    lower.env <- lapply(envelopes, "[[", "lower")
+    upper.env <- lapply(envelopes, "[[", "upper")
 
     lower.env <- split_parallel(lower.env)
     upper.env <- split_parallel(upper.env)
