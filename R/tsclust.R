@@ -227,22 +227,15 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     ## =============================================================================================
 
     tic <- proc.time()
-
     set.seed(seed)
-
-    if (is.null(series)) stop("No data provided")
-
     type <- match.arg(type, c("partitional", "hierarchical", "tadpole", "fuzzy"))
-
-    ## coerce to list if necessary
-    series <- any2list(series)
+    series <- any2list(series) ## coerce to list if necessary
 
     if (any(k < 2L)) stop("At least two clusters must be defined")
     if (any(k > length(series))) stop("Cannot have more clusters than series in the dataset")
     if (!is.list(control)) stop("Invalid control argument")
 
     MYCALL <- match.call(expand.dots = TRUE)
-
     dots <- list(...)
 
     args <- lapply(args, function(args) {
@@ -282,7 +275,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     ## ---------------------------------------------------------------------------------------------
 
     diff_lengths <- different_lengths(series)
-
     check_consistency(distance, "dist", trace = trace, Lengths = diff_lengths, silent = FALSE)
 
     if (type %in% c("partitional", "hierarchical")) {
@@ -301,519 +293,537 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             control$symmetric <- TRUE
     }
 
-    RET <-
-        switch(type,
-               partitional =, fuzzy = {
-                   ## ==============================================================================
-                   ## Partitional or fuzzy
-                   ## ==============================================================================
+    matrices_allocated <- FALSE
+    if (type != "tadpole") {
+        if (tolower(distance) == "dtw_basic" && is.null(args$dist$gcm)) {
+            N <- max(sapply(series, NROW))
+            args$dist$gcm <- matrix(0, 2L, N + 1L)
+            matrices_allocated <- TRUE
 
-                   if (!inherits(control, "PtCtrl") && !inherits(control, "FzCtrl"))
-                       stop("Invalid control provided")
+        } else if (tolower(distance) == "gak" && is.null(args$dist$logs)) {
+            N <- max(sapply(series, NROW))
+            args$dist$logs <- matrix(0, N + 1L, 3L)
+            matrices_allocated <- TRUE
+        }
+    }
 
-                   nrep <- if (is.null(control$nrep)) 1L else control$nrep
+    RET <- switch(
+        type,
+        partitional =, fuzzy = {
+            ## =====================================================================================
+            ## Partitional or fuzzy
+            ## =====================================================================================
 
-                   if (is.character(centroid)) {
-                       if (type == "fuzzy")
-                           centroid <- match.arg(centroid, centroids_fuzzy)
-                       else
-                           centroid <- match.arg(centroid, centroids_nonfuzzy)
+            if (!inherits(control, "PtCtrl") && !inherits(control, "FzCtrl"))
+                stop("Invalid control provided")
 
-                       ## replace any given distmat if centroid not "pam" or "fcmdd"
-                       if (!(centroid %in% c("pam", "fcmdd"))) control$distmat <- NULL
+            nrep <- if (is.null(control$nrep)) 1L else control$nrep
 
-                   } else {
-                       control$distmat <- NULL
-                   }
+            if (is.character(centroid)) {
+                if (type == "fuzzy")
+                    centroid <- match.arg(centroid, centroids_fuzzy)
+                else
+                    centroid <- match.arg(centroid, centroids_nonfuzzy)
 
-                   if (diff_lengths) {
-                       if (type == "fuzzy" && is.character(centroid) && centroid == "fcm")
-                           stop("Fuzzy c-means does not support series with different length.")
+                ## replace any given distmat if centroid not "pam" or "fcmdd"
+                if (!(centroid %in% c("pam", "fcmdd"))) control$distmat <- NULL
 
-                       check_consistency(centroid, "cent", trace = trace)
-                   }
+            } else {
+                control$distmat <- NULL
+            }
 
-                   cent_char <- as.character(substitute(centroid))[1L]
+            if (diff_lengths) {
+                if (type == "fuzzy" && is.character(centroid) && centroid == "fcm")
+                    stop("Fuzzy c-means does not support series with different length.")
 
-                   ## ------------------------------------------------------------------------------
-                   ## Family creation, see initialization in tsclusters-methods.R
-                   ## ------------------------------------------------------------------------------
+                check_consistency(centroid, "cent", trace = trace)
+            }
 
-                   family <- new("tsclustFamily",
-                                 dist = distance,
-                                 allcent = centroid,
-                                 preproc = preproc,
-                                 control = control,
-                                 fuzzy = isTRUE(type == "fuzzy"))
+            cent_char <- as.character(substitute(centroid))[1L]
 
-                   if (!all(c("x", "cl_id", "k", "cent", "cl_old") %in% names(formals(family@allcent))))
-                       stop("The provided centroid function must have at least the following ",
-                            "arguments with the shown names:\n\t",
-                            paste(c("x", "cl_id", "k", "cent", "cl_old"), collapse = ", "))
+            ## -------------------------------------------------------------------------------------
+            ## Family creation, see initialization in tsclusters-methods.R
+            ## -------------------------------------------------------------------------------------
 
-                   ## ------------------------------------------------------------------------------
-                   ## PAM precompute?
-                   ## ------------------------------------------------------------------------------
+            family <- new("tsclustFamily",
+                          dist = distance,
+                          allcent = centroid,
+                          preproc = preproc,
+                          control = control,
+                          fuzzy = isTRUE(type == "fuzzy"))
 
-                   ## for a check near the end, changed if appropriate
-                   distmat_provided <- FALSE
-                   distmat <- control$distmat
+            if (!all(c("x", "cl_id", "k", "cent", "cl_old") %in% names(formals(family@allcent))))
+                stop("The provided centroid function must have at least the following ",
+                     "arguments with the shown names:\n\t",
+                     paste(c("x", "cl_id", "k", "cent", "cl_old"), collapse = ", "))
 
-                   ## precompute distance matrix?
-                   if (cent_char %in% c("pam", "fcmdd")) {
-                       if (!is.null(distmat)) {
-                           if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
-                               stop("Dimensions of provided cross-distance matrix don't correspond ",
-                                    "to length of provided data")
+            ## -------------------------------------------------------------------------------------
+            ## PAM precompute?
+            ## -------------------------------------------------------------------------------------
 
-                           ## distmat was provided in call
-                           distmat_provided <- TRUE
-                           distmat <- control$distmat
+            ## for a check near the end, changed if appropriate
+            distmat_provided <- FALSE
+            distmat <- control$distmat
 
-                           ## see Distmat.R
-                           if (!inherits(distmat, "Distmat"))
-                               distmat <- Distmat$new(distmat = distmat)
+            ## precompute distance matrix?
+            if (cent_char %in% c("pam", "fcmdd")) {
+                if (!is.null(distmat)) {
+                    if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
+                        stop("Dimensions of provided cross-distance matrix don't correspond ",
+                             "to length of provided data")
 
-                           if (trace) cat("\n\tDistance matrix provided...\n\n")
+                    ## distmat was provided in call
+                    distmat_provided <- TRUE
+                    distmat <- control$distmat
 
-                       } else if (isTRUE(control$pam.precompute) || cent_char == "fcmdd") {
-                           if (tolower(distance) == "dtw_lb")
-                               warning("Using dtw_lb with control$pam.precompute = TRUE is not ",
-                                       "advised.")
+                    ## see Distmat.R
+                    if (!inherits(distmat, "Distmat"))
+                        distmat <- Distmat$new(distmat = distmat)
 
-                           if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
+                    if (trace) cat("\n\tDistance matrix provided...\n\n")
 
-                           ## see Distmat.R
-                           distmat <- Distmat$new(distmat = do.call(
-                               family@dist,
-                               enlist(x = series,
-                                      centroids = NULL,
-                                      dots = args$dist))
-                           )
+                } else if (isTRUE(control$pam.precompute) || cent_char == "fcmdd") {
+                    if (tolower(distance) == "dtw_lb")
+                        warning("Using dtw_lb with control$pam.precompute = TRUE is not ",
+                                "advised.")
 
-                           gc(FALSE)
+                    if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
 
-                       } else {
-                           if (isTRUE(control$pam.sparse) && tolower(distance) != "dtw_lb") {
-                               ## see SparseDistmat.R
-                               distmat <- SparseDistmat$new(series = series,
-                                                            distance = distance,
-                                                            control = control,
-                                                            dist_args = args$dist,
-                                                            error.check = FALSE)
+                    ## see Distmat.R
+                    distmat <- Distmat$new(distmat = do.call(
+                        family@dist,
+                        enlist(x = series,
+                               centroids = NULL,
+                               dots = args$dist))
+                    )
 
-                           } else {
-                               ## see Distmat.R
-                               distmat <- Distmat$new(series = series,
-                                                      distance = distance,
-                                                      control = control,
-                                                      dist_args = args$dist,
-                                                      error.check = FALSE)
-                           }
-                       }
+                    gc(FALSE)
 
-                       ## Redefine new distmat
-                       control$distmat <- distmat
-                       environment(family@dist)$control$distmat <- distmat
-                       environment(family@allcent)$control$distmat <- distmat
-                   }
+                } else {
+                    if (isTRUE(control$pam.sparse) && tolower(distance) != "dtw_lb") {
+                        ## see SparseDistmat.R
+                        distmat <- SparseDistmat$new(series = series,
+                                                     distance = distance,
+                                                     control = control,
+                                                     dist_args = args$dist,
+                                                     error.check = FALSE)
 
-                   ## ------------------------------------------------------------------------------
-                   ## Cluster
-                   ## ------------------------------------------------------------------------------
+                    } else {
+                        ## see Distmat.R
+                        distmat <- Distmat$new(series = series,
+                                               distance = distance,
+                                               control = control,
+                                               dist_args = args$dist,
+                                               error.check = FALSE)
+                    }
+                }
 
-                   if (length(k) == 1L && nrep == 1L) {
-                       rngtools::setRNG(rngtools::RNGseq(1L, seed = seed, simplify = TRUE))
+                ## Redefine new distmat
+                control$distmat <- distmat
+                environment(family@dist)$control$distmat <- distmat
+                environment(family@allcent)$control$distmat <- distmat
+            }
 
-                       ## Just one repetition
-                       pc.list <- list(do.call(pfclust,
-                                               enlist(x = series,
-                                                      k = k,
-                                                      family = family,
-                                                      control = control,
-                                                      fuzzy = isTRUE(type == "fuzzy"),
-                                                      cent = cent_char,
-                                                      trace = trace,
-                                                      args = args)))
+            ## -------------------------------------------------------------------------------------
+            ## Cluster
+            ## -------------------------------------------------------------------------------------
 
-                   } else {
-                       if ((foreach::getDoParName() != "doSEQ") && trace)
-                           message("Tracing of repetitions might not be available if done in ",
-                                   "parallel.\n")
+            if (length(k) == 1L && nrep == 1L) {
+                rngtools::setRNG(rngtools::RNGseq(1L, seed = seed, simplify = TRUE))
 
-                       ## I need to re-register any custom distances in each parallel worker
-                       dist_entry <- proxy::pr_DB$get_entry(distance)
+                ## Just one repetition
+                pc.list <- list(do.call(pfclust,
+                                        enlist(x = series,
+                                               k = k,
+                                               family = family,
+                                               control = control,
+                                               fuzzy = isTRUE(type == "fuzzy"),
+                                               cent = cent_char,
+                                               trace = trace,
+                                               args = args)))
 
-                       export <- c("pfclust", "check_consistency", "enlist")
+            } else {
+                if ((foreach::getDoParName() != "doSEQ") && trace)
+                    message("Tracing of repetitions might not be available if done in ",
+                            "parallel.\n")
 
-                       rng <- rngtools::RNGseq(length(k) * nrep, seed = seed, simplify = FALSE)
-                       rng0 <- lapply(parallel::splitIndices(length(rng), length(k)),
-                                      function(i) { rng[i] })
+                ## I need to re-register any custom distances in each parallel worker
+                dist_entry <- proxy::pr_DB$get_entry(distance)
 
-                       ## if %do% is used, the outer loop replaces value of k in this envir
-                       k0 <- k
-                       comb0 <- if (nrep > 1L) c else list
+                export <- c("pfclust", "check_consistency", "enlist")
 
-                       i <- integer() # CHECK complains about non-initialization now
+                rng <- rngtools::RNGseq(length(k) * nrep, seed = seed, simplify = FALSE)
+                rng0 <- lapply(parallel::splitIndices(length(rng), length(k)),
+                               function(i) { rng[i] })
 
-                       ## sequential allows the matrix to be updated iteratively
-                       `%this_op%` <- ifelse(inherits(control$distmat, "SparseDistmat"), `%do%`, `%op%`)
+                ## if %do% is used, the outer loop replaces value of k in this envir
+                k0 <- k
+                comb0 <- if (nrep > 1L) c else list
 
-                       pc.list <- foreach(k = k0, rng = rng0,
-                                          .combine = comb0, .multicombine = TRUE,
-                                          .packages = control$packages,
-                                          .export = export) %:%
-                           foreach(i = 1L:nrep,
-                                   .combine = list, .multicombine = TRUE,
+                i <- integer() # CHECK complains about non-initialization now
+
+                ## sequential allows the matrix to be updated iteratively
+                `%this_op%` <- ifelse(inherits(control$distmat, "SparseDistmat"), `%do%`, `%op%`)
+
+                pc.list <- foreach(k = k0, rng = rng0,
+                                   .combine = comb0, .multicombine = TRUE,
                                    .packages = control$packages,
-                                   .export = export) %this_op%
-                                   {
-                                       if (trace) message("Repetition ", i, " for k = ", k)
-
-                                       rngtools::setRNG(rng[[i]])
-
-                                       if (!check_consistency(dist_entry$names[1L], "dist"))
-                                           do.call(proxy::pr_DB$set_entry, dist_entry)
-
-                                       pc <- do.call(pfclust,
-                                                     enlist(x = series,
-                                                            k = k,
-                                                            family = family,
-                                                            control = control,
-                                                            fuzzy = isTRUE(type == "fuzzy"),
-                                                            cent = cent_char,
-                                                            trace = trace,
-                                                            args = args))
-
-                                       gc(FALSE)
-
-                                       pc
-                                   }
-                   }
-
-                   ## ------------------------------------------------------------------------------
-                   ## Prepare results
-                   ## ------------------------------------------------------------------------------
-
-                   ## Replace distmat with NULL so that, if the distance function is called again,
-                   ## it won't subset it
-                   environment(family@dist)$control$distmat <- NULL
-
-                   ## If distmat was provided, let it be shown in the results
-                   if (distmat_provided) {
-                       dist_method <- attr(distmat, "method")
-                       distance <- if (is.null(dist_method)) "unknown" else dist_method
-                   }
-
-                   if (inherits(distmat, "Distmat")) distmat <- distmat$distmat
-
-                   ## Create objects
-                   RET <- lapply(pc.list, function(pc) {
-                       if (type == "partitional") {
-                           new("PartitionalTSClusters",
-                               call = MYCALL,
-                               family = family,
-                               control = control,
-                               datalist = series,
-
-                               type = type,
-                               distance = distance,
-                               centroid = cent_char,
-                               preproc = preproc_char,
-
-                               k = pc$k,
-                               cluster = pc$cluster,
-                               centroids = pc$centroids,
-                               distmat = distmat,
-
-                               dots = dots,
-                               args = args,
-
-                               iter = pc$iter,
-                               converged = pc$converged,
-                               clusinfo = pc$clusinfo,
-                               cldist = pc$cldist,
-
-                               override.family = FALSE)
-
-                       } else {
-                           new("FuzzyTSClusters",
-                               call = MYCALL,
-                               family = family,
-                               control = control,
-                               datalist = series,
-
-                               type = type,
-                               distance = distance,
-                               centroid = cent_char,
-                               preproc = preproc_char,
-
-                               k = pc$k,
-                               cluster = pc$cluster,
-                               centroids = pc$centroids,
-                               distmat = distmat,
-
-                               dots = dots,
-                               args = args,
-
-                               iter = pc$iter,
-                               converged = pc$converged,
-                               fcluster = pc$fcluster,
-
-                               override.family = FALSE)
-                       }
-                   })
-
-                   if (!inherits(RET, "TSClusters") && length(RET) == 1L) RET <- RET[[1L]]
-                   RET
-               },
+                                   .export = export) %:%
+                    foreach(i = 1L:nrep,
+                            .combine = list, .multicombine = TRUE,
+                            .packages = control$packages,
+                            .export = export) %this_op%
+                            {
+                                if (trace) message("Repetition ", i, " for k = ", k)
+
+                                rngtools::setRNG(rng[[i]])
+
+                                if (!check_consistency(dist_entry$names[1L], "dist"))
+                                    do.call(proxy::pr_DB$set_entry, dist_entry)
+
+                                pc <- do.call(pfclust,
+                                              enlist(x = series,
+                                                     k = k,
+                                                     family = family,
+                                                     control = control,
+                                                     fuzzy = isTRUE(type == "fuzzy"),
+                                                     cent = cent_char,
+                                                     trace = trace,
+                                                     args = args))
+
+                                gc(FALSE)
+
+                                pc
+                            }
+            }
+
+            ## -------------------------------------------------------------------------------------
+            ## Prepare results
+            ## -------------------------------------------------------------------------------------
+
+            ## Replace distmat with NULL so that, if the distance function is called again,
+            ## it won't subset it
+            environment(family@dist)$control$distmat <- NULL
+
+            ## If distmat was provided, let it be shown in the results
+            if (distmat_provided) {
+                dist_method <- attr(distmat, "method")
+                distance <- if (is.null(dist_method)) "unknown" else dist_method
+            }
+
+            if (inherits(distmat, "Distmat")) distmat <- distmat$distmat
+            if (matrices_allocated) { args$dist$gcm <- args$dist$logs <- NULL }
+
+            ## Create objects
+            RET <- lapply(pc.list, function(pc) {
+                if (type == "partitional") {
+                    new("PartitionalTSClusters",
+                        call = MYCALL,
+                        family = family,
+                        control = control,
+                        datalist = series,
+
+                        type = type,
+                        distance = distance,
+                        centroid = cent_char,
+                        preproc = preproc_char,
+
+                        k = pc$k,
+                        cluster = pc$cluster,
+                        centroids = pc$centroids,
+                        distmat = distmat,
+
+                        dots = dots,
+                        args = args,
+
+                        iter = pc$iter,
+                        converged = pc$converged,
+                        clusinfo = pc$clusinfo,
+                        cldist = pc$cldist,
+
+                        override.family = FALSE)
+
+                } else {
+                    new("FuzzyTSClusters",
+                        call = MYCALL,
+                        family = family,
+                        control = control,
+                        datalist = series,
+
+                        type = type,
+                        distance = distance,
+                        centroid = cent_char,
+                        preproc = preproc_char,
+
+                        k = pc$k,
+                        cluster = pc$cluster,
+                        centroids = pc$centroids,
+                        distmat = distmat,
+
+                        dots = dots,
+                        args = args,
+
+                        iter = pc$iter,
+                        converged = pc$converged,
+                        fcluster = pc$fcluster,
+
+                        override.family = FALSE)
+                }
+            })
+
+            if (!inherits(RET, "TSClusters") && length(RET) == 1L) RET <- RET[[1L]]
+            RET
+        },
 
-               hierarchical = {
-                   ## ==============================================================================
-                   ## Hierarchical
-                   ## ==============================================================================
+        hierarchical = {
+            ## =====================================================================================
+            ## Hierarchical
+            ## =====================================================================================
 
-                   if (!inherits(control, "HcCtrl")) stop("Invalid control provided")
+            if (!inherits(control, "HcCtrl")) stop("Invalid control provided")
 
-                   method <- control$method
-                   distmat <- control$distmat
+            method <- control$method
+            distmat <- control$distmat
 
-                   if (tolower(distance) == "dtw_lb")
-                       warning("Using dtw_lb with hierarchical clustering is not advised.")
+            if (tolower(distance) == "dtw_lb")
+                warning("Using dtw_lb with hierarchical clustering is not advised.")
 
-                   ## ------------------------------------------------------------------------------
-                   ## Calculate distance matrix
-                   ## ------------------------------------------------------------------------------
-
-                   ## Take advantage of the function I defined for the partitional methods
-                   ## Which can do calculations in parallel if appropriate
-                   distfun <- ddist2(distance = distance, control = control)
-
-                   if (!is.null(distmat)) {
-                       if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
-                           stop("Dimensions of provided cross-distance matrix don't correspond to ",
-                                "length of provided data")
-
-                       if (trace) cat("\n\tDistance matrix provided...\n")
-
-                       if (is.null(attr(distmat, "method")))
-                           distance <- "unknown"
-                       else
-                           distance <- attr(distmat, "method")
-
-                   } else {
-                       if (trace) cat("\n\tCalculating distance matrix...\n")
-
-                       distmat <- do.call(distfun, enlist(x = series,
-                                                          centroids = NULL,
-                                                          dots = args$dist))
-                   }
-
-                   ## ------------------------------------------------------------------------------
-                   ## Cluster
-                   ## ------------------------------------------------------------------------------
-
-                   if (trace) cat("\n\tPerforming hierarchical clustering...\n\n")
-
-                   if (is.character(method)) {
-                       ## Using hclust
-                       hc <- lapply(method, function(method) {
-                           stats::hclust(stats::as.dist(distmat), method, members = dots$members)
-                       })
-
-                   } else {
-                       ## Using provided function
-                       hc <- list(do.call(method,
-                                          args = enlist(stats::as.dist(distmat),
-                                                        dots = subset_dots(dots, method))))
+            ## -------------------------------------------------------------------------------------
+            ## Calculate distance matrix
+            ## -------------------------------------------------------------------------------------
 
-                       method <- attr(method, "name")
-                   }
-
-                   ## Invalid centroid specifier provided?
-                   if (!missing(centroid) && !is.function(centroid))
-                       warning("The 'centroid' argument was provided but it wasn't a function, ",
-                               "so it was ignored.")
-                   if (!is.function(centroid))
-                       centroid <- NA
-
-                   ## ------------------------------------------------------------------------------
-                   ## Prepare results
-                   ## ------------------------------------------------------------------------------
-
-                   RET <- lapply(k, function(k) {
-                       lapply(hc, function(hc) {
-                           ## cutree and corresponding centroids
-                           cluster <- stats::cutree(stats::as.hclust(hc), k)
-
-                           if (is.function(centroid)) {
-                               allcent <- function(...) { list(centroid(...)) }
-                               environment(allcent) <- new.env(parent = .GlobalEnv)
-                               assign("centroid", centroid, environment(allcent))
-
-                               centroids <- lapply(1L:k, function(kcent) {
-                                   do.call(centroid,
-                                           enlist(series[cluster == kcent],
-                                                  dots = subset_dots(args$cent, centroid)))
-                               })
-
-                               cent_char <- as.character(substitute(centroid))[1L]
-
-                           } else {
-                               allcent <- function(...) {}
-
-                               centroids <- sapply(1L:k, function(kcent) {
-                                   id_k <- cluster == kcent
-
-                                   d_sub <- distmat[id_k, id_k, drop = FALSE]
-
-                                   id_centroid <- which.min(apply(d_sub, 1L, sum))
-
-                                   which(id_k)[id_centroid]
-                               })
-
-                               centroids <- series[centroids]
-                               cent_char <- "PAM (Hierarchical)"
-                           }
-
-                           new("HierarchicalTSClusters",
-                               stats::as.hclust(hc),
-                               call = MYCALL,
-                               family = new("tsclustFamily",
-                                            dist = distfun,
-                                            allcent = allcent,
-                                            preproc = preproc),
-                               control = control,
-                               datalist = series,
-
-                               type = type,
-                               distance = distance,
-                               centroid = cent_char,
-                               preproc = preproc_char,
-
-                               k = as.integer(k),
-                               cluster = cluster,
-                               centroids = centroids,
-                               distmat = distmat,
-
-                               dots = dots,
-                               args = args,
-
-                               method = if (!is.null(hc$method)) hc$method else method,
-
-                               override.family = !is.function(centroid))
-                       })
-                   })
-
-                   RET <- unlist(RET, recursive = FALSE)
-                   if (!inherits(RET, "TSClusters") && length(RET) == 1L) RET <- RET[[1L]]
-                   RET
-               },
-
-               tadpole = {
-                   ## ==============================================================================
-                   ## TADPole
-                   ## ==============================================================================
-
-                   if (!inherits(control, "TpCtrl")) stop("Invalid control provided")
-                   if (!missing(distance)) warning("The distance argument is ignored for TADPole.")
-
-                   ## ------------------------------------------------------------------------------
-                   ## Cluster
-                   ## ------------------------------------------------------------------------------
-
-                   ## mainly for predict generic
-                   distfun <- ddist2("dtw_lb", control = control)
-
-                   ## Invalid centroid specifier provided?
-                   if (!missing(centroid) && !is.function(centroid))
-                       warning("The 'centroid' argument was provided but it wasn't a function, ",
-                               "so it was ignored.")
-
-                   if (is.function(centroid))
-                       cent_char <- as.character(substitute(centroid))
-                   else
-                       cent_char <- "PAM (TADPole)"
-
-                   ## for family@dist
-                   args$dist$window.size <- control$window.size
-                   args$dist$norm <- "L2"
-                   args$dist$window.type <- "sakoechiba"
-
-                   ## ------------------------------------------------------------------------------
-                   ## Cluster
-                   ## ------------------------------------------------------------------------------
-
-                   if (trace) cat("\nEntering TADPole...\n\n")
-
-                   R <- TADPole(series,
-                                k = k,
-                                dc = control$dc,
-                                window.size = control$window.size,
-                                lb = control$lb,
-                                trace = trace)
-
-                   if (length(k) == 1L && length(control$dc) == 1L) R <- list(R)
-
-                   ## ------------------------------------------------------------------------------
-                   ## Prepare results
-                   ## ------------------------------------------------------------------------------
-
-                   ## seeds
-                   rng <- rngtools::RNGseq(length(k) * length(control$dc),
-                                           seed = seed,
-                                           simplify = FALSE)
-
-                   RET <- mapply(R, rng, SIMPLIFY = FALSE, FUN = function(R, rng) {
-                       rngtools::setRNG(rng)
-
-                       k <- length(R$centroids)
-
-                       if (is.function(centroid)) {
-                           allcent <- function(...) { list(centroid(...)) }
-                           environment(allcent) <- new.env(parent = .GlobalEnv)
-                           assign("centroid", centroid, environment(allcent))
-
-                           centroids <- lapply(1L:k, function(kcent) {
-                               centroid(series[R$cl == kcent])
-                           })
-
-                       } else {
-                           allcent <- function(...) {}
-                           centroids <- series[R$centroids]
-                       }
-
-                       obj <- new("PartitionalTSClusters",
-                                  call = MYCALL,
-                                  family = new("tsclustFamily",
-                                               dist = distfun,
-                                               allcent = allcent,
-                                               preproc = preproc),
-                                  control = control,
-                                  datalist = series,
-
-                                  type = type,
-                                  distance = "dtw_lb",
-                                  centroid = cent_char,
-                                  preproc = preproc_char,
-
-                                  k = as.integer(k),
-                                  cluster = R$cl,
-                                  centroids = centroids,
-                                  distmat = NULL,
-
-                                  dots = dots,
-                                  args = args,
-
-                                  override.family = !is.function(centroid))
-
-                       obj@distance <- "LB+DTW2"
-                       obj
-                   })
-
-                   if (!inherits(RET, "TSClusters") && length(RET) == 1L) RET <- RET[[1L]]
-                   RET
-               })
+            ## Take advantage of the function I defined for the partitional methods
+            ## Which can do calculations in parallel if appropriate
+            distfun <- ddist2(distance = distance, control = control)
+
+            if (!is.null(distmat)) {
+                if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
+                    stop("Dimensions of provided cross-distance matrix don't correspond to ",
+                         "length of provided data")
+
+                if (trace) cat("\n\tDistance matrix provided...\n")
+
+                if (is.null(attr(distmat, "method")))
+                    distance <- "unknown"
+                else
+                    distance <- attr(distmat, "method")
+
+            } else {
+                if (trace) cat("\n\tCalculating distance matrix...\n")
+
+                distmat <- do.call(distfun, enlist(x = series,
+                                                   centroids = NULL,
+                                                   dots = args$dist))
+            }
+
+            ## -------------------------------------------------------------------------------------
+            ## Cluster
+            ## -------------------------------------------------------------------------------------
+
+            if (trace) cat("\n\tPerforming hierarchical clustering...\n\n")
+
+            if (is.character(method)) {
+                ## Using hclust
+                hc <- lapply(method, function(method) {
+                    stats::hclust(stats::as.dist(distmat), method, members = dots$members)
+                })
+
+            } else {
+                ## Using provided function
+                hc <- list(do.call(method,
+                                   args = enlist(stats::as.dist(distmat),
+                                                 dots = subset_dots(dots, method))))
+
+                method <- attr(method, "name")
+            }
+
+            ## Invalid centroid specifier provided?
+            if (!missing(centroid) && !is.function(centroid))
+                warning("The 'centroid' argument was provided but it wasn't a function, ",
+                        "so it was ignored.")
+            if (!is.function(centroid))
+                centroid <- NA
+
+            ## -------------------------------------------------------------------------------------
+            ## Prepare results
+            ## -------------------------------------------------------------------------------------
+
+            if (matrices_allocated) { args$dist$gcm <- args$dist$logs <- NULL }
+
+            RET <- lapply(k, function(k) {
+                lapply(hc, function(hc) {
+                    ## cutree and corresponding centroids
+                    cluster <- stats::cutree(stats::as.hclust(hc), k)
+
+                    if (is.function(centroid)) {
+                        allcent <- function(...) { list(centroid(...)) }
+                        environment(allcent) <- new.env(parent = .GlobalEnv)
+                        assign("centroid", centroid, environment(allcent))
+
+                        centroids <- lapply(1L:k, function(kcent) {
+                            do.call(centroid,
+                                    enlist(series[cluster == kcent],
+                                           dots = subset_dots(args$cent, centroid)))
+                        })
+
+                        cent_char <- as.character(substitute(centroid))[1L]
+
+                    } else {
+                        allcent <- function(...) {}
+
+                        centroids <- sapply(1L:k, function(kcent) {
+                            id_k <- cluster == kcent
+
+                            d_sub <- distmat[id_k, id_k, drop = FALSE]
+
+                            id_centroid <- which.min(apply(d_sub, 1L, sum))
+
+                            which(id_k)[id_centroid]
+                        })
+
+                        centroids <- series[centroids]
+                        cent_char <- "PAM (Hierarchical)"
+                    }
+
+                    new("HierarchicalTSClusters",
+                        stats::as.hclust(hc),
+                        call = MYCALL,
+                        family = new("tsclustFamily",
+                                     dist = distfun,
+                                     allcent = allcent,
+                                     preproc = preproc),
+                        control = control,
+                        datalist = series,
+
+                        type = type,
+                        distance = distance,
+                        centroid = cent_char,
+                        preproc = preproc_char,
+
+                        k = as.integer(k),
+                        cluster = cluster,
+                        centroids = centroids,
+                        distmat = distmat,
+
+                        dots = dots,
+                        args = args,
+
+                        method = if (!is.null(hc$method)) hc$method else method,
+
+                        override.family = !is.function(centroid))
+                })
+            })
+
+            RET <- unlist(RET, recursive = FALSE)
+            if (!inherits(RET, "TSClusters") && length(RET) == 1L) RET <- RET[[1L]]
+            RET
+        },
+
+        tadpole = {
+            ## =====================================================================================
+            ## TADPole
+            ## =====================================================================================
+
+            if (!inherits(control, "TpCtrl")) stop("Invalid control provided")
+            if (!missing(distance)) warning("The distance argument is ignored for TADPole.")
+
+            ## -------------------------------------------------------------------------------------
+            ## Cluster
+            ## -------------------------------------------------------------------------------------
+
+            ## mainly for predict generic
+            distfun <- ddist2("dtw_lb", control = control)
+
+            ## Invalid centroid specifier provided?
+            if (!missing(centroid) && !is.function(centroid))
+                warning("The 'centroid' argument was provided but it wasn't a function, ",
+                        "so it was ignored.")
+
+            if (is.function(centroid))
+                cent_char <- as.character(substitute(centroid))
+            else
+                cent_char <- "PAM (TADPole)"
+
+            ## for family@dist
+            args$dist$window.size <- control$window.size
+            args$dist$norm <- "L2"
+            args$dist$window.type <- "sakoechiba"
+
+            ## -------------------------------------------------------------------------------------
+            ## Cluster
+            ## -------------------------------------------------------------------------------------
+
+            if (trace) cat("\nEntering TADPole...\n\n")
+
+            R <- TADPole(series,
+                         k = k,
+                         dc = control$dc,
+                         window.size = control$window.size,
+                         lb = control$lb,
+                         trace = trace)
+
+            if (length(k) == 1L && length(control$dc) == 1L) R <- list(R)
+
+            ## -------------------------------------------------------------------------------------
+            ## Prepare results
+            ## -------------------------------------------------------------------------------------
+
+            ## seeds
+            rng <- rngtools::RNGseq(length(k) * length(control$dc),
+                                    seed = seed,
+                                    simplify = FALSE)
+
+            RET <- mapply(R, rng, SIMPLIFY = FALSE, FUN = function(R, rng) {
+                rngtools::setRNG(rng)
+
+                k <- length(R$centroids)
+
+                if (is.function(centroid)) {
+                    allcent <- function(...) { list(centroid(...)) }
+                    environment(allcent) <- new.env(parent = .GlobalEnv)
+                    assign("centroid", centroid, environment(allcent))
+
+                    centroids <- lapply(1L:k, function(kcent) {
+                        centroid(series[R$cl == kcent])
+                    })
+
+                } else {
+                    allcent <- function(...) {}
+                    centroids <- series[R$centroids]
+                }
+
+                obj <- new("PartitionalTSClusters",
+                           call = MYCALL,
+                           family = new("tsclustFamily",
+                                        dist = distfun,
+                                        allcent = allcent,
+                                        preproc = preproc),
+                           control = control,
+                           datalist = series,
+
+                           type = type,
+                           distance = "dtw_lb",
+                           centroid = cent_char,
+                           preproc = preproc_char,
+
+                           k = as.integer(k),
+                           cluster = R$cl,
+                           centroids = centroids,
+                           distmat = NULL,
+
+                           dots = dots,
+                           args = args,
+
+                           override.family = !is.function(centroid))
+
+                obj@distance <- "LB+DTW2"
+                obj
+            })
+
+            if (!inherits(RET, "TSClusters") && length(RET) == 1L) RET <- RET[[1L]]
+            RET
+        }
+    )
 
     ## =============================================================================================
     ## Finish

@@ -31,7 +31,7 @@ test_that("Errors in input data are detected by dtwclust", {
 })
 
 test_that("Errors in input data are detected by tsclust", {
-    expect_error(tsclust(NULL), "No data")
+    expect_error(tsclust(NULL), "data")
     expect_error(tsclust(NA), "type")
     expect_error(tsclust(mean), "type")
     expect_error(tsclust("data"), "type")
