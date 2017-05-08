@@ -154,7 +154,7 @@ all_cent <- function(case = NULL, distmat = NULL, distfun, control, fuzzy = FALS
     fcm_cent <- function(x, u, k, ...) {
         ## utils.R
         if (is_multivariate(x)) {
-            mv <- reshape_multviariate(x, NULL)
+            mv <- reshape_multivariate(x, NULL)
 
             cent <- lapply(mv$series, fcm_cent, u = u)
             cent <- lapply(1L:k, function(idc) {

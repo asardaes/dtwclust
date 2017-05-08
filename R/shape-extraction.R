@@ -63,7 +63,7 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
     ## utils.R
     if (is_multivariate(X)) {
         ## multivariate
-        mv <- reshape_multviariate(X, centroid) # utils.R
+        mv <- reshape_multivariate(X, centroid) # utils.R
 
         new_c <- mapply(mv$series, mv$cent,
                         SIMPLIFY = FALSE,

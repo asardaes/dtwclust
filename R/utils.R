@@ -244,7 +244,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
 }
 
 # ==================================================================================================
-# Multviariate helpers
+# Multivariate helpers
 # ==================================================================================================
 
 is_multivariate <- function(x) {
@@ -255,7 +255,7 @@ is_multivariate <- function(x) {
     any(ncols > 1L)
 }
 
-reshape_multviariate <- function(series, cent) {
+reshape_multivariate <- function(series, cent) {
     ncols <- ncol(series[[1L]])
 
     series <- lapply(1L:ncols, function(idc) {

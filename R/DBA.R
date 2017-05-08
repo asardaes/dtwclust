@@ -92,7 +92,6 @@ DBA <- function(X, centroid = NULL, ...,
                 error.check = TRUE, trace = FALSE)
 {
     X <- any2list(X)
-
     if (is.null(centroid)) centroid <- X[[sample(length(X), 1L)]] # Random choice
 
     if (error.check) {
@@ -102,31 +101,27 @@ DBA <- function(X, centroid = NULL, ...,
 
     ## utils.R
     if (is_multivariate(X)) {
-        mv <- reshape_multviariate(X, centroid) # utils.R
+        mv <- reshape_multivariate(X, centroid) # utils.R
 
-        new_c <- mapply(mv$series, mv$cent, SIMPLIFY = FALSE,
-                        FUN = function(xx, cc) {
-                            DBA(xx, cc, ...,
-                                norm = norm,
-                                window.size = window.size,
-                                max.iter = max.iter,
-                                delta = delta,
-                                error.check = FALSE,
-                                trace = trace)
-                        })
+        new_c <- mapply(
+            mv$series, mv$cent, SIMPLIFY = FALSE, FUN = function(xx, cc) {
+                DBA(xx, cc, ...,
+                    norm = norm,
+                    window.size = window.size,
+                    max.iter = max.iter,
+                    delta = delta,
+                    error.check = FALSE,
+                    trace = trace)
+            }
+        )
 
         return(do.call(cbind, new_c))
     }
 
-    norm <- match.arg(norm, c("L1", "L2"))
-
     if (!is.null(window.size)) window.size <- check_consistency(window.size, "window")
-
+    norm <- match.arg(norm, c("L1", "L2"))
     dots <- list(...)
-
-    ## maximum length of considered series
-    L <- max(lengths(X))
-
+    L <- max(lengths(X)) ## maximum length of considered series
     Xs <- split_parallel(X)
 
     ## pre-allocate local cost matrices
@@ -136,7 +131,6 @@ DBA <- function(X, centroid = NULL, ...,
     ## Iterations
     iter <- 1L
     centroid_old <- centroid
-
     if (trace) cat("\tDBA Iteration:")
 
     while(iter <= max.iter) {
@@ -155,15 +149,15 @@ DBA <- function(X, centroid = NULL, ...,
                                                   backtrack = TRUE, gcm = gcm,
                                                   dots = dots))
 
-                              x.sub <- stats::aggregate(x[d$index1],
+                              x_sub <- stats::aggregate(x[d$index1],
                                                         by = list(ind = d$index2),
                                                         sum)
 
-                              n.sub <- stats::aggregate(x[d$index1],
+                              n_sub <- stats::aggregate(x[d$index1],
                                                         by = list(ind = d$index2),
                                                         length)
 
-                              cbind(sum = x.sub$x, n = n.sub$x)
+                              cbind(sum = x_sub$x, n = n_sub$x)
                           })
                       }
 
@@ -178,22 +172,19 @@ DBA <- function(X, centroid = NULL, ...,
 
         if (isTRUE(all.equal(centroid, centroid_old, tolerance = delta))) {
             if (trace) cat("", iter ,"- Converged!\n")
-
             break
 
         } else {
-            centroid_old <- centroid
-
             if (trace) {
                 cat(" ", iter, ",", sep = "")
                 if (iter %% 10 == 0) cat("\n\t\t")
             }
 
+            centroid_old <- centroid
             iter <- iter + 1L
         }
     }
 
     if (iter > max.iter && trace) cat(" Did not 'converge'\n")
-
     as.numeric(centroid)
 }
