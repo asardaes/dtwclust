@@ -102,26 +102,52 @@ cfgs <- compare_clusterings_configs(c("p", "h", "f", "t"), k = 2L:3L,
                                     )
 )
 
+cfgs_gak <- compare_clusterings_configs(types = "p", k = 2L:3L,
+                                        controls = list(
+                                            partitional = partitional_control(
+                                                iter.max = 5L,
+                                                nrep = 2L
+                                            )
+                                        ),
+                                        preprocs = pdc_configs(
+                                            "preproc",
+                                            none = list()
+                                        ),
+                                        distances = pdc_configs(
+                                            "distance",
+                                            gak = list(window.size = 20L, sigma = c(100, 120))
+                                        ),
+                                        centroids = pdc_configs(
+                                            "centroid",
+                                            partitional = list(
+                                                pam = list()
+                                            )
+                                        )
+)
+
 # =================================================================================================
 # Compare clusterings
 # =================================================================================================
 
 test_that("Compare clusterings works for the minimum set with all possibilities.", {
     expect_warning(no_score <- compare_clusterings(data_reinterpolated_subset, c("f"),
-                                                   configs = cfgs, seed = 392L))
+                                                   configs = cfgs, seed = 392L),
+                   "score.clus")
     expect_null(no_score$scores)
 
     expect_warning(no_pick <- compare_clusterings(data_reinterpolated_subset, c("f"),
                                                   configs = cfgs, seed = 392L,
                                                   score.clus = score_fun,
-                                                  lbls = labels_subset))
+                                                  lbls = labels_subset),
+                   "pick.clus")
     expect_null(no_pick$pick)
     expect_true(!is.null(no_pick$scores))
 
     expect_warning(type_score <- compare_clusterings(data_reinterpolated_subset, c("f"),
                                                      configs = cfgs, seed = 392L,
                                                      score.clus = type_score_fun,
-                                                     lbls = labels_subset))
+                                                     lbls = labels_subset),
+                   "pick.clus")
 
     expect_identical(no_pick$results, type_score$results)
 
@@ -134,12 +160,21 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                                                   shuffle.configs = TRUE,
                                                                   lbls = labels_subset))
 
+    expect_warning(gak_comparison <- compare_clusterings(data_subset, "p",
+                                                          configs = cfgs_gak, seed = 190L,
+                                                          score.clus = score_fun,
+                                                          lbls = labels_subset),
+                   "pick.clus")
+
     ## rds
     all_comparisons$pick <- reset_nondeterministic(all_comparisons$pick)
     all_comparisons$pick@call <- call("zas", foo = "bar")
     all_comparisons$proc_time <- NULL
 
+    gak_comparison$proc_time <- NULL
+
     assign("all_comp", all_comparisons, persistent)
+    assign("gak_comp", gak_comparison, persistent)
 })
 
 # =================================================================================================

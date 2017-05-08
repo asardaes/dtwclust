@@ -16,6 +16,7 @@ with(persistent, {
         skip_on_cran()
 
         expect_equal_to_reference(all_comp, file_name(all_comp))
+        expect_equal_to_reference(gak_comp, file_name(gak_comp))
     })
 })
 
