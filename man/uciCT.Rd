@@ -26,4 +26,8 @@ vector with labels is also loaded in \code{CharTrajLabels}.
 
 The subset included in \code{CharTrajMV} has 5 examples too, but includes tip force as well as X and Y
 velocity. Each element of the list is a multivariate series with 3 variables.
+
+Please note that even though both \code{CharTraj} and \code{CharTrajMV} have the same series names, the
+actual series in each subset are \strong{not} the same, i.e., \code{CharTraj$A.V1} is not in
+\code{CharTrajMV$A.V1}.
 }

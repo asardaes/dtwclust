@@ -16,7 +16,7 @@
 #' @param normalize Should the distance be normalized? Only supported for `symmetric2`.
 #' @param ... Currently ignored.
 #' @param gcm Optionally, a matrix to use for the global cost matrix calculations. It should have
-#'   `NROW(y)+1` columns and `NROW(x)+1` rows for `backtrack = TRUE` **or** `2` rows for `backtrack
+#'   `NROW(y)+1` columns, and `NROW(x)+1` rows for `backtrack = TRUE` **or** `2` rows for `backtrack
 #'   = FALSE`. Used internally for memory optimization. If provided, it **will** be modified *in
 #'   place* by `C` code, except in the parallel version in [proxy::dist()] which ignores it for
 #'   thread-safe reasons.

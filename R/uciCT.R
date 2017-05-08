@@ -23,6 +23,10 @@
 #' The subset included in `CharTrajMV` has 5 examples too, but includes tip force as well as X and Y
 #' velocity. Each element of the list is a multivariate series with 3 variables.
 #'
+#' Please note that even though both `CharTraj` and `CharTrajMV` have the same series names, the
+#' actual series in each subset are **not** the same, i.e., `CharTraj$A.V1` is not in
+#' `CharTrajMV$A.V1`.
+#'
 #' @source \url{https://archive.ics.uci.edu/ml/datasets/Character+Trajectories}
 #'
 NULL

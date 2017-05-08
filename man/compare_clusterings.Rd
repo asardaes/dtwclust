@@ -116,67 +116,69 @@ acf_fun <- function(dat, ...) {
 }
 
 ## Define overall configuration
-cfgs <- compare_clusterings_configs(c("p", "h", "f", "t"), k = 19L:20L,
-                                    controls = list(
-                                        partitional = partitional_control(
-                                            iter.max = 30L,
-                                            nrep = 1L
-                                        ),
-                                        hierarchical = hierarchical_control(
-                                            method = "all"
-                                        ),
-                                        fuzzy = fuzzy_control(
-                                            ## notice the vector
-                                            fuzziness = c(2, 2.5),
-                                            iter.max = 30L
-                                        ),
-                                        tadpole = tadpole_control(
-                                            ## notice the vectors
-                                            dc = c(1.5, 2),
-                                            window.size = 19L:20L
-                                        )
-                                    ),
-                                    preprocs = pdc_configs(
-                                        type = "preproc",
-                                        ## shared
-                                        none = list(),
-                                        zscore = list(center = c(FALSE)),
-                                        ## only for fuzzy
-                                        fuzzy = list(
-                                            acf_fun = list()
-                                        ),
-                                        ## only for tadpole
-                                        tadpole = list(
-                                            reinterpolate = list(new.length = 205L)
-                                        ),
-                                        ## specify which should consider the shared ones
-                                        share.config = c("p", "h")
-                                    ),
-                                    distances = pdc_configs(
-                                        type = "distance",
-                                        sbd = list(),
-                                        fuzzy = list(
-                                            L2 = list()
-                                        ),
-                                        share.config = c("p", "h")
-                                    ),
-                                    centroids = pdc_configs(
-                                        type = "centroid",
-                                        partitional = list(
-                                            pam = list()
-                                        ),
-                                        ## special name 'default'
-                                        hierarchical = list(
-                                            default = list()
-                                        ),
-                                        fuzzy = list(
-                                            fcmdd = list()
-                                        ),
-                                        tadpole = list(
-                                            default = list(),
-                                            shape_extraction = list(znorm = TRUE)
-                                        )
-                                    )
+cfgs <- compare_clusterings_configs(
+    types = c("p", "h", "f", "t"),
+    k = 19L:20L,
+    controls = list(
+        partitional = partitional_control(
+            iter.max = 30L,
+            nrep = 1L
+        ),
+        hierarchical = hierarchical_control(
+            method = "all"
+        ),
+        fuzzy = fuzzy_control(
+            ## notice the vector
+            fuzziness = c(2, 2.5),
+            iter.max = 30L
+        ),
+        tadpole = tadpole_control(
+            ## notice the vectors
+            dc = c(1.5, 2),
+            window.size = 19L:20L
+        )
+    ),
+    preprocs = pdc_configs(
+        type = "preproc",
+        ## shared
+        none = list(),
+        zscore = list(center = c(FALSE)),
+        ## only for fuzzy
+        fuzzy = list(
+            acf_fun = list()
+        ),
+        ## only for tadpole
+        tadpole = list(
+            reinterpolate = list(new.length = 205L)
+        ),
+        ## specify which should consider the shared ones
+        share.config = c("p", "h")
+    ),
+    distances = pdc_configs(
+        type = "distance",
+        sbd = list(),
+        fuzzy = list(
+            L2 = list()
+        ),
+        share.config = c("p", "h")
+    ),
+    centroids = pdc_configs(
+        type = "centroid",
+        partitional = list(
+            pam = list()
+        ),
+        ## special name 'default'
+        hierarchical = list(
+            default = list()
+        ),
+        fuzzy = list(
+            fcmdd = list()
+        ),
+        tadpole = list(
+            default = list(),
+            shape_extraction = list(znorm = TRUE)
+        )
+    )
 )
 
 ## Number of configurations is returned as attribute
