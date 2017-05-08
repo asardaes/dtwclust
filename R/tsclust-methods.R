@@ -127,7 +127,11 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
                                      dist = .Object@dots,
                                      cent = .Object@dots)
     else
-        .Object@args <- lapply(.Object@args, function(args) { c(args, .Object@dots) })
+        .Object@args <- lapply(.Object@args, function(arg) {
+            arg <- c(arg, .Object@dots)
+            unique_args <- unique(match(names(arg), names(arg))) ## remove duplicates
+            arg[unique_args]
+        })
 
     ## more helpful for hierarchical/tadpole
     if (override.family) {

@@ -4,6 +4,7 @@
 * Optimized `TADPole` for multiple `k` and `dc` values.
 * Partitional and hierarchical configurations in `compare_clusterings` now take into account the `symmetric` control parameter if provided.
 * Optimized PAM centroids with `pam.precompute = FALSE` by using sparse matrices from the `Matrix` package.
+* Fixed an error that sometimes caused objects returned by `tsclust` to have duplicated elements in the `args` slot.
 * Some internal functions changed, so older objects might no longer be compatible. Try using `update(old_obj)`.
 
 ## Version 3.2.0
