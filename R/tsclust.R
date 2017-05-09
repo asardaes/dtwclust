@@ -25,6 +25,7 @@
 #'   See [tsclust_args()]
 #' @param seed Random seed for reproducibility.
 #' @param trace Logical flag. If `TRUE`, more output regarding the progress is printed to screen.
+#' @template error-check
 #'
 #' @details
 #'
@@ -220,7 +221,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                     centroid = ifelse(type == "fuzzy", "fcm", "pam"),
                     control = do.call(paste0(type, "_control"), list()),
                     args = tsclust_args(),
-                    seed = NULL, trace = FALSE)
+                    seed = NULL, trace = FALSE, error.check = TRUE)
 {
     ## =============================================================================================
     ## Start
@@ -268,7 +269,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
     } else stop("Invalid preprocessing")
 
-    check_consistency(series, "vltslist")
+    if (error.check) check_consistency(series, "vltslist")
 
     ## ---------------------------------------------------------------------------------------------
     ## Further options

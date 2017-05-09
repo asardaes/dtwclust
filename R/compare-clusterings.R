@@ -721,6 +721,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                     trace = trace,
                                     args = args,
                                     control = control,
+                                    error.check = FALSE,
                                     dots = dots)
 
                 if (type == "tadpole") this_args$distance <- NULL

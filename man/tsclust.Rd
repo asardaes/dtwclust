@@ -7,7 +7,7 @@
 tsclust(series = NULL, type = "partitional", k = 2L, ...,
   preproc = NULL, distance = "dtw_basic", centroid = ifelse(type ==
   "fuzzy", "fcm", "pam"), control = do.call(paste0(type, "_control"), list()),
-  args = tsclust_args(), seed = NULL, trace = FALSE)
+  args = tsclust_args(), seed = NULL, trace = FALSE, error.check = TRUE)
 }
 \arguments{
 \item{series}{A list of series, a numeric matrix or a data frame. Matrices and data frames are
@@ -38,6 +38,9 @@ See \code{\link[=tsclust_args]{tsclust_args()}}}
 \item{seed}{Random seed for reproducibility.}
 
 \item{trace}{Logical flag. If \code{TRUE}, more output regarding the progress is printed to screen.}
+
+\item{error.check}{Logical indicating whether the function should try to detect inconsistencies
+and give more informative errors messages. Also used internally to avoid repeating checks.}
 }
 \value{
 An object with an appropriate class from \linkS4class{TSClusters}.
