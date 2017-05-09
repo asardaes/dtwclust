@@ -238,12 +238,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
     MYCALL <- match.call(expand.dots = TRUE)
     dots <- list(...)
-
-    args <- lapply(args, function(args) {
-        new_args <- c(args, dots)
-        unique_args <- unique(match(names(new_args), names(new_args))) ## remove duplicates
-        new_args[unique_args]
-    })
+    args <- adjust_args(args, dots) ## utils.R
 
     ## ---------------------------------------------------------------------------------------------
     ## Preprocess
@@ -433,7 +428,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 rngtools::setRNG(rngtools::RNGseq(1L, seed = seed, simplify = TRUE))
 
                 ## Just one repetition
-                pc.list <- list(do.call(pfclust,
+                pc_list <- list(do.call(pfclust,
                                         enlist(x = series,
                                                k = k,
                                                family = family,
@@ -466,7 +461,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 ## sequential allows the matrix to be updated iteratively
                 `%this_op%` <- ifelse(inherits(control$distmat, "SparseDistmat"), `%do%`, `%op%`)
 
-                pc.list <- foreach(k = k0, rng = rng0,
+                pc_list <- foreach(k = k0, rng = rng0,
                                    .combine = comb0, .multicombine = TRUE,
                                    .packages = control$packages,
                                    .export = export) %:%
@@ -516,7 +511,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             if (matrices_allocated) { args$dist$gcm <- args$dist$logs <- NULL }
 
             ## Create objects
-            RET <- lapply(pc.list, function(pc) {
+            RET <- lapply(pc_list, function(pc) {
                 if (type == "partitional") {
                     new("PartitionalTSClusters",
                         call = MYCALL,
@@ -572,7 +567,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 }
             })
 
-            if (!inherits(RET, "TSClusters") && length(RET) == 1L) RET <- RET[[1L]]
+            ## return partitional/fuzzy
             RET
         },
 
@@ -716,7 +711,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             })
 
             RET <- unlist(RET, recursive = FALSE)
-            if (!inherits(RET, "TSClusters") && length(RET) == 1L) RET <- RET[[1L]]
+            ## return hierarchical
             RET
         },
 
@@ -821,7 +816,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 obj
             })
 
-            if (!inherits(RET, "TSClusters") && length(RET) == 1L) RET <- RET[[1L]]
+            ## return tadpole
             RET
         }
     )
@@ -832,23 +827,18 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
     toc <- proc.time() - tic
 
-    if (inherits(RET, "TSClusters")) {
-        RET@proctime <- toc
-        RET@seed <- as.integer(seed)
+    RET <- lapply(RET, function(ret) {
+        ret@proctime <- toc
+        ret@seed <- as.integer(seed)
 
-    } else {
-        RET <- lapply(RET, function(ret) {
-            ret@proctime <- toc
-            ret@seed <- as.integer(seed)
+        ret
+    })
 
-            ret
-        })
-    }
-
-    if (type %in% c("partitional", "fuzzy") && (nrep > 1L || length(k) > 1L))
+    if (length(RET) == 1L)
+        RET <- RET[[1L]]
+    else if (type %in% c("partitional", "fuzzy"))
         attr(RET, "rng") <- unlist(rng0, recursive = FALSE, use.names = FALSE)
 
     if (trace) cat("\tElapsed time is", toc["elapsed"], "seconds.\n\n")
-
     RET
 }

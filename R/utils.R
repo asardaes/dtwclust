@@ -92,6 +92,14 @@ subset_dots <- function(dots = list(), foo) {
         list()
 }
 
+# Adjust args for tsclust() and TSClusters-class
+adjust_args <- function(args, dots) {
+    lapply(args, function(arg) {
+        arg <- c(arg, dots)
+        arg[!duplicated(names(arg))]
+    })
+}
+
 # Reinitialize empty clusters
 reinit_clusters <- function(x, cent, cent_case, num_empty, empty_clusters, control) {
     ## Make sure no centroid is repeated (especially in case of PAM)
