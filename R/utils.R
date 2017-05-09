@@ -201,13 +201,6 @@ validate_pairwise <- function(x, y) {
     invisible(NULL)
 }
 
-## tasks created based on getDoParWorkers() could be larger than tasks based on objects
-allocate_matrices <- function(mat = NULL, ..., target.size) {
-    mat <- if (is.null(mat)) list(matrix(0, ...)) else list(mat)
-    if (foreach::getDoParWorkers() > 1L) mat <- rep(mat, target.size)
-    mat
-}
-
 # ==================================================================================================
 # Helper distance-related
 # ==================================================================================================

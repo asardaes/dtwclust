@@ -48,28 +48,25 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
         check_consistency(y, "ts")
     }
 
-    backtrack <- isTRUE(backtrack)
-
-    if (NCOL(x) != NCOL(y))
-        stop("Multivariate series must have the same number of variables.")
-
     if (is.null(window.size))
         window.size <- -1L
     else
         window.size <- check_consistency(window.size, "window")
 
-    norm <- match.arg(norm, c("L1", "L2"))
-    norm <- switch(norm, "L1" = 1, "L2" = 2)
+    if (NCOL(x) != NCOL(y)) stop("Multivariate series must have the same number of variables.")
 
     if (identical(step.pattern, symmetric1))
         step.pattern <- 1
     else if (identical(step.pattern, symmetric2))
         step.pattern <- 2
     else
-        stop("step.pattern must be either symmetric1 or symmetric2")
+        stop("step.pattern must be either symmetric1 or symmetric2 (without quotes)")
 
-    if (normalize && step.pattern == 1)
-        stop("Unable to normalize with chosen step pattern.")
+    if (normalize && step.pattern == 1) stop("Unable to normalize with chosen step pattern.")
+
+    norm <- match.arg(norm, c("L1", "L2"))
+    norm <- switch(norm, "L1" = 1, "L2" = 2)
+    backtrack <- isTRUE(backtrack)
 
     if (backtrack) {
         if (is.null(gcm))
@@ -105,6 +102,7 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
         d$path <- NULL
     }
 
+    ## return
     d
 }
 
@@ -115,6 +113,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
     dots <- list(...)
     dots$backtrack <- FALSE
     dots$error.check <- FALSE
+    retclass <- "crossdist"
 
     if (is.null(y)) {
         y <- x
@@ -123,25 +122,19 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
     } else {
         y <- any2list(y)
         if (error.check) check_consistency(y, "vltslist")
-
         symmetric <- FALSE
     }
 
-    retclass <- "crossdist"
-
-    ## to pre-allocate GCMs
-    nc <- max(sapply(y, NROW)) + 1L
+    ## pre-allocate gcm
+    if(is.null(gcm)) gcm <- matrix(0, 2L, max(sapply(y, NROW)) + 1L)
 
     ## Calculate distance matrix
     if (pairwise) {
         X <- split_parallel(x)
         Y <- split_parallel(y)
-
         validate_pairwise(X, Y)
 
-        GCM <- allocate_matrices(gcm, nrow = 2L, ncol = nc, target.size = length(X))
-
-        D <- foreach(x = X, y = Y, gcm = GCM,
+        D <- foreach(x = X, y = Y,
                      .combine = c,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
@@ -161,12 +154,9 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
     } else if (symmetric) {
         pairs <- call_pairs(length(x), lower = FALSE)
         pairs <- split_parallel(pairs, 1L)
-
-        GCM <- allocate_matrices(gcm, nrow = 2L, ncol = nc, target.size = length(pairs))
-
         dots$pairwise <- TRUE
 
-        d <- foreach(pairs = pairs, gcm = GCM,
+        d <- foreach(pairs = pairs,
                      .combine = c,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
@@ -185,15 +175,12 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
         D[upper.tri(D)] <- d
         D <- t(D)
         D[upper.tri(D)] <- d
-
         attr(D, "dimnames") <- list(names(x), names(x))
 
     } else {
         Y <- split_parallel(y)
 
-        GCM <- allocate_matrices(gcm, nrow = 2L, ncol = nc, target.size = length(Y))
-
-        D <- foreach(y = Y, gcm = GCM,
+        D <- foreach(y = Y,
                      .combine = cbind,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
@@ -215,5 +202,6 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
     class(D) <- retclass
     attr(D, "method") <- "DTW_BASIC"
 
+    ## return
     D
 }
