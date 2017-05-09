@@ -23,7 +23,7 @@ ddist2 <- function(distance, control) {
                 if (is.null(centroids))
                     d <- control$distmat ## return whole distmat
                 else
-                    d <- control$distmat[ , control$distmat$id_cent, drop = FALSE] ## subset
+                    d <- control$distmat[, control$distmat$id_cent, drop = FALSE] ## subset
             }
         } else {
             ## distmat not available, calculate it
@@ -68,9 +68,7 @@ ddist2 <- function(distance, control) {
 
                     ## strict pairwise as in proxy::dist doesn't make sense here, it's pairwise between pairs
                     dots$pairwise <- TRUE
-
                     pairs <- call_pairs(length(x), lower = FALSE)
-
                     pairs <- split_parallel(pairs, 1L)
 
                     d <- foreach(pairs = pairs,
@@ -93,12 +91,10 @@ ddist2 <- function(distance, control) {
                                  }
 
                     rm("pairs")
-
                     D <- matrix(0, nrow = length(x), ncol = length(x))
                     D[upper.tri(D)] <- d
                     D <- t(D)
                     D[upper.tri(D)] <- d
-
                     d <- D
                     attr(d, "class") <- "crossdist"
                     attr(d, "dimnames") <- list(names(x), names(x))
@@ -118,11 +114,8 @@ ddist2 <- function(distance, control) {
 
             } else {
                 ## WHOLE DISTMAT OR SUBDISTMAT OR NOT SYMMETRIC
-                if (is.null(centroids))
-                    centroids <- x
-
+                if (is.null(centroids)) centroids <- x
                 dim_names <- list(names(x), names(centroids))
-
                 x <- split_parallel(x)
 
                 if (isTRUE(dots$pairwise)) {
@@ -131,7 +124,7 @@ ddist2 <- function(distance, control) {
                     combine <- c
 
                 } else {
-                    centroids <- lapply(1L:foreach::getDoParWorkers(), function(dummy) centroids)
+                    centroids <- lapply(1L:foreach::getDoParWorkers(), function(dummy) { centroids })
                     if (length(centroids) > length(x)) centroids <- centroids[1L:length(x)]
                     combine <- rbind
                 }
@@ -167,6 +160,7 @@ ddist2 <- function(distance, control) {
         attr(d, "method") <- toupper(distance)
         attr(d, "call") <- NULL
 
+        ## return
         d
     }
 
