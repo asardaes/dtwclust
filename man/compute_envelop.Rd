@@ -11,7 +11,8 @@ compute_envelop(x, window.size, error.check = TRUE)
 
 \item{window.size}{Window size for envelope calculation. See details.}
 
-\item{error.check}{Check data inconsistencies?}
+\item{error.check}{Logical indicating whether the function should try to detect inconsistencies
+and give more informative errors messages. Also used internally to avoid repeating checks.}
 }
 \value{
 A list with two elements (lower and upper envelopes): \code{lower} and \code{upper}.

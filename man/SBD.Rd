@@ -11,7 +11,8 @@ SBD(x, y, znorm = FALSE, error.check = TRUE)
 
 \item{znorm}{Logical. Should each series be z-normalized before calculating the distance?}
 
-\item{error.check}{Check data inconsistencies?}
+\item{error.check}{Logical indicating whether the function should try to detect inconsistencies
+and give more informative errors messages. Also used internally to avoid repeating checks.}
 }
 \value{
 A list with:

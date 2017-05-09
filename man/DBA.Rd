@@ -30,7 +30,8 @@ Euclidean distance.}
 \item{delta}{At iteration \code{i}, if \code{all(abs(centroid_{i}} \code{-} \code{centroid_{i-1})} \code{< delta)},
 convergence is assumed.}
 
-\item{error.check}{Should inconsistencies in the data be checked?}
+\item{error.check}{Logical indicating whether the function should try to detect inconsistencies
+and give more informative errors messages. Also used internally to avoid repeating checks.}
 
 \item{trace}{If \code{TRUE}, the current iteration is printed to output.}
 }

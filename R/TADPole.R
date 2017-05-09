@@ -9,7 +9,7 @@
 #' @param window.size Window size constraint for DTW (Sakoe-Chiba). See details.
 #' @param k The number of desired clusters. Can be a vector with several values
 #' @param dc The cutoff distance(s).
-#' @param error.check Should the data be checked for inconsistencies?
+#' @template error-check
 #' @param lb Which lower bound to use, "lbk" for [lb_keogh()] or "lbi" for [lb_improved()].
 #' @param trace Logical flag. If `TRUE`, more output regarding the progress is printed to screen.
 #'

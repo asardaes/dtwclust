@@ -16,7 +16,7 @@
 #' @param force.symmetry If `TRUE`, a second lower bound is calculated by swapping `x` and `y`, and
 #'   whichever result has a *higher* distance value is returned. The proxy version can only work if
 #'   a square matrix is obtained, but use carefully.
-#' @param error.check Check data inconsistencies?
+#' @template error-check
 #'
 #' @details
 #'

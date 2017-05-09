@@ -7,7 +7,7 @@
 #'
 #' @param x A univariate time series.
 #' @param window.size Window size for envelope calculation. See details.
-#' @param error.check Check data inconsistencies?
+#' @template error-check
 #'
 #' @template window
 #'

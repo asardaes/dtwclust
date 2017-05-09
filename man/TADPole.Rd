@@ -17,7 +17,8 @@ is a time series. Multivariate series are not supported.}
 
 \item{window.size}{Window size constraint for DTW (Sakoe-Chiba). See details.}
 
-\item{error.check}{Should the data be checked for inconsistencies?}
+\item{error.check}{Logical indicating whether the function should try to detect inconsistencies
+and give more informative errors messages. Also used internally to avoid repeating checks.}
 
 \item{lb}{Which lower bound to use, "lbk" for \code{\link[=lb_keogh]{lb_keogh()}} or "lbi" for \code{\link[=lb_improved]{lb_improved()}}.}
 

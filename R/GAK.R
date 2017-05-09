@@ -15,7 +15,7 @@
 #'   the logarithm calculations. Used internally for memory optimization. If provided, it **will**
 #'   be modified *in place* by `C` code, except in the parallel version in [proxy::dist()] which
 #'   ignores it for thread-safe reasons.
-#' @param error.check Check data inconsistencies?
+#' @template error-check
 #'
 #' @details
 #'

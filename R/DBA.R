@@ -19,7 +19,7 @@
 #' @param max.iter Maximum number of iterations allowed.
 #' @param delta At iteration `i`, if `all(abs(centroid_{i}` `-` `centroid_{i-1})` `< delta)`,
 #'   convergence is assumed.
-#' @param error.check Should inconsistencies in the data be checked?
+#' @template error-check
 #' @param trace If `TRUE`, the current iteration is printed to output.
 #'
 #' @details

@@ -26,7 +26,8 @@ version only).}
 whichever result has a \emph{higher} distance value is returned. The proxy version can only work if
 a square matrix is obtained, but use carefully.}
 
-\item{error.check}{Check data inconsistencies?}
+\item{error.check}{Logical indicating whether the function should try to detect inconsistencies
+and give more informative errors messages. Also used internally to avoid repeating checks.}
 }
 \value{
 A list with:

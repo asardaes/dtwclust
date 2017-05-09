@@ -14,7 +14,8 @@ dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
 
 \item{norm}{Pointwise distance. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.}
 
-\item{error.check}{Should inconsistencies in the data be checked?}
+\item{error.check}{Logical indicating whether the function should try to detect inconsistencies
+and give more informative errors messages. Also used internally to avoid repeating checks.}
 
 \item{pairwise}{Calculate pairwise distances?}
 

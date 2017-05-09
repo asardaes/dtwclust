@@ -25,7 +25,8 @@ the logarithm calculations. Used internally for memory optimization. If provided
 be modified \emph{in place} by \code{C} code, except in the parallel version in \code{\link[proxy:dist]{proxy::dist()}} which
 ignores it for thread-safe reasons.}
 
-\item{error.check}{Check data inconsistencies?}
+\item{error.check}{Logical indicating whether the function should try to detect inconsistencies
+and give more informative errors messages. Also used internally to avoid repeating checks.}
 }
 \value{
 The logarithm of the GAK if \code{normalize = FALSE}, otherwise 1 minus the normalized GAK.

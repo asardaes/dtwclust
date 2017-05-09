@@ -7,7 +7,7 @@
 #'
 #' @param x,y Univariate time series.
 #' @param znorm Logical. Should each series be z-normalized before calculating the distance?
-#' @param error.check Check data inconsistencies?
+#' @template error-check
 #'
 #' @details
 #'
