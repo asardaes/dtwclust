@@ -3,6 +3,10 @@
 
 \title{News for package \pkg{dtwclust}}
 
+\description{
+Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/master/CHANGELOG.md}
+}
+
 \section{Changes in version 4.0.0}{
     \itemize{
         \item Optimized \code{TADPole} for multiple \code{k} and \code{dc} values.
