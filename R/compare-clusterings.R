@@ -23,7 +23,8 @@
 #' The named lists are interpreted in the following way: the name of each element of the list will
 #' be considered to be a function name, and the elements of the nested list will be the possible
 #' parameters for the function. Each function must have at least an empty list. The parameters may
-#' be vectors that specify different values to be tested.
+#' be vectors that specify different values to be tested. For values that should *not* be expanded,
+#' wrap them in a list (see example below).
 #'
 #' For preprocessing, the special name `none` signifies no preprocessing.
 #'
@@ -34,6 +35,11 @@
 #' @return
 #'
 #' A list for each clustering, each of which includes a data frame with the computed configurations.
+#'
+#' @examples
+#'
+#' ## prevent the "mat" argument from being expanded
+#' pdc_configs("p", example = list(mat = list(matrix(0L, 2L, 2L))))
 #'
 pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
                         partitional = NULL, hierarchical = NULL, fuzzy = NULL, tadpole = NULL,
