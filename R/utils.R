@@ -203,19 +203,9 @@ validate_pairwise <- function(x, y) {
 
 ## tasks created based on getDoParWorkers() could be larger than tasks based on objects
 allocate_matrices <- function(mat = NULL, ..., target.size) {
-    if (foreach::getDoParWorkers() > 1L) {
-        MAT <- lapply(1L:target.size, function(dummy) {
-            matrix(0, ...)
-        })
-
-    } else if (is.null(mat)) {
-        MAT <- list(matrix(0, ...))
-
-    } else {
-        MAT <- list(mat)
-    }
-
-    MAT
+    mat <- if (is.null(mat)) list(matrix(0, ...)) else list(mat)
+    if (foreach::getDoParWorkers() > 1L) mat <- rep(mat, target.size)
+    mat
 }
 
 # ==================================================================================================
