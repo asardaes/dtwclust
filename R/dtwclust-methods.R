@@ -1,6 +1,6 @@
 #' Methods for `dtwclust`
 #'
-#' Methods associated with [dtwclust-class] objects.
+#' **Deprecated** methods associated with [dtwclust-class] objects.
 #'
 #' @name dtwclust-methods
 #' @rdname dtwclust-methods

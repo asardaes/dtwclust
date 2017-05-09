@@ -1,9 +1,10 @@
 #' Class definition for `dtwclustFamily`
 #'
-#' Formal S4 class with a family of functions used in [dtwclust()].
+#' **Deprecated** S4 class with a family of functions used in [dtwclust()].
 #'
 #' @name dtwclustFamily-class
 #' @rdname dtwclustFamily-class
+#' @include tsclust-classes.R
 #' @aliases dtwclustFamily
 #' @exportClass dtwclustFamily
 #'
@@ -59,7 +60,7 @@ methods::setClassUnion("intORnull", c("integer", "NULL"))
 
 #' Class definition for `dtwclustControl`
 #'
-#' Formal S4 class with several control parameters used in [dtwclust()].
+#' **Deprecated** S4 class with several control parameters used in [dtwclust()].
 #'
 #' @name dtwclustControl-class
 #' @rdname dtwclustControl-class
@@ -149,18 +150,9 @@ setClass("dtwclustControl",
                                packages = character(0))
 )
 
-## For dtwclust class
-methods::setClass("proc_time4", contains = "numeric", slots = c(names = "character"))
-methods::setOldClass("proc_time", S4Class = "proc_time4")
-methods::removeClass("proc_time4")
-
-methods::setClass("hclust4", contains = "list", slots = c(names = "character"))
-methods::setOldClass("hclust", S4Class = "hclust4")
-methods::removeClass("hclust4")
-
 #' Class definition for `dtwclust`
 #'
-#' Formal S4 class.
+#' **Deprecated** S4 class.
 #'
 #' @name dtwclust-class
 #' @rdname dtwclust-class

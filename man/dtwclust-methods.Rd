@@ -67,7 +67,7 @@ without printing anything to screen}
 The plot method returns a \code{gg} object (or \code{NULL} for dendrogram plot) invisibly.
 }
 \description{
-Methods associated with \linkS4class{dtwclust} objects.
+\strong{Deprecated} methods associated with \linkS4class{dtwclust} objects.
 }
 \details{
 Supported generics from the \code{flexclust} package are: \code{\link[flexclust:randIndex]{flexclust::randIndex()}} and

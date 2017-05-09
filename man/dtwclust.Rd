@@ -50,7 +50,7 @@ If \code{control@nrep > 1} and a partitional procedure is used, \code{length(met
 hierarchical procedures are used, or \code{length(k)} \code{>} \code{1}, a list of objects is returned.
 }
 \description{
-This is the \emph{old} main function to perform time series clustering. It supports partitional,
+This is the \strong{old} main function to perform time series clustering. It supports partitional,
 hierarchical, fuzzy, k-Shape and TADPole clustering. See \code{\link[=tsclust]{tsclust()}} for the new interface.
 Please note that possible updates will only be implemented in the new function.
 }

@@ -5,7 +5,7 @@
 \alias{dtwclust-class}
 \title{Class definition for \code{dtwclust}}
 \description{
-Formal S4 class.
+\strong{Deprecated} S4 class.
 }
 \details{
 This class contains \code{\link[stats:hclust]{stats::hclust()}} as superclass and supports all its methods. Plot is a

@@ -1,6 +1,6 @@
 #' Time series clustering
 #'
-#' This is the *old* main function to perform time series clustering. It supports partitional,
+#' This is the **old** main function to perform time series clustering. It supports partitional,
 #' hierarchical, fuzzy, k-Shape and TADPole clustering. See [tsclust()] for the new interface.
 #' Please note that possible updates will only be implemented in the new function.
 #'
@@ -332,6 +332,8 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     ## =============================================================================================
 
     tic <- proc.time()
+    message("This function is now deprecated and will be eventually removed.\n",
+            "Please use 'tsclust' instead.")
 
     set.seed(seed)
 
@@ -354,8 +356,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     if (is.null(control) || is.list(control)) control <- as(control, "dtwclustControl")
     else if (class(control) != "dtwclustControl") stop("Invalid control argument")
     else methods::validObject(control)
-
-    if (control@trace) message("Consider using the 'tsclust' function instead.\n")
 
     dots <- list(...)
 

@@ -5,7 +5,8 @@
 * Partitional and hierarchical configurations in `compare_clusterings` now take into account the `symmetric` control parameter if provided.
 * Optimized PAM centroids with `pam.precompute = FALSE` by using sparse matrices from the `Matrix` package.
 * Fixed an error that sometimes caused objects returned by `tsclust` to have duplicated elements in the `args` slot.
-* Some internal functions changed, so older objects might no longer be compatible. Try using `update(old_obj)`.
+* Some internal functions changed, so older objects might no longer be compatible. Try using `update(old_TSClusters_obj)`.
+* The `dtwclust` *function* is now deprecated. Try using `as(dtwclust_class_obj, "TSClusters")` for old objects.
 
 ## Version 3.2.0
 * Added functions `compare_clusterings` and helpers to compare many clustering configurations, possibly in parallel.

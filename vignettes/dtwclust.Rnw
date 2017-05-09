@@ -1262,31 +1262,16 @@ library("dtwclust")
 data("uciCT")
 @
 
-The original main clustering function in \dtwclust{} has the same name, i.e., \code{dtwclust}.
-As of version 3.1.1, a new main function \code{tsclust} was added,
-which is hopefully more coherent in general.
-For completeness, comments about both are given below.
-Both return objects of type \code{S4}, which are one way in which \R{} implements classes.
+As of version 3.1.1, the main clustering function is \code{tsclust}.
+It returns objects of type \code{S4}, which are one way in which \R{} implements classes.
 The formal elements of the class are called \code{slots},
 and can be accessed with the \code{@} operator (instead of the usual \code{$}).
-
-With regard to the original \code{dtwclust} function,
-all documented information about the slots of the returned objects can be found by typing \code{?"dtwclust-class"} in the console.
-The associated methods can be found with \code{?"dtwclust-methods"}.
-Note that the \code{dtwclust} class contains the \code{S3} class \code{hclust} as a superclass.
-This can lead to some unexpected behavior,
-such as \code{is.list(new("dtwclust"))} being \code{TRUE}.
-Many control parameters can be modified by using the \code{control} argument,
-which should have a \code{dtwclustControl} class.
-A named list is also accepted.
-The documentation of all control parameters,
-as well as their default values,
-can be accessed by typing \code{?"dtwclustControl"} in the console.
-
-For the new \code{tsclust} function,
-the documentation of the slots for the objects returned can be found with \code{?"TSClusters-class"},
+The documentation of the slots can be found with \code{?"TSClusters-class"},
 and the methods with \code{?"tsclusters-methods"}.
-Controls are now set via intermediary functions whose documentation can be found with \code{?"tsclust-controls"}.
+Controls are set via intermediary functions whose documentation can be found with \code{?"tsclust-controls"}.
+The function \code{compare_clusterings} and some helper functions were added in version 3.2.0 to test many different clustering configurations in a convenient way.
+The \code{tsclust} function is used for the calculations.
+A series of examples are included in the documentation of the function.
 
 The random number generator of \R{} is set to L'Ecuyer-CMRG when \dtwclust{} is attached in an attempt to preserve reproducibility.
 The user is free to change this afterwards by using the \code{RNGkind} function.
@@ -1314,10 +1299,6 @@ Moreover, lists enable support for multivariate series,
 where a single multivariate time-series should be provided as a matrix where time spans the rows and the variables span the columns.
 Thus, several multivariate time-series should be provided as a list of matrices to ensure that they are correctly detected.
 Note, however, that not all distance and centroid functions support multivariate time-series.
-
-The function \code{compare_clusterings} and some helper functions were added in version 3.2.0 to test many different clustering configurations in a convenient way.
-The \code{tsclust} function is used for the calculations.
-A series of examples are included in the documentation of the function.
 
 \section[Registering a custom distance with proxy]{Registering a custom distance with \pkg{proxy}}
 \label{app:custom-dist}
@@ -1440,7 +1421,7 @@ classify_series(data[100L])
 \section{Hierarchical clustering examples}
 \label{app:hc}
 
-In the following call to \dtwclust{},
+In the following call to \code{tsclust},
 specifying the value of \code{k} indicates the number of desired clusters,
 so that the \code{cutree} function is called internally.
 Additionally, the shape extraction function is provided in the \code{centroid} argument so that,
@@ -1449,18 +1430,19 @@ their prototypes are extracted.
 Therefore, the data is \textit{z}-normalized by means of the \code{zscore} function.
 The seed is provided because of the randomness in shape extraction when choosing a reference series (see \cref{sec:shape}).
 
-<<example-hc, echo = TRUE, fig.cap = c("Resulting dendrogram after hierarchical clustering.", "Obtained clusters and their respective prototypes (centroids) shown as dashed lines.")>>=
+<<example-hc, echo = TRUE, fig.cap = "Resulting dendrogram after hierarchical clustering.">>=
 hc_sbd <- tsclust(CharTraj, type = "h", k = 20L,
-                  preproc = zscore, seed = 899, trace = TRUE,
+                  preproc = zscore, seed = 899,
                   distance = "sbd", centroid = shape_extraction,
                   control = hierarchical_control(method = "average"))
 
-# Cluster sizes
-table(hc_sbd@cluster)
-
 # By default, the dendrogram is plotted in hierarchical clustering
 plot(hc_sbd)
+@
 
+\FloatBarrier
+
+<<example-hc-1, echo = TRUE, fig.cap = "Obtained clusters and their respective prototypes (centroids) shown as dashed lines.">>=
 # The series and the obtained prototypes can be plotted too
 plot(hc_sbd, type = "sc")
 @

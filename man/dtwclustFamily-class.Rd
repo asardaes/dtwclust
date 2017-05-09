@@ -6,7 +6,7 @@
 \alias{dtwclustFamily}
 \title{Class definition for \code{dtwclustFamily}}
 \description{
-Formal S4 class with a family of functions used in \code{\link[=dtwclust]{dtwclust()}}.
+\strong{Deprecated} S4 class with a family of functions used in \code{\link[=dtwclust]{dtwclust()}}.
 }
 \details{
 The custom implementations also handle parallelization.
