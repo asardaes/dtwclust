@@ -104,6 +104,12 @@ test_that("Partitional clustering works as expected.", {
                                 args = tsclust_args(dist = list(window.size = 20L)),
                                 control = partitional_control(pam.precompute = FALSE))
 
+    pc_dtwb_npampre3 <- tsclust(data_reinterpolated_subset, type = "p", k = 4L,
+                                distance = "dtw_basic", centroid = "pam", seed = 938,
+                                args = tsclust_args(dist = list(window.size = 20L)),
+                                control = partitional_control(pam.precompute = FALSE,
+                                                              pam.sparse = FALSE))
+
     pc_dtwb_distmat <- dtwclust(data_reinterpolated_subset, type = "p", k = 4L,
                                 distance = "dtw_basic", centroid = "pam",
                                 seed = 938, control = list(window.size = 20L),
@@ -127,9 +133,10 @@ test_that("Partitional clustering works as expected.", {
     expect_identical(pc_dtwb@cluster, pc_dtwb_npampre@cluster, info = "pam.pre vs no pam.pre")
     expect_identical(pc_dtwb@cluster, pc_dtwb_distmat@cluster, info = "distmat supplied")
     expect_identical(pc_dtwb@cluster, pc_dtwlb@cluster, info = "dtw_basic vs dtw_lb")
-    expect_identical(pc_dtwb@cluster, pc_dtwb2@cluster, info = "TSC dtw_basic vs dtw_lb")
-    expect_identical(pc_dtwb@cluster, pc_dtwb_npampre2@cluster, info = "TSC dtw_basic vs dtw_lb")
-    expect_identical(pc_dtwb@cluster, pc_dtwb_distmat2@cluster, info = "TSC dtw_basic vs dtw_lb")
+    expect_identical(pc_dtwb@cluster, pc_dtwb2@cluster, info = "TSC")
+    expect_identical(pc_dtwb@cluster, pc_dtwb_npampre2@cluster, info = "TSC no pam.pre")
+    expect_identical(pc_dtwb@cluster, pc_dtwb_npampre3@cluster, info = "TSC no pam.pre nor sparse")
+    expect_identical(pc_dtwb@cluster, pc_dtwb_distmat2@cluster, info = "TSC distmat supplied")
     expect_identical(pc_dtwb@cluster, pc_dtwlb2@cluster, info = "TSC dtw_basic vs dtw_lb")
 
     pc_dtwb <- reset_nondeterministic(pc_dtwb)
