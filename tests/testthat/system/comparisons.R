@@ -119,10 +119,41 @@ cfgs_gak <- compare_clusterings_configs(types = "p", k = 2L:3L,
                                         ),
                                         centroids = pdc_configs(
                                             "centroid",
-                                            partitional = list(
-                                                pam = list()
-                                            )
+                                            pam = list()
                                         )
+)
+
+cfgs_dba <- compare_clusterings_configs(types = "h", k = 2L:3L,
+                                        preprocs = pdc_configs(
+                                            "preproc",
+                                            none = list()
+                                        ),
+                                        distances = pdc_configs(
+                                            "distance",
+                                            dtw_basic = list(window.size = 20L)
+                                        ),
+                                        centroids = pdc_configs(
+                                            "centroid",
+                                            DBA = list(window.size = 20L,
+                                                       max.iter = 5L)
+                                        )
+)
+
+cfgs_mats <- compare_clusterings_configs(types = "h", k = 2L:3L,
+                                         preprocs = pdc_configs(
+                                             "preproc",
+                                             none = list()
+                                         ),
+                                         distances = pdc_configs(
+                                             "distance",
+                                             gak = list(window.size = 20L,
+                                                        sigma = 100)
+                                         ),
+                                         centroids = pdc_configs(
+                                             "centroid",
+                                             DBA = list(window.size = 20L,
+                                                        max.iter = 5L)
+                                         )
 )
 
 # =================================================================================================
@@ -166,15 +197,39 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                                           lbls = labels_subset),
                    "pick.clus")
 
+    expect_warning(dba_comparison <- compare_clusterings(data_multivariate, "h",
+                                                         configs = cfgs_dba, seed = 294L,
+                                                         score.clus = score_fun,
+                                                         lbls = labels_subset),
+                   "pick.clus")
+
+    N <- max(lengths(data_subset)) + 1L
+    logs <- matrix(0, N, 3L)
+    gcm <- matrix(0, N, N)
+    expect_warning(mats_comparison <- compare_clusterings(data_subset, "h",
+                                                         configs = cfgs_mats, seed = 9430L,
+                                                         logs = logs,
+                                                         gcm = gcm,
+                                                         return.objects = TRUE),
+                   "score.clus")
+
+    expect_true(all(c("gcm", "logs") %in% names(mats_comparison$objects.hierarchical$config1_1@dots)))
+
+    if (foreach::getDoParWorkers() == 1L) {
+        expect_false(all(logs == 0))
+        expect_false(all(gcm == 0))
+    }
+
     ## rds
     all_comparisons$pick <- reset_nondeterministic(all_comparisons$pick)
     all_comparisons$pick@call <- call("zas", foo = "bar")
     all_comparisons$proc_time <- NULL
-
     gak_comparison$proc_time <- NULL
+    dba_comparison$proc_time <- NULL
 
     assign("all_comp", all_comparisons, persistent)
     assign("gak_comp", gak_comparison, persistent)
+    assign("dba_comp", dba_comparison, persistent)
 })
 
 # =================================================================================================

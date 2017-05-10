@@ -17,6 +17,7 @@ with(persistent, {
 
         expect_equal_to_reference(all_comp, file_name(all_comp))
         expect_equal_to_reference(gak_comp, file_name(gak_comp))
+        expect_equal_to_reference(dba_comp, file_name(dba_comp))
     })
 })
 
