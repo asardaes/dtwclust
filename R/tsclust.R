@@ -273,7 +273,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     diff_lengths <- different_lengths(series)
     check_consistency(distance, "dist", trace = trace, Lengths = diff_lengths, silent = FALSE)
 
-    if (type %in% c("partitional", "hierarchical")) {
+    if (type != "tadpole") {
         ## symmetric versions of dtw that I know of
         ## unconstrained and with symmetric1/symmetric2 is always symmetric, regardless of lengths
         ## constrained and same lengths with symmetric1/symmetric2 is also symmetric
