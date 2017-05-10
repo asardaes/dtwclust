@@ -5,7 +5,8 @@
 \title{DTW Barycenter Averaging}
 \usage{
 DBA(X, centroid = NULL, ..., window.size = NULL, norm = "L1",
-  max.iter = 20L, delta = 0.001, error.check = TRUE, trace = FALSE)
+  max.iter = 20L, delta = 0.001, error.check = TRUE, trace = FALSE,
+  gcm = NULL)
 }
 \arguments{
 \item{X}{A matrix or data frame where each row is a time series, or a list where each element is
@@ -34,6 +35,10 @@ convergence is assumed.}
 and give more informative errors messages. Also used internally to avoid repeating checks.}
 
 \item{trace}{If \code{TRUE}, the current iteration is printed to output.}
+
+\item{gcm}{Optional matrix to pass to \code{\link[=dtw_basic]{dtw_basic()}} (for the case when \code{backtrack = TRUE}). To
+define the matrix size, it should be assumed that \code{x} is the \emph{longest} series in \code{X}, and \code{y}
+is the \code{centroid} if provided or \code{x} otherwise. Ignored in parallel computations.}
 }
 \value{
 The average time series.

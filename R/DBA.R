@@ -21,6 +21,9 @@
 #'   convergence is assumed.
 #' @template error-check
 #' @param trace If `TRUE`, the current iteration is printed to output.
+#' @param gcm Optional matrix to pass to [dtw_basic()] (for the case when `backtrack = TRUE`). To
+#'   define the matrix size, it should be assumed that `x` is the *longest* series in `X`, and `y`
+#'   is the `centroid` if provided or `x` otherwise. Ignored in parallel computations.
 #'
 #' @details
 #'
@@ -89,11 +92,12 @@
 DBA <- function(X, centroid = NULL, ...,
                 window.size = NULL, norm = "L1",
                 max.iter = 20L, delta = 1e-3,
-                error.check = TRUE, trace = FALSE)
+                error.check = TRUE, trace = FALSE,
+                gcm = NULL)
 {
     X <- any2list(X)
-    if (is.null(centroid)) centroid <- X[[sample(length(X), 1L)]] # Random choice
 
+    if (is.null(centroid)) centroid <- X[[sample(length(X), 1L)]] # Random choice
     if (error.check) {
         check_consistency(X, "vltslist")
         check_consistency(centroid, "ts")
@@ -121,12 +125,23 @@ DBA <- function(X, centroid = NULL, ...,
     if (!is.null(window.size)) window.size <- check_consistency(window.size, "window")
     norm <- match.arg(norm, c("L1", "L2"))
     dots <- list(...)
-    L <- max(lengths(X)) ## maximum length of considered series
+    L <- max(lengths(X)) + 1L ## maximum length of considered series + 1L
     Xs <- split_parallel(X)
 
-    ## pre-allocate local cost matrices
-    GCM <- NULL # for CHECK
-    GCMs <- lapply(Xs, function(dummy) { list(matrix(0, L + 1L, length(centroid) + 1L)) })
+    ## pre-allocate cost matrices
+    if (is.null(gcm))
+        gcm <- matrix(0, L, length(centroid) + 1L)
+    else if (!is.matrix(gcm) || nrow(gcm) < (L) || ncol(gcm) < (length(centroid) + 1L))
+        stop("DBA: Dimension inconsistency in 'gcm'")
+    else if (storage.mode(gcm) != "double")
+        stop("DBA: If provided, 'gcm' must have 'double' storage mode.")
+
+    ## All extra parameters for dtw_basic()
+    dots <- enlist(window.size = window.size,
+                   norm = norm,
+                   gcm = gcm,
+                   backtrack = TRUE,
+                   dots = dots)
 
     ## Iterations
     iter <- 1L
@@ -137,17 +152,13 @@ DBA <- function(X, centroid = NULL, ...,
         ## Return the coordinates of each series in X grouped by the coordinate they match to in the
         ## centroid time series.
         ## Also return the number of coordinates used in each case (for averaging below).
-        xg <- foreach(X = Xs, GCM = GCMs,
+        xg <- foreach(X = Xs,
                       .combine = c,
                       .multicombine = TRUE,
                       .export = "enlist",
                       .packages = c("dtwclust", "stats")) %op% {
-                          mapply(X, GCM, SIMPLIFY = FALSE, FUN = function(x, gcm) {
-                              d <- do.call(dtw_basic,
-                                           enlist(x = x, y = centroid,
-                                                  window.size = window.size, norm = norm,
-                                                  backtrack = TRUE, gcm = gcm,
-                                                  dots = dots))
+                          mapply(X, SIMPLIFY = FALSE, FUN = function(x) {
+                              d <- do.call(dtw_basic, enlist(x = x, y = centroid, dots = dots))
 
                               x_sub <- stats::aggregate(x[d$index1],
                                                         by = list(ind = d$index2),
@@ -163,10 +174,8 @@ DBA <- function(X, centroid = NULL, ...,
 
         ## Put everything in one big data frame
         xg <- reshape2::melt(xg)
-
         ## Aggregate according to index of centroid time series (Var1) and the variable type (Var2)
         xg <- stats::aggregate(xg$value, by = list(xg$Var1, xg$Var2), sum)
-
         ## Average
         centroid <- xg$x[xg$Group.2 == "sum"] / xg$x[xg$Group.2 == "n"]
 
