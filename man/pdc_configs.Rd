@@ -39,18 +39,11 @@ All functions use \code{\link[base:expand.grid]{base::expand.grid()}}.
 The named lists are interpreted in the following way: the name of each element of the list will
 be considered to be a function name, and the elements of the nested list will be the possible
 parameters for the function. Each function must have at least an empty list. The parameters may
-be vectors that specify different values to be tested. For values that should \emph{not} be expanded,
-wrap them in a list (see example below).
+be vectors that specify different values to be tested.
 
 For preprocessing, the special name \code{none} signifies no preprocessing.
 
 For centroids, the special name \code{default} leaves the centroid unspecified.
 
 Please see the examples in \code{\link[=compare_clusterings]{compare_clusterings()}} to see how this is used.
-}
-\examples{
-
-## prevent the "mat" argument from being expanded
-pdc_configs("p", example = list(mat = list(matrix(0L, 2L, 2L))))
-
 }
