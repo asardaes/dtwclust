@@ -18,7 +18,7 @@ if \code{NULL}. For multivariate series, this should be a matrix with the same c
 the matrices in \code{X}.}
 
 \item{...}{Further arguments for \code{\link[=dtw_basic]{dtw_basic()}}. However, the following are already pre-
-specified: \code{window.size}, \code{norm} (passed along), \code{backtrack} and \code{gcm}.}
+specified: \code{window.size}, \code{norm} (passed along), and \code{backtrack}.}
 
 \item{window.size}{Window constraint for the DTW calculations. \code{NULL} means no constraint. A
 slanted band is used by default.}

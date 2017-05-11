@@ -11,7 +11,7 @@
 #'   if `NULL`. For multivariate series, this should be a matrix with the same characteristics as
 #'   the matrices in `X`.
 #' @param ... Further arguments for [dtw_basic()]. However, the following are already pre-
-#'   specified: `window.size`, `norm` (passed along), `backtrack` and `gcm`.
+#'   specified: `window.size`, `norm` (passed along), and `backtrack`.
 #' @param window.size Window constraint for the DTW calculations. `NULL` means no constraint. A
 #'   slanted band is used by default.
 #' @param norm Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for
