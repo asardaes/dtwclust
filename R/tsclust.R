@@ -288,6 +288,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             control$symmetric <- TRUE
     }
 
+    ## pre-allocate matrices for known distances
     matrices_allocated <- FALSE
     if (type != "tadpole") {
         if (tolower(distance) == "dtw_basic" && is.null(args$dist$gcm)) {
@@ -301,6 +302,14 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             matrices_allocated <- TRUE
         }
     }
+
+    ## pre-allocate matrix for DBA
+    if (grepl("^dba$", cent_char, ignore.case = TRUE) && is.null(args$cent$gcm)) {
+        dba_allocated <- TRUE
+        if (!exists("N", mode = "integer", inherits = FALSE)) N <- max(sapply(series, NROW))
+        args$cent$gcm <- matrix(0, N + 1L, N + 1L)
+
+    } else dba_allocated <- FALSE
 
     RET <- switch(
         type,
@@ -489,6 +498,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             if (inherits(distmat, "Distmat")) distmat <- distmat$distmat
             if (matrices_allocated) { args$dist$gcm <- args$dist$logs <- NULL }
+            if (dba_allocated) args$cent$gcm <- NULL
 
             ## Create objects
             RET <- lapply(pc_list, function(pc) {
@@ -619,6 +629,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             ## -------------------------------------------------------------------------------------
 
             if (matrices_allocated) { args$dist$gcm <- args$dist$logs <- NULL }
+            if (dba_allocated) args$cent$gcm <- NULL
 
             RET <- lapply(k, function(k) {
                 lapply(hc, function(hc) {
@@ -747,6 +758,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                     allcent <- function(...) {}
                     centroids <- series[R$centroids]
                 }
+
+                if (dba_allocated) args$cent$gcm <- NULL
 
                 obj <- new("PartitionalTSClusters",
                            call = MYCALL,
