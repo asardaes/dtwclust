@@ -221,7 +221,7 @@ test_that("Invalid combinations in fuzzy clustering are detected by tsclust.", {
     expect_error(tsclust(data, type = "f", distance = "dtw_basic"), "different length")
     expect_error(tsclust(data, type = "f", distance = "sbd"), "different length")
 
-    expect_error(tsclust(data, type = "f", preproc = "zscore"), "preprocessing")
+    expect_error(tsclust(data_matrix, type = "f", preproc = "zscore"), "preprocessing")
 
     expect_error(tsclust(data_matrix, type = "f", distance = mean), "proxy", info = "Function")
     expect_error(tsclust(data_matrix, type = "f", distance = NULL), "proxy", info = "NULL")

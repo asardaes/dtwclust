@@ -245,18 +245,13 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     ## ---------------------------------------------------------------------------------------------
 
     if (!is.null(preproc) && is.function(preproc)) {
-        series <- do.call(preproc,
-                          enlist(series,
-                                 dots = subset_dots(args$preproc, preproc)))
-
+        series <- do.call(preproc, enlist(series, dots = subset_dots(args$preproc, preproc)))
         preproc_char <- as.character(substitute(preproc))[1L]
 
     } else if (type == "partitional" && is.character(centroid) && centroid == "shape") {
         preproc <- zscore
         preproc_char <- "zscore"
-        series <- do.call(zscore,
-                          enlist(series,
-                                 dots = subset_dots(args$preproc, zscore)))
+        series <- do.call(zscore, enlist(series, dots = args$preproc))
 
     } else if (is.null(preproc)) {
         preproc <- function(x, ...) { x }
@@ -270,8 +265,12 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     ## Further options
     ## ---------------------------------------------------------------------------------------------
 
+    ## after preprocessing!
     diff_lengths <- different_lengths(series)
-    check_consistency(distance, "dist", trace = trace, Lengths = diff_lengths, silent = FALSE)
+    check_consistency(distance, "dist", trace = trace, diff_lengths = diff_lengths, silent = FALSE)
+    cent_missing <- missing(centroid)
+    cent_char <- check_consistency(centroid, "cent", clus_type = type,
+                                   diff_lengths = diff_lengths, cent_missing = cent_missing)
 
     if (type != "tadpole") {
         ## symmetric versions of dtw that I know of
@@ -315,27 +314,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             nrep <- if (is.null(control$nrep)) 1L else control$nrep
 
-            if (is.character(centroid)) {
-                if (type == "fuzzy")
-                    centroid <- match.arg(centroid, centroids_fuzzy)
-                else
-                    centroid <- match.arg(centroid, centroids_nonfuzzy)
-
-                ## replace any given distmat if centroid not "pam" or "fcmdd"
-                if (!(centroid %in% c("pam", "fcmdd"))) control$distmat <- NULL
-
-            } else {
+            if (!is.character(centroid) || !(cent_char %in% c("pam", "fcmdd")))
                 control$distmat <- NULL
-            }
-
-            if (diff_lengths) {
-                if (type == "fuzzy" && is.character(centroid) && centroid == "fcm")
-                    stop("Fuzzy c-means does not support series with different length.")
-
-                check_consistency(centroid, "cent", trace = trace)
-            }
-
-            cent_char <- as.character(substitute(centroid))[1L]
 
             ## -------------------------------------------------------------------------------------
             ## Family creation, see initialization in tsclusters-methods.R
@@ -581,6 +561,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             method <- control$method
             distmat <- control$distmat
 
+            if (!is.function(centroid)) centroid <- NA
             if (tolower(distance) == "dtw_lb")
                 warning("Using dtw_lb with hierarchical clustering is not advised.")
 
@@ -633,13 +614,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 method <- attr(method, "name")
             }
 
-            ## Invalid centroid specifier provided?
-            if (!missing(centroid) && !is.function(centroid))
-                warning("The 'centroid' argument was provided but it wasn't a function, ",
-                        "so it was ignored.")
-            if (!is.function(centroid))
-                centroid <- NA
-
             ## -------------------------------------------------------------------------------------
             ## Prepare results
             ## -------------------------------------------------------------------------------------
@@ -662,8 +636,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                            dots = subset_dots(args$cent, centroid)))
                         })
 
-                        cent_char <- as.character(substitute(centroid))[1L]
-
                     } else {
                         allcent <- function(...) {}
 
@@ -678,7 +650,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                         })
 
                         centroids <- series[centroids]
-                        cent_char <- "PAM (Hierarchical)"
                     }
 
                     new("HierarchicalTSClusters",
@@ -724,22 +695,11 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             if (!missing(distance)) warning("The distance argument is ignored for TADPole.")
 
             ## -------------------------------------------------------------------------------------
-            ## Cluster
+            ## Parameters
             ## -------------------------------------------------------------------------------------
 
             ## mainly for predict generic
             distfun <- ddist2("dtw_lb", control = control)
-
-            ## Invalid centroid specifier provided?
-            if (!missing(centroid) && !is.function(centroid))
-                warning("The 'centroid' argument was provided but it wasn't a function, ",
-                        "so it was ignored.")
-
-            if (is.function(centroid))
-                cent_char <- as.character(substitute(centroid))
-            else
-                cent_char <- "PAM (TADPole)"
-
             ## for family@dist
             args$dist$window.size <- control$window.size
             args$dist$norm <- "L2"

@@ -2,7 +2,10 @@
 # Miscellaneous
 # ==================================================================================================
 
-check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, silent = TRUE) {
+check_consistency <- function(obj, case, ..., clus_type,
+                              diff_lengths = FALSE, cent_missing,
+                              trace = FALSE, silent = TRUE)
+{
     case <- match.arg(case, c("ts", "tslist", "vltslist", "window", "dist", "cent"))
 
     if (case == "ts") {
@@ -32,7 +35,7 @@ check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
                      "'proxy' package.")
         }
 
-        if (Lengths) {
+        if (diff_lengths) {
             if ((obj %in% distances_included) && !(obj %in% distances_difflength))
                 stop("Only the following distances are supported for series with different length:\n\t",
                      paste(distances_difflength, collapse = "\t"))
@@ -45,10 +48,60 @@ check_consistency <- function(obj, case, ..., trace = FALSE, Lengths = FALSE, si
         return(TRUE)
 
     } else if (case == "cent") {
-        if (is.character(obj) && (obj %in% centroids_included) && !(obj %in% centroids_difflength))
-            stop("Only the following centroids are supported for series with different lengths:\n\t",
-                 paste(centroids_difflength, collapse = "\t"))
+        cent_char <- switch(
+            clus_type,
+            partitional = {
+                if (is.character(obj)) {
+                    cent_char <- match.arg(obj, centroids_nonfuzzy)
 
+                    if (diff_lengths &&
+                        cent_char %in% centroids_included &&
+                        !(cent_char %in% centroids_difflength))
+                        stop("Only the following centroids are supported for ",
+                             "series with different lengths:\n\t",
+                             paste(centroids_difflength, collapse = "\t"))
+
+                } else {
+                    cent_char <- as.character(substitute(obj))[1L]
+                }
+
+                ## return partitional switch
+                cent_char
+            },
+            fuzzy = {
+                if (is.character(obj)) {
+                    cent_char <- match.arg(obj, centroids_fuzzy)
+
+                    if (diff_lengths && cent_char == "fcm")
+                        stop("Fuzzy c-means does not support series with different length.")
+
+                } else {
+                    cent_char <- as.character(substitute(obj))[1L]
+                }
+
+                ## return fuzzy switch
+                cent_char
+            },
+            hierarchical =, tadpole = {
+                cent_char <- paste("PAM",
+                                   switch(clus_type,
+                                          hierarchical = "(Hierarchical)",
+                                          tadpole = "(TADPole)"))
+
+                if (is.function(obj))
+                    cent_char <- as.character(substitute(obj))[1L]
+                else if (!cent_missing)
+                    warning("The 'centroid' argument was provided but it wasn't a function, ",
+                            "so it was ignored.",
+                            call. = FALSE, immediate. = TRUE)
+
+                ## return hierarchical/tadpole switch
+                cent_char
+            }
+        )
+
+        ## cent case
+        return(cent_char)
     }
 
     invisible(NULL)

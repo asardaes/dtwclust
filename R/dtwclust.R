@@ -399,7 +399,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
 
     diff_lengths <- different_lengths(data)
 
-    check_consistency(distance, "dist", trace = control@trace, Lengths = diff_lengths, silent = FALSE)
+    check_consistency(distance, "dist", trace = control@trace, diff_lengths = diff_lengths, silent = FALSE)
 
     ## symmetric versions of dtw that I know of
     ## unconstrained and with symmetric1/symmetric2 is always symmetric, regardless of lengths
@@ -449,7 +449,9 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
             if (type == "fuzzy" && is.character(centroid) && centroid == "fcm")
                 stop("Fuzzy c-means does not support series with different length.")
 
-            check_consistency(centroid, "cent", trace = control@trace)
+            if (is.character(centroid) && (centroid %in% centroids_included) && !(centroid %in% centroids_difflength))
+                stop("Only the following centroids are supported for series with different lengths:\n\t",
+                     paste(centroids_difflength, collapse = "\t"))
         }
 
         ## -----------------------------------------------------------------------------------------

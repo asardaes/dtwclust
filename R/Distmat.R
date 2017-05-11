@@ -31,7 +31,7 @@ Distmat <- setRefClass("Distmat",
                                        check_consistency(distance,
                                                          "dist",
                                                          trace = FALSE,
-                                                         Lengths = different_lengths(series),
+                                                         diff_lengths = different_lengths(series),
                                                          silent = FALSE)
 
                                        if (class(control) != "PtCtrl")
