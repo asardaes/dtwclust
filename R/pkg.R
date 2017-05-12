@@ -67,9 +67,6 @@
 #' @importFrom dtw symmetric1
 #' @importFrom dtw symmetric2
 #'
-#' @importFrom caTools runmin
-#' @importFrom caTools runmax
-#'
 #' @importFrom flexclust randIndex
 #' @importFrom flexclust clusterSim
 #' @importFrom flexclust comPart

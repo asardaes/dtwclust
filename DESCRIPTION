@@ -15,7 +15,6 @@ Imports:
     parallel,
     stats,
     utils,
-    caTools,
     flexclust,
     foreach,
     Matrix,

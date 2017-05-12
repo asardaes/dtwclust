@@ -39,14 +39,19 @@ between two time series. It uses a Sakoe-Chiba constraint.
 \details{
 The reference time series should go in \code{x}, whereas the query time series should go in \code{y}.
 
+If the envelopes are provided, they should be provided together. If either one is missing, both
+will be computed.
+
 The windowing constraint uses a centered window. The calculations expect a value in
 \code{window.size} that represents the distance between the point considered and one of the edges
 of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
 observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
 in \code{10(2) + 1 = 21} observations falling within the window.
 }
-\note{
-The lower bound is defined for time series of equal length only and is \strong{not} symmetric.
+\section{Note}{
+
+
+The lower bound is only defined for time series of equal length and is \strong{not} symmetric.
 
 If you wish to calculate the lower bound between several time series, it would be better to use
 the version registered with the \code{proxy} package, since it includes some small optimizations. The
@@ -56,6 +61,7 @@ The proxy version of \code{force.symmetry} should only be used when only \code{x
 and \code{y} are identical. It compares the lower and upper triangular of the resulting distance
 matrix and forces symmetry in such a way that the tightest lower bound is obtained.
 }
+
 \examples{
 
 # Sample data
