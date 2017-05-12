@@ -35,7 +35,7 @@
 #'
 compute_envelop <- function(x, window.size, error.check = TRUE) {
     if (error.check) {
-        if (NCOL(x) > 1L) stop("The envelop can conly be computed for univariate series.")
+        if (NCOL(x) > 1L) stop("The envelope can conly be computed for univariate series.")
         check_consistency(x, "ts")
     }
 
