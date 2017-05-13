@@ -364,9 +364,6 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'   [pdc_configs()] and [compare_clusterings_configs()].
 #' @param seed Seed for random reproducibility.
 #' @param trace Logical indicating that more output should be printed to screen.
-#' @param packages A character vector with the names of any packages needed for any functions used
-#'   (distance, centroid, preprocessing, etc.). The name "dtwclust" is added automatically. Relevant
-#'   for parallel computation.
 #' @param score.clus A function that gets the list of results (and `...`) and scores each one. It
 #'   may also be a named list of functions, one for each type of clustering. See Scoring section.
 #' @param pick.clus A function that gets the result from `score.clus` as first argument, as well as
@@ -375,6 +372,10 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'   when using parallel computation.
 #' @param return.objects Logical indicating whether the objects from returned by [tsclust()] should
 #'   be given in the result.
+#' @param packages A character vector with the names of any packages needed for any functions used
+#'   (distance, centroid, preprocessing, etc.). The name "dtwclust" is added automatically. Relevant
+#'   for parallel computation.
+#' @param .errorhandling This will be passed to [foreach::foreach()]. See Parallel section below.
 #'
 #' @details
 #'
@@ -397,6 +398,18 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #' - `proc_time`: The measured execution time, using [base::proc.time()].
 #'
 #' The cluster objects are also returned if `return.objects` `=` `TRUE`.
+#'
+#' @section Parallel computation:
+#'
+#'   The configurations for each clustering type can be evaluated in parallel with the \pkg{foreach}
+#'   package. A parallel backend can be registered, e.g., with \pkg{doParallel}.
+#'
+#'   If the `.errorhandling` parameter is changed to "pass" and a custom `score.clus` function is
+#'   used, said function should be able to deal with possible error objects.
+#'
+#'   If it is changed to "remove", it might not be possible to attach the scores to the results data
+#'   frame, or it may be inconsistent. Additionally, if `return.objects` is `TRUE`, the names given
+#'   to the objects might also be inconsistent.
 #'
 #' @section Scoring:
 #'
@@ -441,10 +454,11 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'
 compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ...,
                                 configs = compare_clusterings_configs(types),
-                                seed = NULL, trace = FALSE, packages = character(0L),
+                                seed = NULL, trace = FALSE,
                                 score.clus = function(...) stop("No scoring"),
                                 pick.clus = function(...) stop("No picking"),
-                                shuffle.configs = FALSE, return.objects = FALSE)
+                                shuffle.configs = FALSE, return.objects = FALSE,
+                                packages = character(0L), .errorhandling = "stop")
 {
     ## =============================================================================================
     ## Start
@@ -455,6 +469,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
     if (is.null(series)) stop("No series provided.")
     types <- match.arg(types, supported_clusterings, TRUE)
+    .errorhandling <- match.arg(.errorhandling, c("stop", "remove", "pass"))
 
     ## coerce to list if necessary
     series <- any2list(series)
@@ -596,7 +611,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
     if (trace) cat("\n")
 
-    objs_by_type <- mapply(configs, names(configs), seeds, SIMPLIFY = FALSE, FUN = function(config, type, seeds) {
+    objs_by_type <- Map(configs, names(configs), seeds, f = function(config, type, seeds) {
         if (trace) message("=================================== Performing ",
                            type,
                            " clusterings ===================================\n")
@@ -633,17 +648,18 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         ## perform clusterings
         ## -----------------------------------------------------------------------------------------
 
-        config_split <- split_parallel(config, 1L)
+        configs_split <- split_parallel(config, 1L)
         seeds_split <- split_parallel(seeds)
         cfg <- NULL # CHECK complains with NOTE regarding undefined global
 
         objs <- foreach(
-            cfg = config_split,
+            cfg = configs_split,
             seed = seeds_split,
-            .combine = c,
+            .combine = list,
             .multicombine = TRUE,
             .packages = packages,
-            .export = export
+            .export = export,
+            .errorhandling = .errorhandling
         ) %op% {
             chunk <- lapply(seq_len(nrow(cfg)), function(i) {
                 if (trace) {
@@ -779,15 +795,25 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                     tsc
                 })
 
+                ## return config result from lapply()
                 tsc
             })
 
-            ## return chunk
+            ## return chunk from foreach()
             unlist(chunk, recursive = FALSE, use.names = FALSE)
         }
 
-        ## return TSClusters
-        objs
+        ## foreach() with one 'iteration' does NOT execute .combine function
+        if (length(configs_split) == 1L) objs <- list(objs)
+
+        if (.errorhandling == "pass") {
+            failed_cfgs <- sapply(objs, function(obj) { inherits(obj, "error") })
+            ## make one more list level so unlist() below leaves errors as one object
+            if (any(failed_cfgs)) objs[failed_cfgs] <- lapply(objs[failed_cfgs], list)
+        }
+
+        ## return TSClusters from Map()
+        unlist(objs, recursive = FALSE, use.names = FALSE)
     })
 
     ## =============================================================================================
@@ -932,14 +958,20 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     results <- list(results = results, scores = scores, pick = pick, proc_time = proc.time() - tic)
 
     if (return.objects) {
-        objs_by_type <- mapply(objs_by_type, results$results,
+        objs_out <- try(mapply(objs_by_type, results$results,
                                SIMPLIFY = FALSE,
                                FUN = function(objs, res) {
                                    names(objs) <- res$config_id
                                    objs
-                               })
+                               }),
+                        silent = TRUE)
 
-        results <- c(results, objects = objs_by_type)
+        if (inherits(objs_out, "try-error")) {
+            warning("Could not assign names to returned objects.")
+            objs_out <- objs_by_type
+        }
+
+        results <- c(results, objects = objs_out)
     }
 
     if (shuffle.configs)

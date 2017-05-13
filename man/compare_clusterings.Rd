@@ -6,9 +6,10 @@
 \usage{
 compare_clusterings(series = NULL, types = c("p", "h", "f", "t"), ...,
   configs = compare_clusterings_configs(types), seed = NULL,
-  trace = FALSE, packages = character(0L), score.clus = function(...)
-  stop("No scoring"), pick.clus = function(...) stop("No picking"),
-  shuffle.configs = FALSE, return.objects = FALSE)
+  trace = FALSE, score.clus = function(...) stop("No scoring"),
+  pick.clus = function(...) stop("No picking"), shuffle.configs = FALSE,
+  return.objects = FALSE, packages = character(0L),
+  .errorhandling = "stop")
 }
 \arguments{
 \item{series}{A list of series, a numeric matrix or a data frame. Matrices and data frames are
@@ -26,10 +27,6 @@ hierarchical, fuzzy, tadpole.}
 
 \item{trace}{Logical indicating that more output should be printed to screen.}
 
-\item{packages}{A character vector with the names of any packages needed for any functions used
-(distance, centroid, preprocessing, etc.). The name "dtwclust" is added automatically. Relevant
-for parallel computation.}
-
 \item{score.clus}{A function that gets the list of results (and \code{...}) and scores each one. It
 may also be a named list of functions, one for each type of clustering. See Scoring section.}
 
@@ -41,6 +38,12 @@ when using parallel computation.}
 
 \item{return.objects}{Logical indicating whether the objects from returned by \code{\link[=tsclust]{tsclust()}} should
 be given in the result.}
+
+\item{packages}{A character vector with the names of any packages needed for any functions used
+(distance, centroid, preprocessing, etc.). The name "dtwclust" is added automatically. Relevant
+for parallel computation.}
+
+\item{.errorhandling}{This will be passed to \code{\link[foreach:foreach]{foreach::foreach()}}. See Parallel section below.}
 }
 \value{
 A list with:
@@ -66,6 +69,20 @@ Parameters specified in \code{configs} whose values are \code{NA} will be ignore
 The scoring and picking functions are for convenience, if they are not specified, the \code{scores}
 and \code{pick} elements of the result will be \code{NULL}.
 }
+\section{Parallel computation}{
+
+
+The configurations for each clustering type can be evaluated in parallel with the \pkg{foreach}
+package. A parallel backend can be registered, e.g., with \pkg{doParallel}.
+
+If the \code{.errorhandling} parameter is changed to "pass" and a custom \code{score.clus} function is
+used, said function should be able to deal with possible error objects.
+
+If it is changed to "remove", it might not be possible to attach the scores to the results data
+frame, or it may be inconsistent. Additionally, if \code{return.objects} is \code{TRUE}, the names given
+to the objects might also be inconsistent.
+}
+
 \section{Scoring}{
 
 

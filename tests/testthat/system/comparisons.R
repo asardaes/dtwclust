@@ -161,6 +161,21 @@ cfgs_mats <- compare_clusterings_configs(types = "h", k = 2L:3L,
 # =================================================================================================
 
 test_that("Compare clusterings works for the minimum set with all possibilities.", {
+    expect_warning(errorpass_comp <- compare_clusterings(data_subset, c("p", "h", "f"),
+                                                         configs = compare_clusterings_configs(),
+                                                         seed = 932L, return.objects = TRUE,
+                                                         .errorhandling = "pass"),
+                   "score.clus")
+
+    expect_true(inherits(errorpass_comp$objects.fuzzy[[1L]], "error"))
+
+    expect_warning(errorrm_comp <- compare_clusterings(data_subset, c("p", "h", "f"),
+                                                       configs = compare_clusterings_configs(),
+                                                       seed = 932L, return.objects = TRUE,
+                                                       .errorhandling = "remove"))
+
+    expect_null(errorrm_comp$objects.fuzzy)
+
     expect_warning(no_score <- compare_clusterings(data_reinterpolated_subset, c("f"),
                                                    configs = cfgs, seed = 392L),
                    "score.clus")
@@ -192,9 +207,9 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                                                   lbls = labels_subset))
 
     expect_warning(gak_comparison <- compare_clusterings(data_subset, "p",
-                                                          configs = cfgs_gak, seed = 190L,
-                                                          score.clus = score_fun,
-                                                          lbls = labels_subset),
+                                                         configs = cfgs_gak, seed = 190L,
+                                                         score.clus = score_fun,
+                                                         lbls = labels_subset),
                    "pick.clus")
 
     expect_warning(dba_comparison <- compare_clusterings(data_multivariate, "h",
@@ -207,10 +222,10 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
     logs <- matrix(0, N, 3L)
     gcm <- matrix(0, N, N)
     expect_warning(mats_comparison <- compare_clusterings(data_subset, "h",
-                                                         configs = cfgs_mats, seed = 9430L,
-                                                         logs = logs,
-                                                         gcm = gcm,
-                                                         return.objects = TRUE),
+                                                          configs = cfgs_mats, seed = 9430L,
+                                                          logs = logs,
+                                                          gcm = gcm,
+                                                          return.objects = TRUE),
                    "score.clus")
 
     expect_true(all(c("gcm", "logs") %in% names(mats_comparison$objects.hierarchical$config1_1@dots)))
