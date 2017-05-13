@@ -77,7 +77,6 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
     D[ind1] <- x[ind1] - upper.env[ind1]
     ind2 <- x < lower.env
     D[ind2] <- lower.env[ind2] - x[ind2]
-
     d <- switch(EXPR = norm, L1 = sum(D), L2 = sqrt(sum(D^2)))
 
     if (force.symmetry) {
