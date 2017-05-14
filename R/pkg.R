@@ -223,6 +223,7 @@ NULL ## remember to check methods imports after removing dtwclust()
 release_questions <- function() {
     c(
         "Changed .Rbuildignore to exclude test rds files?",
-        "Built the binary with --compact-vignettes?"
+        "Built the binary with --compact-vignettes?",
+        "Set vignette's cache to FALSE?"
     )
 }
