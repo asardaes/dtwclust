@@ -129,7 +129,7 @@ create_dtwclust <- function(..., override.family = TRUE) {
                              .Object@centroids,
                              dots = .Object@dots))
 
-        .Object@cldist <- as.matrix(dm[cbind(1L:length(.Object@datalist), .Object@cluster)])
+        .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist), .Object@cluster)])
 
         dimnames(.Object@cldist) <- NULL
     }

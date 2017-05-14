@@ -191,7 +191,8 @@ setMethod("initialize", "PartitionalTSClusters",
                                        .Object@centroids,
                                        dots = .Object@args$dist))
 
-                  .Object@cldist <- as.matrix(dm[cbind(1L:length(.Object@datalist), .Object@cluster)])
+                  .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist),
+                                                             .Object@cluster)])
 
                   dimnames(.Object@cldist) <- NULL
               }
@@ -226,7 +227,8 @@ setMethod("initialize", "HierarchicalTSClusters",
                                        .Object@centroids,
                                        dots = .Object@args$dist))
 
-                  .Object@cldist <- as.matrix(dm[cbind(1L:length(.Object@datalist), .Object@cluster)])
+                  .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist),
+                                                             .Object@cluster)])
 
                   dimnames(.Object@cldist) <- NULL
               }

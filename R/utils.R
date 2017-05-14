@@ -118,7 +118,7 @@ any2list <- function(obj) {
         obj <- list(obj)
 
     } else if (is.data.frame(obj)) {
-        obj <- any2list(as.matrix(obj))
+        obj <- any2list(base::as.matrix(obj))
 
     } else if (!is.list(obj))
         stop("Unsupported data type.")

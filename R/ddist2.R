@@ -103,11 +103,11 @@ ddist2 <- function(distance, control) {
                 } else {
                     ## WHOLE SYMMETRIC DISTMAT WITH CUSTOM LOOP OR SEQUENTIAL proxy LOOP
                     ## maybe one of my distances, or one included in proxy by default, let it handle parallelization
-                    d <- as.matrix(do.call(proxy::dist,
-                                           enlist(x = x,
-                                                  y = NULL,
-                                                  method = distance,
-                                                  dots = dots)))
+                    d <- base::as.matrix(do.call(proxy::dist,
+                                                 enlist(x = x,
+                                                        y = NULL,
+                                                        method = distance,
+                                                        dots = dots)))
 
                     class(d) <- "crossdist"
                 }

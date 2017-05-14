@@ -115,7 +115,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, cent, ...) {
         fcluster <- matrix(NA_real_)
     }
 
-    cldist <- as.matrix(distmat[cbind(1L:N, cluster)])
+    cldist <- base::as.matrix(distmat[cbind(1L:N, cluster)])
     size <- tabulate(cluster)
 
     ## if some clusters are empty, tapply() would not return enough rows
@@ -257,7 +257,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         fcluster <- matrix(NA_real_)
     }
 
-    cldist <- as.matrix(distmat[cbind(1L:N, cluster)])
+    cldist <- base::as.matrix(distmat[cbind(1L:N, cluster)])
     size <- tabulate(cluster)
 
     ## if some clusters are empty, tapply() would not return enough rows
