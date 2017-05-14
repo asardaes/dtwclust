@@ -48,13 +48,13 @@ double lnorm(double const *x, double const *y, double const norm,
 }
 
 // which direction to take in the cost matrix
-int which_min(int const i, int const j, int const nx, int const backtrack,
+int which_min(double const diag, double const left, double const up,
               double const step, double volatile const local_cost)
 {
     // DIAG, LEFT, UP
-    tuple[0] = (D[d2s(i-1, j-1, nx, backtrack)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j-1, nx, backtrack)] + step * local_cost;
-    tuple[1] = (D[d2s(i, j-1, nx, backtrack)] == NOT_VISITED) ? DBL_MAX : D[d2s(i, j-1, nx, backtrack)] + local_cost;
-    tuple[2] = (D[d2s(i-1, j, nx, backtrack)] == NOT_VISITED) ? DBL_MAX : D[d2s(i-1, j, nx, backtrack)] + local_cost;
+    tuple[0] = (diag == NOT_VISITED) ? DBL_MAX : diag + step * local_cost;
+    tuple[1] = (left == NOT_VISITED) ? DBL_MAX : left + local_cost;
+    tuple[2] = (up == NOT_VISITED) ? DBL_MAX : up + local_cost;
 
     int direction = (tuple[1] < tuple[0]) ? 1 : 0;
     direction = (tuple[2] < tuple[direction]) ? 2 : direction;
@@ -111,7 +111,8 @@ double dtw_basic_c(double const *x, double const *y, int const w,
 
     // first value, must set here to avoid multiplying by step
     D[d2s(1, 1, nx, backtrack)] = lnorm(x, y, norm, nx, ny, dim, 0, 0);
-    if (norm == 2) D[d2s(1, 1, nx, backtrack)] = D[d2s(1, 1, nx, backtrack)] * D[d2s(1, 1, nx, backtrack)];
+    if (norm == 2)
+        D[d2s(1, 1, nx, backtrack)] = D[d2s(1, 1, nx, backtrack)] * D[d2s(1, 1, nx, backtrack)];
 
     // dynamic programming
     for (i = 1; i <= nx; i++) {
@@ -144,7 +145,11 @@ double dtw_basic_c(double const *x, double const *y, int const w,
             if (norm == 2) local_cost = local_cost * local_cost;
 
             // set the value of 'direction'
-            direction = which_min(i, j, nx, backtrack, step, local_cost);
+            direction = which_min(D[d2s(i-1, j-1, nx, backtrack)],
+                                  D[d2s(i, j-1, nx, backtrack)],
+                                  D[d2s(i-1, j, nx, backtrack)],
+                                  step,
+                                  local_cost);
 
             /*
              * I can use the same matrix to save both cost values and steps taken by shifting
