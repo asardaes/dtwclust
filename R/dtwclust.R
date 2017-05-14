@@ -353,7 +353,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     ## Control parameters
     ## ---------------------------------------------------------------------------------------------
 
-    if (is.null(control) || is.list(control)) control <- as(control, "dtwclustControl")
+    if (is.null(control) || is.list(control)) control <- methods::as(control, "dtwclustControl")
     else if (class(control) != "dtwclustControl") stop("Invalid control argument")
     else methods::validObject(control)
 

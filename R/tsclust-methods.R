@@ -40,7 +40,7 @@ setMethod("initialize", "tsclustFamily",
                       stop("Centroid definition must be either a function or a character")
               }
 
-              do.call(callNextMethod, dots)
+              do.call(methods::callNextMethod, dots)
           })
 
 #' @rdname tsclusters-methods
@@ -366,7 +366,7 @@ update.TSClusters <- function(object, ..., evaluate = TRUE) {
 #' @aliases update,TSClusters
 #' @exportMethod update
 #'
-setMethod("update", signature(object = "TSClusters"), update.TSClusters)
+setMethod("update", methods::signature(object = "TSClusters"), update.TSClusters)
 
 # ==================================================================================================
 # predict from stats
@@ -422,7 +422,7 @@ predict.TSClusters <- function(object, newdata = NULL, ...) {
 #' @aliases predict,TSClusters
 #' @exportMethod predict
 #'
-setMethod("predict", signature(object = "TSClusters"), predict.TSClusters)
+setMethod("predict", methods::signature(object = "TSClusters"), predict.TSClusters)
 
 # ==================================================================================================
 # Plot
@@ -488,7 +488,7 @@ plot.TSClusters <- function(x, y, ...,
 
     ## plot dendrogram?
     if (inherits(x, "HierarchicalTSClusters") && type == "dendrogram") {
-        x <- S3Part(x, strictS3 = TRUE)
+        x <- methods::S3Part(x, strictS3 = TRUE)
         if (plot) graphics::plot(x, ...)
         return(invisible(NULL))
 
@@ -601,9 +601,9 @@ plot.TSClusters <- function(x, y, ...,
                                      value = numeric(),
                                      cl = factor(),
                                      color = factor()),
-                          aes_string(x = "t",
-                                     y = "value",
-                                     group = "L1"))
+                          ggplot2::aes_string(x = "t",
+                                              y = "value",
+                                              group = "L1"))
 
     ## add centroids first if appropriate, so that they are at the very back
     if (type %in% c("sc", "centroids")) {
@@ -628,7 +628,7 @@ plot.TSClusters <- function(x, y, ...,
 
         gg <- gg + ggplot2::geom_vline(data = ggdata[ggdata$cl %in% clus, , drop = FALSE],
                                        colour = "black", linetype = "longdash",
-                                       aes_string(xintercept = "vbreaks"))
+                                       ggplot2::aes_string(xintercept = "vbreaks"))
     }
 
     ## add facets, remove legend, apply kinda black-white theme
@@ -653,7 +653,7 @@ plot.TSClusters <- function(x, y, ...,
 #' @aliases plot,TSClusters,missing
 #' @exportMethod plot
 #'
-setMethod("plot", signature(x = "TSClusters", y = "missing"), plot.TSClusters)
+setMethod("plot", methods::signature(x = "TSClusters", y = "missing"), plot.TSClusters)
 
 # ==================================================================================================
 # Cluster validity indices
@@ -851,13 +851,13 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
 #' @aliases cvi,PartitionalTSClusters
 #' @exportMethod cvi
 #'
-setMethod("cvi", signature(a = "PartitionalTSClusters"), cvi_TSClusters)
+setMethod("cvi", methods::signature(a = "PartitionalTSClusters"), cvi_TSClusters)
 
 #' @rdname cvi
 #' @aliases cvi,HierarchicalTSClusters
 #' @exportMethod cvi
 #'
-setMethod("cvi", signature(a = "HierarchicalTSClusters"), cvi_TSClusters)
+setMethod("cvi", methods::signature(a = "HierarchicalTSClusters"), cvi_TSClusters)
 
 # ==================================================================================================
 # Functions to support package 'clue'
@@ -881,7 +881,7 @@ n_of_objects.TSClusters <- function(x) {
 #' @export
 #'
 cl_class_ids.TSClusters <- function(x) {
-    as.cl_class_ids(x@cluster)
+    clue::as.cl_class_ids(x@cluster)
 }
 
 #' @method as.cl_membership TSClusters
@@ -941,10 +941,10 @@ setAs("dtwclust", "TSClusters",
                        partitional = {
                            to <- methods::new("PartitionalTSClusters", base, override.family = FALSE)
 
-                           for (sl in slotNames(to)) {
+                           for (sl in methods::slotNames(to)) {
                                if (sl %in% exclude_slots) next
 
-                               slot(to, sl) <- slot(from, sl)
+                               slot(to, sl) <- methods::slot(from, sl)
                            }
 
                            to@control <- partitional_control(pam.precompute = from@control@pam.precompute,
@@ -960,10 +960,10 @@ setAs("dtwclust", "TSClusters",
                        hierarchical = {
                            to <- methods::new("HierarchicalTSClusters", base, override.family = FALSE)
 
-                           for (sl in slotNames(to)) {
+                           for (sl in methods::slotNames(to)) {
                                if (sl %in% exclude_slots) next
 
-                               slot(to, sl) <- slot(from, sl)
+                               slot(to, sl) <- methods::slot(from, sl)
                            }
 
                            to@control <- hierarchical_control(symmetric = from@control@symmetric,
@@ -978,10 +978,10 @@ setAs("dtwclust", "TSClusters",
                        fuzzy = {
                            to <- methods::new("FuzzyTSClusters", base, override.family = FALSE)
 
-                           for (sl in slotNames(to)) {
+                           for (sl in methods::slotNames(to)) {
                                if (sl %in% exclude_slots) next
 
-                               slot(to, sl) <- slot(from, sl)
+                               slot(to, sl) <- methods::slot(from, sl)
                            }
 
                            to@control <- fuzzy_control(fuzziness = from@control@fuzziness,
@@ -995,10 +995,10 @@ setAs("dtwclust", "TSClusters",
                        tadpole = {
                            to <- methods::new("PartitionalTSClusters", base, override.family = FALSE)
 
-                           for (sl in slotNames(to)) {
+                           for (sl in methods::slotNames(to)) {
                                if (sl %in% exclude_slots) next
 
-                               slot(to, sl) <- slot(from, sl)
+                               slot(to, sl) <- methods::slot(from, sl)
                            }
 
                            lb <- if (is.null(from@dots$lb)) "lbk" else from@dots$lb

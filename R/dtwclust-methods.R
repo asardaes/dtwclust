@@ -39,7 +39,7 @@ setMethod("initialize", "dtwclustFamily",
               dots <- list(...)
               dots$.Object <- .Object
 
-              control <- as(control, "dtwclustControl")
+              control <- methods::as(control, "dtwclustControl")
 
               if (!missing(dist)) {
                   if (is.character(dist))
@@ -156,7 +156,7 @@ update.dtwclust <- function(object, ..., evaluate = TRUE) {
 #' @aliases update,dtwclust
 #' @exportMethod update
 #'
-setMethod("update", signature(object = "dtwclust"), update.dtwclust)
+setMethod("update", methods::signature(object = "dtwclust"), update.dtwclust)
 
 # ==================================================================================================
 # predict from stats
@@ -212,7 +212,7 @@ predict.dtwclust <- function(object, newdata = NULL, ...) {
 #' @aliases predict,dtwclust
 #' @exportMethod predict
 #'
-setMethod("predict", signature(object = "dtwclust"), predict.dtwclust)
+setMethod("predict", methods::signature(object = "dtwclust"), predict.dtwclust)
 
 # ==================================================================================================
 # Plot
@@ -447,7 +447,7 @@ plot.dtwclust <- function(x, y, ...,
 #' @aliases plot,dtwclust,missing
 #' @exportMethod plot
 #'
-setMethod("plot", signature(x = "dtwclust", y = "missing"), plot.dtwclust)
+setMethod("plot", methods::signature(x = "dtwclust", y = "missing"), plot.dtwclust)
 
 # ==================================================================================================
 # Cluster validity indices
@@ -457,7 +457,7 @@ setMethod("plot", signature(x = "dtwclust", y = "missing"), plot.dtwclust)
 #' @aliases cvi,dtwclust
 #' @exportMethod cvi
 #'
-setMethod("cvi", signature(a = "dtwclust"),
+setMethod("cvi", methods::signature(a = "dtwclust"),
           function(a, b = NULL, type = "valid", ...) {
               if (a@type == "fuzzy")
                   stop("Only CVIs for crisp partitions are currently implemented.")
@@ -674,7 +674,7 @@ NULL
 #' @aliases randIndex,dtwclust,ANY
 #' @exportMethod randIndex
 #'
-setMethod("randIndex", signature(x="dtwclust", y="ANY"),
+setMethod("randIndex", methods::signature(x="dtwclust", y="ANY"),
           function(x, y, correct = TRUE, original = !correct) {
               randIndex(x@cluster, y, correct = correct, original = original)
           })
@@ -683,7 +683,7 @@ setMethod("randIndex", signature(x="dtwclust", y="ANY"),
 #' @aliases randIndex,ANY,dtwclust
 #' @exportMethod randIndex
 #'
-setMethod("randIndex", signature(x="ANY", y="dtwclust"),
+setMethod("randIndex", methods::signature(x="ANY", y="dtwclust"),
           function(x, y, correct = TRUE, original = !correct) {
               randIndex(x, y@cluster, correct = correct, original = original)
           })
@@ -692,7 +692,7 @@ setMethod("randIndex", signature(x="ANY", y="dtwclust"),
 #' @aliases randIndex,dtwclust,dtwclust
 #' @exportMethod randIndex
 #'
-setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
+setMethod("randIndex", methods::signature(x="dtwclust", y="dtwclust"),
           function(x, y, correct = TRUE, original = !correct) {
               randIndex(x@cluster, y@cluster, correct = correct, original = original)
           })
@@ -717,7 +717,7 @@ setMethod("randIndex", signature(x="dtwclust", y="dtwclust"),
 #'
 #' [flexclust::clusterSim()]
 #'
-setMethod("clusterSim", signature(object = "dtwclust"),
+setMethod("clusterSim", methods::signature(object = "dtwclust"),
           function (object, data = NULL,
                     method = c("shadow", "centers"),
                     symmetric = FALSE, ...)
@@ -869,7 +869,7 @@ n_of_objects.dtwclust <- function(x) {
 #' @export
 #'
 cl_class_ids.dtwclust <- function(x) {
-    as.cl_class_ids(x@cluster)
+    clue::as.cl_class_ids(x@cluster)
 }
 
 #' @method as.cl_membership dtwclust

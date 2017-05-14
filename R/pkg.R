@@ -58,18 +58,35 @@
 #'
 #' @useDynLib dtwclust, .registration = TRUE
 #'
-#' @import clue
 #' @import foreach
-#' @import ggplot2
-#' @import methods
+#'
+#' @importFrom clue as.cl_class_ids
+#' @importFrom clue as.cl_membership
+#' @importFrom clue cl_class_ids
+#' @importFrom clue cl_membership
+#' @importFrom clue is.cl_dendrogram
+#' @importFrom clue is.cl_hard_partition
+#' @importFrom clue is.cl_hierarchy
+#' @importFrom clue is.cl_partition
+#' @importFrom clue n_of_classes
+#' @importFrom clue n_of_objects
 #'
 #' @importFrom dtw dtw
 #' @importFrom dtw symmetric1
 #' @importFrom dtw symmetric2
 #'
-#' @importFrom flexclust randIndex
 #' @importFrom flexclust clusterSim
 #' @importFrom flexclust comPart
+#' @importFrom flexclust randIndex
+#'
+#' @importFrom ggplot2 aes_string
+#' @importFrom ggplot2 facet_wrap
+#' @importFrom ggplot2 geom_line
+#' @importFrom ggplot2 geom_vline
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 guides
+#' @importFrom ggplot2 labs
+#' @importFrom ggplot2 theme_bw
 #'
 #' @importFrom graphics plot
 #'
@@ -78,6 +95,23 @@
 #' @importFrom Matrix rowSums
 #' @importFrom Matrix sparseMatrix
 #' @importFrom Matrix summary
+#'
+#' @importFrom methods S3Part
+#' @importFrom methods as
+#' @importFrom methods callNextMethod
+#' @importFrom methods initialize
+#' @importFrom methods new
+#' @importFrom methods setAs
+#' @importFrom methods setClass
+#' @importFrom methods setClassUnion
+#' @importFrom methods setGeneric
+#' @importFrom methods setValidity
+#' @importFrom methods show
+#' @importFrom methods signature
+#' @importFrom methods slot
+#' @importFrom methods slot<-
+#' @importFrom methods slotNames
+#' @importFrom methods validObject
 #'
 #' @importFrom parallel splitIndices
 #'
@@ -95,22 +129,22 @@
 #'
 #' @importFrom stats aggregate
 #' @importFrom stats approx
+#' @importFrom stats as.dist
+#' @importFrom stats as.hclust
 #' @importFrom stats convolve
 #' @importFrom stats cutree
 #' @importFrom stats fft
 #' @importFrom stats hclust
 #' @importFrom stats median
 #' @importFrom stats nextn
-#' @importFrom stats update
 #' @importFrom stats predict
 #' @importFrom stats runif
-#' @importFrom stats as.dist
-#' @importFrom stats as.hclust
+#' @importFrom stats update
 #'
-#' @importFrom utils packageVersion
 #' @importFrom utils head
+#' @importFrom utils packageVersion
 #'
-NULL
+NULL ## remember to check methods imports after removing dtwclust()
 
 .onAttach <- function(lib, pkg) {
     ## proxy_prefun is in utils.R
