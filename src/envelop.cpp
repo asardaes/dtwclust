@@ -6,16 +6,16 @@
 
 #include <Rcpp.h>
 #include <deque>
+#include "dtwclustpp.h"
 
-using namespace std;
-using namespace Rcpp;
+namespace dtwclust {
 
-void envelop_cpp(const NumericVector& array, unsigned int width,
-                 NumericVector& minvalues, NumericVector& maxvalues)
+void envelop_cpp(const Rcpp::NumericVector& array, unsigned int width,
+                 Rcpp::NumericVector& minvalues, Rcpp::NumericVector& maxvalues)
 {
     unsigned int constraint = (width - 1) / 2;
     unsigned int array_size = static_cast<unsigned int>(array.size());
-    deque<int> maxfifo, minfifo;
+    std::deque<int> maxfifo, minfifo;
 
     maxfifo.push_back(0);
     minfifo.push_back(0);
@@ -61,16 +61,16 @@ void envelop_cpp(const NumericVector& array, unsigned int width,
     }
 }
 
-RcppExport SEXP envelop (SEXP series, SEXP window) {
-    NumericVector x(series);
-    NumericVector L(x.size());
-    NumericVector U(x.size());
+} // namespace dtwclust
 
-    envelop_cpp(x, as<unsigned int>(window), L, U);
+RcppExport SEXP envelop(SEXP series, SEXP window) {
+    Rcpp::NumericVector x(series);
+    Rcpp::NumericVector L(x.size()), U(x.size());
 
-    List ret;
+    dtwclust::envelop_cpp(x, Rcpp::as<unsigned int>(window), L, U);
+
+    Rcpp::List ret;
     ret["lower"] = L;
     ret["upper"] = U;
-
     return(ret);
 }

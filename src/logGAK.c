@@ -54,6 +54,7 @@
 #include <math.h>
 #include <R.h>
 #include <Rinternals.h>
+#include "dtwclust.h"
 
 // Useful constants
 #define LOG0 -10000          // log(0)

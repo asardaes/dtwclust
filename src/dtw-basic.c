@@ -3,6 +3,7 @@
 #include <float.h>
 #include <R.h>
 #include <Rinternals.h>
+#include "dtwclust.h"
 
 // for cost matrix, in case of window constraint
 #define NOT_VISITED -1.0
