@@ -14,6 +14,4 @@ fcm_cluster <- function(distmat, m) {
 # Fuzzy objective function
 # ========================================================================================================
 
-fuzzy_objective <- function(u, distmat, m) {
-    sum(u^m * distmat^2)
-}
+fuzzy_objective <- function(u, distmat, m) { sum(u^m * distmat^2) }

@@ -75,7 +75,6 @@ setMethod("show", "SparseDistmat", function(object) { show(object$distmat) })
 setMethod(`[`, "SparseDistmat", function(x, i, j, ..., drop = TRUE) {
     ## number of rows of existing indices
     rows <- nrow(x$existing_ids)
-
     ## indices of needed vals
     id_new <- base::as.matrix(expand.grid(i = i, j = j))
 

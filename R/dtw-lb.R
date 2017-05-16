@@ -149,7 +149,6 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
         X <- split_parallel(X)
         Y <- split_parallel(Y)
-
         validate_pairwise(X, Y)
 
         D <- foreach(X = X, Y = Y,
@@ -205,7 +204,6 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                                                  dots = dots))
 
                          distmat[id_mat[id_changed, , drop = FALSE]] <- d_sub
-
                          id_nn <- apply(distmat, 1L, which.min)
                          id_mat[ , 2L] <- id_nn
                      }
@@ -216,5 +214,6 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     class(D) <- "crossdist"
     attr(D, "method") <- "DTW_LB"
 
+    ## return
     D
 }

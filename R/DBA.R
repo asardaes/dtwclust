@@ -152,25 +152,20 @@ DBA <- function(X, centroid = NULL, ...,
         ## Return the coordinates of each series in X grouped by the coordinate they match to in the
         ## centroid time series.
         ## Also return the number of coordinates used in each case (for averaging below).
-        xg <- foreach(X = Xs,
-                      .combine = c,
-                      .multicombine = TRUE,
-                      .export = "enlist",
-                      .packages = c("dtwclust", "stats")) %op% {
-                          mapply(X, SIMPLIFY = FALSE, FUN = function(x) {
-                              d <- do.call(dtw_basic, enlist(x = x, y = centroid, dots = dots))
-
-                              x_sub <- stats::aggregate(x[d$index1],
-                                                        by = list(ind = d$index2),
-                                                        sum)
-
-                              n_sub <- stats::aggregate(x[d$index1],
-                                                        by = list(ind = d$index2),
-                                                        length)
-
-                              cbind(sum = x_sub$x, n = n_sub$x)
-                          })
-                      }
+        xg <- foreach::foreach(
+            X = Xs,
+            .combine = c,
+            .multicombine = TRUE,
+            .export = "enlist",
+            .packages = c("dtwclust", "stats")
+        ) %op% {
+            lapply(X, function(x) {
+                d <- do.call(dtw_basic, enlist(x = x, y = centroid, dots = dots))
+                x_sub <- stats::aggregate(x[d$index1], by = list(ind = d$index2), sum)
+                n_sub <- stats::aggregate(x[d$index1], by = list(ind = d$index2), length)
+                cbind(sum = x_sub$x, n = n_sub$x)
+            })
+        }
 
         ## Put everything in one big data frame
         xg <- reshape2::melt(xg)

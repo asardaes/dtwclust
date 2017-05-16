@@ -293,9 +293,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
 
 is_multivariate <- function(x) {
     ncols <- sapply(x, NCOL)
-
     if (any(diff(ncols) != 0L)) stop("Inconsistent dimensions across series.")
-
     any(ncols > 1L)
 }
 

@@ -100,7 +100,6 @@ setMethod("initialize", "tsclustFamily",
 #'
 setMethod("initialize", "TSClusters", function(.Object, ..., override.family = TRUE) {
     tic <- proc.time()
-
     dots <- list(...)
 
     ## some minor checks
@@ -529,14 +528,11 @@ plot.TSClusters <- function(x, y, ...,
             L <- max(len, NROW(centroids[[id_clus]]))
             trail <- L - len
 
-            clusters[[id_clus]] <- mapply(cluster, trail,
-                                          SIMPLIFY = FALSE,
-                                          FUN = function(mvs, trail) {
-                                              rbind(mvs, matrix(NA, trail, nc))
-                                          })
+            clusters[[id_clus]] <- Map(cluster, trail, f = function(mvs, trail) {
+                rbind(mvs, matrix(NA, trail, nc))
+            })
 
             trail <- L - NROW(centroids[[id_clus]])
-
             centroids[[id_clus]] <- rbind(centroids[[id_clus]], matrix(NA, trail, nc))
         }
 
@@ -566,7 +562,6 @@ plot.TSClusters <- function(x, y, ...,
 
     ## time, cluster and colour indices
     color_ids <- integer(x@k)
-
     dfm_tcc <- mapply(x@cluster, L1, USE.NAMES = FALSE, SIMPLIFY = FALSE,
                       FUN = function(clus, len) {
                           t <- if (is.null(time)) seq_len(len) else time[1L:len]
@@ -577,7 +572,6 @@ plot.TSClusters <- function(x, y, ...,
 
                           data.frame(t = t, cl = cl, color = color)
                       })
-
     dfcm_tc <- mapply(1L:x@k, L2, USE.NAMES = FALSE, SIMPLIFY = FALSE,
                       FUN = function(clus, len) {
                           t <- if (is.null(time)) seq_len(len) else time[1L:len]
@@ -645,7 +639,6 @@ plot.TSClusters <- function(x, y, ...,
 
     ## plot without warnings in case I added NAs for multivariate cases
     if (plot) suppressWarnings(graphics::plot(gg))
-
     invisible(gg)
 }
 
@@ -719,14 +712,12 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
             }
         }
 
-        ## are valid indices still left?
-        if (length(type) == 0L)
-            return(CVIs)
+        ## are no valid indices left?
+        if (length(type) == 0L) return(CVIs)
 
         ## calculate some values that both Davies-Bouldin indices use
         if (any(type %in% c("DB", "DBstar"))) {
             S <- a@clusinfo$av_dist
-
             ## distance between centroids
             distcent <- do.call(a@family@dist,
                                 args = enlist(x = a@centroids,
@@ -766,9 +757,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
 
                        ab <- lapply(unique(a@cluster), function(k) {
                            idx <- a@cluster == k
-
                            this_a <- rowSums(distmat[idx, idx, drop = FALSE]) / c_k[idx]
-
                            this_b <- apply(distmat[idx, !idx, drop = FALSE], 1L, function(row) {
                                ret <- row / c_k[!idx]
                                ret <- min(tapply(ret, a@cluster[!idx], sum))
@@ -779,7 +768,6 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                        })
 
                        ab <- do.call(rbind, ab)
-
                        sum((ab$b - ab$a) / apply(ab, 1L, max)) / nrow(distmat)
                    },
 
@@ -1067,6 +1055,7 @@ setAs("dtwclust", "TSClusters",
               assign("control", to@control, environment(to@family@allcent))
           }
 
+          to@args <- adjust_args(to@args, to@dots)
           to@seed <- as.integer(from@call$seed)
 
           to

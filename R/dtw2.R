@@ -30,9 +30,7 @@
 #'
 dtw2 <- function(x, y, ...) {
     lcm <- proxy::dist(x, y, method = "L1")
-
     d <- dtw::dtw(x = lcm^2, y = NULL, ...)
-
     d$distance <- sqrt(d$distance)
 
     if (!is.na(d$normalizedDistance)) {
@@ -45,11 +43,11 @@ dtw2 <- function(x, y, ...) {
         d$normalizedDistance <- d$distance / normalization
     }
 
+    ## return
     d
 }
 
 dtw2.proxy <- function(x, y, ...) {
     lcm <- proxy::dist(x, y, method = "L1")
-
     sqrt(dtw::dtw(x = lcm^2, y = NULL, distance.only = TRUE, ...)$distance)
 }

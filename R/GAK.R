@@ -158,7 +158,6 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
     if (is.null(sigma)) {
         L <- c(sapply(x, NROW), sapply(y, NROW))
         n <- round(0.5 * min(L))
-
         med1 <- sqrt(median(L))
 
         med2 <- median(replicate(length(x) + length(y), {

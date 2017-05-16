@@ -204,8 +204,7 @@ NULL ## remember to check methods imports after removing dtwclust()
     RNGkind("L'Ecuyer")
 
     ## avoids default message if no backend exists
-    if (is.null(foreach::getDoParName()))
-        foreach::registerDoSEQ()
+    if (is.null(foreach::getDoParName())) foreach::registerDoSEQ()
 
     packageStartupMessage("\ndtwclust: Setting random number generator to L'Ecuyer-CMRG (see RNGkind()).\n",
                           'To read the included vignette, type: vignette("dtwclust").\n',

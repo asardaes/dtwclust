@@ -46,11 +46,11 @@
 #'
 #'   The first 4 CVIs are calculated via [flexclust::comPart()], so please refer to that function.
 #'
-#'   * `"RI"`: Rand Index (to be maximized).
-#'   * `"ARI"`: Adjusted Rand Index (to be maximized).
-#'   * `"J"`: Jaccard Index (to be maximized).
-#'   * `"FM"`: Fowlkes-Mallows (to be maximized).
-#'   * `"VI"`: Variation of Information (Meila (2003); to be minimized).
+#'   - `"RI"`: Rand Index (to be maximized).
+#'   - `"ARI"`: Adjusted Rand Index (to be maximized).
+#'   - `"J"`: Jaccard Index (to be maximized).
+#'   - `"FM"`: Fowlkes-Mallows (to be maximized).
+#'   - `"VI"`: Variation of Information (Meila (2003); to be minimized).
 #'
 #' @section Internal CVIs:
 #'
@@ -121,8 +121,7 @@ setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10
     if (length(a) != length(b)) stop("External CVIs: the length of 'a' and 'b' must match.")
 
     type <- match.arg(type, several.ok = TRUE,
-                      choices = c("RI", "ARI", "J", "FM", "VI",
-                                  "valid", "external"))
+                      choices = c("RI", "ARI", "J", "FM", "VI", "valid", "external"))
 
     if (any(type %in% c("valid", "external")))
         type <- c("RI", "ARI", "J", "FM", "VI")

@@ -53,7 +53,6 @@ setClass("tsclustFamily",
                    cluster = "function",
                    preproc = "function"),
          prototype = prototype(preproc = function(x, ...) { x },
-
                                cluster = function(distmat = NULL, ...) {
                                    max.col(-distmat, "first")
                                })

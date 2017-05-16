@@ -117,18 +117,12 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     x <- any2list(x)
 
     if (error.check) check_consistency(x, "vltslist")
-
     if (znorm) x <- zscore(x)
-
     if (is.null(y)) {
         y <- x
-
     } else {
         y <- any2list(y)
-
-        if (error.check)
-            check_consistency(y, "vltslist")
-
+        if (error.check) check_consistency(y, "vltslist")
         if (znorm) y <- zscore(y)
     }
 
@@ -139,10 +133,8 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     ## Precompute FFTs, padding with zeros as necessary, which will be compensated later
     L <- max(lengths(x)) + max(lengths(y)) - 1L
     fftlen <- stats::nextn(L, 2L)
-
     fftx <- lapply(x, function(u) { stats::fft(c(u, rep(0, fftlen - length(u)))) })
     ffty <- lapply(y, function(v) { stats::fft(c(v, rep(0, fftlen - length(v)))) })
-
     y <- split_parallel(y)
     ffty <- split_parallel(ffty)
 
@@ -150,7 +142,6 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     if (pairwise) {
         x <- split_parallel(x)
         fftx <- split_parallel(fftx)
-
         validate_pairwise(x, y)
 
         D <- foreach(x = x, fftx = fftx, y = y, ffty = ffty,
@@ -163,15 +154,11 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
                                     ## Manually normalize by length
                                     CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) /
                                         length(fftx)
-
                                     ## Truncate to correct length
                                     CCseq <- c(CCseq[(length(ffty) - length(y) + 2L):length(CCseq)],
                                                CCseq[1L:length(x)])
-
                                     CCseq <- CCseq / (lnorm(x, 2) * lnorm(y, 2))
-
                                     dd <- 1 - max(CCseq)
-
                                     dd
                                 })
                      }
@@ -195,15 +182,11 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
                                                       CCseq <- Re(stats::fft(fftx * Conj(ffty),
                                                                              inverse = TRUE)) /
                                                           length(fftx)
-
                                                       ## Truncate to correct length
                                                       CCseq <- c(CCseq[(length(ffty) - length(y) + 2L):length(CCseq)],
                                                                  CCseq[1L:length(x)])
-
                                                       CCseq <- CCseq / (lnorm(x, 2) * lnorm(y, 2))
-
                                                       dd <- 1 - max(CCseq)
-
                                                       dd
                                                   })
                                        })
@@ -215,5 +198,6 @@ SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     class(D) <- retclass
     attr(D, "method") <- "SBD"
 
+    ## return
     D
 }

@@ -57,7 +57,6 @@
 #'
 shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
     X <- any2list(X)
-
     check_consistency(X, "vltslist")
 
     ## utils.R
@@ -93,19 +92,14 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
 
         } else {
             centroid <- Xz[[sample(length(Xz), 1L)]] # random choice as reference
-
             A <- lapply(Xz, function(a) { SBD(centroid, a)$yshift })
-
             A <- do.call(rbind, A)
         }
 
     } else {
         check_consistency(centroid, "ts")
-
         centroid <- zscore(centroid) # use given reference
-
         A <- lapply(Xz, function(a) { SBD(centroid, a)$yshift })
-
         A <- do.call(rbind, A)
     }
 
@@ -119,15 +113,10 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
     nc <- ncol(A)
     P <- diag(nc) - 1 / nc * matrix(1, nc, nc)
     M <- P %*% S %*% P
-
     ksc <- Re(eigen(M)$vectors[ , 1L, drop = TRUE])
-
     d1 <- lnorm(A[1L, , drop = TRUE] - ksc, 2)
     d2 <- lnorm(A[1L, , drop = TRUE] + ksc, 2)
-
     if (d1 >= d2) ksc <- -ksc
-
     ksc <- zscore(ksc)
-
     ksc
 }

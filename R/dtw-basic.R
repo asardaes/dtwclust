@@ -170,7 +170,6 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
                      }
 
         rm("pairs")
-
         D <- matrix(0, nrow = length(x), ncol = length(x))
         D[upper.tri(D)] <- d
         D <- t(D)

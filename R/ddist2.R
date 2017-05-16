@@ -4,7 +4,6 @@
 
 ddist2 <- function(distance, control) {
     symmetric <- isTRUE(control$symmetric)
-
     ## I need to re-register any custom distances in each parallel worker
     dist_entry <- proxy::pr_DB$get_entry(distance)
 
@@ -15,11 +14,10 @@ ddist2 <- function(distance, control) {
                 ## internal class, sparse or full
                 i <- 1L:length(x)
                 j <- if (is.null(centroids)) i else control$distmat$id_cent
-
                 d <- control$distmat[i, j, drop = FALSE]
 
             } else {
-                ## normal matrix distmat pre-computed
+                ## normal distmat pre-computed
                 if (is.null(centroids))
                     d <- control$distmat ## return whole distmat
                 else
@@ -46,7 +44,6 @@ ddist2 <- function(distance, control) {
 
             ## If the function doesn't have '...', remove invalid arguments from 'dots'
             valid_args <- names(dots)
-
             if (is.function(dist_entry$FUN)) {
                 if (!has_dots(dist_entry$FUN))
                     valid_args <- union(names(formals(proxy::dist)), names(formals(dist_entry$FUN)))
@@ -54,7 +51,6 @@ ddist2 <- function(distance, control) {
             } else {
                 valid_args <- names(formals(proxy::dist))
             }
-
             dots <- dots[intersect(names(dots), valid_args)]
 
             ## variables/functions from the parent environments that should be exported
@@ -76,7 +72,6 @@ ddist2 <- function(distance, control) {
                                  .multicombine = TRUE,
                                  .packages = control$packages,
                                  .export = export) %op% {
-
                                      if (!check_consistency(dist_entry$names[1L], "dist"))
                                          do.call(proxy::pr_DB$set_entry, dist_entry)
 

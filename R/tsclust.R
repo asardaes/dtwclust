@@ -434,7 +434,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                 ## I need to re-register any custom distances in each parallel worker
                 dist_entry <- proxy::pr_DB$get_entry(distance)
-
                 export <- c("pfclust", "check_consistency", "enlist")
 
                 rng <- rngtools::RNGseq(length(k) * nrep, seed = seed, simplify = FALSE)
@@ -597,7 +596,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             } else {
                 if (trace) cat("\n\tCalculating distance matrix...\n")
-
                 distmat <- do.call(distfun, enlist(x = series,
                                                    centroids = NULL,
                                                    dots = args$dist))
@@ -652,11 +650,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                         centroids <- sapply(1L:k, function(kcent) {
                             id_k <- cluster == kcent
-
                             d_sub <- distmat[id_k, id_k, drop = FALSE]
-
                             id_centroid <- which.min(apply(d_sub, 1L, sum))
-
                             which(id_k)[id_centroid]
                         })
 
@@ -742,7 +737,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             RET <- mapply(R, rng, SIMPLIFY = FALSE, FUN = function(R, rng) {
                 rngtools::setRNG(rng)
-
                 k <- length(R$centroids)
 
                 if (is.function(centroid)) {
