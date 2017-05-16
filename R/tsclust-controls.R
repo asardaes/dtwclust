@@ -68,7 +68,7 @@ partitional_control <- function(pam.precompute = TRUE,
              symmetric = as.logical(symmetric)[1L],
              packages = unique(c("dtwclust", as.character(packages))),
              distmat = distmat),
-        "class" = c("PtCtrl")
+        "class" = c(control_classes[["partitional"]])
     )
 }
 
@@ -115,7 +115,7 @@ hierarchical_control <- function(method = "average",
              symmetric = as.logical(symmetric),
              packages = unique(c("dtwclust", as.character(packages))),
              distmat = distmat),
-        "class" = c("HcCtrl")
+        "class" = c(control_classes[["hierarchical"]])
     )
 }
 
@@ -141,7 +141,7 @@ fuzzy_control <- function(fuzziness = 2,
              iter.max = as.integer(iter.max),
              delta = delta,
              packages = unique(c("dtwclust", as.character(packages)))),
-        "class" = c("FzCtrl")
+        "class" = c(control_classes[["fuzzy"]])
     )
 }
 
@@ -165,7 +165,7 @@ tadpole_control <- function(dc,
         list(dc = dc,
              window.size = window.size,
              lb = lb),
-        "class" = c("TpCtrl")
+        "class" = c(control_classes[["tadpole"]])
     )
 }
 
@@ -188,7 +188,7 @@ tsclust_args <- function(preproc = list(), dist = list(), cent = list())
         list(preproc = preproc,
              dist = dist,
              cent = cent),
-        "class" = c("TscArgs")
+        "class" = c(control_classes[["args"]])
     )
 }
 
