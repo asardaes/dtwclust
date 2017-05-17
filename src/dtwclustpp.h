@@ -5,6 +5,10 @@
 #ifndef _DTWCLUST_HPP
 #define _DTWCLUST_HPP
 
-RcppExport SEXP envelop(SEXP series, SEXP window);
+namespace dtwclust {
+
+RcppExport SEXP envelope(SEXP series, SEXP window);
+
+} // namespace dtwclust
 
 #endif

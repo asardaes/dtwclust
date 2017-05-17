@@ -5,17 +5,19 @@
 #define CALLDEF(name, n) { "C_"#name, (DL_FUNC) &name, n }
 
 static R_CallMethodDef callMethods[] = {
+    { "C_envelope", (DL_FUNC) &dtwclust::envelope, 2 },
     CALLDEF(dtw_basic, 10),
-    CALLDEF(envelop, 2),
     CALLDEF(logGAK, 8),
     CALLDEF(pairs, 2),
     {NULL, NULL, 0}
 };
 
 void register_functions() {
+    using namespace dtwclust;
+
     #define DTWCLUST_REGISTER(__FUN__) R_RegisterCCallable("dtwclust", #__FUN__, (DL_FUNC)__FUN__);
     DTWCLUST_REGISTER(dtw_basic)
-    DTWCLUST_REGISTER(envelop)
+    DTWCLUST_REGISTER(envelope)
     DTWCLUST_REGISTER(logGAK)
     DTWCLUST_REGISTER(pairs)
     #undef DTWCLUST_REGISTER

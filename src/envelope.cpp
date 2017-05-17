@@ -1,5 +1,5 @@
 /*
- * Lemire's streaming algorithm to compute warping envelop using no more than 3n comparisons
+ * Lemire's streaming algorithm to compute warping envelope using no more than 3n comparisons
  *
  * Adapted from the code available at https://github.com/lemire/lbimproved/blob/master/dtw.h
  */
@@ -10,7 +10,7 @@
 
 namespace dtwclust {
 
-void envelop_cpp(const Rcpp::NumericVector& array, unsigned int width,
+void envelope_cpp(const Rcpp::NumericVector& array, unsigned int width,
                  Rcpp::NumericVector& minvalues, Rcpp::NumericVector& maxvalues)
 {
     unsigned int constraint = (width - 1) / 2;
@@ -61,16 +61,16 @@ void envelop_cpp(const Rcpp::NumericVector& array, unsigned int width,
     }
 }
 
-} // namespace dtwclust
-
-RcppExport SEXP envelop(SEXP series, SEXP window) {
+RcppExport SEXP envelope(SEXP series, SEXP window) {
     Rcpp::NumericVector x(series);
     Rcpp::NumericVector L(x.size()), U(x.size());
 
-    dtwclust::envelop_cpp(x, Rcpp::as<unsigned int>(window), L, U);
+    envelope_cpp(x, Rcpp::as<unsigned int>(window), L, U);
 
     Rcpp::List ret;
     ret["lower"] = L;
     ret["upper"] = U;
     return(ret);
 }
+
+} // namespace dtwclust

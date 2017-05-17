@@ -46,5 +46,5 @@ compute_envelop <- function(x, window.size, error.check = TRUE) {
     if (window.size > (2L * NROW(x)))
         stop("Window cannot be greater or equal than the series' length.")
 
-    .Call(C_envelop, x, window.size, PACKAGE = "dtwclust")
+    .Call(C_envelope, x, window.size, PACKAGE = "dtwclust")
 }
