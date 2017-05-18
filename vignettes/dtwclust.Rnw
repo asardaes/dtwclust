@@ -98,7 +98,7 @@ data("uciCT")
 opts_chunk$set(fig.width = 8, fig.asp = 0.5625,
                out.width = "\\linewidth",
                fig.align = "center", fig.pos = "htbp",
-               cache = TRUE, echo = FALSE, autodep = TRUE)
+               cache = FALSE, echo = FALSE, autodep = TRUE)
 
 # use Sinput and Soutput environments
 # render_sweave()
