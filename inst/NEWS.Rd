@@ -11,6 +11,7 @@ Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/maste
     \itemize{
         \item Optimized \code{TADPole} for multiple \code{k} and \code{dc} values.
         \item Partitional and hierarchical configurations in \code{compare_clusterings} now take into account the \code{symmetric} control parameter if provided.
+        \item The functionality for \code{pick.clus} in \code{compare_clusterings} changed depending on the value of \code{return.objects}.
         \item Optimized PAM centroids with \code{pam.precompute = FALSE} by using sparse matrices from the \pkg{Matrix} package.
         \item Fixed an error that sometimes caused objects returned by \code{tsclust} to have duplicated elements in the \code{args} slot.
         \item Fixed DTW symmetry detection for fuzzy clustering.

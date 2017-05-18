@@ -173,7 +173,8 @@ comparison_majority <- compare_clusterings(CharTraj, types = c("p", "h", "f", "t
                                            configs = cfgs,
                                            seed = 84L, trace = TRUE,
                                            score.clus = score_external,
-                                           pick.clus = pick_majority)
+                                           pick.clus = pick_majority,
+                                           return.objects = TRUE)
 
 plot(comparison_majority$pick)
 
@@ -227,5 +228,6 @@ comparison_partitional <- compare_clusterings(CharTraj, types = "p",
                                               seed = 32903L, trace = TRUE,
                                               score.clus = score_fun,
                                               pick.clus = pick_fun,
-                                              shuffle.configs = TRUE)
+                                              shuffle.configs = TRUE,
+                                              return.objects = TRUE)
 }

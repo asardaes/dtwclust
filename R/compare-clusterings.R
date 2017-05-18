@@ -404,8 +404,15 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'   [base::mapply()] with `SIMPLIFY` `=` `FALSE`).
 #'
 #'   Therefore, the scores returned shall always be a list of lists with first-level names as above.
-#'   These scores and the list of clustering results are given to `pick.clus` as first and second
-#'   arguments respectively, followed by `...`.
+#'
+#' @section Picking:
+#'
+#'   **Please note that this functionality was slightly modified in version 4.0.0 of dtwclust.**
+#'
+#'   If `return.objects` is `TRUE`, the scores and the list of clustering results are given to
+#'   `pick.clus` as first and second arguments respectively, followed by `...`. Otherwise,
+#'   `pick.clus` will receive only the scores and the contents of `...` (since the results will not
+#'   be returned by the preceding step).
 #'
 #' @author Alexis Sarda-Espinosa
 #'
@@ -433,6 +440,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     if (is.null(series)) stop("No series provided.")
     types <- match.arg(types, supported_clusterings, TRUE)
     .errorhandling <- match.arg(.errorhandling, c("stop", "remove", "pass"))
+    if (!return.objects && missing(score.clus))
+        stop("Returning no objects without specifying a scoring function would return no useful results.")
 
     ## coerce to list if necessary
     series <- any2list(series)
@@ -599,7 +608,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         for (custom_centroid in custom_centroids)
             assign(custom_centroid, get_from_callers(custom_centroid, "function"))
 
-        export <- c("dots", "trace", "centroids_included",
+        export <- c("trace", "score.clus",
+                    "dots", "centroids_included",
                     "allocate_gcm", "allocate_logs", "allocate_dba",
                     "check_consistency", "enlist", "subset_dots", "get_from_callers",
                     custom_preprocs, custom_centroids)
@@ -728,7 +738,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
                 if (inherits(tsc, "TSClusters")) tsc <- list(tsc)
 
-                tsc <- lapply(tsc, function(tsc) {
+                ret <- lapply(tsc, function(tsc) {
                     tsc@preproc <- preproc_char
 
                     if (preproc_char != "none")
@@ -755,12 +765,21 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                     tsc
                 })
 
+                ## ---------------------------------------------------------------------------------
+                ## evaluate
+                ## ---------------------------------------------------------------------------------
+
+                if (!return.objects) {
+                    if (!is.function(score.clus)) score.clus <- score.clus[[type]]
+                    ret <- do.call(score.clus, enlist(ret, dots = dots))
+                }
+
                 ## return config result from lapply()
-                tsc
+                ret
             })
 
             ## return chunk from foreach()
-            unlist(chunk, recursive = FALSE, use.names = FALSE)
+            unlist(chunk, recursive = FALSE)
         }
 
         ## foreach() with one 'iteration' does NOT execute .combine function
@@ -772,30 +791,40 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
             if (any(failed_cfgs)) objs[failed_cfgs] <- lapply(objs[failed_cfgs], list)
         }
 
-        ## return TSClusters from Map()
-        unlist(objs, recursive = FALSE, use.names = FALSE)
+        ## return scores/TSClusters from Map()
+        unlist(objs, recursive = FALSE)
     })
 
     ## =============================================================================================
     ## Evaluations
     ## =============================================================================================
 
-    if (is.function(score.clus))
-        scores <- try(lapply(objs_by_type, score.clus, ...), silent = TRUE)
-    else
-        scores <- try(mapply(objs_by_type, score.clus[names(objs_by_type)],
-                             SIMPLIFY = FALSE,
-                             MoreArgs = dots,
-                             FUN = function(objs, score_fun, ...) { score_fun(objs, ...) }),
-                      silent = TRUE)
+    if (return.objects) {
+        if (is.function(score.clus))
+            scores <- try(lapply(objs_by_type, score.clus, ...), silent = TRUE)
+        else
+            scores <- try(mapply(objs_by_type, score.clus[names(objs_by_type)],
+                                 SIMPLIFY = FALSE,
+                                 MoreArgs = dots,
+                                 FUN = function(objs, score_fun, ...) { score_fun(objs, ...) }),
+                          silent = TRUE)
 
-    if (inherits(scores, "try-error")) {
-        warning("The score.clus function(s) did not execute successfully.")
-        scores <- NULL
-        pick <- NULL
+        if (inherits(scores, "try-error")) {
+            warning("The score.clus function(s) did not execute successfully.")
+            scores <- NULL
+            pick <- NULL
 
+        } else {
+            pick <- try(pick.clus(scores, objs_by_type, ...), silent = TRUE)
+
+            if (inherits(pick, "try-error")) {
+                warning("The pick.clus function did not execute successfully.")
+                pick <- NULL
+            }
+        }
     } else {
-        pick <- try(pick.clus(scores, objs_by_type, ...), silent = TRUE)
+        scores <- objs_by_type
+        pick <- try(pick.clus(scores, ...), silent = TRUE)
 
         if (inherits(pick, "try-error")) {
             warning("The pick.clus function did not execute successfully.")

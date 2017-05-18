@@ -177,7 +177,8 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
     expect_null(errorrm_comp$objects.fuzzy)
 
     expect_warning(no_score <- compare_clusterings(data_reinterpolated_subset, c("f"),
-                                                   configs = cfgs, seed = 392L),
+                                                   configs = cfgs, seed = 392L,
+                                                   return.objects = TRUE),
                    "score.clus")
     expect_null(no_score$scores)
 
@@ -203,6 +204,7 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                                                   trace = TRUE,
                                                                   score.clus = score_fun,
                                                                   pick.clus = pick_fun,
+                                                                  return.objects = TRUE,
                                                                   shuffle.configs = TRUE,
                                                                   lbls = labels_subset))
 
@@ -239,6 +241,10 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
     all_comparisons$pick <- reset_nondeterministic(all_comparisons$pick)
     all_comparisons$pick@call <- call("zas", foo = "bar")
     all_comparisons$proc_time <- NULL
+    all_comparisons$objects.partitional <- NULL
+    all_comparisons$objects.hierarchical <- NULL
+    all_comparisons$objects.fuzzy <- NULL
+    all_comparisons$objects.tadpole <- NULL
     gak_comparison$proc_time <- NULL
     dba_comparison$proc_time <- NULL
 

@@ -120,8 +120,17 @@ so that \code{score.clus$partitional} is used to score \code{list_of_lists$parti
 \code{\link[base:mapply]{base::mapply()}} with \code{SIMPLIFY} \code{=} \code{FALSE}).
 
 Therefore, the scores returned shall always be a list of lists with first-level names as above.
-These scores and the list of clustering results are given to \code{pick.clus} as first and second
-arguments respectively, followed by \code{...}.
+}
+
+\section{Picking}{
+
+
+\strong{Please note that this functionality was slightly modified in version 4.0.0 of dtwclust.}
+
+If \code{return.objects} is \code{TRUE}, the scores and the list of clustering results are given to
+\code{pick.clus} as first and second arguments respectively, followed by \code{...}. Otherwise,
+\code{pick.clus} will receive only the scores and the contents of \code{...} (since the results will not
+be returned by the preceding step).
 }
 
 \examples{
@@ -300,7 +309,8 @@ comparison_majority <- compare_clusterings(CharTraj, types = c("p", "h", "f", "t
                                            configs = cfgs,
                                            seed = 84L, trace = TRUE,
                                            score.clus = score_external,
-                                           pick.clus = pick_majority)
+                                           pick.clus = pick_majority,
+                                           return.objects = TRUE)
 
 plot(comparison_majority$pick)
 
@@ -354,7 +364,8 @@ comparison_partitional <- compare_clusterings(CharTraj, types = "p",
                                               seed = 32903L, trace = TRUE,
                                               score.clus = score_fun,
                                               pick.clus = pick_fun,
-                                              shuffle.configs = TRUE)
+                                              shuffle.configs = TRUE,
+                                              return.objects = TRUE)
 }
 }
 \seealso{
