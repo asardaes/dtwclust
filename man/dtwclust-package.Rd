@@ -42,6 +42,12 @@ For more information, please read the included package vignette, which can be ac
 \code{vignette("dtwclust")}.
 }
 \note{
+The \pkg{methods} \link[methods:methods-package]{package} must be attached in order for some internal
+functions to work properly. This is usually done automatically by \code{R}, with \code{\link[utils:Rscript]{utils::Rscript()}}
+being an exception. As of \pkg{dtwclust} version 3.2.0, attaching the \pkg{methods} package is
+also done when attaching \pkg{dtwclust} (via \code{\link[base:library]{base::library()}}), so please always attach the
+package before using its functionality.
+
 This software package was developed independently of any organization or institution that is or
 has been associated with the author.
 }
