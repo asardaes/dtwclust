@@ -736,8 +736,10 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                     seed = seed,
                                     simplify = FALSE)
 
-            RET <- Map(R, rng, f = function(R, rng) {
-                rngtools::setRNG(rng)
+            ## mapply/Map were causing series to be (deeply?) copied into datalist!
+            RET <- lapply(1L:length(R), function(i) {
+                rngtools::setRNG(rng[[i]])
+                R <- R[[i]]
                 k <- length(R$centroids)
 
                 if (is.function(centroid)) {
