@@ -35,6 +35,14 @@ SEXP pairs(SEXP L, SEXP lower)
     return fun(L, lower);
 }
 
+SEXP setnames_inplace(SEXP vec, SEXP names)
+{
+    static SEXP(*fun)(SEXP, SEXP) = NULL;
+    if(fun == NULL)
+        fun = (SEXP(*)(SEXP, SEXP)) R_GetCCallable("dtwclust", "setnames_inplace");
+    return fun(vec, names);
+}
+
 #endif
 
 #ifdef __cplusplus

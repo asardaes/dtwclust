@@ -17,6 +17,8 @@ SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP dim, SEXP sigma, SEXP window,
 
 SEXP pairs(SEXP L, SEXP lower);
 
+SEXP setnames_inplace(SEXP vec, SEXP names);
+
 #endif
 
 #ifdef __cplusplus

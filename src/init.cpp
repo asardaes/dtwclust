@@ -9,6 +9,7 @@ static R_CallMethodDef callMethods[] = {
     CALLDEF(dtw_basic, 10),
     CALLDEF(logGAK, 8),
     CALLDEF(pairs, 2),
+    CALLDEF(setnames_inplace, 2),
     {NULL, NULL, 0}
 };
 
@@ -20,6 +21,7 @@ void register_functions() {
     DTWCLUST_REGISTER(envelope)
     DTWCLUST_REGISTER(logGAK)
     DTWCLUST_REGISTER(pairs)
+    DTWCLUST_REGISTER(setnames_inplace)
     #undef DTWCLUST_REGISTER
 }
 

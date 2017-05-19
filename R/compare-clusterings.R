@@ -530,7 +530,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         })
     })
 
-    names(processed_series) <- names(configs)
+    ## utils.R
+    setnames_inplace(processed_series, names(configs))
 
     ## =============================================================================================
     ## Matrix allocation
@@ -692,7 +693,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                     if (!check_consistency(dist_entry$names[1L], "dist"))
                         do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                } else distance <- "dtw_basic" ## dummy
+                } else distance <- NULL ## dummy
 
                 ## ---------------------------------------------------------------------------------
                 ## centroid for this configuration
@@ -931,19 +932,14 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     results <- list(results = results, scores = scores, pick = pick, proc_time = proc.time() - tic)
 
     if (return.objects) {
-        objs_out <- try(Map(objs_by_type, results$results,
-                            f = function(objs, res) {
-                                names(objs) <- res$config_id
-                                objs
-                            }),
-                        silent = TRUE)
+        setnames_res <- try(Map(objs_by_type, results$results,
+                                f = function(objs, res) { setnames_inplace(objs, res$config_id) }),
+                            silent = TRUE)
 
-        if (inherits(objs_out, "try-error")) {
+        if (inherits(setnames_res, "try-error"))
             warning("Could not assign names to returned objects.")
-            objs_out <- objs_by_type
-        }
 
-        results <- c(results, objects = objs_out)
+        results <- c(results, objects = objs_by_type)
     }
 
     if (shuffle.configs)

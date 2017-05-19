@@ -110,9 +110,9 @@ check_consistency <- function(obj, case, ..., clus_type,
 # Coerce to list
 any2list <- function(obj) {
     if (is.matrix(obj)) {
-        Names <- rownames(obj)
+        rnms <- rownames(obj)
         obj <- lapply(seq_len(nrow(obj)), function(i) obj[i, ])
-        names(obj) <- Names
+        if (!is.null(rnms)) setnames_inplace(obj, rnms)
 
     } else if (is.numeric(obj)) {
         obj <- list(obj)
@@ -209,6 +209,14 @@ call_pairs <- function(n = 2L, lower = TRUE) {
     }
 
     pairs
+}
+
+# Modify names in place
+setnames_inplace <- function(vec, names) {
+    if (!is.vector(vec) || !is.vector(names)) stop("Both 'vec' and 'names' must be vectors.")
+    if (length(vec) != length(names)) stop("Length mismatch when changing names in place.")
+    if (!is.character(names)) stop("Trying to set names in place with non-character names.")
+    invisible(.Call(C_setnames_inplace, vec, names, PACKAGE = "dtwclust"))
 }
 
 # ==================================================================================================
