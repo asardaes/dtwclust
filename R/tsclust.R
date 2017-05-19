@@ -255,6 +255,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
     } else if (is.null(preproc)) {
         preproc <- function(x, ...) { x }
+        environment(preproc) <- .GlobalEnv
         preproc_char <- "none"
 
     } else stop("Invalid preprocessing")
@@ -735,7 +736,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                     seed = seed,
                                     simplify = FALSE)
 
-            RET <- mapply(R, rng, SIMPLIFY = FALSE, FUN = function(R, rng) {
+            RET <- Map(R, rng, f = function(R, rng) {
                 rngtools::setRNG(rng)
                 k <- length(R$centroids)
 
@@ -797,7 +798,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     RET <- lapply(RET, function(ret) {
         ret@proctime <- toc
         ret@seed <- as.integer(seed)
-
         ret
     })
 
