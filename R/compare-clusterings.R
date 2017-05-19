@@ -441,7 +441,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     types <- match.arg(types, supported_clusterings, TRUE)
     .errorhandling <- match.arg(.errorhandling, c("stop", "remove", "pass"))
     if (!return.objects && missing(score.clus))
-        stop("Returning no objects without specifying a scoring function would return no useful results.")
+        stop("Returning no objects and specifying no scoring function would return no useful results.")
 
     ## coerce to list if necessary
     series <- any2list(series)
@@ -506,7 +506,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
             if (preproc_df$preproc[i] != "none") {
                 preproc_fun <- get_from_callers(preproc_df$preproc[i], "function")
                 this_config <- preproc_df[i, , drop = FALSE]
-                names(this_config) <- gsub("_preproc", "", names(this_config))
+                names(this_config) <- sub("_preproc$", "", names(this_config))
 
                 if (any(preproc_args)) {
                     preproc_args <- as.list(this_config)[preproc_args]
@@ -519,7 +519,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                enlist(series,
                                       dots = preproc_args))
 
-                attr(ret, "config") <- as.list(this_config)
+                attr(ret, "config") <- as.list(this_config) ## leave version with possible NAs here!
 
             } else {
                 ret <- series
@@ -608,7 +608,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         for (custom_centroid in custom_centroids)
             assign(custom_centroid, get_from_callers(custom_centroid, "function"))
 
-        export <- c("trace", "score.clus",
+        export <- c("trace", "score.clus", "return.objects",
                     "dots", "centroids_included",
                     "allocate_gcm", "allocate_logs", "allocate_dba",
                     "check_consistency", "enlist", "subset_dots", "get_from_callers",
@@ -719,21 +719,18 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
                 if (centroid_char == "default") {
                     ## do not specify centroid
-                    tsc <- do.call(tsclust, this_args, quote = TRUE)
+                    tsc <- do.call(tsclust, this_args)
 
                 } else if (centroid_char %in% centroids_included) {
                     ## with included centroid
                     tsc <- do.call(tsclust,
-                                   enlist(centroid = centroid_char, dots = this_args),
-                                   quote = TRUE)
+                                   enlist(centroid = centroid_char, dots = this_args))
 
                 } else {
                     ## with centroid function
-                    delayedAssign("centroid", get_from_callers(centroid_char, "function"))
-
                     tsc <- do.call(tsclust,
-                                   enlist(centroid = centroid, dots = this_args),
-                                   quote = TRUE)
+                                   enlist(centroid = get_from_callers(centroid_char, "function"),
+                                          dots = this_args))
                 }
 
                 if (inherits(tsc, "TSClusters")) tsc <- list(tsc)
@@ -836,7 +833,6 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## Data frame with results
     ## =============================================================================================
 
-    k <- unlist(configs[[1L]]$k[1L])
     i_cfg <- 1L
     config_ids <- list()
 
@@ -847,6 +843,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
     configs_out <- Map(configs, config_ids, types, f = function(config, ids, type) {
         config <- data.frame(config_id = paste0("config", ids), config)
+        k <- unlist(config$k[1L])
 
         dfs <- switch(
             type,
