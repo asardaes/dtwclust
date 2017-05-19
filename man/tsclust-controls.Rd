@@ -109,8 +109,8 @@ updated iteratively.
 There are some limitations when using a custom hierarchical function in \code{method}: it will
 receive the lower triangular of the distance matrix as first argument (see \code{\link[stats:as.dist]{stats::as.dist()}})
 and the result should support the \code{\link[stats:as.hclust]{stats::as.hclust()}} generic. This functionality was added
-with the \pkg{cluster} in mind, since its functions follow this convention, but other functions
-could be used if they are adapted to work similarly.
+with the \pkg{cluster} package in mind, since its functions follow this convention, but other
+functions could be used if they are adapted to work similarly.
 }
 
 \section{TADPole}{

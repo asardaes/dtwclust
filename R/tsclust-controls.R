@@ -86,8 +86,8 @@ partitional_control <- function(pam.precompute = TRUE,
 #'   There are some limitations when using a custom hierarchical function in `method`: it will
 #'   receive the lower triangular of the distance matrix as first argument (see [stats::as.dist()])
 #'   and the result should support the [stats::as.hclust()] generic. This functionality was added
-#'   with the \pkg{cluster} in mind, since its functions follow this convention, but other functions
-#'   could be used if they are adapted to work similarly.
+#'   with the \pkg{cluster} package in mind, since its functions follow this convention, but other
+#'   functions could be used if they are adapted to work similarly.
 #'
 hierarchical_control <- function(method = "average",
                                  symmetric = FALSE,
