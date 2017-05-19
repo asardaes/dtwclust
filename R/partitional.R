@@ -135,8 +135,6 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
     N <- length(x)
     k <- as.integer(k)
 
-    if (is.null(names(x))) names(x) <- paste0("series_", 1:N) # used by custom PAM centroids
-
     if (fuzzy && cent == "fcm") {
         cluster <- matrix(0, N, k)
         cluster[ , -1L] <- stats::runif(N *(k - 1)) / (k - 1)
