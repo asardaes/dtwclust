@@ -165,7 +165,7 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                                          configs = compare_clusterings_configs(),
                                                          seed = 932L, return.objects = TRUE,
                                                          .errorhandling = "pass"),
-                   "score.clus")
+                   "names")
 
     expect_true(inherits(errorpass_comp$objects.fuzzy[[1L]], "error"))
 
@@ -178,24 +178,24 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
 
     expect_warning(no_score <- compare_clusterings(data_reinterpolated_subset, c("f"),
                                                    configs = cfgs, seed = 392L,
-                                                   return.objects = TRUE),
+                                                   return.objects = TRUE,
+                                                   score.clus = function(...) stop("NO!")),
                    "score.clus")
     expect_null(no_score$scores)
 
     expect_warning(no_pick <- compare_clusterings(data_reinterpolated_subset, c("f"),
                                                   configs = cfgs, seed = 392L,
                                                   score.clus = score_fun,
+                                                  pick.clus = function(...) stop("NO!"),
                                                   lbls = labels_subset),
                    "pick.clus")
     expect_null(no_pick$pick)
     expect_true(!is.null(no_pick$scores))
 
-    expect_warning(type_score <- compare_clusterings(data_reinterpolated_subset, c("f"),
-                                                     configs = cfgs, seed = 392L,
-                                                     score.clus = type_score_fun,
-                                                     lbls = labels_subset),
-                   "pick.clus")
-
+    type_score <- compare_clusterings(data_reinterpolated_subset, c("f"),
+                                      configs = cfgs, seed = 392L,
+                                      score.clus = type_score_fun,
+                                      lbls = labels_subset)
     expect_identical(no_pick$results, type_score$results)
 
     mute <- capture.output(all_comparisons <- compare_clusterings(data_reinterpolated_subset,
@@ -208,27 +208,24 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                                                   shuffle.configs = TRUE,
                                                                   lbls = labels_subset))
 
-    expect_warning(gak_comparison <- compare_clusterings(data_subset, "p",
-                                                         configs = cfgs_gak, seed = 190L,
-                                                         score.clus = score_fun,
-                                                         lbls = labels_subset),
-                   "pick.clus")
+    gak_comparison <- compare_clusterings(data_subset, "p",
+                                          configs = cfgs_gak, seed = 190L,
+                                          score.clus = score_fun,
+                                          lbls = labels_subset)
 
-    expect_warning(dba_comparison <- compare_clusterings(data_multivariate, "h",
-                                                         configs = cfgs_dba, seed = 294L,
-                                                         score.clus = score_fun,
-                                                         lbls = labels_subset),
-                   "pick.clus")
+    dba_comparison <- compare_clusterings(data_multivariate, "h",
+                                          configs = cfgs_dba, seed = 294L,
+                                          score.clus = score_fun,
+                                          lbls = labels_subset)
 
     N <- max(lengths(data_subset)) + 1L
     logs <- matrix(0, N, 3L)
     gcm <- matrix(0, N, N)
-    expect_warning(mats_comparison <- compare_clusterings(data_subset, "h",
-                                                          configs = cfgs_mats, seed = 9430L,
-                                                          logs = logs,
-                                                          gcm = gcm,
-                                                          return.objects = TRUE),
-                   "score.clus")
+    mats_comparison <- compare_clusterings(data_subset, "h",
+                                           configs = cfgs_mats, seed = 9430L,
+                                           logs = logs,
+                                           gcm = gcm,
+                                           return.objects = TRUE)
 
     expect_true(all(c("gcm", "logs") %in% names(mats_comparison$objects.hierarchical$config1_1@dots)))
 

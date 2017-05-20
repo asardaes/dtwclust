@@ -437,10 +437,13 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     tic <- proc.time()
     set.seed(seed)
 
+    score_missing <- missing(score.clus)
+    pick_missing <- missing(pick.clus)
+
     if (is.null(series)) stop("No series provided.")
     types <- match.arg(types, supported_clusterings, TRUE)
     .errorhandling <- match.arg(.errorhandling, c("stop", "remove", "pass"))
-    if (!return.objects && missing(score.clus))
+    if (!return.objects && score_missing)
         stop("Returning no objects and specifying no scoring function would return no useful results.")
 
     ## coerce to list if necessary
@@ -621,7 +624,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
         configs_split <- split_parallel(config, 1L)
         seeds_split <- split_parallel(seeds)
-        cfg <- NULL # CHECK complains with NOTE regarding undefined global
+        cfg <- attr(config, "num.configs")
 
         objs <- foreach::foreach(
             cfg = configs_split,
@@ -630,7 +633,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
             .multicombine = TRUE,
             .packages = packages,
             .export = export,
-            .errorhandling = .errorhandling
+            .errorhandling = .errorhandling,
+            .maxcombine = ifelse(cfg > 100L, cfg, 100L)
         ) %op% {
             chunk <- lapply(seq_len(nrow(cfg)), function(i) {
                 if (trace) {
@@ -769,7 +773,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
                 if (!return.objects) {
                     if (!is.function(score.clus)) score.clus <- score.clus[[type]]
-                    ret <- do.call(score.clus, enlist(ret, dots = dots))
+                    ret <- list(do.call(score.clus, enlist(ret, dots = dots)))
                 }
 
                 ## return config result from lapply()
@@ -808,7 +812,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                           silent = TRUE)
 
         if (inherits(scores, "try-error")) {
-            warning("The score.clus function(s) did not execute successfully.")
+            if (!score_missing) warning("The score.clus function(s) did not execute successfully.")
             scores <- NULL
             pick <- NULL
 
@@ -816,16 +820,21 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
             pick <- try(pick.clus(scores, objs_by_type, ...), silent = TRUE)
 
             if (inherits(pick, "try-error")) {
-                warning("The pick.clus function did not execute successfully.")
+                if (!pick_missing) warning("The pick.clus function did not execute successfully.")
                 pick <- NULL
             }
         }
     } else {
-        scores <- objs_by_type
-        pick <- try(pick.clus(scores, ...), silent = TRUE)
+        scores <- lapply(objs_by_type, function(objs) {
+            if (any(sapply(objs, function(score) { is.null(dim(score)) })))
+                unlist(objs, recursive = FALSE)
+            else
+                plyr::rbind.fill(lapply(objs, base::as.data.frame))
+        })
 
+        pick <- try(pick.clus(scores, ...), silent = TRUE)
         if (inherits(pick, "try-error")) {
-            warning("The pick.clus function did not execute successfully.")
+            if (!pick_missing) warning("The pick.clus function did not execute successfully.")
             pick <- NULL
         }
     }
