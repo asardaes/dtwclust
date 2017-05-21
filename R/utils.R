@@ -11,7 +11,7 @@ check_consistency <- function(obj, case, ..., clus_type,
     if (case == "ts") {
         if (!is.numeric(obj)) stop("The series must be numeric")
         if (length(obj) < 1L) stop("The series must have at least one point")
-        if (any(is.na(obj))) stop("There are missing values in the series")
+        if (anyNA(obj)) stop("There are missing values in the series")
 
     } else if (case %in% c("tslist", "vltslist")) {
         if (!is.list(obj)) stop("Oops, data should already be a list by this point...")
