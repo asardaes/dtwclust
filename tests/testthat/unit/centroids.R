@@ -362,6 +362,18 @@ test_that("Operations with dba centroid complete successfully.", {
                                     norm = "L2"))
 })
 
+test_that("Second version of DBA works as expected.", {
+    dba2_uv <- DBA(data_subset[1L:5L], centroid = data_subset[[1L]], mv.ver = "by-s")
+    expect_true(is.null(dim(dba2_uv)))
+
+    dba2_mv <- DBA(data_multivariate[1L:5L], centroid = data_multivariate[[1L]], mv.ver = "by-s")
+    expect_identical(dim(dba2_mv), dim(data_multivariate[[1L]]))
+    expect_identical(dimnames(dba2_mv), dimnames(data_multivariate[[1L]]))
+
+    assign("dba2_uv", dba2_uv, persistent)
+    assign("dba2_mv", dba2_mv, persistent)
+})
+
 # =================================================================================================
 # custom
 # =================================================================================================

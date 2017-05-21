@@ -24,6 +24,7 @@
 #' @param gcm Optional matrix to pass to [dtw_basic()] (for the case when `backtrack = TRUE`). To
 #'   define the matrix size, it should be assumed that `x` is the *longest* series in `X`, and `y`
 #'   is the `centroid` if provided or `x` otherwise. Ignored in parallel computations.
+#' @param mv.ver Multivariate version to use. See below.
 #'
 #' @details
 #'
@@ -37,6 +38,17 @@
 #' @template window
 #'
 #' @return The average time series.
+#'
+#' @section Multivariate series:
+#'
+#'   There are currently 2 versions of DBA implemented for multivariate series:
+#'
+#'   - If `mv.ver = "by-variable"`, then each variable of `X` and `centroid` are extracted, and the
+#'     univariate version of the algorithm is applied to each set of variables, binding the results
+#'     by column. Therefore, the DTW backtracking is different for each variable.
+#'   - If `mv.ver = "by-series"`, then all variables are considered at the same time, so the DTW
+#'     backtracking is computed based on each multivariate series as a whole. This version was
+#'     implemented in version 4.0.0 of \pkg{dtwclust}, and it might be faster.
 #'
 #' @template parallel
 #'
@@ -93,9 +105,10 @@ DBA <- function(X, centroid = NULL, ...,
                 window.size = NULL, norm = "L1",
                 max.iter = 20L, delta = 1e-3,
                 error.check = TRUE, trace = FALSE,
-                gcm = NULL)
+                gcm = NULL, mv.ver = "by-variable")
 {
     X <- any2list(X)
+    mv.ver <- match.arg(mv.ver, c("by-variable", "by-series"))
 
     if (is.null(centroid)) centroid <- X[[sample(length(X), 1L)]] # Random choice
     if (error.check) {
@@ -104,11 +117,12 @@ DBA <- function(X, centroid = NULL, ...,
     }
 
     ## utils.R
-    if (is_multivariate(X)) {
+    mv <- is_multivariate(X)
+    if (mv && mv.ver == "by-variable") {
         mv <- reshape_multivariate(X, centroid) # utils.R
 
-        new_c <- mapply(
-            mv$series, mv$cent, SIMPLIFY = FALSE, FUN = function(xx, cc) {
+        new_c <- Map(
+            mv$series, mv$cent, f = function(xx, cc) {
                 DBA(xx, cc, ...,
                     norm = norm,
                     window.size = window.size,
@@ -119,19 +133,25 @@ DBA <- function(X, centroid = NULL, ...,
             }
         )
 
-        return(do.call(cbind, new_c))
+        new_c <- do.call(cbind, new_c)
+        dimnames(new_c) <- dimnames(centroid)
+        return(new_c)
+
+    } else {
+        X <- lapply(X, cbind)
+        centroid <- cbind(centroid)
     }
 
     if (!is.null(window.size)) window.size <- check_consistency(window.size, "window")
     norm <- match.arg(norm, c("L1", "L2"))
     dots <- list(...)
-    L <- max(lengths(X)) + 1L ## maximum length of considered series + 1L
+    L <- max(sapply(X, NROW)) + 1L ## maximum length of considered series + 1L
     Xs <- split_parallel(X)
 
     ## pre-allocate cost matrices
     if (is.null(gcm))
-        gcm <- matrix(0, L, length(centroid) + 1L)
-    else if (!is.matrix(gcm) || nrow(gcm) < (L) || ncol(gcm) < (length(centroid) + 1L))
+        gcm <- matrix(0, L, NROW(centroid) + 1L)
+    else if (!is.matrix(gcm) || nrow(gcm) < (L) || ncol(gcm) < (NROW(centroid) + 1L))
         stop("DBA: Dimension inconsistency in 'gcm'")
     else if (storage.mode(gcm) != "double")
         stop("DBA: If provided, 'gcm' must have 'double' storage mode.")
@@ -148,7 +168,7 @@ DBA <- function(X, centroid = NULL, ...,
     centroid_old <- centroid
     if (trace) cat("\tDBA Iteration:")
 
-    while(iter <= max.iter) {
+    while (iter <= max.iter) {
         ## Return the coordinates of each series in X grouped by the coordinate they match to in the
         ## centroid time series.
         ## Also return the number of coordinates used in each case (for averaging below).
@@ -161,21 +181,21 @@ DBA <- function(X, centroid = NULL, ...,
         ) %op% {
             lapply(X, function(x) {
                 d <- do.call(dtw_basic, enlist(x = x, y = centroid, dots = dots))
-                x_sub <- stats::aggregate(x[d$index1], by = list(ind = d$index2), sum)
-                n_sub <- stats::aggregate(x[d$index1], by = list(ind = d$index2), length)
-                cbind(sum = x_sub$x, n = n_sub$x)
+                x_sub <- stats::aggregate(x[d$index1, ], by = list(ind = d$index2), sum)
+                n_sub <- stats::aggregate(x[d$index1, ], by = list(ind = d$index2), length)
+                data.frame(".id_var" = 1L:nrow(x_sub), x_sub[, -1L], ".n" = n_sub[, 2L])
             })
         }
 
         ## Put everything in one big data frame
-        xg <- reshape2::melt(xg)
-        ## Aggregate according to index of centroid time series (Var1) and the variable type (Var2)
-        xg <- stats::aggregate(xg$value, by = list(xg$Var1, xg$Var2), sum)
+        xg <- reshape2::melt(xg, id.vars = ".id_var")
+        ## Aggregate by summing according to index of centroid time series
+        xg <- reshape2::dcast(xg, .id_var ~ variable, fun.aggregate = sum, value.var = "value")
         ## Average
-        centroid <- xg$x[xg$Group.2 == "sum"] / xg$x[xg$Group.2 == "n"]
+        centroid <- base::as.matrix(xg[setdiff(colnames(xg), c(".id_var", ".n"))] / xg$.n)
 
         if (isTRUE(all.equal(centroid, centroid_old, tolerance = delta))) {
-            if (trace) cat("", iter ,"- Converged!\n")
+            if (trace) cat("", iter, "- Converged!\n")
             break
 
         } else {
@@ -190,5 +210,5 @@ DBA <- function(X, centroid = NULL, ...,
     }
 
     if (iter > max.iter && trace) cat(" Did not 'converge'\n")
-    as.numeric(centroid)
+    if (mv) centroid else base::as.numeric(centroid)
 }

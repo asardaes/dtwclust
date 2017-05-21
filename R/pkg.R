@@ -128,6 +128,7 @@
 #'
 #' @importFrom Rcpp evalCpp
 #'
+#' @importFrom reshape2 dcast
 #' @importFrom reshape2 melt
 #'
 #' @importFrom rngtools RNGseq

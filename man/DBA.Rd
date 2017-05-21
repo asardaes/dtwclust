@@ -6,7 +6,7 @@
 \usage{
 DBA(X, centroid = NULL, ..., window.size = NULL, norm = "L1",
   max.iter = 20L, delta = 0.001, error.check = TRUE, trace = FALSE,
-  gcm = NULL)
+  gcm = NULL, mv.ver = "by-variable")
 }
 \arguments{
 \item{X}{A matrix or data frame where each row is a time series, or a list where each element is
@@ -39,6 +39,8 @@ and give more informative errors messages. Also used internally to avoid repeati
 \item{gcm}{Optional matrix to pass to \code{\link[=dtw_basic]{dtw_basic()}} (for the case when \code{backtrack = TRUE}). To
 define the matrix size, it should be assumed that \code{x} is the \emph{longest} series in \code{X}, and \code{y}
 is the \code{centroid} if provided or \code{x} otherwise. Ignored in parallel computations.}
+
+\item{mv.ver}{Multivariate version to use. See below.}
 }
 \value{
 The average time series.
@@ -63,6 +65,20 @@ in \code{10(2) + 1 = 21} observations falling within the window.
 \note{
 The indices of the DTW alignment are obtained by calling \code{\link[=dtw_basic]{dtw_basic()}} with \code{backtrack = TRUE}.
 }
+\section{Multivariate series}{
+
+
+There are currently 2 versions of DBA implemented for multivariate series:
+\itemize{
+\item If \code{mv.ver = "by-variable"}, then each variable of \code{X} and \code{centroid} are extracted, and the
+univariate version of the algorithm is applied to each set of variables, binding the results
+by column. Therefore, the DTW backtracking is different for each variable.
+\item If \code{mv.ver = "by-series"}, then all variables are considered at the same time, so the DTW
+backtracking is computed based on each multivariate series as a whole. This version was
+implemented in version 4.0.0 of \pkg{dtwclust}, and it might be faster.
+}
+}
+
 \section{Parallel Computing}{
 
 
