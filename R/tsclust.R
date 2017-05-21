@@ -448,7 +448,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 i <- integer() # CHECK complains about non-initialization now
 
                 ## sequential allows the matrix to be updated iteratively
-                `%this_op%` <- ifelse(inherits(control$distmat, "SparseDistmat"), `%do%`, `%op%`)
+                `%this_op%` <- if(inherits(control$distmat, "SparseDistmat")) `%do%` else `%op%`
 
                 pc_list <- foreach(k = k0, rng = rng0,
                                    .combine = comb0, .multicombine = TRUE,

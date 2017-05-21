@@ -1003,7 +1003,7 @@ setAs("dtwclust", "TSClusters",
                            fuzzy = isTRUE(to@type == "fuzzy"),
                            preproc = from@family@preproc,
                            cluster = from@family@cluster,
-                           dist = ifelse(from@type == "tadpole", "dtw_lb", from@distance),
+                           dist = if (from@type == "tadpole") "dtw_lb" else from@distance,
                            allcent = if (is.null(from@call$centroid)) from@centroid else from@call$centroid)
 
           centroids <- from@centroids
@@ -1028,7 +1028,7 @@ setAs("dtwclust", "TSClusters",
               to@args$dist$window.type <- if (is.null(to@args$dist$window.size)) "none" else "slantedband"
           }
 
-          pr_entry <- pr_DB$get_entry(ifelse(from@type == "tadpole", "dtw_lb", from@distance))
+          pr_entry <- pr_DB$get_entry(if (from@type == "tadpole") "dtw_lb" else from@distance)
 
           if (is.function(pr_entry$FUN))
               to@args$dist <- c(to@args$dist, subset_dots(from@dots, pr_entry$FUN))

@@ -634,7 +634,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
             .packages = packages,
             .export = export,
             .errorhandling = .errorhandling,
-            .maxcombine = ifelse(cfg > 100L, cfg, 100L)
+            .maxcombine = if (isTRUE(cfg > 100L)) cfg else 100L
         ) %op% {
             chunk <- lapply(seq_len(nrow(cfg)), function(i) {
                 if (trace) {

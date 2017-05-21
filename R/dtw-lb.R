@@ -118,7 +118,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     dtw.func <- match.arg(dtw.func, c("dtw", "dtw_basic"))
 
     if (dtw.func == "dtw")
-        method <- ifelse(norm == "L1", "DTW", "DTW2")
+        method <- if (norm == "L1") "DTW" else "DTW2"
     else
         method <- toupper(dtw.func)
 
