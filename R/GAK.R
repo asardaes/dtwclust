@@ -95,15 +95,20 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
         window.size <- check_consistency(window.size, "window")
 
     if (is.null(sigma)) {
-        x <- cbind(x)
-        y <- cbind(y)
         med1 <- sqrt(median(c(NROW(x), NROW(y))))
-
         n <- round(0.5 * min(NROW(x), NROW(y)))
-        xx <- sapply(1L:NCOL(x), function(idc) sample(x[ , idc], n))
-        yy <- sapply(1L:NCOL(y), function(idc) sample(y[ , idc], n))
-        med2 <- median(replicate(100L, lnorm(xx - yy, 2)))
 
+        if (is.null(dim(x)))
+            xx <- sample(x, n)
+        else
+            xx <- sapply(1L:ncol(x), function(idc) { sample(x[, idc], n) })
+
+        if (is.null(dim(y)))
+            yy <- sample(y, n)
+        else
+            yy <- sapply(1L:ncol(y), function(idc) { sample(y[, idc], n) })
+
+        med2 <- median(replicate(100L, lnorm(xx - yy, 2)))
         sigma <- med1 * med2
 
     } else if (sigma <= 0) stop("Parameter 'sigma' must be positive.")
@@ -161,11 +166,18 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
         med1 <- sqrt(median(L))
 
         med2 <- median(replicate(length(x) + length(y), {
-            x <- cbind(sample(x, 1L)[[1L]])
-            y <- cbind(sample(y, 1L)[[1L]])
+            x <- sample(x, 1L)[[1L]]
+            y <- sample(y, 1L)[[1L]]
 
-            xx <- sapply(1L:NCOL(x), function(idc) sample(x[ , idc], n))
-            yy <- sapply(1L:NCOL(y), function(idc) sample(y[ , idc], n))
+            if (is.null(dim(x)))
+                xx <- sample(x, n)
+            else
+                xx <- sapply(1L:ncol(x), function(idc) { sample(x[, idc], n) })
+
+            if (is.null(dim(y)))
+                yy <- sample(y, n)
+            else
+                yy <- sapply(1L:ncol(y), function(idc) { sample(y[, idc], n) })
 
             lnorm(xx - yy, 2)
         }))
