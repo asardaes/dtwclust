@@ -112,8 +112,7 @@ double dtw_basic_c(double const *x, double const *y, int const w,
 
     // first value, must set here to avoid multiplying by step
     D[d2s(1, 1, nx, backtrack)] = lnorm(x, y, norm, nx, ny, dim, 0, 0);
-    if (norm == 2)
-        D[d2s(1, 1, nx, backtrack)] = D[d2s(1, 1, nx, backtrack)] * D[d2s(1, 1, nx, backtrack)];
+    if (norm == 2) D[d2s(1, 1, nx, backtrack)] *= D[d2s(1, 1, nx, backtrack)];
 
     // dynamic programming
     for (i = 1; i <= nx; i++) {

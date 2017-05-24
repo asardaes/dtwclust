@@ -64,6 +64,10 @@ in \code{10(2) + 1 = 21} observations falling within the window.
 }
 \note{
 The indices of the DTW alignment are obtained by calling \code{\link[=dtw_basic]{dtw_basic()}} with \code{backtrack = TRUE}.
+
+The new \code{C++} implementation (v4.0.0) has slightly different numerical accuracy (in the
+order of 10^-16), and no longer supports parallelization directly. The calls through \code{\link[=tsclust]{tsclust()}}
+can still perform different DBA calculations in parallel.
 }
 \section{Multivariate series}{
 
@@ -77,16 +81,6 @@ by column. Therefore, the DTW backtracking is different for each variable.
 backtracking is computed based on each multivariate series as a whole. This version was
 implemented in version 4.0.0 of \pkg{dtwclust}, and it might be faster.
 }
-}
-
-\section{Parallel Computing}{
-
-
-  Please note that running tasks in parallel does \strong{not} guarantee faster computations.
-  The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
-
-  The user can register a parallel backend, e.g. with the \pkg{doParallel} package, in order to
-  attempt to speed up the calculations (see the examples).
 }
 
 \examples{
@@ -106,26 +100,6 @@ dtw.avg2 <- DBA(CharTraj[5:1], CharTraj[[1]], trace = TRUE)
 
 # Same result?
 all(dtw.avg == dtw.avg2)
-
-\dontrun{
-#### Running DBA with parallel support
-# For such a small dataset, this is probably slower in parallel
-require(doParallel)
-
-# Create parallel workers
-cl <- makeCluster(detectCores())
-invisible(clusterEvalQ(cl, library(dtwclust)))
-registerDoParallel(cl)
-
-# DTW Average
-cen <- DBA(CharTraj[1:5], CharTraj[[1]], trace = TRUE)
-
-# Stop parallel workers
-stopCluster(cl)
-
-# Return to sequential computations
-registerDoSEQ()
-}
 
 }
 \references{

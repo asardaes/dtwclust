@@ -7,6 +7,10 @@
 
 namespace dtwclust {
 
+RcppExport SEXP dba(SEXP X, SEXP centroid,
+                    SEXP max_iter, SEXP delta, SEXP trace,
+                    SEXP multivariate, SEXP mv_ver, SEXP DOTS);
+
 RcppExport SEXP envelope(SEXP series, SEXP window);
 
 } // namespace dtwclust
