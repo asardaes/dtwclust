@@ -1,5 +1,4 @@
 #include <Rcpp.h>
-#include <deque>
 #include <cmath>
 #include "dtwclustpp.h"
 #include "dtwclust.h"
