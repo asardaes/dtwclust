@@ -466,19 +466,16 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                 if (!check_consistency(dist_entry$names[1L], "dist"))
                                     do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                                pc <- do.call(pfclust,
-                                              enlist(x = series,
-                                                     k = k,
-                                                     family = family,
-                                                     control = control,
-                                                     fuzzy = isTRUE(type == "fuzzy"),
-                                                     cent = cent_char,
-                                                     trace = trace,
-                                                     args = args))
-
-                                gc(FALSE)
-
-                                pc
+                                ## return
+                                do.call(pfclust,
+                                        enlist(x = series,
+                                               k = k,
+                                               family = family,
+                                               control = control,
+                                               fuzzy = isTRUE(type == "fuzzy"),
+                                               cent = cent_char,
+                                               trace = trace,
+                                               args = args))
                             }
             }
 
@@ -647,7 +644,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                         })
 
                     } else {
-                        allcent <- function(...) {}
+                        allcent <- function(...) {} ## dummy
 
                         centroids <- sapply(1L:k, function(kcent) {
                             id_k <- cluster == kcent

@@ -30,14 +30,13 @@ hierarchical, fuzzy, tadpole.}
 \item{score.clus}{A function that gets the list of results (and \code{...}) and scores each one. It
 may also be a named list of functions, one for each type of clustering. See Scoring section.}
 
-\item{pick.clus}{A function that gets the result from \code{score.clus} as first argument, as well as
-the objects returned by \code{\link[=tsclust]{tsclust()}} (and elements of \code{...}) and picks the best result.}
+\item{pick.clus}{A function that to pick the best result. See Picking section.}
 
 \item{shuffle.configs}{Randomly shuffle the order of configs, which can be useful to balance load
 when using parallel computation.}
 
-\item{return.objects}{Logical indicating whether the objects from returned by \code{\link[=tsclust]{tsclust()}} should
-be given in the result.}
+\item{return.objects}{Logical indicating whether the objects returned by \code{\link[=tsclust]{tsclust()}} should be
+given in the result.}
 
 \item{packages}{A character vector with the names of any packages needed for any functions used
 (distance, centroid, preprocessing, etc.). The name "dtwclust" is added automatically. Relevant

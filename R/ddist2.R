@@ -62,7 +62,8 @@ ddist2 <- function(distance, control) {
                     ## Only half of it is computed
                     ## I think proxy can do this if y = NULL, but not in parallel
 
-                    ## strict pairwise as in proxy::dist doesn't make sense here, it's pairwise between pairs
+                    ## strict pairwise as in proxy::dist doesn't make sense here,
+                    ## but it's pairwise between pairs
                     dots$pairwise <- TRUE
                     pairs <- call_pairs(length(x), lower = FALSE)
                     pairs <- split_parallel(pairs, 1L)
@@ -91,9 +92,9 @@ ddist2 <- function(distance, control) {
                     D <- t(D)
                     D[upper.tri(D)] <- d
                     d <- D
+                    rm("D")
                     attr(d, "class") <- "crossdist"
                     attr(d, "dimnames") <- list(names(x), names(x))
-                    rm("D")
 
                 } else {
                     ## WHOLE SYMMETRIC DISTMAT WITH CUSTOM LOOP OR SEQUENTIAL proxy LOOP

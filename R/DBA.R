@@ -113,12 +113,10 @@ DBA <- function(X, centroid = NULL, ...,
     dots <- list(...)
     step.pattern <- dots$step.pattern
 
-    if (is.null(step.pattern))
+    if (is.null(step.pattern) || identical(step.pattern, symmetric2))
         step.pattern <- 2
     else if (identical(step.pattern, symmetric1))
         step.pattern <- 1
-    else if (identical(step.pattern, symmetric2))
-        step.pattern <- 2
     else
         stop("step.pattern must be either symmetric1 or symmetric2 (without quotes)")
 

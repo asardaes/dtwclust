@@ -2,7 +2,7 @@
 % Please edit documentation in R/compare-clusterings.R
 \name{pdc_configs}
 \alias{pdc_configs}
-\title{Helper function for \code{\link[=compare_clusterings_configs]{compare_clusterings_configs()}}}
+\title{Helper function for preprocessing/distance/centroid configurations}
 \usage{
 pdc_configs(type = c("preproc", "distance", "centroid"), ...,
   partitional = NULL, hierarchical = NULL, fuzzy = NULL, tadpole = NULL,

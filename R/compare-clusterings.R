@@ -1,4 +1,4 @@
-#' Helper function for [compare_clusterings_configs()]
+#' Helper function for preprocessing/distance/centroid configurations
 #'
 #' Create preprocessing, distance and centroid configurations for [compare_clusterings_configs()].
 #' All functions use [base::expand.grid()].
@@ -329,12 +329,11 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #' @param trace Logical indicating that more output should be printed to screen.
 #' @param score.clus A function that gets the list of results (and `...`) and scores each one. It
 #'   may also be a named list of functions, one for each type of clustering. See Scoring section.
-#' @param pick.clus A function that gets the result from `score.clus` as first argument, as well as
-#'   the objects returned by [tsclust()] (and elements of `...`) and picks the best result.
+#' @param pick.clus A function that to pick the best result. See Picking section.
 #' @param shuffle.configs Randomly shuffle the order of configs, which can be useful to balance load
 #'   when using parallel computation.
-#' @param return.objects Logical indicating whether the objects from returned by [tsclust()] should
-#'   be given in the result.
+#' @param return.objects Logical indicating whether the objects returned by [tsclust()] should be
+#'   given in the result.
 #' @param packages A character vector with the names of any packages needed for any functions used
 #'   (distance, centroid, preprocessing, etc.). The name "dtwclust" is added automatically. Relevant
 #'   for parallel computation.

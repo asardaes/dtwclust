@@ -12,6 +12,7 @@
 * Fixed DTW symmetry detection for fuzzy clustering.
 * Some internal functions changed, so older objects might no longer be compatible. Try using `update(old_TSClusters_obj)`.
 * The `dtwclust` *function* is now deprecated. Try using `as(dtwclust_class_obj, "TSClusters")` for old objects.
+* Several internal optimizations.
 
 ## Version 3.2.0
 * Added functions `compare_clusterings` and helpers to compare many clustering configurations, possibly in parallel.

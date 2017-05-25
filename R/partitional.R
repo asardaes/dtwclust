@@ -231,9 +231,9 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
 
     if (fuzzy) {
         fcluster <- cluster
+        cluster <- max.col(-distmat, "first")
         rownames(fcluster) <- names(x)
         colnames(fcluster) <- paste0("cluster_", 1:k)
-        cluster <- max.col(-distmat, "first")
 
     } else {
         fcluster <- matrix(NA_real_)
