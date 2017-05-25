@@ -128,7 +128,6 @@
 #'
 #' @importFrom Rcpp evalCpp
 #'
-#' @importFrom reshape2 dcast
 #' @importFrom reshape2 melt
 #'
 #' @importFrom rngtools RNGseq
@@ -170,7 +169,7 @@ NULL ## remember to check methods imports after removing dtwclust()
                                description = "Basic and maybe faster DTW distance",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
-    ## Register LB_Keogh with the 'proxy' package for distance matrix calculation
+    ## Register LB_Keogh
     if (!check_consistency("LB_Keogh", "dist", silent = TRUE))
         proxy::pr_DB$set_entry(FUN = lb_keogh_proxy, names=c("LBK", "LB_Keogh", "lbk"),
                                loop = FALSE, type = "metric", distance = TRUE,
@@ -178,7 +177,7 @@ NULL ## remember to check methods imports after removing dtwclust()
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
 
-    ## Register LB_Improved with the 'proxy' package for distance matrix calculation
+    ## Register LB_Improved
     if (!check_consistency("LB_Improved", "dist", silent = TRUE))
         proxy::pr_DB$set_entry(FUN = lb_improved_proxy, names=c("LBI", "LB_Improved", "lbi"),
                                loop = FALSE, type = "metric", distance = TRUE,
@@ -213,12 +212,13 @@ NULL ## remember to check methods imports after removing dtwclust()
     ## avoids default message if no backend exists
     if (is.null(foreach::getDoParName())) foreach::registerDoSEQ()
 
-    packageStartupMessage("\ndtwclust: Setting random number generator to L'Ecuyer-CMRG (see RNGkind()).\n",
-                          'To read the included vignette, type: vignette("dtwclust").\n',
-                          'Please see news(package = "dtwclust") for important information.\n')
+    packageStartupMessage("\ndtwclust:\n",
+                          "Setting random number generator to L'Ecuyer-CMRG (see RNGkind()).\n",
+                          'To read the included vignette type: vignette("dtwclust").\n',
+                          'Please see news(package = "dtwclust") for important information.')
 
     if (grepl("\\.9000$", utils::packageVersion("dtwclust")))
-        packageStartupMessage("This is a developer version of 'dtwclust'.\n",
+        packageStartupMessage("\nThis is a developer version of 'dtwclust'.\n",
                               "Using devtools::test() is currently broken, see tests/testthat.R")
 }
 
