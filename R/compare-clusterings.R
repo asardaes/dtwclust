@@ -307,7 +307,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                 tadpole = length(k) * length(cfg$dc[[1L]]) * nrow(cfg)
             )
 
-            ## return mapply
+            ## return Map
             cfg
         })
 }
@@ -486,7 +486,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     seeds <- rngtools::RNGseq(num_seeds[length(num_seeds)], seed = seed, simplify = FALSE)
     seeds <- Map(c(1L, num_seeds[-length(num_seeds)] + 1L), num_seeds,
                  f = function(first, last) { seeds[first:last] })
-    names(seeds) <- names(configs)
+    setnames_inplace(seeds, names(configs))
 
     ## =============================================================================================
     ## Preprocessings
@@ -595,9 +595,11 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         ## distance entries to re-register in parallel workers
         ## -----------------------------------------------------------------------------------------
 
-        dist_names <- unique(config$distance)
-        dist_entries <- lapply(dist_names, function(dist) { proxy::pr_DB$get_entry(dist) })
-        names(dist_entries) <- dist_names
+        if (type != "tadpole") {
+            dist_names <- unique(config$distance)
+            dist_entries <- lapply(dist_names, function(dist) { proxy::pr_DB$get_entry(dist) })
+            setnames_inplace(dist_entries, dist_names)
+        }
 
         ## -----------------------------------------------------------------------------------------
         ## export any necessary preprocessing and centroid functions
@@ -613,9 +615,9 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
             assign(custom_centroid, get_from_callers(custom_centroid, "function"))
 
         export <- c("trace", "score.clus", "return.objects",
-                    "dots", "centroids_included",
-                    "allocate_gcm", "allocate_logs", "allocate_dba",
-                    "check_consistency", "enlist", "subset_dots", "get_from_callers",
+                    "dots", "allocate_gcm", "allocate_logs", "allocate_dba",
+                    "centroids_included",
+                    "check_consistency", "enlist", "subset_dots", "get_from_callers", "setnames_inplace",
                     custom_preprocs, custom_centroids)
 
         ## -----------------------------------------------------------------------------------------
@@ -652,7 +654,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
                                    if (cfg[[func]][i] != "none" && any(col_ids)) {
                                        this_args <- as.list(cfg[i, col_ids, drop = FALSE])
-                                       names(this_args) <- sub(paste0("_", func),
+                                       names(this_args) <- sub(paste0("_", func, "$"),
                                                                "",
                                                                names(this_args))
                                        ## return
@@ -661,7 +663,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                    } else list()
                                })
 
-                names(args) <- c("preproc", "dist", "cent")
+                setnames_inplace(args, c("preproc", "dist", "cent"))
                 args <- do.call(tsclust_args, args = args)
 
                 ## ---------------------------------------------------------------------------------
@@ -851,15 +853,15 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
     ## create initial IDs
     i_cfg <- 1L
-    config_ids <- list()
-    for (nr in sapply(configs_out, nrow)) {
-        config_ids <- c(config_ids, list(seq(from = i_cfg, by = 1L, length.out = nr)))
-        i_cfg <- i_cfg + nr
-    }
+    config_ids <- lapply(sapply(configs_out, nrow), function(nr) {
+        ids <- seq(from = i_cfg, by = 1L, length.out = nr)
+        i_cfg <<- i_cfg + nr
+        ids
+    })
 
     ## flatten
     configs_out <- Map(configs_out, config_ids, types, f = function(config, ids, type) {
-        config <- data.frame(config_id = paste0("config", ids), config)
+        config$config_id <- paste0("config", ids)
         k <- unlist(config$k[1L])
 
         dfs <- switch(
@@ -930,7 +932,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     if (!is.null(scores)) {
         results <- try(Map(configs_out, scores,
                            f = function(config, score) {
-                               cbind(config, as.data.frame(score))
+                               cbind(config, base::as.data.frame(score))
                            }),
                        silent = TRUE)
 

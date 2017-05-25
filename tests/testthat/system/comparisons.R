@@ -162,7 +162,7 @@ cfgs_mats <- compare_clusterings_configs(types = "h", k = 2L:3L,
 
 test_that("Compare clusterings works for the minimum set with all possibilities.", {
     expect_warning(errorpass_comp <- compare_clusterings(data_subset, c("p", "h", "f"),
-                                                         configs = compare_clusterings_configs(),
+                                                         configs = compare_clusterings_configs(k = 2L:3L),
                                                          seed = 932L, return.objects = TRUE,
                                                          .errorhandling = "pass"),
                    "names")
