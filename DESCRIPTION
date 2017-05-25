@@ -42,6 +42,7 @@ BugReports: https://github.com/asardaes/dtwclust/issues
 License: GPL-3
 LazyData: TRUE
 NeedsCompilation: yes
+SystemRequirements: C++11
 RoxygenNote: 6.0.1
 Collate: 
     'DBA.R'
