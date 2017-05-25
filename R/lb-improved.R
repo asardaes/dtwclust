@@ -99,29 +99,11 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
             stop("Length mismatch between 'x' and the upper envelope")
     }
 
-    ## LB Keogh first
-    ind1 <- x > upper.env
-    ind2 <- x < lower.env
-    H <- x
-    H[ind1] <- upper.env[ind1]
-    H[ind2] <- lower.env[ind2]
-    d1 <- abs(x - H)
-
-    ## From here on is Lemire's improvement
-    EH <- compute_envelop(H, window.size = window.size, error.check = FALSE)
-    ind3 <- y > EH$upper
-    ind4 <- y < EH$lower
-    H2 <- y
-    H2[ind3] <- EH$upper[ind3]
-    H2[ind4] <- EH$lower[ind4]
-    d2 <- abs(y - H2)
-
-    ## LB_Improved is defined as root-p of the sum of LB_Keoghs^p
-    ## careful: LBK_2 = sqrt(sum(d1^2)), so LBK^2 = sum(d1^2)
-    d <- switch(EXPR = norm, L1 = sum(d1) + sum(d2), L2 = sqrt(sum(d1^2) + sum(d2^2)))
+    p <- switch(norm, L1 = 1L, L2 = 2L)
+    d <- .Call(C_lbi, x, y, window.size, p, lower.env, upper.env, PACKAGE = "dtwclust")
 
     if (force.symmetry) {
-        d2 <- lb_improved(x = y, y = x, window.size = window.size, norm = norm)
+        d2 <- lb_improved(x = y, y = x, window.size = window.size, norm = norm, error.check = FALSE)
         if (d2 > d) d <- d2
     }
 

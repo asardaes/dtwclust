@@ -25,6 +25,22 @@ SEXP envelope(SEXP series, SEXP window)
     return fun(series, window);
 }
 
+SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U)
+{
+    static SEXP(*fun)(SEXP, SEXP, SEXP, SEXP) = NULL;
+    if(fun == NULL)
+        fun = (SEXP(*)(SEXP, SEXP, SEXP, SEXP)) R_GetCCallable("dtwclust", "lbk");
+    return fun(X, P, L, U);
+}
+
+SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U)
+{
+    static SEXP(*fun)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP) = NULL;
+    if(fun == NULL)
+        fun = (SEXP(*)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP)) R_GetCCallable("dtwclust", "lbi");
+    return fun(X, Y, WINDOW, P, L, U);
+}
+
 } // namespace dtwclust
 
 #endif

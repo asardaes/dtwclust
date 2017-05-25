@@ -2,11 +2,12 @@
 
 ## Version 4.0.0
 * Optimized `TADPole` for multiple `k` and `dc` values.
-* Partitional and hierarchical configurations in `compare_clusterings` now take into account the `symmetric` control parameter if provided.
-* The functionality for `pick.clus` in `compare_clusterings` changed depending on the value of `return.objects`.
 * Optimized PAM centroids with `pam.precompute = FALSE` by using sparse matrices from the `Matrix` package.
+* Implemented the DTW lower bounds in `C++`.
 * Implemented DBA in `C++`.
   + Implemented an alternative version of *multivariate* DBA that might be faster. See its documentation.
+* Partitional and hierarchical configurations in `compare_clusterings` now take into account the `symmetric` control parameter.
+* The functionality for `pick.clus` in `compare_clusterings` changed depending on the value of `return.objects`.
 * Fixed an error that sometimes caused objects returned by `tsclust` to have duplicated elements in the `args` slot.
 * Fixed DTW symmetry detection for fuzzy clustering.
 * Some internal functions changed, so older objects might no longer be compatible. Try using `update(old_TSClusters_obj)`.

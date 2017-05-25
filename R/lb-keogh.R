@@ -72,16 +72,11 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
             stop("Length mismatch between 'x' and the upper envelope")
     }
 
-    D <- rep(0, length(x))
-    ind1 <- x > upper.env
-    D[ind1] <- x[ind1] - upper.env[ind1]
-    ind2 <- x < lower.env
-    D[ind2] <- lower.env[ind2] - x[ind2]
-    d <- switch(EXPR = norm, L1 = sum(D), L2 = sqrt(sum(D^2)))
+    p <- switch(norm, L1 = 1L, L2 = 2L)
+    d <- .Call(C_lbk, x, p, lower.env, upper.env, PACKAGE = "dtwclust")
 
     if (force.symmetry) {
         d2 <- lb_keogh(x = y, y = x, window.size = window.size, norm = norm, error.check = FALSE)
-
         if (d2$d > d) {
             d <- d2$d
             lower.env = d2$lower.env
