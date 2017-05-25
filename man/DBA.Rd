@@ -66,8 +66,8 @@ in \code{10(2) + 1 = 21} observations falling within the window.
 The indices of the DTW alignment are obtained by calling \code{\link[=dtw_basic]{dtw_basic()}} with \code{backtrack = TRUE}.
 
 The new \code{C++} implementation (v4.0.0) has slightly different numerical accuracy (in the
-order of 10^-16), and no longer supports parallelization directly. The calls through \code{\link[=tsclust]{tsclust()}}
-can still perform different DBA calculations in parallel.
+order of 10^-16, at least in x64 systems), and no longer supports parallelization directly. The
+calls through \code{\link[=tsclust]{tsclust()}} can still perform different DBA calculations in parallel.
 }
 \section{Multivariate series}{
 

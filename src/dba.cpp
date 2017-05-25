@@ -175,7 +175,6 @@ void print_trace(bool converged, int iter)
     if (trace) {
         if (converged) {
             Rcpp::Rcout << " " << iter << " - Converged!" << std::endl;
-            Rflush();
 
         } else {
             Rcpp::Rcout << " " << iter << ",";
