@@ -860,7 +860,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
     ## flatten
     configs_out <- Map(configs_out, config_ids, types, f = function(config, ids, type) {
-        config$config_id <- paste0("config", ids)
+        config <- data.frame(config_id = paste0("config", ids), config, stringsAsFactors = FALSE)
         k <- unlist(config$k[1L])
 
         dfs <- switch(
