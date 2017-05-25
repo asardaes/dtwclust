@@ -843,15 +843,22 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## Data frame with results
     ## =============================================================================================
 
+    ## add seeds
+    configs_out <- Map(configs, seeds, f = function(config, seed) {
+        config$seed <- seed
+        config
+    })
+
+    ## create initial IDs
     i_cfg <- 1L
     config_ids <- list()
-
-    for (nr in sapply(configs, nrow)) {
+    for (nr in sapply(configs_out, nrow)) {
         config_ids <- c(config_ids, list(seq(from = i_cfg, by = 1L, length.out = nr)))
         i_cfg <- i_cfg + nr
     }
 
-    configs_out <- Map(configs, config_ids, types, f = function(config, ids, type) {
+    ## flatten
+    configs_out <- Map(configs_out, config_ids, types, f = function(config, ids, type) {
         config <- data.frame(config_id = paste0("config", ids), config)
         k <- unlist(config$k[1L])
 
@@ -917,7 +924,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## in case ordering is required below
     if (shuffle.configs)
         configs_cols <- lapply(configs_out, function(config) {
-            setdiff(colnames(config), c("config_id", "rep"))
+            setdiff(colnames(config), c("config_id", "rep", "seed"))
         })
 
     if (!is.null(scores)) {

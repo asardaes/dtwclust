@@ -245,9 +245,9 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
     gak_comparison$proc_time <- NULL
     dba_comparison$proc_time <- NULL
 
-    assign("all_comp", all_comparisons, persistent)
-    assign("gak_comp", gak_comparison, persistent)
-    assign("dba_comp", dba_comparison, persistent)
+    assign("comp_all", all_comparisons, persistent)
+    assign("comp_gak", gak_comparison, persistent)
+    assign("comp_dba", dba_comparison, persistent)
 })
 
 # =================================================================================================
