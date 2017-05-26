@@ -62,6 +62,7 @@ void envelope_cpp(const Rcpp::NumericVector& array, unsigned int width,
 }
 
 RcppExport SEXP envelope(SEXP series, SEXP window) {
+BEGIN_RCPP
     Rcpp::NumericVector x(series);
     Rcpp::NumericVector L(x.size()), U(x.size());
 
@@ -71,6 +72,7 @@ RcppExport SEXP envelope(SEXP series, SEXP window) {
     ret["lower"] = L;
     ret["upper"] = U;
     return(ret);
+END_RCPP
 }
 
 } // namespace dtwclust

@@ -46,9 +46,11 @@ SEXP lbk_cpp(const Rcpp::NumericVector& x, int p,
 }
 
 RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U) {
+BEGIN_RCPP
     Rcpp::NumericVector x(X), lower_envelope(L), upper_envelope(U);
     Rcpp::NumericVector H(x.length());
     return lbk_cpp(x, Rcpp::as<int>(P), lower_envelope, upper_envelope, H);
+END_RCPP
 }
 
 // =================================================================================================
@@ -100,10 +102,12 @@ SEXP lbi_cpp(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
 }
 
 RcppExport SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U) {
+BEGIN_RCPP
     Rcpp::NumericVector x(X), y(Y), lower_envelope(L), upper_envelope(U);
     Rcpp::NumericVector L2(x.length()), U2(x.length()), H(x.length());
     return lbi_cpp(x, y, Rcpp::as<unsigned int>(WINDOW), Rcpp::as<int>(P),
                    lower_envelope, upper_envelope, L2, U2, H);
+END_RCPP
 }
 
 } // namespace dtwclust

@@ -1,5 +1,3 @@
-#include <R.h>
-#include <Rinternals.h>
 #include <Rcpp.h>
 
 #ifndef _DTWCLUST_HPP

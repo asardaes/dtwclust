@@ -337,6 +337,7 @@ RcppExport SEXP dba(SEXP X, SEXP centroid,
                     SEXP MAX_ITER, SEXP DELTA, SEXP TRACE,
                     SEXP multivariate, SEXP mv_ver, SEXP DOTS)
 {
+BEGIN_RCPP
     series = Rcpp::List(X);
 
     max_iter = Rcpp::as<int>(MAX_ITER);
@@ -360,6 +361,7 @@ RcppExport SEXP dba(SEXP X, SEXP centroid,
             return dba_mv_by_series(centroid);
 
     } else return dba_uv(centroid);
+END_RCPP
 }
 
 } // namespace dtwclust
