@@ -542,7 +542,6 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
             } else {
                 ret <- series
-                attr(ret, "config") <- list(preproc = "none")
             }
 
             ret
@@ -700,6 +699,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
                 for (this_series in series) {
                     this_series_config <- attr(this_series, "config")
+                    if (preproc_char == "none" && is.null(this_series_config))
+                        break
                     if (identical(this_series_config[names(this_preproc_config)], this_preproc_config))
                         break
                 }
