@@ -63,20 +63,13 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ...) {
     ## utils.R
     if (is_multivariate(X)) {
         mv <- reshape_multivariate(X, centroid) # utils.R
-
-        new_c <- mapply(mv$series, mv$cent,
-                        SIMPLIFY = FALSE,
-                        FUN = function(xx, cc, ...) {
-                            new_c <- shape_extraction(xx, cc, znorm = znorm, ...)
-                        })
-
+        new_c <- Map(mv$series, mv$cent, f = function(xx, cc, ...) {
+            new_c <- shape_extraction(xx, cc, znorm = znorm, ...)
+        })
         return(do.call(cbind, new_c))
     }
 
-    if (znorm)
-        Xz <- zscore(X, ...)
-    else
-        Xz <- X
+    Xz <- if (znorm) zscore(X, ...) else X
 
     ## make sure at least one series is not just a flat line at zero
     if (all(sapply(Xz, sum) == 0)) {
@@ -104,12 +97,7 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ...) {
     }
 
     Y <- zscore(A, ...)
-
-    if (is.matrix(Y))
-        S <- t(Y) %*% Y
-    else
-        S <- Y %*% t(Y)
-
+    S <- if (is.matrix(Y)) t(Y) %*% Y else Y %*% t(Y)
     nc <- ncol(A)
     P <- diag(nc) - 1 / nc * matrix(1, nc, nc)
     M <- P %*% S %*% P
