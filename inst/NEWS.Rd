@@ -11,6 +11,7 @@ Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/maste
     \itemize{
         \item Optimized \code{TADPole} for multiple \code{k} and \code{dc} values.
         \item Optimized PAM centroids with \code{pam.precompute = FALSE} by using sparse matrices from the \pkg{Matrix} package.
+        \item Optimized \code{shape_extraction} by using the \code{eigs_sym} function from the \pkg{RSpectra} package.
         \item Implemented the DTW lower bounds in \code{C++}.
         \item Implemented DBA in \code{C++}.
         \item Implemented an alternative version of \emph{multivariate} DBA that might be faster. See its documentation.

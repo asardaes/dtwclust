@@ -126,6 +126,8 @@
 #' @importFrom proxy dist
 #' @importFrom proxy pr_DB
 #'
+#' @importFrom RSpectra eigs_sym
+#'
 #' @importFrom Rcpp evalCpp
 #'
 #' @importFrom reshape2 melt

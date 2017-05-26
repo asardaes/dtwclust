@@ -3,6 +3,7 @@
 ## Version 4.0.0
 * Optimized `TADPole` for multiple `k` and `dc` values.
 * Optimized PAM centroids with `pam.precompute = FALSE` by using sparse matrices from the `Matrix` package.
+* Optimized `shape_extraction` by using the `eigs_sym` function from the `RSpectra` package.
 * Implemented the DTW lower bounds in `C++`.
 * Implemented DBA in `C++`.
   + Implemented an alternative version of *multivariate* DBA that might be faster. See its documentation.

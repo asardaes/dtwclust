@@ -19,6 +19,7 @@ Imports:
     foreach,
     Matrix,
     plyr,
+    RSpectra,
     Rcpp,
     reshape2,
     rngtools

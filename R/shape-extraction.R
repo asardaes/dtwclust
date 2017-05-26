@@ -112,7 +112,7 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
     nc <- ncol(A)
     P <- diag(nc) - 1 / nc * matrix(1, nc, nc)
     M <- P %*% S %*% P
-    ksc <- Re(eigen(M)$vectors[ , 1L, drop = TRUE])
+    ksc <- Re(RSpectra::eigs_sym(M, 1L)$vectors[ , 1L, drop = TRUE])
     d1 <- lnorm(A[1L, , drop = TRUE] - ksc, 2)
     d2 <- lnorm(A[1L, , drop = TRUE] + ksc, 2)
     if (d1 >= d2) ksc <- -ksc
