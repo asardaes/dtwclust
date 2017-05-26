@@ -358,6 +358,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #' - `scores`: The scores given by `score.clus`.
 #' - `pick`: The object returned by `pick.clus`.
 #' - `proc_time`: The measured execution time, using [base::proc.time()].
+#' - `seeds`: A list of lists with the random seeds computed for each configuration.
 #'
 #' The cluster objects are also returned if `return.objects` `=` `TRUE`.
 #'
@@ -412,6 +413,22 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'   `pick.clus` as first and second arguments respectively, followed by `...`. Otherwise,
 #'   `pick.clus` will receive only the scores and the contents of `...` (since the results will not
 #'   be returned by the preceding step).
+#'
+#' @section Limitations:
+#'
+#'   Note that the configurations returned by the helper functions assign special names to
+#'   preprocessing/distance/centroid arguments, and these names are used internally to recognize
+#'   them.
+#'
+#'   If some of these arguments are more complicated (e.g. matrices) and should *not* be expanded,
+#'   consider passing them directly via the ellipsis (`...`) instead of using [pdc_configs()]. This
+#'   assumes that it doesn't matter if said arguments can be passed to all functions without
+#'   affecting their results.
+#'
+#'   The distance matrices (if calculated) are not re-used across configurations. Given the way the
+#'   configurations are created, this shouldn't matter, because clusterings with arguments that can
+#'   use the same distance matrix are already grouped together by [pdc_configs()] and
+#'   [compare_clusterings_configs()].
 #'
 #' @author Alexis Sarda-Espinosa
 #'
@@ -844,23 +861,24 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## Data frame with results
     ## =============================================================================================
 
-    ## add seeds
-    configs_out <- Map(configs, seeds, f = function(config, seed) {
-        config$seed <- seed
-        config
-    })
-
     ## create initial IDs
     i_cfg <- 1L
-    config_ids <- lapply(sapply(configs_out, nrow), function(nr) {
+    config_ids <- lapply(sapply(configs, nrow), function(nr) {
         ids <- seq(from = i_cfg, by = 1L, length.out = nr)
         i_cfg <<- i_cfg + nr
         ids
     })
 
+    ## change to config names and assign to seeds (before flattening)
+    config_ids <- Map(config_ids, seeds, f = function(ids, seed) {
+        nms <- paste0("config", ids)
+        try(setnames_inplace(seed, nms), silent = TRUE)
+        nms
+    })
+
     ## flatten
-    configs_out <- Map(configs_out, config_ids, types, f = function(config, ids, type) {
-        config <- data.frame(config_id = paste0("config", ids), config, stringsAsFactors = FALSE)
+    configs_out <- Map(configs, config_ids, types, f = function(config, ids, type) {
+        config <- data.frame(config_id = ids, config, stringsAsFactors = FALSE)
         k <- unlist(config$k[1L])
 
         dfs <- switch(
@@ -925,7 +943,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## in case ordering is required below
     if (shuffle.configs)
         configs_cols <- lapply(configs_out, function(config) {
-            setdiff(colnames(config), c("config_id", "rep", "seed"))
+            setdiff(colnames(config), c("config_id", "rep", "k", "method", "dc",  "window.size", "lb"))
         })
 
     if (!is.null(scores)) {
@@ -946,7 +964,11 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## List with all results
     ## =============================================================================================
 
-    results <- list(results = results, scores = scores, pick = pick, proc_time = proc.time() - tic)
+    results <- list(results = results,
+                    scores = scores,
+                    pick = pick,
+                    proc_time = proc.time() - tic,
+                    seeds = seeds)
 
     if (return.objects) {
         setnames_res <- try(Map(objs_by_type, results$results,

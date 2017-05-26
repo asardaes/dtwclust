@@ -52,6 +52,7 @@ returned by \code{score.clus}.
 \item \code{scores}: The scores given by \code{score.clus}.
 \item \code{pick}: The object returned by \code{pick.clus}.
 \item \code{proc_time}: The measured execution time, using \code{\link[base:proc.time]{base::proc.time()}}.
+\item \code{seeds}: A list of lists with the random seeds computed for each configuration.
 }
 
 The cluster objects are also returned if \code{return.objects} \code{=} \code{TRUE}.
@@ -130,6 +131,24 @@ If \code{return.objects} is \code{TRUE}, the scores and the list of clustering r
 \code{pick.clus} as first and second arguments respectively, followed by \code{...}. Otherwise,
 \code{pick.clus} will receive only the scores and the contents of \code{...} (since the results will not
 be returned by the preceding step).
+}
+
+\section{Limitations}{
+
+
+Note that the configurations returned by the helper functions assign special names to
+preprocessing/distance/centroid arguments, and these names are used internally to recognize
+them.
+
+If some of these arguments are more complicated (e.g. matrices) and should \emph{not} be expanded,
+consider passing them directly via the ellipsis (\code{...}) instead of using \code{\link[=pdc_configs]{pdc_configs()}}. This
+assumes that it doesn't matter if said arguments can be passed to all functions without
+affecting their results.
+
+The distance matrices (if calculated) are not re-used across configurations. Given the way the
+configurations are created, this shouldn't matter, because clusterings with arguments that can
+use the same distance matrix are already grouped together by \code{\link[=pdc_configs]{pdc_configs()}} and
+\code{\link[=compare_clusterings_configs]{compare_clusterings_configs()}}.
 }
 
 \examples{
