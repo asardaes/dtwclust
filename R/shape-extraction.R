@@ -12,6 +12,7 @@
 #'   if `NULL`. For multivariate series, this should be a matrix with the same characteristics as
 #'   the matrices in `X`. **It will be z-normalized**.
 #' @param znorm Logical flag. Should z-scores be calculated for `X` before processing?
+#' @param ... Further arguments for [zscore()].
 #'
 #' @details
 #'
@@ -55,7 +56,7 @@
 #'         type = "l", col = 1:5)
 #' points(C)
 #'
-shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
+shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ...) {
     X <- any2list(X)
     check_consistency(X, "vltslist")
 
@@ -65,15 +66,15 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
 
         new_c <- mapply(mv$series, mv$cent,
                         SIMPLIFY = FALSE,
-                        FUN = function(xx, cc) {
-                            new_c <- shape_extraction(xx, cc, znorm = znorm)
+                        FUN = function(xx, cc, ...) {
+                            new_c <- shape_extraction(xx, cc, znorm = znorm, ...)
                         })
 
         return(do.call(cbind, new_c))
     }
 
     if (znorm)
-        Xz <- zscore(X)
+        Xz <- zscore(X, ...)
     else
         Xz <- X
 
@@ -97,12 +98,12 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
 
     } else {
         check_consistency(centroid, "ts")
-        centroid <- zscore(centroid) # use given reference
+        centroid <- zscore(centroid, ...) # use given reference
         A <- lapply(Xz, function(a) { SBD(centroid, a)$yshift })
         A <- do.call(rbind, A)
     }
 
-    Y <- zscore(A)
+    Y <- zscore(A, ...)
 
     if (is.matrix(Y))
         S <- t(Y) %*% Y
@@ -116,6 +117,6 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE) {
     d1 <- lnorm(A[1L, , drop = TRUE] - ksc, 2)
     d2 <- lnorm(A[1L, , drop = TRUE] + ksc, 2)
     if (d1 >= d2) ksc <- -ksc
-    ksc <- zscore(ksc)
+    ksc <- zscore(ksc, ...)
     ksc
 }
