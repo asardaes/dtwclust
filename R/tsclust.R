@@ -383,8 +383,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                dots = args$dist))
                     )
 
-                    gc(FALSE)
-
                 } else {
                     if (isTRUE(control$pam.sparse) && tolower(distance) != "dtw_lb") {
                         ## see SparseDistmat.R
@@ -436,26 +434,20 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 ## I need to re-register any custom distances in each parallel worker
                 dist_entry <- proxy::pr_DB$get_entry(distance)
                 export <- c("pfclust", "check_consistency", "enlist")
-
                 rng <- rngtools::RNGseq(length(k) * nrep, seed = seed, simplify = FALSE)
-                rng0 <- lapply(parallel::splitIndices(length(rng), length(k)),
-                               function(i) { rng[i] })
-
-                ## if %do% is used, the outer loop replaces value of k in this envir
+                ## if %do% is used, the outer loop replaces values in this envir
+                rng0 <- lapply(parallel::splitIndices(length(rng), length(k)), function(i) rng[i])
                 k0 <- k
-                comb0 <- if (nrep > 1L) c else list
-
-                i <- integer() # CHECK complains about non-initialization now
-
                 ## sequential allows the matrix to be updated iteratively
                 `%this_op%` <- if(inherits(control$distmat, "SparseDistmat")) `%do%` else `%op%`
+                i <- integer() # CHECK complains about non-initialization now
 
                 pc_list <- foreach(k = k0, rng = rng0,
-                                   .combine = comb0, .multicombine = TRUE,
+                                   .combine = c, .multicombine = TRUE,
                                    .packages = control$packages,
                                    .export = export) %:%
                     foreach(i = 1L:nrep,
-                            .combine = list, .multicombine = TRUE,
+                            .combine = c, .multicombine = TRUE,
                             .packages = control$packages,
                             .export = export) %this_op%
                             {
@@ -467,15 +459,17 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                     do.call(proxy::pr_DB$set_entry, dist_entry)
 
                                 ## return
-                                do.call(pfclust,
-                                        enlist(x = series,
-                                               k = k,
-                                               family = family,
-                                               control = control,
-                                               fuzzy = isTRUE(type == "fuzzy"),
-                                               cent = cent_char,
-                                               trace = trace,
-                                               args = args))
+                                list(
+                                    do.call(pfclust,
+                                            enlist(x = series,
+                                                   k = k,
+                                                   family = family,
+                                                   control = control,
+                                                   fuzzy = isTRUE(type == "fuzzy"),
+                                                   cent = cent_char,
+                                                   trace = trace,
+                                                   args = args))
+                                )
                             }
             }
 
@@ -594,9 +588,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             } else {
                 if (trace) cat("\n\tCalculating distance matrix...\n")
-                distmat <- do.call(distfun, enlist(x = series,
-                                                   centroids = NULL,
-                                                   dots = args$dist))
+                distmat <- do.call(distfun, enlist(x = series, centroids = NULL, dots = args$dist))
             }
 
             ## -------------------------------------------------------------------------------------
