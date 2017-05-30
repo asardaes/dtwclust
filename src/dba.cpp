@@ -178,8 +178,10 @@ void print_trace(bool converged, int iter)
 
         } else {
             Rcpp::Rcout << " " << iter << ",";
-            if (iter % 10 == 0) Rcpp::Rcout << "\n\t\t";
-            Rflush();
+            if (iter % 10 == 0) {
+                Rcpp::Rcout << "\n\t\t";
+                Rflush();
+            } 
         }
     }
 }
