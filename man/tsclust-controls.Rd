@@ -21,7 +21,7 @@ hierarchical_control(method = "average", symmetric = FALSE,
   packages = character(0L), distmat = NULL)
 
 fuzzy_control(fuzziness = 2, iter.max = 100L, delta = 0.001,
-  packages = character(0L))
+  packages = character(0L), symmetric = FALSE)
 
 tadpole_control(dc, window.size, lb = "lbk")
 
@@ -37,8 +37,8 @@ details.}
 \item{nrep}{Integer. How many times to repeat clustering with different starting points.}
 
 \item{symmetric}{Logical flag. Is the distance function symmetric? In other words, is \code{dist(x,y)}
-== \code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be computed. Overridden if
-the function detects an invalid user-provided value.}
+== \code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be computed. Overridden for
+the distances included in \pkg{dtwclust}.}
 
 \item{packages}{Character vector with the names of any packages required for custom \code{proxy}
 functions. Since the distance entries are re-registered in each parallel worker if needed, this

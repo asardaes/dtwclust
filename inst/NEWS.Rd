@@ -15,7 +15,8 @@ Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/maste
         \item Implemented the DTW lower bounds in \code{C++}.
         \item Implemented DBA in \code{C++}.
         \item Implemented an alternative version of \emph{multivariate} DBA that might be faster. See its documentation.
-        \item Partitional and hierarchical configurations in \code{compare_clusterings} now take into account the \code{symmetric} control parameter.
+        \item Added a \code{symmetric} control for fuzzy clustering.
+        \item Partitional, hierarchical and fuzzy configurations in \code{compare_clusterings} now take into account the \code{symmetric} control parameter.
         \item The functionality for \code{pick.clus} in \code{compare_clusterings} changed depending on the value of \code{return.objects}.
         \item Fixed an error that sometimes caused objects returned by \code{tsclust} to have duplicated elements in the \code{args} slot.
         \item Fixed DTW symmetry detection for fuzzy clustering.

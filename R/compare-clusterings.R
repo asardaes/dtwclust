@@ -258,6 +258,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                                    fuzziness = control$fuzziness,
                                    iter.max = control$iter.max,
                                    delta = control$delta,
+                                   symmetric = control$symmetric,
                                    stringsAsFactors = FALSE))
                 },
                 tadpole = {

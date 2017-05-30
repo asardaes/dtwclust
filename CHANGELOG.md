@@ -7,7 +7,8 @@
 * Implemented the DTW lower bounds in `C++`.
 * Implemented DBA in `C++`.
   + Implemented an alternative version of *multivariate* DBA that might be faster. See its documentation.
-* Partitional and hierarchical configurations in `compare_clusterings` now take into account the `symmetric` control parameter.
+* Added a `symmetric` control for fuzzy clustering.
+* Partitional, hierarchical and fuzzy configurations in `compare_clusterings` now take into account the `symmetric` control parameter.
 * The functionality for `pick.clus` in `compare_clusterings` changed depending on the value of `return.objects`.
 * Fixed an error that sometimes caused objects returned by `tsclust` to have duplicated elements in the `args` slot.
 * Fixed DTW symmetry detection for fuzzy clustering.

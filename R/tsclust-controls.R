@@ -13,8 +13,8 @@
 #' @param iter.max Integer. Maximum number of allowed iterations for partitional/fuzzy clustering.
 #' @param nrep Integer. How many times to repeat clustering with different starting points.
 #' @param symmetric Logical flag. Is the distance function symmetric? In other words, is `dist(x,y)`
-#'   == `dist(y,x)`? If `TRUE`, only half the distance matrix needs to be computed. Overridden if
-#'   the function detects an invalid user-provided value.
+#'   == `dist(y,x)`? If `TRUE`, only half the distance matrix needs to be computed. Overridden for
+#'   the distances included in \pkg{dtwclust}.
 #' @param packages Character vector with the names of any packages required for custom `proxy`
 #'   functions. Since the distance entries are re-registered in each parallel worker if needed, this
 #'   is probably useless, but just in case.
@@ -130,7 +130,8 @@ hierarchical_control <- function(method = "average",
 fuzzy_control <- function(fuzziness = 2,
                           iter.max = 100L,
                           delta = 1e-3,
-                          packages = character(0L))
+                          packages = character(0L),
+                          symmetric = FALSE)
 {
     if (any(fuzziness <= 1)) stop("Fuzziness exponent should be greater than one")
     if (any(iter.max <= 0L)) stop("Maximum iterations must be positive")
@@ -140,6 +141,7 @@ fuzzy_control <- function(fuzziness = 2,
         list(fuzziness = fuzziness,
              iter.max = as.integer(iter.max),
              delta = delta,
+             symmetric = as.logical(symmetric)[1L],
              packages = unique(c("dtwclust", as.character(packages)))),
         "class" = c(control_classes[["fuzzy"]])
     )
