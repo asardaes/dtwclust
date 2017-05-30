@@ -13,6 +13,7 @@
 #'   the matrices in `X`. **It will be z-normalized**.
 #' @param znorm Logical flag. Should z-scores be calculated for `X` before processing?
 #' @param ... Further arguments for [zscore()].
+#' @template error-check
 #'
 #' @details
 #'
@@ -56,15 +57,18 @@
 #'         type = "l", col = 1:5)
 #' points(C)
 #'
-shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ...) {
+shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check = TRUE) {
     X <- any2list(X)
-    check_consistency(X, "vltslist")
+    if (error.check) {
+        check_consistency(X, "vltslist")
+        if (!is.null(centroid)) check_consistency(centroid, "ts")
+    }
 
     ## utils.R
     if (is_multivariate(X)) {
         mv <- reshape_multivariate(X, centroid) # utils.R
         new_c <- Map(mv$series, mv$cent, f = function(xx, cc, ...) {
-            new_c <- shape_extraction(xx, cc, znorm = znorm, ...)
+            new_c <- shape_extraction(xx, cc, znorm = znorm, ..., error.check = FALSE)
         })
         return(do.call(cbind, new_c))
     }
@@ -90,7 +94,6 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ...) {
         }
 
     } else {
-        check_consistency(centroid, "ts")
         centroid <- zscore(centroid, ...) # use given reference
         A <- lapply(Xz, function(a) { SBD(centroid, a)$yshift })
         A <- do.call(rbind, A)

@@ -5,7 +5,7 @@
 all_cent2 <- function(case = NULL, control) {
     ## ---------------------------------------------------------------------------------------------
     ## pam
-    pam_cent <- function(x, x_split, cent, cl_id, id_changed, ...) {
+    pam_cent <- function(x, x_split, cent, id_changed, cl_id, ...) {
         id_x <- lapply(id_changed, function(cl_num) { which(cl_id == cl_num) })
 
         ## return
@@ -21,7 +21,10 @@ all_cent2 <- function(case = NULL, control) {
 
     ## ---------------------------------------------------------------------------------------------
     ## shape
-    shape_cent <- function(x_split, cent, ...) {
+    shape_cent <- function(x, x_split, cent, id_changed, cl_id, ...) {
+        ## not all arguments are used, but I want them to be isolated from ellipsis
+        dots <- list(...)
+        dots$error.check <- FALSE
         x_split <- split_parallel(x_split)
         cent <- split_parallel(cent)
 
@@ -29,8 +32,11 @@ all_cent2 <- function(case = NULL, control) {
         foreach(x_split = x_split, cent = cent,
                 .combine = c,
                 .multicombine = TRUE,
-                .packages = "dtwclust") %op% {
-                    Map(x_split, cent, f = function(x, c) { shape_extraction(x, c) })
+                .packages = "dtwclust",
+                .export = c("enlist")) %op% {
+                    Map(x_split, cent, f = function(x, cent) {
+                        do.call(shape_extraction, enlist(X = x, centroid = cent, dots = dots))
+                    })
                 }
     }
 
@@ -49,8 +55,8 @@ all_cent2 <- function(case = NULL, control) {
                 .multicombine = TRUE,
                 .packages = "dtwclust",
                 .export = c("enlist")) %op% {
-                    Map(x_split, cent, f = function(x, c) {
-                        do.call(DBA, enlist(X = x, centroid = c, dots = dots))
+                    Map(x_split, cent, f = function(x, cent) {
+                        do.call(DBA, enlist(X = x, centroid = cent, dots = dots))
                     })
                 }
     }
