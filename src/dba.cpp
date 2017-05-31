@@ -9,10 +9,9 @@ namespace dtwclust {
 /* shared variables */
 // =================================================================================================
 
-SEXP window, norm, step, backtrack;
-Rcpp::List series, dots;
+SEXP window, norm, step, backtrack, gcm;
+Rcpp::List series;
 Rcpp::IntegerVector index1, index2;
-Rcpp::NumericMatrix gcm;
 int max_iter, nx, ny, nv, begin;
 double delta;
 bool trace;
@@ -25,34 +24,28 @@ void uv_set_alignment(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y
 {
     SEXP X = PROTECT(Rcpp::wrap(x));
     SEXP Y = PROTECT(Rcpp::wrap(y));
-    SEXP GCM = PROTECT(Rcpp::wrap(gcm));
     SEXP NX = PROTECT(Rcpp::wrap(nx));
     SEXP NY = PROTECT(Rcpp::wrap(ny));
     SEXP NV = PROTECT(Rcpp::wrap(nv));
-
-    Rcpp::List alignment(dtw_basic(X, Y, window, NX, NY, NV, norm, step, backtrack, GCM));
-
+    Rcpp::List alignment(dtw_basic(X, Y, window, NX, NY, NV, norm, step, backtrack, gcm));
     index1 = alignment["index1"];
     index2 = alignment["index2"];
     begin = alignment["path"];
-    UNPROTECT(6);
+    UNPROTECT(5);
 }
 
 void mv_set_alignment(const Rcpp::NumericMatrix& x, const Rcpp::NumericMatrix& y)
 {
     SEXP X = PROTECT(Rcpp::wrap(x));
     SEXP Y = PROTECT(Rcpp::wrap(y));
-    SEXP GCM = PROTECT(Rcpp::wrap(gcm));
     SEXP NX = PROTECT(Rcpp::wrap(nx));
     SEXP NY = PROTECT(Rcpp::wrap(ny));
     SEXP NV = PROTECT(Rcpp::wrap(nv));
-
-    Rcpp::List alignment(dtw_basic(X, Y, window, NX, NY, NV, norm, step, backtrack, GCM));
-
+    Rcpp::List alignment(dtw_basic(X, Y, window, NX, NY, NV, norm, step, backtrack, gcm));
     index1 = alignment["index1"];
     index2 = alignment["index2"];
     begin = alignment["path"];
-    UNPROTECT(6);
+    UNPROTECT(5);
 }
 
 // =================================================================================================
@@ -74,22 +67,23 @@ void uv_sum_step(const Rcpp::NumericVector& x, Rcpp::NumericVector& cent, Rcpp::
 }
 
 void mv_sum_step(const Rcpp::NumericMatrix& x, Rcpp::NumericMatrix& cent, Rcpp::IntegerMatrix& n,
-                 Rcpp::NumericMatrix& kahan_c, Rcpp::NumericMatrix& kahan_y, Rcpp::NumericMatrix& kahan_t,
-                 int col)
+                 Rcpp::NumericMatrix& kahan_c, Rcpp::NumericMatrix& kahan_y, Rcpp::NumericMatrix& kahan_t)
 {
-    for (int i = begin - 1; i >= 0; i--) {
-        int i1 = index1[i] - 1;
-        int i2 = index2[i] - 1;
-        kahan_y(i2, col) = x(i1, col) - kahan_c(i2, col);
-        kahan_t(i2, col) = cent(i2, col) + kahan_y(i2, col);
-        kahan_c(i2, col) = (kahan_t(i2, col) - cent(i2, col)) - kahan_y(i2, col);
-        cent(i2, col) = kahan_t(i2, col);
-        n(i2, col) += 1;
+    for (int j = 0; j < nv; j++) {
+        for (int i = begin - 1; i >= 0; i--) {
+            int i1 = index1[i] - 1;
+            int i2 = index2[i] - 1;
+            kahan_y(i2, j) = x(i1, j) - kahan_c(i2, j);
+            kahan_t(i2, j) = cent(i2, j) + kahan_y(i2, j);
+            kahan_c(i2, j) = (kahan_t(i2, j) - cent(i2, j)) - kahan_y(i2, j);
+            cent(i2, j) = kahan_t(i2, j);
+            n(i2, j) += 1;
+        }
     }
 }
 
 // =================================================================================================
-/* average step for vectors and matrices */
+/* average step with check for 'convergence' and update ref_cent for vectors and matrices */
 // =================================================================================================
 
 bool uv_average_step(Rcpp::NumericVector& new_cent,
@@ -102,7 +96,6 @@ bool uv_average_step(Rcpp::NumericVector& new_cent,
         if (std::abs(new_cent[i] - ref_cent[i]) >= delta) converged = false;
         ref_cent[i] = new_cent[i];
     }
-
     return converged;
 }
 
@@ -118,7 +111,6 @@ bool mv_average_step(Rcpp::NumericMatrix& new_cent,
             ref_cent(i, j) = new_cent(i, j);
         }
     }
-
     return converged;
 }
 
@@ -181,7 +173,7 @@ void print_trace(bool converged, int iter)
             if (iter % 10 == 0) {
                 Rcpp::Rcout << "\n\t\t";
                 Rflush();
-            } 
+            }
         }
     }
 }
@@ -190,17 +182,14 @@ void print_trace(bool converged, int iter)
 /* univariate DBA */
 // =================================================================================================
 
-SEXP dba_uv(const SEXP& centroid)
+SEXP dba_uv(const Rcpp::NumericVector& centroid)
 {
-    Rcpp::NumericVector ref_cent = Rcpp::clone(Rcpp::NumericVector(centroid));
+    Rcpp::NumericVector ref_cent = Rcpp::clone(centroid);
     ny = ref_cent.length();
     nv = 1;
-
     Rcpp::NumericVector new_cent(ny);
     Rcpp::IntegerVector num_vals(ny);
-
-    // for Kahan summation
-    Rcpp::NumericVector kahan_c(ny), kahan_y(ny), kahan_t(ny);
+    Rcpp::NumericVector kahan_c(ny), kahan_y(ny), kahan_t(ny); // for Kahan summation
 
     if (trace) Rcpp::Rcout << "\tDBA Iteration:";
     int iter = 1;
@@ -227,32 +216,28 @@ SEXP dba_uv(const SEXP& centroid)
         Rflush();
     }
 
-    UNPROTECT(4);
-    return Rcpp::wrap(new_cent);
+    return PROTECT(Rcpp::wrap(new_cent));
 }
 
 // =================================================================================================
 /* multivariate DBA considering each variable separately */
 // =================================================================================================
 
-SEXP dba_mv_by_variable(const SEXP& centroid)
+SEXP dba_mv_by_variable(const Rcpp::NumericMatrix& mv_ref_cent)
 {
-    Rcpp::NumericMatrix mv_ref_cent(centroid);
     ny = mv_ref_cent.nrow();
     nv = 1; // careful! this is used by the uv_* functions so it must be 1
-
     Rcpp::NumericMatrix mat_cent(ny, mv_ref_cent.ncol());
     Rcpp::NumericVector x(max_lengths(true));
     Rcpp::NumericVector ref_cent(ny);
     Rcpp::NumericVector new_cent(ny);
     Rcpp::IntegerVector num_vals(ny);
-
-    // for Kahan summation
-    Rcpp::NumericVector kahan_c(ny), kahan_y(ny), kahan_t(ny);
+    Rcpp::NumericVector kahan_c(ny), kahan_y(ny), kahan_t(ny); // for Kahan summation
 
     for (int j = 0; j < mv_ref_cent.ncol(); j++) {
         if (trace) Rcpp::Rcout << "\tDBA Iteration:";
         for (int k = 0; k < ny; k++) ref_cent[k] = mv_ref_cent(k, j);
+
         int iter = 1;
         while (iter <= max_iter) {
             reset_vectors(new_cent, num_vals, kahan_c);
@@ -281,25 +266,21 @@ SEXP dba_mv_by_variable(const SEXP& centroid)
         mat_cent(Rcpp::_, j) = new_cent;
     }
 
-    UNPROTECT(4);
-    return Rcpp::wrap(mat_cent);
+    return PROTECT(Rcpp::wrap(mat_cent));
 }
 
 // =================================================================================================
 /* multivariate DBA considering each series as a whole */
 // =================================================================================================
 
-SEXP dba_mv_by_series(const SEXP& centroid)
+SEXP dba_mv_by_series(const Rcpp::NumericMatrix& centroid)
 {
-    Rcpp::NumericMatrix ref_cent = Rcpp::clone(Rcpp::NumericMatrix(centroid));
+    Rcpp::NumericMatrix ref_cent = Rcpp::clone(centroid);
     ny = ref_cent.nrow();
     nv = ref_cent.ncol();
-
     Rcpp::NumericMatrix mat_cent(ny, nv);
     Rcpp::IntegerMatrix mat_vals(ny, nv);
-
-    // for Kahan summation
-    Rcpp::NumericMatrix kahan_c(ny, nv), kahan_y(ny, nv), kahan_t(ny, nv);
+    Rcpp::NumericMatrix kahan_c(ny, nv), kahan_y(ny, nv), kahan_t(ny, nv); // for Kahan summation
 
     if (trace) Rcpp::Rcout << "\tDBA Iteration:";
     int iter = 1;
@@ -311,8 +292,7 @@ SEXP dba_mv_by_series(const SEXP& centroid)
             Rcpp::NumericMatrix x = series[i];
             nx = x.nrow();
             mv_set_alignment(x, ref_cent);
-            for (int j = 0; j < nv; j++)
-                mv_sum_step(x, mat_cent, mat_vals, kahan_c, kahan_y, kahan_t, j);
+            mv_sum_step(x, mat_cent, mat_vals, kahan_c, kahan_y, kahan_t);
         }
 
         // average step with check for 'convergence' and update ref_cent
@@ -327,15 +307,14 @@ SEXP dba_mv_by_series(const SEXP& centroid)
         Rflush();
     }
 
-    UNPROTECT(4);
-    return Rcpp::wrap(mat_cent);
+    return PROTECT(Rcpp::wrap(mat_cent));
 }
 
 // =================================================================================================
 /* main gateway function */
 // =================================================================================================
 
-RcppExport SEXP dba(SEXP X, SEXP centroid,
+RcppExport SEXP dba(SEXP X, SEXP CENT,
                     SEXP MAX_ITER, SEXP DELTA, SEXP TRACE,
                     SEXP multivariate, SEXP mv_ver, SEXP DOTS)
 {
@@ -346,23 +325,31 @@ BEGIN_RCPP
     delta = Rcpp::as<double>(DELTA);
     trace = Rcpp::as<bool>(TRACE);
 
-    dots = Rcpp::List(DOTS);
-    window = PROTECT(Rcpp::wrap(dots["window.size"]));
-    norm = PROTECT(Rcpp::wrap(dots["norm"]));
-    step = PROTECT(Rcpp::wrap(dots["step.pattern"]));
-    backtrack = PROTECT(Rcpp::wrap(true));
+    Rcpp::List dots(DOTS);
+    window = dots["window.size"];
+    norm = dots["norm"];
+    step = dots["step.pattern"];
+    backtrack = dots["backtrack"];
+    gcm = dots["gcm"];
 
-    // doing it in one step complains about ambiguous operator=
-    Rcpp::NumericMatrix GCM = dots["gcm"];
-    gcm = GCM;
+    SEXP new_cent;
 
     if (Rcpp::as<bool>(multivariate)) {
-        if (Rcpp::as<int>(mv_ver) == 1)
-            return dba_mv_by_variable(centroid);
-        else
-            return dba_mv_by_series(centroid);
+        Rcpp::NumericMatrix centroid(CENT);
 
-    } else return dba_uv(centroid);
+        if (Rcpp::as<int>(mv_ver) == 1)
+            new_cent = dba_mv_by_variable(centroid);
+        else
+            new_cent = dba_mv_by_series(centroid);
+
+    } else {
+        Rcpp::NumericVector centroid(CENT);
+        new_cent = dba_uv(centroid);
+    }
+
+    // new_cent is protected by dba_*(centroid)
+    UNPROTECT(1);
+    return new_cent;
 END_RCPP
 }
 

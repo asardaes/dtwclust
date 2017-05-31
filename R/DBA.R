@@ -140,7 +140,8 @@ DBA <- function(X, centroid = NULL, ...,
     dots <- list(window.size = window.size,
                  norm = norm,
                  gcm = gcm,
-                 step.pattern = step.pattern)
+                 step.pattern = step.pattern,
+                 backtrack = TRUE)
 
     ## C++ code
     new_cent <- .Call(C_dba, X, centroid, max.iter, delta, trace, mv, mv.ver, dots, PACKAGE = "dtwclust")
