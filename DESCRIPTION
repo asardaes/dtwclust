@@ -45,7 +45,7 @@ LazyData: TRUE
 NeedsCompilation: yes
 SystemRequirements: C++11
 RoxygenNote: 6.0.1
-Collate:
+Collate: 
     'DBA.R'
     'Distmat.R'
     'GAK.R'
@@ -65,6 +65,7 @@ Collate:
     'dtw-basic.R'
     'dtw-lb.R'
     'dtw2.R'
+    'tsclust-family.R'
     'tsclust-classes.R'
     'dtwclust-classes.R'
     'dtwclust-methods.R'

@@ -1,63 +1,3 @@
-## Needed old classes
-methods::setClass("proc_time4", contains = "numeric", slots = c(names = "character"))
-methods::setOldClass("proc_time", S4Class = "proc_time4")
-methods::removeClass("proc_time4")
-
-methods::setClass("hclust4", contains = "list", slots = c(names = "character"))
-methods::setOldClass("hclust", S4Class = "hclust4")
-methods::removeClass("hclust4")
-
-#' Class definition for `tsclustFamily`
-#'
-#' Formal S4 class with a family of functions used in [tsclust()].
-#'
-#' @exportClass tsclustFamily
-#'
-#' @details
-#'
-#' The custom implementations also handle parallelization.
-#'
-#' Since the distance function makes use of `proxy`, it also supports any extra [proxy::dist()]
-#' parameters in `...`.
-#'
-#' The prototype includes the `cluster` function for partitional methods, as well as a pass-through
-#' `preproc` function.
-#'
-#' @slot dist The function to calculate the distance matrices.
-#' @slot allcent The function to calculate centroids on each iteration.
-#' @slot cluster The function used to assign a series to a cluster.
-#' @slot preproc The function used to preprocess the data (relevant for [stats::predict()]).
-#'
-#' @examples
-#'
-#' # The dist() function in tsclustFamily works like proxy::dist() but supports
-#' # parallelization and optimized symmetric calculations. If you like, you can
-#' # use the function more or less directly, but provide a control argument when
-#' # creating the family.
-#'
-#' \dontrun{
-#' data(uciCT)
-#' fam <- new("tsclustFamily", dist = "gak",
-#'            control = partitional_control(symmetric = TRUE))
-#'
-#' crossdist <- fam@dist(CharTraj, window.size = 18L)
-#' }
-#'
-#' # If you want the fuzzy family, use fuzzy = TRUE
-#' ffam <- new("tsclustFamily", control = fuzzy_control(), fuzzy = TRUE)
-#'
-#'
-setClass("tsclustFamily",
-         slots = c(dist = "function",
-                   allcent = "function",
-                   cluster = "function",
-                   preproc = "function"),
-         prototype = prototype(preproc = function(x, ...) { x },
-                               cluster = function(distmat = NULL, ...) {
-                                   max.col(-distmat, "first")
-                               })
-)
-
 #' Class definition for `TSClusters` and derived classes
 #'
 #' Formal S4 classes for time-series clusters. See class hierarchy and slot organization at the
@@ -65,6 +5,7 @@ setClass("tsclustFamily",
 #'
 #' @rdname TSClusters-class
 #' @exportClass TSClusters
+#' @include tsclust-family.R
 #'
 #' @details
 #'

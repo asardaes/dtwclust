@@ -12,37 +12,6 @@ NULL
 # Custom initialize
 # ==================================================================================================
 
-## for tsclustFamily
-setMethod("initialize", "tsclustFamily",
-          function(.Object, dist, allcent, ..., control = list(), fuzzy = FALSE) {
-              dots <- list(...)
-              dots$.Object <- .Object
-
-              if (!missing(dist)) {
-                  if (is.character(dist))
-                      dots$dist <- ddist2(dist, control)
-                  else
-                      dots$dist <- dist
-              }
-
-              if (fuzzy) {
-                  dots$cluster <- fcm_cluster # fuzzy.R
-                  if (!missing(allcent) && is.character(allcent))
-                      allcent <- match.arg(allcent, c("fcm", "fcmdd"))
-              }
-
-              if (!missing(allcent)) {
-                  if (is.character(allcent))
-                      dots$allcent <- all_cent2(allcent, control)
-                  else if (is.function(allcent))
-                      dots$allcent <- allcent
-                  else
-                      stop("Centroid definition must be either a function or a character")
-              }
-
-              do.call(methods::callNextMethod, dots)
-          })
-
 #' @rdname tsclusters-methods
 #' @aliases initialize,TSClusters
 #'
