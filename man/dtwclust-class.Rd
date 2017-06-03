@@ -8,13 +8,7 @@
 \strong{Deprecated} S4 class.
 }
 \details{
-This class contains \code{\link[stats:hclust]{stats::hclust()}} as superclass and supports all its methods. Plot is a
-special case (see \link{dtwclust-methods}).
-
-Please note that not all slots will contain valid information for all clustering types. In some
-cases, for example for fuzzy and hierarchical clustering, some results are computed assuming a
-hard partition is created based on the fuzzy memberships or dendrogram tree, and the provided
-value of \code{k}.
+Please refer to \linkS4class{TSClusters} for the new class.
 
 If you want to transform a dtwclust-class object to \linkS4class{TSClusters}, just use:
 

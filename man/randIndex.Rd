@@ -24,9 +24,5 @@
 \item{x, y, correct, original}{See \code{\link[flexclust:randIndex]{flexclust::randIndex()}}.}
 }
 \description{
-Compute the (adjusted) Rand, Jaccard and Fowlkes-Mallows index for agreement of two partitions.
-This generic is included in the \code{flexclust} package.
-}
-\seealso{
-\code{\link[flexclust:randIndex]{flexclust::randIndex()}}
+No longer supported directly in \pkg{dtwclust}. Please refer to \code{\link[=cvi]{cvi()}}
 }

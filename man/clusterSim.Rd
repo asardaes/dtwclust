@@ -13,8 +13,7 @@
 \item{object, data, method, symmetric, ...}{See \code{\link[flexclust:clusterSim]{flexclust::clusterSim()}}.}
 }
 \description{
-Returns a matrix of cluster similarities. Currently two methods for computing similarities of
-clusters are implemented. This generic is included in the \pkg{flexclust} package.
+No longer supported directly in \pkg{dtwclust}.
 }
 \seealso{
 \code{\link[flexclust:clusterSim]{flexclust::clusterSim()}}

@@ -10,35 +10,12 @@
 #'
 #' @details
 #'
-#' The custom implementations also handle parallelization.
-#'
-#' Since the distance function makes use of `proxy`, it also supports any extra [proxy::dist()]
-#' parameters in `...`.
-#'
-#' The prototype includes the `cluster` function for partitional methods, as well as a pass-through
-#' `preproc` function.
+#' Please refer to [tsclustFamily-class] for the new class.
 #'
 #' @slot dist The function to calculate the distance matrices.
 #' @slot allcent The function to calculate centroids on each iteration.
 #' @slot cluster The function used to assign a series to a cluster.
 #' @slot preproc The function used to preprocess the data (relevant for [stats::predict()]).
-#'
-#' @examples
-#'
-#' # The dist() function in dtwclustFamily works like proxy::dist() but supports
-#' # parallelization and optimized symmetric calculations. If you like, you can
-#' # use the function more or less directly, but provide a control argument when
-#' # creating the family.
-#'
-#' \dontrun{
-#' data(uciCT)
-#' fam <- new("dtwclustFamily", dist = "gak",
-#'            control = list(symmetric = TRUE, window.size = 18L))
-#' fam@dist(CharTraj)
-#' }
-#'
-#' # If you want the fuzzy family, use fuzzy = TRUE
-#' ffam <- new("dtwclustFamily", control = new("dtwclustControl"), fuzzy = TRUE)
 #'
 setClass("dtwclustFamily",
          slots = c(dist = "function",
@@ -69,7 +46,7 @@ methods::setClassUnion("intORnull", c("integer", "NULL"))
 #'
 #' @details
 #'
-#' Default values are shown at the end.
+#' Please refer to [tsclust-controls] for the new interfaces.
 #'
 #' @slot window.size Integer or `NULL`. Window constraint for GAK, DTW, DBA and LB calculations.
 #'   `NULL` means no constraint.
@@ -160,13 +137,7 @@ setClass("dtwclustControl",
 #'
 #' @details
 #'
-#' This class contains [stats::hclust()] as superclass and supports all its methods. Plot is a
-#' special case (see [dtwclust-methods]).
-#'
-#' Please note that not all slots will contain valid information for all clustering types. In some
-#' cases, for example for fuzzy and hierarchical clustering, some results are computed assuming a
-#' hard partition is created based on the fuzzy memberships or dendrogram tree, and the provided
-#' value of `k`.
+#' Please refer to [TSClusters-class] for the new class.
 #'
 #' If you want to transform a dtwclust-class object to [TSClusters-class], just use:
 #'

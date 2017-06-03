@@ -8,14 +8,7 @@
 #'
 #' @details
 #'
-#' Supported generics from the `flexclust` package are: [flexclust::randIndex()] and
-#' [flexclust::clusterSim()].
-#'
-#' All generics from package \pkg{clue} are also supported in order to use its functions.
-#'
-#' @seealso
-#'
-#' [dtwclust-class], [dtwclust()], [ggplot2::ggplot()], [cvi()]
+#' Please refer to [tsclusters-methods] for the updated versions.
 #'
 NULL
 
@@ -79,10 +72,6 @@ setMethod("initialize", "dtwclustFamily",
 #'
 #' @param object,x An object of class [dtwclust-class] as returned by [dtwclust()].
 #'
-#' @details
-#'
-#' Show method displays basic information from the clustering results.
-#'
 setMethod("show", "dtwclust",
           function(object) {
               print(object@call)
@@ -122,12 +111,6 @@ setMethod("show", "dtwclust",
 #'
 #' @param evaluate Logical. Defaults to `TRUE` and evaluates the updated call, which will result in
 #'   a new `dtwclust` object. Otherwise, it returns the unevaluated call.
-#'
-#' @details
-#'
-#' The `update` method takes the original function call, replaces any provided argument and
-#' optionally evaluates the call again. Use `evaluate = FALSE` if you want to get the unevaluated
-#' call.
 #'
 update.dtwclust <- function(object, ..., evaluate = TRUE) {
     args <- as.pairlist(list(...))
@@ -169,12 +152,6 @@ setMethod("update", methods::signature(object = "dtwclust"), update.dtwclust)
 #' @param newdata New data to be assigned to a cluster. It can take any of the supported formats of
 #'   [dtwclust()]. Note that for multivariate series, this means that it **must** be a list of
 #'   matrices, even if the list has only one element.
-#'
-#' @details
-#'
-#' The `predict` generic can take the usual `newdata` argument and it returns the cluster(s) to
-#' which the data belongs; if `NULL`, it simply returns the obtained cluster indices. It
-#' preprocesses the data with the corresponding function if available.
 #'
 predict.dtwclust <- function(object, newdata = NULL, ...) {
     if (is.null(newdata)) {
@@ -235,39 +212,6 @@ setMethod("predict", methods::signature(object = "dtwclust"), predict.dtwclust)
 #' @param plot Logical flag. You can set this to `FALSE` in case you want to save the ggplot object
 #'   without printing anything to screen
 #' @param type What to plot. `NULL` means default. See details.
-#'
-#' @section Plotting:
-#'
-#'   The plot method uses the `ggplot2` plotting system (see [ggplot2::ggplot()]).
-#'
-#'   The default depends on whether a hierarchical method was used or not. In those cases, the
-#'   dendrogram is plotted by default; you can pass any extra parameters to [stats::plot.hclust()]
-#'   via `...`.
-#'
-#'   Otherwise, the function plots the time series of each cluster along with the obtained centroid.
-#'   The default values for cluster centroids are: `linetype = "dashed"`, `size = 1.5`, `colour =
-#'   "black"`, `alpha = 0.5`. You can change this by means of `...`.
-#'
-#'   You can choose what to plot with the `type` parameter. Possible options are:
-#'
-#'   - `"dendrogram"`: Only available for hierarchical clustering.
-#'   - `"series"`: Plot the time series divided into clusters without including centroids.
-#'   - `"centroids"`: Plot the obtained centroids only.
-#'   - `"sc"`: Plot both series and centroids
-#'
-#'   The flag `save.data` should be set to `TRUE` when running [dtwclust()] to be able to use this.
-#'   Optionally, you can manually provide the data in the `data` parameter.
-#'
-#'   If created, the function returns the `gg` object invisibly, in case you want to modify it to
-#'   your liking. You might want to look at [ggplot2::ggplot_build()] if that's the case.
-#'
-#'   If you want to free the scale of the X axis, you can do the following:
-#'
-#'   `plot(object, plot = FALSE)` `+` `facet_wrap(~cl, scales = "free")`
-#'
-#' @return
-#'
-#' The plot method returns a `gg` object (or `NULL` for dendrogram plot) invisibly.
 #'
 plot.dtwclust <- function(x, y, ...,
                           clus = seq_len(x@k), labs.arg = NULL,
@@ -655,18 +599,13 @@ setMethod("cvi", methods::signature(a = "dtwclust"),
 
 #' Compare partitions
 #'
-#' Compute the (adjusted) Rand, Jaccard and Fowlkes-Mallows index for agreement of two partitions.
-#' This generic is included in the `flexclust` package.
+#' No longer supported directly in \pkg{dtwclust}. Please refer to [cvi()]
 #'
 #' @name randIndex
 #' @rdname randIndex
 #' @exportMethod randIndex
 #'
 #' @param x,y,correct,original See [flexclust::randIndex()].
-#'
-#' @seealso
-#'
-#' [flexclust::randIndex()]
 #'
 NULL
 
@@ -703,8 +642,7 @@ setMethod("randIndex", methods::signature(x="dtwclust", y="dtwclust"),
 
 #' Cluster Similarity Matrix
 #'
-#' Returns a matrix of cluster similarities. Currently two methods for computing similarities of
-#' clusters are implemented. This generic is included in the \pkg{flexclust} package.
+#' No longer supported directly in \pkg{dtwclust}.
 #'
 #' @name clusterSim
 #' @rdname clusterSim

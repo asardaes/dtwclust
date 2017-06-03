@@ -63,59 +63,9 @@ without printing anything to screen}
 
 \item{type}{What to plot. \code{NULL} means default. See details.}
 }
-\value{
-The plot method returns a \code{gg} object (or \code{NULL} for dendrogram plot) invisibly.
-}
 \description{
 \strong{Deprecated} methods associated with \linkS4class{dtwclust} objects.
 }
 \details{
-Supported generics from the \code{flexclust} package are: \code{\link[flexclust:randIndex]{flexclust::randIndex()}} and
-\code{\link[flexclust:clusterSim]{flexclust::clusterSim()}}.
-
-All generics from package \pkg{clue} are also supported in order to use its functions.
-
-Show method displays basic information from the clustering results.
-
-The \code{update} method takes the original function call, replaces any provided argument and
-optionally evaluates the call again. Use \code{evaluate = FALSE} if you want to get the unevaluated
-call.
-
-The \code{predict} generic can take the usual \code{newdata} argument and it returns the cluster(s) to
-which the data belongs; if \code{NULL}, it simply returns the obtained cluster indices. It
-preprocesses the data with the corresponding function if available.
-}
-\section{Plotting}{
-
-
-The plot method uses the \code{ggplot2} plotting system (see \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}}).
-
-The default depends on whether a hierarchical method was used or not. In those cases, the
-dendrogram is plotted by default; you can pass any extra parameters to \code{\link[stats:plot.hclust]{stats::plot.hclust()}}
-via \code{...}.
-
-Otherwise, the function plots the time series of each cluster along with the obtained centroid.
-The default values for cluster centroids are: \code{linetype = "dashed"}, \code{size = 1.5}, \code{colour = "black"}, \code{alpha = 0.5}. You can change this by means of \code{...}.
-
-You can choose what to plot with the \code{type} parameter. Possible options are:
-\itemize{
-\item \code{"dendrogram"}: Only available for hierarchical clustering.
-\item \code{"series"}: Plot the time series divided into clusters without including centroids.
-\item \code{"centroids"}: Plot the obtained centroids only.
-\item \code{"sc"}: Plot both series and centroids
-}
-
-The flag \code{save.data} should be set to \code{TRUE} when running \code{\link[=dtwclust]{dtwclust()}} to be able to use this.
-Optionally, you can manually provide the data in the \code{data} parameter.
-
-If created, the function returns the \code{gg} object invisibly, in case you want to modify it to
-your liking. You might want to look at \code{\link[ggplot2:ggplot_build]{ggplot2::ggplot_build()}} if that's the case.
-
-If you want to free the scale of the X axis, you can do the following:
-
-\code{plot(object, plot = FALSE)} \code{+} \code{facet_wrap(~cl, scales = "free")}
-}
-
-\seealso{
-\linkS4class{dtwclust}, \code{\link[=dtwclust]{dtwclust()}}, \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}}, \code{\link[=cvi]{cvi()}}
+Please refer to \link{tsclusters-methods} for the updated versions.
 }

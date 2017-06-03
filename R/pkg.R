@@ -154,6 +154,26 @@
 #'
 NULL ## remember to check methods imports after removing dtwclust()
 
+#' Deprecated functionality in \pkg{dtwclust}
+#'
+#' @name dtwclust-deprecated
+#' @aliases dtwclust-deprecated
+#'
+#' @description
+#'
+#' The following functions and/or classes are deprecated and will be eventually removed:
+#'
+#' - [dtwclust()]
+#' - [dtwclustFamily-class]
+#' - [dtwclustControl-class]
+#' - [dtwclust-class]
+#' - [dtwclust-methods]
+#' - [randIndex()]
+#' - [clusterSim()]
+#' - [create_dtwclust()]
+#'
+NULL
+
 .onAttach <- function(lib, pkg) {
     ## proxy_prefun is in utils.R
 
