@@ -14,5 +14,6 @@ The following functions and/or classes are deprecated and will be eventually rem
 \item \code{\link[=randIndex]{randIndex()}}
 \item \code{\link[=clusterSim]{clusterSim()}}
 \item \code{\link[=create_dtwclust]{create_dtwclust()}}
+\item \code{\link[=compute_envelop]{compute_envelop()}}
 }
 }

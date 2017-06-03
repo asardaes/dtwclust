@@ -57,7 +57,7 @@ Collate:
     'all-cent2.R'
     'as-methods.R'
     'compare-clusterings.R'
-    'compute-envelop.R'
+    'compute-envelope.R'
     'create-dtwclust.R'
     'cvi.R'
     'ddist.R'

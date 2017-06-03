@@ -483,7 +483,7 @@ Based on these, a running minimum and maximum are computed and, respectively, a 
 \Cref{fig:envelope-plot} depicts a sample time-series with its corresponding envelopes for a Sakoe-Chiba window of size 15.
 
 <<envelope-plot, out.width = "0.75\\linewidth", fig.cap = "Visual representation of a time-series (shown as a solid black line) and its corresponding envelopes based on a Sakoe-Chiba window of size 15. The green dashed line represents the upper envelope, while the red dashed line represents the lower envelope.">>=
-envelopes <- compute_envelop(CharTraj[[2L]], window.size = 15)
+envelopes <- compute_envelope(CharTraj[[2L]], window.size = 15)
 matplot(cbind(envelopes$lower, envelopes$upper),
         type = "l", lty = 2, col = 2:3,
         xlab = "Time", ylab = "Series")

@@ -14,6 +14,7 @@
 * Fixed DTW symmetry detection for fuzzy clustering.
 * Some internal functions changed, so older objects might no longer be compatible. Try using `update(old_TSClusters_obj)`.
 * The `dtwclust` *function* is now deprecated. Try using `as(dtwclust_class_obj, "TSClusters")` for old objects.
+* Changed name of function `compute_envelop` to `compute_envelope` (old one still available but deprecated).
 * Minor vignette updates.
 * Several internal optimizations.
 

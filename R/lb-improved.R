@@ -88,7 +88,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
     }
 
     if (is.null(lower.env) || is.null(upper.env)) {
-        envelopes <- compute_envelop(y, window.size = window.size, error.check = FALSE)
+        envelopes <- compute_envelope(y, window.size = window.size, error.check = FALSE)
         lower.env <- envelopes$lower
         upper.env <- envelopes$upper
 
@@ -134,7 +134,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     if (is_multivariate(x) || is_multivariate(y))
         stop("lb_improved does not support multivariate series.")
 
-    envelopes <- lapply(y, function(s) { compute_envelop(s, window.size, error.check = FALSE) })
+    envelopes <- lapply(y, function(s) { compute_envelope(s, window.size, error.check = FALSE) })
     lower.env <- lapply(envelopes, "[[", "lower")
     upper.env <- lapply(envelopes, "[[", "upper")
     lower.env <- split_parallel(lower.env)

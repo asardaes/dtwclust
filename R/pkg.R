@@ -171,6 +171,7 @@ NULL ## remember to check methods imports after removing dtwclust()
 #' - [randIndex()]
 #' - [clusterSim()]
 #' - [create_dtwclust()]
+#' - [compute_envelop()]
 #'
 NULL
 

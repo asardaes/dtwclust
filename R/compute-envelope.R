@@ -28,12 +28,12 @@
 #'
 #' data(uciCT)
 #'
-#' H <- compute_envelop(CharTraj[[1L]], 18L)
+#' H <- compute_envelope(CharTraj[[1L]], 18L)
 #'
 #' matplot(do.call(cbind, H), type = "l", col = 2:3)
 #' lines(CharTraj[[1L]])
 #'
-compute_envelop <- function(x, window.size, error.check = TRUE) {
+compute_envelope <- function(x, window.size, error.check = TRUE) {
     if (error.check) {
         if (NCOL(x) > 1L) stop("The envelope can conly be computed for univariate series.")
         check_consistency(x, "ts")
@@ -47,4 +47,12 @@ compute_envelop <- function(x, window.size, error.check = TRUE) {
         stop("Window cannot be greater or equal than the series' length.")
 
     .Call(C_envelope, x, window.size, PACKAGE = "dtwclust")
+}
+
+#' @rdname compute_envelope
+#' @export
+#'
+compute_envelop <- function(x, window.size, error.check = TRUE) {
+    .Deprecated("compute_envelope", "dtwclust")
+    compute_envelope(x, window.size, error.check)
 }
