@@ -1,4 +1,4 @@
-\documentclass[article,shortnames,nojss]{jss}
+\documentclass[article,shortnames,nojss,noheadings]{jss}
 
 % Vignette options
 %\VignetteEngine{knitr::knitr_notangle}
@@ -160,7 +160,7 @@ The most important elements to consider are the (dis)similarity or distance meas
 the prototype extraction function (if applicable),
 the clustering algorithm itself,
 and cluster evaluation \citep{aghabozorgi2015}.
-In most cases, algorithms developed for time-series clustering take static clustering algorithms and either modify the similarity definition or the prototype extraction function by an appropriate one,
+In most cases, algorithms developed for time-series clustering take static clustering algorithms and either modify the similarity definition or the prototype extraction function to an appropriate one,
 or apply a transformation to the series so that static features are obtained \citep{liao2005}.
 Therefore, the underlying basis for the different clustering procedures remains approximately the same across clustering methods.
 The most common approaches are hierarchical and partitional clustering (cf. Table 4 in \citet{aghabozorgi2015}),
@@ -178,7 +178,7 @@ or model-based.
 where the former usually deals with grouping incoming data streams on-the-go (see, e.g., \citet{rakthanmanon2011}),
 while the latter deals with data that no longer change.
 
-In this context, it is common to utilize the Dynamic Time Warping (DTW) distance \citep{aghabozorgi2015} as dissimilarity measure.
+In this context, it is common to utilize the Dynamic Time Warping (DTW) distance as dissimilarity measure \citep{aghabozorgi2015}.
 The calculation of the DTW distance involves a dynamic programming algorithm that tries to find the optimum warping path between two series under certain constraints.
 However, the DTW algorithm is computationally expensive,
 both in time and memory utilization.
@@ -190,11 +190,11 @@ clustering procedures lend themselves for parallelization,
 since a lot of similar calculations are performed independently of each other.
 This can make a very significant difference,
 especially if the data complexity increases (which can happen really quickly in case of time-series),
-or some of the more computationally expensive algorithms are used.
+or more computationally expensive algorithms are used.
 
 The choice of time-series representation,
 preprocessing,
-and clustering algorithm has a big impact in performance with respect to cluster quality and execution time.
+and clustering algorithm has a big impact on performance with respect to cluster quality and execution time.
 Similarly, different programming languages have different run-time characteristics and user interfaces,
 and even though many authors make their algorithms publicly available,
 combining them is far from trivial.
@@ -237,7 +237,7 @@ but were implemented in \proglang{MATLAB}, making their combination with other \
 Hence, the \dtwclust{} package is intended to provide a consistent and user-friendly way of interacting with classic and new clustering algorithms,
 taking into consideration the nuances of time-series data.
 
-The rest of this paper is organized as follows.
+The rest of this manuscript is organized as follows.
 The information relevant to the distance measures will be presented in \cref{sec:distances}.
 Supported algorithms for prototype extraction will be discussed in \cref{sec:prototypes}.
 The main clustering algorithms will be described in \cref{sec:clustering}.
@@ -246,6 +246,8 @@ Basic information rearding cluster evaluation will be provided in \cref{sec:eval
 An overview of extensibility will be given in \cref{sec:extensibility},
 and the final remarks will be given in \cref{sec:conclusion}.
 Code examples will be deferred to the appendices.
+Note, however, that these examples are intentionally brief,
+and do not necessarily represent a thorough procedure to choose or evaluate a clustering algorithm.
 The data used in all examples is included in the package (saved in a list called \code{CharTraj}),
 and is a subset of the character trajectories dataset found in \citet{lichman2013}:
 they are pen tip trajectories recorded for individual characters,
@@ -266,7 +268,7 @@ The \pkg{proxy} package \citep{proxy} provides a highly optimized and extensible
 and is used extensively by \dtwclust{}.
 It includes several common metrics,
 and users can register custom functions in its database.
-Please refer to \cref{app:notes} for further information.
+Please refer to \cref{app:proxy} for further information.
 
 The $l_1$ and $l_2$ vector norms,
 also known as Manhattan and Euclidean distances respectively,
@@ -275,7 +277,7 @@ and are arguably the only competitive $l_p$ norms when measuring dissimilarity \
 They can be efficiently computed,
 but are only defined for series of equal length and are sensitive to noise,
 scale and time shifts.
-Thus, many other distance measures tailored to time-series have been developed in order to overcome this limitations as well as other challenges associated with the structure of time-series,
+Thus, many other distance measures tailored to time-series have been developed in order to overcome these limitations as well as other challenges associated with the structure of time-series,
 such as multiple variables,
 serial correlation, etc.
 
@@ -283,12 +285,12 @@ In the following sections a description of the distance functions included in \d
 these functions are associated with shape-based time-series clustering,
 and either support DTW or provide an alternative to it.
 However, there are many other distance measures that can be used for time-series \citep{montero2014, tsdist}.
-Refer to \cref{app:custom-dist} for examples on how to use the \pkg{proxy} package with \dtwclust{} and exploit custom distance measures,
+Refer to \cref{app:proxy} for examples of how to use the \pkg{proxy} package with \dtwclust{} and exploit custom distance measures,
 as well as those defined in other \R{} packages.
 
 To facilitate notation,
 we define a time-series as a vector (or set of vectors in case of multivariate series) $x$.
-Each vector has length $n$.
+Each vector must have the same length for a given time-series.
 In general, $x^v_i$ represents the $i$-th element of the $v$-th variable of the (possibly multivariate) time-series $x$.
 We will assume that all elements are equally spaced in time in order to avoid the time index explicitly.
 
@@ -330,7 +332,7 @@ The DTW distance is considered a more robust distance measure for time-series \c
 and can potentially deal with series of different length directly.
 This is not necessarily an advantage,
 as it has been shown before that performing linear reinterpolation to obtain equal length may be appropriate if $m$ and $n$ do not vary significantly \citep{keogh2004}.
-For a more detailed explanation of the DTW algorithm, see, e.g., \citet{giorgino2009}.
+For a more detailed explanation of the DTW algorithm see, e.g., \citet{giorgino2009}.
 However, there are some aspects that are worth discussing here.
 
 The first step in DTW involves creating a local cost matrix (LCM  or $lcm$),
@@ -382,6 +384,7 @@ For this reason,
 a special version of $\text{DTW}_2$ is registered with \pkg{proxy} by \dtwclust{} (called simply \code{"DTW2"}),
 which also uses \pkg{dtw} for the core calculations,
 but appropriately uses the $l_2$ norm in the second step.
+The \code{dtw_basic} function does this correctly.
 
 The way in which the algorithm traverses through the LCM is primarily dictated by the chosen step pattern.
 The step pattern is a local constraint that determines which directions are allowed when moving ahead in the LCM as the cost is being aggregated,
@@ -404,6 +407,9 @@ plot(symmetric2)
 As final comments, it should be noted that the DTW distance does not satisfy the triangle inequality,
 and it is not symmetric in general,
 e.g., for asymmetric step patterns \citep{giorgino2009}.
+The patterns in \cref{fig:step-patterns} can result in a symmetric DTW calculation,
+provided no constraints are used (see the next section),
+or all series have the same length if a constraint is indeed used.
 
 \subsubsection{Global DTW constraints}
 \label{sec:dtw-window}
@@ -485,10 +491,12 @@ lines(CharTraj[[2L]])
 @
 
 When calculating the LBs between $x$ and $y$,
-a copy of the reference series is created;
+one must be taken as a reference and the other one as a query.
+Assume $x$ is the reference and $y$ is the query.
+First, a copy of the reference series is created;
 denote this copy with $H$.
-The envelopes for the other series (the query) are computed:
-if $y$ is the query, then its upper and lower envelope (UE and LE respectively) are compared against $x$,
+The envelopes for the query are computed:
+$y$'s upper and lower envelopes (UE and LE respectively) are compared against $x$,
 so that the values of $H$ are updated according to \cref{eq:lb-envelope}.
 Subsequently, \code{LB_Keogh} is defined as in \cref{eq:lbk},
 where $\left\lVert \cdot \right\rVert_p$ is the $l_p$ norm of the series.
@@ -536,7 +544,7 @@ Because of the way it works,
 which is usually the case in partitional clustering.
 However, if partition around medoids is performed (see \cref{sec:pam}),
 the distance matrix should not be precomputed so that the matrices are correctly updated on each iteration.
-Additionally, a considerably large dataset would be needed before the overhead of DTW becomes much larger than that of \code{dtw_lb}.
+Additionally, a considerably large dataset would be needed before the overhead of DTW becomes much larger than that of \code{dtw_lb}'s iterations.
 
 \subsection{Shape-based distance}
 \label{sec:sbd}
@@ -544,7 +552,7 @@ Additionally, a considerably large dataset would be needed before the overhead o
 The shape-based distance (SBD) was recently proposed as part of the \kshape{} clustering algorithm \citep{paparrizos2015};
 this algorithm will be further discussed in \cref{sec:shape} and \cref{sec:kshape}.
 SBD is based on the cross-correlation with coefficient normalization (NCCc) sequence between two series,
-and it is thus sensitive to scale,
+and is thus sensitive to scale,
 which is why \citet{paparrizos2015} recommend \textit{z}-normalization.
 The distance can be calculated with the formula shown in \cref{eq:sbd},
 where $\left\lVert \cdot \right\rVert_2$ is the $l_2$ norm of the series.
@@ -566,6 +574,7 @@ and it supports (univariate) series of different length directly.
 Additionally, some FFTs can be reused when computing the SBD between several series;
 this optimization is also included in the SBD function registered with \pkg{proxy} by \dtwclust{}.
 
+\newpage
 \subsection{Global alignment kernel distance}
 \label{sec:gak}
 
@@ -665,7 +674,7 @@ It is expected that all series within a cluster are similar to each other,
 and one may be interested in trying to define a time-series that effectively summarizes the most important characteristics of all series in a given cluster.
 This series is sometimes referred to as an average series,
 and prototyping is also sometimes called time-series averaging,
-however we will prefer the term ``prototyping'' in this paper.
+however we will prefer the term ``prototyping''.
 The prototypes could be used for visualization aid or to perform time-series classification,
 but in the context of clustering,
 partitional procedures rely heavily on the prototyping function,
@@ -684,6 +693,7 @@ which are the ones implemented by default in \dtwclust{}.
 Nevertheless, it is also possible to create custom prototyping functions and provide them in the \code{centroid} argument
 (see \cref{sec:extensibility}).
 
+\newpage
 \subsection{Mean and median}
 \label{sec:mean-median}
 
@@ -836,7 +846,7 @@ In agglomerative procedures,
 every member of the data starts in its own cluster,
 and members are grouped together sequentially based on the similarity measure until all members are contained in a single cluster.
 Divisive procedures do the exact opposite,
-starting with all data in one cluster and dividing it until each member is in a singleton.
+starting with all data in one cluster and dividing them until each member is in a singleton.
 Both strategies suffer from a lack of flexibility,
 because they cannot perform adjustments once a split or merger has been done.
 
@@ -915,7 +925,7 @@ Perhaps using a different distance function or a lower value of $k$ can help in 
 An optimization that the included centroid functions in \dtwclust{} have is that,
 on each iteration,
 the centroid function is only applied to those clusters that changed either by losing or gaining data objects.
-Additionally, when PAM centroids are used,
+Additionally, when PAM centroids are used and the distance matrix is precomputed,
 the function simply keeps track of the data indices,
 how they change and which ones are chosen as cluster centroids,
 so that no data is modified.
@@ -958,6 +968,7 @@ Finally, the allocation of several distance matrices is required,
 making it similar to hierarchical procedures memory-wise,
 so its applicability is limited to relatively small datasets.
 
+\newpage
 \subsubsection[k-Shape clustering]{\kshape{} clustering}
 \label{sec:kshape}
 
@@ -1032,7 +1043,6 @@ Similar to PAM, this centroid function does not alter the data,
 so the centroids are always elements of the original set,
 and series of different length can be supported
 (as long as the distance function also supports this).
-This centroid function was implemented in \dtwclust{} in version 3.1.0.
 
 \begin{subequations}
 \label{eq:fcmdd-centroid}
@@ -1075,8 +1085,7 @@ parallel computation can result in a very significant reduction in execution tim
 There are some important considerations when using parallelization.
 The amount of parallel workers, i.e., subprocesses that can each handle a given task,
 is dependent on the computer processor that is being used and the number of physical processing cores and logical threads it can handle.
-Each worker may require additional RAM, and \R{} can only work with data that is loaded on RAM,
-so there is no way around this limitation.
+Each worker may require additional RAM, and \R{} usually only works with data that is loaded on RAM.
 Finally, the overhead introduced for the orchestration of the parallel workers may be too large when compared to the amount of time each worker needs to finish their assigned tasks,
 which is especially true for relatively simple workloads.
 Therefore, using parallelization does not guarantee faster execution times,
@@ -1112,9 +1121,9 @@ since each distance calculation is usually very fast.
 This chunking is also performed by the distance functions used by \dtwclust{} which are registered with \pkg{proxy},
 specifically: \code{LB_Keogh}, \code{LB_Improved}, \code{SBD}, \code{dtw_basic}, \code{dtw_lb} and \code{GAK}.
 
-The included implementation of the TADPole and DBA algorithms also try to create chunks when calculating DTW distances.
+The included implementation of the TADPole algorithms also tries to create chunks when calculating DTW distances.
 The amount of calculations needed should be relatively small,
-so parallelization may not always be worth it in these cases.
+so parallelization may not always be worth it in this case.
 
 Finally, in the context of partitional clustering,
 calculating time-series prototypes is something that is done many times each iteration.
@@ -1183,7 +1192,7 @@ See \cref{app:evaluation} for more complete examples.
 All of the clustering algorithms implemented in \dtwclust{} have something in common:
 they depend on a distance measure between time-series.
 By leveraging the \pkg{proxy} package,
-any suitable distance function can be used (see \cref{app:custom-dist}).
+any suitable distance function can be used (see \cref{app:proxy}).
 This fact alone already overcomes a severe limitation that other packages have,
 such as \pkg{flexclust} \citep{leisch2006} and \pkg{TSdist} \citep{tsdist}.
 
@@ -1259,19 +1268,26 @@ library("dtwclust")
 data("uciCT")
 @
 
-As of version 3.1.1, the main clustering function is \code{tsclust}.
+The main clustering function is \code{tsclust}.
 It returns objects of type \code{S4}, which are one way in which \R{} implements classes.
 The formal elements of the class are called \code{slots},
 and can be accessed with the \code{@} operator (instead of the usual \code{$}).
 The documentation of the slots can be found with \code{?"TSClusters-class"},
 and the methods with \code{?"tsclusters-methods"}.
-Controls are set via intermediary functions whose documentation can be found with \code{?"tsclust-controls"}.
-The function \code{compare_clusterings} and some helper functions were added in version 3.2.0 to test many different clustering configurations in a convenient way.
+Controls are set via intermediary functions whose documentation can be found by typing \code{?"tsclust-controls"}.
+The function \code{compare_clusterings} and some helper functions were added in version 3.2.0 to execute many different clustering configurations in a convenient way.
 The \code{tsclust} function is used for the calculations.
 A series of examples are included in the documentation of the function.
 
 The random number generator of \R{} is set to L'Ecuyer-CMRG when \dtwclust{} is attached in an attempt to preserve reproducibility.
 The user is free to change this afterwards by using the \code{RNGkind} function.
+
+This manuscript summarizes some of the theory behind the algorithms.
+However, the documentation of the different functions includes additional information regarding usability,
+and should also be considered when using the package.
+
+\section[Using the proxy package]{Using the \pkg{proxy} package}
+\label{app:proxy}
 
 The \pkg{proxy} package is one of the main dependencies of \dtwclust{}.
 It aggregates all its measures in a database object called \code{pr_DB}.
@@ -1297,12 +1313,8 @@ where a single multivariate time-series should be provided as a matrix where tim
 Thus, several multivariate time-series should be provided as a list of matrices to ensure that they are correctly detected.
 Note, however, that not all distance and centroid functions support multivariate time-series.
 
-\section[Registering a custom distance with proxy]{Registering a custom distance with \pkg{proxy}}
-\label{app:custom-dist}
-
 As a first example,
-the autocorrelation-based distance included in the \pkg{TSclust} package \citep{montero2014} is registered with \pkg{proxy} so that it can be used either directly,
-or with \dtwclust{}.
+the autocorrelation-based distance from the \pkg{TSclust} package \citep{montero2014} is registered with \pkg{proxy} so that it can be used either directly or with \dtwclust{}.
 
 <<example-register-tsclust, echo = TRUE, message = FALSE>>=
 require("TSclust")
@@ -1528,7 +1540,9 @@ sapply(list(DTW = pc_dtw, DTW_LB = pc_dtwlb, kShape = pc_ks, TADPole = pc_tp),
 \label{app:fuzzy}
 
 This example performs autocorrelation-based fuzzy clustering as proposed by \citet{durso2009}.
-Using the autocorrelation function overcomes the problem of time-series with different length.
+Using the autocorrelation function can be used to overcome the problem of time-series with different length.
+Note, however, that this essentially changes the clustering space,
+using autocorrelation coefficients instead of the time-series themselves.
 
 <<example-fuzzy, echo = TRUE, fig.cap = "Visualization of the clusters that would result from changing the fuzzy partition to a crisp one. Note that the original time-series are used, so the centroids are not shown, since the centroids are made of autocorrelation coefficients.">>=
 # Calculate autocorrelation up to 50th lag
