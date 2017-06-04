@@ -640,177 +640,177 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         ## perform clusterings
         ## -----------------------------------------------------------------------------------------
 
-        configs_split <- split_parallel(config, 1L)
-        seeds_split <- split_parallel(seeds)
-        cfg <- attr(config, "num.configs")
+        force(seeds)
+        i <- nrow(config)
 
         objs <- foreach::foreach(
-            cfg = configs_split,
-            seed = seeds_split,
+            i = seq_len(i),
             .combine = list,
             .multicombine = TRUE,
             .packages = packages,
             .export = export,
             .errorhandling = .errorhandling,
-            .maxcombine = if (isTRUE(cfg > 100L)) cfg else 100L
+            .maxcombine = if (isTRUE(i > 100L)) i else 100L
         ) %op% {
-            chunk <- lapply(seq_len(nrow(cfg)), function(i) {
-                if (trace) {
-                    message("-------------- Using configuration: --------------")
-                    print(cfg[i, , drop = FALSE])
+            cfg <- config[i, , drop = FALSE]
+            seed <- seeds[[i]]
+
+            if (trace) {
+                message("-------------- Using configuration: --------------")
+                print(cfg)
+                cat("\n")
+            }
+
+            ## ---------------------------------------------------------------------------------
+            ## obtain args from configuration
+            ## ---------------------------------------------------------------------------------
+
+            args <- lapply(c("preproc", "distance", "centroid"),
+                           function(func) {
+                               col_ids <- grepl(paste0("_", func, "$"), names(cfg))
+
+                               if (cfg[[func]] != "none" && any(col_ids)) {
+                                   this_args <- as.list(cfg[, col_ids, drop = FALSE])
+                                   names(this_args) <- sub(paste0("_", func, "$"),
+                                                           "",
+                                                           names(this_args))
+                                   ## return
+                                   this_args[!sapply(this_args, is.na)]
+
+                               } else list()
+                           })
+
+            setnames_inplace(args, c("preproc", "dist", "cent"))
+            args <- do.call(tsclust_args, args = args)
+
+            ## ---------------------------------------------------------------------------------
+            ## controls for this configuration
+            ## ---------------------------------------------------------------------------------
+
+            control_fun <- match.fun(paste0(type, "_control"))
+            control_args <- subset_dots(as.list(cfg), control_fun)
+            control_args <- lapply(control_args, unlist, recursive = FALSE)
+            control <- do.call(control_fun, control_args)
+
+            ## ---------------------------------------------------------------------------------
+            ## get processed series
+            ## ---------------------------------------------------------------------------------
+
+            preproc_char <- cfg$preproc
+            this_preproc_config <- c(list(preproc = preproc_char), args$preproc)
+
+            for (this_series in series) {
+                this_series_config <- attr(this_series, "config")
+                if (preproc_char == "none" && is.null(this_series_config))
+                    break
+                if (identical(this_series_config[names(this_preproc_config)], this_preproc_config))
+                    break
+            }
+
+            ## ---------------------------------------------------------------------------------
+            ## distance entry to re-register in parallel worker
+            ## ---------------------------------------------------------------------------------
+
+            if (type != "tadpole") {
+                distance <- cfg$distance
+                dist_entry <- dist_entries[[distance]]
+
+                if (!check_consistency(dist_entry$names[1L], "dist"))
+                    do.call(proxy::pr_DB$set_entry, dist_entry)
+
+            } else distance <- NULL ## dummy
+
+            ## ---------------------------------------------------------------------------------
+            ## centroid for this configuration
+            ## ---------------------------------------------------------------------------------
+
+            centroid_char <- cfg$centroid
+
+            ## ---------------------------------------------------------------------------------
+            ## call tsclust
+            ## ---------------------------------------------------------------------------------
+
+            this_args <- enlist(series = this_series,
+                                type = type,
+                                k = unlist(cfg$k),
+                                distance = distance,
+                                seed = seed,
+                                trace = trace,
+                                args = args,
+                                control = control,
+                                error.check = FALSE,
+                                dots = dots)
+
+            if (type == "tadpole") this_args$distance <- NULL
+
+            if (centroid_char == "default") {
+                ## do not specify centroid
+                tsc <- do.call(tsclust, this_args)
+
+            } else if (centroid_char %in% centroids_included) {
+                ## with included centroid
+                tsc <- do.call(tsclust,
+                               enlist(centroid = centroid_char, dots = this_args))
+
+            } else {
+                ## with centroid function
+                tsc <- do.call(tsclust,
+                               enlist(centroid = get_from_callers(centroid_char, "function"),
+                                      dots = this_args))
+            }
+
+            if (inherits(tsc, "TSClusters")) tsc <- list(tsc)
+
+            ret <- lapply(tsc, function(tsc) {
+                tsc@preproc <- preproc_char
+
+                if (preproc_char != "none")
+                    tsc@family@preproc <- get_from_callers(preproc_char, "function")
+                if (centroid_char != "default")
+                    tsc@centroid <- centroid_char
+
+                if (allocate_gcm || allocate_dba) {
+                    tsc@dots$gcm <- NULL
+                    tsc@args <- lapply(tsc@args, function(arg) {
+                        arg$gcm <- NULL
+                        arg
+                    })
                 }
 
-                ## ---------------------------------------------------------------------------------
-                ## obtain args from configuration
-                ## ---------------------------------------------------------------------------------
-
-                args <- lapply(c("preproc", "distance", "centroid"),
-                               function(func) {
-                                   col_ids <- grepl(paste0("_", func, "$"), names(cfg))
-
-                                   if (cfg[[func]][i] != "none" && any(col_ids)) {
-                                       this_args <- as.list(cfg[i, col_ids, drop = FALSE])
-                                       names(this_args) <- sub(paste0("_", func, "$"),
-                                                               "",
-                                                               names(this_args))
-                                       ## return
-                                       this_args[!sapply(this_args, is.na)]
-
-                                   } else list()
-                               })
-
-                setnames_inplace(args, c("preproc", "dist", "cent"))
-                args <- do.call(tsclust_args, args = args)
-
-                ## ---------------------------------------------------------------------------------
-                ## controls for this configuration
-                ## ---------------------------------------------------------------------------------
-
-                control_fun <- match.fun(paste0(type, "_control"))
-                control_args <- subset_dots(as.list(cfg[i, , drop = FALSE]), control_fun)
-                control_args <- lapply(control_args, unlist, recursive = FALSE)
-                control <- do.call(control_fun, control_args)
-
-                ## ---------------------------------------------------------------------------------
-                ## get processed series
-                ## ---------------------------------------------------------------------------------
-
-                preproc_char <- cfg$preproc[i]
-                this_preproc_config <- c(list(preproc = preproc_char), args$preproc)
-
-                for (this_series in series) {
-                    this_series_config <- attr(this_series, "config")
-                    if (preproc_char == "none" && is.null(this_series_config))
-                        break
-                    if (identical(this_series_config[names(this_preproc_config)], this_preproc_config))
-                        break
+                if (allocate_logs) {
+                    tsc@dots$logs <- NULL
+                    tsc@args <- lapply(tsc@args, function(arg) {
+                        arg$logs <- NULL
+                        arg
+                    })
                 }
 
-                ## ---------------------------------------------------------------------------------
-                ## distance entry to re-register in parallel worker
-                ## ---------------------------------------------------------------------------------
-
-                if (type != "tadpole") {
-                    distance <- cfg$distance[i]
-                    dist_entry <- dist_entries[[distance]]
-
-                    if (!check_consistency(dist_entry$names[1L], "dist"))
-                        do.call(proxy::pr_DB$set_entry, dist_entry)
-
-                } else distance <- NULL ## dummy
-
-                ## ---------------------------------------------------------------------------------
-                ## centroid for this configuration
-                ## ---------------------------------------------------------------------------------
-
-                centroid_char <- cfg$centroid[i]
-
-                ## ---------------------------------------------------------------------------------
-                ## call tsclust
-                ## ---------------------------------------------------------------------------------
-
-                this_args <- enlist(series = this_series,
-                                    type = type,
-                                    k = cfg$k[[i]],
-                                    distance = distance,
-                                    seed = seed[[i]],
-                                    trace = trace,
-                                    args = args,
-                                    control = control,
-                                    error.check = FALSE,
-                                    dots = dots)
-
-                if (type == "tadpole") this_args$distance <- NULL
-
-                if (centroid_char == "default") {
-                    ## do not specify centroid
-                    tsc <- do.call(tsclust, this_args)
-
-                } else if (centroid_char %in% centroids_included) {
-                    ## with included centroid
-                    tsc <- do.call(tsclust,
-                                   enlist(centroid = centroid_char, dots = this_args))
-
-                } else {
-                    ## with centroid function
-                    tsc <- do.call(tsclust,
-                                   enlist(centroid = get_from_callers(centroid_char, "function"),
-                                          dots = this_args))
-                }
-
-                if (inherits(tsc, "TSClusters")) tsc <- list(tsc)
-
-                ret <- lapply(tsc, function(tsc) {
-                    tsc@preproc <- preproc_char
-
-                    if (preproc_char != "none")
-                        tsc@family@preproc <- get_from_callers(preproc_char, "function")
-                    if (centroid_char != "default")
-                        tsc@centroid <- centroid_char
-
-                    if (allocate_gcm || allocate_dba) {
-                        tsc@dots$gcm <- NULL
-                        tsc@args <- lapply(tsc@args, function(arg) {
-                            arg$gcm <- NULL
-                            arg
-                        })
-                    }
-
-                    if (allocate_logs) {
-                        tsc@dots$logs <- NULL
-                        tsc@args <- lapply(tsc@args, function(arg) {
-                            arg$logs <- NULL
-                            arg
-                        })
-                    }
-
-                    tsc
-                })
-
-                ## ---------------------------------------------------------------------------------
-                ## evaluate
-                ## ---------------------------------------------------------------------------------
-
-                if (!return.objects) {
-                    if (!is.function(score.clus)) score.clus <- score.clus[[type]]
-                    ret <- list(do.call(score.clus, enlist(ret, dots = dots)))
-                }
-
-                ## return config result from lapply()
-                ret
+                tsc
             })
 
-            ## return chunk from foreach()
-            unlist(chunk, recursive = FALSE)
+            ## ---------------------------------------------------------------------------------
+            ## evaluate
+            ## ---------------------------------------------------------------------------------
+
+            if (!return.objects) {
+                if (!is.function(score.clus)) score.clus <- score.clus[[type]]
+                ret <- list(do.call(score.clus, enlist(ret, dots = dots)))
+            }
+
+            ## return config result from foreach()
+            ret
         }
 
-        ## foreach() with one 'iteration' does NOT execute .combine function
-        if (length(configs_split) == 1L) objs <- list(objs)
+        ## foreach() with one 'iteration' does NOT call .combine function
+        if (length(i) == 1L && i == 1L) objs <- list(objs)
 
         if (.errorhandling == "pass") {
             failed_cfgs <- sapply(objs, function(obj) { inherits(obj, "error") })
-            ## make one more list level so unlist() below leaves errors as one object
-            if (any(failed_cfgs)) objs[failed_cfgs] <- lapply(objs[failed_cfgs], list)
+            if (any(failed_cfgs)) {
+                warning("At least one of the ", type, " configurations resulted in an error.")
+                ## make one more list level so unlist() below leaves errors as one object
+                objs[failed_cfgs] <- lapply(objs[failed_cfgs], list)
+            }
         }
 
         ## return scores/TSClusters from Map()
@@ -846,10 +846,19 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         }
     } else {
         scores <- lapply(objs_by_type, function(objs) {
-            if (any(sapply(objs, function(score) { is.null(dim(score)) })))
-                unlist(objs, recursive = FALSE)
+            failed_cfgs <- sapply(objs, function(obj) { inherits(obj, "error") })
+
+            if (any(failed_cfgs))
+                passed_objs <- objs[!failed_cfgs]
             else
-                plyr::rbind.fill(lapply(objs, base::as.data.frame))
+                passed_objs <- objs
+
+            if (length(passed_objs) == 0L) return(objs)
+
+            if (any(sapply(passed_objs, function(score) { is.null(dim(score)) })))
+                unlist(passed_objs, recursive = FALSE)
+            else
+                plyr::rbind.fill(lapply(passed_objs, base::as.data.frame))
         })
 
         pick <- try(pick.clus(scores, ...), silent = TRUE)
@@ -988,7 +997,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                f = function(result, cols) {
                                    order_args <- as.list(result[cols])
                                    names(order_args) <- NULL
-                                   result[do.call(order, order_args), , drop = FALSE]
+                                   result[do.call(base::order, order_args), , drop = FALSE]
                                })
 
     ## return results
