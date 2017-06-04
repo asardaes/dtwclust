@@ -802,7 +802,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         }
 
         ## foreach() with one 'iteration' does NOT call .combine function
-        if (length(i) == 1L && i == 1L) objs <- list(objs)
+        if (i == 1L) objs <- list(objs)
 
         if (.errorhandling == "pass") {
             failed_cfgs <- sapply(objs, function(obj) { inherits(obj, "error") })
