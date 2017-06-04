@@ -158,10 +158,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
 
     while (iter <= control$iter.max) {
         clustold <- if (cent != "fcmdd") cluster else control$distmat$id_cent
-        distmat <- do.call(family@dist,
-                           enlist(x = x,
-                                  centroids = centroids,
-                                  dots = subset_dots(args$dist, family@dist)))
+        distmat <- do.call(family@dist, enlist(x = x, centroids = centroids, dots = args$dist))
         cluster <- family@cluster(distmat = distmat, m = control$fuzziness)
         centroids <- do.call(family@allcent,
                              enlist(x = x,
@@ -172,7 +169,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
                                     dots = subset_dots(args$cent, family@allcent)))
 
         if (fuzzy && cent == "fcm") {
-            # fuzzy.R
+            ## fuzzy.R
             objective <- fuzzy_objective(cluster, distmat = distmat, m = control$fuzziness)
 
             if (trace) {
@@ -223,10 +220,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         converged <- TRUE
     }
 
-    distmat <- do.call(family@dist,
-                       enlist(x = x,
-                              centroids = centroids,
-                              dots = subset_dots(args$dist, family@dist)))
+    distmat <- do.call(family@dist, enlist(x = x, centroids = centroids, dots = args$dist))
     cluster <- family@cluster(distmat = distmat, m = control$fuzziness)
 
     if (fuzzy) {
@@ -247,6 +241,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
     clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(cldist[ , 1L], cluster, mean))
     names(centroids) <- NULL
 
+    ## return
     list(k = k,
          cluster = cluster,
          fcluster = fcluster,
