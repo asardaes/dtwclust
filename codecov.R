@@ -4,5 +4,6 @@ codecov(type = "all",
             "R/pkg.R",
             "R/create-dtwclust.R",
             "R/dtwclust-classes.R",
-            "R/dtwclust-methods.R"
+            "R/dtwclust-methods.R",
+            "R/compute-envelope.R" = 55L:58L
         ))
