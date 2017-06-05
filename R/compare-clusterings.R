@@ -559,7 +559,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     allocate_gcm <- allocate_logs <- allocate_dba <- FALSE
     if (any(types != "tadpole")) {
         allocate_gcm <- any(sapply(setdiff(types, "tadpole"), function(type) {
-            any(grepl("^dtw_basic$", configs[[type]]$distance, ignore.case = TRUE)) &&
+            any(grepl("^dtw_basic$|^dtw_lb$", configs[[type]]$distance, ignore.case = TRUE)) &&
                 !("gcm_distance" %in% colnames(configs[[type]]))
         }))
 

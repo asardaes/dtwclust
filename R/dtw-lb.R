@@ -39,7 +39,7 @@
 #' A considerably large dataset is probably necessary before this is faster than using [dtw_basic()]
 #' with [proxy::dist()].
 #'
-#' Nearest neighbors are found row-wise.
+#' Nearest neighbors are found **row-wise**.
 #'
 #' @author Alexis Sarda-Espinosa
 #'
@@ -123,11 +123,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
         method <- toupper(dtw.func)
 
     X <- any2list(x)
-
-    if (is.null(y))
-        Y <- X
-    else
-        Y <- any2list(y)
+    Y <- if (is.null(y)) X else any2list(y)
 
     if (is_multivariate(X) || is_multivariate(Y))
         stop("dtw_lb does not support multivariate series.")
@@ -139,8 +135,10 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     dots$pairwise <- TRUE
 
     if (pairwise) {
-        check_consistency(X, "tslist")
-        check_consistency(Y, "tslist")
+        if (error.check) {
+            check_consistency(X, "tslist")
+            check_consistency(Y, "tslist")
+        }
 
         if (is.null(window.size))
             dots$window.type <- "none"
@@ -179,6 +177,13 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                      error.check = error.check,
                      ...)
 
+    ## y = NULL means diagonal is zero and NNs are themselves
+    if (is.null(y)) {
+        class(D) <- "crossdist"
+        attr(D, "method") <- "DTW_LB"
+        return(D)
+    }
+
     D <- split_parallel(D, 1L)
     X <- split_parallel(X)
 
@@ -188,26 +193,31 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                  .combine = rbind,
                  .multicombine = TRUE,
                  .packages = "dtwclust",
-                 .export = "enlist") %op% {
-                     id_nn <- apply(distmat, 1L, which.min) # index of nearest neighbors
-                     id_nn_prev <- id_nn + 1L # initialize all different
-                     id_mat <- cbind(1L:nrow(distmat), id_nn) # to index the distance matrix
+                 .export = c("enlist", "call_dtwlb")) %op% {
+                     if (method == "DTW_BASIC") {
+                         do.call(call_dtwlb, enlist(x = X, y = Y, distmat = distmat, dots = dots))
 
-                     while (!is.null(y) && any(id_nn_prev != id_nn)) {
-                         id_changed <- which(id_nn_prev != id_nn)
-                         id_nn_prev <- id_nn
+                     } else {
+                         id_nn <- apply(distmat, 1L, which.min) # index of nearest neighbors
+                         id_nn_prev <- id_nn + 1L # initialize all different
+                         id_mat <- cbind(1L:nrow(distmat), id_nn) # to index the distance matrix
+                         while (any(id_nn_prev != id_nn)) {
+                             id_changed <- which(id_nn_prev != id_nn)
+                             id_nn_prev <- id_nn
 
-                         d_sub <- do.call(proxy::dist,
-                                          enlist(x = X[id_changed],
-                                                 y = Y[id_nn[id_changed]],
-                                                 method = method,
-                                                 dots = dots))
+                             d_sub <- do.call(proxy::dist,
+                                              enlist(x = X[id_changed],
+                                                     y = Y[id_nn[id_changed]],
+                                                     method = method,
+                                                     dots = dots))
 
-                         distmat[id_mat[id_changed, , drop = FALSE]] <- d_sub
-                         id_nn <- apply(distmat, 1L, which.min)
-                         id_mat[ , 2L] <- id_nn
+                             distmat[id_mat[id_changed, , drop = FALSE]] <- d_sub
+                             id_nn <- apply(distmat, 1L, which.min)
+                             id_mat[ , 2L] <- id_nn
+                         }
                      }
 
+                     ## return from foreach()
                      distmat
                  }
 
@@ -216,4 +226,32 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
     ## return
     D
+}
+
+## helper function
+call_dtwlb <- function(x, y, distmat, ..., window.size, norm, step.pattern = NULL, gcm = NULL) {
+    if (is.null(step.pattern) || identical(step.pattern, symmetric2))
+        step.pattern <- 2
+    else if (identical(step.pattern, symmetric1))
+        step.pattern <- 1
+    else
+        stop("step.pattern must be either symmetric1 or symmetric2 (without quotes)")
+
+    L <- max(lengths(y)) + 1L
+
+    if (is.null(gcm))
+        gcm <- matrix(0, 2L, L)
+    else if (!is.matrix(gcm) || nrow(gcm) < 2L || ncol(gcm) < L)
+        stop("dtw_lb: Dimension inconsistency in 'gcm'")
+    else if (storage.mode(gcm) != "double")
+        stop("dtw_lb: If provided, 'gcm' must have 'double' storage mode.")
+
+    dots <- list(window.size = window.size,
+                 norm = switch(norm, "L1" = 1, "L2" = 2),
+                 step.pattern = step.pattern,
+                 backtrack = FALSE,
+                 gcm = gcm)
+
+    ## return
+    .Call(C_dtw_lb, x, y, distmat, dots, PACKAGE = "dtwclust")
 }

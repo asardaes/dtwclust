@@ -54,7 +54,7 @@ This function uses a lower bound that is only defined for time series of equal l
 A considerably large dataset is probably necessary before this is faster than using \code{\link[=dtw_basic]{dtw_basic()}}
 with \code{\link[proxy:dist]{proxy::dist()}}.
 
-Nearest neighbors are found row-wise.
+Nearest neighbors are found \strong{row-wise}.
 }
 \section{Parallel Computing}{
 

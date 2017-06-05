@@ -7,6 +7,7 @@
 
 static R_CallMethodDef callMethods[] = {
     CALLDEFpp(dba, 8),
+    CALLDEFpp(dtw_lb, 4),
     CALLDEFpp(envelope, 2),
     CALLDEFpp(lbk, 4),
     CALLDEFpp(lbi, 6),
@@ -23,6 +24,7 @@ void register_functions() {
     #define DTWCLUST_REGISTER(__FUN__) R_RegisterCCallable("dtwclust", #__FUN__, (DL_FUNC)__FUN__)
     DTWCLUST_REGISTER(dba);
     DTWCLUST_REGISTER(dtw_basic);
+    DTWCLUST_REGISTER(dtw_lb);
     DTWCLUST_REGISTER(envelope);
     DTWCLUST_REGISTER(lbk);
     DTWCLUST_REGISTER(lbi);

@@ -9,6 +9,6 @@ Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/maste
 
 \section{Changes in version 4.0.1}{
     \itemize{
-        \item TBA
+        \item Ported \code{dtw_lb} to \code{C++} when using \code{dtw_basic}.
     }
 }

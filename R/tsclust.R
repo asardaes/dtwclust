@@ -292,7 +292,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     ## pre-allocate matrices for known distances
     matrices_allocated <- FALSE
     if (type != "tadpole") {
-        if (tolower(distance) == "dtw_basic" && is.null(args$dist$gcm)) {
+        if (tolower(distance) %in% c("dtw_basic", "dtw_lb") && is.null(args$dist$gcm)) {
             N <- max(sapply(series, NROW))
             args$dist$gcm <- matrix(0, 2L, N + 1L)
             matrices_allocated <- TRUE
