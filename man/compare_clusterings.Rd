@@ -147,8 +147,8 @@ affecting their results.
 
 The distance matrices (if calculated) are not re-used across configurations. Given the way the
 configurations are created, this shouldn't matter, because clusterings with arguments that can
-use the same distance matrix are already grouped together by \code{\link[=pdc_configs]{pdc_configs()}} and
-\code{\link[=compare_clusterings_configs]{compare_clusterings_configs()}}.
+use the same distance matrix are already grouped together by \code{\link[=compare_clusterings_configs]{compare_clusterings_configs()}}
+and \code{\link[=pdc_configs]{pdc_configs()}}.
 }
 
 \examples{

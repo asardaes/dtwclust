@@ -428,8 +428,8 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'
 #'   The distance matrices (if calculated) are not re-used across configurations. Given the way the
 #'   configurations are created, this shouldn't matter, because clusterings with arguments that can
-#'   use the same distance matrix are already grouped together by [pdc_configs()] and
-#'   [compare_clusterings_configs()].
+#'   use the same distance matrix are already grouped together by [compare_clusterings_configs()]
+#'   and [pdc_configs()].
 #'
 #' @author Alexis Sarda-Espinosa
 #'
