@@ -69,7 +69,7 @@ pc.dtwlb <- tsclust(series, k = 20L,
 #> Iteration 4: Changes / Distsum = 3 / 2630.285
 #> Iteration 5: Changes / Distsum = 0 / 2630.285
 #> 
-#>  Elapsed time is 4.714 seconds.
+#>  Elapsed time is 2.847 seconds.
 
 plot(pc.dtwlb)
 ```
@@ -89,36 +89,36 @@ hc.sbd <- tsclust(CharTraj, type = "hierarchical", k = 20L,
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 1.904 seconds.
+#>  Elapsed time is 1.358 seconds.
 
 # CVIs for HC+SBD
 print(cvis <- sapply(hc.sbd, cvi, b = CharTrajLabels))
-#>               [,1]        [,2]       [,3]        [,4]        [,5]
-#> ARI     0.74050121  0.70344375  0.3428238  0.53026441  0.51258299
-#> RI      0.97838384  0.97232323  0.8965657  0.94848485  0.94202020
-#> J       0.60223048  0.55948553  0.2369598  0.38405797  0.36923077
-#> FM      0.75369221  0.72880580  0.4479318  0.58214036  0.57759590
-#> VI      0.22265488  0.21511035  0.5185772  0.34855573  0.34677938
-#> Sil     0.58811104  0.61748556  0.4094015  0.53663563  0.56617496
-#> SF      0.36348668  0.38500224  0.4659191  0.40333496  0.44479800
-#> CH     27.29320621 25.53616172 17.1076283 23.50969213 23.28285129
-#> DB      0.65336293  0.61402700  0.5085174  0.72846310  0.46973394
-#> DBstar  1.68466461  1.09582372  0.9083771  0.95600061  0.61732267
-#> D       0.13801520  0.22382404  0.1308103  0.17967703  0.23163554
-#> COP     0.06595574  0.06893191  0.1154545  0.08337437  0.08273567
-#>               [,6]       [,7]        [,8]
-#> ARI     0.57464085  0.4182468  0.41964584
-#> RI      0.95414141  0.9216162  0.92202020
-#> J       0.42531646  0.2919708  0.29304029
-#> FM      0.62350648  0.5019646  0.50295569
-#> VI      0.31972827  0.4460655  0.44257501
-#> Sil     0.57151588  0.4741491  0.50197422
-#> SF      0.43608567  0.4518092  0.45568653
-#> CH     23.03569943 19.6161099 18.93844087
-#> DB      0.55074053  0.5464752  0.45639546
-#> DBstar  0.64117537  0.7977064  0.66318416
-#> D       0.16176333  0.1747119  0.19373597
-#> COP     0.07841355  0.1000334  0.09445372
+#>                [,1]         [,2]        [,3]         [,4]         [,5]
+#> ARI      0.74050121   0.70344375   0.3428238   0.53026441   0.51258299
+#> RI       0.97838384   0.97232323   0.8965657   0.94848485   0.94202020
+#> J        0.60223048   0.55948553   0.2369598   0.38405797   0.36923077
+#> FM       0.75369221   0.72880580   0.4479318   0.58214036   0.57759590
+#> VI       0.22265488   0.21511035   0.5185772   0.34855573   0.34677938
+#> Sil      0.58811104   0.61748556   0.4094015   0.53663563   0.56617496
+#> SF       0.46587629   0.49555414   0.5949832   0.52263364   0.56892670
+#> CH     709.19997325 709.41247992 475.5431233 633.26646084 645.54710628
+#> DB       0.65336293   0.61402700   0.5085174   0.72846310   0.46973394
+#> DBstar   1.68466461   1.09582372   0.9083771   0.95600061   0.61732267
+#> D        0.13801520   0.22382404   0.1308103   0.17967703   0.23163554
+#> COP      0.06595574   0.06893191   0.1154545   0.08337437   0.08273567
+#>                [,6]        [,7]         [,8]
+#> ARI      0.57464085   0.4182468   0.41964584
+#> RI       0.95414141   0.9216162   0.92202020
+#> J        0.42531646   0.2919708   0.29304029
+#> FM       0.62350648   0.5019646   0.50295569
+#> VI       0.31972827   0.4460655   0.44257501
+#> Sil      0.57151588   0.4741491   0.50197422
+#> SF       0.55858504   0.5752352   0.57919722
+#> CH     667.89703885 531.7178679 553.99994918
+#> DB       0.55074053   0.5464752   0.45639546
+#> DBstar   0.64117537   0.7977064   0.66318416
+#> D        0.16176333   0.1747119   0.19373597
+#> COP      0.07841355   0.1000334   0.09445372
 
 # Best according to variation of information
 plot(hc.sbd[[which.min(cvis["VI", ])]])
@@ -135,9 +135,16 @@ pc.tadp <- tsclust(series, type = "tadpole", k = 20L,
 #> 
 #> Entering TADPole...
 #> 
-#> TADPole completed, pruning percentage = 77.8%
+#>  Computing lower and upper bound matrices
 #> 
-#>  Elapsed time is 1.912 seconds.
+#>  Pruning during local density calculation
+#>  Pruning during nearest-neighbor distance calculation (phase 1)
+#>  Pruning during nearest-neighbor distance calculation (phase 2)
+#>  Performing cluster assignment
+#> 
+#> TADPole completed for k = 20 & dc = 1.5, pruning percentage = 77.8%
+#> 
+#>  Elapsed time is 1.127 seconds.
 
 plot(pc.tadp, clus = 1L:4L)
 ```
@@ -158,9 +165,6 @@ fc <- tsclust(series[1L:25L], type = "fuzzy", k = 5L,
               seed = 123)
 
 fc
-#> tsclust(series = series[1L:25L], type = "fuzzy", k = 5L, preproc = acf_fun, 
-#>     distance = "L2", seed = 123)
-#> 
 #> fuzzy clustering with 5 clusters
 #> Using L2 distance
 #> Using fcm centroids
@@ -168,7 +172,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.252   0.000   0.250 
+#>    0.25    0.00    0.25 
 #> 
 #> Head of fuzzy memberships:
 #> 
@@ -201,7 +205,6 @@ plot(mvc)
 ``` r
 require(doParallel)
 #> Loading required package: doParallel
-#> Loading required package: foreach
 #> Loading required package: iterators
 
 # Create and register parallel workers
@@ -216,11 +219,11 @@ hc <- tsclust(CharTraj, k = 20L,
                                   cent = list(window.size = 20L,
                                               max.iter = 15L)))
 #> Iteration 1: Changes / Distsum = 100 / 1531.018
-#> Iteration 2: Changes / Distsum = 3 / 886.4657
-#> Iteration 3: Changes / Distsum = 2 / 873.7465
-#> Iteration 4: Changes / Distsum = 0 / 864.1764
+#> Iteration 2: Changes / Distsum = 3 / 886.4687
+#> Iteration 3: Changes / Distsum = 2 / 873.7354
+#> Iteration 4: Changes / Distsum = 0 / 864.1794
 #> 
-#>  Elapsed time is 5.467 seconds.
+#>  Elapsed time is 2.055 seconds.
 
 ## Returning to sequential calculations
 stopCluster(cl)
