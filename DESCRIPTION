@@ -40,7 +40,7 @@ Description: Time series clustering along with optimized techniques related
     custom distance measures and centroid definitions.
 URL: https://github.com/asardaes/dtwclust
 BugReports: https://github.com/asardaes/dtwclust/issues
-License: GPL-3 + file LICENSE
+License: GPL-3
 LazyData: TRUE
 NeedsCompilation: yes
 SystemRequirements: C++11

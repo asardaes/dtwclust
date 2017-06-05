@@ -1,11 +1,14 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^\..*
-^appveyor\.yml$
+
 ^man-roxygen
 
+^\..*
 .*\.md
+^README.*
+^appveyor\.yml$
 ^codecov\.R
+^LICENSE$
 
 ^inst/.*\.R$
 
@@ -15,7 +18,5 @@
 ^vignettes/.*\.tex
 ^vignettes/cache/.*
 ^vignettes/figure/.*
-
-^README.*
 
 # ^tests/.*\.rds$
