@@ -151,8 +151,19 @@ test_that("Valid inputs provide a result greater than zero", {
 
 test_that("GAK can estimate sigma.", {
     dgak <- GAK(data[[1L]], data[[100L]])
-
     expect_gt(attr(dgak, "sigma"), 0)
+})
+
+# =================================================================================================
+# dtw_lb with dtw::dtw
+# =================================================================================================
+
+test_that("dtw_lb has the same result regardless of dtw.func.", {
+    d1 <- dtw_lb(data_reinterpolated_subset[1L:10L], data_reinterpolated_subset[11L:20L],
+                 window.size = 15L, step.pattern = symmetric1)
+    d2 <- dtw_lb(data_reinterpolated_subset[1L:10L], data_reinterpolated_subset[11L:20L],
+                 window.size = 15L, step.pattern = symmetric1, dtw.func = "dtw")
+    expect_identical(d1, d2)
 })
 
 # =================================================================================================
