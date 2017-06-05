@@ -195,6 +195,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                  .packages = "dtwclust",
                  .export = c("enlist", "call_dtwlb")) %op% {
                      if (method == "DTW_BASIC") {
+                         ## modifies distmat in place
                          do.call(call_dtwlb, enlist(x = X, y = Y, distmat = distmat, dots = dots))
 
                      } else {

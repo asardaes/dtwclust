@@ -108,7 +108,7 @@ BEGIN_RCPP
     Rcpp::List x(X), y(Y), dots(DOTS);
     Rcpp::NumericMatrix distmat(D);
     dtw_lb_cpp(x, y, distmat, dots);
-    return D;
+    return R_NilValue;
 END_RCPP
 }
 
