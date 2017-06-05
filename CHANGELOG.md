@@ -1,5 +1,7 @@
 # Changelog
 
+## Version 4.0.1
+
 ## Version 4.0.0
 * Optimized `TADPole` for multiple `k` and `dc` values.
 * Optimized PAM centroids with `pam.precompute = FALSE` by using sparse matrices from the `Matrix` package.

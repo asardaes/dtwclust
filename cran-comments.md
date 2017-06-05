@@ -1,8 +1,4 @@
-## Update to version 4.0.0
-RESUBMIT: removed "file LICENSE" directive from description.
-Several optimizations and bug fixes.
-Some of the new functionality requires new dependencies,
-and some previous dependencies were dropped.
+## Update to version 4.0.1
 
 ## Test environments
 * Local GNU/Linux, R 3.4.0
