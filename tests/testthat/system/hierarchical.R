@@ -26,8 +26,6 @@ test_that("Multiple k works as expected.", {
 
     expect_identical(length(hc_k), 4L)
 
-    skip_on_cran()
-
     hc_k <- lapply(hc_k, reset_nondeterministic)
     assign("hc_k", hc_k, persistent)
 })

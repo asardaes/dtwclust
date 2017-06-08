@@ -7,6 +7,14 @@ context("\tConsistency of DTW lower bounds")
 ## Original objects in env
 ols <- ls()
 
+lb_comp <- function(lower, greater, ...) {
+    all(mapply(a = lower, b = greater, MoreArgs = list(...), FUN = function(a, b, ...) {
+        ret <- isTRUE(all.equal(a, b, ...))
+        if (!ret) ret <- a < b
+        ret
+    }))
+}
+
 # =================================================================================================
 # L1 norm
 # =================================================================================================
@@ -23,17 +31,17 @@ test_that("Lower bounds with L1 norm are always leq than DTW.", {
     dtwds <- proxy::dist(data_reinterpolated[-1L], data_reinterpolated[1L],
                          method = "dtw_basic", window.size = 15L)
 
-    expect_true(lbk <= lbi, info = "single")
-    expect_true(lbk <= dtwd, info = "single")
-    expect_true(lbi <= dtwd, info = "single")
+    expect_true(lb_comp(lbk, lbi), info = "single")
+    expect_true(lb_comp(lbk, dtwd), info = "single")
+    expect_true(lb_comp(lbi, dtwd), info = "single")
 
-    expect_true(all(lbks <= lbis), info = "multiple")
-    expect_true(all(lbks <= dtwds), info = "multiple")
-    expect_true(all(lbis <= dtwds), info = "multiple")
+    expect_true(lb_comp(lbks, lbis), info = "multiple")
+    expect_true(lb_comp(lbks, dtwds), info = "multiple")
+    expect_true(lb_comp(lbis, dtwds), info = "multiple")
 
-    expect_true(lbk == lbks[1L, 1L], info = "single-vs-proxy")
-    expect_true(lbi == lbis[1L, 1L], info = "single-vs-proxy")
-    expect_true(dtwd == dtwds[1L, 1L], info = "single-vs-proxy")
+    expect_equal(lbk, lbks[1L, 1L], info = "single-vs-proxy")
+    expect_equal(lbi, lbis[1L, 1L], info = "single-vs-proxy")
+    expect_equal(dtwd, dtwds[1L, 1L], info = "single-vs-proxy")
 })
 
 # =================================================================================================
@@ -46,26 +54,23 @@ test_that("Lower bounds with L2 norm are always leq than DTW.", {
     dtwd <- dtw_basic(data_matrix[2L, ], data_matrix[1L, ], norm = "L2", window.size = 15L)
 
     lbks <- proxy::dist(data_reinterpolated[-1L], data_reinterpolated[1L],
-                        method = "lbk", window.size = 15L,
-                        norm = "L2")
+                        method = "lbk", window.size = 15L, norm = "L2")
     lbis <- proxy::dist(data_reinterpolated[-1L], data_reinterpolated[1L],
-                        method = "lbi", window.size = 15L,
-                        norm = "L2")
+                        method = "lbi", window.size = 15L, norm = "L2")
     dtwds <- proxy::dist(data_reinterpolated[-1L], data_reinterpolated[1L],
-                         method = "dtw_basic", window.size = 15L,
-                         norm = "L2")
+                         method = "dtw_basic", window.size = 15L, norm = "L2")
 
-    expect_true(lbk <= lbi, info = "single")
-    expect_true(lbk <= dtwd, info = "single")
-    expect_true(lbi <= dtwd, info = "single")
+    expect_true(lb_comp(lbk, lbi), info = "single")
+    expect_true(lb_comp(lbk, dtwd), info = "single")
+    expect_true(lb_comp(lbi, dtwd), info = "single")
 
-    expect_true(all(lbks <= lbis), info = "multiple")
-    expect_true(all(lbks <= dtwds), info = "multiple")
-    expect_true(all(lbis <= dtwds), info = "multiple")
+    expect_true(lb_comp(lbks, lbis), info = "multiple")
+    expect_true(lb_comp(lbks, dtwds), info = "multiple")
+    expect_true(lb_comp(lbis, dtwds), info = "multiple")
 
-    expect_true(lbk == lbks[1L, 1L], info = "single-vs-proxy")
-    expect_true(lbi == lbis[1L, 1L], info = "single-vs-proxy")
-    expect_true(dtwd == dtwds[1L, 1L], info = "single-vs-proxy")
+    expect_equal(lbk, lbks[1L, 1L], info = "single-vs-proxy")
+    expect_equal(lbi, lbis[1L, 1L], info = "single-vs-proxy")
+    expect_equal(dtwd, dtwds[1L, 1L], info = "single-vs-proxy")
 })
 
 # =================================================================================================

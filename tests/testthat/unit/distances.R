@@ -163,7 +163,7 @@ test_that("dtw_lb has the same result regardless of dtw.func.", {
                  window.size = 15L, step.pattern = symmetric1)
     d2 <- dtw_lb(data_reinterpolated[1L:50L], data_reinterpolated[51L:100L],
                  window.size = 15L, step.pattern = symmetric1, dtw.func = "dtw")
-    expect_identical(d1, d2)
+    expect_equal(d1, d2)
 })
 
 # =================================================================================================

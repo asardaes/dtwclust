@@ -2,6 +2,7 @@
 
 ## Version 4.0.1
 * Ported `dtw_lb` to `C++` when using `dtw_basic`.
+* Modified some tests to account for rounding error (CRAN request).
 
 ## Version 4.0.0
 * Optimized `TADPole` for multiple `k` and `dc` values.
