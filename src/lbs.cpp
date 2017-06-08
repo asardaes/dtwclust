@@ -75,7 +75,7 @@ SEXP lbi_cpp(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
 
         } else {
             H[i] = x[i];
-            LB[i] = std::abs(x[i] - x[i]);
+            LB[i] = 0;
         }
 
         if (p > 1) LB[i] *= LB[i];
@@ -90,7 +90,7 @@ SEXP lbi_cpp(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
         else if (y[i] < L2[i])
             temp = L2[i] - y[i];
         else
-            temp = std::abs(y[i] - y[i]);
+            temp = 0;
 
         if (p > 1) temp *= temp;
         LB[i] += temp;
