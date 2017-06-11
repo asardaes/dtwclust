@@ -1,5 +1,7 @@
 # Changelog
 
+## Version 4.0.2
+
 ## Version 4.0.1
 * Ported `dtw_lb` to `C++` when using `dtw_basic`.
 * Modified some tests to account for rounding error (CRAN request).

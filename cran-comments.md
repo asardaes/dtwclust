@@ -1,5 +1,4 @@
-## Update to version 4.0.1
-* Short-term patch: modified some tests to account for rounding errors as requested (see https://www.r-project.org/nosvn/R.check/r-patched-solaris-x86/dtwclust-00check.html)
+## Update to version 4.0.2
 
 ## Test environments
 * Local GNU/Linux, R 3.4.0
