@@ -8,7 +8,6 @@ if (identical(Sys.getenv("NOT_CRAN"), "true")) {
     source("regression/centroids.R", TRUE)
     source("regression/custom-dist.R", TRUE)
     source("regression/cvis.R", TRUE)
-    source("regression/methods.R", TRUE)
     source("regression/clusterings.R", TRUE)
     source("regression/comparisons.R", TRUE)
 }

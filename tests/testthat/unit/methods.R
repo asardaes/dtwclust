@@ -1,117 +1,165 @@
-context("\tMethods")
+context("\tGenerics for included classes")
 
-# =================================================================================================
+# ==================================================================================================
 # setup
-# =================================================================================================
+# ==================================================================================================
 
 ## Original objects in env
 ols <- ls()
 
-# =================================================================================================
-# generics
-# =================================================================================================
-
-test_that("Methods for dtwclust objects are dispatched correctly.", {
-    mute <- capture.output(pc <- dtwclust(data_subset[-1L], type = "partitional", k = 4L,
-                                          distance = "sbd", preproc = zscore,
-                                          control = list(trace = TRUE)))
-
-    expect_error(plot(pc, type = "dendrogram"), "dendrogram.*hierarchical", ignore.case = TRUE)
-
-    ## fuzzy
-    mute <- capture.output(fc <- dtwclust(data_reinterpolated_subset[-1L], type = "fuzzy",
-                                          k = 4L, distance = "sbd", preproc = zscore,
-                                          control = list(trace = TRUE)))
-
-    expect_error(plot(fc, type = "dendrogram"), "dendrogram.*hierarchical", ignore.case = TRUE)
-
-    ## extra argument for preproc so that it is used in predict
-    mute <- capture.output(hc <- dtwclust(data_subset[-1L], type = "hierarchical", k = 4L,
-                                          distance = "sbd", preproc = zscore, center = FALSE,
-                                          control = list(trace = TRUE)))
-
-    mute <- capture.output(show_return <- show(pc))
-    expect_null(show_return, info = "show")
-    mute <- capture.output(show_return <- show(hc))
-    expect_null(show_return, info = "show")
-    mute <- capture.output(show_return <- show(fc))
-    expect_null(show_return, info = "show")
-
-    expect_null(plot(hc), info = "plot dendrogram")
-    expect_true(inherits(plot(hc, type = "sc", plot = FALSE), "ggplot"), info = "plot sc")
-    expect_true(inherits(plot(hc, type = "sc", data = data_subset[-1L], plot = FALSE), "ggplot"),
-                info = "plot sc with data")
-
-    expect_true(predict(hc)[1L] == predict(hc, newdata = data_subset[1L]), info = "predict")
-
-    suppressMessages(method_update <- update(hc))
-    expect_identical(hc, method_update)
-    mute <- capture.output(method_update <- update(hc, method = "complete", distmat = hc@distmat))
-    expect_true(inherits(method_update, "dtwclust") & validObject(method_update), info = "update")
-
-    require(flexclust)
-    clusterSim(hc)
-    clusterSim(hc, symmetric = TRUE)
-    clusterSim(hc, method = "centers")
-
-    ## refs
-    method_update <- reset_nondeterministic(method_update)
-    assign("method_update", method_update, persistent)
-})
+# ==================================================================================================
+# For tsclustFamily and TSClusters
+# ==================================================================================================
 
 test_that("Methods for TSClusters objects are dispatched correctly.", {
-    mute <- capture.output(pc <- tsclust(data_subset[-1L], type = "partitional", k = 4L,
-                                         distance = "sbd", preproc = zscore,
-                                         trace = TRUE))
+    # ----------------------------------------------------------------------------------------------
+    # initialize first, since the objects created will be used by the other methods
+    # ----------------------------------------------------------------------------------------------
 
-    expect_error(plot(pc, type = "dendrogram"), "dendrogram.*hierarchical", ignore.case = TRUE)
+    expect_s4_class(
+        tsclust_family <- new("tsclustFamily",
+                              dist = "sbd",
+                              allcent = "pam",
+                              preproc = zscore,
+                              control = partitional_control()),
+        "tsclustFamily"
+    )
 
-    ## fuzzy
-    mute <- capture.output(fc <- tsclust(data_reinterpolated_subset[-1L], type = "fuzzy",
-                                         k = 4L, distance = "sbd", preproc = zscore,
-                                         trace = TRUE))
+    expect_s4_class(
+        partitional_object <- new("PartitionalTSClusters",
+                                  type = "partitional",
+                                  k = 4L,
+                                  control = partitional_control(),
+                                  datalist = data_subset[-2L],
+                                  centroids = data_subset[seq(from = 1L, to = 16L, by = 5L)],
+                                  cluster = rep(1L:4L, each = 5L)[-2L],
+                                  preproc = "zscore",
+                                  distance = "sbd",
+                                  centroid = "pam",
+                                  override.family = TRUE),
+        "PartitionalTSClusters"
+    )
 
-    expect_error(plot(fc, type = "dendrogram"), "dendrogram.*hierarchical", ignore.case = TRUE)
+    expect_s4_class(
+        fuzzy_object <- new("FuzzyTSClusters",
+                            type = "fuzzy",
+                            k = 4L,
+                            control = fuzzy_control(),
+                            datalist = data_reinterpolated_subset[-2L],
+                            centroids = data_reinterpolated_subset[seq(from = 1L, to = 16L, by = 5L)],
+                            preproc = "zscore",
+                            distance = "sbd",
+                            centroid = "fcm",
+                            override.family = TRUE),
+        "FuzzyTSClusters"
+    )
 
     ## extra argument for preproc so that it is used in predict
-    mute <- capture.output(hc <- tsclust(data_subset[-1L], type = "hierarchical", k = 4L,
-                                         distance = "sbd", preproc = zscore,
-                                         trace = TRUE,
-                                         args = tsclust_args(preproc = list(center = FALSE))))
+    expect_s4_class(
+        hierarchical_object <- new("HierarchicalTSClusters",
+                                   hclust(proxy::dist(data_reinterpolated_subset, method = "L2")),
+                                   type = "hierarchical",
+                                   k = 4L,
+                                   control = hierarchical_control(),
+                                   datalist = data_subset[-2L],
+                                   centroids = data_subset[seq(from = 1L, to = 16L, by = 5L)],
+                                   cluster = rep(1L:4L, each = 5L)[-2L],
+                                   preproc = "zscore",
+                                   distance = "sbd",
+                                   centroid = "pam",
+                                   args = tsclust_args(preproc = list(center = FALSE)),
+                                   override.family = TRUE),
+        "HierarchicalTSClusters"
+    )
 
-    mute <- capture.output(show_return <- show(pc))
-    expect_null(show_return, info = "show")
-    mute <- capture.output(show_return <- show(hc))
-    expect_null(show_return, info = "show")
-    mute <- capture.output(show_return <- show(fc))
-    expect_null(show_return, info = "show")
+    # ----------------------------------------------------------------------------------------------
+    # show
+    # ----------------------------------------------------------------------------------------------
 
-    expect_null(plot(hc), info = "plot dendrogram")
-    expect_true(inherits(plot(hc, type = "sc", plot = FALSE), "ggplot"), info = "plot sc")
-    expect_true(inherits(plot(hc, type = "sc", series = data_subset[-1L], plot = FALSE), "ggplot"),
-                info = "plot sc with data")
+    expect_output(show(partitional_object))
+    expect_output(show(fuzzy_object))
+    expect_output(show(hierarchical_object))
 
-    expect_true(predict(hc)[1L] == predict(hc, newdata = data_subset[1L]), info = "predict")
+    # ----------------------------------------------------------------------------------------------
+    # update
+    # ----------------------------------------------------------------------------------------------
 
-    method_update <- update(hc)
-    expect_identical(hc, method_update)
-    method_update <- update(pc)
-    expect_identical(body(pc@family@allcent), body(method_update@family@allcent))
-    mute <- capture.output(method_update <- update(hc, distmat = hc@distmat,
-                                                   control = hierarchical_control(method = "complete")))
-    expect_true(inherits(method_update, "TSClusters") & validObject(method_update), info = "update")
+    pc_update <- update(partitional_object)
+    expect_identical(body(pc_update@family@allcent), body(partitional_object@family@allcent),
+                     info = "Updating partitional object with no parameters creates new identical allcent function in family")
+
+    fc_update <- update(fuzzy_object)
+    expect_identical(body(fc_update@family@allcent), body(fuzzy_object@family@allcent),
+                     info = "Updating fuzzy object with no parameters creates new identical allcent function in family")
+
+    hc_update <- update(hierarchical_object)
+    expect_identical(hc_update, hierarchical_object,
+                     info = "Updating hierarchical object with no parameters does nothing")
+
+    ## for artificial update test below
+    partitional_object@call <- call("tsclust",
+                                    quote(data_subset),
+                                    k = 4L,
+                                    distance = "sbd",
+                                    preproc = quote(zscore))
+
+    expect_true(inherits(update(partitional_object, k = 3L), "TSClusters"),
+                info = "Updating a TSClusters object with parameters produces a valid new object")
+
+    # ----------------------------------------------------------------------------------------------
+    # plot
+    # ----------------------------------------------------------------------------------------------
+
+    expect_error(plot(partitional_object, type = "dendrogram"), "dendrogram.*hierarchical",
+                 ignore.case = TRUE, info = "Partitional clusters don't support dendrogram plot")
+    expect_error(plot(fuzzy_object, type = "dendrogram"), "dendrogram.*hierarchical",
+                 ignore.case = TRUE, info = "Fuzzy clusters don't support dendrogram plot")
+    expect_silent(plot(hierarchical_object, type = "dendrogram"))
+    expect_true(inherits(plot(hierarchical_object, type = "sc", plot = FALSE), "ggplot"),
+                info = "Plotting series and centroids returns a gg object invisibly")
+    expect_true(inherits(plot(hierarchical_object, type = "sc", series = data_subset[-1L], plot = FALSE), "ggplot"),
+                info = "Plotting series and centroids providing data returns a gg object invisibly")
+
+    # ----------------------------------------------------------------------------------------------
+    # predict
+    # ----------------------------------------------------------------------------------------------
+
+    expect_identical(predict(partitional_object), partitional_object@cluster,
+                     info = "Predicting with partitional clusters and no arguments simply returns existing cluster slot")
+    expect_identical(predict(fuzzy_object), fuzzy_object@fcluster,
+                     info = "Predicting with fuzzy clusters and no arguments simply returns existing fcluster slot")
+    expect_identical(predict(hierarchical_object), hierarchical_object@cluster,
+                     info = "Predicting with hierarchical clusters and no arguments simply returns existing cluster slot")
+
+    expect_true(is.integer(predict(partitional_object, newdata = data_subset[1L])),
+                info = "Predicting with partitional clusters and newdata returns a new integer index")
+    expect_true(is.matrix(predict(fuzzy_object, newdata = data_reinterpolated_subset[1L])),
+                info = "Predicting with fuzzy clusters and newdata returns a new matrix of indices")
+    expect_true(is.integer(predict(hierarchical_object, newdata = data_subset[1L])),
+                info = "Predicting with hierarchical clusters and newdata returns a new integer index")
 })
 
-test_that("as.* methods are dispatched correctly.", {
-    dm <- proxy::dist(data_reinterpolated_subset, data_reinterpolated_subset)
-    expect_identical(dim(base::as.matrix(dm)), dim(as.data.frame(dm)))
+# ==================================================================================================
+# as.matrix and as.data.frame for crossdist and pairdist
+# ==================================================================================================
 
-    pd <- proxy::dist(data_reinterpolated_subset[1L:10L], data_reinterpolated_subset[11L:20L],
+test_that("Included as.* methods are dispatched correctly.", {
+    crossdist <- proxy::dist(data_reinterpolated_subset, data_reinterpolated_subset)
+    expect_true(class(base::as.matrix(crossdist)) == "matrix")
+    expect_s3_class(base::as.data.frame(crossdist), "data.frame")
+    expect_identical(dim(base::as.matrix(crossdist)), dim(as.data.frame(crossdist)),
+                     info = "Changing a crossdist class to matrix/data.frame does not alter dimensions")
+
+    pairdist <- proxy::dist(data_reinterpolated_subset[1L:10L], data_reinterpolated_subset[11L:20L],
                       pairwise = TRUE)
-    expect_identical(dim(base::as.matrix(pd)), dim(as.data.frame(pd)))
+    expect_true(class(base::as.matrix(pairdist)) == "matrix")
+    expect_s3_class(base::as.data.frame(pairdist), "data.frame")
+    expect_identical(dim(base::as.matrix(pairdist)), dim(as.data.frame(pairdist)),
+                     info = "Changing a pairdist class to matrix/data.frame results in equal dimensions")
 })
 
-# =================================================================================================
+# ==================================================================================================
 # clean
-# =================================================================================================
+# ==================================================================================================
+
 rm(list = setdiff(ls(), ols))
