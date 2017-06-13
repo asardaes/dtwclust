@@ -107,6 +107,8 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
             centroids <- .Object@centroids
             datalist <- .Object@datalist
 
+            preproc <- if (.Object@preproc == "none") .Object@family@preproc else match.fun(.Object@preproc)
+
             if (.Object@type == "partitional" && length(.Object@centroid))
                 allcent <- all_cent2(.Object@centroid, .Object@control)
             else if (.Object@type == "hierarchical" && length(formals(.Object@family@allcent)))
@@ -125,7 +127,7 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
             .Object@family <- new("tsclustFamily",
                                   dist = .Object@distance,
                                   allcent = allcent,
-                                  preproc = .Object@family@preproc,
+                                  preproc = preproc,
                                   control = .Object@control,
                                   fuzzy = isTRUE(.Object@type == "fuzzy"))
 
