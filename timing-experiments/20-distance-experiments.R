@@ -355,12 +355,19 @@ len <- sapply(series, function(s) { lengths(s)[1L] })
 id_ascending <- sort(len, decreasing = FALSE, index.return = TRUE)
 series <- series[id_ascending$ix][!duplicated(id_ascending$x)]
 series_mv <- multivariate_series[id_ascending$ix][!duplicated(id_ascending$x)]
+num_workers_to_test <- 1L:4L
+
+if (short_experiments) {
+    series <- series[1L:2L]
+    series_mv <- series_mv[1L:2L]
+    num_workers_to_test <- c(2L, 4L)
+}
 
 # --------------------------------------------------------------------------------------------------
 # lb_keogh
 # --------------------------------------------------------------------------------------------------
 
-dist_lbk_multiple <- plyr::rbind.fill(lapply(1L:4L, function(num_workers) {
+dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
     invisible(clusterEvalQ(workers, library("microbenchmark")))
