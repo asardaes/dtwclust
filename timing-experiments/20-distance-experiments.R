@@ -405,14 +405,19 @@ dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 
     window_size <- 50L
     benchmarks <- lapply(series, function(this_series) {
-        id_series <- rbind(
-            expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
-            expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
-            cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
-                  Var2 = seq(from = 20L, to = 90L, by = 10L))
-        )
+        if (short_experiments) {
+            id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
+                               seq(from = 10L, to = 100L, by = 10L))
+        } else {
+            id_series <- rbind(
+                expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
+                expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
+                cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
+                      Var2 = seq(from = 20L, to = 90L, by = 10L))
+            )
 
-        id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
+            id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
+        }
 
         expressions <- lapply(1L:nrow(id_series), function(i) {
             bquote(
@@ -456,14 +461,19 @@ dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 
     window_size <- 50L
     benchmarks <- lapply(series, function(this_series) {
-        id_series <- rbind(
-            expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
-            expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
-            cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
-                  Var2 = seq(from = 20L, to = 90L, by = 10L))
-        )
+        if (short_experiments) {
+            id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
+                               seq(from = 10L, to = 100L, by = 10L))
+        } else {
+            id_series <- rbind(
+                expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
+                expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
+                cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
+                      Var2 = seq(from = 20L, to = 90L, by = 10L))
+            )
 
-        id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
+            id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
+        }
 
         expressions <- lapply(1L:nrow(id_series), function(i) {
             bquote(
@@ -506,14 +516,19 @@ dist_sbd_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
     invisible(clusterEvalQ(workers, library("microbenchmark")))
 
     benchmarks <- lapply(series, function(this_series) {
-        id_series <- rbind(
-            expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
-            expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
-            cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
-                  Var2 = seq(from = 20L, to = 90L, by = 10L))
-        )
+        if (short_experiments) {
+            id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
+                               seq(from = 10L, to = 100L, by = 10L))
+        } else {
+            id_series <- rbind(
+                expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
+                expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
+                cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
+                      Var2 = seq(from = 20L, to = 90L, by = 10L))
+            )
 
-        id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
+            id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
+        }
 
         expressions <- lapply(1L:nrow(id_series), function(i) {
             bquote(
