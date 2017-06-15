@@ -31,6 +31,7 @@ series_mv <- series_mv[id_ascending]
 # lb_keogh
 # --------------------------------------------------------------------------------------------------
 
+cat("\tRunning lb_keogh experiments for single series\n")
 dist_lbk_single <- with(
     new.env(),
     {
@@ -64,6 +65,7 @@ dist_lbk_single <- with(
 # lb_improved
 # --------------------------------------------------------------------------------------------------
 
+cat("\tRunning lb_improved experiments for single series\n")
 dist_lbi_single <- with(
     new.env(),
     {
@@ -97,6 +99,7 @@ dist_lbi_single <- with(
 # sbd
 # --------------------------------------------------------------------------------------------------
 
+cat("\tRunning sbd experiments for single series\n")
 dist_sbd_single <- with(
     new.env(),
     {
@@ -124,6 +127,7 @@ dist_sbd_single <- with(
 # dtw univariate
 # --------------------------------------------------------------------------------------------------
 
+cat("\tRunning dtw experiments for single univariate series\n")
 dist_dtw_univariate_single <- with(
     new.env(),
     {
@@ -159,6 +163,7 @@ dist_dtw_univariate_single <- with(
 # dtw_multivariate
 # --------------------------------------------------------------------------------------------------
 
+cat("\tRunning dtw experiments for single multivariate series\n")
 dist_dtw_multivariate_single <- with(
     new.env(),
     {
@@ -194,6 +199,7 @@ dist_dtw_multivariate_single <- with(
 # unnormalized gak univariate
 # --------------------------------------------------------------------------------------------------
 
+cat("\tRunning unnormalized_gak experiments for single univariate series\n")
 dist_unnormalized_gak_univariate_single <- with(
     new.env(),
     {
@@ -231,6 +237,7 @@ dist_unnormalized_gak_univariate_single <- with(
 # unnormalized gak multivariate
 # --------------------------------------------------------------------------------------------------
 
+cat("\tRunning unnormalized_gak experiments for single multivariate series\n")
 dist_unnormalized_gak_multivariate_single <- with(
     new.env(),
     {
@@ -268,6 +275,7 @@ dist_unnormalized_gak_multivariate_single <- with(
 # normalized gak univariate
 # --------------------------------------------------------------------------------------------------
 
+cat("\tRunning normalized_gak experiments for single univariate series\n")
 dist_normalized_gak_univariate_single <- with(
     new.env(),
     {
@@ -305,6 +313,7 @@ dist_normalized_gak_univariate_single <- with(
 # normalized gak multivariate
 # --------------------------------------------------------------------------------------------------
 
+cat("\tRunning normalized_gak experiments for single multivariate series\n")
 dist_normalized_gak_multivariate_single <- with(
     new.env(),
     {
@@ -359,8 +368,8 @@ dist_single_results$distance <- factor(dist_single_results$distance,
                                        levels = unique(dist_single_results$distance))
 
 ## clean
-existing_objects <- c(existing_objects, "dist_single_results")
-rm(list = setdiff(ls(all.names = TRUE), existing_objects))
+rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "dist_single_results")))
+existing_objects <- ls(all.names = TRUE)
 
 # ==================================================================================================
 # distance experiments using multiple series
@@ -394,10 +403,13 @@ if (short_experiments) {
     num_workers_to_test <- c(2L, 4L)
 }
 
+cat("\n")
+
 # --------------------------------------------------------------------------------------------------
 # lb_keogh
 # --------------------------------------------------------------------------------------------------
 
+cat("\tRunning lb_keogh experiments for multiple series\n")
 dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
@@ -454,6 +466,7 @@ dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 # lb_improved
 # --------------------------------------------------------------------------------------------------
 
+cat("\tRunning lb_improved experiments for multiple series\n")
 dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
@@ -510,6 +523,7 @@ dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 # sbd
 # --------------------------------------------------------------------------------------------------
 
+cat("\tRunning sbd experiments for multiple series\n")
 dist_sbd_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
@@ -574,8 +588,7 @@ dist_multiple_results$distance <- factor(dist_multiple_results$distance,
                                          levels = unique(dist_multiple_results$distance))
 
 ## clean
-existing_objects <- c(existing_objects, "dist_multiple_results")
-rm(list = setdiff(ls(all.names = TRUE), existing_objects))
+rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "dist_multiple_results")))
 
 # ==================================================================================================
 # finish
@@ -596,7 +609,7 @@ ggplot(dist_multiple_results,
            y = median_time_ms,
            colour = num_y,
            shape = factor(series_length))) +
-    geom_point(size=3) +
+    geom_point(size = 3) +
     facet_grid(distance ~ num_workers) +
     theme_bw()
 
