@@ -353,3 +353,4 @@ ggplot(dist_single_results,
 
 ## clean
 rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "dist_single_results")))
+save("dist_single_results", file = "dist-results.RData")

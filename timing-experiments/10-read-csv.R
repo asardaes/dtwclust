@@ -24,3 +24,4 @@ multivariate_series <- lapply(i, function(i) {
 dtwclust:::setnames_inplace(multivariate_series, as.character(univariate_labels[i]))
 
 rm("path", "files", "i")
+save("univariate_labels", "univariate_series", "multivariate_series", file = "read-csv.RData")
