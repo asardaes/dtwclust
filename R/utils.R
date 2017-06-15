@@ -239,15 +239,10 @@ setnames_inplace <- function(vec, names) {
 # Split a given object into chunks for parallel workers
 split_parallel <- function(obj, margin = NULL) {
     num_workers <- foreach::getDoParWorkers()
-
     if (num_workers == 1L) return(list(obj))
 
-    if (is.null(margin))
-        num_tasks <- length(obj)
-    else
-        num_tasks <- dim(obj)[margin]
-
-    if (is.na(num_tasks)) stop("Invalid attempt to split an object into parallel tasks")
+    num_tasks <- if (is.null(margin)) length(obj) else dim(obj)[margin]
+    if (!is.integer(num_tasks)) stop("Invalid attempt to split an object into parallel tasks")
 
     num_tasks <- parallel::splitIndices(num_tasks, num_workers)
     num_tasks <- num_tasks[lengths(num_tasks, use.names = FALSE) > 0L]
