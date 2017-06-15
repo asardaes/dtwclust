@@ -12,9 +12,20 @@ series <- univariate_series[seq(from = 1L, to = length(univariate_series), by = 
 series <- lapply(series, function(s) { s[1L:2L] })
 len <- sapply(series, function(s) { lengths(s)[1L] })
 id_ascending <- sort(len, decreasing = FALSE, index.return = TRUE)
-series <- series[id_ascending$ix][!duplicated(id_ascending$x)]
+
+len <- id_ascending$x
+id_ascending <- id_ascending$ix
+dlen <- diff(len) < length_diff_threshold
+while (any(dlen)) {
+    rem <- which(dlen)[1L] + 1L
+    len <- len[-rem]
+    id_ascending <- id_ascending[-rem]
+    dlen <- diff(len) < length_diff_threshold
+}
+
+series <- series[id_ascending]
 series_mv <- lapply(multivariate_series, function(s) { s[1L:2L] })
-series_mv <- series_mv[id_ascending$ix][!duplicated(id_ascending$x)]
+series_mv <- series_mv[id_ascending]
 
 # --------------------------------------------------------------------------------------------------
 # lb_keogh
@@ -35,7 +46,8 @@ dist_lbk_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            benchmark <- summary(microbenchmark(list = expressions, times = 100L, unit = "us"))
+            times <- if (short_experiments) 10L else 100L
+            benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "lb_keogh",
                        series_length = NROW(x),
@@ -67,7 +79,8 @@ dist_lbi_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            benchmark <- summary(microbenchmark(list = expressions, times = 100L, unit = "us"))
+            times <- if (short_experiments) 10L else 100L
+            benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "lb_improved",
                        series_length = NROW(x),
@@ -91,9 +104,10 @@ dist_sbd_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
+            times <- if (short_experiments) 10L else 100L
             benchmark <- summary(microbenchmark(
                 SBD(x, y, error.check = FALSE, return.shifted = FALSE),
-                times = 100L, unit = "us"
+                times = times, unit = "us"
             ))
 
             data.frame(distance = "sbd",
@@ -127,7 +141,8 @@ dist_dtw_univariate_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            benchmark <- summary(microbenchmark(list = expressions, times = 100L, unit = "us"))
+            times <- if (short_experiments) 10L else 100L
+            benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "dtw_univariate",
                        series_length = NROW(x),
@@ -161,7 +176,8 @@ dist_dtw_multivariate_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            benchmark <- summary(microbenchmark(list = expressions, times = 100L, unit = "us"))
+            times <- if (short_experiments) 10L else 100L
+            benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "dtw_multivariate",
                        series_length = nrow(x),
@@ -197,7 +213,8 @@ dist_unnormalized_gak_univariate_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            benchmark <- summary(microbenchmark(list = expressions, times = 100L, unit = "us"))
+            times <- if (short_experiments) 10L else 100L
+            benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "unnormalized_gak_univariate",
                        series_length = NROW(x),
@@ -233,7 +250,8 @@ dist_unnormalized_gak_multivariate_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            benchmark <- summary(microbenchmark(list = expressions, times = 100L, unit = "us"))
+            times <- if (short_experiments) 10L else 100L
+            benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "unnormalized_gak_multivariate",
                        series_length = nrow(x),
@@ -269,7 +287,8 @@ dist_normalized_gak_univariate_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            benchmark <- summary(microbenchmark(list = expressions, times = 100L, unit = "us"))
+            times <- if (short_experiments) 10L else 100L
+            benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "normalized_gak_univariate",
                        series_length = NROW(x),
@@ -305,7 +324,8 @@ dist_normalized_gak_multivariate_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            benchmark <- summary(microbenchmark(list = expressions, times = 100L, unit = "us"))
+            times <- if (short_experiments) 10L else 100L
+            benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "normalized_gak_multivariate",
                        series_length = nrow(x),
@@ -353,8 +373,19 @@ rm(list = setdiff(ls(all.names = TRUE), existing_objects))
 series <- univariate_series[seq(from = 1L, to = length(univariate_series), by = 3L)]
 len <- sapply(series, function(s) { lengths(s)[1L] })
 id_ascending <- sort(len, decreasing = FALSE, index.return = TRUE)
-series <- series[id_ascending$ix][!duplicated(id_ascending$x)]
-series_mv <- multivariate_series[id_ascending$ix][!duplicated(id_ascending$x)]
+
+len <- id_ascending$x
+id_ascending <- id_ascending$ix
+dlen <- diff(len) < length_diff_threshold
+while (any(dlen)) {
+    rem <- which(dlen)[1L] + 1L
+    len <- len[-rem]
+    id_ascending <- id_ascending[-rem]
+    dlen <- diff(len) < length_diff_threshold
+}
+
+series <- series[id_ascending]
+series_mv <- multivariate_series[id_ascending]
 num_workers_to_test <- 1L:4L
 
 if (short_experiments) {
@@ -393,7 +424,8 @@ dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
             )
         })
 
-        benchmark <- summary(microbenchmark(list = expressions, times = 50L, unit = "ms"))
+        times <- if (short_experiments) 10L else 50L
+        benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
         data.frame(distance = "lb_keogh",
                    num_workers = num_workers,
@@ -413,6 +445,74 @@ dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
     plyr::rbind.fill(benchmarks)
 }))
 
+# --------------------------------------------------------------------------------------------------
+# lb_improved
+# --------------------------------------------------------------------------------------------------
+
+dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+    registerDoParallel(workers <- makeCluster(num_workers))
+    invisible(clusterEvalQ(workers, library("dtwclust")))
+    invisible(clusterEvalQ(workers, library("microbenchmark")))
+
+    window_size <- 50L
+    benchmarks <- lapply(series, function(this_series) {
+        id_series <- rbind(
+            expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
+            expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
+            cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
+                  Var2 = seq(from = 20L, to = 90L, by = 10L))
+        )
+
+        id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
+
+        expressions <- lapply(1L:nrow(id_series), function(i) {
+            bquote(
+                proxy::dist(x = this_series[1L:.(id_series[i, 1L])],
+                            y = this_series[1L:.(id_series[i, 2L])],
+                            method = "lbi",
+                            window.size = .(window_size),
+                            error.check = FALSE)
+            )
+        })
+
+        times <- if (short_experiments) 10L else 50L
+        benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
+
+        data.frame(distance = "lb_improved",
+                   num_workers = num_workers,
+                   num_x = id_series[,1L],
+                   num_y = id_series[,2L],
+                   num_total = id_series[,1L] * id_series[,2L],
+                   series_length = NROW(this_series[[1L]]),
+                   window_size = window_size,
+                   median_time_ms = benchmark$median,
+                   stringsAsFactors = FALSE)
+    })
+
+    stopCluster(workers)
+    registerDoSEQ()
+    rm(workers)
+
+    plyr::rbind.fill(benchmarks)
+}))
+
+# --------------------------------------------------------------------------------------------------
+# aggregate
+# --------------------------------------------------------------------------------------------------
+
+dist_multiple_results <- plyr::rbind.fill(
+    dist_lbk_multiple,
+    dist_lbi_multiple
+)
+
+## make factor with the given order
+dist_multiple_results$distance <- factor(dist_multiple_results$distance,
+                                         levels = unique(dist_multiple_results$distance))
+
+## clean
+existing_objects <- c(existing_objects, "dist_multiple_results")
+rm(list = setdiff(ls(all.names = TRUE), existing_objects))
+
 # ==================================================================================================
 # finish
 # ==================================================================================================
@@ -425,6 +525,15 @@ ggplot(dist_single_results,
            colour = factor(window_size))) +
     geom_line() +
     facet_wrap(~distance, scales = "free_y") +
+    theme_bw()
+
+ggplot(dist_multiple_results,
+       aes(x = num_total,
+           y = median_time_ms,
+           colour = num_y,
+           shape = factor(series_length))) +
+    geom_point(size=3) +
+    facet_grid(distance ~ num_workers) +
     theme_bw()
 
 # save("dist_single_results", file = "dist-results.RData")
