@@ -1,7 +1,9 @@
-library("dtwclust")
-library("microbenchmark")
-library("plyr")
-library("doParallel")
+suppressPackageStartupMessages({
+    library("dtwclust")
+    library("microbenchmark")
+    library("plyr")
+    library("doParallel")
+})
 
 short_experiments <- TRUE
 length_diff_threshold <- 20L

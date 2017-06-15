@@ -574,13 +574,74 @@ dist_sbd_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 }))
 
 # --------------------------------------------------------------------------------------------------
+# dtw univariate
+# --------------------------------------------------------------------------------------------------
+
+cat("\tRunning dtw experiments for multiple univariate series\n")
+dist_dtw_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+    registerDoParallel(workers <- makeCluster(num_workers))
+    invisible(clusterEvalQ(workers, library("dtwclust")))
+    invisible(clusterEvalQ(workers, library("microbenchmark")))
+
+    benchmarks <- lapply(series, function(this_series) {
+        if (short_experiments) {
+            id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
+                               seq(from = 10L, to = 100L, by = 10L))
+        } else {
+            id_series <- rbind(
+                expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
+                expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
+                cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
+                      Var2 = seq(from = 20L, to = 90L, by = 10L))
+            )
+
+            id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
+        }
+
+        window_sizes <- seq(from = 20L, to = 100L, by = 20L)
+        expressions <- lapply(window_sizes, function(window_size) {
+            lapply(1L:nrow(id_series), function(i) {
+                bquote(
+                    proxy::dist(x = this_series[1L:.(id_series[i, 1L])],
+                                y = this_series[1L:.(id_series[i, 2L])],
+                                method = "dtw_basic",
+                                window.size = .(window_size),
+                                error.check = FALSE)
+                )
+            })
+        })
+        expressions <- unlist(expressions, recursive = FALSE)
+
+        times <- if (short_experiments) 10L else 50L
+        benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
+
+        data.frame(distance = "dtw_univariate",
+                   num_workers = num_workers,
+                   num_x = id_series[,1L],
+                   num_y = id_series[,2L],
+                   num_total = id_series[,1L] * id_series[,2L],
+                   series_length = NROW(this_series[[1L]]),
+                   window_size = rep(window_sizes, each = nrow(id_series)),
+                   median_time_ms = benchmark$median,
+                   stringsAsFactors = FALSE)
+    })
+
+    stopCluster(workers)
+    registerDoSEQ()
+    rm(workers)
+
+    plyr::rbind.fill(benchmarks)
+}))
+
+# --------------------------------------------------------------------------------------------------
 # aggregate
 # --------------------------------------------------------------------------------------------------
 
 dist_multiple_results <- plyr::rbind.fill(
     dist_lbk_multiple,
     dist_lbi_multiple,
-    dist_sbd_multiple
+    dist_sbd_multiple,
+    dist_dtw_univariate_multiple
 )
 
 ## make factor with the given order
@@ -604,13 +665,23 @@ ggplot(dist_single_results,
     facet_wrap(~distance, scales = "free_y") +
     theme_bw()
 
-ggplot(dist_multiple_results,
+ggplot(dist_multiple_results[dist_multiple_results$distance %in% c("lb_keogh", "lb_improved", "sbd"),],
        aes(x = num_total,
            y = median_time_ms,
            colour = num_y,
            shape = factor(series_length))) +
     geom_point(size = 3) +
     facet_grid(distance ~ num_workers) +
+    theme_bw()
+
+ggplot(dist_multiple_results[dist_multiple_results$distance %in% c("dtw_univariate"),],
+       aes(x = num_total,
+           y = median_time_ms,
+           colour = factor(series_length),
+           shape = factor(series_length))) +
+    geom_point(size = 3) +
+    geom_line() +
+    facet_grid(factor(window_size) ~ num_workers) +
     theme_bw()
 
 # save("dist_single_results", "dist_multiple_results", file = "dist-results.RData")
