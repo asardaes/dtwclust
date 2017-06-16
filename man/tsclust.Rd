@@ -131,7 +131,7 @@ desired, and the initial choice selects two series with length of 10, the final 
 have this same length.
 
 As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid
-function that takes a list of series as only input and returns a single centroid series. These
+function that takes a list of series as input and returns a single centroid series. These
 centroids are returned in the \code{centroids} slot. By default, a type of PAM centroid function is
 used.
 }
@@ -168,8 +168,9 @@ with \code{L1} norm, \emph{each} element of the matrix is squared and the result
 \code{\link[dtw:dtw]{dtw::dtw()}}, which finds the optimum warping path. The square root of the resulting distance
 is \emph{then} computed. See \code{\link[=dtw2]{dtw2()}}.
 
-Only \code{dtw}, \code{dtw2}, \code{sbd} and \code{gak} support series of different length. The lower bounds are
-probably unsuitable for direct clustering unless series are very easily distinguishable.
+Out of the aforementioned, only the distances based on DTW lower bounds \emph{don't} support series
+of different length. The lower bounds are probably unsuitable for direct clustering unless
+series are very easily distinguishable.
 
 If you know that the distance function is symmetric, and you use a hierarchical algorithm, or a
 partitional algorithm with PAM centroids, some time can be saved by calculating only half the
@@ -229,7 +230,7 @@ function like \code{DTW} or \code{GAK}.
 If you register a parallel backend, the function will also try to do the calculation of the
 distance matrices in parallel. This should work with any function registered with
 \code{\link[proxy:dist]{proxy::dist()}} via \code{\link[proxy:pr_DB]{proxy::pr_DB()}} whose \code{loop} flag is set to \code{TRUE}. If the function
-requires special packages to be loaded, provide their names in the \code{packages} slot of
+requires special packages to be loaded, provide their names in the \code{packages} element of
 \code{control}. Note that "dtwclust" is always loaded in each parallel worker, so that doesn't need
 to be included. Alternatively, you may want to pre-load \pkg{dtwclust} in each worker with
 \code{\link[parallel:clusterEvalQ]{parallel::clusterEvalQ()}}.
