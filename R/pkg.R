@@ -129,7 +129,6 @@
 #' @importFrom RSpectra eigs_sym
 #'
 #' @importFrom Rcpp loadModule
-#' @importFrom Rcpp cpp_object_initializer
 #'
 #' @importFrom reshape2 melt
 #'
