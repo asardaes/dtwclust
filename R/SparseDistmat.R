@@ -8,17 +8,19 @@
 #' allows for mutable state. It contains [Distmat-class].
 #'
 #' @include Distmat.R
+#' @include pkg.R
 #'
 #' @field distmat The sparse matrix.
 #' @field symmetric Logical indicating if the matrix is symmetric.
-#' @field existing_ids Matrix with the indices of existing values within the matrix.
+#' @field distmat_indices S4 object (Rcpp Module) with the indices of existing values within the
+#'   matrix.
 #'
 SparseDistmat <- setRefClass("SparseDistmat",
                              contains = "Distmat",
                              fields = list(
                                  distmat = "sparseMatrix",
                                  symmetric = "logical",
-                                 existing_ids = "matrix"
+                                 distmat_indices = "ANY"
                              ),
                              methods = list(
                                  initialize = function(..., control) {
@@ -35,9 +37,12 @@ SparseDistmat <- setRefClass("SparseDistmat",
                                      if (isTRUE(control$symmetric) && distmat@uplo != "L")
                                          distmat <<- t(distmat)
 
-                                     existing_ids <<- base::as.matrix(
-                                         Matrix::summary(distmat)[c("i", "j")]
-                                     )
+                                     ## initialize C++ class
+                                     distmat_indices <<- new(SparseDistmatIndices, nrow(distmat))
+                                     sapply(1L:length(series), function(id) {
+                                         distmat_indices$getNewIndices(id, id, symmetric)
+                                         NULL
+                                     })
 
                                      invisible(NULL)
                                  }
@@ -73,22 +78,7 @@ setMethod("show", "SparseDistmat", function(object) { show(object$distmat) })
 #' Accessing matrix elements with `[]` first calculates the values if necessary.
 #'
 setMethod(`[`, "SparseDistmat", function(x, i, j, ..., drop = TRUE) {
-    ## number of rows of existing indices
-    rows <- nrow(x$existing_ids)
-    ## indices of needed vals
-    id_new <- base::as.matrix(expand.grid(i = i, j = j))
-
-    ## modify indices to lower triangular if necessary (symmetric only)
-    if (x$symmetric)
-        id_new <- t(apply(id_new, 1L, function(this_row) {
-            if (this_row[2L] > this_row[1L]) this_row[2L:1L] else this_row
-        }))
-
-    ## extract only indices of needed values that don't exist yet
-    id_new <- rbind(x$existing_ids, id_new)
-    id_duplicated <- duplicated(id_new)
-    rows <- (rows + 1L):nrow(id_new)
-    id_new <- id_new[rows, , drop = FALSE][!id_duplicated[rows], , drop = FALSE]
+    id_new <- x$distmat_indices$getNewIndices(i, j, x$symmetric)
 
     ## update distmat if necessary
     if (nrow(id_new) > 0L) {
@@ -99,7 +89,6 @@ setMethod(`[`, "SparseDistmat", function(x, i, j, ..., drop = TRUE) {
                                                        dots = x$dist_args)))
 
         if (x$symmetric) x$distmat <- Matrix::forceSymmetric(x$distmat, "L")
-        x$existing_ids <- rbind(x$existing_ids, id_new)
     }
 
     x$distmat[i, j, drop = drop]

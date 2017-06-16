@@ -1,6 +1,7 @@
 # Changelog
 
 ## Version 4.0.2
+* Ported part of the algorithm that updates sparse distance matrices to `C++`.
 
 ## Version 4.0.1
 * Ported `dtw_lb` to `C++` when using `dtw_basic`.

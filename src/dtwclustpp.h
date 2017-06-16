@@ -5,6 +5,8 @@
 
 namespace dtwclust {
 
+RcppExport SEXP _rcpp_module_boot_SparseDistmatIndices();
+
 RcppExport SEXP dba(SEXP X, SEXP centroid,
                     SEXP max_iter, SEXP delta, SEXP trace,
                     SEXP multivariate, SEXP mv_ver, SEXP DOTS);

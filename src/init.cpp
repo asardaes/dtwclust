@@ -6,6 +6,7 @@
 #define CALLDEFpp(name, n) { "C_"#name, (DL_FUNC) &dtwclust::name, n }
 
 static R_CallMethodDef callMethods[] = {
+    { "_rcpp_module_boot_SparseDistmatIndices", (DL_FUNC) &dtwclust::_rcpp_module_boot_SparseDistmatIndices, 0 },
     CALLDEFpp(dba, 8),
     CALLDEFpp(dtw_lb, 4),
     CALLDEFpp(envelope, 2),
@@ -38,5 +39,4 @@ extern "C" void R_init_dtwclust(DllInfo* info) {
     register_functions();
     R_registerRoutines(info, NULL, callMethods, NULL, NULL);
     R_useDynamicSymbols(info, FALSE);
-    R_forceSymbols(info, TRUE);
 }

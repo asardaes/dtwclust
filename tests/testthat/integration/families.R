@@ -401,7 +401,9 @@ test_that("Operations with dtwclustFamily@dist and dtw_lb give expected results"
     expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
 
-    expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
+    sdm <- distmat[ , c(1L, 15L), drop = FALSE]
+    dimnames(sdm) <- NULL
+    expect_equal(sub_distmat, sdm, info = "Sub, with distmat",
                  tolerance = 0, check.attributes = FALSE)
 
     ## ---------------------------------------------------------- ref

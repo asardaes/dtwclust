@@ -128,7 +128,8 @@
 #'
 #' @importFrom RSpectra eigs_sym
 #'
-#' @importFrom Rcpp evalCpp
+#' @importFrom Rcpp loadModule
+#' @importFrom Rcpp cpp_object_initializer
 #'
 #' @importFrom reshape2 melt
 #'
@@ -174,6 +175,8 @@ NULL ## remember to check methods imports after removing dtwclust()
 #' - [compute_envelop()]
 #'
 NULL
+
+Rcpp::loadModule("SparseDistmatIndices", TRUE)
 
 .onAttach <- function(lib, pkg) {
     ## proxy_prefun is in utils.R

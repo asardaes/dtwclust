@@ -3,7 +3,7 @@ Type: Package
 Title: Time Series Clustering Along with Optimizations for the Dynamic Time
     Warping Distance
 Version: 4.0.1.9000
-Date: 2017-06-11
+Date: 2017-06-16
 Depends:
     R (>= 3.2.0),
     methods,
@@ -51,6 +51,8 @@ Collate:
     'GAK.R'
     'NCCc.R'
     'SBD.R'
+    'utils.R'
+    'pkg.R'
     'SparseDistmat.R'
     'TADPole.R'
     'all-cent.R'
@@ -75,8 +77,6 @@ Collate:
     'lb-improved.R'
     'lb-keogh.R'
     'partitional.R'
-    'utils.R'
-    'pkg.R'
     'reinterpolate.R'
     'shape-extraction.R'
     'tsclust-controls.R'

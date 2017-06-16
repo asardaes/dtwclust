@@ -9,6 +9,6 @@
 
 \section{Changes in version 4.0.2}{
     \itemize{
-        \item TBA
+        \item Ported part of the algorithm that updates sparse distance matrices to \code{C++}.
     }
 }
