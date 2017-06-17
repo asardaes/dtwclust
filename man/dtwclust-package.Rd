@@ -42,14 +42,18 @@ For more information, please read the included package vignette, which can be ac
 \code{vignette("dtwclust")}.
 }
 \note{
-The \pkg{methods} \link[methods:methods-package]{package} must be attached in order for some internal
-functions to work properly. This is usually done automatically by \code{R}, with \code{\link[utils:Rscript]{utils::Rscript()}}
-being an exception. As of \pkg{dtwclust} version 3.2.0, attaching the \pkg{methods} package is
-also done when attaching \pkg{dtwclust} (via \code{\link[base:library]{base::library()}}), so please always attach the
-package before using its functionality.
-
 This software package was developed independently of any organization or institution that is or
 has been associated with the author.
+
+There are several reasons why this package will \strong{not} work if it is not attached (via
+\code{\link[base:library]{base::library()}}). For the specifics, see below.
+
+The \pkg{methods} \link[methods:methods-package]{package} must be attached in order for some internal
+inheritance to work properly. This is usually done automatically by \code{R}, with \code{\link[utils:Rscript]{utils::Rscript()}}
+being an exception. Additionally, an \code{\link[Rcpp:Module]{Rcpp::Module()}} is used by one of the functions, which
+needs the \pkg{Rcpp} package to be attached. This is why these 2 packages are dependencies of
+\pkg{dtwclust}. Finally, the included distance functions are registered with \pkg{proxy} during
+attachment.
 }
 \references{
 Please refer to the package vignette references.

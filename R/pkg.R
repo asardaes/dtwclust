@@ -43,14 +43,18 @@
 #'
 #' @note
 #'
-#' The \pkg{methods} [package][methods::methods-package] must be attached in order for some internal
-#' functions to work properly. This is usually done automatically by `R`, with [utils::Rscript()]
-#' being an exception. As of \pkg{dtwclust} version 3.2.0, attaching the \pkg{methods} package is
-#' also done when attaching \pkg{dtwclust} (via [base::library()]), so please always attach the
-#' package before using its functionality.
-#'
 #' This software package was developed independently of any organization or institution that is or
 #' has been associated with the author.
+#'
+#' There are several reasons why this package will **not** work if it is not attached (via
+#' [base::library()]). For the specifics, see below.
+#'
+#' The \pkg{methods} [package][methods::methods-package] must be attached in order for some internal
+#' inheritance to work properly. This is usually done automatically by `R`, with [utils::Rscript()]
+#' being an exception. Additionally, an [Rcpp::Module()] is used by one of the functions, which
+#' needs the \pkg{Rcpp} package to be attached. This is why these 2 packages are dependencies of
+#' \pkg{dtwclust}. Finally, the included distance functions are registered with \pkg{proxy} during
+#' attachment.
 #'
 #' @author Alexis Sarda-Espinosa
 #'
