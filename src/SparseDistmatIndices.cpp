@@ -43,31 +43,21 @@ public:
         return new_ids;
     }
 
-    Rcpp::IntegerVector getExistingIndices() {
-        Rcpp::IntegerVector existing_ids(existing_indices.size());
-        int i = 0;
-        for (int id : existing_indices) {
-            existing_ids[i] = id;
-            i++;
-        }
-        return existing_ids;
-    }
-
 private:
     int _num_rows;
     std::unordered_set<int> existing_indices;
 };
 
-RCPP_MODULE(SparseDistmatIndices) {
-    using namespace Rcpp;
+RcppExport SEXP SparseDistmatIndices__new(SEXP num_rows) {
+    Rcpp::XPtr<SparseDistmatIndices> ptr(new SparseDistmatIndices(Rcpp::as<int>(num_rows)), true);
+    return ptr;
+}
 
-    class_<SparseDistmatIndices>("SparseDistmatIndices")
-
-    .constructor<int>()
-
-    .method("getNewIndices", &SparseDistmatIndices::getNewIndices)
-    .method("getExistingIndices", &SparseDistmatIndices::getExistingIndices)
-    ;
+RcppExport SEXP SparseDistmatIndices__getNewIndices(SEXP xptr, SEXP i, SEXP j, SEXP symmetric) {
+    Rcpp::XPtr<SparseDistmatIndices> ptr(xptr);
+    return ptr->getNewIndices(Rcpp::IntegerVector(i),
+                              Rcpp::IntegerVector(j),
+                              Rcpp::as<bool>(symmetric));
 }
 
 } // namespace dtwclust

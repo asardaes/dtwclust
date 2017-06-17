@@ -12,41 +12,45 @@
 #'
 #' @field distmat The sparse matrix.
 #' @field symmetric Logical indicating if the matrix is symmetric.
-#' @field distmat_indices S4 object (Rcpp Module) with the indices of existing values within the
-#'   matrix.
+#' @field distmat_indices External pointer (C++ class) with the indices of existing values within
+#'   the matrix, and the method to update them.
 #'
-SparseDistmat <- setRefClass("SparseDistmat",
-                             contains = "Distmat",
-                             fields = list(
-                                 distmat = "sparseMatrix",
-                                 symmetric = "logical",
-                                 distmat_indices = "ANY"
-                             ),
-                             methods = list(
-                                 initialize = function(..., control) {
-                                     "Initialization based on needed parameters"
+SparseDistmat <- setRefClass(
+    "SparseDistmat",
+    contains = "Distmat",
+    fields = list(
+        distmat = "sparseMatrix",
+        symmetric = "logical",
+        distmat_indices = "externalptr"
+    ),
+    methods = list(
+        initialize = function(..., control) {
+            "Initialization based on needed parameters"
 
-                                     callSuper(..., control = control)
-                                     symmetric <<- control$symmetric
+            callSuper(..., control = control)
+            symmetric <<- control$symmetric
 
-                                     distmat <<- Matrix::sparseMatrix(i = 1L:length(series),
-                                                                      j = 1L:length(series),
-                                                                      x = 0,
-                                                                      symmetric = control$symmetric)
+            distmat <<- Matrix::sparseMatrix(i = 1L:length(series),
+                                             j = 1L:length(series),
+                                             x = 0,
+                                             symmetric = control$symmetric)
 
-                                     if (isTRUE(control$symmetric) && distmat@uplo != "L")
-                                         distmat <<- t(distmat)
+            if (isTRUE(control$symmetric) && distmat@uplo != "L") distmat <<- t(distmat)
 
-                                     ## initialize C++ class
-                                     distmat_indices <<- new(SparseDistmatIndices, nrow(distmat))
-                                     sapply(1L:length(series), function(id) {
-                                         distmat_indices$getNewIndices(id, id, symmetric)
-                                         NULL
-                                     })
+            ## initialize C++ class
+            distmat_indices <<- .Call(C_SparseDistmatIndices__new,
+                                      nrow(distmat),
+                                      PACKAGE = "dtwclust")
+            sapply(1L:length(series), function(id) {
+                .Call(C_SparseDistmatIndices__getNewIndices,
+                      distmat_indices, id, id, symmetric,
+                      PACKAGE = "dtwclust")
+            })
 
-                                     invisible(NULL)
-                                 }
-                             ))
+            invisible(NULL)
+        }
+    )
+)
 
 #' Generics for `SparseDistmat`
 #'
@@ -78,7 +82,9 @@ setMethod("show", "SparseDistmat", function(object) { show(object$distmat) })
 #' Accessing matrix elements with `[]` first calculates the values if necessary.
 #'
 setMethod(`[`, "SparseDistmat", function(x, i, j, ..., drop = TRUE) {
-    id_new <- x$distmat_indices$getNewIndices(i, j, x$symmetric)
+    id_new <- .Call(C_SparseDistmatIndices__getNewIndices,
+                    x$distmat_indices, i, j, x$symmetric,
+                    PACKAGE = "dtwclust")
 
     ## update distmat if necessary
     if (nrow(id_new) > 0L) {

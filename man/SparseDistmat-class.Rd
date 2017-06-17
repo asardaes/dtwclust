@@ -16,8 +16,8 @@ allows for mutable state. It contains \linkS4class{Distmat}.
 
 \item{\code{symmetric}}{Logical indicating if the matrix is symmetric.}
 
-\item{\code{distmat_indices}}{S4 object (Rcpp Module) with the indices of existing values within the
-matrix.}
+\item{\code{distmat_indices}}{External pointer (C++ class) with the indices of existing values within
+the matrix, and the method to update them.}
 }}
 
 \section{Methods}{

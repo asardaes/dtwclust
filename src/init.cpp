@@ -6,7 +6,8 @@
 #define CALLDEFpp(name, n) { "C_"#name, (DL_FUNC) &dtwclust::name, n }
 
 static R_CallMethodDef callMethods[] = {
-    { "_rcpp_module_boot_SparseDistmatIndices", (DL_FUNC) &dtwclust::_rcpp_module_boot_SparseDistmatIndices, 0 },
+    CALLDEFpp(SparseDistmatIndices__new, 1),
+    CALLDEFpp(SparseDistmatIndices__getNewIndices, 4),
     CALLDEFpp(dba, 8),
     CALLDEFpp(dtw_lb, 4),
     CALLDEFpp(envelope, 2),

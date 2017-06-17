@@ -5,7 +5,8 @@
 
 namespace dtwclust {
 
-RcppExport SEXP _rcpp_module_boot_SparseDistmatIndices();
+RcppExport SEXP SparseDistmatIndices__new(SEXP num_rows);
+RcppExport SEXP SparseDistmatIndices__getNewIndices(SEXP xptr, SEXP i, SEXP j, SEXP symmetric);
 
 RcppExport SEXP dba(SEXP X, SEXP centroid,
                     SEXP max_iter, SEXP delta, SEXP trace,

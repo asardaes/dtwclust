@@ -46,15 +46,13 @@
 #' This software package was developed independently of any organization or institution that is or
 #' has been associated with the author.
 #'
-#' There are several reasons why this package will **not** work if it is not attached (via
+#' There are a couple of reasons why this package will **not** work if it is not attached (via
 #' [base::library()]). For the specifics, see below.
 #'
 #' The \pkg{methods} [package][methods::methods-package] must be attached in order for some internal
 #' inheritance to work properly. This is usually done automatically by `R`, with [utils::Rscript()]
-#' being an exception. Additionally, an [Rcpp::Module()] is used by one of the functions, which
-#' needs the \pkg{Rcpp} package to be attached. This is why these 2 packages are dependencies of
-#' \pkg{dtwclust}. Finally, the included distance functions are registered with \pkg{proxy} during
-#' attachment.
+#' being an exception. This is why this package is a dependency of \pkg{dtwclust}. Additionally, the
+#' included distance functions are registered with \pkg{proxy} during attachment.
 #'
 #' @author Alexis Sarda-Espinosa
 #'
@@ -132,7 +130,7 @@
 #'
 #' @importFrom RSpectra eigs_sym
 #'
-#' @importFrom Rcpp loadModule
+#' @importFrom Rcpp evalCpp
 #'
 #' @importFrom reshape2 melt
 #'
@@ -178,8 +176,6 @@ NULL ## remember to check methods imports after removing dtwclust()
 #' - [compute_envelop()]
 #'
 NULL
-
-Rcpp::loadModule("SparseDistmatIndices", TRUE)
 
 .onAttach <- function(lib, pkg) {
     ## proxy_prefun is in utils.R
