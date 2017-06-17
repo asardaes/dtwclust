@@ -65,6 +65,7 @@
 #' @useDynLib dtwclust, .registration = TRUE
 #'
 #' @import foreach
+#' @import Rcpp
 #'
 #' @importFrom clue as.cl_class_ids
 #' @importFrom clue as.cl_membership
@@ -127,8 +128,6 @@
 #' @importFrom proxy pr_DB
 #'
 #' @importFrom RSpectra eigs_sym
-#'
-#' @importFrom Rcpp loadModule
 #'
 #' @importFrom reshape2 melt
 #'
