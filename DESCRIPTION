@@ -8,6 +8,7 @@ Depends:
     R (>= 3.2.0),
     methods,
     proxy (>= 0.4-16),
+    Rcpp,
     clue,
     dtw,
     ggplot2
@@ -20,7 +21,6 @@ Imports:
     Matrix,
     plyr,
     RSpectra,
-    Rcpp,
     reshape2,
     rngtools
 Suggests:
