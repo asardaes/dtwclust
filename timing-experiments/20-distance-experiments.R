@@ -8,6 +8,8 @@ existing_objects <- ls(all.names = TRUE)
 # get sample series and sort them by length
 # --------------------------------------------------------------------------------------------------
 
+length_diff_threshold <- 20L
+
 series <- univariate_series[seq(from = 1L, to = length(univariate_series), by = 3L)]
 series <- lapply(series, function(s) { s[1L:2L] })
 len <- sapply(series, function(s) { lengths(s)[1L] })
@@ -26,7 +28,8 @@ while (any(dlen)) {
 series <- series[id_ascending]
 series_mv <- lapply(multivariate_series, function(s) { s[1L:2L] })
 series_mv <- series_mv[id_ascending]
-num_evals <- 100L
+window_sizes <- seq(from = 10L, to = 100L, by = 10L)
+times <- if (short_experiments) 10L else 100L
 
 # --------------------------------------------------------------------------------------------------
 # lb_keogh
@@ -36,8 +39,6 @@ cat("\tRunning lb_keogh experiments for single series\n")
 dist_lbk_single <- with(
     new.env(),
     {
-        window_sizes <- seq(from = 10L, to = 100L, by = 10L)
-
         benchmarks <- lapply(series, function(this_series) {
             expressions <- lapply(window_sizes, function(window.size) {
                 bquote(
@@ -48,7 +49,6 @@ dist_lbk_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            times <- if (short_experiments) 10L else num_evals
             benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "lb_keogh",
@@ -70,8 +70,6 @@ cat("\tRunning lb_improved experiments for single series\n")
 dist_lbi_single <- with(
     new.env(),
     {
-        window_sizes <- seq(from = 10L, to = 100L, by = 10L)
-
         benchmarks <- lapply(series, function(this_series) {
             expressions <- lapply(window_sizes, function(window.size) {
                 bquote(
@@ -82,7 +80,6 @@ dist_lbi_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            times <- if (short_experiments) 10L else num_evals
             benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "lb_improved",
@@ -108,7 +105,6 @@ dist_sbd_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            times <- if (short_experiments) 10L else num_evals
             benchmark <- summary(microbenchmark(
                 SBD(x, y, error.check = FALSE, return.shifted = FALSE),
                 times = times, unit = "us"
@@ -132,8 +128,6 @@ cat("\tRunning dtw experiments for single univariate series\n")
 dist_dtw_univariate_single <- with(
     new.env(),
     {
-        window_sizes <- seq(from = 10L, to = 100L, by = 10L)
-
         benchmarks <- lapply(series, function(this_series) {
             expressions <- lapply(window_sizes, function(window.size) {
                 bquote(
@@ -146,7 +140,6 @@ dist_dtw_univariate_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            times <- if (short_experiments) 10L else num_evals
             benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "dtw_univariate",
@@ -168,8 +161,6 @@ cat("\tRunning dtw experiments for single multivariate series\n")
 dist_dtw_multivariate_single <- with(
     new.env(),
     {
-        window_sizes <- seq(from = 10L, to = 100L, by = 10L)
-
         benchmarks <- lapply(series_mv, function(this_series) {
             expressions <- lapply(window_sizes, function(window.size) {
                 bquote(
@@ -182,7 +173,6 @@ dist_dtw_multivariate_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            times <- if (short_experiments) 10L else num_evals
             benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "dtw_multivariate",
@@ -204,8 +194,6 @@ cat("\tRunning unnormalized_gak experiments for single univariate series\n")
 dist_unnormalized_gak_univariate_single <- with(
     new.env(),
     {
-        window_sizes <- seq(from = 10L, to = 100L, by = 10L)
-
         benchmarks <- lapply(series, function(this_series) {
             expressions <- lapply(window_sizes, function(window.size) {
                 bquote(
@@ -220,7 +208,6 @@ dist_unnormalized_gak_univariate_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            times <- if (short_experiments) 10L else num_evals
             benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "unnormalized_gak_univariate",
@@ -242,8 +229,6 @@ cat("\tRunning unnormalized_gak experiments for single multivariate series\n")
 dist_unnormalized_gak_multivariate_single <- with(
     new.env(),
     {
-        window_sizes <- seq(from = 10L, to = 100L, by = 10L)
-
         benchmarks <- lapply(series_mv, function(this_series) {
             expressions <- lapply(window_sizes, function(window.size) {
                 bquote(
@@ -258,7 +243,6 @@ dist_unnormalized_gak_multivariate_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            times <- if (short_experiments) 10L else num_evals
             benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "unnormalized_gak_multivariate",
@@ -280,8 +264,6 @@ cat("\tRunning normalized_gak experiments for single univariate series\n")
 dist_normalized_gak_univariate_single <- with(
     new.env(),
     {
-        window_sizes <- seq(from = 10L, to = 100L, by = 10L)
-
         benchmarks <- lapply(series, function(this_series) {
             expressions <- lapply(window_sizes, function(window.size) {
                 bquote(
@@ -296,7 +278,6 @@ dist_normalized_gak_univariate_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            times <- if (short_experiments) 10L else num_evals
             benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "normalized_gak_univariate",
@@ -318,8 +299,6 @@ cat("\tRunning normalized_gak experiments for single multivariate series\n")
 dist_normalized_gak_multivariate_single <- with(
     new.env(),
     {
-        window_sizes <- seq(from = 10L, to = 100L, by = 10L)
-
         benchmarks <- lapply(series_mv, function(this_series) {
             expressions <- lapply(window_sizes, function(window.size) {
                 bquote(
@@ -334,7 +313,6 @@ dist_normalized_gak_multivariate_single <- with(
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
-            times <- if (short_experiments) 10L else num_evals
             benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
             data.frame(distance = "normalized_gak_multivariate",
@@ -381,6 +359,8 @@ existing_objects <- ls(all.names = TRUE)
 # get series and sort them by length
 # --------------------------------------------------------------------------------------------------
 
+length_diff_threshold <- 40L
+
 series <- univariate_series[seq(from = 1L, to = length(univariate_series), by = 3L)]
 len <- sapply(series, function(s) { lengths(s)[1L] })
 id_ascending <- sort(len, decreasing = FALSE, index.return = TRUE)
@@ -397,13 +377,26 @@ while (any(dlen)) {
 
 series <- series[id_ascending]
 series_mv <- multivariate_series[id_ascending]
-num_evals <- 30L
-num_workers_to_test <- 1L:4L
+window_sizes <- seq(from = 20L, to = 80L, by = 20L)
+window_size <- 50L
+times <- if (short_experiments) 5L else 30L
+num_workers_to_test <- c(1L, 2L, 4L)
 
 if (short_experiments) {
     series <- series[1L:2L]
     series_mv <- series_mv[1L:2L]
     num_workers_to_test <- c(2L, 4L)
+    id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
+                       seq(from = 10L, to = 100L, by = 10L))
+} else {
+    id_series <- rbind(
+        expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
+        expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
+        cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
+              Var2 = seq(from = 20L, to = 90L, by = 10L))
+    )
+
+    id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
 }
 
 cat("\n")
@@ -418,22 +411,7 @@ dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
     invisible(clusterEvalQ(workers, library("dtwclust")))
     invisible(clusterEvalQ(workers, library("microbenchmark")))
 
-    window_size <- 50L
     benchmarks <- lapply(series, function(this_series) {
-        if (short_experiments) {
-            id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
-                               seq(from = 10L, to = 100L, by = 10L))
-        } else {
-            id_series <- rbind(
-                expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
-                expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
-                cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
-                      Var2 = seq(from = 20L, to = 90L, by = 10L))
-            )
-
-            id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
-        }
-
         expressions <- lapply(1L:nrow(id_series), function(i) {
             bquote(
                 proxy::dist(x = this_series[1L:.(id_series[i, 1L])],
@@ -444,7 +422,6 @@ dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
             )
         })
 
-        times <- if (short_experiments) 10L else num_evals
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
         data.frame(distance = "lb_keogh",
@@ -475,22 +452,7 @@ dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
     invisible(clusterEvalQ(workers, library("dtwclust")))
     invisible(clusterEvalQ(workers, library("microbenchmark")))
 
-    window_size <- 50L
     benchmarks <- lapply(series, function(this_series) {
-        if (short_experiments) {
-            id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
-                               seq(from = 10L, to = 100L, by = 10L))
-        } else {
-            id_series <- rbind(
-                expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
-                expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
-                cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
-                      Var2 = seq(from = 20L, to = 90L, by = 10L))
-            )
-
-            id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
-        }
-
         expressions <- lapply(1L:nrow(id_series), function(i) {
             bquote(
                 proxy::dist(x = this_series[1L:.(id_series[i, 1L])],
@@ -501,7 +463,6 @@ dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
             )
         })
 
-        times <- if (short_experiments) 10L else num_evals
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
         data.frame(distance = "lb_improved",
@@ -532,22 +493,7 @@ dist_dtwlb_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num
     invisible(clusterEvalQ(workers, library("dtwclust")))
     invisible(clusterEvalQ(workers, library("microbenchmark")))
 
-    window_size <- 50L
     benchmarks <- lapply(series, function(this_series) {
-        if (short_experiments) {
-            id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
-                               seq(from = 10L, to = 100L, by = 10L))
-        } else {
-            id_series <- rbind(
-                expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
-                expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
-                cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
-                      Var2 = seq(from = 20L, to = 90L, by = 10L))
-            )
-
-            id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
-        }
-
         expressions <- lapply(1L:nrow(id_series), function(i) {
             bquote(
                 proxy::dist(x = this_series[1L:.(id_series[i, 1L])],
@@ -558,7 +504,6 @@ dist_dtwlb_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num
             )
         })
 
-        times <- if (short_experiments) 10L else num_evals
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
         data.frame(distance = "dtw_lb",
@@ -590,20 +535,6 @@ dist_sbd_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
     invisible(clusterEvalQ(workers, library("microbenchmark")))
 
     benchmarks <- lapply(series, function(this_series) {
-        if (short_experiments) {
-            id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
-                               seq(from = 10L, to = 100L, by = 10L))
-        } else {
-            id_series <- rbind(
-                expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
-                expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
-                cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
-                      Var2 = seq(from = 20L, to = 90L, by = 10L))
-            )
-
-            id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
-        }
-
         expressions <- lapply(1L:nrow(id_series), function(i) {
             bquote(
                 proxy::dist(x = this_series[1L:.(id_series[i, 1L])],
@@ -613,7 +544,6 @@ dist_sbd_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
             )
         })
 
-        times <- if (short_experiments) 10L else num_evals
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
         data.frame(distance = "sbd",
@@ -644,21 +574,6 @@ dist_dtw_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fun
     invisible(clusterEvalQ(workers, library("microbenchmark")))
 
     benchmarks <- lapply(series, function(this_series) {
-        if (short_experiments) {
-            id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
-                               seq(from = 10L, to = 100L, by = 10L))
-        } else {
-            id_series <- rbind(
-                expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
-                expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
-                cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
-                      Var2 = seq(from = 20L, to = 90L, by = 10L))
-            )
-
-            id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
-        }
-
-        window_sizes <- seq(from = 20L, to = 100L, by = 20L)
         expressions <- lapply(window_sizes, function(window_size) {
             lapply(1L:nrow(id_series), function(i) {
                 bquote(
@@ -672,7 +587,6 @@ dist_dtw_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fun
         })
         expressions <- unlist(expressions, recursive = FALSE)
 
-        times <- if (short_experiments) 10L else num_evals
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
         data.frame(distance = "dtw_univariate",
@@ -704,21 +618,6 @@ dist_dtw_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, f
     invisible(clusterEvalQ(workers, library("microbenchmark")))
 
     benchmarks <- lapply(series_mv, function(this_series) {
-        if (short_experiments) {
-            id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
-                               seq(from = 10L, to = 100L, by = 10L))
-        } else {
-            id_series <- rbind(
-                expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
-                expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
-                cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
-                      Var2 = seq(from = 20L, to = 90L, by = 10L))
-            )
-
-            id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
-        }
-
-        window_sizes <- seq(from = 20L, to = 100L, by = 20L)
         expressions <- lapply(window_sizes, function(window_size) {
             lapply(1L:nrow(id_series), function(i) {
                 bquote(
@@ -732,7 +631,6 @@ dist_dtw_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, f
         })
         expressions <- unlist(expressions, recursive = FALSE)
 
-        times <- if (short_experiments) 10L else num_evals
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
         data.frame(distance = "dtw_multivariate",
@@ -764,21 +662,6 @@ dist_ngak_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fu
     invisible(clusterEvalQ(workers, library("microbenchmark")))
 
     benchmarks <- lapply(series, function(this_series) {
-        if (short_experiments) {
-            id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
-                               seq(from = 10L, to = 100L, by = 10L))
-        } else {
-            id_series <- rbind(
-                expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
-                expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
-                cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
-                      Var2 = seq(from = 20L, to = 90L, by = 10L))
-            )
-
-            id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
-        }
-
-        window_sizes <- seq(from = 20L, to = 100L, by = 20L)
         expressions <- lapply(window_sizes, function(window_size) {
             lapply(1L:nrow(id_series), function(i) {
                 bquote(
@@ -793,7 +676,6 @@ dist_ngak_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fu
         })
         expressions <- unlist(expressions, recursive = FALSE)
 
-        times <- if (short_experiments) 10L else num_evals
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
         data.frame(distance = "normalized_gak_univariate",
@@ -825,21 +707,6 @@ dist_ngak_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, 
     invisible(clusterEvalQ(workers, library("microbenchmark")))
 
     benchmarks <- lapply(series_mv, function(this_series) {
-        if (short_experiments) {
-            id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
-                               seq(from = 10L, to = 100L, by = 10L))
-        } else {
-            id_series <- rbind(
-                expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
-                expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
-                cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
-                      Var2 = seq(from = 20L, to = 90L, by = 10L))
-            )
-
-            id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
-        }
-
-        window_sizes <- seq(from = 20L, to = 100L, by = 20L)
         expressions <- lapply(window_sizes, function(window_size) {
             lapply(1L:nrow(id_series), function(i) {
                 bquote(
@@ -854,7 +721,6 @@ dist_ngak_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, 
         })
         expressions <- unlist(expressions, recursive = FALSE)
 
-        times <- if (short_experiments) 10L else num_evals
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
         data.frame(distance = "normalized_gak_multivariate",
@@ -911,7 +777,9 @@ ggplot(dist_single_results,
     facet_wrap(~distance, scales = "free_y") +
     theme_bw()
 
-ggplot(dist_multiple_results[dist_multiple_results$distance %in% c("lb_keogh", "lb_improved", "dtw_lb"),],
+ggplot(dist_multiple_results[dist_multiple_results$distance %in% c("lb_keogh",
+                                                                   "lb_improved",
+                                                                   "dtw_lb"),],
        aes(x = num_total,
            y = median_time_ms,
            colour = num_y,
