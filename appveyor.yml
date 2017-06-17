@@ -12,10 +12,6 @@ install:
 
 # Adapt as necessary starting from here
 
-branches:
-  only:
-    - master
-
 environment:
   global:
     NOT_CRAN: 'true'
