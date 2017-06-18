@@ -5,6 +5,8 @@ suppressPackageStartupMessages({
     library("doParallel")
 })
 
+#' Set this to TRUE to run a subset of the experiments with less evaluations. "Short" is relative
+#' though, it will still take a few hours to complete.
 short_experiments <- TRUE
 
 if (short_experiments) message("\nShort experiments active\n") else message("\nShort experiments NOT active\n")

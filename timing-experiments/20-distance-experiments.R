@@ -1,20 +1,27 @@
-existing_objects <- ls(all.names = TRUE)
-
 # ==================================================================================================
 # distance experiments using single series (1 to 1)
 # ==================================================================================================
 
+existing_objects <- ls(all.names = TRUE)
+
 # --------------------------------------------------------------------------------------------------
-# get sample series and sort them by length
+# Parameters
 # --------------------------------------------------------------------------------------------------
 
+#' The dataset has series with different lengths. This threshold specifies the difference there
+#' should be between series in the subset that is taken.
 length_diff_threshold <- 20L
 
+# Take only one variable of each character
 series <- univariate_series[seq(from = 1L, to = length(univariate_series), by = 3L)]
+# Take only two samples of each character
 series <- lapply(series, function(s) { s[1L:2L] })
+# Get length of each character's time series
 len <- sapply(series, function(s) { lengths(s)[1L] })
+# Sort lengths
 id_ascending <- sort(len, decreasing = FALSE, index.return = TRUE)
 
+# Identify those characters that have length differences greater than the threshold specified
 len <- id_ascending$x
 id_ascending <- id_ascending$ix
 dlen <- diff(len) < length_diff_threshold
@@ -25,11 +32,19 @@ while (any(dlen)) {
     dlen <- diff(len) < length_diff_threshold
 }
 
+# Get the resulting characters
 series <- series[id_ascending]
+# Also get the multivariate versions
 series_mv <- lapply(multivariate_series, function(s) { s[1L:2L] })
 series_mv <- series_mv[id_ascending]
+# Window sizes for the experiments (where applicable)
 window_sizes <- seq(from = 10L, to = 100L, by = 10L)
+# Number of times each experiment will be repeated (by microbenchmark)
 times <- if (short_experiments) 10L else 100L
+
+#' NOTE: all single experiments are pretty much equivalent, only the first one is commented. They
+#' are run within a new environment so that they don't change variables in the global environment
+#' (this one).
 
 # --------------------------------------------------------------------------------------------------
 # lb_keogh
@@ -39,18 +54,23 @@ cat("\tRunning lb_keogh experiments for single series\n")
 dist_lbk_single <- with(
     new.env(),
     {
+        # Loop along extracted subsets
         benchmarks <- lapply(series, function(this_series) {
+            # Build expressions to evaluate, substituting window size
             expressions <- lapply(window_sizes, function(window.size) {
                 bquote(
                     lb_keogh(x, y, .(window.size), error.check = FALSE)
                 )
             })
 
+            # Extract sample series
             x <- this_series[[1L]]
             y <- this_series[[2L]]
 
+            # Evaluate expressions
             benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "us"))
 
+            # Return data frame with results
             data.frame(distance = "lb_keogh",
                        series_length = NROW(x),
                        window_size = window_sizes,
@@ -58,6 +78,7 @@ dist_lbk_single <- with(
                        stringsAsFactors = FALSE)
         })
 
+        # Bind results for all series and return to global environment
         plyr::rbind.fill(benchmarks)
     }
 )
@@ -342,11 +363,11 @@ dist_single_results <- plyr::rbind.fill(
     dist_normalized_gak_multivariate_single
 )
 
-## make factor with the given order
+# Make factor with the given order
 dist_single_results$distance <- factor(dist_single_results$distance,
                                        levels = unique(dist_single_results$distance))
 
-## clean
+# Clean
 rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "dist_single_results")))
 
 # ==================================================================================================
@@ -356,8 +377,11 @@ rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "dist_single_results
 existing_objects <- ls(all.names = TRUE)
 
 # --------------------------------------------------------------------------------------------------
-# get series and sort them by length
+# Parameters
 # --------------------------------------------------------------------------------------------------
+
+#' NOTE: these case is almost the same as above, except we take all series for each character
+#' (initially). Some new parameters are explained below.
 
 length_diff_threshold <- 40L
 
@@ -377,15 +401,21 @@ while (any(dlen)) {
 
 series <- series[id_ascending]
 series_mv <- multivariate_series[id_ascending]
+# Window sizes for experiments that test more than one value
 window_sizes <- seq(from = 20L, to = 80L, by = 20L)
+# Window size for experiments that set a fixed value
 window_size <- 50L
+# Number of evaluations for each expression
 times <- if (short_experiments) 5L else 30L
+# Number of parallel workers to test
 num_workers_to_test <- c(1L, 2L, 4L)
 
+#' 'id_series' will have two columns, each one specifying the number of rows and columns the cross-
+#' distance matrix should have. The short experiments only get square matrices.
 if (short_experiments) {
     series <- series[1L:2L]
     series_mv <- series_mv[1L:2L]
-    num_workers_to_test <- c(2L, 4L)
+    num_workers_to_test <- c(4L)
     id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
                        seq(from = 10L, to = 100L, by = 10L))
 } else {
@@ -401,17 +431,24 @@ if (short_experiments) {
 
 cat("\n")
 
+#' NOTE: the next experiments are also pretty much equivalent to each other, except some look along
+#' different window sizes. Only the first one is commented. Also note that the proxy::dist version
+#' of GAK is always normalized, that's why there aren't experiments for the unnormalized version.
+
 # --------------------------------------------------------------------------------------------------
 # lb_keogh
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning lb_keogh experiments for multiple series\n")
+# Loop along number of parallel workers
 dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+    # Create parallel workers and load dtwclust in each one
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
-    invisible(clusterEvalQ(workers, library("microbenchmark")))
 
+    # Loop along series
     benchmarks <- lapply(series, function(this_series) {
+        # Build expressions for proxy::dist
         expressions <- lapply(1L:nrow(id_series), function(i) {
             bquote(
                 proxy::dist(x = this_series[1L:.(id_series[i, 1L])],
@@ -422,8 +459,10 @@ dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
             )
         })
 
+        # Evaluate expressions
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
+        # Return data frame with results
         data.frame(distance = "lb_keogh",
                    num_workers = num_workers,
                    num_x = id_series[,1L],
@@ -435,10 +474,12 @@ dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
                    stringsAsFactors = FALSE)
     })
 
+    # Stop parallel workers
     stopCluster(workers)
     registerDoSEQ()
     rm(workers)
 
+    # Bind results for all series and return
     plyr::rbind.fill(benchmarks)
 }))
 
@@ -450,7 +491,6 @@ cat("\tRunning lb_improved experiments for multiple series\n")
 dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
-    invisible(clusterEvalQ(workers, library("microbenchmark")))
 
     benchmarks <- lapply(series, function(this_series) {
         expressions <- lapply(1L:nrow(id_series), function(i) {
@@ -491,7 +531,6 @@ cat("\tRunning dtw_lb experiments for multiple series\n")
 dist_dtwlb_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
-    invisible(clusterEvalQ(workers, library("microbenchmark")))
 
     benchmarks <- lapply(series, function(this_series) {
         expressions <- lapply(1L:nrow(id_series), function(i) {
@@ -532,7 +571,6 @@ cat("\tRunning sbd experiments for multiple series\n")
 dist_sbd_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
-    invisible(clusterEvalQ(workers, library("microbenchmark")))
 
     benchmarks <- lapply(series, function(this_series) {
         expressions <- lapply(1L:nrow(id_series), function(i) {
@@ -571,7 +609,6 @@ cat("\tRunning dtw experiments for multiple univariate series\n")
 dist_dtw_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
-    invisible(clusterEvalQ(workers, library("microbenchmark")))
 
     benchmarks <- lapply(series, function(this_series) {
         expressions <- lapply(window_sizes, function(window_size) {
@@ -615,7 +652,6 @@ cat("\tRunning dtw experiments for multiple multivariate series\n")
 dist_dtw_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
-    invisible(clusterEvalQ(workers, library("microbenchmark")))
 
     benchmarks <- lapply(series_mv, function(this_series) {
         expressions <- lapply(window_sizes, function(window_size) {
@@ -659,7 +695,6 @@ cat("\tRunning normalized_gak experiments for multiple univariate series\n")
 dist_ngak_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
-    invisible(clusterEvalQ(workers, library("microbenchmark")))
 
     benchmarks <- lapply(series, function(this_series) {
         expressions <- lapply(window_sizes, function(window_size) {
@@ -704,7 +739,6 @@ cat("\tRunning normalized_gak experiments for multiple multivariate series\n")
 dist_ngak_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
-    invisible(clusterEvalQ(workers, library("microbenchmark")))
 
     benchmarks <- lapply(series_mv, function(this_series) {
         expressions <- lapply(window_sizes, function(window_size) {
@@ -756,11 +790,11 @@ dist_multiple_results <- plyr::rbind.fill(
     dist_ngak_multivariate_multiple
 )
 
-## make factor with the given order
+# Make factor with the given order
 dist_multiple_results$distance <- factor(dist_multiple_results$distance,
                                          levels = unique(dist_multiple_results$distance))
 
-## clean
+# Clean
 rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "dist_multiple_results")))
 
 # ==================================================================================================
