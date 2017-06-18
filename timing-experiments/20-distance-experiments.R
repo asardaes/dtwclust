@@ -367,6 +367,10 @@ dist_single_results <- plyr::rbind.fill(
 dist_single_results$distance <- factor(dist_single_results$distance,
                                        levels = unique(dist_single_results$distance))
 
+# Add some metadata
+attr(dist_single_results, "proctime") <- proc.time() - tic
+attr(dist_single_results, "times") <- times
+
 # Clean
 rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "dist_single_results")))
 
@@ -793,6 +797,10 @@ dist_multiple_results <- plyr::rbind.fill(
 # Make factor with the given order
 dist_multiple_results$distance <- factor(dist_multiple_results$distance,
                                          levels = unique(dist_multiple_results$distance))
+
+# Add some metadata
+attr(dist_multiple_results, "proctime") <- proc.time() - tic
+attr(dist_multiple_results, "times") <- times
 
 # Clean
 rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "dist_multiple_results")))
