@@ -1,0 +1,123 @@
+---
+title: "Timing experiments for dtwclust"
+author: "Alexis Sarda-Espinosa"
+output:
+    html_vignette:
+        toc: true
+        number_sections: true
+        fig_width: 7
+        fig_height: 7
+vignette: >
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignettePackage{dtwclust}
+    %\VignetteIndexEntry{Timing experiments for dtwclust}
+    %\VignetteEncoding{UTF-8}
+bibliography: REFERENCES.bib
+---
+
+```{r setup, include=FALSE}
+library("dtwclust")
+
+load("../timing-experiments/dist-results.RData")
+
+# knitr defaults
+knitr::opts_chunk$set(echo = FALSE, comment = "#>")
+```
+
+# Introduction
+
+To get an idea of the running times that can be expected for some of the included functions,
+a series of timing experiments were made.
+The data used again comes from the Character Trajectories set [@lichman2013].
+
+These were run using `R` v3.4.0 and `dtwclust` v4.0.2.
+The computer used was running `linux-gnu` with an `i5-6500` Intel processor.
+
+# Distance experiments
+
+## Calculations for single time-series
+
+Results of the timing experiments for single time-series. 
+An `NA` window size means that no constraint was used.
+Note that the vertical scale is different for each facet.
+
+```{r dist-single-plot, fig.height=7}
+ggplot(dist_single_results,
+       aes(x = factor(series_length),
+           y = median_time_us,
+           group = factor(window_size),
+           colour = factor(window_size))) +
+    geom_line() +
+    facet_wrap(~distance, scales = "free_y") +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+## Calculations for several time-series
+
+### Lower bounds
+
+First the results for the lower bounds.
+The number of series in `y` is important because the envelopes are calculated for those.
+In the case of `dtw_lb`, it means that there are more neighbors too.
+
+```{r dist-multiple-lb-plot, fig.cap="The facets' columns indicate the number of parallel workers, whereas the rows indicate the distance that was used."}
+id_gg <- dist_multiple_results$distance %in% c("lb_keogh", "lb_improved", "dtw_lb")
+ggplot(dist_multiple_results[id_gg,],
+       aes(x = num_total,
+           y = median_time_ms,
+           colour = num_y,
+           shape = factor(series_length))) +
+    geom_point(size = 3) +
+    facet_grid(distance ~ num_workers) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+### Shape-based distance
+
+```{r dist-multiple-sbd-plot, fig.height=5, fig.cap="The facets' columns indicate the number of parallel workers."}
+id_gg <- dist_multiple_results$distance %in% c("sbd")
+ggplot(dist_multiple_results[id_gg,],
+       aes(x = num_total,
+           y = median_time_ms,
+           colour = factor(series_length))) +
+    geom_point(size = 3) +
+    facet_wrap(~num_workers) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+### Dynamic time warping
+
+```{r dist-multiple-dtw-plot, fig.height=8, fig.cap="The facets' columns indicate the number of parallel workers, whereas the rows indicate the window size that was used."}
+id_gg <- dist_multiple_results$distance %in% c("dtw_univariate", "dtw_multivariate")
+ggplot(dist_multiple_results[id_gg,],
+       aes(x = num_total,
+           y = median_time_ms,
+           colour = factor(series_length),
+           shape = distance)) +
+    geom_point(size = 3) +
+    scale_shape_manual(values = c(0, 3)) +
+    facet_grid(factor(window_size) ~ num_workers) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+### Triangular global alignment kernel
+
+```{r dist-multiple-gak-plot, fig.height=8, fig.cap="The facets' columns indicate the number of parallel workers, whereas the rows indicate the window size that was used."}
+id_gg <- dist_multiple_results$distance %in% c("gak_univariate", "gak_multivariate")
+ggplot(dist_multiple_results[id_gg,],
+       aes(x = num_total,
+           y = median_time_ms,
+           colour = factor(series_length),
+           shape = distance)) +
+    geom_point(size = 3) +
+    scale_shape_manual(values = c(0, 3)) +
+    facet_grid(factor(window_size) ~ num_workers) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+# References

@@ -717,7 +717,7 @@ dist_ngak_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fu
 
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
-        data.frame(distance = "normalized_gak_univariate",
+        data.frame(distance = "gak_univariate",
                    num_workers = num_workers,
                    num_x = id_series[,1L],
                    num_y = id_series[,2L],
@@ -761,7 +761,7 @@ dist_ngak_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, 
 
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
-        data.frame(distance = "normalized_gak_multivariate",
+        data.frame(distance = "gak_multivariate",
                    num_workers = num_workers,
                    num_x = id_series[,1L],
                    num_y = id_series[,2L],
@@ -808,39 +808,5 @@ rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "dist_multiple_resul
 # ==================================================================================================
 # finish
 # ==================================================================================================
-
-## temporary
-ggplot(dist_single_results,
-       aes(x = factor(series_length),
-           y = median_time_us,
-           group = factor(window_size),
-           colour = factor(window_size))) +
-    geom_line() +
-    facet_wrap(~distance, scales = "free_y") +
-    theme_bw()
-
-ggplot(dist_multiple_results[dist_multiple_results$distance %in% c("lb_keogh",
-                                                                   "lb_improved",
-                                                                   "dtw_lb"),],
-       aes(x = num_total,
-           y = median_time_ms,
-           colour = num_y,
-           shape = factor(series_length))) +
-    geom_point(size = 3) +
-    facet_grid(distance ~ num_workers) +
-    theme_bw()
-
-ggplot(dist_multiple_results[dist_multiple_results$distance %in% c("dtw_univariate",
-                                                                   "dtw_multivariate",
-                                                                   "normalized_gak_univariate",
-                                                                   "normalized_gak_multivariate"),],
-       aes(x = num_total,
-           y = median_time_ms,
-           colour = factor(series_length),
-           shape = factor(distance))) +
-    geom_point(size = 3) +
-    geom_line() +
-    facet_grid(factor(window_size) ~ num_workers) +
-    theme_bw()
 
 save("dist_single_results", "dist_multiple_results", file = "dist-results.RData")
