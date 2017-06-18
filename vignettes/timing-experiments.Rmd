@@ -19,6 +19,7 @@ bibliography: REFERENCES.bib
 library("dtwclust")
 
 load("../timing-experiments/dist-results.RData")
+load("../timing-experiments/cent-results.RData")
 
 # knitr defaults
 knitr::opts_chunk$set(echo = FALSE, comment = "#>")
@@ -31,7 +32,7 @@ a series of timing experiments were made.
 The data used again comes from the Character Trajectories set [@lichman2013].
 
 These were run using `R` v3.4.0 and `dtwclust` v4.0.2.
-The computer used was running `linux-gnu` with an `i5-6500` Intel processor.
+The computer used was running GNU-Linux with an `i5-6500` Intel processor.
 
 # Distance experiments
 
@@ -117,6 +118,36 @@ ggplot(dist_multiple_results[id_gg,],
     scale_shape_manual(values = c(0, 3)) +
     facet_grid(factor(window_size) ~ num_workers) +
     theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+# Prototyping experiments
+
+## Shape extraction
+
+```{r cent-shape-plot, fig.height=5}
+id_gg <- cent_results$cent %in% c("shape_univariate", "shape_multivariate")
+ggplot(cent_results[id_gg,],
+       aes(x = num_series,
+           y = median_time_ms,
+           colour = factor(series_length))) +
+    geom_line() +
+    facet_wrap(~cent) +
+    theme_bw() + 
+    theme(legend.position = "bottom")
+```
+
+## DTW barycenter averaging
+
+```{r cent-dba-plot, fig.height=8, fig.cap="The facets' rows indicate the length of the considered series. In the columns, 'byS' means 'by series' and 'byV' means 'by variable' (see DBA documentation)."}
+id_gg <- grepl("^dba_", cent_results$cent)
+ggplot(cent_results[id_gg,],
+       aes(x = num_series,
+           y = median_time_ms,
+           colour = factor(window_size))) +
+    geom_line() +
+    facet_grid(factor(series_length) ~ cent) +
+    theme_bw() + 
     theme(legend.position = "bottom")
 ```
 
