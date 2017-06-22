@@ -9,6 +9,9 @@ ddist2 <- function(distance, control) {
 
     ## Closures capture the values of the objects from the environment where they're created
     distfun <- function(x, centroids = NULL, ...) {
+        x <- any2list(x)
+        if (!is.null(centroids)) centroids <- any2list(centroids)
+
         if (!is.null(control$distmat)) {
             if (inherits(control$distmat, "Distmat")) {
                 ## internal class, sparse or full
