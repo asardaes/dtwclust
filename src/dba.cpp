@@ -155,13 +155,6 @@ void reset_matrices(Rcpp::NumericMatrix& mat_cent,
     kahan_c.fill(0);
 }
 
-void Rflush()
-{
-    R_FlushConsole();
-    R_ProcessEvents();
-    R_CheckUserInterrupt();
-}
-
 void print_trace(bool converged, int iter)
 {
     if (trace) {

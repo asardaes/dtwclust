@@ -10,6 +10,7 @@
 \section{Changes in version 4.0.2}{
     \itemize{
         \item Ported part of the algorithm that updates sparse distance matrices to \code{C++}.
+        \item Ported \code{TADPole} to \code{C++}.
         \item Fixed \code{tsclustFamily}'s \code{dist} function for matrix or data frame input.
     }
 }

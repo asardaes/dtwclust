@@ -2,6 +2,7 @@
 
 ## Version 4.0.2
 * Ported part of the algorithm that updates sparse distance matrices to `C++`.
+* Ported `TADPole` to `C++`.
 * Fixed `tsclustFamily`'s `dist` function for matrix or data frame input.
 
 ## Version 4.0.1
