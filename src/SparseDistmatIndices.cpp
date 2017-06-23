@@ -35,7 +35,7 @@ public:
         }
 
         Rcpp::IntegerMatrix new_ids(new_i.size(), 2);
-        for (int k = 0; k < new_i.size(); k++) {
+        for (int k = 0; k < new_ids.nrow(); k++) {
             new_ids(k, 0) = new_i[k];
             new_ids(k, 1) = new_j[k];
         }
