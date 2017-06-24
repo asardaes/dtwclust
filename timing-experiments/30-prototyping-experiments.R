@@ -78,8 +78,7 @@ cent_shape_univariate <- with(
             data.frame(cent = "shape_univariate",
                        series_length = NROW(ref),
                        num_series = num_series,
-                       median_time_ms = benchmark$median,
-                       stringsAsFactors = FALSE)
+                       median_time_ms = benchmark$median)
         })
 
         # Bind results for all series and return to global environment
@@ -113,8 +112,7 @@ cent_shape_multivariate <- with(
             data.frame(cent = "shape_multivariate",
                        series_length = NROW(ref),
                        num_series = num_series,
-                       median_time_ms = benchmark$median,
-                       stringsAsFactors = FALSE)
+                       median_time_ms = benchmark$median)
         })
 
         # Bind results for all series and return to global environment
@@ -152,8 +150,7 @@ cent_dba_univariate <- with(
                        series_length = NROW(ref),
                        window_size = window_sizes,
                        num_series = rep(num_series, each = length(window_sizes)),
-                       median_time_ms = benchmark$median,
-                       stringsAsFactors = FALSE)
+                       median_time_ms = benchmark$median)
         })
 
         # Bind results for all series and return to global environment
@@ -192,8 +189,7 @@ cent_dba_multivariate_byS <- with(
                        series_length = NROW(ref),
                        window_size = window_sizes,
                        num_series = rep(num_series, each = length(window_sizes)),
-                       median_time_ms = benchmark$median,
-                       stringsAsFactors = FALSE)
+                       median_time_ms = benchmark$median)
         })
 
         # Bind results for all series and return to global environment
@@ -232,8 +228,7 @@ cent_dba_multivariate_byV <- with(
                        series_length = NROW(ref),
                        window_size = window_sizes,
                        num_series = rep(num_series, each = length(window_sizes)),
-                       median_time_ms = benchmark$median,
-                       stringsAsFactors = FALSE)
+                       median_time_ms = benchmark$median)
         })
 
         # Bind results for all series and return to global environment

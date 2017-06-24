@@ -74,8 +74,7 @@ dist_lbk_single <- with(
             data.frame(distance = "lb_keogh",
                        series_length = NROW(x),
                        window_size = window_sizes,
-                       median_time_us = benchmark$median,
-                       stringsAsFactors = FALSE)
+                       median_time_us = benchmark$median)
         })
 
         # Bind results for all series and return to global environment
@@ -106,8 +105,7 @@ dist_lbi_single <- with(
             data.frame(distance = "lb_improved",
                        series_length = NROW(x),
                        window_size = window_sizes,
-                       median_time_us = benchmark$median,
-                       stringsAsFactors = FALSE)
+                       median_time_us = benchmark$median)
         })
 
         plyr::rbind.fill(benchmarks)
@@ -133,8 +131,7 @@ dist_sbd_single <- with(
 
             data.frame(distance = "sbd",
                        series_length = NROW(x),
-                       median_time_us = benchmark$median,
-                       stringsAsFactors = FALSE)
+                       median_time_us = benchmark$median)
         })
 
         plyr::rbind.fill(benchmarks)
@@ -166,8 +163,7 @@ dist_dtw_univariate_single <- with(
             data.frame(distance = "dtw_univariate",
                        series_length = NROW(x),
                        window_size = c(window_sizes, NA),
-                       median_time_us = benchmark$median,
-                       stringsAsFactors = FALSE)
+                       median_time_us = benchmark$median)
         })
 
         plyr::rbind.fill(benchmarks)
@@ -199,8 +195,7 @@ dist_dtw_multivariate_single <- with(
             data.frame(distance = "dtw_multivariate",
                        series_length = nrow(x),
                        window_size = c(window_sizes, NA),
-                       median_time_us = benchmark$median,
-                       stringsAsFactors = FALSE)
+                       median_time_us = benchmark$median)
         })
 
         plyr::rbind.fill(benchmarks)
@@ -234,8 +229,7 @@ dist_unnormalized_gak_univariate_single <- with(
             data.frame(distance = "unnormalized_gak_univariate",
                        series_length = NROW(x),
                        window_size = c(window_sizes, NA),
-                       median_time_us = benchmark$median,
-                       stringsAsFactors = FALSE)
+                       median_time_us = benchmark$median)
         })
 
         plyr::rbind.fill(benchmarks)
@@ -269,8 +263,7 @@ dist_unnormalized_gak_multivariate_single <- with(
             data.frame(distance = "unnormalized_gak_multivariate",
                        series_length = nrow(x),
                        window_size = c(window_sizes, NA),
-                       median_time_us = benchmark$median,
-                       stringsAsFactors = FALSE)
+                       median_time_us = benchmark$median)
         })
 
         plyr::rbind.fill(benchmarks)
@@ -304,8 +297,7 @@ dist_normalized_gak_univariate_single <- with(
             data.frame(distance = "normalized_gak_univariate",
                        series_length = NROW(x),
                        window_size = c(window_sizes, NA),
-                       median_time_us = benchmark$median,
-                       stringsAsFactors = FALSE)
+                       median_time_us = benchmark$median)
         })
 
         plyr::rbind.fill(benchmarks)
@@ -339,8 +331,7 @@ dist_normalized_gak_multivariate_single <- with(
             data.frame(distance = "normalized_gak_multivariate",
                        series_length = nrow(x),
                        window_size = c(window_sizes, NA),
-                       median_time_us = benchmark$median,
-                       stringsAsFactors = FALSE)
+                       median_time_us = benchmark$median)
         })
 
         plyr::rbind.fill(benchmarks)
@@ -474,8 +465,7 @@ dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
                    num_total = id_series[,1L] * id_series[,2L],
                    series_length = NROW(this_series[[1L]]),
                    window_size = window_size,
-                   median_time_ms = benchmark$median,
-                   stringsAsFactors = FALSE)
+                   median_time_ms = benchmark$median)
     })
 
     # Stop parallel workers
@@ -516,8 +506,7 @@ dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
                    num_total = id_series[,1L] * id_series[,2L],
                    series_length = NROW(this_series[[1L]]),
                    window_size = window_size,
-                   median_time_ms = benchmark$median,
-                   stringsAsFactors = FALSE)
+                   median_time_ms = benchmark$median)
     })
 
     stopCluster(workers)
@@ -556,8 +545,7 @@ dist_dtwlb_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num
                    num_total = id_series[,1L] * id_series[,2L],
                    series_length = NROW(this_series[[1L]]),
                    window_size = window_size,
-                   median_time_ms = benchmark$median,
-                   stringsAsFactors = FALSE)
+                   median_time_ms = benchmark$median)
     })
 
     stopCluster(workers)
@@ -594,8 +582,7 @@ dist_sbd_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
                    num_y = id_series[,2L],
                    num_total = id_series[,1L] * id_series[,2L],
                    series_length = NROW(this_series[[1L]]),
-                   median_time_ms = benchmark$median,
-                   stringsAsFactors = FALSE)
+                   median_time_ms = benchmark$median)
     })
 
     stopCluster(workers)
@@ -637,8 +624,7 @@ dist_dtw_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fun
                    num_total = id_series[,1L] * id_series[,2L],
                    series_length = NROW(this_series[[1L]]),
                    window_size = rep(window_sizes, each = nrow(id_series)),
-                   median_time_ms = benchmark$median,
-                   stringsAsFactors = FALSE)
+                   median_time_ms = benchmark$median)
     })
 
     stopCluster(workers)
@@ -680,8 +666,7 @@ dist_dtw_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, f
                    num_total = id_series[,1L] * id_series[,2L],
                    series_length = NROW(this_series[[1L]]),
                    window_size = rep(window_sizes, each = nrow(id_series)),
-                   median_time_ms = benchmark$median,
-                   stringsAsFactors = FALSE)
+                   median_time_ms = benchmark$median)
     })
 
     stopCluster(workers)
@@ -724,8 +709,7 @@ dist_ngak_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fu
                    num_total = id_series[,1L] * id_series[,2L],
                    series_length = NROW(this_series[[1L]]),
                    window_size = rep(window_sizes, each = nrow(id_series)),
-                   median_time_ms = benchmark$median,
-                   stringsAsFactors = FALSE)
+                   median_time_ms = benchmark$median)
     })
 
     stopCluster(workers)
@@ -768,8 +752,7 @@ dist_ngak_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, 
                    num_total = id_series[,1L] * id_series[,2L],
                    series_length = NROW(this_series[[1L]]),
                    window_size = rep(window_sizes, each = nrow(id_series)),
-                   median_time_ms = benchmark$median,
-                   stringsAsFactors = FALSE)
+                   median_time_ms = benchmark$median)
     })
 
     stopCluster(workers)
