@@ -1,8 +1,7 @@
-#include <stdlib.h>
-#include <math.h>
-#include <float.h>
 #include <R.h>
 #include <Rinternals.h>
+#include <stdlib.h>
+#include <math.h>
 #include "dtwclust.h"
 
 // for cost matrix, in case of window constraint
@@ -53,9 +52,9 @@ int which_min(double const diag, double const left, double const up,
               double const step, double volatile const local_cost)
 {
     // DIAG, LEFT, UP
-    tuple[0] = (diag == NOT_VISITED) ? DBL_MAX : diag + step * local_cost;
-    tuple[1] = (left == NOT_VISITED) ? DBL_MAX : left + local_cost;
-    tuple[2] = (up == NOT_VISITED) ? DBL_MAX : up + local_cost;
+    tuple[0] = (diag == NOT_VISITED) ? R_PosInf : diag + step * local_cost;
+    tuple[1] = (left == NOT_VISITED) ? R_PosInf : left + local_cost;
+    tuple[2] = (up == NOT_VISITED) ? R_PosInf : up + local_cost;
 
     int direction = (tuple[1] < tuple[0]) ? 1 : 0;
     direction = (tuple[2] < tuple[direction]) ? 2 : direction;
@@ -145,11 +144,8 @@ double dtw_basic_c(double const *x, double const *y, int const w,
             if (norm == 2) local_cost = local_cost * local_cost;
 
             // set the value of 'direction'
-            direction = which_min(D[d2s(i-1, j-1, nx, backtrack)],
-                                  D[d2s(i, j-1, nx, backtrack)],
-                                  D[d2s(i-1, j, nx, backtrack)],
-                                  step,
-                                  local_cost);
+            direction = which_min(D[d2s(i-1, j-1, nx, backtrack)], D[d2s(i, j-1, nx, backtrack)],
+                                  D[d2s(i-1, j, nx, backtrack)], step, local_cost);
 
             /*
              * I can use the same matrix to save both cost values and steps taken by shifting

@@ -3,7 +3,6 @@
 #include <iomanip> // std::setprecision
 #include <vector>
 #include "dtwclustpp.h"
-#include "dtwclust.h"
 
 namespace dtwclust {
 
@@ -88,7 +87,7 @@ private:
     T* _data;
 
     // double to single index with adjustment for missing upper triangular
-    int d2s(int row, int col) const
+    int d2s(const int row, const int col) const
     {
         int adjustment = 0;
         for (int k = col; k >= 0; k--) adjustment += k + 1;
@@ -104,7 +103,7 @@ private:
 // =================================================================================================
 
 std::vector<double> local_density(const Rcpp::List& series,
-                                  int num_series,
+                                  const int num_series,
                                   double dc,
                                   const Rcpp::List& dtw_args,
                                   const Rcpp::NumericMatrix& LBM,
@@ -344,10 +343,14 @@ void cluster_assignment(const Rcpp::IntegerVector& k_vec,
 /* main C++ function */
 // =================================================================================================
 
-SEXP tadpole_cpp(const Rcpp::List& series, const Rcpp::IntegerVector& k,
-                 const double dc, const Rcpp::List& dtw_args,
-                 const Rcpp::NumericMatrix& LBM, const Rcpp::NumericMatrix& UBM,
-                 const bool trace, Rcpp::List& list)
+SEXP tadpole_cpp(const Rcpp::List& series,
+                 const Rcpp::IntegerVector& k,
+                 const double dc,
+                 const Rcpp::List& dtw_args,
+                 const Rcpp::NumericMatrix& LBM,
+                 const Rcpp::NumericMatrix& UBM,
+                 const bool trace,
+                 Rcpp::List& list)
 {
     int num_series = series.length();
     LowerTriMat<double> distmat(num_series, NA_REAL);

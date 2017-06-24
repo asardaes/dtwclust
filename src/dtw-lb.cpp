@@ -26,7 +26,8 @@ void set_nn(const Rcpp::NumericMatrix& distmat, Rcpp::IntegerVector& nn)
 /* check if updates are finished based on indices */
 // =================================================================================================
 
-bool check_finished(const Rcpp::IntegerVector& nn, const Rcpp::IntegerVector& nn_prev,
+bool check_finished(const Rcpp::IntegerVector& nn,
+                    const Rcpp::IntegerVector& nn_prev,
                     Rcpp::LogicalVector& changed)
 {
     bool finished = true;
@@ -46,7 +47,8 @@ bool check_finished(const Rcpp::IntegerVector& nn, const Rcpp::IntegerVector& nn
 /* main C++ function */
 // =================================================================================================
 
-void dtw_lb_cpp(const Rcpp::List& x, const Rcpp::List& y,
+void dtw_lb_cpp(const Rcpp::List& x,
+                const Rcpp::List& y,
                 Rcpp::NumericMatrix& distmat,
                 const Rcpp::List& dots)
 {
@@ -80,12 +82,12 @@ void dtw_lb_cpp(const Rcpp::List& x, const Rcpp::List& y,
 
 RcppExport SEXP dtw_lb(SEXP X, SEXP Y, SEXP D, SEXP DOTS)
 {
-BEGIN_RCPP
+    BEGIN_RCPP
     Rcpp::List x(X), y(Y), dots(DOTS);
     Rcpp::NumericMatrix distmat(D);
     dtw_lb_cpp(x, y, distmat, dots);
     return R_NilValue;
-END_RCPP
+    END_RCPP
 }
 
 } // namespace dtwclust

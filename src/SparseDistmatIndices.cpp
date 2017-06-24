@@ -11,7 +11,7 @@ public:
 
     Rcpp::IntegerMatrix getNewIndices(const Rcpp::IntegerVector& i,
                                       const Rcpp::IntegerVector& j,
-                                      bool symmetric)
+                                      const bool symmetric)
     {
         std::vector<int> new_i, new_j;
 

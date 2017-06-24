@@ -50,10 +50,10 @@
  * v1.0 of Global Alignment Kernel, March 25th 2011.
  */
 
-#include <stdlib.h>
-#include <math.h>
 #include <R.h>
 #include <Rinternals.h>
+#include <stdlib.h>
+#include <math.h>
 #include "dtwclust.h"
 
 // Useful constants
@@ -191,7 +191,6 @@ SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP dim, SEXP sigma, SEXP window,
     int triangular = asInteger(window);
     int nX = asInteger(nx);
     int nY = asInteger(ny);
-
     double d;
 
     // If triangular is smaller than the difference in length of the time series, the kernel is equal to zero,

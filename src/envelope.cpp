@@ -10,8 +10,8 @@
 
 namespace dtwclust {
 
-void envelope_cpp(const Rcpp::NumericVector& array, unsigned int width,
-                 Rcpp::NumericVector& minvalues, Rcpp::NumericVector& maxvalues)
+void envelope_cpp(const Rcpp::NumericVector& array, const unsigned int width,
+                  Rcpp::NumericVector& minvalues, Rcpp::NumericVector& maxvalues)
 {
     unsigned int constraint = (width - 1) / 2;
     unsigned int array_size = static_cast<unsigned int>(array.size());
@@ -62,7 +62,7 @@ void envelope_cpp(const Rcpp::NumericVector& array, unsigned int width,
 }
 
 RcppExport SEXP envelope(SEXP series, SEXP window) {
-BEGIN_RCPP
+    BEGIN_RCPP
     Rcpp::NumericVector x(series);
     Rcpp::NumericVector L(x.size()), U(x.size());
 
@@ -72,7 +72,7 @@ BEGIN_RCPP
     ret["lower"] = L;
     ret["upper"] = U;
     return(ret);
-END_RCPP
+    END_RCPP
 }
 
 } // namespace dtwclust

@@ -43,7 +43,7 @@ void Rflush();
 double dtwb(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y, const Rcpp::List& dots);
 
 // defined in envelope.cpp
-void envelope_cpp(const Rcpp::NumericVector& array, unsigned int width,
+void envelope_cpp(const Rcpp::NumericVector& array, const unsigned int width,
                   Rcpp::NumericVector& minvalues, Rcpp::NumericVector& maxvalues);
 
 // =================================================================================================
@@ -51,7 +51,7 @@ void envelope_cpp(const Rcpp::NumericVector& array, unsigned int width,
 // =================================================================================================
 
 template <typename T>
-std::vector<size_t> stable_sort_ind(const std::vector<T>& v, bool decreasing)
+std::vector<size_t> stable_sort_ind(const std::vector<T>& v, const bool decreasing)
 {
     // see https://stackoverflow.com/questions/1577475/c-sorting-and-keeping-track-of-indexes
 
