@@ -1,7 +1,9 @@
-#include <Rcpp.h>
-
 #ifndef _DTWCLUST_HPP
 #define _DTWCLUST_HPP
+
+#include <R.h>
+#include <Rinternals.h>
+#include <R_ext/Rdynload.h>
 
 namespace dtwclust {
 
@@ -47,14 +49,14 @@ SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U)
     return fun(X, Y, WINDOW, P, L, U);
 }
 
-RcppExport SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
+SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
                         SEXP LB, SEXP UB, SEXP TRACE,
                         SEXP LIST)
 {
     static SEXP(*fun)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP) = NULL;
     if(fun == NULL)
         fun = (SEXP(*)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP)) R_GetCCallable("dtwclust", "tadpole");
-    return fun(X, K, DC, DTW_ARGS, LB; UB; TRACE, LIST);
+    return fun(X, K, DC, DTW_ARGS, LB, UB, TRACE, LIST);
 }
 
 } // namespace dtwclust

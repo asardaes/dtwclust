@@ -2,11 +2,12 @@
 extern "C" {
 #endif
 
-#include <R.h>
-#include <Rinternals.h>
-
 #ifndef _DTWCLUST_H
 #define _DTWCLUST_H
+
+#include <R.h>
+#include <Rinternals.h>
+#include <R_ext/Rdynload.h>
 
 SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
                SEXP m, SEXP n, SEXP dim,
