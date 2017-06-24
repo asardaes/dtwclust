@@ -15,6 +15,7 @@ tic <- proc.time()
 if (file.exists("read-csv.RData")) load("read-csv.RData") else source("10-read-csv.R")
 if (file.exists("dist-results.RData")) load("dist-results.RData") else source("20-distance-experiments.R")
 if (file.exists("cent-results.RData")) load("cent-results.RData") else source("30-prototyping-experiments.R")
+if (file.exists("tadpole-results.RData")) load("tadpole-results.RData") else source("40-tadpole-experiments.R")
 toc <- proc.time() - tic
 
-message("Finished after: ", toc["elapsed"], " seconds")
+message("\nFinished after: ", toc["elapsed"], " seconds")

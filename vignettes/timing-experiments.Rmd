@@ -20,6 +20,7 @@ library("dtwclust")
 
 load("../timing-experiments/dist-results.RData")
 load("../timing-experiments/cent-results.RData")
+load("../timing-experiments/tadpole-results.RData")
 
 # knitr defaults
 knitr::opts_chunk$set(echo = FALSE, comment = "#>")
@@ -63,7 +64,7 @@ The number of series in `y` is important because the envelopes are calculated fo
 In the case of `dtw_lb`, it means that there are more neighbors too.
 
 ```{r dist-multiple-lb-plot, fig.cap="The facets' columns indicate the number of parallel workers, whereas the rows indicate the distance that was used."}
-id_gg <- dist_multiple_results$distance %in% c("lb_keogh", "lb_improved", "dtw_lb")
+id_gg <- grepl("lb", dist_multiple_results$distance)
 ggplot(dist_multiple_results[id_gg,],
        aes(x = num_total,
            y = median_time_ms,
@@ -78,7 +79,7 @@ ggplot(dist_multiple_results[id_gg,],
 ### Shape-based distance
 
 ```{r dist-multiple-sbd-plot, fig.height=5, fig.cap="The facets' columns indicate the number of parallel workers."}
-id_gg <- dist_multiple_results$distance %in% c("sbd")
+id_gg <- grepl("^sbd$", dist_multiple_results$distance)
 ggplot(dist_multiple_results[id_gg,],
        aes(x = num_total,
            y = median_time_ms,
@@ -92,7 +93,7 @@ ggplot(dist_multiple_results[id_gg,],
 ### Dynamic time warping
 
 ```{r dist-multiple-dtw-plot, fig.height=8, fig.cap="The facets' columns indicate the number of parallel workers, whereas the rows indicate the window size that was used."}
-id_gg <- dist_multiple_results$distance %in% c("dtw_univariate", "dtw_multivariate")
+id_gg <- grepl("^dtw_[um]", dist_multiple_results$distance)
 ggplot(dist_multiple_results[id_gg,],
        aes(x = num_total,
            y = median_time_ms,
@@ -108,7 +109,7 @@ ggplot(dist_multiple_results[id_gg,],
 ### Triangular global alignment kernel
 
 ```{r dist-multiple-gak-plot, fig.height=8, fig.cap="The facets' columns indicate the number of parallel workers, whereas the rows indicate the window size that was used."}
-id_gg <- dist_multiple_results$distance %in% c("gak_univariate", "gak_multivariate")
+id_gg <- grepl("^gak_", dist_multiple_results$distance)
 ggplot(dist_multiple_results[id_gg,],
        aes(x = num_total,
            y = median_time_ms,
@@ -126,7 +127,7 @@ ggplot(dist_multiple_results[id_gg,],
 ## Shape extraction
 
 ```{r cent-shape-plot, fig.height=5}
-id_gg <- cent_results$cent %in% c("shape_univariate", "shape_multivariate")
+id_gg <- grepl("^shape_", cent_results$cent)
 ggplot(cent_results[id_gg,],
        aes(x = num_series,
            y = median_time_ms,
@@ -147,6 +148,26 @@ ggplot(cent_results[id_gg,],
            colour = factor(window_size))) +
     geom_line() +
     facet_grid(factor(series_length) ~ cent) +
+    theme_bw() + 
+    theme(legend.position = "bottom")
+```
+
+# Clustering experiments
+
+With `tsclust`.
+
+## TADPole
+
+No parallel here because it is only parallelized with multiple `dc` values,
+and that wasn't tested.
+
+```{r clust-tadpole-plot}
+ggplot(clus_tadpole_results,
+       aes(x = num_series,
+           y = median_time_s,
+           colour = factor(window_size))) +
+    geom_line() +
+    facet_wrap(~lb) +
     theme_bw() + 
     theme(legend.position = "bottom")
 ```
