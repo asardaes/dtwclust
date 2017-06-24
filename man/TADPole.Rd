@@ -9,11 +9,11 @@ TADPole(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk",
 }
 \arguments{
 \item{data}{A matrix or data frame where each row is a time series, or a list where each element
-is a time series. Multivariate series are not supported.}
+is a time series. Multivariate series are \strong{not} supported.}
 
-\item{k}{The number of desired clusters. Can be a vector with several values}
+\item{k}{The number of desired clusters. Can be a vector with several values.}
 
-\item{dc}{The cutoff distance(s).}
+\item{dc}{The cutoff distance(s). May be a vector with several values.}
 
 \item{window.size}{Window size constraint for DTW (Sakoe-Chiba). See details.}
 
@@ -31,6 +31,9 @@ A list with:
 \item \code{centroids}: Indices of the centroids.
 \item \code{distCalcPercentage}: Percentage of distance calculations that were actually performed.
 }
+
+For multiple \code{k}/\code{dc} values, a list of lists is returned, each internal list having the
+aforementioned elements.
 }
 \description{
 Time-series Anytime Density Peaks Clustering as proposed by Begum et al. (2015).
@@ -54,52 +57,14 @@ that lie in dense areas (i.e. that have lots of neighbors) are taken as cluster 
 The algorithm relies on the DTW bounds, which are only defined for univariate time series of
 equal length.
 
+Parallelization is supported, but given the internal optimizations, it may only be useful if
+multiple \code{dc} values are specified in the same call.
+
 The windowing constraint uses a centered window. The calculations expect a value in
 \code{window.size} that represents the distance between the point considered and one of the edges
 of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
 observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
 in \code{10(2) + 1 = 21} observations falling within the window.
-}
-\section{Parallel Computing}{
-
-
-  Please note that running tasks in parallel does \strong{not} guarantee faster computations.
-  The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
-
-  The user can register a parallel backend, e.g. with the \pkg{doParallel} package, in order to
-  attempt to speed up the calculations (see the examples).
-}
-
-\examples{
-
-\dontrun{
-#### Running TADPole with parallel support
-require(doParallel)
-
-# Load data
-data(uciCT)
-
-# Reinterpolate to same length
-data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
-
-# Create parallel workers
-cl <- makeCluster(detectCores())
-invisible(clusterEvalQ(cl, library(dtwclust)))
-registerDoParallel(cl)
-
-# Cluster
-kc.tadp <- TADPole(data, k = 20, window.size = 20, dc = 1.5)
-
-# Stop parallel workers
-stopCluster(cl)
-
-# Return to sequential computations
-registerDoSEQ()
-
-# Compute VI Index
-cat("VI index for TADPole:", cvi(kc.tadp$cl, CharTrajLabels, "VI"), "\\n\\n")
-}
-
 }
 \references{
 Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering

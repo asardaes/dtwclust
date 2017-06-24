@@ -5,10 +5,10 @@
 #' @export
 #'
 #' @param data A matrix or data frame where each row is a time series, or a list where each element
-#'   is a time series. Multivariate series are not supported.
+#'   is a time series. Multivariate series are **not** supported.
 #' @param window.size Window size constraint for DTW (Sakoe-Chiba). See details.
-#' @param k The number of desired clusters. Can be a vector with several values
-#' @param dc The cutoff distance(s).
+#' @param k The number of desired clusters. Can be a vector with several values.
+#' @param dc The cutoff distance(s). May be a vector with several values.
 #' @template error-check
 #' @param lb Which lower bound to use, "lbk" for [lb_keogh()] or "lbi" for [lb_improved()].
 #' @param trace Logical flag. If `TRUE`, more output regarding the progress is printed to screen.
@@ -33,15 +33,21 @@
 #' The algorithm relies on the DTW bounds, which are only defined for univariate time series of
 #' equal length.
 #'
+#' Parallelization is supported, but given the internal optimizations, it may only be useful if
+#' multiple `dc` values are specified in the same call.
+#'
 #' @template window
 #'
-#' @return A list with:
+#' @return
 #'
-#'   - `cl`: Cluster indices.
-#'   - `centroids`: Indices of the centroids.
-#'   - `distCalcPercentage`: Percentage of distance calculations that were actually performed.
+#' A list with:
 #'
-#' @template parallel
+#' - `cl`: Cluster indices.
+#' - `centroids`: Indices of the centroids.
+#' - `distCalcPercentage`: Percentage of distance calculations that were actually performed.
+#'
+#' For multiple `k`/`dc` values, a list of lists is returned, each internal list having the
+#' aforementioned elements.
 #'
 #' @references
 #'
@@ -49,36 +55,6 @@
 #' with a Novel Admissible Pruning Strategy.'' In *Conference on Knowledge Discovery and Data
 #' Mining*, series KDD '15. ISBN 978-1-4503-3664-2/15/08, \url{
 #' http://dx.doi.org/10.1145/2783258.2783286}.
-#'
-#' @examples
-#'
-#' \dontrun{
-#' #### Running TADPole with parallel support
-#' require(doParallel)
-#'
-#' # Load data
-#' data(uciCT)
-#'
-#' # Reinterpolate to same length
-#' data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
-#'
-#' # Create parallel workers
-#' cl <- makeCluster(detectCores())
-#' invisible(clusterEvalQ(cl, library(dtwclust)))
-#' registerDoParallel(cl)
-#'
-#' # Cluster
-#' kc.tadp <- TADPole(data, k = 20, window.size = 20, dc = 1.5)
-#'
-#' # Stop parallel workers
-#' stopCluster(cl)
-#'
-#' # Return to sequential computations
-#' registerDoSEQ()
-#'
-#' # Compute VI Index
-#' cat("VI index for TADPole:", cvi(kc.tadp$cl, CharTrajLabels, "VI"), "\n\n")
-#' }
 #'
 TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk", trace = FALSE) {
     if (missing(window.size)) stop("Please provide a positive window size")
