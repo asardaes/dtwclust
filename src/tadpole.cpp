@@ -124,6 +124,7 @@ std::vector<double> local_density(const Rcpp::List& series,
      *   4 - identical series
      */
     for (int i = 1; i < num_series; i++) {
+        R_CheckUserInterrupt();
         for (int j = 0; j < i; j++) {
             if (LBM(i,j) <= dc && UBM(i,j) > dc) {
                 num_dist_op++;
@@ -190,6 +191,7 @@ std::vector<double> nn_dist_1(const std::vector<double>& rho, const int num_seri
 
     double max_delta = 0;
     for (int i = 1; i < num_series; i++) {
+        R_CheckUserInterrupt();
         double min_ub_i = R_PosInf;
         for (int j = 0; j < i; j++) {
             int ii = id_rho_sorted[i], jj = id_rho_sorted[j];
@@ -231,6 +233,7 @@ std::vector<double> nn_dist_2(const Rcpp::List& series,
         int which_min_delta = -1;
         min_delta = R_PosInf;
         for (int j = 0; j < i; j++) {
+            R_CheckUserInterrupt();
             int ii = id_cl[i], jj = id_cl[j];
             bool prune = LBM(ii,jj) > delta_ub[ii];
             bool precomputed = flags(ii,jj) == 0 || flags(ii,jj) == 1;
