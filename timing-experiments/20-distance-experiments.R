@@ -437,6 +437,8 @@ cat("\n")
 cat("\tRunning lb_keogh experiments for multiple series\n")
 # Loop along number of parallel workers
 dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+    cat("\t\t")
+
     # Create parallel workers and load dtwclust in each one
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
@@ -457,6 +459,7 @@ dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
         # Evaluate expressions
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
+        cat(".")
         # Return data frame with results
         data.frame(distance = "lb_keogh",
                    num_workers = num_workers,
@@ -473,6 +476,7 @@ dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
     registerDoSEQ()
     rm(workers)
 
+    cat("\n")
     # Bind results for all series and return
     plyr::rbind.fill(benchmarks)
 }))
@@ -483,6 +487,7 @@ dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 
 cat("\tRunning lb_improved experiments for multiple series\n")
 dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+    cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
 
@@ -499,6 +504,7 @@ dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
+        cat(".")
         data.frame(distance = "lb_improved",
                    num_workers = num_workers,
                    num_x = id_series[,1L],
@@ -513,6 +519,7 @@ dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
     registerDoSEQ()
     rm(workers)
 
+    cat("\n")
     plyr::rbind.fill(benchmarks)
 }))
 
@@ -522,6 +529,7 @@ dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 
 cat("\tRunning dtw_lb experiments for multiple series\n")
 dist_dtwlb_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+    cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
 
@@ -538,6 +546,7 @@ dist_dtwlb_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num
 
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
+        cat(".")
         data.frame(distance = "dtw_lb",
                    num_workers = num_workers,
                    num_x = id_series[,1L],
@@ -552,6 +561,7 @@ dist_dtwlb_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num
     registerDoSEQ()
     rm(workers)
 
+    cat("\n")
     plyr::rbind.fill(benchmarks)
 }))
 
@@ -561,6 +571,7 @@ dist_dtwlb_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num
 
 cat("\tRunning sbd experiments for multiple series\n")
 dist_sbd_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+    cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
 
@@ -576,6 +587,7 @@ dist_sbd_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
+        cat(".")
         data.frame(distance = "sbd",
                    num_workers = num_workers,
                    num_x = id_series[,1L],
@@ -589,6 +601,7 @@ dist_sbd_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
     registerDoSEQ()
     rm(workers)
 
+    cat("\n")
     plyr::rbind.fill(benchmarks)
 }))
 
@@ -598,6 +611,7 @@ dist_sbd_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 
 cat("\tRunning dtw experiments for multiple univariate series\n")
 dist_dtw_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+    cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
 
@@ -617,6 +631,7 @@ dist_dtw_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fun
 
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
+        cat(".")
         data.frame(distance = "dtw_univariate",
                    num_workers = num_workers,
                    num_x = id_series[,1L],
@@ -631,6 +646,7 @@ dist_dtw_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fun
     registerDoSEQ()
     rm(workers)
 
+    cat("\n")
     plyr::rbind.fill(benchmarks)
 }))
 
@@ -640,6 +656,7 @@ dist_dtw_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fun
 
 cat("\tRunning dtw experiments for multiple multivariate series\n")
 dist_dtw_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+    cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
 
@@ -659,6 +676,7 @@ dist_dtw_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, f
 
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
+        cat(".")
         data.frame(distance = "dtw_multivariate",
                    num_workers = num_workers,
                    num_x = id_series[,1L],
@@ -673,6 +691,7 @@ dist_dtw_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, f
     registerDoSEQ()
     rm(workers)
 
+    cat("\n")
     plyr::rbind.fill(benchmarks)
 }))
 
@@ -682,6 +701,7 @@ dist_dtw_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, f
 
 cat("\tRunning normalized_gak experiments for multiple univariate series\n")
 dist_ngak_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+    cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
 
@@ -702,6 +722,7 @@ dist_ngak_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fu
 
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
+        cat(".")
         data.frame(distance = "gak_univariate",
                    num_workers = num_workers,
                    num_x = id_series[,1L],
@@ -716,6 +737,7 @@ dist_ngak_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fu
     registerDoSEQ()
     rm(workers)
 
+    cat("\n")
     plyr::rbind.fill(benchmarks)
 }))
 
@@ -725,6 +747,7 @@ dist_ngak_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fu
 
 cat("\tRunning normalized_gak experiments for multiple multivariate series\n")
 dist_ngak_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+    cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
 
@@ -745,6 +768,7 @@ dist_ngak_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, 
 
         benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
 
+        cat(".")
         data.frame(distance = "gak_multivariate",
                    num_workers = num_workers,
                    num_x = id_series[,1L],
@@ -759,6 +783,7 @@ dist_ngak_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, 
     registerDoSEQ()
     rm(workers)
 
+    cat("\n")
     plyr::rbind.fill(benchmarks)
 }))
 
