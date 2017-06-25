@@ -40,13 +40,15 @@ public:
     LowerTriMat(const LowerTriMat& ltm)
     {
         _size = ltm._size;
+        _len = ltm._len;
         _data = new T[_len];
         for (int i = 0; i < _len; i++) _data[i] = ltm._data[i];
     }
 
     LowerTriMat& operator= (const LowerTriMat& ltm)
     {
-        _size = ltm.size;
+        _size = ltm._size;
+        _len = ltm._len;
         _data = new T[_len];
         for (int i = 0; i < _len; i++) _data[i] = ltm._data[i];
         return *this;
