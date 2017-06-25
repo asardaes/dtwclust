@@ -1,5 +1,5 @@
 #include <Rcpp.h>
-#include <algorithm> // std::stable_sort
+#include <algorithm> // std::stable_sort and std::sort
 #include <iomanip> // std::setprecision
 #include <vector>
 #include "dtwclustpp.h"
@@ -293,7 +293,7 @@ std::vector<double> nn_dist_2(const Rcpp::List& series,
 
 void cluster_assignment(const Rcpp::IntegerVector& k_vec,
                         const double dc,
-                        const std::vector<size_t>& id_cent,
+                        std::vector<size_t>& id_cent,
                         const std::vector<size_t>& id_cl,
                         const std::vector<int>& nearest_neighbors,
                         const double dist_op_percent,
@@ -305,25 +305,24 @@ void cluster_assignment(const Rcpp::IntegerVector& k_vec,
     for (int counter = 0; counter < len; counter++) {
         int k = k_vec[counter];
         int n = id_cl.size();
-        Rcpp::IntegerVector cl = Rcpp::rep(-1, n);
-        Rcpp::IntegerVector cent(k);
-        std::vector<int> cent_stdv(k);
+        Rcpp::IntegerVector cl = Rcpp::rep(-1, n); // cluster ids
+        Rcpp::IntegerVector cent(k); // centroid ids
 
-        for (int i = 0; i < k; i++) cent_stdv[i] = (int)(id_cent[i]);
-        std::stable_sort(cent_stdv.begin(), cent_stdv.end());
-
+        // id_cent only contains distinct elements, so stable sorting is not needed
+        std::sort(id_cent.begin(), id_cent.begin() + k);
         for (int i = 0; i < k; i++) {
-            cent[i] = cent_stdv[i] + 1;
-            cl[cent_stdv[i]] = i + 1;
-        }
-
-        for (int i = 0; i < n; i++) {
-            if (cl[id_cl[i]] == -1) cl[id_cl[i]] = cl[nearest_neighbors[i]];
+            int ii = (int)(id_cent[i]);
+            cent[i] = ii + 1;
+            cl[ii] = i + 1;
         }
 
         bool warn = false;
         for (int i = 0; i < n; i++) {
-            if (cl[i] == -1) warn = true;
+            int ii = id_cl[i];
+            if (cl[ii] == -1) {
+                cl[ii] = cl[nearest_neighbors[i]];
+                if (cl[ii] == -1) warn = true;
+            }
         }
 
         if (warn)
