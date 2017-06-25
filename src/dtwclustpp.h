@@ -50,11 +50,10 @@ void envelope_cpp(const Rcpp::NumericVector& array, const unsigned int width,
 /* Templates */
 // =================================================================================================
 
+// see https://stackoverflow.com/questions/1577475/c-sorting-and-keeping-track-of-indexes
 template <typename T>
 std::vector<size_t> stable_sort_ind(const std::vector<T>& v, const bool decreasing)
 {
-    // see https://stackoverflow.com/questions/1577475/c-sorting-and-keeping-track-of-indexes
-
     // initialize original index locations
     std::vector<size_t> idx(v.size());
     std::iota(idx.begin(), idx.end(), 0);
@@ -70,10 +69,10 @@ std::vector<size_t> stable_sort_ind(const std::vector<T>& v, const bool decreasi
     return idx;
 }
 
+// see https://stackoverflow.com/a/22183350/5793905
 template <typename T>
 void reorder(std::vector<T>& v, std::vector<size_t>& order)
 {
-    // see https://stackoverflow.com/a/22183350/5793905
     if (v.size() != order.size()) Rcpp::stop("Cannot reorder with vectors of different sizes");
 
     // for all elements to put in place
