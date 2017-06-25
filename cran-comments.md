@@ -1,4 +1,5 @@
 ## Update to version 4.0.2
+* Ported some functionality to C++ and fixed bugs.
 
 ## Test environments
 * Local GNU/Linux, R 3.4.0

@@ -26,6 +26,8 @@ Distmat <- setRefClass("Distmat",
                                "Initialization based on needed parameters"
 
                                if (missing(distmat)) {
+                                   if (tolower(distance) == "dtw_lb") distance <- "dtw_basic"
+
                                    if (error.check) {
                                        check_consistency(series, "vltslist")
                                        check_consistency(distance,

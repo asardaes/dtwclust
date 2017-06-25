@@ -1521,6 +1521,7 @@ pc_dtwlb <- tsclust(data, k = 4L,
                     distance = "dtw_lb", centroid = "dba",
                     trace = TRUE, seed = 8,
                     norm = "L2", window.size = 20L,
+                    control = partitional_control(pam.precompute = FALSE),
                     args = tsclust_args(cent = list(trace = TRUE)))
 
 pc_ks <- tsclust(data, k = 4L,

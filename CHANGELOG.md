@@ -4,6 +4,7 @@
 * Ported part of the algorithm that updates sparse distance matrices to `C++`.
 * Ported `TADPole` to `C++`.
 * Fixed `tsclustFamily`'s `dist` function for matrix or data frame input.
+* Fixed partitional PAM centroids for `dtw_lb` distance and `pam.precompute = FALSE` (#16).
 
 ## Version 4.0.1
 * Ported `dtw_lb` to `C++` when using `dtw_basic`.
