@@ -88,13 +88,20 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
                      backtrack = FALSE,
                      gcm = matrix(0, 2L, len))
 
-    RET <- foreach(dc = dc, .combine = c, .multicombine = TRUE, .packages = c("dtwclust")) %op% {
-        ret <- lapply(k, function(dummy) { list() }) ## modified in place in C++
-        .Call(C_tadpole, x, k, dc, dtw_args, LBM, UBM, trace, ret, PACKAGE = "dtwclust")
-        ## return
-        ret
-    }
+    RET <- foreach(
+        dc = dc, .combine = c, .multicombine = TRUE,
+        .packages = "dtwclust", .export = "call_tadpole") %op%
+        {
+            ret <- lapply(k, function(dummy) { list() }) ## modified in place in C++
+            call_tadpole(x, k, dc, dtw_args, LBM, UBM, trace, ret) ## foreach can't see C objects
+            ## return
+            ret
+        }
 
     ## Return
     if (length(RET) == 1L) RET[[1L]] else RET
 }
+
+## a parallel foreach loop will not see the C objects, so I need to pass a function from the
+## dtwclust namespace (via the .export parameter)
+call_tadpole <- function(...) { .Call(C_tadpole, ..., PACKAGE = "dtwclust") }
