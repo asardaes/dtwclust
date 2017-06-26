@@ -1,3 +1,12 @@
+## Needed old classes
+methods::setClass("proc_time4", contains = "numeric", slots = c(names = "character"))
+methods::setOldClass("proc_time", S4Class = "proc_time4")
+methods::removeClass("proc_time4")
+
+methods::setClass("hclust4", contains = "list", slots = c(names = "character"))
+methods::setOldClass("hclust", S4Class = "hclust4")
+methods::removeClass("hclust4")
+
 #' Class definition for `TSClusters` and derived classes
 #'
 #' Formal S4 classes for time-series clusters. See class hierarchy and slot organization at the
