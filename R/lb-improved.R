@@ -189,18 +189,10 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     }
 
     if (force.symmetry && !pairwise) {
-        if (nrow(D) != ncol(D)) {
+        if (nrow(D) != ncol(D))
             warning("Unable to force symmetry. Resulting distance matrix is not square.")
-
-        } else {
-            ind_tri <- lower.tri(D)
-            new_low_tri_vals <- t(D)[ind_tri]
-            ind_correct <- D[ind_tri] > new_low_tri_vals
-            new_low_tri_vals[ind_correct] <- D[ind_tri][ind_correct]
-            D[ind_tri] <- new_low_tri_vals
-            D <- t(D)
-            D[ind_tri] <- new_low_tri_vals
-        }
+        else
+            .Call(C_force_lb_symmetry, D, PACKAGE = "dtwclust")
     }
 
     class(D) <- retclass
