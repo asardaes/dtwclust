@@ -13,8 +13,8 @@
 #' @param iter.max Integer. Maximum number of allowed iterations for partitional/fuzzy clustering.
 #' @param nrep Integer. How many times to repeat clustering with different starting points.
 #' @param symmetric Logical flag. Is the distance function symmetric? In other words, is `dist(x,y)`
-#'   == `dist(y,x)`? If `TRUE`, only half the distance matrix needs to be computed. Overridden for
-#'   the distances included in \pkg{dtwclust}.
+#'   == `dist(y,x)`? If `TRUE`, only half the distance matrix needs to be computed. Automatically
+#'   detected and overridden for the distances included in \pkg{dtwclust}.
 #' @param packages Character vector with the names of any packages required for custom `proxy`
 #'   functions. Since the distance entries are re-registered in each parallel worker if needed, this
 #'   is probably useless, but just in case.

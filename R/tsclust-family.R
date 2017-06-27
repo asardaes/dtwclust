@@ -14,10 +14,20 @@
 #' The prototype includes the `cluster` function for partitional methods, as well as a pass-through
 #' `preproc` function.
 #'
+#' Note that symmetric optimizations in `dist` (see [tsclust-controls]) are applied automatically to
+#' distances that are included with \pkg{dtwclust} when only one data argument is provided. Use two
+#' to avoid the optimizations (see examples).
+#'
 #' @slot dist The function to calculate the distance matrices.
 #' @slot allcent The function to calculate centroids on each iteration.
 #' @slot cluster The function used to assign a series to a cluster.
 #' @slot preproc The function used to preprocess the data (relevant for [stats::predict()]).
+#'
+#' @note
+#'
+#' This class is meant to group together the most relevant functions, but they are **not** linked
+#' with each other automatically. In other words, neither `dist` nor `allcent` apply `preproc`. They
+#' essentially don't know of each other's existence.
 #'
 #' @examples
 #'
@@ -28,10 +38,18 @@
 #'
 #' \dontrun{
 #' data(uciCT)
-#' fam <- new("tsclustFamily", dist = "gak",
-#'            control = partitional_control(symmetric = TRUE))
+#' fam <- new("tsclustFamily", dist = "gak")
 #'
+#' # This is done with symmetric optimizations
 #' crossdist <- fam@dist(CharTraj, window.size = 18L)
+#'
+#' # This is done without symmetric optimizations
+#' crossdist <- fam@dist(CharTraj, CharTraj, window.size = 18L)
+#'
+#' # For non-dtwclust distances, symmetric optimizations only apply with an appropriate control
+#' fam <- new("tsclustFamily", dist = "Euclidean",
+#'            control = partitional_control(symmetric = TRUE))
+#' fam@dist(CharTraj[1L:5L])
 #' }
 #'
 #' # If you want the fuzzy family, use fuzzy = TRUE

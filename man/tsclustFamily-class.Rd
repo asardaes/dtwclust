@@ -15,6 +15,10 @@ parameters in \code{...}.
 
 The prototype includes the \code{cluster} function for partitional methods, as well as a pass-through
 \code{preproc} function.
+
+Note that symmetric optimizations in \code{dist} (see \link{tsclust-controls}) are applied automatically to
+distances that are included with \pkg{dtwclust} when only one data argument is provided. Use two
+to avoid the optimizations (see examples).
 }
 \section{Slots}{
 
@@ -28,6 +32,11 @@ The prototype includes the \code{cluster} function for partitional methods, as w
 \item{\code{preproc}}{The function used to preprocess the data (relevant for \code{\link[stats:predict]{stats::predict()}}).}
 }}
 
+\note{
+This class is meant to group together the most relevant functions, but they are \strong{not} linked
+with each other automatically. In other words, neither \code{dist} nor \code{allcent} apply \code{preproc}. They
+essentially don't know of each other's existence.
+}
 \examples{
 
 # The dist() function in tsclustFamily works like proxy::dist() but supports
@@ -37,10 +46,18 @@ The prototype includes the \code{cluster} function for partitional methods, as w
 
 \dontrun{
 data(uciCT)
-fam <- new("tsclustFamily", dist = "gak",
-           control = partitional_control(symmetric = TRUE))
+fam <- new("tsclustFamily", dist = "gak")
 
+# This is done with symmetric optimizations
 crossdist <- fam@dist(CharTraj, window.size = 18L)
+
+# This is done without symmetric optimizations
+crossdist <- fam@dist(CharTraj, CharTraj, window.size = 18L)
+
+# For non-dtwclust distances, symmetric optimizations only apply with an appropriate control
+fam <- new("tsclustFamily", dist = "Euclidean",
+           control = partitional_control(symmetric = TRUE))
+fam@dist(CharTraj[1L:5L])
 }
 
 # If you want the fuzzy family, use fuzzy = TRUE
