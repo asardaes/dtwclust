@@ -60,10 +60,13 @@ ddist2 <- function(distance, control) {
             export <- c("distance", "dist_entry", "check_consistency", "enlist")
 
             if (is.null(centroids) && symmetric && !isTRUE(dots$pairwise)) {
-                if (dist_entry$loop && foreach::getDoParWorkers() > 1L && isTRUE(foreach::getDoParName() != "doSEQ")) {
+                if (dist_entry$loop && foreach::getDoParWorkers() > 1L) {
                     ## WHOLE SYMMETRIC DISTMAT WITH proxy LOOP IN PARALLEL
                     ## Only half of it is computed
                     ## I think proxy can do this if y = NULL, but not in parallel
+
+                    d <- bigmemory::big.matrix(length(x), length(x), "double", 0)
+                    d_desc <- bigmemory::describe(d)
 
                     ## strict pairwise as in proxy::dist doesn't make sense here,
                     ## but it's pairwise between pairs
@@ -71,33 +74,33 @@ ddist2 <- function(distance, control) {
                     pairs <- call_pairs(length(x), lower = FALSE)
                     pairs <- split_parallel(pairs, 1L)
 
-                    d <- foreach(pairs = pairs,
-                                 .combine = c,
-                                 .multicombine = TRUE,
-                                 .packages = control$packages,
-                                 .export = export) %op% {
-                                     if (!check_consistency(dist_entry$names[1L], "dist"))
-                                         do.call(proxy::pr_DB$set_entry, dist_entry)
+                    foreach(pairs = pairs,
+                            .combine = c,
+                            .multicombine = TRUE,
+                            .noexport = c("d"),
+                            .packages = c(control$packages, "bigmemory"),
+                            .export = export) %op% {
+                                if (!check_consistency(dist_entry$names[1L], "dist"))
+                                    do.call(proxy::pr_DB$set_entry, dist_entry)
 
-                                     ## 'dots' has all extra arguments that are valid
-                                     dd <- do.call(proxy::dist,
-                                                   enlist(x = x[pairs[ , 1L]],
-                                                          y = x[pairs[ , 2L]],
-                                                          method = distance,
-                                                          dots = dots))
+                                dd <- bigmemory::attach.big.matrix(d_desc)
 
-                                     dd
-                                 }
+                                ## 'dots' has all extra arguments that are valid
+                                dd[pairs] <- do.call(proxy::dist,
+                                                     enlist(x = x[pairs[ , 1L]],
+                                                            y = x[pairs[ , 2L]],
+                                                            method = distance,
+                                                            dots = dots))
+                                gc()
+                                NULL
+                            }
 
                     rm("pairs")
-                    D <- matrix(0, nrow = length(x), ncol = length(x))
-                    D[upper.tri(D)] <- d
-                    D <- t(D)
-                    D[upper.tri(D)] <- d
-                    d <- D
-                    rm("D")
+                    d <- d[,]
+                    .Call(C_force_symmetry, d, FALSE, PACKAGE = "dtwclust")
                     attr(d, "class") <- "crossdist"
                     attr(d, "dimnames") <- list(names(x), names(x))
+                    gc()
 
                 } else {
                     ## WHOLE SYMMETRIC DISTMAT WITH CUSTOM LOOP OR SEQUENTIAL proxy LOOP

@@ -155,26 +155,33 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
         pairs <- call_pairs(length(x), lower = FALSE)
         pairs <- split_parallel(pairs, 1L)
         dots$pairwise <- TRUE
+        D <- bigmemory::big.matrix(length(x), length(x), "double", 0)
+        D_desc <- bigmemory::describe(D)
 
-        d <- foreach(pairs = pairs,
-                     .combine = c,
-                     .multicombine = TRUE,
-                     .packages = "dtwclust",
-                     .export = "enlist") %op% {
-                         do.call(proxy::dist,
-                                 enlist(x = x[pairs[ , 1L]],
-                                        y = x[pairs[ , 2L]],
-                                        method = "dtw_basic",
-                                        gcm = gcm,
-                                        dots = dots))
-                     }
+        foreach(pairs = pairs,
+                .combine = c,
+                .multicombine = TRUE,
+                .packages = c("dtwclust", "bigmemory"),
+                .noexport = "D",
+                .export = "enlist") %op% {
+                    d <- bigmemory::attach.big.matrix(D_desc)
+
+                    ## 'dots' has all extra arguments that are valid
+                    d[pairs] <- do.call(proxy::dist,
+                                        enlist(x = x[pairs[ , 1L]],
+                                               y = x[pairs[ , 2L]],
+                                               method = "dtw_basic",
+                                               gcm = gcm,
+                                               dots = dots))
+                    gc()
+                    NULL
+                }
 
         rm("pairs")
-        D <- matrix(0, nrow = length(x), ncol = length(x))
-        D[upper.tri(D)] <- d
-        D <- t(D)
-        D[upper.tri(D)] <- d
+        D <- D[,]
+        .Call(C_force_symmetry, D, FALSE, PACKAGE = "dtwclust")
         attr(D, "dimnames") <- list(names(x), names(x))
+        gc()
 
     } else {
         Y <- split_parallel(y)

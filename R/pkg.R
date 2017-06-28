@@ -68,6 +68,10 @@
 #'
 #' @import foreach
 #'
+#' @importFrom bigmemory attach.big.matrix
+#' @importFrom bigmemory big.matrix
+#' @importFrom bigmemory describe
+#'
 #' @importFrom clue as.cl_class_ids
 #' @importFrom clue as.cl_membership
 #' @importFrom clue cl_class_ids

@@ -264,28 +264,32 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
     } else if (symmetric) {
         pairs <- call_pairs(length(x), lower = FALSE)
         pairs <- split_parallel(pairs, 1L)
+        D <- bigmemory::big.matrix(length(x), length(x), "double", 0)
+        D_desc <- bigmemory::describe(D)
 
-        d <- foreach(pairs = pairs,
-                     .combine = c,
-                     .multicombine = TRUE,
-                     .packages = "dtwclust",
-                     .export = "enlist") %op% {
-                         mapply(x[pairs[ , 1L]], x[pairs[ , 2L]],
-                                SIMPLIFY = TRUE,
-                                FUN = function(xx, yy) {
-                                    do.call("GAK",
-                                            enlist(x = xx,
-                                                   y = yy,
-                                                   logs = logs,
-                                                   dots = dots))
-                                })
-                     }
+        foreach(pairs = pairs,
+                .combine = c,
+                .multicombine = TRUE,
+                .packages = c("dtwclust", "bigmemory"),
+                .noexport = "D",
+                .export = "enlist") %op% {
+                    d <- bigmemory::attach.big.matrix(D_desc)
+                    d[pairs] <- mapply(x[pairs[ , 1L]], x[pairs[ , 2L]],
+                                       SIMPLIFY = TRUE,
+                                       FUN = function(xx, yy) {
+                                           do.call("GAK",
+                                                   enlist(x = xx,
+                                                          y = yy,
+                                                          logs = logs,
+                                                          dots = dots))
+                                       })
+                    gc()
+                    NULL
+                }
 
         rm("pairs")
-        D <- matrix(0, nrow = length(x), ncol = length(x))
-        D[upper.tri(D)] <- d
-        D <- t(D)
-        D[upper.tri(D)] <- d
+        D <- D[,]
+        .Call(C_force_symmetry, D, FALSE, PACKAGE = "dtwclust")
         ## normalize
         D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
         diag(D) <- 0
