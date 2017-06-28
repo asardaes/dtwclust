@@ -15,8 +15,8 @@
 #' `preproc` function.
 #'
 #' Note that symmetric optimizations in `dist` (see [tsclust-controls]) are applied automatically to
-#' distances that are included with \pkg{dtwclust} when only one data argument is provided. Use two
-#' to avoid the optimizations (see examples).
+#' [dtw_basic()] (if applicable) and [GAK()] when only one data argument is provided. Use two to
+#' avoid the optimizations (see examples).
 #'
 #' @slot dist The function to calculate the distance matrices.
 #' @slot allcent The function to calculate centroids on each iteration.

@@ -17,8 +17,8 @@ The prototype includes the \code{cluster} function for partitional methods, as w
 \code{preproc} function.
 
 Note that symmetric optimizations in \code{dist} (see \link{tsclust-controls}) are applied automatically to
-distances that are included with \pkg{dtwclust} when only one data argument is provided. Use two
-to avoid the optimizations (see examples).
+\code{\link[=dtw_basic]{dtw_basic()}} (if applicable) and \code{\link[=GAK]{GAK()}} when only one data argument is provided. Use two to
+avoid the optimizations (see examples).
 }
 \section{Slots}{
 
