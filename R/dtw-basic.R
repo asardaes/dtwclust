@@ -154,7 +154,6 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
     } else if (symmetric) {
         pairs <- call_pairs(length(x), lower = FALSE)
         pairs <- split_parallel(pairs, 1L)
-        dots$pairwise <- TRUE
         D <- bigmemory::big.matrix(length(x), length(x), "double", 0)
         D_desc <- bigmemory::describe(D)
 
@@ -162,16 +161,19 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
                 .combine = c,
                 .multicombine = TRUE,
                 .packages = c("dtwclust", "bigmemory"),
-                .noexport = "D",
+                .noexport = c("D", "y"),
                 .export = "enlist") %op% {
                     d <- bigmemory::attach.big.matrix(D_desc)
                     ## 'dots' has all extra arguments that are valid
-                    d[pairs] <- do.call(proxy::dist,
-                                        enlist(x = x[pairs[ , 1L]],
-                                               y = x[pairs[ , 2L]],
-                                               method = "dtw_basic",
-                                               gcm = gcm,
-                                               dots = dots))
+                    d[pairs] <- mapply(x[pairs[ , 1L]], x[pairs[ , 2L]],
+                                       SIMPLIFY = TRUE,
+                                       FUN = function(xx, yy) {
+                                           do.call("dtw_basic",
+                                                   enlist(x = xx,
+                                                          y = yy,
+                                                          gcm = gcm,
+                                                          dots = dots))
+                                       })
                     rm("d")
                     gc()
                     NULL
