@@ -104,4 +104,6 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
 
 ## a parallel foreach loop will not see the C objects, so I need to pass a function from the
 ## dtwclust namespace (via the .export parameter)
-call_tadpole <- function(...) { .Call(C_tadpole, ..., PACKAGE = "dtwclust") }
+call_tadpole <- function(x, k, dc, dtw_args, LBM, UBM, trace, ret) {
+    .Call(C_tadpole, x, k, dc, dtw_args, LBM, UBM, trace, ret, PACKAGE = "dtwclust")
+}
