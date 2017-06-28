@@ -24,6 +24,8 @@ RcppExport SEXP dtw_lb(SEXP X, SEXP Y, SEXP D, SEXP DOTS);
 
 RcppExport SEXP envelope(SEXP series, SEXP window);
 
+RcppExport SEXP force_symmetry(SEXP X, SEXP LOWER);
+
 RcppExport SEXP force_lb_symmetry(SEXP X);
 
 RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U);
