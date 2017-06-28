@@ -57,7 +57,7 @@ ddist2 <- function(distance, control) {
             dots <- dots[intersect(names(dots), valid_args)]
 
             ## variables/functions from the parent environments that should be exported
-            export <- c("distance", "dist_entry", "check_consistency", "enlist")
+            export <- c("distance", "dist_entry", "check_consistency", "enlist", "subset_dots")
 
             if (is.null(centroids) && symmetric && !isTRUE(dots$pairwise)) {
                 if (dist_entry$loop && foreach::getDoParWorkers() > 1L) {
@@ -65,36 +65,33 @@ ddist2 <- function(distance, control) {
                     ## Only half of it is computed
                     ## I think proxy can do this if y = NULL, but not in parallel
 
+                    pairs <- call_pairs(length(x), lower = FALSE)
+                    pairs <- split_parallel(pairs, 1L)
                     d <- bigmemory::big.matrix(length(x), length(x), "double", 0)
                     d_desc <- bigmemory::describe(d)
 
-                    ## strict pairwise as in proxy::dist doesn't make sense here,
-                    ## but it's pairwise between pairs
-                    dots$pairwise <- TRUE
-                    pairs <- call_pairs(length(x), lower = FALSE)
-                    pairs <- split_parallel(pairs, 1L)
-
-                    foreach(pairs = pairs,
-                            .combine = c,
-                            .multicombine = TRUE,
-                            .noexport = c("d"),
-                            .packages = c(control$packages, "bigmemory"),
-                            .export = export) %op% {
-                                if (!check_consistency(dist_entry$names[1L], "dist"))
-                                    do.call(proxy::pr_DB$set_entry, dist_entry)
-
-                                dd <- bigmemory::attach.big.matrix(d_desc)
-
-                                ## 'dots' has all extra arguments that are valid
-                                dd[pairs] <- do.call(proxy::dist,
-                                                     enlist(x = x[pairs[ , 1L]],
-                                                            y = x[pairs[ , 2L]],
-                                                            method = distance,
-                                                            dots = dots))
-                                rm("dd")
-                                gc()
-                                NULL
-                            }
+                    foreach(
+                        pairs = pairs,
+                        .combine = c,
+                        .multicombine = TRUE,
+                        .noexport = c("d"),
+                        .packages = c(control$packages, "bigmemory"),
+                        .export = export
+                    ) %op% {
+                        dd <- bigmemory::attach.big.matrix(d_desc)
+                        dd[pairs] <- mapply(x[pairs[ , 1L]], x[pairs[ , 2L]],
+                                            SIMPLIFY = TRUE,
+                                            FUN = function(xx, yy) {
+                                                do.call(dist_entry$FUN,
+                                                        enlist(xx,
+                                                               yy,
+                                                               dots = subset_dots(dots,
+                                                                                  dist_entry$FUN)))
+                                            })
+                        rm("dd")
+                        gc()
+                        NULL
+                    }
 
                     rm("pairs")
                     d <- d[,]
