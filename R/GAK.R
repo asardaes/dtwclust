@@ -271,7 +271,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
                 .combine = c,
                 .multicombine = TRUE,
                 .packages = c("dtwclust", "bigmemory"),
-                .noexport = "D",
+                .noexport = c("D", "X", "Y", "y", "gak_x", "gak_y"),
                 .export = "enlist") %op% {
                     d <- bigmemory::attach.big.matrix(D_desc)
                     d[pairs] <- mapply(x[pairs[ , 1L]], x[pairs[ , 2L]],
@@ -283,6 +283,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
                                                           logs = logs,
                                                           dots = dots))
                                        })
+                    rm("d")
                     gc()
                     NULL
                 }

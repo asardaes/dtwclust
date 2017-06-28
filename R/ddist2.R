@@ -91,6 +91,7 @@ ddist2 <- function(distance, control) {
                                                             y = x[pairs[ , 2L]],
                                                             method = distance,
                                                             dots = dots))
+                                rm("dd")
                                 gc()
                                 NULL
                             }
