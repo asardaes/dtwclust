@@ -52,7 +52,7 @@ test_that("Parallel FORK computation gives the same results as sequential", {
     ## Also test FORK in Linux
     cat("Test FORKs:\n")
 
-    cl <- makeCluster(num_workers, "FORK")
+    cl <- makeCluster(num_workers - 1L, "FORK")
     registerDoParallel(cl)
 
     ## Filter excludes files that have "parallel" in them, otherwise it would be recursive
