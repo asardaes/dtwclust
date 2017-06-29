@@ -165,15 +165,16 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
                 .export = "enlist") %op% {
                     d <- bigmemory::attach.big.matrix(D_desc)
                     ## 'dots' has all extra arguments that are valid
-                    d[pairs] <- mapply(x[pairs[ , 1L]], x[pairs[ , 2L]],
-                                       SIMPLIFY = TRUE,
-                                       FUN = function(xx, yy) {
-                                           do.call("dtw_basic",
-                                                   enlist(x = xx,
-                                                          y = yy,
-                                                          gcm = gcm,
-                                                          dots = dots))
-                                       })
+                    apply(pairs, 1L, function(ij) {
+                        i <- ij[1L]
+                        j <- ij[2L]
+                        d[i,j] <- do.call("dtw_basic",
+                                          enlist(x = x[[i]],
+                                                 y = x[[j]],
+                                                 gcm = gcm,
+                                                 dots = dots))
+                        NULL
+                    })
                     rm("d")
                     gc()
                     NULL

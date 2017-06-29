@@ -79,15 +79,15 @@ ddist2 <- function(distance, control) {
                         .export = export
                     ) %op% {
                         dd <- bigmemory::attach.big.matrix(d_desc)
-                        dd[pairs] <- mapply(x[pairs[ , 1L]], x[pairs[ , 2L]],
-                                            SIMPLIFY = TRUE,
-                                            FUN = function(xx, yy) {
-                                                do.call(dist_entry$FUN,
-                                                        enlist(xx,
-                                                               yy,
-                                                               dots = subset_dots(dots,
-                                                                                  dist_entry$FUN)))
-                                            })
+                        apply(pairs, 1L, function(ij) {
+                            i <- ij[1L]
+                            j <- ij[2L]
+                            dd[i,j] <- do.call(dist_entry$FUN,
+                                               enlist(x[[i]],
+                                                      x[[j]],
+                                                      dots = subset_dots(dots, dist_entry$FUN)))
+                            NULL
+                        })
                         rm("dd")
                         gc()
                         NULL

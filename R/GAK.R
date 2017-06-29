@@ -274,15 +274,16 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
                 .noexport = c("D", "X", "Y", "y", "gak_x", "gak_y"),
                 .export = "enlist") %op% {
                     d <- bigmemory::attach.big.matrix(D_desc)
-                    d[pairs] <- mapply(x[pairs[ , 1L]], x[pairs[ , 2L]],
-                                       SIMPLIFY = TRUE,
-                                       FUN = function(xx, yy) {
-                                           do.call("GAK",
-                                                   enlist(x = xx,
-                                                          y = yy,
-                                                          logs = logs,
-                                                          dots = dots))
-                                       })
+                    apply(pairs, 1L, function(ij) {
+                        i <- ij[1L]
+                        j <- ij[2L]
+                        d[i,j] <- do.call("GAK",
+                                          enlist(x = x[[i]],
+                                                 y = x[[j]],
+                                                 logs = logs,
+                                                 dots = dots))
+                        NULL
+                    })
                     rm("d")
                     gc()
                     NULL
