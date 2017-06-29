@@ -152,37 +152,42 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
         retclass <- "pairdist"
 
     } else if (symmetric) {
-        pairs <- call_pairs(length(x), lower = FALSE)
-        pairs <- split_parallel(pairs, 1L)
+        len <- length(x)
+        loop_endpoints <- symmetric_loop_endpoints(len)
         D <- bigmemory::big.matrix(length(x), length(x), "double", 0)
         D_desc <- bigmemory::describe(D)
 
-        foreach(pairs = pairs,
+        foreach(loop_endpoints = loop_endpoints,
                 .combine = c,
                 .multicombine = TRUE,
                 .packages = c("dtwclust", "bigmemory"),
                 .noexport = c("D", "y"),
                 .export = "enlist") %op% {
                     d <- bigmemory::attach.big.matrix(D_desc)
-                    ## 'dots' has all extra arguments that are valid
-                    apply(pairs, 1L, function(ij) {
-                        i <- ij[1L]
-                        j <- ij[2L]
-                        d[i,j] <- do.call("dtw_basic",
-                                          enlist(x = x[[i]],
-                                                 y = x[[j]],
-                                                 gcm = gcm,
-                                                 dots = dots))
-                        NULL
-                    })
+                    ## while should be faster here, no big data is modified
+                    i <- loop_endpoints$start$i
+                    j <- loop_endpoints$start$j
+                    while (j <= loop_endpoints$end$j) {
+                        i_max <- if (j == loop_endpoints$end$j) loop_endpoints$end$i else len
+                        while (i <= i_max) {
+                            dist_val <- do.call("dtw_basic",
+                                                enlist(x = x[[i]],
+                                                       y = x[[j]],
+                                                       gcm = gcm,
+                                                       dots = dots))
+                            d[i,j] <- dist_val
+                            d[j,i] <- dist_val
+                            i <- i + 1L
+                        }
+                        j <- j + 1L
+                        i <- j + 1L
+                    }
                     rm("d")
                     gc()
                     NULL
                 }
 
-        rm("pairs")
         D <- D[,]
-        .Call(C_force_symmetry, D, FALSE, PACKAGE = "dtwclust")
         attr(D, "dimnames") <- list(names(x), names(x))
         gc()
 

@@ -262,36 +262,42 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
         retclass <- "pairdist"
 
     } else if (symmetric) {
-        pairs <- call_pairs(length(x), lower = FALSE)
-        pairs <- split_parallel(pairs, 1L)
+        len <- length(x)
+        loop_endpoints <- symmetric_loop_endpoints(len)
         D <- bigmemory::big.matrix(length(x), length(x), "double", 0)
         D_desc <- bigmemory::describe(D)
 
-        foreach(pairs = pairs,
+        foreach(loop_endpoints = loop_endpoints,
                 .combine = c,
                 .multicombine = TRUE,
                 .packages = c("dtwclust", "bigmemory"),
                 .noexport = c("D", "X", "Y", "y", "gak_x", "gak_y"),
                 .export = "enlist") %op% {
                     d <- bigmemory::attach.big.matrix(D_desc)
-                    apply(pairs, 1L, function(ij) {
-                        i <- ij[1L]
-                        j <- ij[2L]
-                        d[i,j] <- do.call("GAK",
-                                          enlist(x = x[[i]],
-                                                 y = x[[j]],
-                                                 logs = logs,
-                                                 dots = dots))
-                        NULL
-                    })
+                    ## while should be faster here, no big data is modified
+                    i <- loop_endpoints$start$i
+                    j <- loop_endpoints$start$j
+                    while (j <= loop_endpoints$end$j) {
+                        i_max <- if (j == loop_endpoints$end$j) loop_endpoints$end$i else len
+                        while (i <= i_max) {
+                            dist_val <- do.call("GAK",
+                                                enlist(x = x[[i]],
+                                                       y = x[[j]],
+                                                       logs = logs,
+                                                       dots = dots))
+                            d[i,j] <- dist_val
+                            d[j,i] <- dist_val
+                            i <- i + 1L
+                        }
+                        j <- j + 1L
+                        i <- j + 1L
+                    }
                     rm("d")
                     gc()
                     NULL
                 }
 
-        rm("pairs")
         D <- D[,]
-        .Call(C_force_symmetry, D, FALSE, PACKAGE = "dtwclust")
         ## normalize
         D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
         diag(D) <- 0

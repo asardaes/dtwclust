@@ -269,6 +269,49 @@ validate_pairwise <- function(x, y) {
 # Helper distance-related
 # ==================================================================================================
 
+# get endpoints for parallel symmetric distance matrix calculations based on number of workers
+symmetric_loop_endpoints <- function(n) {
+    if (n < 2L) stop("No symmetric calculations possible for a 1x1 distance matrix")
+    num_workers <- foreach::getDoParWorkers()
+    if (num_workers == 1L) return(list(list(
+        start = list(i = 2L, j = 1L), end = list(i = n, j = n - 1L))
+    ))
+
+    ## single to double index for symmetric matrices
+    s2d <- function(id, n) {
+        if (id < n) return(list(i = id + 1L, j = 1L))
+        ## start at second column
+        i <- 3L
+        j <- 2L
+        start_pair <- n
+        end_pair <- n * 2L - 3L
+        next_start_pair <- end_pair + 1L
+        next_end_pair <- next_start_pair + n - j - 2L
+        ## j is ready after this while loop finishes
+        while (!(id >= start_pair && id <= end_pair)) {
+            start_pair <- end_pair + 1L
+            end_pair <- start_pair + n - j - 2L
+            i <- i + 1L
+            j <- j + 1L
+        }
+        ## while loop for i
+        while (start_pair < id) {
+            i <- i + 1L
+            start_pair <- start_pair + 1L
+        }
+        ## return
+        list(i = i, j = j)
+    }
+
+    num_pairs <- as.integer(n * (n + 1L) / 2L - n)
+    if (num_pairs < num_workers) num_workers <- num_pairs
+    start_pairs <- cumsum(c(1L, rep(as.integer(num_pairs / num_workers), num_workers - 1L)))
+    end_pairs <- c(start_pairs[-1L] - 1L, num_pairs)
+    Map(start_pairs, end_pairs, f = function(start_pair, end_pair) {
+        list(start = s2d(start_pair, n), end = s2d(end_pair, n))
+    })
+}
+
 # column-wise medians
 colMedians <- function(mat) { apply(mat, 2L, stats::median) }
 

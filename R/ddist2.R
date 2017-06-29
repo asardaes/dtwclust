@@ -64,14 +64,13 @@ ddist2 <- function(distance, control) {
                     ## WHOLE SYMMETRIC DISTMAT WITH proxy LOOP IN PARALLEL
                     ## Only half of it is computed
                     ## I think proxy can do this if y = NULL, but not in parallel
-
-                    pairs <- call_pairs(length(x), lower = FALSE)
-                    pairs <- split_parallel(pairs, 1L)
-                    d <- bigmemory::big.matrix(length(x), length(x), "double", 0)
+                    len <- length(x)
+                    loop_endpoints <- symmetric_loop_endpoints(len)
+                    d <- bigmemory::big.matrix(len, len, "double", 0)
                     d_desc <- bigmemory::describe(d)
 
                     foreach(
-                        pairs = pairs,
+                        loop_endpoints = loop_endpoints,
                         .combine = c,
                         .multicombine = TRUE,
                         .noexport = c("d"),
@@ -79,23 +78,30 @@ ddist2 <- function(distance, control) {
                         .export = export
                     ) %op% {
                         dd <- bigmemory::attach.big.matrix(d_desc)
-                        apply(pairs, 1L, function(ij) {
-                            i <- ij[1L]
-                            j <- ij[2L]
-                            dd[i,j] <- do.call(dist_entry$FUN,
-                                               enlist(x[[i]],
-                                                      x[[j]],
-                                                      dots = subset_dots(dots, dist_entry$FUN)))
-                            NULL
-                        })
+                        ## while should be faster here, no big data is modified
+                        i <- loop_endpoints$start$i
+                        j <- loop_endpoints$start$j
+                        while (j <= loop_endpoints$end$j) {
+                            i_max <- if (j == loop_endpoints$end$j) loop_endpoints$end$i else len
+                            while (i <= i_max) {
+                                dist_val <- do.call(dist_entry$FUN,
+                                                    enlist(x[[i]],
+                                                           x[[j]],
+                                                           dots = subset_dots(dots,
+                                                                              dist_entry$FUN)))
+                                dd[i,j] <- dist_val
+                                dd[j,i] <- dist_val
+                                i <- i + 1L
+                            }
+                            j <- j + 1L
+                            i <- j + 1L
+                        }
                         rm("dd")
                         gc()
                         NULL
                     }
 
-                    rm("pairs")
                     d <- d[,]
-                    .Call(C_force_symmetry, d, FALSE, PACKAGE = "dtwclust")
                     attr(d, "class") <- "crossdist"
                     attr(d, "dimnames") <- list(names(x), names(x))
                     gc()
