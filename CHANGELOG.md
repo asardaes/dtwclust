@@ -6,6 +6,7 @@
 * Improved the optimizations for symmetric distance matrices by using the `bigmemory` package.
 * Fixed `tsclustFamily`'s `dist` function for matrix or data frame input.
 * Fixed partitional PAM centroids for `dtw_lb` distance and `pam.precompute = FALSE` (#16).
+* Exported a function to coerce matrices and data frames to a list.
 
 ## Version 4.0.1
 * Ported `dtw_lb` to `C++` when using `dtw_basic`.
