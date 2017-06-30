@@ -38,7 +38,9 @@ Description: Time series clustering along with optimized techniques related
     to the Dynamic Time Warping distance and its corresponding lower bounds.
     Implementations of partitional, hierarchical, fuzzy, k-Shape and TADPole
     clustering are available. Functionality can be easily extended with
-    custom distance measures and centroid definitions.
+    custom distance measures and centroid definitions. Implementations of
+    DTW barycenter averaging and a distance based on global alignment kernels
+    are also provided. Several cluster validity indices are included.
 URL: https://github.com/asardaes/dtwclust
 BugReports: https://github.com/asardaes/dtwclust/issues
 License: GPL-3

@@ -62,7 +62,7 @@ majority vote to decide on a final result. Furthermore, it should be noted that 
 additional distance calculations when being computed, which can be very considerable if using
 DTW.
 
-Note that, even though a fuzzy partition can be changed into a crisp one, making it compatible
+Note that even though a fuzzy partition can be changed into a crisp one, making it compatible
 with many of the existing CVIs, there are also fuzzy CVIs tailored specifically to fuzzy
 clustering, and these may be more suitable in those situations, but have not been implemented
 here yet.
@@ -71,9 +71,6 @@ here yet.
 In the original definition of many internal CVIs, the Euclidean distance and a mean centroid was
 used. The implementations here change this, making use of whatever distance/centroid was chosen
 during clustering.
-
-Some internal indices require the original data for calculations, so the control flag \code{save.data}
-must be set to \code{TRUE} when running the clustering algorithm.
 
 The formula for the SF index in Saitta et al. (2007) does not correspond to the one in Arbelaitz
 et al. (2013). The one specified in the former is used here.

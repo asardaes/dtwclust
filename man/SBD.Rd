@@ -44,6 +44,20 @@ This distance is calculated with help of the Fast Fourier Transform, so it can b
 numerical precision. Thus, this function (and the functions that depend on it) might return
 different values in 32 bit installations compared to 64 bit ones.
 }
+\section{Proxy version}{
+
+
+  The version registered with \code{\link[proxy]{dist}} is custom (\code{loop = FALSE} in
+  \code{\link[proxy]{pr_DB}}). The custom function handles parallelization directly (with
+  \code{\link[foreach]{foreach}}).
+
+
+
+This distance does \emph{not} include symmetric optimizations even though the distance is symmetric.
+The overhead introduced by the logic to get only half the distance matrix was usually bigger
+than just calculating the whole matrix without said logic.
+}
+
 \examples{
 
 # load data

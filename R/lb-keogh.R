@@ -10,6 +10,8 @@
 #' @inherit lb_improved details
 #' @inheritSection lb_improved Note
 #'
+#' @template proxy
+#'
 #' @return A list with:
 #'
 #'   - `d`: The lower bound of the DTW distance.
@@ -31,7 +33,7 @@
 #'
 #' # Corresponding true DTW distance
 #' d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]],
-#'              window.type = "slantedband", window.size = 20)$distance
+#'              window.type = "sakoechiba", window.size = 20)$distance
 #'
 #' d.lbk <= d.dtw
 #'
@@ -41,9 +43,8 @@
 #'                      window.size = 20, norm = "L2")
 #'
 #' # Corresponding true DTW distance
-#' # (see dtwclust-package description for an explanation of DTW2)
-#' D.dtw <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "DTW2",
-#'                      window.type = "slantedband", window.size = 20)
+#' D.dtw <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "dtw_basic",
+#'                      norm = "L2", window.size = 20)
 #'
 #' D.lbk <= D.dtw
 #'

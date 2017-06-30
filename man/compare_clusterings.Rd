@@ -81,6 +81,10 @@ used, said function should be able to deal with possible error objects.
 If it is changed to "remove", it might not be possible to attach the scores to the results data
 frame, or it may be inconsistent. Additionally, if \code{return.objects} is \code{TRUE}, the names given
 to the objects might also be inconsistent.
+
+Parallelization can incur a lot of deep copies of data when returning the cluster objects,
+since each one will likely contain a copy of \code{datalist}. If you want to avoid this, consider
+specifying \code{score.clus} and setting \code{return.objects} to \code{FALSE}.
 }
 
 \section{Scoring}{
@@ -117,15 +121,13 @@ fuzzy and/or tadpole results via:\preformatted{scores <- lapply(list_of_lists, s
 
 Otherwise, \code{score.clus} should be a list of functions with the same names as the list above,
 so that \code{score.clus$partitional} is used to score \code{list_of_lists$partitional} and so on (via
-\code{\link[base:mapply]{base::mapply()}} with \code{SIMPLIFY} \code{=} \code{FALSE}).
+\code{\link[base:Map]{base::Map()}}).
 
 Therefore, the scores returned shall always be a list of lists with first-level names as above.
 }
 
 \section{Picking}{
 
-
-\strong{Please note that this functionality was slightly modified in version 4.0.0 of dtwclust.}
 
 If \code{return.objects} is \code{TRUE}, the scores and the list of clustering results are given to
 \code{pick.clus} as first and second arguments respectively, followed by \code{...}. Otherwise,
@@ -142,8 +144,7 @@ them.
 
 If some of these arguments are more complicated (e.g. matrices) and should \emph{not} be expanded,
 consider passing them directly via the ellipsis (\code{...}) instead of using \code{\link[=pdc_configs]{pdc_configs()}}. This
-assumes that it doesn't matter if said arguments can be passed to all functions without
-affecting their results.
+assumes that said arguments can be passed to all functions without affecting their results.
 
 The distance matrices (if calculated) are not re-used across configurations. Given the way the
 configurations are created, this shouldn't matter, because clusterings with arguments that can

@@ -33,10 +33,17 @@
 #'
 #' For more information, refer to the package vignette and the referenced article.
 #'
-#' @return The logarithm of the GAK if `normalize = FALSE`, otherwise 1 minus the normalized GAK.
-#'   The value of `sigma` is assigned as an attribute of the result.
+#' @return
+#'
+#' The logarithm of the GAK if `normalize = FALSE`, otherwise 1 minus the normalized GAK. The value
+#' of `sigma` is assigned as an attribute of the result.
+#'
+#' @template proxy
+#' @template symmetric
 #'
 #' @note
+#'
+#' The estimation of `sigma` does *not* depend on `window.size`.
 #'
 #' If `normalize` is set to `FALSE`, the returned value is **not** a distance, rather a similarity.
 #' The [proxy::dist()] version is thus always normalized.
@@ -264,7 +271,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
     } else if (symmetric) {
         len <- length(x)
         loop_endpoints <- symmetric_loop_endpoints(len)
-        D <- bigmemory::big.matrix(length(x), length(x), "double", 0)
+        D <- bigmemory::big.matrix(len, len, "double", 0)
         D_desc <- bigmemory::describe(D)
 
         foreach(loop_endpoints = loop_endpoints,
@@ -302,6 +309,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
         D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
         diag(D) <- 0
         attr(D, "dimnames") <- list(names(x), names(x))
+        gc()
 
     } else {
         D <- foreach(y = Y,

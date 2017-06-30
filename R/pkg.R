@@ -1,10 +1,7 @@
 #' Time series clustering along with optimizations for the Dynamic Time Warping distance
 #'
 #' Time series clustering with a wide variety of strategies and a series of optimizations specific
-#' to the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs). There are
-#' implementations of both traditional clustering algorithms, and more recent procedures such as
-#' k-Shape and TADPole clustering. Functionality can be easily extended with custom distance
-#' measures and centroid definitions.
+#' to the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs).
 #'
 #' @docType package
 #' @name dtwclust-package
@@ -27,9 +24,6 @@
 #' length. DTW itself does not require this, but it is relatively expensive to compute. Other
 #' distance definitions may be used, or series could be reinterpolated to a matching length
 #' (Ratanamahatana and Keogh 2004).
-#'
-#' Other packages that are particularly leveraged here are the \pkg{proxy} package for distance
-#' matrix calculations and the \pkg{dtw} package for some of the core DTW calculations.
 #'
 #' The main clustering function and entry point for this package is [tsclust()], with a convenience
 #' wrapper for multiple tests in [compare_clusterings()].
@@ -215,7 +209,7 @@ NULL
 
     ## Register SBD
     if (!check_consistency("SBD", "dist", silent = TRUE))
-        proxy::pr_DB$set_entry(FUN = SBD.proxy, names=c("SBD", "sbd"),
+        proxy::pr_DB$set_entry(FUN = SBD_proxy, names=c("SBD", "sbd"),
                                loop = FALSE, type = "metric", distance = TRUE,
                                description = "Paparrizos and Gravanos' shape-based distance for time series",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun,
@@ -251,9 +245,7 @@ NULL
                               "Using devtools::test() is currently broken, see tests/testthat.R")
 }
 
-.onUnload <- function(libpath) {
-    library.dynam.unload("dtwclust", libpath)
-}
+.onUnload <- function(libpath) { library.dynam.unload("dtwclust", libpath) }
 
 release_questions <- function() {
     c(

@@ -11,7 +11,7 @@ as.matrix(x, ...)
 }
 \description{
 \pkg{proxy} exported a non-generic \code{as.matrix} function. This is to re-export the base version
-and add some coercion methods for \code{pairdist} and \code{crossdist}.
+and add coercion methods for \code{pairdist} and \code{crossdist}.
 }
 \seealso{
 \code{\link[base:as.matrix]{base::as.matrix()}}

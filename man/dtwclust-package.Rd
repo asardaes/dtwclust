@@ -6,10 +6,7 @@
 \title{Time series clustering along with optimizations for the Dynamic Time Warping distance}
 \description{
 Time series clustering with a wide variety of strategies and a series of optimizations specific
-to the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs). There are
-implementations of both traditional clustering algorithms, and more recent procedures such as
-k-Shape and TADPole clustering. Functionality can be easily extended with custom distance
-measures and centroid definitions.
+to the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs).
 }
 \details{
 Many of the algorithms implemented in this package are specifically tailored to DTW, hence its
@@ -27,9 +24,6 @@ Most optimizations require equal dimensionality, which means time series should 
 length. DTW itself does not require this, but it is relatively expensive to compute. Other
 distance definitions may be used, or series could be reinterpolated to a matching length
 (Ratanamahatana and Keogh 2004).
-
-Other packages that are particularly leveraged here are the \pkg{proxy} package for distance
-matrix calculations and the \pkg{dtw} package for some of the core DTW calculations.
 
 The main clustering function and entry point for this package is \code{\link[=tsclust]{tsclust()}}, with a convenience
 wrapper for multiple tests in \code{\link[=compare_clusterings]{compare_clusterings()}}.

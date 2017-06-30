@@ -25,6 +25,13 @@
 #'   - `dist`: The shape-based distance between `x` and `y`.
 #'   - `yshift`: A shifted version of `y` so that it optimally matches `x` (based on [NCCc()]).
 #'
+#' @template proxy
+#' @section Proxy version:
+#'
+#'   This distance does *not* include symmetric optimizations even though the distance is symmetric.
+#'   The overhead introduced by the logic to get only half the distance matrix was usually bigger
+#'   than just calculating the whole matrix without said logic.
+#'
 #' @note
 #'
 #' If you wish to calculate the distance between several time series, it would be better to use the
@@ -113,7 +120,7 @@ SBD <- function(x, y, znorm = FALSE, error.check = TRUE) {
 # Wrapper for proxy::dist
 # ==================================================================================================
 
-SBD.proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairwise = FALSE) {
+SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairwise = FALSE) {
     x <- any2list(x)
 
     if (error.check) check_consistency(x, "vltslist")

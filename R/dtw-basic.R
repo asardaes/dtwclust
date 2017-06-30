@@ -34,6 +34,13 @@
 #'   - `index1`: `x` indices for the matched elements in the warping path.
 #'   - `index2`: `y` indices for the matched elements in the warping path.
 #'
+#' @template proxy
+#' @template symmetric
+#' @section Proxy version:
+#'
+#'   In order for symmetry to apply here, the following must be true: no window constraint is used
+#'   (`window.size` is `NULL`) or, if one is used, all series have the same length.
+#'
 #' @note
 #'
 #' The DTW algorithm (and the functions that depend on it) might return different values in 32 bit

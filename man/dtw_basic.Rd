@@ -59,3 +59,23 @@ in \code{10(2) + 1 = 21} observations falling within the window.
 The DTW algorithm (and the functions that depend on it) might return different values in 32 bit
 installations compared to 64 bit ones.
 }
+\section{Proxy version}{
+
+
+  The version registered with \code{\link[proxy]{dist}} is custom (\code{loop = FALSE} in
+  \code{\link[proxy]{pr_DB}}). The custom function handles parallelization directly (with
+  \code{\link[foreach]{foreach}}).
+
+
+
+  It also includes symmetric optimizations to calculate only half a distance matrix when
+  appropriate. Only one list of series should be provided. If you want to avoid this
+  optimization, call \code{\link[proxy]{dist}} by giving the same list of series in both \code{x}
+  and \code{y}.
+
+
+
+In order for symmetry to apply here, the following must be true: no window constraint is used
+(\code{window.size} is \code{NULL}) or, if one is used, all series have the same length.
+}
+

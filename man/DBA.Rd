@@ -38,7 +38,7 @@ and give more informative errors messages. Also used internally to avoid repeati
 
 \item{gcm}{Optional matrix to pass to \code{\link[=dtw_basic]{dtw_basic()}} (for the case when \code{backtrack = TRUE}). To
 define the matrix size, it should be assumed that \code{x} is the \emph{longest} series in \code{X}, and \code{y}
-is the \code{centroid} if provided or \code{x} otherwise. Ignored in parallel computations.}
+is the \code{centroid} if provided or \code{x} otherwise.}
 
 \item{mv.ver}{Multivariate version to use. See below.}
 }
@@ -64,19 +64,16 @@ in \code{10(2) + 1 = 21} observations falling within the window.
 }
 \note{
 The indices of the DTW alignment are obtained by calling \code{\link[=dtw_basic]{dtw_basic()}} with \code{backtrack = TRUE}.
-
-The new \code{C++} implementation (v4.0.0) has slightly different numerical accuracy (in the
-order of 10^-16, at least in x64 systems), and no longer supports parallelization directly. The
-calls through \code{\link[=tsclust]{tsclust()}} can still perform different DBA calculations in parallel.
 }
 \section{Multivariate series}{
 
 
 There are currently 2 versions of DBA implemented for multivariate series:
 \itemize{
-\item If \code{mv.ver = "by-variable"}, then each variable of \code{X} and \code{centroid} are extracted, and the
-univariate version of the algorithm is applied to each set of variables, binding the results
-by column. Therefore, the DTW backtracking is different for each variable.
+\item If \code{mv.ver = "by-variable"}, then each variable of each series in \code{X} and \code{centroid} are
+extracted, and the univariate version of the algorithm is applied to each set of variables,
+binding the results by column. Therefore, the DTW backtracking is different for each
+variable.
 \item If \code{mv.ver = "by-series"}, then all variables are considered at the same time, so the DTW
 backtracking is computed based on each multivariate series as a whole. This version was
 implemented in version 4.0.0 of \pkg{dtwclust}, and it might be faster.
@@ -89,17 +86,17 @@ implemented in version 4.0.0 of \pkg{dtwclust}, and it might be faster.
 data(uciCT)
 
 # Obtain an average for the first 5 time series
-dtw.avg <- DBA(CharTraj[1:5], CharTraj[[1]], trace = TRUE)
+dtw_avg <- DBA(CharTraj[1:5], CharTraj[[1]], trace = TRUE)
 
 # Plot
 matplot(do.call(cbind, CharTraj[1:5]), type = "l")
-points(dtw.avg)
+points(dtw_avg)
 
 # Change the provided order
-dtw.avg2 <- DBA(CharTraj[5:1], CharTraj[[1]], trace = TRUE)
+dtw_avg2 <- DBA(CharTraj[5:1], CharTraj[[1]], trace = TRUE)
 
 # Same result?
-all(dtw.avg == dtw.avg2)
+all(dtw_avg2 == dtw_avg2)
 
 }
 \references{

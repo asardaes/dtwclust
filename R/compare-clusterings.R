@@ -375,6 +375,10 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'   frame, or it may be inconsistent. Additionally, if `return.objects` is `TRUE`, the names given
 #'   to the objects might also be inconsistent.
 #'
+#'   Parallelization can incur a lot of deep copies of data when returning the cluster objects,
+#'   since each one will likely contain a copy of `datalist`. If you want to avoid this, consider
+#'   specifying `score.clus` and setting `return.objects` to `FALSE`.
+#'
 #' @section Scoring:
 #'
 #'   The clustering results are organized in a *list of lists* in the following way (where only
@@ -402,13 +406,11 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'
 #'   Otherwise, `score.clus` should be a list of functions with the same names as the list above,
 #'   so that `score.clus$partitional` is used to score `list_of_lists$partitional` and so on (via
-#'   [base::mapply()] with `SIMPLIFY` `=` `FALSE`).
+#'   [base::Map()]).
 #'
 #'   Therefore, the scores returned shall always be a list of lists with first-level names as above.
 #'
 #' @section Picking:
-#'
-#'   **Please note that this functionality was slightly modified in version 4.0.0 of dtwclust.**
 #'
 #'   If `return.objects` is `TRUE`, the scores and the list of clustering results are given to
 #'   `pick.clus` as first and second arguments respectively, followed by `...`. Otherwise,
@@ -423,8 +425,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'
 #'   If some of these arguments are more complicated (e.g. matrices) and should *not* be expanded,
 #'   consider passing them directly via the ellipsis (`...`) instead of using [pdc_configs()]. This
-#'   assumes that it doesn't matter if said arguments can be passed to all functions without
-#'   affecting their results.
+#'   assumes that said arguments can be passed to all functions without affecting their results.
 #'
 #'   The distance matrices (if calculated) are not re-used across configurations. Given the way the
 #'   configurations are created, this shouldn't matter, because clusterings with arguments that can

@@ -5,7 +5,7 @@
 #' as.matrix
 #'
 #' \pkg{proxy} exported a non-generic `as.matrix` function. This is to re-export the base version
-#' and add some coercion methods for `pairdist` and `crossdist`.
+#' and add coercion methods for `pairdist` and `crossdist`.
 #'
 #' @name as.matrix
 #' @export

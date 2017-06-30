@@ -35,7 +35,7 @@
 #' additional distance calculations when being computed, which can be very considerable if using
 #' DTW.
 #'
-#' Note that, even though a fuzzy partition can be changed into a crisp one, making it compatible
+#' Note that even though a fuzzy partition can be changed into a crisp one, making it compatible
 #' with many of the existing CVIs, there are also fuzzy CVIs tailored specifically to fuzzy
 #' clustering, and these may be more suitable in those situations, but have not been implemented
 #' here yet.
@@ -89,9 +89,6 @@
 #' used. The implementations here change this, making use of whatever distance/centroid was chosen
 #' during clustering.
 #'
-#' Some internal indices require the original data for calculations, so the control flag `save.data`
-#' must be set to `TRUE` when running the clustering algorithm.
-#'
 #' The formula for the SF index in Saitta et al. (2007) does not correspond to the one in Arbelaitz
 #' et al. (2013). The one specified in the former is used here.
 #'
@@ -123,9 +120,7 @@ setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10
     type <- match.arg(type, several.ok = TRUE,
                       choices = c("RI", "ARI", "J", "FM", "VI", "valid", "external"))
 
-    if (any(type %in% c("valid", "external")))
-        type <- c("RI", "ARI", "J", "FM", "VI")
-
+    if (any(type %in% c("valid", "external"))) type <- c("RI", "ARI", "J", "FM", "VI")
     which_flexclust <- type %in% c("RI", "ARI", "J", "FM")
 
     if (any(which_flexclust))

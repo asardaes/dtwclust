@@ -48,6 +48,14 @@ of the window. Therefore, if, for example, \code{window.size = 10}, the warping 
 observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
 in \code{10(2) + 1 = 21} observations falling within the window.
 }
+\section{Proxy version}{
+
+
+  The version registered with \code{\link[proxy]{dist}} is custom (\code{loop = FALSE} in
+  \code{\link[proxy]{pr_DB}}). The custom function handles parallelization directly (with
+  \code{\link[foreach]{foreach}}).
+}
+
 \section{Note}{
 
 
@@ -72,7 +80,7 @@ d.lbi <- lb_improved(CharTraj[[1]], CharTraj[[2]], window.size = 20)
 
 # Corresponding true DTW distance
 d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]],
-             window.type = "slantedband", window.size = 20)$distance
+             window.type = "sakoechiba", window.size = 20)$distance
 
 d.lbi <= d.dtw
 
@@ -82,9 +90,8 @@ D.lbi <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "LB_Improved",
                      window.size = 20, norm = "L2")
 
 # Corresponding true DTW distance
-# (see dtwclust documentation for an explanation of DTW2)
-D.dtw <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "DTW2",
-                     window.type = "slantedband", window.size = 20)
+D.dtw <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "dtw_basic",
+                     norm = "L2", window.size = 20)
 
 D.lbi <= D.dtw
 

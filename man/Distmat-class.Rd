@@ -7,7 +7,7 @@
 \title{Distance matrix}
 \description{
 Reference class that is used internally for PAM centroids when both \code{pam.precompute} and
-\code{pam.sparse} are \code{FALSE}.
+\code{pam.sparse} are \code{FALSE} (see \link{tsclust-controls}).
 }
 \section{Fields}{
 

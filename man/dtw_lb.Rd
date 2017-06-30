@@ -33,11 +33,13 @@ improved lower bound (LB_Improved).
 }
 \details{
 This function first calculates an initial estimate of a distance matrix between two sets of time
-series using LB_Improved. Afterwards, it uses the estimate to calculate the corresponding true
-DTW distance between \emph{only} the nearest neighbors of each series in \code{x} found in \code{y}, and it
-continues iteratively until no changes in the nearest neighbors occur.
+series using \code{\link[=lb_improved]{lb_improved()}} (the \code{\link[proxy:dist]{proxy::dist()}} version). Afterwards, it uses the estimate to
+calculate the corresponding true DTW distance between \emph{only} the nearest neighbors of each series
+in \code{x} found in \code{y}, and it continues iteratively until no changes in the nearest neighbors
+occur.
 
-If only \code{x} is provided, the distance matrix is calculated between all its time series.
+If only \code{x} is provided, the distance matrix is calculated between all its time series,
+effectively returning a matrix filled with the LB_Improved values.
 
 This could be useful in case one is interested in only the nearest neighbor of one or more series
 within a dataset.

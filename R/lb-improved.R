@@ -29,6 +29,8 @@
 #'
 #' @return The improved lower bound for the DTW distance.
 #'
+#' @template proxy
+#'
 #' @section Note:
 #'
 #' The lower bound is only defined for time series of equal length and is **not** symmetric.
@@ -58,7 +60,7 @@
 #'
 #' # Corresponding true DTW distance
 #' d.dtw <- dtw(CharTraj[[1]], CharTraj[[2]],
-#'              window.type = "slantedband", window.size = 20)$distance
+#'              window.type = "sakoechiba", window.size = 20)$distance
 #'
 #' d.lbi <= d.dtw
 #'
@@ -68,9 +70,8 @@
 #'                      window.size = 20, norm = "L2")
 #'
 #' # Corresponding true DTW distance
-#' # (see dtwclust documentation for an explanation of DTW2)
-#' D.dtw <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "DTW2",
-#'                      window.type = "slantedband", window.size = 20)
+#' D.dtw <- proxy::dist(CharTraj[1], CharTraj[2:5], method = "dtw_basic",
+#'                      norm = "L2", window.size = 20)
 #'
 #' D.lbi <= D.dtw
 #'

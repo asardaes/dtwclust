@@ -1,11 +1,11 @@
 # ==================================================================================================
-# Distmat RC and methods to transparently handle PAM's pam.precompute = FALSE non-sparse case
+# Distmat RC and methods to transparently handle PAM centroids
 # ==================================================================================================
 
 #' Distance matrix
 #'
 #' Reference class that is used internally for PAM centroids when both `pam.precompute` and
-#' `pam.sparse` are `FALSE`.
+#' `pam.sparse` are `FALSE` (see [tsclust-controls]).
 #'
 #' @field distmat A distance matrix.
 #' @field series Time series list.

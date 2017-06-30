@@ -23,7 +23,7 @@
 #' @param trace If `TRUE`, the current iteration is printed to output.
 #' @param gcm Optional matrix to pass to [dtw_basic()] (for the case when `backtrack = TRUE`). To
 #'   define the matrix size, it should be assumed that `x` is the *longest* series in `X`, and `y`
-#'   is the `centroid` if provided or `x` otherwise. Ignored in parallel computations.
+#'   is the `centroid` if provided or `x` otherwise.
 #' @param mv.ver Multivariate version to use. See below.
 #'
 #' @details
@@ -43,9 +43,10 @@
 #'
 #'   There are currently 2 versions of DBA implemented for multivariate series:
 #'
-#'   - If `mv.ver = "by-variable"`, then each variable of `X` and `centroid` are extracted, and the
-#'     univariate version of the algorithm is applied to each set of variables, binding the results
-#'     by column. Therefore, the DTW backtracking is different for each variable.
+#'   - If `mv.ver = "by-variable"`, then each variable of each series in `X` and `centroid` are
+#'     extracted, and the univariate version of the algorithm is applied to each set of variables,
+#'     binding the results by column. Therefore, the DTW backtracking is different for each
+#'     variable.
 #'   - If `mv.ver = "by-series"`, then all variables are considered at the same time, so the DTW
 #'     backtracking is computed based on each multivariate series as a whole. This version was
 #'     implemented in version 4.0.0 of \pkg{dtwclust}, and it might be faster.
@@ -53,10 +54,6 @@
 #' @note
 #'
 #' The indices of the DTW alignment are obtained by calling [dtw_basic()] with `backtrack = TRUE`.
-#'
-#' The new \code{C++} implementation (v4.0.0) has slightly different numerical accuracy (in the
-#' order of 10^-16, at least in x64 systems), and no longer supports parallelization directly. The
-#' calls through [tsclust()] can still perform different DBA calculations in parallel.
 #'
 #' @references
 #'
@@ -71,17 +68,17 @@
 #' data(uciCT)
 #'
 #' # Obtain an average for the first 5 time series
-#' dtw.avg <- DBA(CharTraj[1:5], CharTraj[[1]], trace = TRUE)
+#' dtw_avg <- DBA(CharTraj[1:5], CharTraj[[1]], trace = TRUE)
 #'
 #' # Plot
 #' matplot(do.call(cbind, CharTraj[1:5]), type = "l")
-#' points(dtw.avg)
+#' points(dtw_avg)
 #'
 #' # Change the provided order
-#' dtw.avg2 <- DBA(CharTraj[5:1], CharTraj[[1]], trace = TRUE)
+#' dtw_avg2 <- DBA(CharTraj[5:1], CharTraj[[1]], trace = TRUE)
 #'
 #' # Same result?
-#' all(dtw.avg == dtw.avg2)
+#' all(dtw_avg2 == dtw_avg2)
 #'
 DBA <- function(X, centroid = NULL, ...,
                 window.size = NULL, norm = "L1",
