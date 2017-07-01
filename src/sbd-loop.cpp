@@ -16,10 +16,14 @@ void sbd_loop_pairwise(Rcpp::NumericVector& dist, const int fftlen,
     arma::vec cc_seq_truncated(fftlen);
     for (int i = 0; i < X.length(); i++) {
         R_CheckUserInterrupt();
-        arma::vec x(Rcpp::NumericVector(X[i]));
-        arma::vec y(Rcpp::NumericVector(Y[i]));
-        arma::cx_vec fftx(Rcpp::ComplexVector(FFTX[i]));
-        arma::cx_vec ffty(Rcpp::ComplexVector(FFTY[i]));
+
+        // in two steps to avoid disambiguation
+        Rcpp::NumericVector x_rcpp(X[i]);
+        Rcpp::NumericVector y_rcpp(Y[i]);
+        Rcpp::ComplexVector fftx_rcpp(FFTX[i]);
+        Rcpp::ComplexVector ffty_rcpp(FFTY[i]);
+        arma::vec x(x_rcpp), y(y_rcpp);
+        arma::cx_vec fftx(fftx_rcpp), ffty(ffty_rcpp);
 
         // already normalizes by length
         arma::vec cc_seq = arma::real(arma::ifft(fftx % ffty));
@@ -64,8 +68,11 @@ void sbd_loop_symmetric(const Rcpp::XPtr<BigMatrix>& dist_ptr, const int fftlen,
 
     int i = i_start - 1, j = j_start - 1;
     while (j < j_end) {
-        arma::vec y(Rcpp::NumericVector(X[j]));
-        arma::cx_vec ffty(Rcpp::ComplexVector(FFTY[j]));
+        // in two steps to avoid disambiguation
+        Rcpp::NumericVector y_rcpp(X[j]);
+        Rcpp::ComplexVector ffty_rcpp(FFTY[j]);
+        arma::vec y(y_rcpp);
+        arma::cx_vec ffty(ffty_rcpp);
         double y_norm = arma::norm(y);
 
         int i_max;
@@ -76,8 +83,12 @@ void sbd_loop_symmetric(const Rcpp::XPtr<BigMatrix>& dist_ptr, const int fftlen,
 
         while (i < i_max) {
             R_CheckUserInterrupt();
-            arma::vec x(Rcpp::NumericVector(X[i]));
-            arma::cx_vec fftx(Rcpp::ComplexVector(FFTX[i]));
+
+            // in two steps to avoid disambiguation
+            Rcpp::NumericVector x_rcpp(X[i]);
+            Rcpp::ComplexVector fftx_rcpp(FFTX[i]);
+            arma::vec x(x_rcpp);
+            arma::cx_vec fftx(fftx_rcpp);
 
             // already normalizes by length
             arma::vec cc_seq = arma::real(arma::ifft(fftx % ffty));
@@ -122,13 +133,21 @@ void sbd_loop_general(Rcpp::NumericMatrix& dist, const int fftlen,
 {
     arma::vec cc_seq_truncated(fftlen);
     for (int i = 0; i < X.length(); i++) {
-        arma::vec x(Rcpp::NumericVector(X[i]));
-        arma::cx_vec fftx(Rcpp::ComplexVector(FFTX[i]));
+        // in two steps to avoid disambiguation
+        Rcpp::NumericVector x_rcpp(X[i]);
+        Rcpp::ComplexVector fftx_rcpp(FFTX[i]);
+        arma::vec x(x_rcpp);
+        arma::cx_vec fftx(fftx_rcpp);
         double x_norm = arma::norm(x);
+
         for (int j = 0; j < Y.length(); j++) {
             R_CheckUserInterrupt();
-            arma::vec y(Rcpp::NumericVector(Y[j]));
-            arma::cx_vec ffty(Rcpp::ComplexVector(FFTY[j]));
+
+            // in two steps to avoid disambiguation
+            Rcpp::NumericVector y_rcpp(Y[j]);
+            Rcpp::ComplexVector ffty_rcpp(FFTY[j]);
+            arma::vec y(y_rcpp);
+            arma::cx_vec ffty(ffty_rcpp);
 
             // already normalizes by length
             arma::vec cc_seq = arma::real(arma::ifft(fftx % ffty));
