@@ -163,15 +163,15 @@ NULL ## remember to check methods imports after removing dtwclust()
 #'
 #' The following functions and/or classes are deprecated and will be eventually removed:
 #'
-#' - [dtwclust()]
-#' - [dtwclustFamily-class]
-#' - [dtwclustControl-class]
-#' - [dtwclust-class]
-#' - [dtwclust-methods]
-#' - [randIndex()]
+#' - [dtwclust()] - see [tsclust()]
+#' - [dtwclustFamily-class] - see [tsclustFamily-class]
+#' - [dtwclustControl-class] - see [tsclust-controls]
+#' - [dtwclust-class] - see [TSClusters-class]
+#' - [dtwclust-methods] - see [tsclusters-methods]
+#' - [randIndex()] - see [cvi()]
 #' - [clusterSim()]
-#' - [create_dtwclust()]
-#' - [compute_envelop()]
+#' - [create_dtwclust()] - see [tsclusters-methods]
+#' - [compute_envelop()] - see [compute_envelope()]
 #'
 NULL
 

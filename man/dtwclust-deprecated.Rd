@@ -6,14 +6,14 @@
 \description{
 The following functions and/or classes are deprecated and will be eventually removed:
 \itemize{
-\item \code{\link[=dtwclust]{dtwclust()}}
-\item \linkS4class{dtwclustFamily}
-\item \linkS4class{dtwclustControl}
-\item \linkS4class{dtwclust}
-\item \link{dtwclust-methods}
-\item \code{\link[=randIndex]{randIndex()}}
+\item \code{\link[=dtwclust]{dtwclust()}} - see \code{\link[=tsclust]{tsclust()}}
+\item \linkS4class{dtwclustFamily} - see \linkS4class{tsclustFamily}
+\item \linkS4class{dtwclustControl} - see \link{tsclust-controls}
+\item \linkS4class{dtwclust} - see \linkS4class{TSClusters}
+\item \link{dtwclust-methods} - see \link{tsclusters-methods}
+\item \code{\link[=randIndex]{randIndex()}} - see \code{\link[=cvi]{cvi()}}
 \item \code{\link[=clusterSim]{clusterSim()}}
-\item \code{\link[=create_dtwclust]{create_dtwclust()}}
-\item \code{\link[=compute_envelop]{compute_envelop()}}
+\item \code{\link[=create_dtwclust]{create_dtwclust()}} - see \link{tsclusters-methods}
+\item \code{\link[=compute_envelop]{compute_envelop()}} - see \code{\link[=compute_envelope]{compute_envelope()}}
 }
 }
