@@ -2,7 +2,7 @@
 * Ported some functionality to C++ and fixed bugs.
 
 ## Test environments
-* Local GNU/Linux, R 3.4.0
+* Local GNU/Linux, R 3.4.1
 * Local Windows 10, R 3.4.0
 * win-builder (devel and release)
 * Travis CI
