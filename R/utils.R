@@ -269,6 +269,16 @@ validate_pairwise <- function(x, y) {
 # Helper distance-related
 # ==================================================================================================
 
+# get endpoints for parallel non-symmetric distance matrix calculations based on number of workers
+loop_endpoints <- function(ncols) {
+    num_workers <- foreach::getDoParWorkers()
+    if (num_workers == 1L) return(list(list(start = 1L, end = ncols)))
+    if (ncols < num_workers) num_workers <- ncols
+    start <- cumsum(c(1L, rep(as.integer(ncols / num_workers), num_workers - 1L)))
+    end <- c(start[-1L] - 1L, ncols)
+    Map(start, end, f = function(s, e) { list(start = s, end = e) })
+}
+
 # get endpoints for parallel symmetric distance matrix calculations based on number of workers
 symmetric_loop_endpoints <- function(n) {
     if (n < 2L) stop("No symmetric calculations possible for a 1x1 distance matrix")

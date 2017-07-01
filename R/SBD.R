@@ -151,73 +151,46 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     }
 
     if (is_multivariate(x) || is_multivariate(y)) stop("SBD does not support multivariate series.")
-
-    retclass <- "crossdist"
-    nms_x <- names(x)
-    nms_y <- names(y)
+    pairwise <- isTRUE(pairwise)
 
     ## Calculate distance matrix
     if (pairwise) {
-        x <- split_parallel(x)
-        fftx <- split_parallel(fftx)
-        y <- split_parallel(y)
-        ffty <- split_parallel(ffty)
-        validate_pairwise(x, y)
-
-        D <- foreach(x = x, fftx = fftx, y = y, ffty = ffty,
-                     .combine = c,
-                     .multicombine = TRUE,
-                     .export = "sbd_loop",
-                     .packages = "dtwclust") %op% {
-                         d <- numeric(length(x))
-                         sbd_loop(d, x, y, fftx, ffty, fftlen, FALSE, TRUE, NULL)
-                         d
-                     }
-
-        retclass <- "pairdist"
+        validate_pairwise(list(x), list(y))
+        D <- bigmemory::big.matrix(length(x), 1L, "double", 0)
+        endpoints <- loop_endpoints(length(x))
 
     } else if (symmetric) {
-        len <- length(x)
-        loop_endpoints <- symmetric_loop_endpoints(len)
-        D <- bigmemory::big.matrix(len, len, "double", 0)
-        D_desc <- bigmemory::describe(D)
-
-        foreach(loop_endpoints = loop_endpoints,
-                .combine = c,
-                .multicombine = TRUE,
-                .packages = c("dtwclust", "bigmemory"),
-                .noexport = c("D", "y"),
-                .export = "sbd_loop") %op% {
-                    d <- bigmemory::attach.big.matrix(D_desc)@address
-                    sbd_loop(d, x, NULL, fftx, ffty, fftlen, TRUE, FALSE, loop_endpoints)
-                    rm("d")
-                    gc()
-                    NULL
-                }
-
-        D <- D[,]
-        attr(D, "dimnames") <- list(nms_x, nms_x)
-        gc()
+        D <- bigmemory::big.matrix(length(x), length(x), "double", 0)
+        endpoints <- symmetric_loop_endpoints(length(x))
 
     } else {
-        y <- split_parallel(y)
-        ffty <- split_parallel(ffty)
-        D <- foreach(y = y, ffty = ffty,
-                     .combine = cbind,
-                     .multicombine = TRUE,
-                     .export = "sbd_loop",
-                     .packages = "dtwclust") %op% {
-                         d <- matrix(0, length(x), length(y))
-                         sbd_loop(d, x, y, fftx, ffty, fftlen, FALSE, FALSE, NULL)
-                         d
-                     }
-
-        dimnames(D) <- list(nms_x, nms_y)
+        D <- bigmemory::big.matrix(length(x), length(y), "double", 0)
+        endpoints <- loop_endpoints(length(y))
     }
 
-    class(D) <- retclass
-    attr(D, "method") <- "SBD"
+    D_desc <- bigmemory::describe(D)
+    foreach(endpoints = endpoints,
+            .combine = c,
+            .multicombine = TRUE,
+            .packages = c("dtwclust", "bigmemory"),
+            .noexport = c("D"),
+            .export = "sbd_loop") %op% {
+                d_ptr <- bigmemory::attach.big.matrix(D_desc)@address
+                sbd_loop(d_ptr, x, y, fftx, ffty, fftlen, symmetric, pairwise, endpoints)
+                NULL
+            }
 
+    D <- D[,]
+    if (pairwise) {
+        class(D) <- "pairdist"
+
+    } else {
+        dim(D) <- c(length(x), length(y))
+        dimnames(D) <- list(names(x), names(y))
+        class(D) <- "crossdist"
+    }
+
+    attr(D, "method") <- "SBD"
     ## return
     D
 }
@@ -226,9 +199,9 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
 # Wrapper for C++
 # ==================================================================================================
 
-sbd_loop <- function(d, x, y, fftx, ffty, fftlen, symmetric, pairwise, endpoints) {
+sbd_loop <- function(d_ptr, x, y, fftx, ffty, fftlen, symmetric, pairwise, endpoints) {
     .Call(C_sbd_loop,
-          d, x, y, fftx, ffty,
+          d_ptr, x, y, fftx, ffty,
           fftlen, symmetric, pairwise, endpoints,
           PACKAGE = "dtwclust")
 }

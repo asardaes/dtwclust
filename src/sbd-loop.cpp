@@ -9,12 +9,15 @@ namespace dtwclust {
 /* pairwise case */
 // =================================================================================================
 
-void sbd_loop_pairwise(Rcpp::NumericVector& dist, const int fftlen,
+void sbd_loop_pairwise(MatrixAccessor<double>& dist, const int fftlen,
                        const Rcpp::List& X, const Rcpp::List& Y,
-                       const Rcpp::List& FFTX, const Rcpp::List& FFTY)
+                       const Rcpp::List& FFTX, const Rcpp::List& FFTY,
+                       const Rcpp::List& endpoints)
 {
     arma::vec cc_seq_truncated(fftlen);
-    for (int i = 0; i < X.length(); i++) {
+    int i_start = endpoints["start"], i_end = endpoints["end"];
+
+    for (int i = i_start - 1; i < i_end; i++) {
         R_CheckUserInterrupt();
 
         // in two steps to avoid disambiguation
@@ -47,7 +50,8 @@ void sbd_loop_pairwise(Rcpp::NumericVector& dist, const int fftlen,
             if (this_cc > cc_max) cc_max = this_cc;
         }
 
-        dist[i] = 1 - cc_max;
+        // bigmemory operator[][] is backwards
+        dist[0][i] = 1 - cc_max;
     }
 }
 
@@ -55,11 +59,10 @@ void sbd_loop_pairwise(Rcpp::NumericVector& dist, const int fftlen,
 /* symmetric case */
 // =================================================================================================
 
-void sbd_loop_symmetric(const Rcpp::XPtr<BigMatrix>& dist_ptr, const int fftlen,
+void sbd_loop_symmetric(MatrixAccessor<double>& dist, const int fftlen,
                         const Rcpp::List& X, const Rcpp::List& FFTX, const Rcpp::List& FFTY,
                         const Rcpp::List& endpoints)
 {
-    MatrixAccessor<double> dist(*dist_ptr);
     arma::vec cc_seq_truncated(fftlen);
     Rcpp::List start = Rcpp::as<Rcpp::List>(endpoints["start"]);
     Rcpp::List end = Rcpp::as<Rcpp::List>(endpoints["end"]);
@@ -112,7 +115,7 @@ void sbd_loop_symmetric(const Rcpp::XPtr<BigMatrix>& dist_ptr, const int fftlen,
                 if (this_cc > cc_max) cc_max = this_cc;
             }
 
-            // bigmemory operator[][] is backwards, but it doesn't matter
+            // bigmemory operator[][] is backwards
             cc_max = 1 - cc_max;
             dist[i][j] = cc_max;
             dist[j][i] = cc_max;
@@ -127,11 +130,14 @@ void sbd_loop_symmetric(const Rcpp::XPtr<BigMatrix>& dist_ptr, const int fftlen,
 /* general case */
 // =================================================================================================
 
-void sbd_loop_general(Rcpp::NumericMatrix& dist, const int fftlen,
+void sbd_loop_general(MatrixAccessor<double>& dist, const int fftlen,
                       const Rcpp::List& X, const Rcpp::List& Y,
-                      const Rcpp::List& FFTX, const Rcpp::List& FFTY)
+                      const Rcpp::List& FFTX, const Rcpp::List& FFTY,
+                      const Rcpp::List& endpoints)
 {
     arma::vec cc_seq_truncated(fftlen);
+    int j_start = endpoints["start"], j_end = endpoints["end"];
+
     for (int i = 0; i < X.length(); i++) {
         // in two steps to avoid disambiguation
         Rcpp::NumericVector x_rcpp(X[i]);
@@ -140,7 +146,7 @@ void sbd_loop_general(Rcpp::NumericMatrix& dist, const int fftlen,
         arma::cx_vec fftx(fftx_rcpp);
         double x_norm = arma::norm(x);
 
-        for (int j = 0; j < Y.length(); j++) {
+        for (int j = j_start - 1; j < j_end; j++) {
             R_CheckUserInterrupt();
 
             // in two steps to avoid disambiguation
@@ -171,7 +177,8 @@ void sbd_loop_general(Rcpp::NumericMatrix& dist, const int fftlen,
                 if (this_cc > cc_max) cc_max = this_cc;
             }
 
-            dist(i,j) = 1 - cc_max;
+            // bigmemory operator[][] is backwards
+            dist[j][i] = 1 - cc_max;
         }
     }
 }
@@ -184,18 +191,15 @@ RcppExport SEXP sbd_loop(SEXP D, SEXP X, SEXP Y, SEXP FFTX, SEXP FFTY,
                          SEXP FFTLEN, SEXP SYMMETRIC, SEXP PAIRWISE, SEXP ENDPOINTS)
 {
     BEGIN_RCPP
-    if (Rcpp::as<bool>(PAIRWISE)) {
-        Rcpp::NumericVector dist(D);
-        sbd_loop_pairwise(dist, Rcpp::as<int>(FFTLEN), X, Y, FFTX, FFTY);
+    Rcpp::XPtr<BigMatrix> dist_ptr(D);
+    MatrixAccessor<double> dist(*dist_ptr);
 
-    } else if (Rcpp::as<bool>(SYMMETRIC)) {
-        Rcpp::XPtr<BigMatrix> dist_ptr(D);
-        sbd_loop_symmetric(dist_ptr, Rcpp::as<int>(FFTLEN), X, FFTX, FFTY, ENDPOINTS);
-
-    } else {
-        Rcpp::NumericMatrix dist(D);
-        sbd_loop_general(dist, Rcpp::as<int>(FFTLEN), X, Y, FFTX, FFTY);
-    }
+    if (Rcpp::as<bool>(PAIRWISE))
+        sbd_loop_pairwise(dist, Rcpp::as<int>(FFTLEN), X, Y, FFTX, FFTY, ENDPOINTS);
+    else if (Rcpp::as<bool>(SYMMETRIC))
+        sbd_loop_symmetric(dist, Rcpp::as<int>(FFTLEN), X, FFTX, FFTY, ENDPOINTS);
+    else
+        sbd_loop_general(dist, Rcpp::as<int>(FFTLEN), X, Y, FFTX, FFTY, ENDPOINTS);
 
     return R_NilValue;
     END_RCPP
