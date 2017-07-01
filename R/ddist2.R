@@ -59,7 +59,15 @@ ddist2 <- function(distance, control) {
             ## variables/functions from the parent environments that should be exported
             export <- c("distance", "dist_entry", "check_consistency", "enlist", "subset_dots")
 
-            if (is.null(centroids) && symmetric && !isTRUE(dots$pairwise)) {
+            if (tolower(distance) %in% distances_included) {
+                ## DTWCLUST DISTANCES, LET THEM HANDLE OPTIMIZATIONS
+                d <- do.call(proxy::dist,
+                             enlist(x = x,
+                                    y = centroids,
+                                    method = distance,
+                                    dots = dots))
+
+            } else if (is.null(centroids) && symmetric && !isTRUE(dots$pairwise)) {
                 if (dist_entry$loop && foreach::getDoParWorkers() > 1L) {
                     ## WHOLE SYMMETRIC DISTMAT WITH proxy LOOP IN PARALLEL
                     ## Only half of it is computed
@@ -110,13 +118,11 @@ ddist2 <- function(distance, control) {
 
                 } else {
                     ## WHOLE SYMMETRIC DISTMAT WITH CUSTOM LOOP OR SEQUENTIAL proxy LOOP
-                    ## maybe one of my distances, or one included in proxy by default, let it handle parallelization
                     d <- base::as.matrix(do.call(proxy::dist,
                                                  enlist(x = x,
                                                         y = NULL,
                                                         method = distance,
                                                         dots = dots)))
-
                     class(d) <- "crossdist"
                 }
 

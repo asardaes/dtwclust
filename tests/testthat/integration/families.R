@@ -245,10 +245,10 @@ test_that("Operations with dtwclustFamily@dist and sbd give expected results", {
                  check.attributes = FALSE)
 
     expect_equal(whole_distmat, distmat, info = "Whole, NULL distmat",
-                 tolerance = 0, check.attributes = FALSE)
+                 check.attributes = FALSE)
 
     expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, NULL distmat",
-                 tolerance = 0, check.attributes = FALSE)
+                 check.attributes = FALSE)
 
     ## ---------------------------------------------------------- tsclustFamily, no distmat
     family <- new("tsclustFamily",
@@ -265,10 +265,10 @@ test_that("Operations with dtwclustFamily@dist and sbd give expected results", {
                  check.attributes = FALSE)
 
     expect_equal(whole_distmat, distmat, info = "Whole, NULL distmat",
-                 tolerance = 0, check.attributes = FALSE)
+                 check.attributes = FALSE)
 
     expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, NULL distmat",
-                 tolerance = 0, check.attributes = FALSE)
+                 check.attributes = FALSE)
 
     ## ---------------------------------------------------------- dtwclustFamily, with distmat
     family <- new("dtwclustFamily",
@@ -280,10 +280,10 @@ test_that("Operations with dtwclustFamily@dist and sbd give expected results", {
     sub_distmat <- family@dist(x, centroids)
 
     expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
-                 tolerance = 0, check.attributes = FALSE)
+                 check.attributes = FALSE)
 
     expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
-                 tolerance = 0, check.attributes = FALSE)
+                 check.attributes = FALSE)
 
     ## ---------------------------------------------------------- tsclustFamily, with distmat
     ts_ctrl$distmat <- dtwclust:::Distmat$new(distmat = distmat,
@@ -297,10 +297,10 @@ test_that("Operations with dtwclustFamily@dist and sbd give expected results", {
     sub_distmat <- family@dist(x, centroids)
 
     expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
-                 tolerance = 0, check.attributes = FALSE)
+                 check.attributes = FALSE)
 
     expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
-                 tolerance = 0, check.attributes = FALSE)
+                 check.attributes = FALSE)
 
     ## ---------------------------------------------------------- ref
     assign("distmat_sbd", whole_distmat, persistent)

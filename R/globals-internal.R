@@ -4,7 +4,8 @@
 
 supported_clusterings <- c("partitional", "hierarchical", "fuzzy", "tadpole")
 
-distances_included <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd", "dtw_basic", "gak")
+distances_known <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd", "dtw_basic", "gak")
+distances_included <- c("dtw_lb", "lbk", "lbi", "sbd", "dtw_basic", "gak")
 distances_difflength <- c("dtw", "dtw2", "sbd", "dtw_basic", "gak")
 distances_multivariate <- c("dtw", "dtw2", "dtw_basic", "gak")
 

@@ -36,10 +36,11 @@ check_consistency <- function(obj, case, ..., clus_type,
         }
 
         if (diff_lengths) {
-            if ((obj %in% distances_included) && !(obj %in% distances_difflength))
+            obj <- tolower(obj)
+            if ((obj %in% distances_known) && !(obj %in% distances_difflength))
                 stop("Only the following distances are supported for series with different length:\n\t",
                      paste(distances_difflength, collapse = "\t"))
-            else if (!(obj %in% distances_included) && trace)
+            else if (!(obj %in% distances_known) && trace)
                 message("Series have different lengths. ",
                         "Please confirm that the provided distance function supports this.")
         }
