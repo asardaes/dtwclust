@@ -152,6 +152,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
 
     if (is_multivariate(x) || is_multivariate(y)) stop("SBD does not support multivariate series.")
     pairwise <- isTRUE(pairwise)
+    seed <- get0(".Random.seed", .GlobalEnv, mode = "integer") ## undo big.matrix() seed change...
 
     ## Calculate distance matrix
     if (pairwise) {
@@ -168,6 +169,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         endpoints <- loop_endpoints(length(y))
     }
 
+    assign(".Random.seed", seed, .GlobalEnv)
     D_desc <- bigmemory::describe(D)
     foreach(endpoints = endpoints,
             .combine = c,

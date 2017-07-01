@@ -66,8 +66,10 @@ ddist2 <- function(distance, control) {
                     ## I think proxy can do this if y = NULL, but not in parallel
                     len <- length(x)
                     loop_endpoints <- symmetric_loop_endpoints(len)
+                    seed <- get0(".Random.seed", .GlobalEnv, mode = "integer")
                     d <- bigmemory::big.matrix(len, len, "double", 0)
                     d_desc <- bigmemory::describe(d)
+                    assign(".Random.seed", seed, .GlobalEnv)
 
                     foreach(
                         loop_endpoints = loop_endpoints,

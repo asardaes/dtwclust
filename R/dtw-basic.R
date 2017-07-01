@@ -161,8 +161,10 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
     } else if (symmetric) {
         len <- length(x)
         loop_endpoints <- symmetric_loop_endpoints(len)
+        seed <- get0(".Random.seed", .GlobalEnv, mode = "integer")
         D <- bigmemory::big.matrix(len, len, "double", 0)
         D_desc <- bigmemory::describe(D)
+        assign(".Random.seed", seed, .GlobalEnv)
 
         foreach(loop_endpoints = loop_endpoints,
                 .combine = c,
