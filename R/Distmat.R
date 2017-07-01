@@ -77,12 +77,11 @@ NULL
 #' Accessing matrix elements with `[]` first calculates the values if necessary.
 #'
 setMethod(`[`, "Distmat", function(x, i, j, ..., drop = TRUE) {
-    dm_exists <- !inherits(x$distmat, "uninitializedField")
-
-    if (!dm_exists) {
+    if (inherits(x$distmat, "uninitializedField")) {
+        centroids <- if (identical(i,j)) NULL else x$series[j]
         dm <- do.call(x$distfun,
                       enlist(x = x$series[i],
-                             centroids = x$series[j],
+                             centroids = centroids,
                              dots = x$dist_args))
     } else {
         dm <- x$distmat[i, j, drop = drop]
