@@ -26,11 +26,11 @@ void sbd_loop_pairwise(Rcpp::NumericVector& dist, const int fftlen,
 
         // reorder truncated sequence
         int id = 0;
-        for (int j = fftlen - y.size() + 1; j < cc_seq.size(); j++) {
+        for (unsigned int j = fftlen - y.size() + 1; j < cc_seq.size(); j++) {
             cc_seq_truncated[id] = cc_seq[j];
             id++;
         }
-        for (int j = 0; j < x.size(); j++) {
+        for (unsigned int j = 0; j < x.size(); j++) {
             cc_seq_truncated[id] = cc_seq[j];
             id++;
         }
@@ -82,11 +82,11 @@ void sbd_loop_symmetric(const Rcpp::XPtr<BigMatrix>& dist_ptr, const int fftlen,
 
             // reorder truncated sequence
             int id = 0;
-            for (int k = fftlen - y.size() + 1; k < cc_seq.size(); k++) {
+            for (unsigned int k = fftlen - y.size() + 1; k < cc_seq.size(); k++) {
                 cc_seq_truncated[id] = cc_seq[k];
                 id++;
             }
-            for (int k = 0; k < x.size(); k++) {
+            for (unsigned int k = 0; k < x.size(); k++) {
                 cc_seq_truncated[id] = cc_seq[k];
                 id++;
             }
@@ -132,11 +132,11 @@ void sbd_loop_general(Rcpp::NumericMatrix& dist, const int fftlen,
 
             // reorder truncated sequence
             int id = 0;
-            for (int k = fftlen - y.size() + 1; k < cc_seq.size(); k++) {
+            for (unsigned int k = fftlen - y.size() + 1; k < cc_seq.size(); k++) {
                 cc_seq_truncated[id] = cc_seq[k];
                 id++;
             }
-            for (int k = 0; k < x.size(); k++) {
+            for (unsigned int k = 0; k < x.size(); k++) {
                 cc_seq_truncated[id] = cc_seq[k];
                 id++;
             }
