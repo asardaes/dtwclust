@@ -53,9 +53,16 @@ different values in 32 bit installations compared to 64 bit ones.
 
 
 
-This distance does \emph{not} include symmetric optimizations even though the distance is symmetric.
-The overhead introduced by the logic to get only half the distance matrix was usually bigger
-than just calculating the whole matrix without said logic.
+  It also includes symmetric optimizations to calculate only half a distance matrix when
+  appropriate. Only one list of series should be provided. If you want to avoid this
+  optimization, call \code{\link[proxy]{dist}} by giving the same list of series in both \code{x}
+  and \code{y}.
+
+
+
+In some situations, e.g. for relatively small distance matrices, the overhead introduced by the
+logic that computes only half the distance matrix can be bigger than just calculating the whole
+matrix.
 }
 
 \examples{

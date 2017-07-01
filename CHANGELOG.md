@@ -2,7 +2,7 @@
 
 ## Version 4.0.2
 * Ported `TADPole` to `C++`.
-* Ported part of SBD's `proxy` version to `C++`.
+* Ported part of SBD's `proxy` version to `C++` and added symmetric optimizations.
 * Ported part of the algorithm that updates sparse distance matrices to `C++`.
 * Improved the optimizations for symmetric distance matrices by using the `bigmemory` package.
 * Fixed `tsclustFamily`'s `dist` function for matrix or data frame input.

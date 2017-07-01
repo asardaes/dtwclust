@@ -23,7 +23,8 @@ test_that("Pairwise proxy distances give the same result as references", {
                          window.size = 15L, sigma = 100,
                          pairwise = TRUE)
 
-        expect_equal_to_reference(d, paste0("rds/pdist_", distance, ".rds"))
+        expect_equal_to_reference(d, paste0("rds/pdist_", distance, ".rds"),
+                                  check.attributes = FALSE)
     }
 })
 

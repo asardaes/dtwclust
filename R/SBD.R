@@ -26,11 +26,12 @@
 #'   - `yshift`: A shifted version of `y` so that it optimally matches `x` (based on [NCCc()]).
 #'
 #' @template proxy
+#' @template symmetric
 #' @section Proxy version:
 #'
-#'   This distance does *not* include symmetric optimizations even though the distance is symmetric.
-#'   The overhead introduced by the logic to get only half the distance matrix was usually bigger
-#'   than just calculating the whole matrix without said logic.
+#'   In some situations, e.g. for relatively small distance matrices, the overhead introduced by the
+#'   logic that computes only half the distance matrix can be bigger than just calculating the whole
+#'   matrix.
 #'
 #' @note
 #'
@@ -125,12 +126,28 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
 
     if (error.check) check_consistency(x, "vltslist")
     if (znorm) x <- zscore(x)
+
     if (is.null(y)) {
+        symmetric <- TRUE
         y <- x
+
+        ## Precompute FFTs, padding with zeros as necessary, which will be compensated later
+        L <- max(lengths(x)) * 2L - 1L
+        fftlen <- stats::nextn(L, 2L)
+        fftx <- lapply(x, function(u) { stats::fft(c(u, rep(0, fftlen - length(u)))) })
+        ffty <- lapply(fftx, Conj)
+
     } else {
+        symmetric <- FALSE
         y <- any2list(y)
         if (error.check) check_consistency(y, "vltslist")
         if (znorm) y <- zscore(y)
+
+        ## Precompute FFTs, padding with zeros as necessary, which will be compensated later
+        L <- max(lengths(x)) + max(lengths(y)) - 1L
+        fftlen <- stats::nextn(L, 2L)
+        fftx <- lapply(x, function(u) { stats::fft(c(u, rep(0, fftlen - length(u)))) })
+        ffty <- lapply(y, function(v) { Conj(stats::fft(c(v, rep(0, fftlen - length(v))))) })
     }
 
     if (is_multivariate(x) || is_multivariate(y)) stop("SBD does not support multivariate series.")
@@ -139,18 +156,12 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     nms_x <- names(x)
     nms_y <- names(y)
 
-    ## Precompute FFTs, padding with zeros as necessary, which will be compensated later
-    L <- max(lengths(x)) + max(lengths(y)) - 1L
-    fftlen <- stats::nextn(L, 2L)
-    fftx <- lapply(x, function(u) { stats::fft(c(u, rep(0, fftlen - length(u)))) })
-    ffty <- lapply(y, function(v) { Conj(stats::fft(c(v, rep(0, fftlen - length(v))))) })
-    y <- split_parallel(y)
-    ffty <- split_parallel(ffty)
-
     ## Calculate distance matrix
     if (pairwise) {
         x <- split_parallel(x)
         fftx <- split_parallel(fftx)
+        y <- split_parallel(y)
+        ffty <- split_parallel(ffty)
         validate_pairwise(x, y)
 
         D <- foreach(x = x, fftx = fftx, y = y, ffty = ffty,
@@ -158,18 +169,47 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
                      .multicombine = TRUE,
                      .export = "sbd_loop",
                      .packages = "dtwclust") %op% {
-                         sbd_loop(x, y, fftx, ffty, fftlen, TRUE)
+                         d <- numeric(length(x))
+                         sbd_loop(d, x, y, fftx, ffty, fftlen, FALSE, TRUE, NULL)
+                         d
                      }
 
         retclass <- "pairdist"
 
+    } else if (symmetric) {
+        len <- length(x)
+        loop_endpoints <- symmetric_loop_endpoints(len)
+        D <- bigmemory::big.matrix(len, len, "double", 0)
+        D_desc <- bigmemory::describe(D)
+
+        foreach(loop_endpoints = loop_endpoints,
+                .combine = c,
+                .multicombine = TRUE,
+                .packages = c("dtwclust", "bigmemory"),
+                .noexport = c("D", "y"),
+                .export = "sbd_loop") %op% {
+                    d <- bigmemory::attach.big.matrix(D_desc)@address
+                    sbd_loop(d, x, NULL, fftx, ffty, fftlen, TRUE, FALSE, loop_endpoints)
+                    rm("d")
+                    gc()
+                    NULL
+                }
+
+        D <- D[,]
+        attr(D, "dimnames") <- list(nms_x, nms_x)
+        gc()
+
     } else {
+        y <- split_parallel(y)
+        ffty <- split_parallel(ffty)
         D <- foreach(y = y, ffty = ffty,
                      .combine = cbind,
                      .multicombine = TRUE,
                      .export = "sbd_loop",
                      .packages = "dtwclust") %op% {
-                         sbd_loop(x, y, fftx, ffty, fftlen, FALSE)
+                         d <- matrix(0, length(x), length(y))
+                         sbd_loop(d, x, y, fftx, ffty, fftlen, FALSE, FALSE, NULL)
+                         d
                      }
 
         dimnames(D) <- list(nms_x, nms_y)
@@ -186,8 +226,9 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
 # Wrapper for C++
 # ==================================================================================================
 
-sbd_loop <- function(x, y, fftx, ffty, fftlen, pairwise) {
-    d <- if (pairwise) numeric(length(x)) else matrix(0, length(x), length(y))
-    .Call(C_sbd_loop, d, x, y, fftx, ffty, fftlen, pairwise, PACKAGE = "dtwclust")
-    d
+sbd_loop <- function(d, x, y, fftx, ffty, fftlen, symmetric, pairwise, endpoints) {
+    .Call(C_sbd_loop,
+          d, x, y, fftx, ffty,
+          fftlen, symmetric, pairwise, endpoints,
+          PACKAGE = "dtwclust")
 }

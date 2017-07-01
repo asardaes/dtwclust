@@ -14,7 +14,7 @@ static R_CallMethodDef callMethods[] = {
     CALLDEFpp(force_lb_symmetry, 1),
     CALLDEFpp(lbk, 4),
     CALLDEFpp(lbi, 6),
-    CALLDEFpp(sbd_loop, 7),
+    CALLDEFpp(sbd_loop, 9),
     CALLDEFpp(tadpole, 8),
     CALLDEF(dtw_basic, 10),
     CALLDEF(logGAK, 8),

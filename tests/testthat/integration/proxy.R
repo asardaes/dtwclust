@@ -25,7 +25,7 @@ test_that("Included proxy distances can be called and give expected dimensions."
 
         d2 <- proxy::dist(x, x, method = distance, window.size = 15L, sigma = 100)
 
-        expect_equal(d2, d, tolerance = 0, check.attributes = FALSE,
+        expect_equal(d2, d, check.attributes = FALSE,
                      info = paste(distance, "double-arg"))
 
         d3 <- proxy::dist(x[1L], x, method = distance, window.size = 15L, sigma = 100)
@@ -41,10 +41,10 @@ test_that("Included proxy distances can be called and give expected dimensions."
         ## dtw_lb will give different results below because of how it works
         if (distance == "dtw_lb") next
 
-        expect_equal(d3, d[1L, , drop = FALSE], tolerance = 0, check.attributes = FALSE,
+        expect_equal(d3, d[1L, , drop = FALSE], check.attributes = FALSE,
                      info = paste(distance, "one-vs-many-vs-distmat"))
 
-        expect_equal(d4, d[ , 1L, drop = FALSE], tolerance = 0, check.attributes = FALSE,
+        expect_equal(d4, d[ , 1L, drop = FALSE], check.attributes = FALSE,
                      info = paste(distance, "many-vs-one-vs-distmat"))
     }
 })
