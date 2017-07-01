@@ -136,12 +136,14 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     if (is_multivariate(x) || is_multivariate(y)) stop("SBD does not support multivariate series.")
 
     retclass <- "crossdist"
+    nms_x <- names(x)
+    nms_y <- names(y)
 
     ## Precompute FFTs, padding with zeros as necessary, which will be compensated later
     L <- max(lengths(x)) + max(lengths(y)) - 1L
     fftlen <- stats::nextn(L, 2L)
     fftx <- lapply(x, function(u) { stats::fft(c(u, rep(0, fftlen - length(u)))) })
-    ffty <- lapply(y, function(v) { stats::fft(c(v, rep(0, fftlen - length(v)))) })
+    ffty <- lapply(y, function(v) { Conj(stats::fft(c(v, rep(0, fftlen - length(v))))) })
     y <- split_parallel(y)
     ffty <- split_parallel(ffty)
 
@@ -154,20 +156,9 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         D <- foreach(x = x, fftx = fftx, y = y, ffty = ffty,
                      .combine = c,
                      .multicombine = TRUE,
-                     .export = "lnorm",
-                     .packages = "stats") %op% {
-                         mapply(y, ffty, x, fftx,
-                                FUN = function(y, ffty, x, fftx) {
-                                    ## Manually normalize by length
-                                    CCseq <- Re(stats::fft(fftx * Conj(ffty), inverse = TRUE)) /
-                                        length(fftx)
-                                    ## Truncate to correct length
-                                    CCseq <- c(CCseq[(length(ffty) - length(y) + 2L):length(CCseq)],
-                                               CCseq[1L:length(x)])
-                                    CCseq <- CCseq / (lnorm(x, 2) * lnorm(y, 2))
-                                    dd <- 1 - max(CCseq)
-                                    dd
-                                })
+                     .export = "sbd_loop",
+                     .packages = "dtwclust") %op% {
+                         sbd_loop(x, y, fftx, ffty, fftlen, TRUE)
                      }
 
         retclass <- "pairdist"
@@ -176,30 +167,12 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         D <- foreach(y = y, ffty = ffty,
                      .combine = cbind,
                      .multicombine = TRUE,
-                     .export = "lnorm",
-                     .packages = "stats") %op% {
-                         ret <- mapply(y, ffty,
-                                       MoreArgs = list(x = x, fftx = fftx),
-                                       SIMPLIFY = FALSE,
-                                       FUN = function(y, ffty, x, fftx) {
-                                           mapply(x, fftx,
-                                                  MoreArgs = list(y = y, ffty = ffty),
-                                                  FUN = function(x, fftx, y, ffty) {
-                                                      ## Manually normalize by length
-                                                      CCseq <- Re(stats::fft(fftx * Conj(ffty),
-                                                                             inverse = TRUE)) /
-                                                          length(fftx)
-                                                      ## Truncate to correct length
-                                                      CCseq <- c(CCseq[(length(ffty) - length(y) + 2L):length(CCseq)],
-                                                                 CCseq[1L:length(x)])
-                                                      CCseq <- CCseq / (lnorm(x, 2) * lnorm(y, 2))
-                                                      dd <- 1 - max(CCseq)
-                                                      dd
-                                                  })
-                                       })
-
-                         do.call(cbind, ret)
+                     .export = "sbd_loop",
+                     .packages = "dtwclust") %op% {
+                         sbd_loop(x, y, fftx, ffty, fftlen, FALSE)
                      }
+
+        dimnames(D) <- list(nms_x, nms_y)
     }
 
     class(D) <- retclass
@@ -207,4 +180,14 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
 
     ## return
     D
+}
+
+# ==================================================================================================
+# Wrapper for C++
+# ==================================================================================================
+
+sbd_loop <- function(x, y, fftx, ffty, fftlen, pairwise) {
+    d <- if (pairwise) numeric(length(x)) else matrix(0, length(x), length(y))
+    .Call(C_sbd_loop, d, x, y, fftx, ffty, fftlen, pairwise, PACKAGE = "dtwclust")
+    d
 }
