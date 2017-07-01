@@ -187,7 +187,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         class(D) <- "pairdist"
 
     } else {
-        dim(D) <- c(length(x), length(y))
+        if (is.null(dim(D))) dim(D) <- c(length(x), length(y))
         dimnames(D) <- list(names(x), names(y))
         class(D) <- "crossdist"
     }
