@@ -64,6 +64,10 @@ void sbd_loop_symmetric(const Rcpp::XPtr<BigMatrix>& dist_ptr, const int fftlen,
 
     int i = i_start - 1, j = j_start - 1;
     while (j < j_end) {
+        arma::vec y(Rcpp::NumericVector(X[j]));
+        arma::cx_vec ffty(Rcpp::ComplexVector(FFTY[j]));
+        double y_norm = arma::norm(y);
+
         int i_max;
         if (j == (j_end - 1))
             i_max = i_end;
@@ -73,9 +77,7 @@ void sbd_loop_symmetric(const Rcpp::XPtr<BigMatrix>& dist_ptr, const int fftlen,
         while (i < i_max) {
             R_CheckUserInterrupt();
             arma::vec x(Rcpp::NumericVector(X[i]));
-            arma::vec y(Rcpp::NumericVector(X[j]));
             arma::cx_vec fftx(Rcpp::ComplexVector(FFTX[i]));
-            arma::cx_vec ffty(Rcpp::ComplexVector(FFTY[j]));
 
             // already normalizes by length
             arma::vec cc_seq = arma::real(arma::ifft(fftx % ffty));
@@ -93,7 +95,7 @@ void sbd_loop_symmetric(const Rcpp::XPtr<BigMatrix>& dist_ptr, const int fftlen,
 
             // get max
             double cc_max = R_NegInf;
-            double den = arma::norm(x) * arma::norm(y);
+            double den = arma::norm(x) * y_norm;
             for (int k = 0; k < id; k++) {
                 double this_cc = cc_seq_truncated[k] / den;
                 if (this_cc > cc_max) cc_max = this_cc;
@@ -120,11 +122,12 @@ void sbd_loop_general(Rcpp::NumericMatrix& dist, const int fftlen,
 {
     arma::vec cc_seq_truncated(fftlen);
     for (int i = 0; i < X.length(); i++) {
+        arma::vec x(Rcpp::NumericVector(X[i]));
+        arma::cx_vec fftx(Rcpp::ComplexVector(FFTX[i]));
+        double x_norm = arma::norm(x);
         for (int j = 0; j < Y.length(); j++) {
             R_CheckUserInterrupt();
-            arma::vec x(Rcpp::NumericVector(X[i]));
             arma::vec y(Rcpp::NumericVector(Y[j]));
-            arma::cx_vec fftx(Rcpp::ComplexVector(FFTX[i]));
             arma::cx_vec ffty(Rcpp::ComplexVector(FFTY[j]));
 
             // already normalizes by length
@@ -143,7 +146,7 @@ void sbd_loop_general(Rcpp::NumericMatrix& dist, const int fftlen,
 
             // get max
             double cc_max = R_NegInf;
-            double den = arma::norm(x) * arma::norm(y);
+            double den = x_norm * arma::norm(y);
             for (int k = 0; k < id; k++) {
                 double this_cc = cc_seq_truncated[k] / den;
                 if (this_cc > cc_max) cc_max = this_cc;
