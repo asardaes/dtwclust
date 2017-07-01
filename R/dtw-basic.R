@@ -161,7 +161,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
     } else if (symmetric) {
         len <- length(x)
         loop_endpoints <- symmetric_loop_endpoints(len)
-        D <- bigmemory::big.matrix(length(x), length(x), "double", 0)
+        D <- bigmemory::big.matrix(len, len, "double", 0)
         D_desc <- bigmemory::describe(D)
 
         foreach(loop_endpoints = loop_endpoints,
