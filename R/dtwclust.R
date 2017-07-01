@@ -248,8 +248,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                 ## Redefine new distmat
                 assign("distmat", distmat, environment(family@dist))
                 assign("distmat", distmat, environment(family@allcent))
-
-                gc(FALSE)
             }
         }
 
@@ -308,8 +306,6 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
                                                  fuzzy = isTRUE(type == "fuzzy"),
                                                  cent = cent_char,
                                                  dots = dots))
-
-                            gc(FALSE)
 
                             pc
                         }

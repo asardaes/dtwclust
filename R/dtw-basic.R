@@ -192,13 +192,11 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
                         i <- j + 1L
                     }
                     rm("d")
-                    gc()
                     NULL
                 }
 
         D <- D[,]
         attr(D, "dimnames") <- list(names(x), names(x))
-        gc()
 
     } else {
         Y <- split_parallel(y)

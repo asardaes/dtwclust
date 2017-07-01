@@ -107,14 +107,12 @@ ddist2 <- function(distance, control) {
                             i <- j + 1L
                         }
                         rm("dd")
-                        gc()
                         NULL
                     }
 
                     d <- d[,]
                     attr(d, "class") <- "crossdist"
                     attr(d, "dimnames") <- list(names(x), names(x))
-                    gc()
 
                 } else {
                     ## WHOLE SYMMETRIC DISTMAT WITH CUSTOM LOOP OR SEQUENTIAL proxy LOOP

@@ -302,7 +302,6 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
                         i <- j + 1L
                     }
                     rm("d")
-                    gc()
                     NULL
                 }
 
@@ -311,7 +310,6 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, normalize = TRUE, logs = N
         D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
         diag(D) <- 0
         attr(D, "dimnames") <- list(names(x), names(x))
-        gc()
 
     } else {
         D <- foreach(y = Y,
