@@ -10,7 +10,7 @@ namespace dtwclust {
 
 double kahan_sum(const Rcpp::NumericVector& x) {
     double sum = 0, c = 0;
-    for (double i : x) {
+    for (const double& i : x) {
         double y = i - c;
         double t = sum + y;
         c = (t - sum) - y;
@@ -25,9 +25,9 @@ double kahan_sum(const Rcpp::NumericVector& x) {
 // =================================================================================================
 
 SEXP lbk_cpp(const Rcpp::NumericVector& x, const int p,
-             const Rcpp::NumericVector& lower_envelope, const Rcpp::NumericVector& upper_envelope,
-             Rcpp::NumericVector& H)
+             const Rcpp::NumericVector& lower_envelope, const Rcpp::NumericVector& upper_envelope)
 {
+    Rcpp::NumericVector H(x.length());
     double lb = 0;
     for (int i = 0; i < x.length(); i++) {
         if (x[i] > upper_envelope[i])
@@ -47,9 +47,7 @@ SEXP lbk_cpp(const Rcpp::NumericVector& x, const int p,
 
 RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U) {
     BEGIN_RCPP
-    Rcpp::NumericVector x(X), lower_envelope(L), upper_envelope(U);
-    Rcpp::NumericVector H(x.length());
-    return lbk_cpp(x, Rcpp::as<int>(P), lower_envelope, upper_envelope, H);
+    return lbk_cpp(X, Rcpp::as<int>(P), L, U);
     END_RCPP
 }
 
@@ -59,9 +57,9 @@ RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U) {
 
 SEXP lbi_cpp(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
              const unsigned int window_size, const int p,
-             const Rcpp::NumericVector& lower_envelope, const Rcpp::NumericVector& upper_envelope,
-             Rcpp::NumericVector& L2, Rcpp::NumericVector& U2, Rcpp::NumericVector& H)
+             const Rcpp::NumericVector& lower_envelope, const Rcpp::NumericVector& upper_envelope)
 {
+    Rcpp::NumericVector L2(x.length()), U2(x.length()), H(x.length());
     Rcpp::NumericVector LB(x.length());
     double lb = 0;
     for (int i = 0; i < x.length(); i++) {
@@ -103,10 +101,7 @@ SEXP lbi_cpp(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
 
 RcppExport SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U) {
     BEGIN_RCPP
-    Rcpp::NumericVector x(X), y(Y), lower_envelope(L), upper_envelope(U);
-    Rcpp::NumericVector L2(x.length()), U2(x.length()), H(x.length());
-    return lbi_cpp(x, y, Rcpp::as<unsigned int>(WINDOW), Rcpp::as<int>(P),
-                   lower_envelope, upper_envelope, L2, U2, H);
+    return lbi_cpp(X, Y, Rcpp::as<unsigned int>(WINDOW), Rcpp::as<int>(P), L, U);
     END_RCPP
 }
 
