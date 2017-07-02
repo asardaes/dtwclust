@@ -6,6 +6,40 @@
 namespace dtwclust {
 
 // =================================================================================================
+/* calculate the shape-based distance */
+// =================================================================================================
+
+double sbd_core(const arma::cx_vec& fftx, const arma::cx_vec& ffty,
+                const arma::vec& x, const arma::vec& y,
+                const int fftlen, const double x_norm, const double y_norm,
+                arma::vec& cc_seq_truncated)
+{
+    // already normalizes by length
+    arma::vec cc_seq = arma::real(arma::ifft(fftx % ffty));
+
+    // reorder truncated sequence
+    int id = 0;
+    for (unsigned int i = fftlen - y.size() + 1; i < cc_seq.size(); i++) {
+        cc_seq_truncated[id] = cc_seq[i];
+        id++;
+    }
+    for (unsigned int i = 0; i < x.size(); i++) {
+        cc_seq_truncated[id] = cc_seq[i];
+        id++;
+    }
+
+    // get max
+    double cc_max = R_NegInf;
+    double den = x_norm * y_norm;
+    for (int i = 0; i < id; i++) {
+        double this_cc = cc_seq_truncated[i] / den;
+        if (this_cc > cc_max) cc_max = this_cc;
+    }
+
+    return 1 - cc_max;
+}
+
+// =================================================================================================
 /* pairwise case */
 // =================================================================================================
 
@@ -16,7 +50,6 @@ void sbd_loop_pairwise(MatrixAccessor<double>& dist, const int fftlen,
 {
     arma::vec cc_seq_truncated(fftlen);
     index--;
-
     for (int i = 0; i < X.length(); i++) {
         R_CheckUserInterrupt();
 
@@ -28,30 +61,10 @@ void sbd_loop_pairwise(MatrixAccessor<double>& dist, const int fftlen,
         arma::vec x(x_rcpp), y(y_rcpp);
         arma::cx_vec fftx(fftx_rcpp), ffty(ffty_rcpp);
 
-        // already normalizes by length
-        arma::vec cc_seq = arma::real(arma::ifft(fftx % ffty));
-
-        // reorder truncated sequence
-        int id = 0;
-        for (unsigned int j = fftlen - y.size() + 1; j < cc_seq.size(); j++) {
-            cc_seq_truncated[id] = cc_seq[j];
-            id++;
-        }
-        for (unsigned int j = 0; j < x.size(); j++) {
-            cc_seq_truncated[id] = cc_seq[j];
-            id++;
-        }
-
-        // get max
-        double cc_max = R_NegInf;
-        double den = arma::norm(x) * arma::norm(y);
-        for (int j = 0; j < id; j++) {
-            double this_cc = cc_seq_truncated[j] / den;
-            if (this_cc > cc_max) cc_max = this_cc;
-        }
-
         // bigmemory operator[][] is backwards
-        dist[0][index++] = 1 - cc_max;
+        double x_norm = arma::norm(x);
+        double y_norm = arma::norm(y);
+        dist[0][index++] = sbd_core(fftx, ffty, x, y, fftlen, x_norm, y_norm, cc_seq_truncated);
     }
 }
 
@@ -93,30 +106,10 @@ void sbd_loop_symmetric(MatrixAccessor<double>& dist, const int fftlen,
             arma::vec x(x_rcpp);
             arma::cx_vec fftx(fftx_rcpp);
 
-            // already normalizes by length
-            arma::vec cc_seq = arma::real(arma::ifft(fftx % ffty));
-
-            // reorder truncated sequence
-            int id = 0;
-            for (unsigned int k = fftlen - y.size() + 1; k < cc_seq.size(); k++) {
-                cc_seq_truncated[id] = cc_seq[k];
-                id++;
-            }
-            for (unsigned int k = 0; k < x.size(); k++) {
-                cc_seq_truncated[id] = cc_seq[k];
-                id++;
-            }
-
-            // get max
-            double cc_max = R_NegInf;
-            double den = arma::norm(x) * y_norm;
-            for (int k = 0; k < id; k++) {
-                double this_cc = cc_seq_truncated[k] / den;
-                if (this_cc > cc_max) cc_max = this_cc;
-            }
+            double x_norm = arma::norm(x);
+            double cc_max = sbd_core(fftx, ffty, x, y, fftlen, x_norm, y_norm, cc_seq_truncated);
 
             // bigmemory operator[][] is backwards
-            cc_max = 1 - cc_max;
             dist[i][j] = cc_max;
             dist[j][i] = cc_max;
             i++;
@@ -137,7 +130,6 @@ void sbd_loop_general(MatrixAccessor<double>& dist, const int fftlen,
 {
     arma::vec cc_seq_truncated(fftlen);
     index--;
-
     for (int j = 0; j < Y.length(); j++) {
         // in two steps to avoid disambiguation
         Rcpp::NumericVector y_rcpp(Y[j]);
@@ -155,30 +147,10 @@ void sbd_loop_general(MatrixAccessor<double>& dist, const int fftlen,
             arma::vec x(x_rcpp);
             arma::cx_vec fftx(fftx_rcpp);
 
-            // already normalizes by length
-            arma::vec cc_seq = arma::real(arma::ifft(fftx % ffty));
-
-            // reorder truncated sequence
-            int id = 0;
-            for (unsigned int k = fftlen - y.size() + 1; k < cc_seq.size(); k++) {
-                cc_seq_truncated[id] = cc_seq[k];
-                id++;
-            }
-            for (unsigned int k = 0; k < x.size(); k++) {
-                cc_seq_truncated[id] = cc_seq[k];
-                id++;
-            }
-
-            // get max
-            double cc_max = R_NegInf;
-            double den = arma::norm(x) * y_norm;
-            for (int k = 0; k < id; k++) {
-                double this_cc = cc_seq_truncated[k] / den;
-                if (this_cc > cc_max) cc_max = this_cc;
-            }
+            double x_norm = arma::norm(x);
 
             // bigmemory operator[][] is backwards
-            dist[index][i] = 1 - cc_max;
+            dist[index][i] = sbd_core(fftx, ffty, x, y, fftlen, x_norm, y_norm, cc_seq_truncated);
         }
         index++;
     }
