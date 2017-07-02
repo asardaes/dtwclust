@@ -31,6 +31,11 @@ RcppExport SEXP envelope(SEXP series, SEXP window);
 
 RcppExport SEXP force_lb_symmetry(SEXP X);
 
+RcppExport SEXP gak_loop(SEXP D, SEXP X, SEXP Y,
+                         SEXP SYMMETRIC, SEXP PAIRWISE,
+                         SEXP BIGMAT, SEXP MULTIVARIATE,
+                         SEXP DISTARGS, SEXP ENDPOINTS);
+
 RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U);
 
 RcppExport SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U);
@@ -56,6 +61,10 @@ double dtwb(const Rcpp::NumericMatrix& x, const Rcpp::NumericMatrix& y, const Rc
 // defined in envelope.cpp
 void envelope_cpp(const Rcpp::NumericVector& array, const unsigned int width,
                   Rcpp::NumericVector& minvalues, Rcpp::NumericVector& maxvalues);
+
+// defined in utils.cpp
+double gak(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y, const Rcpp::List& dots);
+double gak(const Rcpp::NumericMatrix& x, const Rcpp::NumericMatrix& y, const Rcpp::List& dots);
 
 // =================================================================================================
 /* Templates */

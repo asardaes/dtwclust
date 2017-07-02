@@ -113,6 +113,10 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
     d
 }
 
+# ==================================================================================================
+# Wrapper for proxy::dist
+# ==================================================================================================
+
 dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pairwise = FALSE) {
     x <- any2list(x)
     if (error.check) check_consistency(x, "vltslist")
