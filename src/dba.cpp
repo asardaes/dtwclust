@@ -22,30 +22,26 @@ bool trace;
 
 void uv_set_alignment(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y)
 {
-    SEXP X = PROTECT(Rcpp::wrap(x));
-    SEXP Y = PROTECT(Rcpp::wrap(y));
     SEXP NX = PROTECT(Rcpp::wrap(nx));
     SEXP NY = PROTECT(Rcpp::wrap(ny));
     SEXP NV = PROTECT(Rcpp::wrap(nv));
-    Rcpp::List alignment(dtw_basic(X, Y, window, NX, NY, NV, norm, step, backtrack, gcm));
+    Rcpp::List alignment(dtw_basic(x, y, window, NX, NY, NV, norm, step, backtrack, gcm));
     index1 = alignment["index1"];
     index2 = alignment["index2"];
     begin = alignment["path"];
-    UNPROTECT(5);
+    UNPROTECT(3);
 }
 
 void mv_set_alignment(const Rcpp::NumericMatrix& x, const Rcpp::NumericMatrix& y)
 {
-    SEXP X = PROTECT(Rcpp::wrap(x));
-    SEXP Y = PROTECT(Rcpp::wrap(y));
     SEXP NX = PROTECT(Rcpp::wrap(nx));
     SEXP NY = PROTECT(Rcpp::wrap(ny));
     SEXP NV = PROTECT(Rcpp::wrap(nv));
-    Rcpp::List alignment(dtw_basic(X, Y, window, NX, NY, NV, norm, step, backtrack, gcm));
+    Rcpp::List alignment(dtw_basic(x, y, window, NX, NY, NV, norm, step, backtrack, gcm));
     index1 = alignment["index1"];
     index2 = alignment["index2"];
     begin = alignment["path"];
-    UNPROTECT(5);
+    UNPROTECT(3);
 }
 
 // =================================================================================================
@@ -217,7 +213,7 @@ SEXP dba_uv(const Rcpp::NumericVector& centroid)
         Rflush();
     }
 
-    return PROTECT(Rcpp::wrap(new_cent));
+    return new_cent;
 }
 
 // =================================================================================================
@@ -267,7 +263,7 @@ SEXP dba_mv_by_variable(const Rcpp::NumericMatrix& mv_ref_cent)
         mat_cent(Rcpp::_, j) = new_cent;
     }
 
-    return PROTECT(Rcpp::wrap(mat_cent));
+    return mat_cent;
 }
 
 // =================================================================================================
@@ -308,7 +304,7 @@ SEXP dba_mv_by_series(const Rcpp::NumericMatrix& centroid)
         Rflush();
     }
 
-    return PROTECT(Rcpp::wrap(mat_cent));
+    return mat_cent;
 }
 
 // =================================================================================================
@@ -348,8 +344,6 @@ RcppExport SEXP dba(SEXP X, SEXP CENT,
         new_cent = dba_uv(centroid);
     }
 
-    // new_cent is protected by dba_*(centroid)
-    UNPROTECT(1);
     return new_cent;
     END_RCPP
 }

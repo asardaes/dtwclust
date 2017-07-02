@@ -10,8 +10,6 @@ namespace dtwclust {
 
 double dtwb(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y, const Rcpp::List& dots)
 {
-    SEXP X = PROTECT(Rcpp::wrap(x));
-    SEXP Y = PROTECT(Rcpp::wrap(y));
     SEXP NX = PROTECT(Rcpp::wrap(x.length()));
     SEXP NY = PROTECT(Rcpp::wrap(y.length()));
     SEXP NV = PROTECT(Rcpp::wrap(1));
@@ -22,8 +20,8 @@ double dtwb(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y, const Rc
     SEXP backtrack = dots["backtrack"];
     SEXP gcm = dots["gcm"];
 
-    double d = Rcpp::as<double>(dtw_basic(X, Y, window, NX, NY, NV, norm, step, backtrack, gcm));
-    UNPROTECT(5);
+    double d = Rcpp::as<double>(dtw_basic(x, y, window, NX, NY, NV, norm, step, backtrack, gcm));
+    UNPROTECT(3);
     return d;
 }
 
