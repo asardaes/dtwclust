@@ -154,11 +154,9 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     pairwise <- isTRUE(pairwise)
     dim_out <- c(length(x), length(y))
     dim_names <- list(names(x), names(y))
-    seed <- get0(".Random.seed", .GlobalEnv, mode = "integer") ## undo big.matrix() seed change...
+    D <- allocate_distmat(length(x), length(y), pairwise, symmetric) ## utils.R
 
-    ## Calculate distance matrix
     if (pairwise) {
-        D <- bigmemory::big.matrix(length(x), 1L, "double", 0)
         x <- split_parallel(x)
         y <- split_parallel(y)
         fftx <- split_parallel(fftx)
@@ -167,15 +165,13 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         endpoints <- attr(x, "endpoints")
 
     } else if (symmetric) {
-        D <- bigmemory::big.matrix(length(x), length(x), "double", 0)
-        endpoints <- symmetric_loop_endpoints(length(x))
+        endpoints <- symmetric_loop_endpoints(length(x)) ## utils.R
         x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
         y <- x
         fftx <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { fftx })
         ffty <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { ffty })
 
     } else {
-        D <- bigmemory::big.matrix(length(x), length(y), "double", 0)
         x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
         y <- split_parallel(y)
         fftx <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { fftx })
@@ -183,7 +179,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         endpoints <- attr(y, "endpoints")
     }
 
-    assign(".Random.seed", seed, .GlobalEnv)
+    ## Calculate distance matrix
     D_desc <- bigmemory::describe(D)
     foreach(x = x, y = y, fftx = fftx, ffty = ffty, endpoints = endpoints,
             .combine = c,
