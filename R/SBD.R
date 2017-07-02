@@ -152,26 +152,40 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
 
     if (is_multivariate(x) || is_multivariate(y)) stop("SBD does not support multivariate series.")
     pairwise <- isTRUE(pairwise)
+    dim_out <- c(length(x), length(y))
+    dim_names <- list(names(x), names(y))
     seed <- get0(".Random.seed", .GlobalEnv, mode = "integer") ## undo big.matrix() seed change...
 
     ## Calculate distance matrix
     if (pairwise) {
-        validate_pairwise(list(x), list(y))
         D <- bigmemory::big.matrix(length(x), 1L, "double", 0)
-        endpoints <- loop_endpoints(length(x))
+        x <- split_parallel(x)
+        y <- split_parallel(y)
+        fftx <- split_parallel(fftx)
+        ffty <- split_parallel(ffty)
+        validate_pairwise(x, y)
+        endpoints <- attr(x, "endpoints")
 
     } else if (symmetric) {
         D <- bigmemory::big.matrix(length(x), length(x), "double", 0)
         endpoints <- symmetric_loop_endpoints(length(x))
+        x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
+        y <- x
+        fftx <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { fftx })
+        ffty <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { ffty })
 
     } else {
         D <- bigmemory::big.matrix(length(x), length(y), "double", 0)
-        endpoints <- loop_endpoints(length(y))
+        x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
+        y <- split_parallel(y)
+        fftx <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { fftx })
+        ffty <- split_parallel(ffty)
+        endpoints <- attr(y, "endpoints")
     }
 
     assign(".Random.seed", seed, .GlobalEnv)
     D_desc <- bigmemory::describe(D)
-    foreach(endpoints = endpoints,
+    foreach(x = x, y = y, fftx = fftx, ffty = ffty, endpoints = endpoints,
             .combine = c,
             .multicombine = TRUE,
             .packages = c("dtwclust", "bigmemory"),
@@ -187,8 +201,8 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         class(D) <- "pairdist"
 
     } else {
-        if (is.null(dim(D))) dim(D) <- c(length(x), length(y))
-        dimnames(D) <- list(names(x), names(y))
+        if (is.null(dim(D))) dim(D) <- dim_out
+        dimnames(D) <- dim_names
         class(D) <- "crossdist"
     }
 

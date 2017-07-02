@@ -12,12 +12,12 @@ namespace dtwclust {
 void sbd_loop_pairwise(MatrixAccessor<double>& dist, const int fftlen,
                        const Rcpp::List& X, const Rcpp::List& Y,
                        const Rcpp::List& FFTX, const Rcpp::List& FFTY,
-                       const Rcpp::List& endpoints)
+                       int index)
 {
     arma::vec cc_seq_truncated(fftlen);
-    int i_start = endpoints["start"], i_end = endpoints["end"];
+    index--;
 
-    for (int i = i_start - 1; i < i_end; i++) {
+    for (int i = 0; i < X.length(); i++) {
         R_CheckUserInterrupt();
 
         // in two steps to avoid disambiguation
@@ -51,7 +51,7 @@ void sbd_loop_pairwise(MatrixAccessor<double>& dist, const int fftlen,
         }
 
         // bigmemory operator[][] is backwards
-        dist[0][i] = 1 - cc_max;
+        dist[0][index++] = 1 - cc_max;
     }
 }
 
@@ -133,27 +133,27 @@ void sbd_loop_symmetric(MatrixAccessor<double>& dist, const int fftlen,
 void sbd_loop_general(MatrixAccessor<double>& dist, const int fftlen,
                       const Rcpp::List& X, const Rcpp::List& Y,
                       const Rcpp::List& FFTX, const Rcpp::List& FFTY,
-                      const Rcpp::List& endpoints)
+                      int index)
 {
     arma::vec cc_seq_truncated(fftlen);
-    int j_start = endpoints["start"], j_end = endpoints["end"];
+    index--;
 
-    for (int i = 0; i < X.length(); i++) {
+    for (int j = 0; j < Y.length(); j++) {
         // in two steps to avoid disambiguation
-        Rcpp::NumericVector x_rcpp(X[i]);
-        Rcpp::ComplexVector fftx_rcpp(FFTX[i]);
-        arma::vec x(x_rcpp);
-        arma::cx_vec fftx(fftx_rcpp);
-        double x_norm = arma::norm(x);
+        Rcpp::NumericVector y_rcpp(Y[j]);
+        Rcpp::ComplexVector ffty_rcpp(FFTY[j]);
+        arma::vec y(y_rcpp);
+        arma::cx_vec ffty(ffty_rcpp);
+        double y_norm = arma::norm(y);
 
-        for (int j = j_start - 1; j < j_end; j++) {
+        for (int i = 0; i < X.length(); i++) {
             R_CheckUserInterrupt();
 
             // in two steps to avoid disambiguation
-            Rcpp::NumericVector y_rcpp(Y[j]);
-            Rcpp::ComplexVector ffty_rcpp(FFTY[j]);
-            arma::vec y(y_rcpp);
-            arma::cx_vec ffty(ffty_rcpp);
+            Rcpp::NumericVector x_rcpp(X[i]);
+            Rcpp::ComplexVector fftx_rcpp(FFTX[i]);
+            arma::vec x(x_rcpp);
+            arma::cx_vec fftx(fftx_rcpp);
 
             // already normalizes by length
             arma::vec cc_seq = arma::real(arma::ifft(fftx % ffty));
@@ -171,15 +171,16 @@ void sbd_loop_general(MatrixAccessor<double>& dist, const int fftlen,
 
             // get max
             double cc_max = R_NegInf;
-            double den = x_norm * arma::norm(y);
+            double den = arma::norm(x) * y_norm;
             for (int k = 0; k < id; k++) {
                 double this_cc = cc_seq_truncated[k] / den;
                 if (this_cc > cc_max) cc_max = this_cc;
             }
 
             // bigmemory operator[][] is backwards
-            dist[j][i] = 1 - cc_max;
+            dist[index][i] = 1 - cc_max;
         }
+        index++;
     }
 }
 
@@ -195,11 +196,11 @@ RcppExport SEXP sbd_loop(SEXP D, SEXP X, SEXP Y, SEXP FFTX, SEXP FFTY,
     MatrixAccessor<double> dist(*dist_ptr);
 
     if (Rcpp::as<bool>(PAIRWISE))
-        sbd_loop_pairwise(dist, Rcpp::as<int>(FFTLEN), X, Y, FFTX, FFTY, ENDPOINTS);
+        sbd_loop_pairwise(dist, Rcpp::as<int>(FFTLEN), X, Y, FFTX, FFTY, Rcpp::as<int>(ENDPOINTS));
     else if (Rcpp::as<bool>(SYMMETRIC))
         sbd_loop_symmetric(dist, Rcpp::as<int>(FFTLEN), X, FFTX, FFTY, ENDPOINTS);
     else
-        sbd_loop_general(dist, Rcpp::as<int>(FFTLEN), X, Y, FFTX, FFTY, ENDPOINTS);
+        sbd_loop_general(dist, Rcpp::as<int>(FFTLEN), X, Y, FFTX, FFTY, Rcpp::as<int>(ENDPOINTS));
 
     return R_NilValue;
     END_RCPP

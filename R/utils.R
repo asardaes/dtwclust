@@ -240,7 +240,7 @@ setnames_inplace <- function(vec, names) {
 # Split a given object into chunks for parallel workers
 split_parallel <- function(obj, margin = NULL) {
     num_workers <- foreach::getDoParWorkers()
-    if (num_workers == 1L) return(list(obj))
+    if (num_workers == 1L) return(structure(list(obj), endpoints = 1L))
 
     num_tasks <- if (is.null(margin)) length(obj) else dim(obj)[margin]
     if (!is.integer(num_tasks)) stop("Invalid attempt to split an object into parallel tasks")
@@ -255,6 +255,7 @@ split_parallel <- function(obj, margin = NULL) {
                       lapply(num_tasks, function(id) obj[id, , drop = FALSE]),
                       lapply(num_tasks, function(id) obj[ , id, drop = FALSE]))
 
+    attr(ret, "endpoints") <- lapply(num_tasks, function(ids) { ids[1L] })
     ret
 }
 
@@ -269,16 +270,6 @@ validate_pairwise <- function(x, y) {
 # ==================================================================================================
 # Helper distance-related
 # ==================================================================================================
-
-# get endpoints for parallel non-symmetric distance matrix calculations based on number of workers
-loop_endpoints <- function(ncols) {
-    num_workers <- foreach::getDoParWorkers()
-    if (num_workers == 1L) return(list(list(start = 1L, end = ncols)))
-    if (ncols < num_workers) num_workers <- ncols
-    start <- cumsum(c(1L, rep(as.integer(ncols / num_workers), num_workers - 1L)))
-    end <- c(start[-1L] - 1L, ncols)
-    Map(start, end, f = function(s, e) { list(start = s, end = e) })
-}
 
 # get endpoints for parallel symmetric distance matrix calculations based on number of workers
 symmetric_loop_endpoints <- function(n) {
