@@ -25,6 +25,23 @@ double dtwb(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y, const Rc
     return d;
 }
 
+double dtwb(const Rcpp::NumericMatrix& x, const Rcpp::NumericMatrix& y, const Rcpp::List& dots)
+{
+    SEXP NX = PROTECT(Rcpp::wrap(x.nrow()));
+    SEXP NY = PROTECT(Rcpp::wrap(y.nrow()));
+    SEXP NV = PROTECT(Rcpp::wrap(x.ncol()));
+
+    SEXP window = dots["window.size"];
+    SEXP norm = dots["norm"];
+    SEXP step = dots["step.pattern"];
+    SEXP backtrack = dots["backtrack"];
+    SEXP gcm = dots["gcm"];
+
+    double d = Rcpp::as<double>(dtw_basic(x, y, window, NX, NY, NV, norm, step, backtrack, gcm));
+    UNPROTECT(3);
+    return d;
+}
+
 // =================================================================================================
 /* for Rcpp::Rcout */
 // =================================================================================================

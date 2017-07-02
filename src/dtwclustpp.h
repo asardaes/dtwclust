@@ -20,6 +20,11 @@ RcppExport SEXP dba(SEXP X, SEXP centroid,
                     SEXP max_iter, SEXP delta, SEXP trace,
                     SEXP multivariate, SEXP mv_ver, SEXP DOTS);
 
+RcppExport SEXP dtwb_loop(SEXP D, SEXP X, SEXP Y,
+                          SEXP SYMMETRIC, SEXP PAIRWISE,
+                          SEXP BIGMAT, SEXP NORMALIZE, SEXP MULTIVARIATE,
+                          SEXP DISTARGS, SEXP ENDPOINTS);
+
 RcppExport SEXP dtw_lb(SEXP X, SEXP Y, SEXP D, SEXP DOTS);
 
 RcppExport SEXP envelope(SEXP series, SEXP window);
@@ -46,6 +51,7 @@ void Rflush();
 
 // defined in utils.cpp
 double dtwb(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y, const Rcpp::List& dots);
+double dtwb(const Rcpp::NumericMatrix& x, const Rcpp::NumericMatrix& y, const Rcpp::List& dots);
 
 // defined in envelope.cpp
 void envelope_cpp(const Rcpp::NumericVector& array, const unsigned int width,
