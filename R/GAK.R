@@ -150,9 +150,14 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
 # ==================================================================================================
 
 GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
-                      logs = NULL, error.check = TRUE, pairwise = FALSE)
+                      logs = NULL, error.check = TRUE, pairwise = FALSE, .internal_ = FALSE)
 {
     ## normalization will be done manually to avoid multiple calculations of gak_x and gak_y
+    if (!.internal_ && !normalize) {
+        warning("The proxy::dist version of GAK is always normalized.")
+        normalize <- TRUE
+    }
+
     x <- any2list(x)
     if (error.check) check_consistency(x, "vltslist")
 
@@ -214,14 +219,16 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         # x
         gak_x <- GAK_proxy(x, x,
                            sigma = sigma, window.size = window.size, logs = logs,
-                           error.check = FALSE, pairwise = TRUE, normalize = FALSE)
+                           error.check = FALSE, pairwise = TRUE, normalize = FALSE,
+                           .internal_ = TRUE)
         # y
         if (symmetric)
             gak_y <- gak_x
         else
             gak_y <- GAK_proxy(y, y,
                                sigma = sigma, window.size = window.size, logs = logs,
-                               error.check = FALSE, pairwise = TRUE, normalize = FALSE)
+                               error.check = FALSE, pairwise = TRUE, normalize = FALSE,
+                               .internal_ = TRUE)
     }
 
     ## Wrap as needed for foreach
