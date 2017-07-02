@@ -156,6 +156,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     dim_names <- list(names(x), names(y))
     D <- allocate_distmat(length(x), length(y), pairwise, symmetric) ## utils.R
 
+    ## Wrap as needed for foreach
     if (pairwise) {
         x <- split_parallel(x)
         y <- split_parallel(y)
@@ -180,16 +181,15 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     }
 
     ## Calculate distance matrix
-    D_desc <- bigmemory::describe(D)
+    D_desc <- if (bigmemory::is.big.matrix(D)) bigmemory::describe(D) else NULL
     foreach(x = x, y = y, fftx = fftx, ffty = ffty, endpoints = endpoints,
             .combine = c,
             .multicombine = TRUE,
             .packages = c("dtwclust", "bigmemory"),
-            .noexport = c("D"),
             .export = "sbd_loop") %op% {
-                d_ptr <- bigmemory::attach.big.matrix(D_desc)@address
-                sbd_loop(d_ptr, x, y, fftx, ffty, fftlen, symmetric, pairwise, endpoints)
-                NULL
+                bigmat <- !is.null(D_desc)
+                d <- if (bigmat) bigmemory::attach.big.matrix(D_desc)@address else D
+                sbd_loop(d, x, y, fftx, ffty, fftlen, symmetric, pairwise, endpoints, bigmat)
             }
 
     D <- D[,]
@@ -211,9 +211,8 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
 # Wrapper for C++
 # ==================================================================================================
 
-sbd_loop <- function(d_ptr, x, y, fftx, ffty, fftlen, symmetric, pairwise, endpoints) {
+sbd_loop <- function(d, x, y, fftx, ffty, fftlen, symmetric, pairwise, endpoints, bigmat) {
     .Call(C_sbd_loop,
-          d_ptr, x, y, fftx, ffty,
-          fftlen, symmetric, pairwise, endpoints,
+          d, x, y, fftx, ffty, fftlen, symmetric, pairwise, endpoints, bigmat,
           PACKAGE = "dtwclust")
 }

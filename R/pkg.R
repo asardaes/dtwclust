@@ -65,6 +65,7 @@
 #' @importFrom bigmemory attach.big.matrix
 #' @importFrom bigmemory big.matrix
 #' @importFrom bigmemory describe
+#' @importFrom bigmemory is.big.matrix
 #'
 #' @importFrom clue as.cl_class_ids
 #' @importFrom clue as.cl_membership

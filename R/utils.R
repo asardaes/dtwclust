@@ -273,14 +273,25 @@ validate_pairwise <- function(x, y) {
 
 # allocate distance matrix for custom proxy loops
 allocate_distmat <- function(x_len, y_len, pairwise, symmetric) {
-    seed <- get0(".Random.seed", .GlobalEnv, mode = "integer") ## undo big.matrix() seed change...
-    if (pairwise)
-        D <- bigmemory::big.matrix(x_len, 1L, "double", 0)
-    else if (symmetric)
-        D <- bigmemory::big.matrix(x_len, x_len, "double", 0)
-    else
-        D <- bigmemory::big.matrix(x_len, y_len, "double", 0)
-    assign(".Random.seed", seed, .GlobalEnv)
+    if (foreach::getDoParWorkers() > 1L) {
+        seed <- get0(".Random.seed", .GlobalEnv, mode = "integer") ## undo big.matrix() seed change...
+        if (pairwise)
+            D <- bigmemory::big.matrix(x_len, 1L, "double", 0)
+        else if (symmetric)
+            D <- bigmemory::big.matrix(x_len, x_len, "double", 0)
+        else
+            D <- bigmemory::big.matrix(x_len, y_len, "double", 0)
+        assign(".Random.seed", seed, .GlobalEnv)
+
+    } else {
+        if (pairwise)
+            D <- matrix(0, x_len, 1L)
+        else if (symmetric)
+            D <- matrix(0, x_len, x_len)
+        else
+            D <- matrix(0, x_len, y_len)
+    }
+    ## return
     D
 }
 
