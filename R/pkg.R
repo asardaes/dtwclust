@@ -227,9 +227,16 @@ NULL
     if (!check_consistency("GAK", "dist", silent = TRUE))
         proxy::pr_DB$set_entry(FUN = GAK_proxy, names=c("GAK", "gak"),
                                loop = FALSE, type = "metric", distance = TRUE,
-                               description = "Fast (triangular) global alignment kernel",
+                               description = "Fast (triangular) global alignment kernel distance",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun,
                                convert = function(d) { 1 - d })
+
+    ## Register uGAK
+    if (!check_consistency("uGAK", "dist", silent = TRUE))
+        proxy::pr_DB$set_entry(FUN = GAK_simil, names=c("uGAK", "ugak"),
+                               loop = FALSE, type = "metric", distance = FALSE,
+                               description = "Fast (triangular) global alignment kernel similarity",
+                               PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
     RNGkind("L'Ecuyer")
 

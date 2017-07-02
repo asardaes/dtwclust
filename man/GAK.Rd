@@ -54,7 +54,8 @@ For more information, refer to the package vignette and the referenced article.
 The estimation of \code{sigma} does \emph{not} depend on \code{window.size}.
 
 If \code{normalize} is set to \code{FALSE}, the returned value is \strong{not} a distance, rather a similarity.
-The \code{\link[proxy:dist]{proxy::dist()}} version is thus always normalized.
+The \code{\link[proxy:dist]{proxy::dist()}} version is thus always normalized. Use \code{\link[proxy:simil]{proxy::simil()}} with \code{method} set to
+"uGAK" if you want the unnormalized similarities.
 
 A constrained unnormalized calculation (i.e. with \code{window.size > 0} and \code{normalize = FALSE}) will
 return negative infinity if \code{abs(NROW(x)} \code{-} \code{NROW(y))} \code{>} \code{window.size}. Since the function
@@ -95,6 +96,9 @@ tsclust(CharTraj, k = 20L,
         args = tsclust_args(dist = list(sigma = sigma,
                                         window.size = 18L)))
 }
+
+# Unnormalized similarities
+proxy::simil(CharTraj[1L:5L], method = "ugak")
 
 }
 \references{

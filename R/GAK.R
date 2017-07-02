@@ -46,7 +46,8 @@
 #' The estimation of `sigma` does *not* depend on `window.size`.
 #'
 #' If `normalize` is set to `FALSE`, the returned value is **not** a distance, rather a similarity.
-#' The [proxy::dist()] version is thus always normalized.
+#' The [proxy::dist()] version is thus always normalized. Use [proxy::simil()] with `method` set to
+#' "uGAK" if you want the unnormalized similarities.
 #'
 #' A constrained unnormalized calculation (i.e. with `window.size > 0` and `normalize = FALSE`) will
 #' return negative infinity if `abs(NROW(x)` `-` `NROW(y))` `>` `window.size`. Since the function
@@ -77,6 +78,9 @@
 #'         args = tsclust_args(dist = list(sigma = sigma,
 #'                                         window.size = 18L)))
 #' }
+#'
+#' # Unnormalized similarities
+#' proxy::simil(CharTraj[1L:5L], method = "ugak")
 #'
 GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
                 logs = NULL, error.check = TRUE)
@@ -162,7 +166,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     if (error.check) check_consistency(x, "vltslist")
 
     if (is.null(y)) {
-        symmetric <- TRUE
+        symmetric <- normalize
         y <- x
 
     } else {
@@ -322,4 +326,13 @@ gak_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ...,
     .Call(C_gak_loop,
           d, x, y, symmetric, pairwise, bigmat, mv, distargs, endpoints,
           PACKAGE = "dtwclust")
+}
+
+# ==================================================================================================
+# Wrapper for proxy::simil
+# ==================================================================================================
+
+GAK_simil <- function(x, y = NULL, ..., normalize = FALSE) {
+    if (normalize) warning("The proxy::simil version of GAK cannot be normalized.")
+    GAK_proxy(x = x, y = y, ..., normalize = FALSE, .internal_ = TRUE)
 }
