@@ -13,7 +13,7 @@ namespace dtwclust {
 void dtwb_loop_pairwise(Rcpp::NumericMatrix& dist,
                         const Rcpp::List& X, const Rcpp::List& Y,
                         const Rcpp::List& distargs,
-                        int index, bool multivariate, bool normalize)
+                        int index, const bool multivariate, const bool normalize)
 {
     index--;
     for (int i = 0; i < X.length(); i++) {
@@ -39,7 +39,7 @@ void dtwb_loop_pairwise(Rcpp::NumericMatrix& dist,
 void dtwb_loop_pairwise(MatrixAccessor<double>& dist,
                         const Rcpp::List& X, const Rcpp::List& Y,
                         const Rcpp::List& distargs,
-                        int index, bool multivariate, bool normalize)
+                        int index, const bool multivariate, const bool normalize)
 {
     index--;
     for (int i = 0; i < X.length(); i++) {
@@ -70,7 +70,7 @@ void dtwb_loop_pairwise(MatrixAccessor<double>& dist,
 // R matrix
 void dtwb_loop_symmetric(Rcpp::NumericMatrix& dist, const Rcpp::List& X,
                          const Rcpp::List& endpoints, const Rcpp::List& distargs,
-                         bool multivariate, bool normalize)
+                         const bool multivariate, const bool normalize)
 {
     Rcpp::List start = Rcpp::as<Rcpp::List>(endpoints["start"]);
     Rcpp::List end = Rcpp::as<Rcpp::List>(endpoints["end"]);
@@ -130,7 +130,7 @@ void dtwb_loop_symmetric(Rcpp::NumericMatrix& dist, const Rcpp::List& X,
 // big.matrix
 void dtwb_loop_symmetric(MatrixAccessor<double>& dist, const Rcpp::List& X,
                          const Rcpp::List& endpoints, const Rcpp::List& distargs,
-                         bool multivariate, bool normalize)
+                         const bool multivariate, const bool normalize)
 {
     Rcpp::List start = Rcpp::as<Rcpp::List>(endpoints["start"]);
     Rcpp::List end = Rcpp::as<Rcpp::List>(endpoints["end"]);
@@ -193,8 +193,8 @@ void dtwb_loop_symmetric(MatrixAccessor<double>& dist, const Rcpp::List& X,
 
 // R matrix
 void dtwb_loop_general(Rcpp::NumericMatrix& dist, const Rcpp::List& X, const Rcpp::List& Y,
-                       const Rcpp::List& endpoints, const Rcpp::List& distargs,
-                       int index, bool multivariate, bool normalize)
+                       const Rcpp::List& distargs, int index,
+                       const bool multivariate, const bool normalize)
 {
     index--;
     if (multivariate) {
@@ -227,8 +227,8 @@ void dtwb_loop_general(Rcpp::NumericMatrix& dist, const Rcpp::List& X, const Rcp
 
 // big.matrix
 void dtwb_loop_general(MatrixAccessor<double>& dist, const Rcpp::List& X, const Rcpp::List& Y,
-                       const Rcpp::List& endpoints, const Rcpp::List& distargs,
-                       int index, bool multivariate, bool normalize)
+                       const Rcpp::List& distargs, int index,
+                       const bool multivariate, const bool normalize)
 {
     index--;
     if (multivariate) {
@@ -285,7 +285,7 @@ RcppExport SEXP dtwb_loop(SEXP D, SEXP X, SEXP Y,
                                 Rcpp::as<bool>(MULTIVARIATE),
                                 Rcpp::as<bool>(NORMALIZE));
         else
-            dtwb_loop_general(dist, X, Y, ENDPOINTS, DISTARGS,
+            dtwb_loop_general(dist, X, Y, DISTARGS,
                               Rcpp::as<int>(ENDPOINTS),
                               Rcpp::as<bool>(MULTIVARIATE),
                               Rcpp::as<bool>(NORMALIZE));
@@ -303,7 +303,7 @@ RcppExport SEXP dtwb_loop(SEXP D, SEXP X, SEXP Y,
                                 Rcpp::as<bool>(MULTIVARIATE),
                                 Rcpp::as<bool>(NORMALIZE));
         else
-            dtwb_loop_general(dist, X, Y, ENDPOINTS, DISTARGS,
+            dtwb_loop_general(dist, X, Y, DISTARGS,
                               Rcpp::as<int>(ENDPOINTS),
                               Rcpp::as<bool>(MULTIVARIATE),
                               Rcpp::as<bool>(NORMALIZE));

@@ -13,7 +13,7 @@ namespace dtwclust {
 void gak_loop_pairwise(Rcpp::NumericMatrix& dist,
                        const Rcpp::List& X, const Rcpp::List& Y,
                        const Rcpp::List& distargs,
-                       int index, bool multivariate)
+                       int index, const bool multivariate)
 {
     index--;
     for (int i = 0; i < X.length(); i++) {
@@ -35,7 +35,7 @@ void gak_loop_pairwise(Rcpp::NumericMatrix& dist,
 void gak_loop_pairwise(MatrixAccessor<double>& dist,
                        const Rcpp::List& X, const Rcpp::List& Y,
                        const Rcpp::List& distargs,
-                       int index, bool multivariate)
+                       int index, const bool multivariate)
 {
     index--;
     for (int i = 0; i < X.length(); i++) {
@@ -62,7 +62,7 @@ void gak_loop_pairwise(MatrixAccessor<double>& dist,
 // R matrix
 void gak_loop_symmetric(Rcpp::NumericMatrix& dist, const Rcpp::List& X,
                         const Rcpp::List& endpoints, const Rcpp::List& distargs,
-                        bool multivariate)
+                        const bool multivariate)
 {
     Rcpp::List start = Rcpp::as<Rcpp::List>(endpoints["start"]);
     Rcpp::List end = Rcpp::as<Rcpp::List>(endpoints["end"]);
@@ -120,7 +120,7 @@ void gak_loop_symmetric(Rcpp::NumericMatrix& dist, const Rcpp::List& X,
 // big.matrix
 void gak_loop_symmetric(MatrixAccessor<double>& dist, const Rcpp::List& X,
                         const Rcpp::List& endpoints, const Rcpp::List& distargs,
-                        bool multivariate)
+                        const bool multivariate)
 {
     Rcpp::List start = Rcpp::as<Rcpp::List>(endpoints["start"]);
     Rcpp::List end = Rcpp::as<Rcpp::List>(endpoints["end"]);
@@ -181,8 +181,7 @@ void gak_loop_symmetric(MatrixAccessor<double>& dist, const Rcpp::List& X,
 
 // R matrix
 void gak_loop_general(Rcpp::NumericMatrix& dist, const Rcpp::List& X, const Rcpp::List& Y,
-                      const Rcpp::List& endpoints, const Rcpp::List& distargs,
-                      int index, bool multivariate)
+                      const Rcpp::List& distargs, int index, const bool multivariate)
 {
     index--;
     if (multivariate) {
@@ -211,8 +210,7 @@ void gak_loop_general(Rcpp::NumericMatrix& dist, const Rcpp::List& X, const Rcpp
 
 // big.matrix
 void gak_loop_general(MatrixAccessor<double>& dist, const Rcpp::List& X, const Rcpp::List& Y,
-                      const Rcpp::List& endpoints, const Rcpp::List& distargs,
-                      int index, bool multivariate)
+                      const Rcpp::List& distargs, int index, const bool multivariate)
 {
     index--;
     if (multivariate) {
@@ -263,7 +261,7 @@ RcppExport SEXP gak_loop(SEXP D, SEXP X, SEXP Y,
             gak_loop_symmetric(dist, X, ENDPOINTS, DISTARGS,
                                Rcpp::as<bool>(MULTIVARIATE));
         else
-            gak_loop_general(dist, X, Y, ENDPOINTS, DISTARGS,
+            gak_loop_general(dist, X, Y, DISTARGS,
                              Rcpp::as<int>(ENDPOINTS),
                              Rcpp::as<bool>(MULTIVARIATE));
 
@@ -278,7 +276,7 @@ RcppExport SEXP gak_loop(SEXP D, SEXP X, SEXP Y,
             gak_loop_symmetric(dist, X, ENDPOINTS, DISTARGS,
                                Rcpp::as<bool>(MULTIVARIATE));
         else
-            gak_loop_general(dist, X, Y, ENDPOINTS, DISTARGS,
+            gak_loop_general(dist, X, Y, DISTARGS,
                              Rcpp::as<int>(ENDPOINTS),
                              Rcpp::as<bool>(MULTIVARIATE));
     }
