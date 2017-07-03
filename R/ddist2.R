@@ -1,11 +1,43 @@
-# ========================================================================================================
+# ==================================================================================================
 # Return a custom distance function that calls registered functions of proxy
-# ========================================================================================================
+# ==================================================================================================
 
 ddist2 <- function(distance, control) {
-    symmetric <- isTRUE(control$symmetric)
     ## I need to re-register any custom distances in each parallel worker
     dist_entry <- proxy::pr_DB$get_entry(distance)
+    symmetric <- isTRUE(control$symmetric)
+
+    ## Function to split indices for the symmetric, parallel, proxy case
+    split_parallel_symmetric <- function(n) {
+        mid_point <- floor(n / 2)
+        ## indices for upper part of the lower triangular
+        ul_trimat <- 1L:mid_point
+        ## indices for lower part of the lower triangular
+        ll_trimat <- (mid_point + 1L):n
+        ## put triangular parts together for load balance
+        trimat <- list(ul = ul_trimat, ll = ll_trimat)
+        attr(trimat, "trimat") <- TRUE
+        attr(trimat, "midpoint") <- mid_point
+        trimat <- list(trimat)
+
+        ## there should be at least 2 workers if this function is called
+        num_workers <- foreach::getDoParWorkers()
+        if (num_workers < 3L) {
+            attr(ul_trimat, "midpoint") <- mid_point
+            mat <- list(ul_trimat)
+
+        } else {
+            endpoints <- parallel::splitIndices(mid_point, num_workers - 1L)
+            endpoints <- endpoints[lengths(endpoints) > 0L]
+            mat <- lapply(endpoints, function(ids) {
+                attr(ids, "midpoint") <- mid_point
+                ids
+            })
+        }
+
+        ## return
+        c(trimat, mat)
+    }
 
     ## Closures capture the values of the objects from the environment where they're created
     distfun <- function(x, centroids = NULL, ...) {
@@ -69,44 +101,67 @@ ddist2 <- function(distance, control) {
 
             } else if (is.null(centroids) && symmetric && !isTRUE(dots$pairwise)) {
                 if (dist_entry$loop && foreach::getDoParWorkers() > 1L) {
-                    ## WHOLE SYMMETRIC DISTMAT WITH proxy LOOP IN PARALLEL
+                    ## WHOLE SYMMETRIC DISTMAT IN PARALLEL
                     ## Only half of it is computed
-                    ## I think proxy can do this if y = NULL, but not in parallel
+                    ## proxy can do this if y = NULL, but not in parallel
                     len <- length(x)
-                    loop_endpoints <- symmetric_loop_endpoints(len)
                     seed <- get0(".Random.seed", .GlobalEnv, mode = "integer")
                     d <- bigmemory::big.matrix(len, len, "double", 0)
                     d_desc <- bigmemory::describe(d)
                     assign(".Random.seed", seed, .GlobalEnv)
 
+                    ids <- integer() ## 'initialize', so CHECK doesn't complain about globals
                     foreach(
-                        loop_endpoints = loop_endpoints,
+                        ids = split_parallel_symmetric(len),
                         .combine = c,
                         .multicombine = TRUE,
                         .noexport = c("d"),
                         .packages = c(control$packages, "bigmemory"),
                         .export = export
                     ) %op% {
+                        if (!check_consistency(dist_entry$names[1L], "dist"))
+                            do.call(proxy::pr_DB$set_entry, dist_entry)
+
                         dd <- bigmemory::attach.big.matrix(d_desc)
-                        ## while should be faster here, no big data is modified
-                        i <- loop_endpoints$start$i
-                        j <- loop_endpoints$start$j
-                        while (j <= loop_endpoints$end$j) {
-                            i_max <- if (j == loop_endpoints$end$j) loop_endpoints$end$i else len
-                            while (i <= i_max) {
-                                dist_val <- do.call(dist_entry$FUN,
-                                                    enlist(x[[i]],
-                                                           x[[j]],
-                                                           dots = subset_dots(dots,
-                                                                              dist_entry$FUN)))
-                                dd[i,j] <- dist_val
-                                dd[j,i] <- dist_val
-                                i <- i + 1L
-                            }
-                            j <- j + 1L
-                            i <- j + 1L
+
+                        if (isTRUE(attr(ids, "trimat"))) {
+                            midpoint <- attr(ids, "midpoint")
+                            ## assign upper part of lower triangular
+                            ul <- ids$ul
+                            if (length(ul) > 1L)
+                                dd[ul,ul] <- base::as.matrix(do.call(
+                                    proxy::dist,
+                                    enlist(x = x[ul],
+                                           y = NULL,
+                                           method = distance,
+                                           dots = dots)
+                                ))
+                            ## assign lower part of lower triangular
+                            ll <- ids$ll
+                            if (length(ll) > 1L)
+                                dd[ll,ll] <- base::as.matrix(do.call(
+                                    proxy::dist,
+                                    enlist(x = x[ll],
+                                           y = NULL,
+                                           method = distance,
+                                           dots = dots)
+                                ))
+                        } else {
+                            midpoint <- attr(ids, "midpoint")
+                            other_ids <- (midpoint + 1L):length(x)
+                            mat_chunk <- base::as.matrix(do.call(
+                                proxy::dist,
+                                enlist(x = x[other_ids],
+                                       y = x[ids],
+                                       method = distance,
+                                       dots = dots)
+                            ))
+                            ## assign matrix chunks
+                            dd[other_ids,ids] <- mat_chunk
+                            dd[ids,other_ids] <- t(mat_chunk)
                         }
-                        rm("dd")
+
+                        ## return from parallel foreach
                         NULL
                     }
 

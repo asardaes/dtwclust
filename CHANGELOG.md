@@ -4,6 +4,7 @@
 * Ported the `proxy` versions of `SBD`, `GAK` and `dtw_basic` to `C++` and improved them by using the `bigmemory` package.
 * Ported `TADPole` to `C++`.
 * Ported part of the algorithm that updates sparse distance matrices to `C++`.
+* Improved the optimizations for symmetric matrices that are calculated in parallel.
 * Fixed `tsclustFamily`'s `dist` function for matrix or data frame input.
 * Fixed partitional PAM centroids for `dtw_lb` distance and `pam.precompute = FALSE` (#16).
 * Exported a function to coerce matrices and data frames to a list.
