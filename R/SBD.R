@@ -180,13 +180,22 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         endpoints <- attr(y, "endpoints")
     }
 
+    if (bigmemory::is.big.matrix(D)) {
+        D_desc <- bigmemory::describe(D)
+        noexport <- "D"
+
+    } else {
+        D_desc <- NULL
+        noexport <- ""
+    }
+
     ## Calculate distance matrix
-    D_desc <- if (bigmemory::is.big.matrix(D)) bigmemory::describe(D) else NULL
     foreach(x = x, y = y, fftx = fftx, ffty = ffty, endpoints = endpoints,
             .combine = c,
             .multicombine = TRUE,
             .packages = c("dtwclust", "bigmemory"),
-            .export = "sbd_loop") %op% {
+            .export = "sbd_loop",
+            .noexport = noexport) %op% {
                 bigmat <- !is.null(D_desc)
                 d <- if (bigmat) bigmemory::attach.big.matrix(D_desc)@address else D
                 sbd_loop(d, x, y, fftx, ffty, fftlen, symmetric, pairwise, endpoints, bigmat)

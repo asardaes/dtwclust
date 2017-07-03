@@ -253,14 +253,22 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         endpoints <- attr(y, "endpoints")
     }
 
+    if (bigmemory::is.big.matrix(D)) {
+        D_desc <- bigmemory::describe(D)
+        noexport <- c("D", "gak_x", "gak_y")
+
+    } else {
+        D_desc <- NULL
+        noexport <- c("gak_x", "gak_y")
+    }
+
     ## Calculate distance matrix
-    D_desc <- if (bigmemory::is.big.matrix(D)) bigmemory::describe(D) else NULL
     foreach(x = x, y = y, endpoints = endpoints,
             .combine = c,
             .multicombine = TRUE,
             .packages = c("dtwclust", "bigmemory"),
-            .noexport = c("gak_x", "gak_y"),
-            .export = c("gak_loop")) %op% {
+            .export = c("gak_loop"),
+            .noexport = noexport) %op% {
                 bigmat <- !is.null(D_desc)
                 d <- if (bigmat) bigmemory::attach.big.matrix(D_desc)@address else D
                 do.call(gak_loop,

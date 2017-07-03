@@ -159,13 +159,22 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
         endpoints <- attr(y, "endpoints")
     }
 
+    if (bigmemory::is.big.matrix(D)) {
+        D_desc <- bigmemory::describe(D)
+        noexport <- "D"
+
+    } else {
+        D_desc <- NULL
+        noexport <- ""
+    }
+
     ## Calculate distance matrix
-    D_desc <- if (bigmemory::is.big.matrix(D)) bigmemory::describe(D) else NULL
     foreach(x = x, y = y, endpoints = endpoints,
             .combine = c,
             .multicombine = TRUE,
             .packages = c("dtwclust", "bigmemory"),
-            .export = c("dtwb_loop", "enlist")) %op% {
+            .export = c("dtwb_loop", "enlist"),
+            .noexport = noexport) %op% {
                 bigmat <- !is.null(D_desc)
                 d <- if (bigmat) bigmemory::attach.big.matrix(D_desc)@address else D
                 do.call(dtwb_loop,
