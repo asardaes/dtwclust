@@ -8,35 +8,45 @@ ddist2 <- function(distance, control) {
     symmetric <- isTRUE(control$symmetric)
 
     ## Function to split indices for the symmetric, parallel, proxy case
-    split_parallel_symmetric <- function(n) {
-        mid_point <- floor(n / 2)
-        ## indices for upper part of the lower triangular
-        ul_trimat <- 1L:mid_point
-        ## indices for lower part of the lower triangular
-        ll_trimat <- (mid_point + 1L):n
-        ## put triangular parts together for load balance
-        trimat <- list(ul = ul_trimat, ll = ll_trimat)
-        attr(trimat, "trimat") <- TRUE
-        attr(trimat, "midpoint") <- mid_point
-        trimat <- list(trimat)
+    split_parallel_symmetric <- function(n, num_workers, adjust = 0L) {
+        if (num_workers <= 2L || n <= 4L) {
+            mid_point <- as.integer(n / 2)
+            ## indices for upper part of the lower triangular
+            ul_trimat <- 1L:mid_point + adjust
+            ## indices for lower part of the lower triangular
+            ll_trimat <- (mid_point + 1L):n + adjust
+            ## put triangular parts together for load balance
+            trimat <- list(ul = ul_trimat, ll = ll_trimat)
 
-        ## there should be at least 2 workers if this function is called
-        num_workers <- foreach::getDoParWorkers()
-        if (num_workers < 3L) {
-            attr(ul_trimat, "midpoint") <- mid_point
+            attr(trimat, "trimat") <- TRUE
+            trimat <- list(trimat)
+
+            mid_point <- mid_point + adjust
+            attr(ul_trimat, "rows") <- ll_trimat #(mid_point + 1L):(mid_point + n - 1L)
             mat <- list(ul_trimat)
 
-        } else {
-            endpoints <- parallel::splitIndices(mid_point, num_workers - 1L)
+            ids <- c(trimat, mat)
+
+        } else { # nocov start
+            mid_point <- as.integer(n / 2)
+
+            ## recursion
+            rec1 <- split_parallel_symmetric(mid_point, as.integer(num_workers / 4), adjust)
+            rec2 <- split_parallel_symmetric(n - mid_point, as.integer(num_workers / 4), mid_point + adjust)
+
+            endpoints <- parallel::splitIndices(mid_point, max(length(rec1) + length(rec2), num_workers))
             endpoints <- endpoints[lengths(endpoints) > 0L]
             mat <- lapply(endpoints, function(ids) {
-                attr(ids, "midpoint") <- mid_point
+                ids <- ids + adjust
+                attr(ids, "rows") <- (mid_point + 1L):n + adjust
                 ids
             })
-        }
+
+            ids <- c(rec1, rec2, mat)
+        } #nocov end
 
         ## return
-        c(trimat, mat)
+        ids
     }
 
     ## Closures capture the values of the objects from the environment where they're created
@@ -112,7 +122,7 @@ ddist2 <- function(distance, control) {
 
                     ids <- integer() ## 'initialize', so CHECK doesn't complain about globals
                     foreach(
-                        ids = split_parallel_symmetric(len),
+                        ids = split_parallel_symmetric(len, foreach::getDoParWorkers()),
                         .combine = c,
                         .multicombine = TRUE,
                         .noexport = c("d"),
@@ -125,7 +135,6 @@ ddist2 <- function(distance, control) {
                         dd <- bigmemory::attach.big.matrix(d_desc)
 
                         if (isTRUE(attr(ids, "trimat"))) {
-                            midpoint <- attr(ids, "midpoint")
                             ## assign upper part of lower triangular
                             ul <- ids$ul
                             if (length(ul) > 1L)
@@ -147,18 +156,17 @@ ddist2 <- function(distance, control) {
                                            dots = dots)
                                 ))
                         } else {
-                            midpoint <- attr(ids, "midpoint")
-                            other_ids <- (midpoint + 1L):length(x)
+                            rows <- attr(ids, "rows")
                             mat_chunk <- base::as.matrix(do.call(
                                 proxy::dist,
-                                enlist(x = x[other_ids],
+                                enlist(x = x[rows],
                                        y = x[ids],
                                        method = distance,
                                        dots = dots)
                             ))
                             ## assign matrix chunks
-                            dd[other_ids,ids] <- mat_chunk
-                            dd[ids,other_ids] <- t(mat_chunk)
+                            dd[rows,ids] <- mat_chunk
+                            dd[ids,rows] <- t(mat_chunk)
                         }
 
                         ## return from parallel foreach
