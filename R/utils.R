@@ -282,7 +282,7 @@ split_parallel_symmetric <- function(n, num_workers, adjust = 0L) {
         trimat <- list(trimat)
 
         mid_point <- mid_point + adjust
-        attr(ul_trimat, "rows") <- ll_trimat #(mid_point + 1L):(mid_point + n - 1L)
+        attr(ul_trimat, "rows") <- ll_trimat
         mat <- list(ul_trimat)
 
         ids <- c(trimat, mat)
@@ -353,8 +353,6 @@ symmetric_loop_endpoints <- function(n) {
         j <- 2L
         start_pair <- n
         end_pair <- n * 2L - 3L
-        next_start_pair <- end_pair + 1L
-        next_end_pair <- next_start_pair + n - j - 2L
         ## j is ready after this while loop finishes
         while (!(id >= start_pair && id <= end_pair)) {
             start_pair <- end_pair + 1L
