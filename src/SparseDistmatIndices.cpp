@@ -49,15 +49,19 @@ private:
 };
 
 RcppExport SEXP SparseDistmatIndices__new(SEXP num_rows) {
+    BEGIN_RCPP
     Rcpp::XPtr<SparseDistmatIndices> ptr(new SparseDistmatIndices(Rcpp::as<int>(num_rows)), true);
     return ptr;
+    END_RCPP
 }
 
 RcppExport SEXP SparseDistmatIndices__getNewIndices(SEXP xptr, SEXP i, SEXP j, SEXP symmetric) {
+    BEGIN_RCPP
     Rcpp::XPtr<SparseDistmatIndices> ptr(xptr);
     return ptr->getNewIndices(Rcpp::IntegerVector(i),
                               Rcpp::IntegerVector(j),
                               Rcpp::as<bool>(symmetric));
+    END_RCPP
 }
 
 } // namespace dtwclust
