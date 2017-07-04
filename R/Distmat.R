@@ -91,4 +91,4 @@ setMethod(`[`, "Distmat", function(x, i, j, ..., drop = TRUE) {
     dm
 })
 
-dim.Distmat <- function(x) { dim(x$distmat) }
+dim.Distmat <- function(x) { dim(x$distmat) } # nocov

@@ -325,10 +325,10 @@ void cluster_assignment(const Rcpp::IntegerVector& k_vec,
             }
         }
 
-        if (warn)
+        if (warn) // nocov start
             Rcpp::warning(
                 "At least one series wasn't assigned to a cluster. This shouldn't happen, please contact maintainer."
-            );
+            ); // nocov end
         if (trace)
             Rcpp::Rcout << "TADPole completed for k = " << k << " & dc = " << dc << "\n\n";
 

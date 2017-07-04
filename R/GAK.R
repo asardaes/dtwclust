@@ -157,10 +157,10 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
                       logs = NULL, error.check = TRUE, pairwise = FALSE, .internal_ = FALSE)
 {
     ## normalization will be done manually to avoid multiple calculations of gak_x and gak_y
-    if (!.internal_ && !normalize) {
+    if (!.internal_ && !normalize) { # nocov start
         warning("The proxy::dist version of GAK is always normalized.")
         normalize <- TRUE
-    }
+    } # nocov end
 
     x <- any2list(x)
     if (error.check) check_consistency(x, "vltslist")

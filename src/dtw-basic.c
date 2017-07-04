@@ -85,7 +85,7 @@ int backtrack_steps(int const nx, int const ny,
             i--;
 
         } else {
-            error("dtw_basic: Invalid direction matrix computed. Indices %d and %d.", ++i, ++j);
+            error("dtw_basic: Invalid direction matrix computed. Indices %d and %d.", ++i, ++j); // nocov
         }
 
         index1[path] = i + 1;

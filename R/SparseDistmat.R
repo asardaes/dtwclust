@@ -66,7 +66,7 @@ NULL
 #'
 #' @param object A [SparseDistmat-class] object.
 #'
-setMethod("show", "SparseDistmat", function(object) { show(object$distmat) })
+setMethod("show", "SparseDistmat", function(object) { show(object$distmat) }) # nocov
 
 #' @rdname SparseDistmat-generics
 #' @aliases [,SparseDistmat,ANY,ANY,ANY
@@ -100,4 +100,4 @@ setMethod(`[`, "SparseDistmat", function(x, i, j, ..., drop = TRUE) {
     x$distmat[i, j, drop = drop]
 })
 
-dim.SparseDistmat <- function(x) { dim(x$distmat) }
+dim.SparseDistmat <- function(x) { dim(x$distmat) } # nocov

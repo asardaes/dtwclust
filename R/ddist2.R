@@ -53,12 +53,12 @@ ddist2 <- function(distance, control) {
     distfun <- function(x, centroids = NULL, ...) {
         x <- any2list(x)
         if (!is.null(centroids)) centroids <- any2list(centroids)
-        if (length(x) == 1L && is.null(centroids)) {
+        if (length(x) == 1L && is.null(centroids)) { # nocov start
             return(structure(matrix(0, 1L, 1L),
                              class = "crossdist",
                              method = toupper(distance),
                              dimnames = list(names(x), names(x))))
-        }
+        } # nocov end
 
         if (!is.null(control$distmat)) {
             if (inherits(control$distmat, "Distmat")) {
