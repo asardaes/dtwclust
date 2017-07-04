@@ -267,6 +267,48 @@ validate_pairwise <- function(x, y) {
     invisible(NULL)
 }
 
+# Function to split indices for the symmetric, parallel, proxy case
+split_parallel_symmetric <- function(n, num_workers, adjust = 0L) {
+    if (num_workers <= 2L || n <= 4L) {
+        mid_point <- as.integer(n / 2)
+        ## indices for upper part of the lower triangular
+        ul_trimat <- 1L:mid_point + adjust
+        ## indices for lower part of the lower triangular
+        ll_trimat <- (mid_point + 1L):n + adjust
+        ## put triangular parts together for load balance
+        trimat <- list(ul = ul_trimat, ll = ll_trimat)
+
+        attr(trimat, "trimat") <- TRUE
+        trimat <- list(trimat)
+
+        mid_point <- mid_point + adjust
+        attr(ul_trimat, "rows") <- ll_trimat #(mid_point + 1L):(mid_point + n - 1L)
+        mat <- list(ul_trimat)
+
+        ids <- c(trimat, mat)
+
+    } else {
+        mid_point <- as.integer(n / 2)
+
+        ## recursion
+        rec1 <- split_parallel_symmetric(mid_point, as.integer(num_workers / 4), adjust)
+        rec2 <- split_parallel_symmetric(n - mid_point, as.integer(num_workers / 4), mid_point + adjust)
+
+        endpoints <- parallel::splitIndices(mid_point, max(length(rec1) + length(rec2), num_workers))
+        endpoints <- endpoints[lengths(endpoints) > 0L]
+        mat <- lapply(endpoints, function(ids) {
+            ids <- ids + adjust
+            attr(ids, "rows") <- (mid_point + 1L):n + adjust
+            ids
+        })
+
+        ids <- c(rec1, rec2, mat)
+    }
+
+    ## return
+    ids
+}
+
 # ==================================================================================================
 # Helper distance-related
 # ==================================================================================================
