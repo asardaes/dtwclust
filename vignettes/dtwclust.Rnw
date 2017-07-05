@@ -91,6 +91,7 @@ Most clustering strategies have not changed considerably since their initial def
 <<setup, include = FALSE, cache = FALSE>>=
 library("knitr")
 library("dtwclust")
+library("bigmemory.sri")
 
 data("uciCT")
 
