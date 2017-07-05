@@ -38,6 +38,10 @@
 #'   Note that all distances implemented as part of \pkg{dtwclust} have custom proxy loops, so see
 #'   their respective documentation to see what optimizations apply to each one.
 #'
+#'   For distances not included in \pkg{dtwclust}, the symmetric, parallel case mentioned above
+#'   makes chunks for parallel workers, but they are not perfectly balanced, so some workers might
+#'   finish before the others.
+#'
 #' @section Centroid function:
 #'
 #'   The default partitional allcent() function is a closure with the implementations of the
