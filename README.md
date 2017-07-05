@@ -17,17 +17,20 @@ Implementations
 
 -   Partitional, hierarchical and fuzzy clustering
     -   k-Shape clustering
+        -   Shape-based distance
+        -   Shape extraction for time series
     -   TADPole clustering
 -   DTW Barycenter Averaging
 -   Keogh's and Lemire's DTW lower bounds
 -   Global alignment kernel distance
+-   Parallelization for most functions
 
 Installation
 ------------
 
 The latest version from CRAN can be installed with `install.packages("dtwclust")`.
 
-If you want to test the latest version from github, first install the [prerequisites for R package development](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites) (LaTeX is probably only neccesary if you want to build the vignette) as well as the [devtools package](https://cran.r-project.org/package=devtools), and then type `devtools::install_github("asardaes/dtwclust")`. If you want the vignette to be installed, set the `build_vignettes` parameter to `TRUE`, it will take a couple of minutes.
+If you want to test the latest version from github, first install the [prerequisites for R package development](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites) (LaTeX is only neccesary if you want to build the vignette) as well as the [remotes package](https://cran.r-project.org/package=remotes), and then type `remotes::install_github("asardaes/dtwclust")`.
 
 If you're wondering about which version to install, take a look at the [CHANGELOG](CHANGELOG.md) file, I try to keep it updated.
 
@@ -39,7 +42,7 @@ Dependencies
 -   Cross-distance matrix calculations make use of the `proxy` package.
 -   The core DTW calculations can be done by the `dtw` package or the included `dtw_basic` function.
 -   Plotting is done with the `ggplot2` package.
--   Parallel computation depends on the `foreach` package.
+-   Parallel computation depends on the `foreach` package, and also uses `bigmemory` for some optimizations.
 -   Cluster evaluation can be done with package `clue` or the `cvi` function.
 
 Examples
@@ -63,13 +66,13 @@ pc.dtwlb <- tsclust(series, k = 20L,
                     seed = 3247, trace = TRUE,
                     control = partitional_control(pam.precompute = FALSE),
                     args = tsclust_args(dist = list(window.size = 20L)))
+#> Loading required package: bigmemory.sri
 #> Iteration 1: Changes / Distsum = 100 / 3214.899
-#> Iteration 2: Changes / Distsum = 18 / 2786.523
-#> Iteration 3: Changes / Distsum = 7 / 2700.449
-#> Iteration 4: Changes / Distsum = 3 / 2630.285
-#> Iteration 5: Changes / Distsum = 0 / 2630.285
+#> Iteration 2: Changes / Distsum = 16 / 2684.667
+#> Iteration 3: Changes / Distsum = 7 / 2617.178
+#> Iteration 4: Changes / Distsum = 0 / 2611.894
 #> 
-#>  Elapsed time is 2.847 seconds.
+#>  Elapsed time is 2.333 seconds.
 
 plot(pc.dtwlb)
 ```
@@ -89,7 +92,7 @@ hc.sbd <- tsclust(CharTraj, type = "hierarchical", k = 20L,
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 1.358 seconds.
+#>  Elapsed time is 0.932 seconds.
 
 # CVIs for HC+SBD
 print(cvis <- sapply(hc.sbd, cvi, b = CharTrajLabels))
@@ -100,10 +103,10 @@ print(cvis <- sapply(hc.sbd, cvi, b = CharTrajLabels))
 #> FM       0.75369221   0.72880580   0.4479318   0.58214036   0.57759590
 #> VI       0.22265488   0.21511035   0.5185772   0.34855573   0.34677938
 #> Sil      0.58811104   0.61748556   0.4094015   0.53663563   0.56617496
-#> SF       0.46587629   0.49555414   0.5949832   0.52263364   0.56892670
-#> CH     709.19997325 709.41247992 475.5431233 633.26646084 645.54710628
-#> DB       0.65336293   0.61402700   0.5085174   0.72846310   0.46973394
-#> DBstar   1.68466461   1.09582372   0.9083771   0.95600061   0.61732267
+#> SF       0.46587629   0.49555414   0.5949832   0.52241669   0.56892670
+#> CH     709.19997325 709.41247992 475.5431233 632.22264816 645.54710628
+#> DB       0.65336293   0.61402700   0.5085174   0.75527034   0.46973394
+#> DBstar   1.68466461   1.09582372   0.9083771   1.03450267   0.61732267
 #> D        0.13801520   0.22382404   0.1308103   0.17967703   0.23163554
 #> COP      0.06595574   0.06893191   0.1154545   0.08337437   0.08273567
 #>                [,6]        [,7]         [,8]
@@ -140,11 +143,12 @@ pc.tadp <- tsclust(series, type = "tadpole", k = 20L,
 #>  Pruning during local density calculation
 #>  Pruning during nearest-neighbor distance calculation (phase 1)
 #>  Pruning during nearest-neighbor distance calculation (phase 2)
-#>  Performing cluster assignment
+#>  Pruning percentage = 77.8%
+#>  Performing cluster assignmnet
 #> 
-#> TADPole completed for k = 20 & dc = 1.5, pruning percentage = 77.8%
+#> TADPole completed for k = 20 & dc = 1.5
 #> 
-#>  Elapsed time is 1.127 seconds.
+#>  Elapsed time is 0.788 seconds.
 
 plot(pc.tadp, clus = 1L:4L)
 ```
@@ -172,7 +176,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>    0.25    0.00    0.25 
+#>   0.240   0.000   0.242 
 #> 
 #> Head of fuzzy memberships:
 #> 
@@ -205,6 +209,7 @@ plot(mvc)
 ``` r
 require(doParallel)
 #> Loading required package: doParallel
+#> Loading required package: foreach
 #> Loading required package: iterators
 
 # Create and register parallel workers
@@ -223,7 +228,7 @@ hc <- tsclust(CharTraj, k = 20L,
 #> Iteration 3: Changes / Distsum = 2 / 873.7354
 #> Iteration 4: Changes / Distsum = 0 / 864.1794
 #> 
-#>  Elapsed time is 2.055 seconds.
+#>  Elapsed time is 1.426 seconds.
 
 ## Returning to sequential calculations
 stopCluster(cl)
