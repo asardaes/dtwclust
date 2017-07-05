@@ -11,7 +11,7 @@ tsclust(series = NULL, type = "partitional", k = 2L, ...,
 }
 \arguments{
 \item{series}{A list of series, a numeric matrix or a data frame. Matrices and data frames are
-coerced to a list row-wise.}
+coerced to a list row-wise (see \code{\link[=tslist]{tslist()}}).}
 
 \item{type}{What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"}, \code{"tadpole"}
 or \code{"fuzzy"}.}
@@ -25,7 +25,7 @@ and to \code{\link[stats:hclust]{stats::hclust()}} if it contains the \code{memb
 \item{preproc}{Function to preprocess data. Defaults to \code{\link[=zscore]{zscore()}} \emph{only} if \code{centroid} \code{=}
 \code{"shape"}, but will be replaced by a custom function if provided.}
 
-\item{distance}{A supported distance from \code{\link[proxy:dist]{proxy::dist()}}. Ignored for \code{type} \code{=} \code{"tadpole"}.}
+\item{distance}{A registered distance from \code{\link[proxy:dist]{proxy::dist()}}. Ignored for \code{type} \code{=} \code{"tadpole"}.}
 
 \item{centroid}{Either a supported string or an appropriate function to calculate centroids when
 using partitional or prototypes for hierarchical/tadpole methods.}
@@ -49,10 +49,9 @@ If \code{control@nrep > 1} and a partitional procedure is used, \code{length(met
 hierarchical procedures are used, or \code{length(k)} \code{>} \code{1}, a list of objects is returned.
 }
 \description{
-This is the new main function to perform time series clustering. It should provide the same
-functionality as \code{\link[=dtwclust]{dtwclust()}}, but it is hopefully more coherent in general. See the details and
-the examples for more information, as well as the included package vignette (which can be loaded
-by typing \code{vignette("dtwclust")}). A convenience wrapper is available in \code{\link[=compare_clusterings]{compare_clusterings()}}.
+This is the main function to perform time series clustering. See the details and the examples for
+more information, as well as the included package vignette (which can be loaded by typing
+\code{vignette("dtwclust")}). A convenience wrapper is available in \code{\link[=compare_clusterings]{compare_clusterings()}}.
 }
 \details{
 Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering
@@ -68,11 +67,10 @@ missing values are allowed.
 
 In the case of multivariate time series, they should be provided as a list of matrices, where
 time spans the rows of each matrix and the variables span the columns (see \link{CharTrajMV} for an
-example). At the moment, only \code{DTW}, \code{DTW2} and \code{GAK} suppport such series, which means only
-partitional and hierarchical procedures using those distances will work. You can of course create
-your own custom distances. All included centroid functions should work with the aforementioned
-format, although \code{shape} is \strong{not} recommended. Note that the \code{plot} method will simply append
-all dimensions (columns) one after the other.
+example). At the moment, only \code{DTW}, \code{DTW2} and \code{GAK} suppport such series. You can of course
+create your own custom distances. All included centroid functions should work with the
+aforementioned format, although \code{shape} is \emph{not} recommended. Note that the \code{plot} method will
+simply append all dimensions (columns) one after the other.
 }
 \note{
 The lower bounds are defined only for time series of equal length.
@@ -116,7 +114,7 @@ details.
 \item "pam": Partition around medoids (PAM). This basically means that the cluster centroids are
 always one of the time series in the data. In this case, the distance matrix can be
 pre-computed once using all time series in the data and then re-used at each iteration. It
-usually saves overhead overall for small datasets.
+usually saves overhead overall for small datasets (see \link{tsclust-controls}).
 \item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and used by default in that case.
 \item "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering. It \strong{always} precomputes the
 whole cross-distance matrix.
@@ -150,16 +148,18 @@ can use one of the following custom implementations (all registered with \code{p
 \item \code{"dtw"}: DTW, optionally with a Sakoe-Chiba/Slanted-band constraint.
 \item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint. Read
 details below.
-\item \code{"dtw_basic"}: A custom version of DTW with less functionality, but slightly faster. See
+\item \code{"dtw_basic"}: A custom version of DTW with less functionality, but faster. See
 \code{\link[=dtw_basic]{dtw_basic()}}.
 \item \code{"dtw_lb"}: DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some
 computations are avoided by first estimating the distance matrix with Lemire's lower bound
 and then iteratively refining with DTW. See \code{\link[=dtw_lb]{dtw_lb()}}. Not suitable for \code{pam.precompute} =
-\code{TRUE}.
-\item \code{"lbk"}: Keogh's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint.
-\item \code{"lbi"}: Lemire's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint.
-\item \code{"sbd"}: Shape-based distance. See \code{\link[=SBD]{SBD()}} for more details.
-\item \code{"gak"}: Global alignment kernels. See \code{\link[=GAK]{GAK()}} for more details..
+\code{TRUE} nor hierarchical clustering.
+\item \code{"lbk"}: Keogh's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint. See
+\code{\link[=lb_keogh]{lb_keogh()}}.
+\item \code{"lbi"}: Lemire's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint. See
+\code{\link[=lb_improved]{lb_improved()}}.
+\item \code{"sbd"}: Shape-based distance. See \code{\link[=SBD]{SBD()}}.
+\item \code{"gak"}: Global alignment kernels. See \code{\link[=GAK]{GAK()}}.
 }
 
 DTW2 is done with \code{\link[dtw:dtw]{dtw::dtw()}}, but it differs from the result you would obtain if you specify
@@ -173,9 +173,9 @@ of different length. The lower bounds are probably unsuitable for direct cluster
 series are very easily distinguishable.
 
 If you know that the distance function is symmetric, and you use a hierarchical algorithm, or a
-partitional algorithm with PAM centroids, some time can be saved by calculating only half the
-distance matrix. Therefore, consider setting the symmetric control parameter to \code{TRUE} if this
-is the case.
+partitional algorithm with PAM centroids, or fuzzy c-medoids, some time can be saved by
+calculating only half the distance matrix. Therefore, consider setting the symmetric control
+parameter to \code{TRUE} if this is the case.
 }
 
 \section{Preprocessing}{
@@ -223,13 +223,8 @@ precomputed, since said matrix is reused for every repetition, and can be comptu
 
 
 
-Unless each repetition requires a few seconds, parallel computing probably isn't worth it. As
-such, I would only use this feature with \code{shape} and \code{DBA} centroids, or an expensive distance
-function like \code{DTW} or \code{GAK}.
-
 If you register a parallel backend, the function will also try to do the calculation of the
-distance matrices in parallel. This should work with any function registered with
-\code{\link[proxy:dist]{proxy::dist()}} via \code{\link[proxy:pr_DB]{proxy::pr_DB()}} whose \code{loop} flag is set to \code{TRUE}. If the function
+distance matrices in parallel. See the caveats in \linkS4class{tsclustFamily}. If the function
 requires special packages to be loaded, provide their names in the \code{packages} element of
 \code{control}. Note that "dtwclust" is always loaded in each parallel worker, so that doesn't need
 to be included. Alternatively, you may want to pre-load \pkg{dtwclust} in each worker with
