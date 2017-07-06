@@ -191,6 +191,59 @@ get_from_callers <- function(obj_name, mode = "any") {
     stop("Could not find object '", obj_name, "' of mode '", mode, "'")
 }
 
+# Get an appropriate distance matrix object for internal use with PAM/FCMdd centroids
+pam_distmat <- function(series, control, distance, cent_char, family, args, trace) {
+    distmat <- control$distmat
+
+    if (!is.null(distmat)) {
+        if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
+            stop("Dimensions of provided cross-distance matrix don't correspond ",
+                 "to length of provided data")
+
+        ## see Distmat.R
+        if (!inherits(distmat, "Distmat"))
+            distmat <- Distmat$new(distmat = distmat)
+
+        if (trace) cat("\n\tDistance matrix provided...\n\n")
+
+    } else if (isTRUE(control$pam.precompute) || cent_char == "fcmdd") {
+        if (distance == "dtw_lb")
+            warning("Using dtw_lb with control$pam.precompute = TRUE is not ",
+                    "advised.")
+
+        if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
+
+        ## see Distmat.R
+        distmat <- Distmat$new(distmat = do.call(
+            family@dist,
+            enlist(x = series,
+                   centroids = NULL,
+                   dots = args$dist))
+        )
+
+    } else {
+        if (isTRUE(control$pam.sparse) && distance != "dtw_lb") {
+            ## see SparseDistmat.R
+            distmat <- SparseDistmat$new(series = series,
+                                         distance = distance,
+                                         control = control,
+                                         dist_args = args$dist,
+                                         error.check = FALSE)
+
+        } else {
+            ## see Distmat.R
+            distmat <- Distmat$new(series = series,
+                                   distance = distance,
+                                   control = control,
+                                   dist_args = args$dist,
+                                   error.check = FALSE)
+        }
+    }
+
+    ## return
+    distmat
+}
+
 # ==================================================================================================
 # Helper C/C++ functions
 # ==================================================================================================

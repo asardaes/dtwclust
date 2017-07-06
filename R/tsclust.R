@@ -326,7 +326,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 control$distmat <- NULL
 
             ## -------------------------------------------------------------------------------------
-            ## Family creation, see initialization in tsclusters-methods.R
+            ## Family creation, see initialization in tsclust-family.R
             ## -------------------------------------------------------------------------------------
 
             family <- new("tsclustFamily",
@@ -351,54 +351,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             ## precompute distance matrix?
             if (cent_char %in% c("pam", "fcmdd")) {
-                if (!is.null(distmat)) {
-                    if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
-                        stop("Dimensions of provided cross-distance matrix don't correspond ",
-                             "to length of provided data")
-
-                    ## distmat was provided in call
-                    distmat_provided <- TRUE
-                    distmat <- control$distmat
-
-                    ## see Distmat.R
-                    if (!inherits(distmat, "Distmat"))
-                        distmat <- Distmat$new(distmat = distmat)
-
-                    if (trace) cat("\n\tDistance matrix provided...\n\n")
-
-                } else if (isTRUE(control$pam.precompute) || cent_char == "fcmdd") {
-                    if (distance == "dtw_lb")
-                        warning("Using dtw_lb with control$pam.precompute = TRUE is not ",
-                                "advised.")
-
-                    if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
-
-                    ## see Distmat.R
-                    distmat <- Distmat$new(distmat = do.call(
-                        family@dist,
-                        enlist(x = series,
-                               centroids = NULL,
-                               dots = args$dist))
-                    )
-
-                } else {
-                    if (isTRUE(control$pam.sparse) && distance != "dtw_lb") {
-                        ## see SparseDistmat.R
-                        distmat <- SparseDistmat$new(series = series,
-                                                     distance = distance,
-                                                     control = control,
-                                                     dist_args = args$dist,
-                                                     error.check = FALSE)
-
-                    } else {
-                        ## see Distmat.R
-                        distmat <- Distmat$new(series = series,
-                                               distance = distance,
-                                               control = control,
-                                               dist_args = args$dist,
-                                               error.check = FALSE)
-                    }
-                }
+                ## utils.R
+                distmat <- pam_distmat(series, control, distance, cent_char, family, args, trace)
 
                 ## Redefine new distmat
                 control$distmat <- distmat
