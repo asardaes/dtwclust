@@ -304,16 +304,14 @@ update.TSClusters <- function(object, ..., evaluate = TRUE) {
 
     if (length(args) == 0L) {
         if (evaluate) {
-            ## all_cent2 changed in v4.0.0, update here for backward compatibility
-            if (object@type %in% c("partitional", "fuzzy")) {
-                if (object@centroid %in% c("pam", "fcmdd") &&
-                    !is.null(object@control$distmat) &&
-                    !inherits(object@control$distmat, "Distmat"))
-                {
-                    object@control$distmat <- Distmat$new(distmat = object@control$distmat)
-                }
-
+            if (object@type != "tadpole") {
+                ## update allcent and dist
                 object@family@allcent <- all_cent2(object@centroid, object@control)
+                object@family@dist <- ddist2(object@distance, object@control)
+
+                ## update distmat in allcent environment with internal class?
+                if (object@centroid %in% c("pam", "fcmdd"))
+                    environment(object@family@allcent)$control$distmat <- object@control$distmat
             }
 
             return(object)
@@ -325,11 +323,9 @@ update.TSClusters <- function(object, ..., evaluate = TRUE) {
     new_call[names(args)] <- args
 
     if (evaluate)
-        ret <- eval.parent(new_call, n = 2L)
+        eval.parent(new_call, n = 2L)
     else
-        ret <- new_call
-
-    ret
+        new_call
 }
 
 #' @rdname tsclusters-methods

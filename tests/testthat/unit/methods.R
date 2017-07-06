@@ -93,8 +93,8 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
                      info = "Updating fuzzy object with no parameters creates new identical allcent function in family")
 
     hc_update <- update(hierarchical_object)
-    expect_identical(hc_update, hierarchical_object,
-                     info = "Updating hierarchical object with no parameters does nothing")
+    expect_identical(body(hc_update@family@allcent), body(hc_update@family@allcent),
+                     info = "Updating hierarchical object with no parameters creates new identical allcent function in family")
 
     ## for artificial update test below
     partitional_object@call <- call("tsclust",
