@@ -364,11 +364,35 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             ## Cluster
             ## -------------------------------------------------------------------------------------
 
-            if (length(k) == 1L && nrep == 1L) {
-                rngtools::setRNG(rngtools::RNGseq(1L, seed = seed, simplify = TRUE))
+            ## I need to re-register any custom distances in each parallel worker
+            dist_entry <- proxy::pr_DB$get_entry(distance)
+            export <- c("pfclust", "check_consistency", "enlist")
+            rng <- rngtools::RNGseq(length(k) * nrep, seed = seed, simplify = FALSE)
+            ## if %do% is used, the outer loop replaces values in this envir
+            rng0 <- lapply(parallel::splitIndices(length(rng), length(k)), function(i) { rng[i] })
+            k0 <- k
+            ## sequential allows the matrix to be updated iteratively
+            `%this_op%` <- if(inherits(control$distmat, "SparseDistmat")) `%do%` else `%op%`
+            i <- integer() # CHECK complains about non-initialization
 
-                ## Just one repetition
-                pc_list <- list(do.call(pfclust,
+            pc_list <- foreach(k = k0, rng = rng0,
+                               .combine = c, .multicombine = TRUE,
+                               .packages = control$packages,
+                               .export = export) %:%
+                foreach(i = 1L:nrep,
+                        .combine = c, .multicombine = TRUE,
+                        .packages = control$packages,
+                        .export = export) %this_op%
+                        {
+                            if (trace) message("Repetition ", i, " for k = ", k)
+                            rngtools::setRNG(rng[[i]])
+
+                            if (!check_consistency(dist_entry$names[1L], "dist"))
+                                do.call(proxy::pr_DB$set_entry, dist_entry)
+
+                            ## return
+                            list(
+                                do.call(pfclust,
                                         enlist(x = series,
                                                k = k,
                                                family = family,
@@ -376,54 +400,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                                fuzzy = isTRUE(type == "fuzzy"),
                                                cent = cent_char,
                                                trace = trace,
-                                               args = args)))
-
-            } else {
-                if ((foreach::getDoParName() != "doSEQ") && trace)
-                    message("Tracing of repetitions might not be available if done in ",
-                            "parallel.\n")
-
-                ## I need to re-register any custom distances in each parallel worker
-                dist_entry <- proxy::pr_DB$get_entry(distance)
-                export <- c("pfclust", "check_consistency", "enlist")
-                rng <- rngtools::RNGseq(length(k) * nrep, seed = seed, simplify = FALSE)
-                ## if %do% is used, the outer loop replaces values in this envir
-                rng0 <- lapply(parallel::splitIndices(length(rng), length(k)), function(i) { rng[i] })
-                k0 <- k
-                ## sequential allows the matrix to be updated iteratively
-                `%this_op%` <- if(inherits(control$distmat, "SparseDistmat")) `%do%` else `%op%`
-                i <- integer() # CHECK complains about non-initialization
-
-                pc_list <- foreach(k = k0, rng = rng0,
-                                   .combine = c, .multicombine = TRUE,
-                                   .packages = control$packages,
-                                   .export = export) %:%
-                    foreach(i = 1L:nrep,
-                            .combine = c, .multicombine = TRUE,
-                            .packages = control$packages,
-                            .export = export) %this_op%
-                            {
-                                if (trace) message("Repetition ", i, " for k = ", k)
-
-                                rngtools::setRNG(rng[[i]])
-
-                                if (!check_consistency(dist_entry$names[1L], "dist"))
-                                    do.call(proxy::pr_DB$set_entry, dist_entry)
-
-                                ## return
-                                list(
-                                    do.call(pfclust,
-                                            enlist(x = series,
-                                                   k = k,
-                                                   family = family,
-                                                   control = control,
-                                                   fuzzy = isTRUE(type == "fuzzy"),
-                                                   cent = cent_char,
-                                                   trace = trace,
-                                                   args = args))
-                                )
-                            }
-            }
+                                               args = args))
+                            )
+                        }
 
             ## -------------------------------------------------------------------------------------
             ## Prepare results
