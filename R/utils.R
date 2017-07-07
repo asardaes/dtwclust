@@ -194,6 +194,7 @@ get_from_callers <- function(obj_name, mode = "any") {
 # Get an appropriate distance matrix object for internal use with PAM/FCMdd centroids
 pam_distmat <- function(series, control, distance, cent_char, family, args, trace) {
     distmat <- control$distmat
+    distmat_provided <- FALSE
 
     if (!is.null(distmat)) {
         if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
@@ -201,8 +202,8 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
                  "to length of provided data")
 
         ## see Distmat.R
-        if (!inherits(distmat, "Distmat"))
-            distmat <- Distmat$new(distmat = distmat)
+        if (!inherits(distmat, "Distmat")) distmat <- Distmat$new(distmat = distmat)
+        distmat_provided <- TRUE
 
         if (trace) cat("\n\tDistance matrix provided...\n\n")
 
@@ -241,7 +242,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
     }
 
     ## return
-    distmat
+    list(distmat = distmat, distmat_provided = distmat_provided)
 }
 
 # ==================================================================================================

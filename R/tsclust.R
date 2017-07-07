@@ -250,7 +250,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
         series <- do.call(zscore, enlist(series, dots = args$preproc))
 
     } else if (is.null(preproc)) {
-        preproc <- function(x, ...) { x }
+        preproc <- function(x, ...) { x } # nocov
         environment(preproc) <- .GlobalEnv
         preproc_char <- "none"
 
@@ -345,19 +345,21 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             ## PAM precompute?
             ## -------------------------------------------------------------------------------------
 
-            ## for a check near the end, changed if appropriate
-            distmat_provided <- FALSE
-            distmat <- control$distmat
-
             ## precompute distance matrix?
             if (cent_char %in% c("pam", "fcmdd")) {
                 ## utils.R
-                distmat <- pam_distmat(series, control, distance, cent_char, family, args, trace)
+                dm <- pam_distmat(series, control, distance, cent_char, family, args, trace)
+                distmat <- dm$distmat
+                distmat_provided <- dm$distmat_provided
 
                 ## Redefine new distmat
                 control$distmat <- distmat
                 environment(family@dist)$control$distmat <- distmat
                 environment(family@allcent)$control$distmat <- distmat
+
+            } else {
+                distmat <- NULL
+                distmat_provided <- FALSE
             }
 
             ## -------------------------------------------------------------------------------------
