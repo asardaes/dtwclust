@@ -111,7 +111,7 @@ opts_knit$set(self.contained = TRUE)
 \section{Introduction}
 \label{sec:introduction}
 
-\blankfootnote{This manuscript corresponds to \dtwclust{} version \Sexpr{packageVersion("dtwclust")}.}
+\blankfootnote{This manuscript was last updated in version 4.0.0 of \dtwclust{}.}
 Cluster analysis is a task which concerns itself with the creation of groups of objects,
 where each group is called a cluster.
 Ideally, all members of the same cluster are similar to each other,
