@@ -8,11 +8,12 @@ context("\tConsistency of DTW lower bounds")
 ols <- ls()
 
 lb_comp <- function(lower, greater, ...) {
-    all(mapply(a = lower, b = greater, MoreArgs = list(...), FUN = function(a, b, ...) {
+    Map(a = lower, b = greater, MoreArgs = list(...), f = function(a, b, ...) {
         ret <- isTRUE(all.equal(a, b, ...))
         if (!ret) ret <- a < b
+        if (!ret) ret <- paste(a, "is NOT less than or equal to", b)
         ret
-    }))
+    })
 }
 
 # =================================================================================================
@@ -31,13 +32,25 @@ test_that("Lower bounds with L1 norm are always leq than DTW.", {
     dtwds <- proxy::dist(data_reinterpolated[-1L], data_reinterpolated[1L],
                          method = "dtw_basic", window.size = 15L)
 
-    expect_true(lb_comp(lbk, lbi), info = "single")
-    expect_true(lb_comp(lbk, dtwd), info = "single")
-    expect_true(lb_comp(lbi, dtwd), info = "single")
+    sapply(lb_comp(lbk, lbi), function(comparison_result) {
+        expect_true(comparison_result, info = paste("Result was: ", comparison_result) )
+    })
+    sapply(lb_comp(lbk, dtwd), function(comparison_result) {
+        expect_true(comparison_result, info = paste("Result was: ", comparison_result) )
+    })
+    sapply(lb_comp(lbi, dtwd), function(comparison_result) {
+        expect_true(comparison_result, info = paste("Result was: ", comparison_result) )
+    })
 
-    expect_true(lb_comp(lbks, lbis), info = "multiple")
-    expect_true(lb_comp(lbks, dtwds), info = "multiple")
-    expect_true(lb_comp(lbis, dtwds), info = "multiple")
+    sapply(lb_comp(lbks, lbis), function(comparison_result) {
+        expect_true(comparison_result, info = paste("Result was: ", comparison_result) )
+    })
+    sapply(lb_comp(lbks, dtwds), function(comparison_result) {
+        expect_true(comparison_result, info = paste("Result was: ", comparison_result) )
+    })
+    sapply(lb_comp(lbis, dtwds), function(comparison_result) {
+        expect_true(comparison_result, info = paste("Result was: ", comparison_result) )
+    })
 
     expect_equal(lbk, lbks[1L, 1L], info = "single-vs-proxy")
     expect_equal(lbi, lbis[1L, 1L], info = "single-vs-proxy")
@@ -60,13 +73,25 @@ test_that("Lower bounds with L2 norm are always leq than DTW.", {
     dtwds <- proxy::dist(data_reinterpolated[-1L], data_reinterpolated[1L],
                          method = "dtw_basic", window.size = 15L, norm = "L2")
 
-    expect_true(lb_comp(lbk, lbi), info = "single")
-    expect_true(lb_comp(lbk, dtwd), info = "single")
-    expect_true(lb_comp(lbi, dtwd), info = "single")
+    sapply(lb_comp(lbk, lbi), function(comparison_result) {
+        expect_true(comparison_result, info = paste("Result was: ", comparison_result) )
+    })
+    sapply(lb_comp(lbk, dtwd), function(comparison_result) {
+        expect_true(comparison_result, info = paste("Result was: ", comparison_result) )
+    })
+    sapply(lb_comp(lbi, dtwd), function(comparison_result) {
+        expect_true(comparison_result, info = paste("Result was: ", comparison_result) )
+    })
 
-    expect_true(lb_comp(lbks, lbis), info = "multiple")
-    expect_true(lb_comp(lbks, dtwds), info = "multiple")
-    expect_true(lb_comp(lbis, dtwds), info = "multiple")
+    sapply(lb_comp(lbks, lbis), function(comparison_result) {
+        expect_true(comparison_result, info = paste("Result was: ", comparison_result) )
+    })
+    sapply(lb_comp(lbks, dtwds), function(comparison_result) {
+        expect_true(comparison_result, info = paste("Result was: ", comparison_result) )
+    })
+    sapply(lb_comp(lbis, dtwds), function(comparison_result) {
+        expect_true(comparison_result, info = paste("Result was: ", comparison_result) )
+    })
 
     expect_equal(lbk, lbks[1L, 1L], info = "single-vs-proxy")
     expect_equal(lbi, lbis[1L, 1L], info = "single-vs-proxy")
