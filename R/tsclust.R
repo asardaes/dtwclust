@@ -64,7 +64,7 @@
 #'   parentheses):
 #'
 #'   - `x`: The *whole* data list (`list(ts1, ts2, ts3)`)
-#'   - `cl_id`: A numeric vector with length equal to the number of series in `data`, indicating
+#'   - `cl_id`: An integer vector with length equal to the number of series in `data`, indicating
 #'     which cluster a series belongs to (`c(1L, 2L, 2L)`)
 #'   - `k`: The desired number of total clusters (`2L`)
 #'   - `cent`: The current centroids in order, in a list (`list(centroid1, centroid2)`)

@@ -65,7 +65,8 @@ finish before the others.
 
 
 The default partitional allcent() function is a closure with the implementations of the
-included centroids. The ones for \code{\link[=DBA]{DBA()}} and \code{\link[=shape_extraction]{shape_extraction()}} can use parallelization.
+included centroids. The ones for \code{\link[=DBA]{DBA()}} and \code{\link[=shape_extraction]{shape_extraction()}} can use parallelization. Its
+formal arguments are described in the Centroid Calculation section from \code{\link[=tsclust]{tsclust()}}.
 }
 
 \examples{

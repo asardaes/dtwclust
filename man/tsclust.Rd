@@ -89,7 +89,7 @@ following parameters with the shown names (examples for partitional clustering a
 parentheses):
 \itemize{
 \item \code{x}: The \emph{whole} data list (\code{list(ts1, ts2, ts3)})
-\item \code{cl_id}: A numeric vector with length equal to the number of series in \code{data}, indicating
+\item \code{cl_id}: An integer vector with length equal to the number of series in \code{data}, indicating
 which cluster a series belongs to (\code{c(1L, 2L, 2L)})
 \item \code{k}: The desired number of total clusters (\code{2L})
 \item \code{cent}: The current centroids in order, in a list (\code{list(centroid1, centroid2)})

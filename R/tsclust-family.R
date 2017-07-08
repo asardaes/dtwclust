@@ -45,7 +45,8 @@
 #' @section Centroid function:
 #'
 #'   The default partitional allcent() function is a closure with the implementations of the
-#'   included centroids. The ones for [DBA()] and [shape_extraction()] can use parallelization.
+#'   included centroids. The ones for [DBA()] and [shape_extraction()] can use parallelization. Its
+#'   formal arguments are described in the Centroid Calculation section from [tsclust()].
 #'
 #' @note
 #'
