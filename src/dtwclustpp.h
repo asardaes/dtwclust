@@ -25,7 +25,7 @@ RcppExport SEXP dtwb_loop(SEXP D, SEXP X, SEXP Y,
                           SEXP BIGMAT, SEXP NORMALIZE, SEXP MULTIVARIATE,
                           SEXP DISTARGS, SEXP ENDPOINTS);
 
-RcppExport SEXP dtw_lb(SEXP X, SEXP Y, SEXP D, SEXP DOTS);
+RcppExport SEXP dtw_lb(SEXP X, SEXP Y, SEXP D, SEXP MARGIN, SEXP DOTS);
 
 RcppExport SEXP envelope(SEXP series, SEXP window);
 

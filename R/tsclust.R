@@ -285,6 +285,11 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             control$symmetric <- FALSE
         else if (distance %in% c("sbd", "gak"))
             control$symmetric <- TRUE
+
+        if (distance == "dtw_lb" && isTRUE(args$dist$nn.margin != 1L)) { # nocov start
+            warning("Using dtw_lb in tsclust() always uses row-wise nearest neighbors.")
+            args$dist$nn.margin <- 1L
+        } # nocov end
     }
 
     ## pre-allocate matrices for known distances

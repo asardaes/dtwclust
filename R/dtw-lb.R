@@ -12,6 +12,8 @@
 #' @param pairwise Calculate pairwise distances?
 #' @param dtw.func Which function to use for core DTW the calculations, either "dtw" or "dtw_basic".
 #'   See [dtw::dtw()] and [dtw_basic()].
+#' @param nn.margin Either 1 to search for nearest neighbors row-wise, or 2 to search column-wise.
+#'   Only implemented for `dtw.func` = "dtw_basic".
 #' @param ... Further arguments for `dtw.func` or [lb_improved()].
 #'
 #' @details
@@ -39,9 +41,8 @@
 #' This function uses a lower bound that is only defined for time series of equal length.
 #'
 #' A considerably large dataset is probably necessary before this is faster than using [dtw_basic()]
-#' with [proxy::dist()].
-#'
-#' Nearest neighbors are found **row-wise**.
+#' with [proxy::dist()]. Also note that [lb_improved()] calculates warping envelopes for the series
+#' in `y`, so be careful with the provided order and `nn.margin` (see examples).
 #'
 #' @author Alexis Sarda-Espinosa
 #'
@@ -65,28 +66,38 @@
 #' data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
 #'
 #' # Calculate the DTW distance between a certain subset aided with the lower bound
-#' system.time(d <- dtw_lb(data[1:5], data[6:50], window.size = 20))
+#' system.time(d <- dtw_lb(data[1:5], data[6:50], window.size = 20L))
 #'
 #' # Nearest neighbors
 #' NN1 <- apply(d, 1L, which.min)
 #'
 #' # Calculate the DTW distances between all elements (slower)
 #' system.time(d2 <- proxy::dist(data[1:5], data[6:50], method = "DTW",
-#'                               window.type = "slantedband", window.size = 20))
+#'                               window.type = "sakoechiba", window.size = 20L))
 #'
 #' # Nearest neighbors
 #' NN2 <- apply(d2, 1L, which.min)
 #'
-#' # Calculate the DTW distances between all elements using dtw_basic (actually faster, see notes)
+#' # Calculate the DTW distances between all elements using dtw_basic
+#' # (actually faster, see notes)
 #' system.time(d3 <- proxy::dist(data[1:5], data[6:50], method = "DTW_BASIC",
-#'                               window.size = 20))
+#'                               window.size = 20L))
 #'
 #' # Nearest neighbors
 #' NN3 <- apply(d3, 1L, which.min)
 #'
+#' # Change order and margin for nearest neighbor search
+#' # (usually fastest, see notes)
+#' system.time(d4 <- dtw_lb(data[6:50], data[1:5],
+#'                          window.size = 20L, nn.margin = 2L))
+#'
+#' # Nearest neighbors *column-wise*
+#' NN4 <- apply(d4, 2L, which.min)
+#'
 #' # Same results?
-#' all(NN1 == NN2)
-#' all(NN1 == NN3)
+#' identical(NN1, NN2)
+#' identical(NN1, NN3)
+#' identical(NN1, NN4)
 #'
 #' \dontrun{
 #' #### Running DTW_LB with parallel support
@@ -114,10 +125,11 @@
 #'
 dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                    error.check = TRUE, pairwise = FALSE,
-                   dtw.func = "dtw_basic", ...)
+                   dtw.func = "dtw_basic", nn.margin = 1L, ...)
 {
     norm <- match.arg(norm, c("L1", "L2"))
     dtw.func <- match.arg(dtw.func, c("dtw", "dtw_basic"))
+    if (nn.margin != 1L) nn.margin <- 2L
 
     if (dtw.func == "dtw")
         method <- if (norm == "L1") "DTW" else "DTW2"
@@ -198,9 +210,12 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                  .export = c("enlist", "call_dtwlb")) %op% {
                      if (method == "DTW_BASIC") {
                          ## modifies distmat in place
+                         dots$margin <- nn.margin
                          do.call(call_dtwlb, enlist(x = X, y = Y, distmat = distmat, dots = dots))
 
                      } else {
+                         if (nn.margin != 1L)
+                             warning("Column-wise nearest neighbors are not implemented for dtw::dtw")
                          id_nn <- apply(distmat, 1L, which.min) # index of nearest neighbors
                          id_nn_prev <- id_nn + 1L # initialize all different
                          id_mat <- cbind(1L:nrow(distmat), id_nn) # to index the distance matrix
@@ -232,7 +247,9 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 }
 
 ## helper function
-call_dtwlb <- function(x, y, distmat, ..., window.size, norm, step.pattern = NULL, gcm = NULL) {
+call_dtwlb <- function(x, y, distmat, ..., window.size, norm, margin,
+                       step.pattern = NULL, gcm = NULL)
+{
     if (is.null(step.pattern) || identical(step.pattern, symmetric2))
         step.pattern <- 2
     else if (identical(step.pattern, symmetric1))
@@ -256,5 +273,5 @@ call_dtwlb <- function(x, y, distmat, ..., window.size, norm, step.pattern = NUL
                  gcm = gcm)
 
     ## return
-    .Call(C_dtw_lb, x, y, distmat, dots, PACKAGE = "dtwclust")
+    .Call(C_dtw_lb, x, y, distmat, margin, dots, PACKAGE = "dtwclust")
 }

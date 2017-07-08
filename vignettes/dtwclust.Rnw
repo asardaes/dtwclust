@@ -1412,13 +1412,14 @@ A very basic but surprisingly competitive algorithm is the 1-nearest-neighbor cl
 which could be implemented as follows.
 
 <<example-1nn-class, echo = TRUE>>=
-classify_series <- function(query) {
-    # Exclude a series as an example
-    database <- data[-100L]
+# Exclude a series as an example
+database <- data[-100L]
 
+classify_series <- function(query) {
     # Nearest neighbor
-    nn <- which.min(dtw_lb(query, database,
-                           window.size = 18L))
+    nn <- which.min(dtw_lb(database, query,
+                           window.size = 18L,
+                           nn.margin = 2L))
 
     # Return a label
     CharTrajLabels[nn]
