@@ -508,7 +508,7 @@ plot.TSClusters <- function(x, y, ...,
 
         ## split returns the result in order of the factor levels,
         ## but I want to keep the original order as returned from clustering
-        ido <- sort(sort(x@cluster, index.return=T)$ix, index.return = TRUE)$ix
+        ido <- sort(sort(x@cluster, index.return = TRUE)$ix, index.return = TRUE)$ix
         data <- unlist(clusters, recursive = FALSE)[ido]
     }
 
