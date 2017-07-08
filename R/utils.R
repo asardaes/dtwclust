@@ -359,8 +359,12 @@ split_parallel_symmetric <- function(n, num_workers, adjust = 0L) {
         ids <- c(rec1, rec2, mat)
     }
 
+    chunk_sizes <- unlist(lapply(ids, function(x) {
+        if (is.null(attr(x, "trimat"))) length(x) else median(lengths(x))
+    }))
+
     ## return
-    ids
+    ids[sort(chunk_sizes, index.return = TRUE)$ix]
 }
 
 # ==================================================================================================
