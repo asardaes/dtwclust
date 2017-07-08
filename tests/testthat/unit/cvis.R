@@ -37,7 +37,8 @@ test_that("CVI calculations are consistent regardless of quantity or order of CV
             all(base_cvis[considered_cvis] == this_cvis[considered_cvis]) &&
                 identical(this_cvis, this_cvis2)
         }
-    ))
+    ),
+    info = "A random number of CVIs are calculated and compared against the base ones, and should always be equal.")
 
     ## when missing elements
     pc_mv2@distmat <- pc_mv@distmat <- NULL
@@ -64,9 +65,7 @@ test_that("CVI calculations are consistent regardless of quantity or order of CV
 
 test_that("external CVI calculations are consistent regardless of quantity or order of CVIs computed", {
     expect_error(cvi(labels_shuffled, type = "external"))
-
     base_cvis <- cvi(labels_shuffled, CharTrajLabels, "external")
-
     export <- c("external_cvis", "labels_shuffled", "CharTrajLabels")
 
     expect_true(all(
@@ -75,7 +74,8 @@ test_that("external CVI calculations are consistent regardless of quantity or or
             this_cvis <- cvi(labels_shuffled, CharTrajLabels, considered_cvis)
             all(base_cvis[considered_cvis] == this_cvis[considered_cvis])
         }
-    ))
+    ),
+    info = "A random number of CVIs are calculated and compared against the base ones, and should always be equal.")
 })
 
 # =================================================================================================
@@ -95,10 +95,12 @@ test_that("CVIs work also for hierarchical and TADPole", {
     expect_error(cvi(fc, labels_subset))
     cvis_tadp <- cvi(tadp, labels_subset)
     cvis_hc <- cvi(hc, labels_subset)
+    cvis_tadp2 <- cvi(as(tadp, "TSClusters"), labels_subset)
+    cvis_hc2 <- cvi(as(hc, "TSClusters"), labels_subset)
 
     expect_error(cvi(as(fc, "TSClusters"), labels_subset))
-    expect_identical(cvi(as(tadp, "TSClusters"), labels_subset), cvis_tadp)
-    expect_identical(cvi(as(hc, "TSClusters"), labels_subset), cvis_hc)
+    expect_identical(cvis_tadp2, cvis_tadp)
+    expect_identical(cvis_hc2, cvis_hc)
 
     ## refs
     assign("cvis_tadp", cvis_tadp, persistent)
