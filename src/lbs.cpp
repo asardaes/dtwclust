@@ -24,8 +24,8 @@ double kahan_sum(const Rcpp::NumericVector& x) {
 /* LB_Keogh */
 // =================================================================================================
 
-SEXP lbk_cpp(const Rcpp::NumericVector& x, const int p,
-             const Rcpp::NumericVector& lower_envelope, const Rcpp::NumericVector& upper_envelope)
+double lbk_cpp(const Rcpp::NumericVector& x, const int p,
+               const Rcpp::NumericVector& lower_envelope, const Rcpp::NumericVector& upper_envelope)
 {
     Rcpp::NumericVector H(x.length());
     double lb = 0;
@@ -42,12 +42,12 @@ SEXP lbk_cpp(const Rcpp::NumericVector& x, const int p,
 
     lb = kahan_sum(H);
     if (p > 1) lb = std::sqrt(lb);
-    return Rcpp::wrap(lb);
+    return lb;
 }
 
 RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U) {
     BEGIN_RCPP
-    return lbk_cpp(X, Rcpp::as<int>(P), L, U);
+    return Rcpp::wrap(lbk_cpp(X, Rcpp::as<int>(P), L, U));
     END_RCPP
 }
 
@@ -55,9 +55,9 @@ RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U) {
 /* LB_Improved */
 // =================================================================================================
 
-SEXP lbi_cpp(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
-             const unsigned int window_size, const int p,
-             const Rcpp::NumericVector& lower_envelope, const Rcpp::NumericVector& upper_envelope)
+double lbi_cpp(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
+               const unsigned int window_size, const int p,
+               const Rcpp::NumericVector& lower_envelope, const Rcpp::NumericVector& upper_envelope)
 {
     Rcpp::NumericVector L2(x.length()), U2(x.length()), H(x.length());
     Rcpp::NumericVector LB(x.length());
@@ -96,12 +96,12 @@ SEXP lbi_cpp(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
 
     lb = kahan_sum(LB);
     if (p > 1) lb = std::sqrt(lb);
-    return Rcpp::wrap(lb);
+    return lb;
 }
 
 RcppExport SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U) {
     BEGIN_RCPP
-    return lbi_cpp(X, Y, Rcpp::as<unsigned int>(WINDOW), Rcpp::as<int>(P), L, U);
+    return Rcpp::wrap(lbi_cpp(X, Y, Rcpp::as<unsigned int>(WINDOW), Rcpp::as<int>(P), L, U));
     END_RCPP
 }
 

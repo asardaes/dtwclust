@@ -135,58 +135,70 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     if (is_multivariate(x) || is_multivariate(y))
         stop("lb_improved does not support multivariate series.")
 
+    pairwise <- isTRUE(pairwise)
+    dim_out <- c(length(x), length(y))
+    dim_names <- list(names(x), names(y))
+    D <- allocate_distmat(length(x), length(y), pairwise, FALSE) ## utils.R
+
     envelopes <- lapply(y, function(s) { compute_envelope(s, window.size, error.check = FALSE) })
     lower.env <- lapply(envelopes, "[[", "lower")
     upper.env <- lapply(envelopes, "[[", "upper")
     lower.env <- split_parallel(lower.env)
     upper.env <- split_parallel(upper.env)
-    Y <- split_parallel(y)
+    y <- split_parallel(y)
 
+    ## Wrap as needed for foreach
     if (pairwise) {
-        X <- split_parallel(x)
-        validate_pairwise(X, Y)
-        retclass <- "pairdist"
-
-        D <- foreach(x = X, y = Y, lower.env = lower.env, upper.env = upper.env,
-                     .combine = c,
-                     .multicombine = TRUE,
-                     .packages = "dtwclust") %op% {
-                         mapply(upper.env, lower.env, y, x,
-                                FUN = function(u, l, y, x) {
-                                    lb_improved(x, y,
-                                                window.size = window.size,
-                                                norm = norm,
-                                                lower.env = l,
-                                                upper.env = u,
-                                                error.check = FALSE)
-                                })
-                     }
+        x <- split_parallel(x)
+        validate_pairwise(x, y)
+        validate_pairwise(x, lower.env)
+        validate_pairwise(x, upper.env)
+        endpoints <- attr(x, "endpoints")
 
     } else {
-        retclass <- "crossdist"
+        x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
+        endpoints <- attr(y, "endpoints")
+    }
 
-        D <- foreach(y = Y, lower.env = lower.env, upper.env = upper.env,
-                     .combine = cbind,
-                     .multicombine = TRUE,
-                     .packages = "dtwclust") %op% {
-                         d <- mapply(y = y, U = upper.env, L = lower.env,
-                                     MoreArgs = list(x = x),
-                                     SIMPLIFY = FALSE,
-                                     FUN = function(y, U, L, x) {
-                                         ## This will return one column of the distance matrix
-                                         sapply(x, y = y, l = L, u = U,
-                                                FUN = function(x, y, l, u) {
-                                                    lb_improved(x, y,
-                                                                window.size = window.size,
-                                                                norm = norm,
-                                                                lower.env = l,
-                                                                upper.env = u,
-                                                                error.check = FALSE)
-                                                })
-                                     })
+    if (bigmemory::is.big.matrix(D)) {
+        D_desc <- bigmemory::describe(D)
+        noexport <- "D"
 
-                         do.call(cbind, d)
-                     }
+    } else {
+        D_desc <- NULL
+        noexport <- ""
+    }
+
+    ## Calculate distance matrix
+    foreach(x = x, y = y, lower.env = lower.env, upper.env = upper.env, endpoints = endpoints,
+            .combine = c,
+            .multicombine = TRUE,
+            .packages = c("dtwclust", "bigmemory"),
+            .export = c("lbi_loop", "enlist"),
+            .noexport = noexport) %op% {
+                bigmat <- !is.null(D_desc)
+                d <- if (bigmat) bigmemory::attach.big.matrix(D_desc)@address else D
+                do.call(lbi_loop,
+                        enlist(d = d,
+                               x = x,
+                               y = y,
+                               lower.env = lower.env,
+                               upper.env = upper.env,
+                               pairwise = pairwise,
+                               endpoints = endpoints,
+                               bigmat = bigmat,
+                               window.size = window.size,
+                               norm = norm))
+            }
+
+    D <- D[,]
+    if (pairwise) {
+        class(D) <- "pairdist"
+
+    } else {
+        if (is.null(dim(D))) dim(D) <- dim_out
+        dimnames(D) <- dim_names
+        class(D) <- "crossdist"
     }
 
     if (force.symmetry && !pairwise) {
@@ -196,9 +208,20 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
             .Call(C_force_lb_symmetry, D, PACKAGE = "dtwclust")
     }
 
-    class(D) <- retclass
     attr(D, "method") <- "LB_Improved"
-
     ## return
     D
+}
+
+# ==================================================================================================
+# Wrapper for C++
+# ==================================================================================================
+
+lbi_loop <- function(d, x, y, lower.env, upper.env, pairwise, endpoints, bigmat, ...,
+                     window.size, norm)
+{
+    p <- switch(norm, "L1" = 1L, "L2" = 2L)
+    .Call(C_lbi_loop,
+          d, x, y, lower.env, upper.env, pairwise, bigmat, p, window.size, endpoints,
+          PACKAGE = "dtwclust")
 }
