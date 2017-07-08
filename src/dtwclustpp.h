@@ -40,13 +40,13 @@ RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U);
 
 RcppExport SEXP lbk_loop(SEXP D, SEXP X, SEXP L, SEXP U,
                          SEXP PAIRWISE, SEXP BIGMAT,
-                         SEXP P, SEXP ENDPOINTS);
+                         SEXP P, SEXP LEN, SEXP ENDPOINTS);
 
 RcppExport SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U);
 
 RcppExport SEXP lbi_loop(SEXP D, SEXP X, SEXP Y, SEXP L, SEXP U,
                          SEXP PAIRWISE, SEXP BIGMAT,
-                         SEXP P, SEXP WINDOW, SEXP ENDPOINTS);
+                         SEXP P, SEXP WINDOW, SEXP LEN, SEXP ENDPOINTS);
 
 RcppExport SEXP sbd_loop(SEXP D, SEXP X, SEXP Y, SEXP FFTX, SEXP FFTY,
                          SEXP FFTLEN, SEXP SYMMETRIC, SEXP PAIRWISE, SEXP ENDPOINTS, SEXP BIGMAT);
@@ -71,14 +71,19 @@ void envelope_cpp(const Rcpp::NumericVector& array, const unsigned int width,
                   Rcpp::NumericVector& minvalues, Rcpp::NumericVector& maxvalues);
 
 // defined in lbs.cpp
-double lbk_cpp(const Rcpp::NumericVector& x, const int p,
-               const Rcpp::NumericVector& lower_envelope,
-               const Rcpp::NumericVector& upper_envelope);
+double lbk_core(const Rcpp::NumericVector& x, const int p,
+                const Rcpp::NumericVector& lower_envelope,
+                const Rcpp::NumericVector& upper_envelope,
+                Rcpp::NumericVector& H);
 
-double lbi_cpp(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
-               const unsigned int window_size, const int p,
-               const Rcpp::NumericVector& lower_envelope,
-               const Rcpp::NumericVector& upper_envelope);
+double lbi_core(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
+                const unsigned int window_size, const int p,
+                const Rcpp::NumericVector& lower_envelope,
+                const Rcpp::NumericVector& upper_envelope,
+                Rcpp::NumericVector& L2,
+                Rcpp::NumericVector& U2,
+                Rcpp::NumericVector& H,
+                Rcpp::NumericVector& LB);
 
 // defined in utils.cpp
 double gak(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y, const Rcpp::List& dots);

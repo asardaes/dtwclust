@@ -24,10 +24,11 @@ double kahan_sum(const Rcpp::NumericVector& x) {
 /* LB_Keogh */
 // =================================================================================================
 
-double lbk_cpp(const Rcpp::NumericVector& x, const int p,
-               const Rcpp::NumericVector& lower_envelope, const Rcpp::NumericVector& upper_envelope)
+double lbk_core(const Rcpp::NumericVector& x, const int p,
+                const Rcpp::NumericVector& lower_envelope,
+                const Rcpp::NumericVector& upper_envelope,
+                Rcpp::NumericVector& H)
 {
-    Rcpp::NumericVector H(x.length());
     double lb = 0;
     for (int i = 0; i < x.length(); i++) {
         if (x[i] > upper_envelope[i])
@@ -45,6 +46,13 @@ double lbk_cpp(const Rcpp::NumericVector& x, const int p,
     return lb;
 }
 
+double lbk_cpp(const Rcpp::NumericVector& x, const int p,
+               const Rcpp::NumericVector& lower_envelope, const Rcpp::NumericVector& upper_envelope)
+{
+    Rcpp::NumericVector H(x.length());
+    return lbk_core(x, p, lower_envelope, upper_envelope, H);
+}
+
 RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U) {
     BEGIN_RCPP
     return Rcpp::wrap(lbk_cpp(X, Rcpp::as<int>(P), L, U));
@@ -55,12 +63,15 @@ RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U) {
 /* LB_Improved */
 // =================================================================================================
 
-double lbi_cpp(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
-               const unsigned int window_size, const int p,
-               const Rcpp::NumericVector& lower_envelope, const Rcpp::NumericVector& upper_envelope)
+double lbi_core(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
+                const unsigned int window_size, const int p,
+                const Rcpp::NumericVector& lower_envelope,
+                const Rcpp::NumericVector& upper_envelope,
+                Rcpp::NumericVector& L2,
+                Rcpp::NumericVector& U2,
+                Rcpp::NumericVector& H,
+                Rcpp::NumericVector& LB)
 {
-    Rcpp::NumericVector L2(x.length()), U2(x.length()), H(x.length());
-    Rcpp::NumericVector LB(x.length());
     double lb = 0;
     for (int i = 0; i < x.length(); i++) {
         if (x[i] > upper_envelope[i]) {
@@ -97,6 +108,15 @@ double lbi_cpp(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
     lb = kahan_sum(LB);
     if (p > 1) lb = std::sqrt(lb);
     return lb;
+}
+
+double lbi_cpp(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
+               const unsigned int window_size, const int p,
+               const Rcpp::NumericVector& lower_envelope, const Rcpp::NumericVector& upper_envelope)
+{
+    Rcpp::NumericVector L2(x.length()), U2(x.length()), H(x.length());
+    Rcpp::NumericVector LB(x.length());
+    return lbi_core(x, y, window_size, p, lower_envelope, upper_envelope, L2, U2, H, LB);
 }
 
 RcppExport SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U) {

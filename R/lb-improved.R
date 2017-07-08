@@ -221,7 +221,8 @@ lbi_loop <- function(d, x, y, lower.env, upper.env, pairwise, endpoints, bigmat,
                      window.size, norm)
 {
     p <- switch(norm, "L1" = 1L, "L2" = 2L)
+    len <- length(x[[1L]])
     .Call(C_lbi_loop,
-          d, x, y, lower.env, upper.env, pairwise, bigmat, p, window.size, endpoints,
+          d, x, y, lower.env, upper.env, pairwise, bigmat, p, window.size, len, endpoints,
           PACKAGE = "dtwclust")
 }
