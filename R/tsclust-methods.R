@@ -893,46 +893,6 @@ setAs("dtwclust", "TSClusters",
           validObject(from)
           base <- methods::new(to, override.family = FALSE)
           exclude_slots <- c("control", "family", "args", "seed")
-          dtwclust_pam_distmat <- function(distmat, series, control, distance, cent_char, family, args) {
-              if (!is.null(distmat)) {
-                  ## see Distmat.R
-                  if (!inherits(distmat, "Distmat")) distmat <- Distmat$new(distmat = distmat)
-
-              } else if (isTRUE(control$pam.precompute) || cent_char == "fcmdd") {
-                  if (distance == "dtw_lb")
-                      warning("Using dtw_lb with control$pam.precompute = TRUE is not ",
-                              "advised.")
-
-                  ## see Distmat.R
-                  distmat <- Distmat$new(distmat = do.call(
-                      family@dist,
-                      enlist(x = series,
-                             centroids = NULL,
-                             dots = args$dist))
-                  )
-
-              } else {
-                  if (isTRUE(control$pam.sparse) && distance != "dtw_lb") {
-                      ## see SparseDistmat.R
-                      distmat <- SparseDistmat$new(series = series,
-                                                   distance = distance,
-                                                   control = control,
-                                                   dist_args = args$dist,
-                                                   error.check = FALSE)
-
-                  } else {
-                      ## see Distmat.R
-                      distmat <- Distmat$new(series = series,
-                                             distance = distance,
-                                             control = control,
-                                             dist_args = args$dist,
-                                             error.check = FALSE)
-                  }
-              }
-
-              ## return
-              distmat
-          }
 
           to <- switch(from@type,
                        partitional = {
@@ -1038,8 +998,8 @@ setAs("dtwclust", "TSClusters",
           }
 
           if (to@type %in% c("partitional", "fuzzy") && to@centroid %in% c("pam", "fcmdd")) {
-              ## utils.R
-              to@control$distmat <- dtwclust_pam_distmat(to@datalist, to@control, to@distance, to@centroid, to@family, to@args)
+              ## Distmat.R
+              to@control$distmat <- Distmat$new(distmat = from@distmat)
               assign("control", to@control, environment(to@family@allcent))
           }
 
