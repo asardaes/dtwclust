@@ -22,29 +22,30 @@ args <- list(
         list(window.size = 15L, norm = "L2", force.symmetry = FALSE),
         list(window.size = 15L, norm = "L2", force.symmetry = TRUE)
     ),
-
     lb_improved = list(
         list(window.size = 15L, norm = "L1", force.symmetry = FALSE),
         list(window.size = 15L, norm = "L1", force.symmetry = TRUE),
         list(window.size = 15L, norm = "L2", force.symmetry = FALSE),
         list(window.size = 15L, norm = "L2", force.symmetry = TRUE)
     ),
-
     dtw_lb = list(
         list(window.size = 15L, norm = "L1"),
         list(window.size = 15L, norm = "L2")
     ),
-
-    SBD = list(),
-
+    SBD = list(
+    ),
     dtw_basic = list(
         list(window.size = 15L, norm = "L1", step.pattern = symmetric1),
         list(window.size = 15L, norm = "L1", step.pattern = symmetric2),
         list(window.size = 15L, norm = "L2", step.pattern = symmetric1),
-        list(window.size = 15L, norm = "L2", step.pattern = symmetric2)
+        list(window.size = 15L, norm = "L2", step.pattern = symmetric2),
+        list(window.size = 15L, norm = "L1", step.pattern = symmetric2, normalize = TRUE),
+        list(window.size = 15L, norm = "L2", step.pattern = symmetric2, normalize = TRUE)
     ),
-
-    GAK = list(sigma = 100, window.size = 15L)
+    GAK = list(
+        sigma = 100, window.size = 15L,
+        sigma = 100, window.size = NULL,
+        sigma = 100, normalize = FALSE)
 )
 
 ## Univariate series
@@ -100,46 +101,40 @@ test_that("Invalid inputs are detected correctly in the distance functions.", {
 test_that("Valid inputs provide a result greater than zero", {
     for (foo in functions) {
         for (arg in args[[foo]]) {
-            d <- do.call(foo,
-                         c(list(x = x_uv,
-                                y = y_uv_same_length),
-                           arg))
+            distance_value <- do.call(foo,
+                                      c(list(x = x_uv,
+                                             y = y_uv_same_length),
+                                        arg))
 
-            if (foo == "lb_keogh") d <- d$d
+            if (foo == "lb_keogh") distance_value <- distance_value$d
 
-            expect_gt(d, 0, label = paste0("d_", foo))
+            expect_gt(distance_value, 0, label = paste0("distance with ", foo))
 
             if (mv <- foo %in% supports_mv) {
-                d <- do.call(foo,
-                             c(list(x = x_mv,
-                                    y = y_mv_same_length),
-                               arg))
+                distance_value <- do.call(foo,
+                                          c(list(x = x_mv,
+                                                 y = y_mv_same_length),
+                                            arg))
 
-                if (foo == "lb_keogh") d <- d$d
-
-                expect_gt(d, 0, label = paste0("d_mv_", foo))
+                expect_gt(distance_value, 0, label = paste0("multivariate distance with ", foo))
             }
 
             if (dl <- foo %in% supports_diff_lengths) {
-                d <- do.call(foo,
-                             c(list(x = x_uv,
-                                    y = y_uv_diff_length),
-                               arg))
+                distance_value <- do.call(foo,
+                                          c(list(x = x_uv,
+                                                 y = y_uv_diff_length),
+                                            arg))
 
-                if (foo == "lb_keogh") d <- d$d
-
-                expect_gt(d, 0, label = paste0("d_dl_", foo))
+                expect_gt(distance_value, 0, label = paste0("distance with different lengths with ", foo))
             }
 
             if (mv && dl) {
-                d <- do.call(foo,
-                             c(list(x = x_mv,
-                                    y = y_mv_diff_length),
-                               arg))
+                distance_value <- do.call(foo,
+                                          c(list(x = x_mv,
+                                                 y = y_mv_diff_length),
+                                            arg))
 
-                if (foo == "lb_keogh") d <- d$d
-
-                expect_gt(d, 0, label = paste0("d_mvdl_", foo))
+                expect_gt(distance_value, 0, label = paste0("multivariate distance with different lengths with ", foo))
             }
         }
     }
@@ -150,8 +145,8 @@ test_that("Valid inputs provide a result greater than zero", {
 # =================================================================================================
 
 test_that("GAK can estimate sigma.", {
-    dgak <- GAK(data[[1L]], data[[100L]])
-    expect_gt(attr(dgak, "sigma"), 0)
+    gak_distance <- GAK(data[[1L]], data[[100L]])
+    expect_gt(attr(gak_distance, "sigma"), 0)
 })
 
 # =================================================================================================
@@ -159,11 +154,11 @@ test_that("GAK can estimate sigma.", {
 # =================================================================================================
 
 test_that("dtw_lb has the same result regardless of dtw.func.", {
-    d1 <- dtw_lb(data_reinterpolated[1L:50L], data_reinterpolated[51L:100L],
-                 window.size = 15L, step.pattern = symmetric1)
-    d2 <- dtw_lb(data_reinterpolated[1L:50L], data_reinterpolated[51L:100L],
-                 window.size = 15L, step.pattern = symmetric1, dtw.func = "dtw")
-    expect_equal(d1, d2)
+    distmat_with_dtwbasic <- dtw_lb(data_reinterpolated[1L:50L], data_reinterpolated[51L:100L],
+                                    window.size = 15L, step.pattern = symmetric1)
+    distmat_with_dtw <- dtw_lb(data_reinterpolated[1L:50L], data_reinterpolated[51L:100L],
+                               window.size = 15L, step.pattern = symmetric1, dtw.func = "dtw")
+    expect_equal(distmat_with_dtwbasic, distmat_with_dtw)
 })
 
 # =================================================================================================
