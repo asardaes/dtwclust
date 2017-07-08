@@ -81,8 +81,8 @@ crossdist <- fam@dist(CharTraj, window.size = 18L)
 # This is done without symmetric optimizations, regardless of control$symmetric
 crossdist <- fam@dist(CharTraj, CharTraj, window.size = 18L)
 
-# For non-dtwclust distances, symmetric optimizations only apply with an appropriate control AND
-# a single data argument:
+# For non-dtwclust distances, symmetric optimizations only apply
+# with an appropriate control AND a single data argument:
 fam <- new("tsclustFamily", dist = "dtw",
            control = partitional_control(symmetric = TRUE))
 fam@dist(CharTraj[1L:5L])

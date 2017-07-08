@@ -41,10 +41,9 @@
 \item{.Object}{A \code{TSClusters} prototype. You shouldn't use this, see Initialize section and the
 examples.}
 
-\item{...}{For \code{initialize}, any valid slots. For \code{plot}, further arguments to pass to
-\code{\link[ggplot2:geom_line]{ggplot2::geom_line()}} for the plotting of the \emph{cluster centroids}, or to
-\code{\link[stats:plot.hclust]{stats::plot.hclust()}}. See Plotting section. For \code{update}, any supported argument. Otherwise
-ignored.}
+\item{...}{For \code{initialize}, any valid slots. For \code{plot}, passed to \code{\link[ggplot2:geom_line]{ggplot2::geom_line()}} for
+the plotting of the \emph{cluster centroids}, or to \code{\link[stats:plot.hclust]{stats::plot.hclust()}}. See Plotting section.
+For \code{update}, any supported argument. Otherwise ignored.}
 
 \item{override.family}{Logical. Attempt to substitute the default family with one that conforms
 to the provided elements? See Initialize section.}

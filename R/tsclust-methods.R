@@ -17,10 +17,9 @@ NULL
 #'
 #' @param .Object A `TSClusters` prototype. You shouldn't use this, see Initialize section and the
 #'   examples.
-#' @param ... For `initialize`, any valid slots. For `plot`, further arguments to pass to
-#'   [ggplot2::geom_line()] for the plotting of the *cluster centroids*, or to
-#'   [stats::plot.hclust()]. See Plotting section. For `update`, any supported argument. Otherwise
-#'   ignored.
+#' @param ... For `initialize`, any valid slots. For `plot`, passed to [ggplot2::geom_line()] for
+#'   the plotting of the *cluster centroids*, or to [stats::plot.hclust()]. See Plotting section.
+#'   For `update`, any supported argument. Otherwise ignored.
 #' @param override.family Logical. Attempt to substitute the default family with one that conforms
 #'   to the provided elements? See Initialize section.
 #'

@@ -1591,7 +1591,7 @@ invisible(clusterEvalQ(workers, library("dtwclust")))
 # Register the backend; this step MUST be done
 registerDoParallel(workers)
 
-# Calling dtwclust
+# Calling tsclust
 pc_par <- tsclust(CharTraj[1L:20L], k = 4L,
                   distance = "dtw_basic", centroid = "dba",
                   window.size = 15L,
