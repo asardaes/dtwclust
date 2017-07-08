@@ -305,9 +305,12 @@ update.TSClusters <- function(object, ..., evaluate = TRUE) {
     if (length(args) == 0L) {
         if (evaluate) {
             if (object@type != "tadpole") {
-                ## update allcent and dist
-                object@family@allcent <- all_cent2(object@centroid, object@control)
+                ## update dist closure
                 object@family@dist <- ddist2(object@distance, object@control)
+
+                ## update allcent closure
+                if (object@centroid %in% centroids_included)
+                    object@family@allcent <- all_cent2(object@centroid, object@control)
 
                 ## update distmat in allcent environment with internal class?
                 if (object@centroid %in% c("pam", "fcmdd"))
