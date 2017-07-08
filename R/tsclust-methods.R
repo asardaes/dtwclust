@@ -891,9 +891,48 @@ is.cl_dendrogram.TSClusters <- function(x) {
 setAs("dtwclust", "TSClusters",
       function(from, to) {
           validObject(from)
-
           base <- methods::new(to, override.family = FALSE)
           exclude_slots <- c("control", "family", "args", "seed")
+          dtwclust_pam_distmat <- function(distmat, series, control, distance, cent_char, family, args) {
+              if (!is.null(distmat)) {
+                  ## see Distmat.R
+                  if (!inherits(distmat, "Distmat")) distmat <- Distmat$new(distmat = distmat)
+
+              } else if (isTRUE(control$pam.precompute) || cent_char == "fcmdd") {
+                  if (distance == "dtw_lb")
+                      warning("Using dtw_lb with control$pam.precompute = TRUE is not ",
+                              "advised.")
+
+                  ## see Distmat.R
+                  distmat <- Distmat$new(distmat = do.call(
+                      family@dist,
+                      enlist(x = series,
+                             centroids = NULL,
+                             dots = args$dist))
+                  )
+
+              } else {
+                  if (isTRUE(control$pam.sparse) && distance != "dtw_lb") {
+                      ## see SparseDistmat.R
+                      distmat <- SparseDistmat$new(series = series,
+                                                   distance = distance,
+                                                   control = control,
+                                                   dist_args = args$dist,
+                                                   error.check = FALSE)
+
+                  } else {
+                      ## see Distmat.R
+                      distmat <- Distmat$new(series = series,
+                                             distance = distance,
+                                             control = control,
+                                             dist_args = args$dist,
+                                             error.check = FALSE)
+                  }
+              }
+
+              ## return
+              distmat
+          }
 
           to <- switch(from@type,
                        partitional = {
@@ -901,7 +940,6 @@ setAs("dtwclust", "TSClusters",
 
                            for (sl in methods::slotNames(to)) {
                                if (sl %in% exclude_slots) next
-
                                slot(to, sl) <- methods::slot(from, sl)
                            }
 
@@ -911,7 +949,6 @@ setAs("dtwclust", "TSClusters",
                                                              symmetric = from@control@symmetric,
                                                              packages = from@control@packages,
                                                              distmat = from@call$distmat)
-
                            to
                        },
 
@@ -920,16 +957,13 @@ setAs("dtwclust", "TSClusters",
 
                            for (sl in methods::slotNames(to)) {
                                if (sl %in% exclude_slots) next
-
                                slot(to, sl) <- methods::slot(from, sl)
                            }
 
                            to@control <- hierarchical_control(symmetric = from@control@symmetric,
                                                               packages = from@control@packages,
                                                               distmat = from@call$distmat)
-
                            to@method <- from@method
-
                            to
                        },
 
@@ -938,7 +972,6 @@ setAs("dtwclust", "TSClusters",
 
                            for (sl in methods::slotNames(to)) {
                                if (sl %in% exclude_slots) next
-
                                slot(to, sl) <- methods::slot(from, sl)
                            }
 
@@ -946,7 +979,6 @@ setAs("dtwclust", "TSClusters",
                                                        iter.max = from@control@iter.max,
                                                        delta = from@control@delta,
                                                        packages = from@control@packages)
-
                            to
                        },
 
@@ -955,16 +987,13 @@ setAs("dtwclust", "TSClusters",
 
                            for (sl in methods::slotNames(to)) {
                                if (sl %in% exclude_slots) next
-
                                slot(to, sl) <- methods::slot(from, sl)
                            }
 
                            lb <- if (is.null(from@dots$lb)) "lbk" else from@dots$lb
-
                            to@control <- tadpole_control(dc = from@call$dc,
                                                          window.size = from@control@window.size,
                                                          lb = lb)
-
                            to
                        })
 
@@ -974,7 +1003,7 @@ setAs("dtwclust", "TSClusters",
                            preproc = from@family@preproc,
                            cluster = from@family@cluster,
                            dist = if (from@type == "tadpole") "dtw_lb" else from@distance,
-                           allcent = if (is.null(from@call$centroid)) from@centroid else from@call$centroid)
+                           allcent = if (is.null(from@call$centroid)) from@centroid else from@family@allcent)
 
           centroids <- from@centroids
           datalist <- from@datalist
@@ -992,9 +1021,7 @@ setAs("dtwclust", "TSClusters",
           if (tolower(to@distance) %in% c("dtw", "dtw2", "dtw_basic", "dtw_lb",
                                           "lbk", "lbi", "gak", "lb_keogh+dtw2"))
           {
-              to@args$dist <- list(window.size = from@control@window.size,
-                                   norm = from@control@norm)
-
+              to@args$dist <- list(window.size = from@control@window.size, norm = from@control@norm)
               to@args$dist$window.type <- if (is.null(to@args$dist$window.size)) "none" else "slantedband"
           }
 
@@ -1011,17 +1038,8 @@ setAs("dtwclust", "TSClusters",
           }
 
           if (to@type %in% c("partitional", "fuzzy") && to@centroid %in% c("pam", "fcmdd")) {
-              ## see Distmat.R
-              if (is.null(from@distmat)) {
-                  to@control$distmat <- Distmat$new(series = to@datalist,
-                                                    distance = to@distance,
-                                                    control = to@control,
-                                                    dist_args = to@args$dist,
-                                                    error.check = FALSE)
-              } else {
-                  to@control$distmat <- Distmat$new(distmat = from@distmat)
-              }
-
+              ## utils.R
+              to@control$distmat <- dtwclust_pam_distmat(to@datalist, to@control, to@distance, to@centroid, to@family, to@args)
               assign("control", to@control, environment(to@family@allcent))
           }
 

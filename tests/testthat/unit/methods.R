@@ -159,6 +159,36 @@ test_that("Included as.* methods are dispatched correctly.", {
 })
 
 # ==================================================================================================
+# coercion to TSClusters from dtwclust
+# ==================================================================================================
+
+test_that("Coercion from dtwclust to TSClusters class works correctly.", {
+    skip_on_cran()
+
+    ndtw <- function(x, y, ...) {
+        dtw::dtw(x, y, distance.only = TRUE, ...)$normalizedDistance
+    }
+
+    coercion <- function(file) {
+        if (grepl("x32$", file)) return(TRUE)
+        obj <- readRDS(file)
+        if (inherits(obj, "dtwclust")) obj <- as(obj, "TSClusters")
+        else if (is.list(obj)) obj <- lapply(obj, function(o) { if (inherits(o, "dtwclust")) as(o, "TSClusters") else NULL })
+        TRUE
+    }
+
+    if (!pr_DB$entry_exists("nDTW"))
+        proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
+                               loop = TRUE, type = "metric", distance = TRUE,
+                               description = "Normalized DTW with L1 norm")
+
+    for (file in list.files("rds", full.names = TRUE, include.dirs = FALSE, no.. = TRUE)) {
+        expect_true(coercion(file), info = paste("File =", file))
+    }
+
+})
+
+# ==================================================================================================
 # clean
 # ==================================================================================================
 
