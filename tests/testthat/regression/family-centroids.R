@@ -25,6 +25,7 @@ with(persistent, {
         expect_equal_to_reference(cent_mv_pam, file_name(cent_mv_pam), info = "Multivariate")
         expect_equal_to_reference(cent_dba, file_name(cent_dba, x32 = TRUE), info = "Univariate")
         expect_equal_to_reference(cent_mv_dba, file_name(cent_mv_dba, x32 = TRUE), info = "Multivariate")
+        expect_equal_to_reference(cent_mv_dba_bys, file_name(cent_mv_dba_bys), info = "DBA by series")
 
         ## notice files are the same, results should be equal
         expect_equal_to_reference(cent_colMeans, file_name(cent_colMeans), info = "Custom colMeans")
