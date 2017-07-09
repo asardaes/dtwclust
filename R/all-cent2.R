@@ -135,6 +135,7 @@ all_cent2 <- function(case = NULL, control) {
         ## function created here to capture objects of this environment (closure)
         allcent <- function(x, cl_id, k, cent, cl_old, ...) {
             ## cent and cl_old are unused here, but R complains if signatures don't match
+            x <- tslist(x)
             u <- cl_id ^ control$fuzziness
 
             cent <- do.call(paste0(case, "_cent"),
@@ -148,6 +149,9 @@ all_cent2 <- function(case = NULL, control) {
         }
     } else {
         allcent <- function(x, cl_id, k, cent, cl_old, ...) {
+            x <- tslist(x)
+            cent <- tslist(cent)
+
             ## Check which clusters changed
             if (all(cl_old == 0L)) {
                 id_changed <- sort(unique(cl_id))
