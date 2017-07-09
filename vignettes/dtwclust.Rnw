@@ -1122,9 +1122,7 @@ since each distance calculation is usually very fast.
 This chunking is also performed by the distance functions used by \dtwclust{} which are registered with \pkg{proxy},
 specifically: \code{LB_Keogh}, \code{LB_Improved}, \code{SBD}, \code{dtw_basic}, \code{dtw_lb} and \code{GAK}.
 
-The included implementation of the TADPole algorithms also tries to create chunks when calculating DTW distances.
-The amount of calculations needed should be relatively small,
-so parallelization may not always be worth it in this case.
+The included implementation of the TADPole algorithm supports parallelization for different values of the cutoff distance.
 
 Finally, in the context of partitional clustering,
 calculating time-series prototypes is something that is done many times each iteration.
