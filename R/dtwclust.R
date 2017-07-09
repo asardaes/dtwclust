@@ -43,14 +43,14 @@
 #'
 #' In the case of multivariate time series, they should be provided as a list of matrices, where
 #' time spans the rows of each matrix and the variables span the columns. At the moment, only `DTW`,
-#' `DTW2` and `GAK` suppport such series, which means only partitional and hierarchical procedures
+#' `DTW2` and `GAK` support such series, which means only partitional and hierarchical procedures
 #' using those distances will work. You can of course create your own custom distances. All included
 #' centroid functions should work with the aforementioned format, although `shape` is **not**
 #' recommended. Note that the `plot` method will simply append all dimensions (columns) one after
 #' the other.
 #'
 #' Several parameters can be adjusted with the `control` argument. See [dtwclustControl]. In the
-#' following sections, elements marked with an asterisk (*) are those that can be adjutsed with this
+#' following sections, elements marked with an asterisk (*) are those that can be adjusted with this
 #' argument.
 #'
 #' @return

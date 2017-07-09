@@ -67,14 +67,14 @@ are allowed.
 
 In the case of multivariate time series, they should be provided as a list of matrices, where
 time spans the rows of each matrix and the variables span the columns. At the moment, only \code{DTW},
-\code{DTW2} and \code{GAK} suppport such series, which means only partitional and hierarchical procedures
+\code{DTW2} and \code{GAK} support such series, which means only partitional and hierarchical procedures
 using those distances will work. You can of course create your own custom distances. All included
 centroid functions should work with the aforementioned format, although \code{shape} is \strong{not}
 recommended. Note that the \code{plot} method will simply append all dimensions (columns) one after
 the other.
 
 Several parameters can be adjusted with the \code{control} argument. See \link{dtwclustControl}. In the
-following sections, elements marked with an asterisk (*) are those that can be adjutsed with this
+following sections, elements marked with an asterisk (*) are those that can be adjusted with this
 argument.
 }
 \references{

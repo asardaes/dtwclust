@@ -33,7 +33,7 @@
 #' Specifying `type` = `"partitional"`, `preproc` = `zscore`, `distance` = `"sbd"` and `centroid` =
 #' `"shape"` is equivalent to the k-Shape algorithm (Paparrizos and Gravano 2015).
 #'
-#' The `series` may be porovided as a matrix, a data frame or a list. Matrices and data frames are
+#' The `series` may be provided as a matrix, a data frame or a list. Matrices and data frames are
 #' coerced to a list, both row-wise. Only lists can have series with different lengths or multiple
 #' dimensions. Most of the optimizations require series to have the same length, so consider
 #' reinterpolating them to save some time (see Ratanamahatana and Keogh 2004; [reinterpolate()]). No
@@ -41,7 +41,7 @@
 #'
 #' In the case of multivariate time series, they should be provided as a list of matrices, where
 #' time spans the rows of each matrix and the variables span the columns (see [CharTrajMV] for an
-#' example). At the moment, only `DTW`, `DTW2` and `GAK` suppport such series. You can of course
+#' example). At the moment, only `DTW`, `DTW2` and `GAK` support such series. You can of course
 #' create your own custom distances. All included centroid functions should work with the
 #' aforementioned format, although `shape` is *not* recommended. Note that the `plot` method will
 #' simply append all dimensions (columns) one after the other.
@@ -174,7 +174,7 @@
 #'   clustering.
 #'
 #'   Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is
-#'   precomputed, since said matrix is reused for every repetition, and can be comptued in parallel
+#'   precomputed, since said matrix is reused for every repetition, and can be computed in parallel
 #'   (see Parallel section).
 #'
 #' @template parallel
