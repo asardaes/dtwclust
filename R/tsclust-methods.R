@@ -465,11 +465,6 @@ plot.TSClusters <- function(x, y, ...,
     }
 
     ## Obtain data, the priority is: provided data > included data list
-    if (length(x@datalist) < 1L)
-        stop("Provided object has no data. Please re-run the algorithm with save.data = TRUE ",
-             "or provide the data manually.")
-
-    ## Obtain data, the priority is: provided data > included data list
     if (!is.null(series)) {
         data <- any2list(series)
 
@@ -512,8 +507,8 @@ plot.TSClusters <- function(x, y, ...,
     }
 
     ## helper values
-    L1 <- lengths(data)
-    L2 <- lengths(centroids)
+    L1 <- sapply(data, NROW)
+    L2 <- sapply(centroids, NROW)
 
     ## timestamp consistency
     if (!is.null(time) && length(time) < max(L1, L2))
@@ -536,16 +531,14 @@ plot.TSClusters <- function(x, y, ...,
                           t <- if (is.null(time)) seq_len(len) else time[1L:len]
                           cl <- rep(clus, len)
                           color <- rep(color_ids[clus], len)
-
                           color_ids[clus] <<- color_ids[clus] + 1L
-
                           data.frame(t = t, cl = cl, color = color)
                       })
+
     dfcm_tc <- mapply(1L:x@k, L2, USE.NAMES = FALSE, SIMPLIFY = FALSE,
                       FUN = function(clus, len) {
                           t <- if (is.null(time)) seq_len(len) else time[1L:len]
                           cl <- rep(clus, len)
-
                           data.frame(t = t, cl = cl)
                       })
 
