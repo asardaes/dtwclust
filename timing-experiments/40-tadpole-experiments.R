@@ -34,6 +34,8 @@ if (short_experiments) {
     times <- 30L
 }
 
+t1 <- proc.time()
+
 # --------------------------------------------------------------------------------------------------
 # Experiments
 # --------------------------------------------------------------------------------------------------
@@ -78,7 +80,7 @@ clus_tadpole_results <- plyr::rbind.fill(lapply(num_series, function(num_series)
 }))
 
 # Add some metadata
-attr(clus_tadpole_results, "proctime") <- proc.time() - tic
+attr(clus_tadpole_results, "proctime") <- proc.time() - t1
 attr(clus_tadpole_results, "times") <- times
 
 # ==================================================================================================
@@ -88,3 +90,4 @@ attr(clus_tadpole_results, "times") <- times
 # Clean
 rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "clus_tadpole_results")))
 save("clus_tadpole_results", file = "tadpole-results.RData")
+cat("\n")

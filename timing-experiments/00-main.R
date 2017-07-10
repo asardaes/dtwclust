@@ -3,6 +3,7 @@ suppressPackageStartupMessages({
     library("microbenchmark")
     library("plyr")
     library("doParallel")
+    library("bigmemory.sri")
 })
 
 #' Set this to TRUE to run a subset of the experiments with less evaluations. "Short" is relative

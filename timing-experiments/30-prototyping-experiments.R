@@ -51,6 +51,9 @@ if (short_experiments) {
 #' NOTE: all experiments are pretty much equivalent. They are run within a new environment so that
 #' they don't change variables in the global environment (this one).
 
+# For metadata
+t1 <- proc.time()
+
 # --------------------------------------------------------------------------------------------------
 # univariate shape_extraction
 # --------------------------------------------------------------------------------------------------
@@ -252,7 +255,7 @@ cent_results$cent <- factor(cent_results$cent,
                             levels = unique(cent_results$cent))
 
 # Add some metadata
-attr(cent_results, "proctime") <- proc.time() - tic
+attr(cent_results, "proctime") <- proc.time() - t1
 attr(cent_results, "times") <- times
 
 # Clean
@@ -263,3 +266,4 @@ rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "cent_results")))
 # ==================================================================================================
 
 save("cent_results", file = "cent-results.RData")
+cat("\n")

@@ -46,6 +46,9 @@ times <- if (short_experiments) 10L else 100L
 #' are run within a new environment so that they don't change variables in the global environment
 #' (this one).
 
+# For metadata
+t1 <- proc.time()
+
 # --------------------------------------------------------------------------------------------------
 # lb_keogh
 # --------------------------------------------------------------------------------------------------
@@ -359,7 +362,7 @@ dist_single_results$distance <- factor(dist_single_results$distance,
                                        levels = unique(dist_single_results$distance))
 
 # Add some metadata
-attr(dist_single_results, "proctime") <- proc.time() - tic
+attr(dist_single_results, "proctime") <- proc.time() - t1
 attr(dist_single_results, "times") <- times
 
 # Clean
@@ -370,12 +373,13 @@ rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "dist_single_results
 # ==================================================================================================
 
 existing_objects <- ls(all.names = TRUE)
+t1 <- proc.time()
 
 # --------------------------------------------------------------------------------------------------
 # Parameters
 # --------------------------------------------------------------------------------------------------
 
-#' NOTE: these case is almost the same as above, except we take all series for each character
+#' NOTE: these cases is almost the same as above, except we take all series for each character
 #' (initially). Some new parameters are explained below.
 
 length_diff_threshold <- 40L
@@ -402,18 +406,19 @@ window_sizes <- seq(from = 20L, to = 80L, by = 20L)
 window_size <- 50L
 # Number of evaluations for each expression
 times <- if (short_experiments) 5L else 30L
-# Number of parallel workers to test
-num_workers_to_test <- c(1L, 2L, 4L)
 
 #' 'id_series' will have two columns, each one specifying the number of rows and columns the cross-
 #' distance matrix should have. The short experiments only get square matrices.
 if (short_experiments) {
     series <- series[1L:2L]
     series_mv <- series_mv[1L:2L]
+    # Number of parallel workers to test
     num_workers_to_test <- c(4L)
     id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
                        seq(from = 10L, to = 100L, by = 10L))
 } else {
+    # Number of parallel workers to test
+    num_workers_to_test <- c(1L, 2L, 4L)
     id_series <- rbind(
         expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
         expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
@@ -807,7 +812,7 @@ dist_multiple_results$distance <- factor(dist_multiple_results$distance,
                                          levels = unique(dist_multiple_results$distance))
 
 # Add some metadata
-attr(dist_multiple_results, "proctime") <- proc.time() - tic
+attr(dist_multiple_results, "proctime") <- proc.time() - t1
 attr(dist_multiple_results, "times") <- times
 
 # Clean
@@ -818,3 +823,4 @@ rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "dist_multiple_resul
 # ==================================================================================================
 
 save("dist_single_results", "dist_multiple_results", file = "dist-results.RData")
+cat("\n")
