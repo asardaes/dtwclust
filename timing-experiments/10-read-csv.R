@@ -6,7 +6,7 @@ univariate_labels <- as.factor(sapply(files, substr, start = 1L, stop = 1L))
 univariate_series <- lapply(files, function(file) {
     df <- read.csv(file.path(path, file), header = FALSE)
     colnames(df) <- NULL
-    dtwclust:::any2list(df)
+    tslist(df)
 })
 
 dtwclust:::setnames_inplace(univariate_series, sub(".csv$", "", files))
