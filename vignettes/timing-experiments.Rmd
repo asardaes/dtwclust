@@ -32,7 +32,7 @@ To get an idea of the running times that can be expected for some of the include
 a series of timing experiments were made.
 The data used again comes from the Character Trajectories set [@lichman2013].
 
-These were run using `R` v3.4.0 and `dtwclust` v4.0.2.
+These were run using `R` v3.4.1 and `dtwclust` v4.0.3.
 The computer used was running GNU-Linux with an `i5-6500` Intel processor and 16GB of RAM.
 
 # Distance experiments
