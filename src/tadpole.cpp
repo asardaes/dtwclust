@@ -390,7 +390,7 @@ SEXP tadpole_cpp(const Rcpp::List& series,
 
     if (trace) {
         Rcpp::Rcout << "\tPruning percentage = " << std::setprecision(3) << 100 - dist_op_percent << "%\n";
-        Rcpp::Rcout << "\tPerforming cluster assignmnet\n\n";
+        Rcpp::Rcout << "\tPerforming cluster assignment\n\n";
         Rflush();
     }
     cluster_assignment(k, dc, id_cent, id_cl, nearest_neighbors, dist_op_percent, trace, list);
