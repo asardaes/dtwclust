@@ -256,17 +256,19 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     if (bigmemory::is.big.matrix(D)) {
         D_desc <- bigmemory::describe(D)
         noexport <- c("D", "gak_x", "gak_y")
+        packages <- c("dtwclust", "bigmemory")
 
     } else {
         D_desc <- NULL
         noexport <- c("gak_x", "gak_y")
+        packages <- c("dtwclust")
     }
 
     ## Calculate distance matrix
     foreach(x = x, y = y, endpoints = endpoints,
             .combine = c,
             .multicombine = TRUE,
-            .packages = c("dtwclust", "bigmemory"),
+            .packages = packages,
             .export = c("gak_loop"),
             .noexport = noexport) %op% {
                 bigmat <- !is.null(D_desc)
