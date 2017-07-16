@@ -29,14 +29,11 @@
 #'
 #' @section Partitional:
 #'
-#'   As of version 4.0.0, using `pam.precompute = FALSE` is optimized by defining a sparse matrix
-#'   (see [Matrix::sparseMatrix()]) and updating it every iteration (except for `"dtw_lb"`
-#'   distance). For smaller datasets, precomputing the whole distance matrix is still probably
-#'   faster.
-#'
-#'   Explicitly setting both `pam.precompute` and `pam.sparse` to `FALSE` will reproduce previous
-#'   behavior, and might be faster if the distance matrix is very big but the distance function is
-#'   very quick.
+#'   Using `pam.sparse = TRUE` defines a sparse matrix (see [Matrix::sparseMatrix()]) and updates it
+#'   every iteration (except for `"dtw_lb"` distance). For smaller datasets, precomputing the whole
+#'   distance matrix is still probably faster. Explicitly setting both `pam.precompute` and
+#'   `pam.sparse` to `FALSE` might be faster if the distance matrix is very big but the distance
+#'   function is very quick.
 #'
 #'   Parallel computations for PAM centroids have the following considerations:
 #'
@@ -55,7 +52,7 @@ partitional_control <- function(pam.precompute = TRUE,
                                 symmetric = FALSE,
                                 packages = character(0L),
                                 distmat = NULL,
-                                pam.sparse = !pam.precompute)
+                                pam.sparse = FALSE)
 {
     if (any(iter.max <= 0L)) stop("Maximum iterations must be positive")
     if (any(nrep < 1L)) stop("Number of repetitions must be at least one")

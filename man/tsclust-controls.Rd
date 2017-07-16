@@ -15,7 +15,7 @@
 \usage{
 partitional_control(pam.precompute = TRUE, iter.max = 100L, nrep = 1L,
   symmetric = FALSE, packages = character(0L), distmat = NULL,
-  pam.sparse = !pam.precompute)
+  pam.sparse = FALSE)
 
 hierarchical_control(method = "average", symmetric = FALSE,
   packages = character(0L), distmat = NULL)
@@ -81,14 +81,11 @@ are performed.
 \section{Partitional}{
 
 
-As of version 4.0.0, using \code{pam.precompute = FALSE} is optimized by defining a sparse matrix
-(see \code{\link[Matrix:sparseMatrix]{Matrix::sparseMatrix()}}) and updating it every iteration (except for \code{"dtw_lb"}
-distance). For smaller datasets, precomputing the whole distance matrix is still probably
-faster.
-
-Explicitly setting both \code{pam.precompute} and \code{pam.sparse} to \code{FALSE} will reproduce previous
-behavior, and might be faster if the distance matrix is very big but the distance function is
-very quick.
+Using \code{pam.sparse = TRUE} defines a sparse matrix (see \code{\link[Matrix:sparseMatrix]{Matrix::sparseMatrix()}}) and updates it
+every iteration (except for \code{"dtw_lb"} distance). For smaller datasets, precomputing the whole
+distance matrix is still probably faster. Explicitly setting both \code{pam.precompute} and
+\code{pam.sparse} to \code{FALSE} might be faster if the distance matrix is very big but the distance
+function is very quick.
 
 Parallel computations for PAM centroids have the following considerations:
 \itemize{

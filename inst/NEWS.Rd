@@ -9,6 +9,6 @@
 
 \section{Changes in version 4.0.3}{
     \itemize{
-        \item TBA
+        \item Deactivating PAM precomputation will no longer use sparse matrices by default, explicitly set \code{pam.sparse} to \code{TRUE} if you want this functionality.
     }
 }
