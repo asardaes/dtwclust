@@ -330,7 +330,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #' @param trace Logical indicating that more output should be printed to screen.
 #' @param score.clus A function that gets the list of results (and `...`) and scores each one. It
 #'   may also be a named list of functions, one for each type of clustering. See Scoring section.
-#' @param pick.clus A function that to pick the best result. See Picking section.
+#' @param pick.clus A function to pick the best result. See Picking section.
 #' @param shuffle.configs Randomly shuffle the order of configs, which can be useful to balance load
 #'   when using parallel computation.
 #' @param return.objects Logical indicating whether the objects returned by [tsclust()] should be

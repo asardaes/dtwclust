@@ -30,7 +30,7 @@ hierarchical, fuzzy, tadpole.}
 \item{score.clus}{A function that gets the list of results (and \code{...}) and scores each one. It
 may also be a named list of functions, one for each type of clustering. See Scoring section.}
 
-\item{pick.clus}{A function that to pick the best result. See Picking section.}
+\item{pick.clus}{A function to pick the best result. See Picking section.}
 
 \item{shuffle.configs}{Randomly shuffle the order of configs, which can be useful to balance load
 when using parallel computation.}
