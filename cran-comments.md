@@ -1,4 +1,5 @@
 ## Update to version 4.0.3
+* Bug fixes
 
 ## Test environments
 * Local GNU/Linux, R 3.4.1

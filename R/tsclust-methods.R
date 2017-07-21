@@ -511,9 +511,9 @@ plot.TSClusters <- function(x, y, ...,
         data <- unlist(clusters, recursive = FALSE)[ido]
     }
 
-    ## helper values
-    L1 <- sapply(data, NROW)
-    L2 <- sapply(centroids, NROW)
+    ## helper values (lengths() here, see issue #18 in GitHub)
+    L1 <- lengths(data)
+    L2 <- lengths(centroids)
 
     ## timestamp consistency
     if (!is.null(time) && length(time) < max(L1, L2))
