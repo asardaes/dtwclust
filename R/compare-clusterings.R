@@ -71,7 +71,8 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
             cfg <- do.call(expand.grid,
                            enlist(foo = fun,
                                   dots = shared_args,
-                                  stringsAsFactors = FALSE))
+                                  stringsAsFactors = FALSE),
+                           TRUE)
 
             names(cfg)[1L] <- type
 
@@ -103,7 +104,8 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
                 cfg <- do.call(expand.grid,
                                enlist(foo = fun,
                                       stringsAsFactors = FALSE,
-                                      dots = config_args))
+                                      dots = config_args),
+                               TRUE)
 
                 names(cfg)[1L] <- type
                 cfg
@@ -243,14 +245,16 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                                    iter.max = control$iter.max,
                                    nrep = control$nrep,
                                    symmetric = control$symmetric,
-                                   stringsAsFactors = FALSE))
+                                   stringsAsFactors = FALSE),
+                            TRUE)
                 },
                 hierarchical = {
                     do.call(expand.grid,
                             enlist(k = list(k),
                                    method = list(control$method),
                                    symmetric = control$symmetric,
-                                   stringsAsFactors = FALSE))
+                                   stringsAsFactors = FALSE),
+                            TRUE)
                 },
                 fuzzy = {
                     do.call(expand.grid,
@@ -259,7 +263,8 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                                    iter.max = control$iter.max,
                                    delta = control$delta,
                                    symmetric = control$symmetric,
-                                   stringsAsFactors = FALSE))
+                                   stringsAsFactors = FALSE),
+                            TRUE)
                 },
                 tadpole = {
                     do.call(expand.grid,
@@ -267,7 +272,8 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                                    dc = list(control$dc),
                                    window.size = control$window.size,
                                    lb = control$lb,
-                                   stringsAsFactors = FALSE))
+                                   stringsAsFactors = FALSE),
+                            TRUE)
                 }
             )
 
@@ -538,7 +544,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
                 ret <- do.call(preproc_fun,
                                enlist(series,
-                                      dots = preproc_args))
+                                      dots = preproc_args),
+                               TRUE)
 
                 attr(ret, "config") <- as.list(this_config) ## leave version with possible NAs here!
 
@@ -682,7 +689,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                            })
 
             setnames_inplace(args, c("preproc", "dist", "cent"))
-            args <- do.call(tsclust_args, args = args)
+            args <- do.call(tsclust_args, args = args, TRUE)
 
             ## ---------------------------------------------------------------------------------
             ## controls for this configuration
@@ -691,7 +698,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
             control_fun <- match.fun(paste0(type, "_control"))
             control_args <- subset_dots(as.list(cfg), control_fun)
             control_args <- lapply(control_args, unlist, recursive = FALSE)
-            control <- do.call(control_fun, control_args)
+            control <- do.call(control_fun, control_args, TRUE)
 
             ## ---------------------------------------------------------------------------------
             ## get processed series
@@ -717,7 +724,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                 dist_entry <- dist_entries[[distance]]
 
                 if (!check_consistency(dist_entry$names[1L], "dist"))
-                    do.call(proxy::pr_DB$set_entry, dist_entry)
+                    do.call(proxy::pr_DB$set_entry, dist_entry, TRUE)
 
             } else distance <- NULL ## dummy
 
@@ -746,18 +753,20 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
             if (centroid_char == "default") {
                 ## do not specify centroid
-                tsc <- do.call(tsclust, this_args)
+                tsc <- do.call(tsclust, this_args, TRUE)
 
             } else if (centroid_char %in% centroids_included) {
                 ## with included centroid
                 tsc <- do.call(tsclust,
-                               enlist(centroid = centroid_char, dots = this_args))
+                               enlist(centroid = centroid_char, dots = this_args),
+                               TRUE)
 
             } else {
                 ## with centroid function
                 tsc <- do.call(tsclust,
                                enlist(centroid = get_from_callers(centroid_char, "function"),
-                                      dots = this_args))
+                                      dots = this_args),
+                               TRUE)
             }
 
             if (inherits(tsc, "TSClusters")) tsc <- list(tsc)
@@ -795,7 +804,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
 
             if (!return.objects) {
                 if (!is.function(score.clus)) score.clus <- score.clus[[type]]
-                ret <- list(do.call(score.clus, enlist(ret, dots = dots)))
+                ret <- list(do.call(score.clus, enlist(ret, dots = dots), TRUE))
             }
 
             ## return config result from foreach()
@@ -998,7 +1007,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                                f = function(result, cols) {
                                    order_args <- as.list(result[cols])
                                    names(order_args) <- NULL
-                                   result[do.call(base::order, order_args), , drop = FALSE]
+                                   result[do.call(base::order, order_args, TRUE), , drop = FALSE]
                                })
 
     ## return results

@@ -71,7 +71,8 @@ ddist2 <- function(distance, control) {
                              enlist(x = x,
                                     y = centroids,
                                     method = distance,
-                                    dots = dots))
+                                    dots = dots),
+                             TRUE)
 
             } else if (is.null(centroids) && symmetric && !isTRUE(dots$pairwise)) {
                 if (dist_entry$loop && foreach::getDoParWorkers() > 1L) {
@@ -94,7 +95,7 @@ ddist2 <- function(distance, control) {
                         .export = export
                     ) %op% {
                         if (!check_consistency(dist_entry$names[1L], "dist"))
-                            do.call(proxy::pr_DB$set_entry, dist_entry)
+                            do.call(proxy::pr_DB$set_entry, dist_entry, TRUE)
 
                         dd <- bigmemory::attach.big.matrix(d_desc)
 
@@ -107,7 +108,8 @@ ddist2 <- function(distance, control) {
                                     enlist(x = x[ul],
                                            y = NULL,
                                            method = distance,
-                                           dots = dots)
+                                           dots = dots),
+                                    TRUE
                                 ))
                             ## assign lower part of lower triangular
                             ll <- ids$ll
@@ -117,7 +119,8 @@ ddist2 <- function(distance, control) {
                                     enlist(x = x[ll],
                                            y = NULL,
                                            method = distance,
-                                           dots = dots)
+                                           dots = dots),
+                                    TRUE
                                 ))
                         } else {
                             rows <- attr(ids, "rows")
@@ -126,7 +129,8 @@ ddist2 <- function(distance, control) {
                                 enlist(x = x[rows],
                                        y = x[ids],
                                        method = distance,
-                                       dots = dots)
+                                       dots = dots),
+                                TRUE
                             ))
                             ## assign matrix chunks
                             dd[rows,ids] <- mat_chunk
@@ -147,7 +151,8 @@ ddist2 <- function(distance, control) {
                                                  enlist(x = x,
                                                         y = NULL,
                                                         method = distance,
-                                                        dots = dots)))
+                                                        dots = dots),
+                                                 TRUE))
                     class(d) <- "crossdist"
                 }
 
@@ -174,14 +179,15 @@ ddist2 <- function(distance, control) {
                              .packages = control$packages,
                              .export = export) %op% {
                                  if (!check_consistency(dist_entry$names[1L], "dist"))
-                                     do.call(proxy::pr_DB$set_entry, dist_entry)
+                                     do.call(proxy::pr_DB$set_entry, dist_entry, TRUE)
 
                                  ## 'dots' has all extra arguments that are valid
                                  dd <- do.call(proxy::dist,
                                                enlist(x = x,
                                                       y = centroids,
                                                       method = distance,
-                                                      dots = dots))
+                                                      dots = dots),
+                                               TRUE)
 
                                  dd
                              }

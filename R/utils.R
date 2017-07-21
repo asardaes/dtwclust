@@ -219,8 +219,9 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
             family@dist,
             enlist(x = series,
                    centroids = NULL,
-                   dots = args$dist))
-        )
+                   dots = args$dist),
+            TRUE
+        ))
 
     } else {
         if (isTRUE(control$pam.sparse) && distance != "dtw_lb") {

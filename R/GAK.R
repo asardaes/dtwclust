@@ -283,7 +283,8 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
                              bigmat = bigmat,
                              window.size = window.size,
                              sigma = sigma,
-                             logs = logs))
+                             logs = logs),
+                        TRUE)
             }
 
     D <- D[,]

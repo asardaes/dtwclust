@@ -171,7 +171,8 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                          do.call(proxy::dist,
                                  enlist(x = X, y = Y,
                                         method = method,
-                                        dots = dots))
+                                        dots = dots),
+                                 TRUE)
                      }
 
         return(D)
@@ -211,7 +212,9 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                      if (method == "DTW_BASIC") {
                          ## modifies distmat in place
                          dots$margin <- nn.margin
-                         do.call(call_dtwlb, enlist(x = X, y = Y, distmat = distmat, dots = dots))
+                         do.call(call_dtwlb,
+                                 enlist(x = X, y = Y, distmat = distmat, dots = dots),
+                                 TRUE)
 
                      } else {
                          if (nn.margin != 1L)
@@ -227,7 +230,8 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                                               enlist(x = X[id_changed],
                                                      y = Y[id_nn[id_changed]],
                                                      method = method,
-                                                     dots = dots))
+                                                     dots = dots),
+                                              TRUE)
 
                              distmat[id_mat[id_changed, , drop = FALSE]] <- d_sub
                              id_nn <- apply(distmat, 1L, which.min)

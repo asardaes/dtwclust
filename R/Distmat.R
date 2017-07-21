@@ -82,7 +82,8 @@ setMethod(`[`, "Distmat", function(x, i, j, ..., drop = TRUE) {
         dm <- do.call(x$distfun,
                       enlist(x = x$series[i],
                              centroids = centroids,
-                             dots = x$dist_args))
+                             dots = x$dist_args),
+                      TRUE)
     } else {
         dm <- x$distmat[i, j, drop = drop]
         if (identical(dim(dm), dim(x$distmat))) attributes(dm) <- attributes(x$distmat)

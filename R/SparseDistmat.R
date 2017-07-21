@@ -92,7 +92,8 @@ setMethod(`[`, "SparseDistmat", function(x, i, j, ..., drop = TRUE) {
                                                 enlist(x = x$series[id_new[, 1L]],
                                                        centroids = x$series[id_new[, 2L]],
                                                        pairwise = TRUE,
-                                                       dots = x$dist_args)))
+                                                       dots = x$dist_args),
+                                                TRUE))
 
         if (x$symmetric) x$distmat <- Matrix::forceSymmetric(x$distmat, "L")
     }

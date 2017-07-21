@@ -163,7 +163,8 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                                pairwise = pairwise,
                                endpoints = endpoints,
                                bigmat = bigmat,
-                               norm = norm))
+                               norm = norm),
+                        TRUE)
             }
 
     D <- D[,]

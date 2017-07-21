@@ -188,7 +188,8 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
                                endpoints = endpoints,
                                bigmat = bigmat,
                                gcm = gcm,
-                               dots = dots))
+                               dots = dots),
+                        TRUE)
             }
 
     D <- D[,]

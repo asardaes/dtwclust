@@ -15,7 +15,8 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
                                     cl_id = cluster,
                                     k = k,
                                     cl_old = cluster,
-                                    dots = subset_dots(args$cent, family@allcent)))
+                                    dots = subset_dots(args$cent, family@allcent)),
+                             TRUE)
 
     } else {
         id_cent <- sample(N, k)
@@ -29,7 +30,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
 
     while (iter <= control$iter.max) {
         clustold <- if (cent != "fcmdd") cluster else control$distmat$id_cent
-        distmat <- do.call(family@dist, enlist(x = x, centroids = centroids, dots = args$dist))
+        distmat <- do.call(family@dist, enlist(x = x, centroids = centroids, dots = args$dist), TRUE)
         cluster <- family@cluster(distmat = distmat, m = control$fuzziness)
         centroids <- do.call(family@allcent,
                              enlist(x = x,
@@ -37,7 +38,8 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
                                     k = k,
                                     cent = centroids,
                                     cl_old = clustold,
-                                    dots = subset_dots(args$cent, family@allcent)))
+                                    dots = subset_dots(args$cent, family@allcent)),
+                             TRUE)
 
         if (fuzzy && cent == "fcm") {
             ## fuzzy.R
@@ -91,7 +93,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         converged <- TRUE
     }
 
-    distmat <- do.call(family@dist, enlist(x = x, centroids = centroids, dots = args$dist))
+    distmat <- do.call(family@dist, enlist(x = x, centroids = centroids, dots = args$dist), TRUE)
     cluster <- family@cluster(distmat = distmat, m = control$fuzziness)
 
     if (fuzzy) {

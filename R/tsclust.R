@@ -241,13 +241,13 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     ## ---------------------------------------------------------------------------------------------
 
     if (!is.null(preproc) && is.function(preproc)) {
-        series <- do.call(preproc, enlist(series, dots = subset_dots(args$preproc, preproc)))
+        series <- do.call(preproc, enlist(series, dots = subset_dots(args$preproc, preproc)), TRUE)
         preproc_char <- as.character(substitute(preproc))[1L]
 
     } else if (type == "partitional" && is.character(centroid) && centroid == "shape") {
         preproc <- zscore
         preproc_char <- "zscore"
-        series <- do.call(zscore, enlist(series, dots = args$preproc))
+        series <- do.call(zscore, enlist(series, dots = args$preproc), TRUE)
 
     } else if (is.null(preproc)) {
         preproc <- function(x, ...) { x } # nocov
@@ -395,7 +395,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                             rngtools::setRNG(rng[[i]])
 
                             if (!check_consistency(dist_entry$names[1L], "dist"))
-                                do.call(proxy::pr_DB$set_entry, dist_entry)
+                                do.call(proxy::pr_DB$set_entry, dist_entry, TRUE)
 
                             ## return
                             list(
@@ -407,7 +407,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                                fuzzy = isTRUE(type == "fuzzy"),
                                                cent = cent_char,
                                                trace = trace,
-                                               args = args))
+                                               args = args),
+                                        TRUE)
                             )
                         }
 
@@ -526,7 +527,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             } else {
                 if (trace) cat("\n\tCalculating distance matrix...\n")
-                distmat <- do.call(distfun, enlist(x = series, centroids = NULL, dots = args$dist))
+                distmat <- do.call(distfun,
+                                   enlist(x = series, centroids = NULL, dots = args$dist),
+                                   TRUE)
             }
 
             ## -------------------------------------------------------------------------------------
@@ -545,7 +548,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 ## Using provided function
                 hc <- list(do.call(method,
                                    args = enlist(stats::as.dist(distmat),
-                                                 dots = subset_dots(dots, method))))
+                                                 dots = subset_dots(dots, method)),
+                                   TRUE))
 
                 method <- attr(method, "name")
             }
@@ -570,7 +574,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                         centroids <- lapply(1L:k, function(kcent) {
                             do.call(centroid,
                                     enlist(series[cluster == kcent],
-                                           dots = subset_dots(args$cent, centroid)))
+                                           dots = subset_dots(args$cent, centroid)),
+                                    TRUE)
                         })
 
                     } else {

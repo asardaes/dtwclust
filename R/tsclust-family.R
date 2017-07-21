@@ -119,5 +119,5 @@ setMethod("initialize", "tsclustFamily",
                       stop("Centroid definition must be either a function or a character")
               }
 
-              do.call(methods::callNextMethod, dots)
+              do.call(methods::callNextMethod, dots, TRUE)
           })

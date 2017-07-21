@@ -83,7 +83,7 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
         dots$call <- NULL
     }
 
-    .Object <- do.call(methods::callNextMethod, enlist(.Object = .Object, dots = dots))
+    .Object <- do.call(methods::callNextMethod, enlist(.Object = .Object, dots = dots), TRUE)
     .Object@call <- call
 
     ## some "defaults"
@@ -158,7 +158,8 @@ setMethod("initialize", "PartitionalTSClusters",
                   dm <- do.call(.Object@family@dist,
                                 enlist(.Object@datalist,
                                        .Object@centroids,
-                                       dots = .Object@args$dist))
+                                       dots = .Object@args$dist),
+                                TRUE)
 
                   .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist),
                                                              .Object@cluster)])
@@ -194,7 +195,8 @@ setMethod("initialize", "HierarchicalTSClusters",
                   dm <- do.call(.Object@family@dist,
                                 enlist(.Object@datalist,
                                        .Object@centroids,
-                                       dots = .Object@args$dist))
+                                       dots = .Object@args$dist),
+                                TRUE)
 
                   .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist),
                                                              .Object@cluster)])
@@ -230,7 +232,8 @@ setMethod("initialize", "FuzzyTSClusters",
                       dm <- do.call(.Object@family@dist,
                                     enlist(.Object@datalist,
                                            .Object@centroids,
-                                           dots = .Object@args$dist))
+                                           dots = .Object@args$dist),
+                                    TRUE)
 
                       .Object@fcluster <- .Object@family@cluster(dm, m = .Object@control$fuzziness)
                       colnames(.Object@fcluster) <- paste0("cluster_", 1:.Object@k)
@@ -368,12 +371,14 @@ predict.TSClusters <- function(object, newdata = NULL, ...) {
 
         newdata <- do.call(object@family@preproc,
                            args = enlist(newdata,
-                                         dots = object@args$preproc))
+                                         dots = object@args$preproc),
+                           TRUE)
 
         distmat <- do.call(object@family@dist,
                            args = enlist(x = newdata,
                                          centroids = object@centroids,
-                                         dots = object@args$dist))
+                                         dots = object@args$dist),
+                           TRUE)
 
         ret <- object@family@cluster(distmat = distmat, m = object@control$fuzziness)
 
@@ -543,8 +548,8 @@ plot.TSClusters <- function(x, y, ...,
                       })
 
     ## bind
-    dfm <- data.frame(dfm, do.call(rbind, dfm_tcc))
-    dfcm <- data.frame(dfcm, do.call(rbind, dfcm_tc))
+    dfm <- data.frame(dfm, do.call(rbind, dfm_tcc, TRUE))
+    dfcm <- data.frame(dfcm, do.call(rbind, dfcm_tc, TRUE))
 
     ## make factor
     dfm$cl <- factor(dfm$cl)
@@ -667,7 +672,8 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                     distmat <- do.call(a@family@dist,
                                        args = enlist(x = a@datalist,
                                                      centroids = NULL,
-                                                     dots = a@args$dist))
+                                                     dots = a@args$dist),
+                                       TRUE)
                 }
             } else {
                 distmat <- a@distmat
@@ -684,7 +690,8 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
             distcent <- do.call(a@family@dist,
                                 args = enlist(x = a@centroids,
                                               centroids = NULL,
-                                              dots = a@args$dist))
+                                              dots = a@args$dist),
+                                TRUE)
         }
 
         ## calculate global centroids if needed
@@ -698,7 +705,8 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                                                      k = 1L,
                                                      cent = a@datalist[sample(N, 1L)],
                                                      cl_old = rep(0L, N),
-                                                     dots = a@args$cent))
+                                                     dots = a@args$cent),
+                                       TRUE)
             } else {
                 global_cent <- a@family@allcent(a@datalist)
             }
@@ -706,7 +714,8 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
             dist_global_cent <- do.call(a@family@dist,
                                         args = enlist(x = a@centroids,
                                                       centroids = global_cent,
-                                                      dots = a@args$dist))
+                                                      dots = a@args$dist),
+                                        TRUE)
 
             dim(dist_global_cent) <- NULL
         }
@@ -729,7 +738,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                            data.frame(a = this_a, b = this_b)
                        })
 
-                       ab <- do.call(rbind, ab)
+                       ab <- do.call(rbind, ab, TRUE)
                        sum((ab$b - ab$a) / apply(ab, 1L, max)) / nrow(distmat)
                    },
 

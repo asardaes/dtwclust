@@ -35,7 +35,7 @@ all_cent2 <- function(case = NULL, control) {
                 .packages = "dtwclust",
                 .export = c("enlist")) %op% {
                     Map(x_split, cent, f = function(x, cent) {
-                        do.call(shape_extraction, enlist(X = x, centroid = cent, dots = dots))
+                        do.call(shape_extraction, enlist(X = x, centroid = cent, dots = dots), TRUE)
                     })
                 }
     }
@@ -56,7 +56,7 @@ all_cent2 <- function(case = NULL, control) {
                 .packages = "dtwclust",
                 .export = c("enlist")) %op% {
                     Map(x_split, cent, f = function(x, cent) {
-                        do.call(DBA, enlist(X = x, centroid = cent, dots = dots))
+                        do.call(DBA, enlist(X = x, centroid = cent, dots = dots), TRUE)
                     })
                 }
     }
@@ -69,12 +69,12 @@ all_cent2 <- function(case = NULL, control) {
             if (is_multivariate(xx)) {
                 ncols <- ncol(xx[[1L]]) # number of dimensions should be equal
                 ncols <- rep(1L:ncols, length(xx))
-                xx <- do.call(cbind, xx)
+                xx <- do.call(cbind, xx, TRUE)
                 xx <- split.data.frame(t(xx), ncols)
-                do.call(cbind, lapply(xx, colMeans))
+                do.call(cbind, lapply(xx, colMeans), TRUE)
 
             } else {
-                xx <- do.call(cbind, xx)
+                xx <- do.call(cbind, xx, TRUE)
                 rowMeans(xx)
             }
         })
@@ -88,12 +88,12 @@ all_cent2 <- function(case = NULL, control) {
             if (is_multivariate(xx)) {
                 ncols <- ncol(xx[[1L]]) # number of dimensions should be equal
                 ncols <- rep(1L:ncols, length(xx))
-                xx <- do.call(cbind, xx)
+                xx <- do.call(cbind, xx, TRUE)
                 xx <- split.data.frame(t(xx), ncols)
-                do.call(cbind, lapply(xx, colMedians))
+                do.call(cbind, lapply(xx, colMedians), TRUE)
 
             } else {
-                xx <- do.call(rbind, xx)
+                xx <- do.call(rbind, xx, TRUE)
                 colMedians(xx) # utils.R
             }
         })
@@ -114,7 +114,7 @@ all_cent2 <- function(case = NULL, control) {
             cent
 
         } else {
-            cent <- t(u) %*% do.call(rbind, x)
+            cent <- t(u) %*% do.call(rbind, x, TRUE)
             apply(cent, 2L, "/", e2 = colSums(u))
         }
     }
@@ -142,7 +142,8 @@ all_cent2 <- function(case = NULL, control) {
                             enlist(x = x,
                                    u = u,
                                    k = k,
-                                   dots = list(...)))
+                                   dots = list(...)),
+                            TRUE)
 
             ## coerce back to list
             any2list(cent)
@@ -177,7 +178,8 @@ all_cent2 <- function(case = NULL, control) {
                                        cent = cent[id_changed],
                                        id_changed = id_changed,
                                        cl_id = cl_id,
-                                       dots = list(...)))
+                                       dots = list(...)),
+                                TRUE)
 
             cent[id_changed] <- new_cent
 

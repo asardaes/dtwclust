@@ -190,7 +190,8 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                                endpoints = endpoints,
                                bigmat = bigmat,
                                window.size = window.size,
-                               norm = norm))
+                               norm = norm),
+                        TRUE)
             }
 
     D <- D[,]
