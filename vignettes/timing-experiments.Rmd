@@ -21,6 +21,7 @@ library("dtwclust")
 load("../timing-experiments/dist-results.RData")
 load("../timing-experiments/cent-results.RData")
 load("../timing-experiments/tadpole-results.RData")
+load("../timing-experiments/partitional-results.RData")
 
 # knitr defaults
 knitr::opts_chunk$set(echo = FALSE, comment = "#>")
@@ -171,5 +172,30 @@ ggplot(clus_tadpole_results,
     theme_bw() + 
     theme(legend.position = "bottom")
 ```
+
+## DTW special cases
+
+### PAM centroids
+
+The different flavors of PAM centroids.
+The remarks about sparse matrices apply for other distances too.
+
+```{r clust-part-dtws-plot, fig.height=5}
+ggdf <- reshape2::melt(clus_dtwb_dtwlb_results, id.vars=c("num_series", "k", "window_size"))
+ggplot(ggdf,
+       aes(x = num_series,
+           y = value,
+           colour = factor(window_size))) +
+    geom_line() +
+    facet_wrap(~variable) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+### DBA centroids
+
+## PAM centroids with sparse matrices
+
+Test different `k` values.
 
 # References

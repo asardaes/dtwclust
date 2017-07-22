@@ -58,6 +58,16 @@ clus_dtwb_dtwlb_results <- plyr::rbind.fill(lapply(num_series, function(num_seri
                                                                 norm = "L1",
                                                                 step.pattern = symmetric1)))
 
+            tsc_dtwbs <- tsclust(series = series, k = 20L, type = "partitional",
+                                 distance = "dtw_basic", centroid = "pam",
+                                 seed = window_size, trace = FALSE, error.check = FALSE,
+                                 control = partitional_control(pam.precompute = FALSE,
+                                                               pam.sparse = TRUE,
+                                                               iter.max = 10L),
+                                 args = tsclust_args(dist = list(window.size = window_size,
+                                                                 norm = "L1",
+                                                                 step.pattern = symmetric1)))
+
             tsc_dtwlb <- tsclust(series = series, k = 20L, type = "partitional",
                                  distance = "dtw_lb", centroid = "pam",
                                  seed = window_size, trace = FALSE, error.check = FALSE,
@@ -67,7 +77,9 @@ clus_dtwb_dtwlb_results <- plyr::rbind.fill(lapply(num_series, function(num_seri
                                                                  norm = "L1",
                                                                  step.pattern = symmetric1)))
 
-            c(dtwb = tsc_dtwb@proctime[["elapsed"]], dtwlb = tsc_dtwlb@proctime[["elapsed"]])
+            c(dtwb = tsc_dtwb@proctime[["elapsed"]],
+              dtwbs = tsc_dtwbs@proctime[["elapsed"]],
+              dtwlb = tsc_dtwlb@proctime[["elapsed"]])
         })
 
         median_times <- apply(times, 1L, median)
@@ -78,6 +90,7 @@ clus_dtwb_dtwlb_results <- plyr::rbind.fill(lapply(num_series, function(num_seri
                    k = 20L,
                    window_size = window_size,
                    dtw_basic_median_time_s = median_times[["dtwb"]],
+                   dtw_basic_sparse_median_time_s = median_times[["dtwbs"]],
                    dtw_lb_median_time_s = median_times[["dtwlb"]])
     }))
 
