@@ -110,7 +110,7 @@ opts_knit$set(self.contained = TRUE)
 \section{Introduction}
 \label{sec:introduction}
 
-\blankfootnote{This manuscript was last updated in version 4.0.2 of \dtwclust{}.}
+\blankfootnote{This manuscript was last updated in version 4.0.3 of \dtwclust{}.}
 Cluster analysis is a task which concerns itself with the creation of groups of objects,
 where each group is called a cluster.
 Ideally, all members of the same cluster are similar to each other,
@@ -1178,8 +1178,8 @@ It does not directly deal with the clustering algorithms themselves,
 rather with ways of quantifying agreement and consensus between several clustering results.
 As such, it is directly compatible with the results from \dtwclust{},
 since it does not care how a partition/hierarchy was created.
-As of \dtwclust{} version 3.0.0, support for the \pkg{clue} package functions is included.
-See \cref{app:evaluation} for more complete examples.
+Support for the \pkg{clue} package functions is included,
+see \cref{app:evaluation} for more complete examples.
 
 \section{Package extensibility}
 \label{sec:extensibility}
@@ -1270,7 +1270,7 @@ and can be accessed with the \code{@} operator (instead of the usual \code{$}).
 The documentation of the slots can be found with \code{?"TSClusters-class"},
 and the methods with \code{?"tsclusters-methods"}.
 Controls are set via intermediary functions whose documentation can be found by typing \code{?"tsclust-controls"}.
-The function \code{compare_clusterings} and some helper functions were added in version 3.2.0 to execute many different clustering configurations in a convenient way.
+The function \code{compare_clusterings} and its helper functions can be used to execute many different clustering configurations in a convenient way.
 The \code{tsclust} function is used for the calculations.
 A series of examples are included in the documentation of the function.
 
@@ -1301,8 +1301,8 @@ it would consider the rows of a matrix or data frame as the individual time-seri
 Matrices and data frames cannot contain series with different length,
 something that can be circumvented by encapsulating the series in a list,
 each element of the list being a single series.
-Internally, \dtwclust{} coerces all provided data to a list and,
-as of version 2.3.0, it parses both matrices and data frames row-wise.
+Internally, \dtwclust{} coerces all provided data to a list,
+and it parses both matrices and data frames row-wise.
 Moreover, lists enable support for multivariate series,
 where a single multivariate time-series should be provided as a matrix where time spans the rows and the variables span the columns.
 Thus, several multivariate time-series should be provided as a list of matrices to ensure that they are correctly detected.
@@ -1464,8 +1464,7 @@ This exemplifies the advantage of having independent functions for the SBD and s
 Even though they were originally proposed for partitional clustering,
 using them in hierarchical procedures is also possible.
 
-As of \dtwclust{} version 3.0.0,
-it is also possible to use other functions for hierarchical procedures by providing them in the \code{method} argument.
+It is also possible to use other functions for hierarchical procedures by providing them in the \code{method} argument.
 However, there are two important considerations:
 such a function will receive the lower triangular part of the distance matrix,
 and it should return a classed object that supports coercion to \code{hclust} objects via the \code{as.hclust} generic.
