@@ -209,5 +209,6 @@ ggplot(ggdf,
 ## PAM centroids with sparse matrices
 
 Test different `k` values.
+Using non-symmetric DTW and symmetric SBD.
 
 # References

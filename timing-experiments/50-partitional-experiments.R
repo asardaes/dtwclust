@@ -18,6 +18,8 @@ if (short_experiments) {
     num_series <- seq(from = 10L, to = 30L, by = 10L)
     # Window sizes to consider
     window_sizes <- seq(from = 40L, to = 60L, by = 20L)
+    # Number of clusters to test for sparse PAM case
+    sparse_k <- seq(from = 5L, to = 20L, by = 5L)
     # Number of evaluations
     times <- 2L
 
@@ -26,18 +28,19 @@ if (short_experiments) {
     num_series <- seq(from = 5L, to = 30L, by = 5L)
     # Window sizes to consider
     window_sizes <- seq(from = 20L, to = 100L, by = 20L)
+    # Number of clusters to test for sparse PAM case
+    sparse_k <- seq(from = 2L, to = 18L, by = 4L)
     # Number of evaluations
-    times <- 30L
+    times <- 15L
 }
 
-t1 <- proc.time()
+# NOTE: all clustering experiments will use tsclust() to include overhead of corresponding checks
 
 # --------------------------------------------------------------------------------------------------
 # dtw_basic vs dtw_lb (PAM)
 # --------------------------------------------------------------------------------------------------
 
-# NOTE: all clustering experiments will use tsclust() to include overhead of corresponding checks
-
+t1 <- proc.time()
 cat("\tRunning dtw_basic vs dtw_lb clustering experiments (PAM)\n")
 clus_dtwb_dtwlb_pam_results <- plyr::rbind.fill(lapply(num_series, function(num_series) {
     cat("\t\t")
@@ -106,8 +109,6 @@ attr(clus_dtwb_dtwlb_pam_results, "times") <- times
 # dtw_basic vs dtw_lb (DBA)
 # --------------------------------------------------------------------------------------------------
 
-# NOTE: all clustering experiments will use tsclust() to include overhead of corresponding checks
-
 t1 <- proc.time()
 cat("\tRunning dtw_basic vs dtw_lb clustering experiments (DBA)\n")
 clus_dtwb_dtwlb_dba_results <- plyr::rbind.fill(lapply(num_series, function(num_series) {
@@ -165,6 +166,122 @@ clus_dtwb_dtwlb_dba_results <- plyr::rbind.fill(lapply(num_series, function(num_
 attr(clus_dtwb_dtwlb_dba_results, "proctime") <- proc.time() - t1
 attr(clus_dtwb_dtwlb_dba_results, "times") <- times
 
+# --------------------------------------------------------------------------------------------------
+# sparse PAM vs different k values
+# --------------------------------------------------------------------------------------------------
+
+t1 <- proc.time()
+cat("\tRunning experiments for sparse PAM vs different k \n")
+clus_pam_sparse_k_results <- plyr::rbind.fill(lapply(num_series, function(num_series) {
+    cat("\t\t")
+
+    # Get subset
+    series <- lapply(series, function(s) { s[1L:num_series] })
+    series <- unlist(series, recursive = FALSE)
+
+    benchmarks <- plyr::rbind.fill(lapply(sparse_k, function(k) {
+        times <- sapply(1L:times, function(dummy) {
+            tsc_nonsparse <- tsclust(series = series, k = k, type = "partitional",
+                                     distance = "dtw_basic", centroid = "pam",
+                                     seed = k, trace = FALSE, error.check = FALSE,
+                                     control = partitional_control(pam.precompute = TRUE,
+                                                                   pam.sparse = FALSE,
+                                                                   iter.max = 10L),
+                                     args = tsclust_args(dist = list(window.size = 20L,
+                                                                     norm = "L1",
+                                                                     step.pattern = symmetric1)))
+
+            tsc_sparse <- tsclust(series = series, k = k, type = "partitional",
+                                  distance = "dtw_basic", centroid = "pam",
+                                  seed = k, trace = FALSE, error.check = FALSE,
+                                  control = partitional_control(pam.precompute = FALSE,
+                                                                pam.sparse = TRUE,
+                                                                iter.max = 10L),
+                                  args = tsclust_args(dist = list(window.size = 20L,
+                                                                  norm = "L1",
+                                                                  step.pattern = symmetric1)))
+
+            distmat <- tsc_sparse@distmat
+
+            c(non_sparse = tsc_nonsparse@proctime[["elapsed"]],
+              sparse = tsc_sparse@proctime[["elapsed"]],
+              sparse_distmat_filled = 100 * sum(distmat != 0) / length(distmat))
+        })
+
+        median_values <- apply(times, 1L, median)
+
+        cat(".")
+        # Return data frame
+        data.frame(num_series = length(series),
+                   k = k,
+                   non_sparse_median_time_s = median_values[["non_sparse"]],
+                   sparse_median_time_s = median_values[["sparse"]],
+                   sparse_distmat_filled_percent = median_values[["sparse_distmat_filled"]])
+    }))
+
+    cat("\n")
+    benchmarks
+}))
+
+# Add some metadata
+attr(clus_pam_sparse_k_results, "proctime") <- proc.time() - t1
+attr(clus_pam_sparse_k_results, "times") <- times
+
+# --------------------------------------------------------------------------------------------------
+# sparse symmetric PAM vs different k values
+# --------------------------------------------------------------------------------------------------
+
+t1 <- proc.time()
+cat("\tRunning experiments for sparse, symmetric PAM vs different k \n")
+clus_pam_sparse_symmetric_k_results <- plyr::rbind.fill(lapply(num_series, function(num_series) {
+    cat("\t\t")
+
+    # Get subset
+    series <- lapply(series, function(s) { s[1L:num_series] })
+    series <- unlist(series, recursive = FALSE)
+
+    benchmarks <- plyr::rbind.fill(lapply(sparse_k, function(k) {
+        times <- sapply(1L:times, function(dummy) {
+            tsc_nonsparse <- tsclust(series = series, k = k, type = "partitional",
+                                     distance = "sbd", centroid = "pam",
+                                     seed = k, trace = FALSE, error.check = FALSE,
+                                     control = partitional_control(pam.precompute = TRUE,
+                                                                   pam.sparse = FALSE,
+                                                                   iter.max = 10L))
+
+            tsc_sparse <- tsclust(series = series, k = k, type = "partitional",
+                                  distance = "sbd", centroid = "pam",
+                                  seed = k, trace = FALSE, error.check = FALSE,
+                                  control = partitional_control(pam.precompute = FALSE,
+                                                                pam.sparse = TRUE,
+                                                                iter.max = 10L))
+
+            distmat <- tsc_sparse@distmat
+
+            c(non_sparse = tsc_nonsparse@proctime[["elapsed"]],
+              sparse = tsc_sparse@proctime[["elapsed"]],
+              sparse_distmat_filled = 100 * sum(distmat != 0) / length(distmat))
+        })
+
+        median_values <- apply(times, 1L, median)
+
+        cat(".")
+        # Return data frame
+        data.frame(num_series = length(series),
+                   k = k,
+                   non_sparse_median_time_s = median_values[["non_sparse"]],
+                   sparse_median_time_s = median_values[["sparse"]],
+                   sparse_distmat_filled_percent = median_values[["sparse_distmat_filled"]])
+    }))
+
+    cat("\n")
+    benchmarks
+}))
+
+# Add some metadata
+attr(clus_pam_sparse_symmetric_k_results, "proctime") <- proc.time() - t1
+attr(clus_pam_sparse_symmetric_k_results, "times") <- times
+
 # ==================================================================================================
 # finish
 # ==================================================================================================
@@ -173,8 +290,12 @@ attr(clus_dtwb_dtwlb_dba_results, "times") <- times
 rm(list = setdiff(ls(all.names = TRUE),
                   c(existing_objects,
                     "clus_dtwb_dtwlb_pam_results",
-                    "clus_dtwb_dtwlb_dba_results")))
+                    "clus_dtwb_dtwlb_dba_results",
+                    "clus_pam_sparse_k_results",
+                    "clus_pam_sparse_symmetric_k_results")))
 save("clus_dtwb_dtwlb_pam_results",
      "clus_dtwb_dtwlb_dba_results",
+     "clus_pam_sparse_k_results",
+     "clus_pam_sparse_symmetric_k_results",
      file = "partitional-results.RData")
 cat("\n")
