@@ -193,7 +193,34 @@ ggplot(ggdf,
     theme(legend.position = "bottom")
 ```
 
+```{r clust-part-dtw-pam-reps-plot, fig.height=5}
+cols <- setdiff(colnames(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps),
+                "sparse_distmat_filled_percent")
+ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps[,cols], 
+                       id.vars=c("num_series", "k", "num_repetitions"))
+ggplot(ggdf,
+       aes(x = num_series,
+           y = value,
+           colour = factor(num_repetitions))) +
+    geom_line() +
+    facet_wrap(~variable) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+```{r clust-part-dtw-pam-reps-distmat-plot, fig.height=5}
+ggplot(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps,
+       aes(x = num_series,
+           y = sparse_distmat_filled_percent,
+           colour = factor(num_repetitions))) +
+    geom_line() +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
 ### DBA centroids
+
+This probably applies to other non-PAM centroids too.
 
 ```{r clust-part-dtw-dba-plot, fig.height=5}
 ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$dba, 
@@ -208,9 +235,46 @@ ggplot(ggdf,
     theme(legend.position = "bottom")
 ```
 
-## PAM centroids with sparse matrices
+## Effect of `k` on PAM centroids with sparse matrices
 
 Test different `k` values.
 Using non-symmetric DTW and symmetric SBD.
+
+### Non-symmetric
+
+```{r clust-part-sparse-pam-k-nonsymmetric-plot, fig.height=5}
+ggdf <- reshape2::melt(partitional_results$sparse_pam_k$non_symmetric, 
+                       id.vars=c("num_series", "k"))
+ggplot(ggdf,
+       aes(x = num_series,
+           y = value,
+           colour = factor(k))) +
+    geom_line() +
+    facet_wrap(~variable, scales = "free_y") +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+### Symmetric
+
+```{r clust-part-sparse-pam-k-symmetric-plot, fig.height=5}
+ggdf <- reshape2::melt(partitional_results$sparse_pam_k$symmetric, 
+                       id.vars=c("num_series", "k"))
+ggplot(ggdf,
+       aes(x = num_series,
+           y = value,
+           colour = factor(k))) +
+    geom_line() +
+    facet_wrap(~variable, scales = "free_y") +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+### Remarks
+
+The effect of `k` is small,
+and as expected smaller values fill the matrix faster.
+But if we consider the results with many repetitions above,
+then it doesn't make much sense to use sparse matrices.
 
 # References
