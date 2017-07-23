@@ -18,10 +18,12 @@ bibliography: REFERENCES.bib
 ```{r setup, include=FALSE}
 library("dtwclust")
 
-load("../timing-experiments/dist-results.RData")
-load("../timing-experiments/cent-results.RData")
-load("../timing-experiments/tadpole-results.RData")
-load("../timing-experiments/partitional-results.RData")
+load("../timing-experiments/dtwclustTimings.RData")
+dist_single_results <- dtwclustTimings$dist$single
+dist_multiple_results <- dtwclustTimings$dist$multiple
+cent_results <- dtwclustTimings$cent
+clus_tadpole_results <- dtwclustTimings$tadpole
+partitional_results <- dtwclustTimings$partitional
 
 # knitr defaults
 knitr::opts_chunk$set(echo = FALSE, comment = "#>")

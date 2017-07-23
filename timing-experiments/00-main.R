@@ -19,4 +19,17 @@ if (file.exists("tadpole-results.RData")) load("tadpole-results.RData") else sou
 if (file.exists("partitional-results.RData")) load("partitional-results.RData") else source("50-partitional-experiments.R")
 toc <- proc.time() - tic
 
+dtwclustTimings <- list(
+    dist = list(
+        single = dist_single_results,
+        multiple = dist_multiple_results
+    ),
+    cent = cent_results,
+    tadpole = clus_tadpole_results,
+    partitional = partitional_results
+)
+
+file <- if (short_experiments) "dtwclustTimings.RData" else "../data/dtwclustTimings.RData"
+save("dtwclustTimings", file = file)
+
 message("\nFinished after: ", toc["elapsed"], " seconds")
