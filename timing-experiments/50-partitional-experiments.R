@@ -36,11 +36,16 @@ if (short_experiments) {
 
 # NOTE: all clustering experiments will use tsclust() to include overhead of corresponding checks
 
+t1 <- proc.time()
+
+# ==================================================================================================
+# dtw_basic vs dtw_lb
+# ==================================================================================================
+
 # --------------------------------------------------------------------------------------------------
-# dtw_basic vs dtw_lb (PAM)
+# PAM
 # --------------------------------------------------------------------------------------------------
 
-t1 <- proc.time()
 cat("\tRunning dtw_basic vs dtw_lb clustering experiments (PAM)\n")
 clus_dtwb_dtwlb_pam_results <- plyr::rbind.fill(lapply(num_series, function(num_series) {
     cat("\t\t")
@@ -75,6 +80,7 @@ clus_dtwb_dtwlb_pam_results <- plyr::rbind.fill(lapply(num_series, function(num_
                                  distance = "dtw_lb", centroid = "pam",
                                  seed = window_size, trace = FALSE, error.check = FALSE,
                                  control = partitional_control(pam.precompute = FALSE,
+                                                               pam.sparse = FALSE,
                                                                iter.max = 10L),
                                  args = tsclust_args(dist = list(window.size = window_size,
                                                                  norm = "L1",
@@ -101,15 +107,10 @@ clus_dtwb_dtwlb_pam_results <- plyr::rbind.fill(lapply(num_series, function(num_
     benchmarks
 }))
 
-# Add some metadata
-attr(clus_dtwb_dtwlb_pam_results, "proctime") <- proc.time() - t1
-attr(clus_dtwb_dtwlb_pam_results, "times") <- times
-
 # --------------------------------------------------------------------------------------------------
-# dtw_basic vs dtw_lb (DBA)
+# DBA
 # --------------------------------------------------------------------------------------------------
 
-t1 <- proc.time()
 cat("\tRunning dtw_basic vs dtw_lb clustering experiments (DBA)\n")
 clus_dtwb_dtwlb_dba_results <- plyr::rbind.fill(lapply(num_series, function(num_series) {
     cat("\t\t")
@@ -162,15 +163,14 @@ clus_dtwb_dtwlb_dba_results <- plyr::rbind.fill(lapply(num_series, function(num_
     benchmarks
 }))
 
-# Add some metadata
-attr(clus_dtwb_dtwlb_dba_results, "proctime") <- proc.time() - t1
-attr(clus_dtwb_dtwlb_dba_results, "times") <- times
-
-# --------------------------------------------------------------------------------------------------
+# ==================================================================================================
 # sparse PAM vs different k values
+# ==================================================================================================
+
+# --------------------------------------------------------------------------------------------------
+# non-symmetric
 # --------------------------------------------------------------------------------------------------
 
-t1 <- proc.time()
 cat("\tRunning experiments for sparse PAM vs different k \n")
 clus_pam_sparse_k_results <- plyr::rbind.fill(lapply(num_series, function(num_series) {
     cat("\t\t")
@@ -223,15 +223,10 @@ clus_pam_sparse_k_results <- plyr::rbind.fill(lapply(num_series, function(num_se
     benchmarks
 }))
 
-# Add some metadata
-attr(clus_pam_sparse_k_results, "proctime") <- proc.time() - t1
-attr(clus_pam_sparse_k_results, "times") <- times
-
 # --------------------------------------------------------------------------------------------------
-# sparse symmetric PAM vs different k values
+# symmetric
 # --------------------------------------------------------------------------------------------------
 
-t1 <- proc.time()
 cat("\tRunning experiments for sparse, symmetric PAM vs different k \n")
 clus_pam_sparse_symmetric_k_results <- plyr::rbind.fill(lapply(num_series, function(num_series) {
     cat("\t\t")
@@ -278,24 +273,30 @@ clus_pam_sparse_symmetric_k_results <- plyr::rbind.fill(lapply(num_series, funct
     benchmarks
 }))
 
+# ==================================================================================================
+# aggregate
+# ==================================================================================================
+
+partitional_results <- list(
+    dtwlb_vs_dtwbasic = list(
+        pam = clus_dtwb_dtwlb_pam_results,
+        dba = clus_dtwb_dtwlb_dba_results
+    ),
+    sparse_pam_k = list(
+        non_symmetric = clus_pam_sparse_k_results,
+        symmetric = clus_pam_sparse_symmetric_k_results
+    )
+)
+
 # Add some metadata
-attr(clus_pam_sparse_symmetric_k_results, "proctime") <- proc.time() - t1
-attr(clus_pam_sparse_symmetric_k_results, "times") <- times
+attr(partitional_results, "proctime") <- proc.time() - t1
+attr(partitional_results, "times") <- times
 
 # ==================================================================================================
 # finish
 # ==================================================================================================
 
 # Clean
-rm(list = setdiff(ls(all.names = TRUE),
-                  c(existing_objects,
-                    "clus_dtwb_dtwlb_pam_results",
-                    "clus_dtwb_dtwlb_dba_results",
-                    "clus_pam_sparse_k_results",
-                    "clus_pam_sparse_symmetric_k_results")))
-save("clus_dtwb_dtwlb_pam_results",
-     "clus_dtwb_dtwlb_dba_results",
-     "clus_pam_sparse_k_results",
-     "clus_pam_sparse_symmetric_k_results",
-     file = "partitional-results.RData")
+rm(list = setdiff(ls(all.names = TRUE), "partitional_results"))
+save("partitional_results", file = "partitional-results.RData")
 cat("\n")

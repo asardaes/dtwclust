@@ -258,12 +258,11 @@ cent_results$cent <- factor(cent_results$cent,
 attr(cent_results, "proctime") <- proc.time() - t1
 attr(cent_results, "times") <- times
 
-# Clean
-rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "cent_results")))
-
 # ==================================================================================================
 # finish
 # ==================================================================================================
 
+# Clean
+rm(list = setdiff(ls(all.names = TRUE), c(existing_objects, "cent_results")))
 save("cent_results", file = "cent-results.RData")
 cat("\n")

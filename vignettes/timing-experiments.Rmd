@@ -181,7 +181,8 @@ The different flavors of PAM centroids.
 The remarks about sparse matrices apply for other distances too.
 
 ```{r clust-part-dtw-pam-plot, fig.height=5}
-ggdf <- reshape2::melt(clus_dtwb_dtwlb_pam_results, id.vars=c("num_series", "k", "window_size"))
+ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$pam, 
+                       id.vars=c("num_series", "k", "window_size"))
 ggplot(ggdf,
        aes(x = num_series,
            y = value,
@@ -195,7 +196,8 @@ ggplot(ggdf,
 ### DBA centroids
 
 ```{r clust-part-dtw-dba-plot, fig.height=5}
-ggdf <- reshape2::melt(clus_dtwb_dtwlb_dba_results, id.vars=c("num_series", "k", "window_size"))
+ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$dba, 
+                       id.vars=c("num_series", "k", "window_size"))
 ggplot(ggdf,
        aes(x = num_series,
            y = value,
