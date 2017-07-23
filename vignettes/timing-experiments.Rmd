@@ -36,7 +36,7 @@ a series of timing experiments were made.
 The data used again comes from the Character Trajectories set [@lichman2013].
 
 These were run using `R` v3.4.1 and `dtwclust` v4.0.3.
-The computer used was running GNU-Linux with an `i5-6500` Intel processor and 16GB of RAM.
+The computer used was running GNU/Linux (LTS kernel v4.9) with an `i5-6500` Intel processor (4 cores) and 16GB of RAM.
 
 # Distance experiments
 
