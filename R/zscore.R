@@ -20,7 +20,7 @@
 #' @return Normalized data in the same format as provided.
 #'
 zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE) {
-    if (is.list(x)) {
+    if (is.list(x) && !is.data.frame(x)) {
         x <- lapply(x, zscore, ...,
                     multivariate = is_multivariate(x),
                     keep.attributes = keep.attributes)
@@ -42,7 +42,7 @@ zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE) {
         x <- base::scale(x, center = center, scale = scale)
         x[is.nan(x)] <- 0
         if (!multivariate) dim(x) <- NULL
-        if (!keep.attributes) attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL
+        if (!keep.attributes) { attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL }
     }
 
     ## return
