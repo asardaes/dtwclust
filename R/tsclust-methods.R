@@ -71,8 +71,8 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
     dots <- list(...)
 
     ## some minor checks
-    if (!is.null(dots$datalist)) dots$datalist <- any2list(dots$datalist)
-    if (!is.null(dots$centroids)) dots$centroids <- any2list(dots$centroids)
+    if (!is.null(dots$datalist)) dots$datalist <- tslist(dots$datalist)
+    if (!is.null(dots$centroids)) dots$centroids <- tslist(dots$centroids)
 
     ## avoid infinite recursion (see https://bugs.r-project.org/bugzilla/show_bug.cgi?id=16629)
     if (is.null(dots$call)) {
@@ -365,7 +365,7 @@ predict.TSClusters <- function(object, newdata = NULL, ...) {
             ret <- object@cluster
 
     } else {
-        newdata <- any2list(newdata)
+        newdata <- tslist(newdata)
         check_consistency(newdata, "vltslist")
         nm <- names(newdata)
 
@@ -471,7 +471,7 @@ plot.TSClusters <- function(x, y, ...,
 
     ## Obtain data, the priority is: provided data > included data list
     if (!is.null(series)) {
-        data <- any2list(series)
+        data <- tslist(series)
 
     } else {
         if (length(x@datalist) < 1L)

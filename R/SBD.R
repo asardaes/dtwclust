@@ -122,7 +122,7 @@ SBD <- function(x, y, znorm = FALSE, error.check = TRUE) {
 # ==================================================================================================
 
 SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairwise = FALSE) {
-    x <- any2list(x)
+    x <- tslist(x)
 
     if (error.check) check_consistency(x, "vltslist")
     if (znorm) x <- zscore(x)
@@ -139,7 +139,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
 
     } else {
         symmetric <- FALSE
-        y <- any2list(y)
+        y <- tslist(y)
         if (error.check) check_consistency(y, "vltslist")
         if (znorm) y <- zscore(y)
 

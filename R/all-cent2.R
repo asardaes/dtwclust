@@ -146,7 +146,7 @@ all_cent2 <- function(case = NULL, control) {
                             TRUE)
 
             ## coerce back to list
-            any2list(cent)
+            tslist(cent)
         }
     } else {
         allcent <- function(x, cl_id, k, cent, cl_old, ...) {

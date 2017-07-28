@@ -61,7 +61,7 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     if (missing(dc)) stop("Please provide the 'dc' parameter")
     if (any(dc < 0)) stop("The cutoff distance 'dc' must be positive")
 
-    x <- any2list(data)
+    x <- tslist(data)
     n <- length(x)
 
     if (n < 2L) stop("data should have more than one time series")

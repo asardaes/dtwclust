@@ -23,8 +23,8 @@ create_dtwclust <- function(..., override.family = TRUE) {
     dots$control <- as(dots$control, "dtwclustControl")
 
     ## some minor checks
-    if (!is.null(dots$datalist)) dots$datalist <- any2list(dots$datalist)
-    if (!is.null(dots$centroids)) dots$centroids <- any2list(dots$centroids)
+    if (!is.null(dots$datalist)) dots$datalist <- tslist(dots$datalist)
+    if (!is.null(dots$centroids)) dots$centroids <- tslist(dots$centroids)
 
     ## avoid infinite recursion
     if (is.null(dots$call)) {

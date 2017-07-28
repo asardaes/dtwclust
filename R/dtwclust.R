@@ -87,7 +87,7 @@ dtwclust <- function(data = NULL, type = "partitional", k = 2L, method = "averag
     type <- match.arg(type, c("partitional", "hierarchical", "tadpole", "fuzzy"))
 
     ## coerce to list if necessary
-    data <- any2list(data)
+    data <- tslist(data)
 
     if (any(k < 2L)) stop("At least two clusters must be defined")
     if (any(k > length(data))) stop("Cannot have more clusters than series in the data")

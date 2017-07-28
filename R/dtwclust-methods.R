@@ -161,7 +161,7 @@ predict.dtwclust <- function(object, newdata = NULL, ...) {
             ret <- object@fcluster
 
     } else {
-        newdata <- any2list(newdata)
+        newdata <- tslist(newdata)
         check_consistency(newdata, "vltslist")
         nm <- names(newdata)
 
@@ -238,7 +238,7 @@ plot.dtwclust <- function(x, y, ...,
 
     ## Obtain data, the priority is: provided data > included data list
     if (!is.null(data)) {
-        data <- any2list(data)
+        data <- tslist(data)
 
     } else {
         if (length(x@datalist) < 1L)
@@ -673,7 +673,7 @@ setMethod("clusterSim", methods::signature(object = "dtwclust"),
                       data <- object@datalist
 
                   } else {
-                      data <- any2list(data)
+                      data <- tslist(data)
                   }
 
                   distmat <- do.call(object@family@dist,

@@ -20,7 +20,20 @@
 #'
 #' @note
 #'
-#' The function assumes that indexing the matrix/data.frame with `series[i, ]` will return a numeric
-#' vector.
+#' The function assumes that indexing the matrix/data.frame with `series[i, ]` will return something
+#' that can be coerced to a numeric vector.
 #'
-tslist <- function(series) { any2list(series) }
+tslist <- function(series) {
+    if (is.matrix(series) || is.data.frame(series)) {
+        rnms <- rownames(series)
+        series <- lapply(seq_len(nrow(series)), function(i) { as.numeric(series[i, ]) })
+        if (!is.null(rnms)) setnames_inplace(series, rnms)
+
+    } else if (is.numeric(series))
+        series <- list(series)
+    else if (!is.list(series))
+        stop("Unsupported data type.")
+
+    ## return
+    series
+}

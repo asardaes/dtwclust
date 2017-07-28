@@ -98,14 +98,14 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 {
     norm <- match.arg(norm, c("L1", "L2"))
     window.size <- check_consistency(window.size, "window")
-    x <- any2list(x)
+    x <- tslist(x)
     if (error.check) check_consistency(x, "tslist")
 
     if (is.null(y)) {
         y <- x
 
     } else {
-        y <- any2list(y)
+        y <- tslist(y)
         if (error.check) check_consistency(y, "tslist")
     }
 

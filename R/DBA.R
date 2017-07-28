@@ -86,7 +86,7 @@ DBA <- function(X, centroid = NULL, ...,
                 error.check = TRUE, trace = FALSE,
                 gcm = NULL, mv.ver = "by-variable")
 {
-    X <- any2list(X)
+    X <- tslist(X)
     mv.ver <- match.arg(mv.ver, c("by-variable", "by-series"))
     mv.ver <- switch(mv.ver, "by-variable" = 1L, "by-series" = 2L)
 

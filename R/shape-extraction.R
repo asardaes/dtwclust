@@ -58,7 +58,7 @@
 #' points(C)
 #'
 shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check = TRUE) {
-    X <- any2list(X)
+    X <- tslist(X)
     if (error.check) {
         check_consistency(X, "vltslist")
         if (!is.null(centroid)) check_consistency(centroid, "ts")

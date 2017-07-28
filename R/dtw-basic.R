@@ -118,7 +118,7 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 # ==================================================================================================
 
 dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pairwise = FALSE) {
-    x <- any2list(x)
+    x <- tslist(x)
     if (error.check) check_consistency(x, "vltslist")
 
     dots <- list(...)
@@ -129,7 +129,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
         symmetric <- is.null(dots$window.size) || !different_lengths(x)
 
     } else {
-        y <- any2list(y)
+        y <- tslist(y)
         if (error.check) check_consistency(y, "vltslist")
         symmetric <- FALSE
     }

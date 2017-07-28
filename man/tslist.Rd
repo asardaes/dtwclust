@@ -23,6 +23,6 @@ For matrices and data frames, each \strong{row} is considered as one time series
 simply passed through.
 }
 \note{
-The function assumes that indexing the matrix/data.frame with \code{series[i, ]} will return a numeric
-vector.
+The function assumes that indexing the matrix/data.frame with \code{series[i, ]} will return something
+that can be coerced to a numeric vector.
 }

@@ -471,7 +471,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         stop("Returning no objects and specifying no scoring function would return no useful results.")
 
     ## coerce to list if necessary
-    series <- any2list(series)
+    series <- tslist(series)
     check_consistency(series, "vltslist")
 
     if (!is.function(score.clus) && !(is.list(score.clus) && all(sapply(score.clus, is.function))))

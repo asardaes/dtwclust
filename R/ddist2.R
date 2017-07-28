@@ -9,8 +9,8 @@ ddist2 <- function(distance, control) {
 
     ## Closures capture the values of the objects from the environment where they're created
     distfun <- function(x, centroids = NULL, ...) {
-        x <- any2list(x)
-        if (!is.null(centroids)) centroids <- any2list(centroids)
+        x <- tslist(x)
+        if (!is.null(centroids)) centroids <- tslist(centroids)
         if (length(x) == 1L && is.null(centroids)) { # nocov start
             return(structure(matrix(0, 1L, 1L),
                              class = "crossdist",

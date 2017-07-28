@@ -162,7 +162,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         normalize <- TRUE
     } # nocov end
 
-    x <- any2list(x)
+    x <- tslist(x)
     if (error.check) check_consistency(x, "vltslist")
 
     if (is.null(y)) {
@@ -171,7 +171,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
 
     } else {
         symmetric <- FALSE
-        y <- any2list(y)
+        y <- tslist(y)
         if (error.check) check_consistency(y, "vltslist")
     }
 
