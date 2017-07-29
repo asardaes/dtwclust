@@ -17,8 +17,8 @@ bibliography: REFERENCES.bib
 
 ```{r setup, include=FALSE}
 library("dtwclust")
+data("dtwclustTimings")
 
-load("../timing-experiments/dtwclustTimings.RData")
 dist_single_results <- dtwclustTimings$dist$single
 dist_multiple_results <- dtwclustTimings$dist$multiple
 cent_results <- dtwclustTimings$cent

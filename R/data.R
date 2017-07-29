@@ -30,3 +30,18 @@
 #' @source \url{https://archive.ics.uci.edu/ml/datasets/Character+Trajectories}
 #'
 NULL
+
+#' Results of timing experiments
+#'
+#' This is the list with data frames containing the results of the timing experiments vignette
+#' included with \pkg{dtwclust}.
+#'
+#' @name dtwclustTimings
+#'
+#' @format
+#'
+#' TBA
+#'
+#' @source Refer to the package vignette.
+#'
+NULL
