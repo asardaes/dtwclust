@@ -1,5 +1,5 @@
 #include <Rcpp.h>
-#include "dtwclustpp.h"
+#include "dtwclust++.h"
 #include "dtwclust.h"
 
 namespace dtwclust {

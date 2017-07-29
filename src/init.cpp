@@ -1,6 +1,6 @@
 #include <Rcpp.h>
 #include "dtwclust.h"
-#include "dtwclustpp.h"
+#include "dtwclust++.h"
 
 #define CALLDEF(name, n) { "C_"#name, (DL_FUNC) &name, n }
 #define CALLDEFpp(name, n) { "C_"#name, (DL_FUNC) &dtwclust::name, n }

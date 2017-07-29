@@ -6,7 +6,7 @@
 
 #include <Rcpp.h>
 #include <deque>
-#include "dtwclustpp.h"
+#include "dtwclust++.h"
 
 namespace dtwclust {
 

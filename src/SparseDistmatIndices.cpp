@@ -1,7 +1,7 @@
 #include <Rcpp.h>
 #include <unordered_set>
 #include <vector>
-#include "dtwclustpp.h"
+#include "dtwclust++.h"
 
 namespace dtwclust {
 

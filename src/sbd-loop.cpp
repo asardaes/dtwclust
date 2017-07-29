@@ -1,7 +1,7 @@
 #include <RcppArmadillo.h>
 #include <bigmemory/BigMatrix.h>
 #include <bigmemory/MatrixAccessor.hpp>
-#include "dtwclustpp.h"
+#include "dtwclust++.h"
 
 namespace dtwclust {
 

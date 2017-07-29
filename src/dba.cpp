@@ -1,6 +1,6 @@
 #include <Rcpp.h>
 #include <cmath>
-#include "dtwclustpp.h"
+#include "dtwclust++.h"
 #include "dtwclust.h"
 
 namespace dtwclust {
