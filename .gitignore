@@ -17,6 +17,9 @@ vignettes/*.tex
 vignettes/*.pdf
 vignettes/**/
 
+# Experiments' results
+timing-experiments/*.RData
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db

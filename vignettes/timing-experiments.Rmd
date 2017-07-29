@@ -1,0 +1,282 @@
+---
+title: "Timing experiments for dtwclust"
+author: "Alexis Sarda-Espinosa"
+output:
+    html_vignette:
+        toc: true
+        number_sections: true
+        fig_width: 7
+        fig_height: 7
+vignette: >
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignettePackage{dtwclust}
+    %\VignetteIndexEntry{Timing experiments for dtwclust}
+    %\VignetteEncoding{UTF-8}
+bibliography: REFERENCES.bib
+---
+
+```{r setup, include=FALSE}
+library("dtwclust")
+
+load("../timing-experiments/dtwclustTimings.RData")
+dist_single_results <- dtwclustTimings$dist$single
+dist_multiple_results <- dtwclustTimings$dist$multiple
+cent_results <- dtwclustTimings$cent
+clus_tadpole_results <- dtwclustTimings$tadpole
+partitional_results <- dtwclustTimings$partitional
+
+# knitr defaults
+knitr::opts_chunk$set(echo = FALSE, comment = "#>")
+```
+
+# Introduction
+
+To get an idea of the running times that can be expected for some of the included functions,
+a series of timing experiments were made.
+The data used again comes from the Character Trajectories set [@lichman2013].
+
+These were run using `R` v3.4.1 and `dtwclust` v4.0.3.
+The computer used was running GNU/Linux (LTS kernel v4.9) with an `i5-6500` Intel processor (4 cores) and 16GB of RAM.
+
+# Distance experiments
+
+## Calculations for single time-series
+
+Results of the timing experiments for single time-series. 
+An `NA` window size means that no constraint was used.
+Note that the vertical scale is different for each facet.
+
+```{r dist-single-plot, fig.height=7}
+ggplot(dist_single_results,
+       aes(x = factor(series_length),
+           y = median_time_us,
+           group = factor(window_size),
+           colour = factor(window_size))) +
+    geom_line() +
+    facet_wrap(~distance, scales = "free_y") +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+## Calculations for several time-series
+
+### Lower bounds
+
+First the results for the lower bounds.
+The number of series in `y` is important because the envelopes are calculated for those.
+In the case of `dtw_lb`, it means that there are more neighbors too.
+
+```{r dist-multiple-lb-plot, fig.cap="The facets' columns indicate the number of parallel workers, whereas the rows indicate the distance that was used."}
+id_gg <- grepl("lb", dist_multiple_results$distance)
+ggplot(dist_multiple_results[id_gg,],
+       aes(x = num_total,
+           y = median_time_ms,
+           colour = num_y,
+           shape = factor(series_length))) +
+    geom_point(size = 3) +
+    facet_grid(distance ~ num_workers) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+### Shape-based distance
+
+```{r dist-multiple-sbd-plot, fig.height=5, fig.cap="The facets' columns indicate the number of parallel workers."}
+id_gg <- grepl("^sbd$", dist_multiple_results$distance)
+ggplot(dist_multiple_results[id_gg,],
+       aes(x = num_total,
+           y = median_time_ms,
+           colour = factor(series_length))) +
+    geom_point(size = 3) +
+    facet_wrap(~num_workers) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+### Dynamic time warping
+
+```{r dist-multiple-dtw-plot, fig.height=8, fig.cap="The facets' columns indicate the number of parallel workers, whereas the rows indicate the window size that was used."}
+id_gg <- grepl("^dtw_[um]", dist_multiple_results$distance)
+ggplot(dist_multiple_results[id_gg,],
+       aes(x = num_total,
+           y = median_time_ms,
+           colour = factor(series_length),
+           shape = distance)) +
+    geom_point(size = 3) +
+    scale_shape_manual(values = c(0, 3)) +
+    facet_grid(factor(window_size) ~ num_workers) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+### Triangular global alignment kernel
+
+```{r dist-multiple-gak-plot, fig.height=8, fig.cap="The facets' columns indicate the number of parallel workers, whereas the rows indicate the window size that was used."}
+id_gg <- grepl("^gak_", dist_multiple_results$distance)
+ggplot(dist_multiple_results[id_gg,],
+       aes(x = num_total,
+           y = median_time_ms,
+           colour = factor(series_length),
+           shape = distance)) +
+    geom_point(size = 3) +
+    scale_shape_manual(values = c(0, 3)) +
+    facet_grid(factor(window_size) ~ num_workers) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+# Prototyping experiments
+
+## Shape extraction
+
+```{r cent-shape-plot, fig.height=5}
+id_gg <- grepl("^shape_", cent_results$cent)
+ggplot(cent_results[id_gg,],
+       aes(x = num_series,
+           y = median_time_ms,
+           colour = factor(series_length))) +
+    geom_line() +
+    facet_wrap(~cent) +
+    theme_bw() + 
+    theme(legend.position = "bottom")
+```
+
+## DTW barycenter averaging
+
+```{r cent-dba-plot, fig.height=8, fig.cap="The facets' rows indicate the length of the considered series. In the columns, 'byS' means 'by series' and 'byV' means 'by variable' (see DBA documentation)."}
+id_gg <- grepl("^dba_", cent_results$cent)
+ggplot(cent_results[id_gg,],
+       aes(x = num_series,
+           y = median_time_ms,
+           colour = factor(window_size))) +
+    geom_line() +
+    facet_grid(factor(series_length) ~ cent) +
+    theme_bw() + 
+    theme(legend.position = "bottom")
+```
+
+# Clustering experiments
+
+With `tsclust`.
+
+## TADPole
+
+No parallel here because it is only parallelized with multiple `dc` values,
+and that wasn't tested.
+
+```{r clust-tadpole-plot}
+ggplot(clus_tadpole_results,
+       aes(x = num_series,
+           y = median_time_s,
+           colour = factor(window_size))) +
+    geom_line() +
+    facet_wrap(~lb) +
+    theme_bw() + 
+    theme(legend.position = "bottom")
+```
+
+## DTW special cases
+
+### PAM centroids
+
+The different flavors of PAM centroids.
+The remarks about sparse matrices apply for other distances too.
+
+```{r clust-part-dtw-pam-plot, fig.height=5}
+ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$pam, 
+                       id.vars=c("num_series", "k", "window_size"))
+ggplot(ggdf,
+       aes(x = num_series,
+           y = value,
+           colour = factor(window_size))) +
+    geom_line() +
+    facet_wrap(~variable) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+```{r clust-part-dtw-pam-reps-plot, fig.height=5}
+cols <- setdiff(colnames(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps),
+                "sparse_distmat_filled_percent")
+ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps[,cols], 
+                       id.vars=c("num_series", "k", "num_repetitions"))
+ggplot(ggdf,
+       aes(x = num_series,
+           y = value,
+           colour = factor(num_repetitions))) +
+    geom_line() +
+    facet_wrap(~variable) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+```{r clust-part-dtw-pam-reps-distmat-plot, fig.height=5}
+ggplot(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps,
+       aes(x = num_series,
+           y = sparse_distmat_filled_percent,
+           colour = factor(num_repetitions))) +
+    geom_line() +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+### DBA centroids
+
+This probably applies to other non-PAM centroids too.
+
+```{r clust-part-dtw-dba-plot, fig.height=5}
+ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$dba, 
+                       id.vars=c("num_series", "k", "window_size"))
+ggplot(ggdf,
+       aes(x = num_series,
+           y = value,
+           colour = factor(window_size))) +
+    geom_line() +
+    facet_wrap(~variable) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+## Effect of `k` on PAM centroids with sparse matrices
+
+Test different `k` values.
+Using non-symmetric DTW and symmetric SBD.
+
+### Non-symmetric
+
+```{r clust-part-sparse-pam-k-nonsymmetric-plot, fig.height=5}
+ggdf <- reshape2::melt(partitional_results$sparse_pam_k$non_symmetric, 
+                       id.vars=c("num_series", "k"))
+ggplot(ggdf,
+       aes(x = num_series,
+           y = value,
+           colour = factor(k))) +
+    geom_line() +
+    facet_wrap(~variable, scales = "free_y") +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+### Symmetric
+
+```{r clust-part-sparse-pam-k-symmetric-plot, fig.height=5}
+ggdf <- reshape2::melt(partitional_results$sparse_pam_k$symmetric, 
+                       id.vars=c("num_series", "k"))
+ggplot(ggdf,
+       aes(x = num_series,
+           y = value,
+           colour = factor(k))) +
+    geom_line() +
+    facet_wrap(~variable, scales = "free_y") +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+### Remarks
+
+The effect of `k` is small,
+and as expected smaller values fill the matrix faster.
+But if we consider the results with many repetitions above,
+then it doesn't make much sense to use sparse matrices.
+
+# References

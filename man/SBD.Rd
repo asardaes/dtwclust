@@ -4,7 +4,7 @@
 \alias{SBD}
 \title{Shape-based distance}
 \usage{
-SBD(x, y, znorm = FALSE, error.check = TRUE)
+SBD(x, y, znorm = FALSE, error.check = TRUE, return.shifted = TRUE)
 }
 \arguments{
 \item{x, y}{Univariate time series.}
@@ -13,9 +13,11 @@ SBD(x, y, znorm = FALSE, error.check = TRUE)
 
 \item{error.check}{Logical indicating whether the function should try to detect inconsistencies
 and give more informative errors messages. Also used internally to avoid repeating checks.}
+
+\item{return.shifted}{Logical. Should the shifted version of \code{y} be returned? See details.}
 }
 \value{
-A list with:
+For \code{return.shifted = FALSE}, the numeric distance value, otherwise a list with:
 \itemize{
 \item \code{dist}: The shape-based distance between \code{x} and \code{y}.
 \item \code{yshift}: A shifted version of \code{y} so that it optimally matches \code{x} (based on \code{\link[=NCCc]{NCCc()}}).

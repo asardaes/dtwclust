@@ -2,6 +2,7 @@
 ^\.Rproj\.user$
 
 ^man-roxygen
+^timing-experiments
 
 ^\..*
 .*\.md
