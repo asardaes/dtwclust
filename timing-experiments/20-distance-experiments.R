@@ -404,19 +404,21 @@ series_mv <- multivariate_series[id_ascending]
 window_sizes <- seq(from = 20L, to = 80L, by = 20L)
 # Window size for experiments that set a fixed value
 window_size <- 50L
-# Number of evaluations for each expression
-times <- if (short_experiments) 5L else 30L
 
 #' 'id_series' will have two columns, each one specifying the number of rows and columns the cross-
 #' distance matrix should have. The short experiments only get square matrices.
 if (short_experiments) {
     series <- series[1L:2L]
     series_mv <- series_mv[1L:2L]
+    # Number of evaluations for each expression
+    times <- 5L
     # Number of parallel workers to test
     num_workers_to_test <- c(4L)
     id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
                        seq(from = 10L, to = 100L, by = 10L))
 } else {
+    # Number of evaluations for each expression
+    times <- 30L
     # Number of parallel workers to test
     num_workers_to_test <- c(1L, 2L, 4L)
     id_series <- rbind(
@@ -425,7 +427,6 @@ if (short_experiments) {
         cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
               Var2 = seq(from = 20L, to = 90L, by = 10L))
     )
-
     id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
 }
 
@@ -532,17 +533,28 @@ dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 # dtw_lb
 # --------------------------------------------------------------------------------------------------
 
+#' NOTE: dtw_lb's experiments make more sense if the series in x and y are different, that's why
+#' id_series is different here.
+
 cat("\tRunning dtw_lb experiments for multiple series\n")
 dist_dtwlb_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
     cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
+    
+    id_series <- rbind(
+        expand.grid(seq(from = 10L, to = 50L, by = 10L), 10L),
+        expand.grid(50L, seq(from = 20L, to = 100L, by = 10L)),
+        cbind(Var1 = seq(from = 20L, to = 40L, by = 10L),
+              Var2 = seq(from = 20L, to = 40L, by = 10L))
+    )
+    id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
 
     benchmarks <- lapply(series, function(this_series) {
         expressions <- lapply(1L:nrow(id_series), function(i) {
             bquote(
                 proxy::dist(x = this_series[1L:.(id_series[i, 1L])],
-                            y = this_series[1L:.(id_series[i, 2L])],
+                            y = this_series[51L:.(50L + id_series[i, 2L])],
                             method = "dtw_lb",
                             window.size = .(window_size),
                             error.check = FALSE)
@@ -704,6 +716,19 @@ dist_dtw_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, f
 # normalized gak univariate
 # --------------------------------------------------------------------------------------------------
 
+#' NOTE: GAK is much more time consuming, so I only test univariate, less window sizes, less series,
+#' and less repetitions. Based on the single experiments, this should be enough to give an idea.
+
+window_sizes <- c(20L, 40L)
+id_series <- rbind(
+    expand.grid(seq(from = 10L, to = 50L, by = 10L), 10L),
+    expand.grid(50L, seq(from = 20L, to = 50L, by = 10L)),
+    cbind(Var1 = seq(from = 20L, to = 40L, by = 10L),
+          Var2 = seq(from = 20L, to = 40L, by = 10L))
+)
+id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
+times <- 10L
+
 cat("\tRunning normalized_gak experiments for multiple univariate series\n")
 dist_ngak_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
     cat("\t\t")
@@ -747,52 +772,6 @@ dist_ngak_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fu
 }))
 
 # --------------------------------------------------------------------------------------------------
-# normalized gak multivariate
-# --------------------------------------------------------------------------------------------------
-
-cat("\tRunning normalized_gak experiments for multiple multivariate series\n")
-dist_ngak_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
-    cat("\t\t")
-    registerDoParallel(workers <- makeCluster(num_workers))
-    invisible(clusterEvalQ(workers, library("dtwclust")))
-
-    benchmarks <- lapply(series_mv, function(this_series) {
-        expressions <- lapply(window_sizes, function(window_size) {
-            lapply(1L:nrow(id_series), function(i) {
-                bquote(
-                    proxy::dist(x = this_series[1L:.(id_series[i, 1L])],
-                                y = this_series[1L:.(id_series[i, 2L])],
-                                method = "gak",
-                                window.size = .(window_size),
-                                sigma = 100,
-                                error.check = FALSE)
-                )
-            })
-        })
-        expressions <- unlist(expressions, recursive = FALSE)
-
-        benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
-
-        cat(".")
-        data.frame(distance = "gak_multivariate",
-                   num_workers = num_workers,
-                   num_x = id_series[,1L],
-                   num_y = id_series[,2L],
-                   num_total = id_series[,1L] * id_series[,2L],
-                   series_length = NROW(this_series[[1L]]),
-                   window_size = rep(window_sizes, each = nrow(id_series)),
-                   median_time_ms = benchmark$median)
-    })
-
-    stopCluster(workers)
-    registerDoSEQ()
-    rm(workers)
-
-    cat("\n")
-    plyr::rbind.fill(benchmarks)
-}))
-
-# --------------------------------------------------------------------------------------------------
 # aggregate
 # --------------------------------------------------------------------------------------------------
 
@@ -803,8 +782,7 @@ dist_multiple_results <- plyr::rbind.fill(
     dist_sbd_multiple,
     dist_dtw_univariate_multiple,
     dist_dtw_multivariate_multiple,
-    dist_ngak_univariate_multiple,
-    dist_ngak_multivariate_multiple
+    dist_ngak_univariate_multiple
 )
 
 # Make factor with the given order

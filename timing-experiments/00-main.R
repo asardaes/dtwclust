@@ -29,7 +29,7 @@ dtwclustTimings <- list(
     partitional = partitional_results
 )
 
-file <- if (short_experiments) "dtwclustTimings.RData" else "../data/dtwclustTimings.RData"
+file <- if (short_experiments) "dtwclustTimings.RData" else "../data/dtwclustTimings.rda"
 save("dtwclustTimings", file = file)
 
 message("\nFinished after: ", toc["elapsed"], " seconds")

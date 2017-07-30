@@ -74,7 +74,7 @@ ggplot(dist_multiple_results[id_gg,],
            colour = num_y,
            shape = factor(series_length))) +
     geom_point(size = 3) +
-    facet_grid(distance ~ num_workers) +
+    facet_grid(distance ~ num_workers, scales = "free_y") +
     theme_bw() +
     theme(legend.position = "bottom")
 ```
@@ -116,8 +116,7 @@ id_gg <- grepl("^gak_", dist_multiple_results$distance)
 ggplot(dist_multiple_results[id_gg,],
        aes(x = num_total,
            y = median_time_ms,
-           colour = factor(series_length),
-           shape = distance)) +
+           colour = factor(series_length))) +
     geom_point(size = 3) +
     scale_shape_manual(values = c(0, 3)) +
     facet_grid(factor(window_size) ~ num_workers) +
