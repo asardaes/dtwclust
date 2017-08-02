@@ -25,6 +25,26 @@ cent_results <- dtwclustTimings$cent
 clus_tadpole_results <- dtwclustTimings$tadpole
 partitional_results <- dtwclustTimings$partitional
 
+factor_columns <- c("series_length", "window_size", "k", "num_repetitions")
+adjust_factors <- function(df) {
+    for (column in factor_columns) {
+        if (column %in% colnames(df)) {
+            df[[column]] <- factor(df[[column]])
+        }
+    }
+    df
+}
+
+dist_single_results <- adjust_factors(dist_single_results)
+dist_multiple_results <- adjust_factors(dist_multiple_results)
+cent_results <- adjust_factors(cent_results)
+clus_tadpole_results <- adjust_factors(clus_tadpole_results)
+partitional_results$dtwlb_vs_dtwbasic$pam <- adjust_factors(partitional_results$dtwlb_vs_dtwbasic$pam)
+partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps <- adjust_factors(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps)
+partitional_results$dtwlb_vs_dtwbasic$dba <- adjust_factors(partitional_results$dtwlb_vs_dtwbasic$dba)
+partitional_results$sparse_pam_k$non_symmetric <- adjust_factors(partitional_results$sparse_pam_k$non_symmetric)
+partitional_results$sparse_pam_k$symmetric <- adjust_factors(partitional_results$sparse_pam_k$symmetric)
+
 # knitr defaults
 knitr::opts_chunk$set(echo = FALSE, comment = "#>")
 ```
@@ -37,6 +57,7 @@ The data used again comes from the Character Trajectories set [@lichman2013].
 
 These were run using `R` v3.4.1 and `dtwclust` v4.0.3.
 The computer used was running GNU/Linux (LTS kernel v4.9) with an `i5-6500` Intel processor (4 cores) and 16GB of RAM.
+They took almost 58 hours to complete (208183.266 seconds).
 
 # Distance experiments
 
@@ -46,12 +67,12 @@ Results of the timing experiments for single time-series.
 An `NA` window size means that no constraint was used.
 Note that the vertical scale is different for each facet.
 
-```{r dist-single-plot, fig.height=7}
+```{r dist-single-plot, fig.height=7, fig.cap="*Note the different vertical scales for each facet, even though they are all in microseconds.*"}
 ggplot(dist_single_results,
-       aes(x = factor(series_length),
+       aes(x = series_length,
            y = median_time_us,
-           group = factor(window_size),
-           colour = factor(window_size))) +
+           group = window_size,
+           colour = window_size)) +
     geom_line() +
     facet_wrap(~distance, scales = "free_y") +
     theme_bw() +
@@ -66,13 +87,13 @@ First the results for the lower bounds.
 The number of series in `y` is important because the envelopes are calculated for those.
 In the case of `dtw_lb`, it means that there are more neighbors too.
 
-```{r dist-multiple-lb-plot, fig.cap="The facets' columns indicate the number of parallel workers, whereas the rows indicate the distance that was used."}
+```{r dist-multiple-lb-plot, fig.cap="*The facets' columns indicate the number of parallel workers, whereas the rows indicate the distance that was used. The vertical scales are different for each row, but they are all in milliseconds.*"}
 id_gg <- grepl("lb", dist_multiple_results$distance)
 ggplot(dist_multiple_results[id_gg,],
        aes(x = num_total,
            y = median_time_ms,
            colour = num_y,
-           shape = factor(series_length))) +
+           shape = series_length)) +
     geom_point(size = 3) +
     facet_grid(distance ~ num_workers, scales = "free_y") +
     theme_bw() +
@@ -81,12 +102,12 @@ ggplot(dist_multiple_results[id_gg,],
 
 ### Shape-based distance
 
-```{r dist-multiple-sbd-plot, fig.height=5, fig.cap="The facets' columns indicate the number of parallel workers."}
+```{r dist-multiple-sbd-plot, fig.height=5, fig.cap="*The facets' columns indicate the number of parallel workers.*"}
 id_gg <- grepl("^sbd$", dist_multiple_results$distance)
 ggplot(dist_multiple_results[id_gg,],
        aes(x = num_total,
            y = median_time_ms,
-           colour = factor(series_length))) +
+           colour = series_length)) +
     geom_point(size = 3) +
     facet_wrap(~num_workers) +
     theme_bw() +
@@ -95,31 +116,30 @@ ggplot(dist_multiple_results[id_gg,],
 
 ### Dynamic time warping
 
-```{r dist-multiple-dtw-plot, fig.height=8, fig.cap="The facets' columns indicate the number of parallel workers, whereas the rows indicate the window size that was used."}
+```{r dist-multiple-dtw-plot, fig.height=8, fig.cap="*The facets' columns indicate the number of parallel workers, whereas the rows indicate the length of the series being considered (all series had the same length for each case). All times are in milliseconds.*"}
 id_gg <- grepl("^dtw_[um]", dist_multiple_results$distance)
 ggplot(dist_multiple_results[id_gg,],
        aes(x = num_total,
            y = median_time_ms,
-           colour = factor(series_length),
+           colour = window_size,
            shape = distance)) +
     geom_point(size = 3) +
     scale_shape_manual(values = c(0, 3)) +
-    facet_grid(factor(window_size) ~ num_workers) +
+    facet_grid(series_length ~ num_workers) +
     theme_bw() +
     theme(legend.position = "bottom")
 ```
 
 ### Triangular global alignment kernel
 
-```{r dist-multiple-gak-plot, fig.height=8, fig.cap="The facets' columns indicate the number of parallel workers, whereas the rows indicate the window size that was used."}
+```{r dist-multiple-gak-plot, fig.height=8, fig.cap="*The facets' columns indicate the number of parallel workers, whereas the rows indicate the length of the series being considered (all series had the same length for each case). All times are in milliseconds.*"}
 id_gg <- grepl("^gak_", dist_multiple_results$distance)
 ggplot(dist_multiple_results[id_gg,],
        aes(x = num_total,
            y = median_time_ms,
-           colour = factor(series_length))) +
+           colour = window_size)) +
     geom_point(size = 3) +
-    scale_shape_manual(values = c(0, 3)) +
-    facet_grid(factor(window_size) ~ num_workers) +
+    facet_grid(series_length ~ num_workers) +
     theme_bw() +
     theme(legend.position = "bottom")
 ```
@@ -133,7 +153,7 @@ id_gg <- grepl("^shape_", cent_results$cent)
 ggplot(cent_results[id_gg,],
        aes(x = num_series,
            y = median_time_ms,
-           colour = factor(series_length))) +
+           colour = series_length)) +
     geom_line() +
     facet_wrap(~cent) +
     theme_bw() + 
@@ -142,14 +162,14 @@ ggplot(cent_results[id_gg,],
 
 ## DTW barycenter averaging
 
-```{r cent-dba-plot, fig.height=8, fig.cap="The facets' rows indicate the length of the considered series. In the columns, 'byS' means 'by series' and 'byV' means 'by variable' (see DBA documentation)."}
+```{r cent-dba-plot, fig.height=8, fig.cap="*The facets' rows indicate the length of the considered series. In the columns, 'byS' means 'by series' and 'byV' means 'by variable' (see DBA documentation).*"}
 id_gg <- grepl("^dba_", cent_results$cent)
 ggplot(cent_results[id_gg,],
        aes(x = num_series,
            y = median_time_ms,
-           colour = factor(window_size))) +
+           colour = window_size)) +
     geom_line() +
-    facet_grid(factor(series_length) ~ cent) +
+    facet_grid(series_length ~ cent) +
     theme_bw() + 
     theme(legend.position = "bottom")
 ```
@@ -163,11 +183,11 @@ With `tsclust`.
 No parallel here because it is only parallelized with multiple `dc` values,
 and that wasn't tested.
 
-```{r clust-tadpole-plot}
+```{r clust-tadpole-plot, fig.cap="*In the facets, lbk stands for lb_keogh and lbi for lb_improved.*"}
 ggplot(clus_tadpole_results,
        aes(x = num_series,
            y = median_time_s,
-           colour = factor(window_size))) +
+           colour = window_size)) +
     geom_line() +
     facet_wrap(~lb) +
     theme_bw() + 
@@ -187,7 +207,7 @@ ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$pam,
 ggplot(ggdf,
        aes(x = num_series,
            y = value,
-           colour = factor(window_size))) +
+           colour = window_size)) +
     geom_line() +
     facet_wrap(~variable) +
     theme_bw() +
@@ -202,7 +222,7 @@ ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps[,cols],
 ggplot(ggdf,
        aes(x = num_series,
            y = value,
-           colour = factor(num_repetitions))) +
+           colour = num_repetitions)) +
     geom_line() +
     facet_wrap(~variable) +
     theme_bw() +
@@ -213,7 +233,7 @@ ggplot(ggdf,
 ggplot(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps,
        aes(x = num_series,
            y = sparse_distmat_filled_percent,
-           colour = factor(num_repetitions))) +
+           colour = num_repetitions)) +
     geom_line() +
     theme_bw() +
     theme(legend.position = "bottom")
@@ -229,7 +249,7 @@ ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$dba,
 ggplot(ggdf,
        aes(x = num_series,
            y = value,
-           colour = factor(window_size))) +
+           colour = window_size)) +
     geom_line() +
     facet_wrap(~variable) +
     theme_bw() +
@@ -249,7 +269,7 @@ ggdf <- reshape2::melt(partitional_results$sparse_pam_k$non_symmetric,
 ggplot(ggdf,
        aes(x = num_series,
            y = value,
-           colour = factor(k))) +
+           colour = k)) +
     geom_line() +
     facet_wrap(~variable, scales = "free_y") +
     theme_bw() +
@@ -264,7 +284,7 @@ ggdf <- reshape2::melt(partitional_results$sparse_pam_k$symmetric,
 ggplot(ggdf,
        aes(x = num_series,
            y = value,
-           colour = factor(k))) +
+           colour = k)) +
     geom_line() +
     facet_wrap(~variable, scales = "free_y") +
     theme_bw() +
