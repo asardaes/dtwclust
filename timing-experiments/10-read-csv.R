@@ -1,4 +1,4 @@
-path <- "../../CharTrajCSV"
+path <- "CharTrajCSV"
 files <- list.files(path)
 
 univariate_labels <- as.factor(sapply(files, substr, start = 1L, stop = 1L))

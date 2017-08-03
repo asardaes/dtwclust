@@ -19,6 +19,8 @@ vignettes/**/
 
 # Experiments' results
 timing-experiments/*.RData
+timing-experiments/*.mat
+timing-experiments/CharTrajCSV
 
 # Windows image file caches
 Thumbs.db
