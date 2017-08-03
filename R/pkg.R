@@ -245,7 +245,7 @@ NULL
 
     packageStartupMessage("\ndtwclust:\n",
                           "Setting random number generator to L'Ecuyer-CMRG (see RNGkind()).\n",
-                          'To read the included vignette type: vignette("dtwclust").\n',
+                          'To read the included vignettes type: browseVignettes("dtwclust").\n',
                           'Please see news(package = "dtwclust") for important information.')
 
     if (grepl("\\.9000$", utils::packageVersion("dtwclust")))
