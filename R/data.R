@@ -40,8 +40,10 @@ NULL
 #'
 #' @format
 #'
-#' TBA
+#' The results are organized into different data frames and saved in one list with nested lists.
+#' For more details, refer to the included vignette or the scripts available at
+#' \url{https://github.com/asardaes/dtwclust/tree/master/timing-experiments}.
 #'
-#' @source Refer to the package vignette.
+#' @source Refer to the timing experiments vignette.
 #'
 NULL
