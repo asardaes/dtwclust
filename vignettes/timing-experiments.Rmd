@@ -51,21 +51,45 @@ knitr::opts_chunk$set(echo = FALSE, comment = "#>")
 
 # Introduction
 
-To get an idea of the running times that can be expected for some of the included functions,
+Time-series clustering is affected by several factors,
+such as the characteristics of time-series themselves,
+the choice of distance or centroid function,
+etc.
+In many situations,
+run-time characteristics are more important,
+e.g. when the amount of memory is limited by the system,
+or when excessive running times must be avoided.
+Most of these aspects cannot be generalized,
+especially in regards to evaluation of correctness,
+but things like complexity or growth rate of an algorithm can be assessed relatively more easily.
+To get an idea of the running times that can be expected for some of the algorithms included in `dtwclust`,
 a series of timing experiments were made.
-The data used again comes from the Character Trajectories set [@lichman2013].
+Said experiments were not concerned with correctness or accuracy,
+and only look at timing characteristics.
 
-These were run using `R` v3.4.1 and `dtwclust` v4.0.3.
+These experiments were run using `R` v3.4.1 and `dtwclust` v4.0.3.
+The `microbenchmark` package (v1.4-2.1) was also used for most of them.
 The computer used was running GNU/Linux (LTS kernel v4.9) with an `i5-6500` Intel processor (4 cores) and 16GB of RAM.
-They took almost 58 hours to complete (208183.266 seconds).
+The whole set of experiments took almost 58 hours to complete.
+The data used comes from the Character Trajectories set [@lichman2013],
+which have different lengths and are originally multivariate series with 3 variables;
+the univariate versions were extracted from these.
+All scripts are available [online in GitHub](https://github.com/asardaes/dtwclust/tree/master/timing-experiments).
+Naturally, since we are dealing with exeuction times,
+the experiments cannot be reproduced exactly,
+but hopefully the median times would not vary too much between systems with similar characteristics.
 
 # Distance experiments
 
 ## Calculations for single time-series
 
-Results of the timing experiments for single time-series. 
-An `NA` window size means that no constraint was used.
-Note that the vertical scale is different for each facet.
+First we look at the results of the timing experiments for single time-series,
+i.e., for distances calculated between two individual time-series.
+The distances tested are those included in the package.
+Here we look at the effect of window sizes and series' lengths.
+Each calculation was repeated 100 times and the *median* value was extracted.
+An `NA` window size means that no constraint was used,
+and note that the vertical scale is different for each facet in the following figure.
 
 ```{r dist-single-plot, fig.height=7, fig.cap="*Note the different vertical scales for each facet, even though they are all in microseconds.*"}
 ggplot(dist_single_results,
@@ -79,7 +103,42 @@ ggplot(dist_single_results,
     theme(legend.position = "bottom")
 ```
 
+The first interesting result relates to the DTW lower bounds: `lb_keogh` and `lb_improved`.
+The window size does not seem to have a very significant effect,
+and the running time appears to grow linearly with the series' length for `lb_improved`.
+However, `lb_improved` was faster that `lb_keogh`.
+Considering that `lb_improved` first needs to calculate `lb_keogh` and then perform additional calculations,
+this is somewhat puzzling,
+and the reason is not immediately evident.
+
+The shape-based distance also presents weird behavior.
+While it was expected that its running time would increase with the series' length,
+the bump for the length of 152 is considerably large.
+It is true that SBD is based on the FFT,
+and thus it adjusts the input series' lengths to powers of 2,
+but if that were the cause,
+then the bump should have occurred for the series with length of 130,
+since the next power of 2 for 109 is 128,
+and it jumps to 256 for a length of 130.
+
+DTW and GAK are the only tested distances that support multivariate series.
+In the case of DTW,
+we can see that a window constraint can indeed have a very significant effect on running time,
+considering that a window size of 10 resulted in a calculation that was 4 times faster than when using no constraint.
+In this case, using multivariate series (with 3 variables) did not have a very significant effect.
+
+The behavior of GAK was rather surprising.
+Its running times increase very fast with the series' length,
+and window size seems to have no effect at all.
+Adding more variables had a much bigger impact here,
+and using series with 3 variables effectively tripled the running time of the calculation.
+
 ## Calculations for several time-series
+
+Computing cross-distance matrices for time-series can be optimized in different ways depending on the distance that is used.
+In the following sections,
+we look at the way the included distances are optimized,
+and evaluate the way it affects their running times when doing distance calculations between several time-series.
 
 ### Lower bounds
 
