@@ -12,5 +12,6 @@
         \item Deactivating PAM precomputation will no longer use sparse matrices by default, explicitly set \code{pam.sparse} to \code{TRUE} if you want this functionality.
         \item Fixed multivariate plots.
         \item Fixed \code{zscore} for data frame input (it was still coercing column-wise instead of row-wise).
+        \item Added an additional vignette with some timing experiments.
     }
 }

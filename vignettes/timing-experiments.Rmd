@@ -74,8 +74,8 @@ The whole set of experiments took almost 58 hours to complete.
 The data used comes from the Character Trajectories set [@lichman2013],
 which have different lengths and are originally multivariate series with 3 variables;
 the univariate versions were extracted from these.
-All scripts are available [online in GitHub](https://github.com/asardaes/dtwclust/tree/master/timing-experiments).
-Naturally, since we are dealing with exeuction times,
+All scripts are available [online on GitHub](https://github.com/asardaes/dtwclust/tree/master/timing-experiments).
+Naturally, since we are dealing with execution times,
 the experiments cannot be reproduced exactly,
 but hopefully the median times would not vary too much between systems with similar characteristics.
 
@@ -87,7 +87,7 @@ First we look at the results of the timing experiments for single time-series,
 i.e., for distances calculated between two individual time-series.
 The distances tested are those included in the package.
 Here we look at the effect of window sizes and series' lengths.
-Each calculation was repeated 100 times and the *median* value was extracted.
+Each calculation was repeated `r attr(dist_single_results, "times")` times and the *median* value was extracted.
 An `NA` window size means that no constraint was used,
 and note that the vertical scale is different for each facet in the following figure.
 
@@ -129,9 +129,12 @@ In this case, using multivariate series (with 3 variables) did not have a very s
 
 The behavior of GAK was rather surprising.
 Its running times increase very fast with the series' length,
-and window size seems to have no effect at all.
-Adding more variables had a much bigger impact here,
-and using series with 3 variables effectively tripled the running time of the calculation.
+and neither window size nor number of variables seem to have any effect whatsoever.
+The normalized version is 3 times slower because it effectively calculates a GAK distance 3 times,
+one time for `x` against `y`,
+one time for `x` alone,
+and one time for `y` alone;
+these 3 values are used to calculate the normalized version.
 
 ## Calculations for several time-series
 
@@ -140,11 +143,34 @@ In the following sections,
 we look at the way the included distances are optimized,
 and evaluate the way it affects their running times when doing distance calculations between several time-series.
 
+These experiments were repeated 30 times and the median value was computed,
+except for the GAK distance which was only repeated 10 times.
+We look at the effect of several factors:
+the length of the series,
+a window size where applicable,
+the effect of parallelization,
+and the size of the cross-distance matrix.
+
 ### Lower bounds
 
-First the results for the lower bounds.
-The number of series in `y` is important because the envelopes are calculated for those.
-In the case of `dtw_lb`, it means that there are more neighbors too.
+First we assess the distances that involve the DTW lower bounds.
+In the following figure,
+the `x` axis contains the total number of series in the cross-distance matrix,
+but the color is mapped to the number of *columns* in said matrix.
+This is relevant in this case because of the envelops that need to be computed when calculating the lower bounds.
+These are computed for the series in `y`,
+which end up across the columns of the distance matrix.
+The applied optimization consists in calculating the envelops for `y` only once,
+and re-using them across `x`.
+In the case of `dtw_lb` (which is based on `lb_improved`),
+this is also important because nearest neighbors are searched row-wise by default,
+and more series in `y` equates to more neighbors to consider.
+Also note that the `dtw_lb` calculations make more sense when the series in `x` and `y` are different
+(if the series are the same, the nearest neighbor of a series is always itself,
+so no iterations take place),
+which is why there are less data points in those experiments.
+Given the results of the previous section,
+the window size value was fixed at 50 for these experiments.
 
 ```{r dist-multiple-lb-plot, fig.cap="*The facets' columns indicate the number of parallel workers, whereas the rows indicate the distance that was used. The vertical scales are different for each row, but they are all in milliseconds.*"}
 id_gg <- grepl("lb", dist_multiple_results$distance)
@@ -159,7 +185,29 @@ ggplot(dist_multiple_results[id_gg,],
     theme(legend.position = "bottom")
 ```
 
+For `lb_keogh` and `lb_improved`,
+we see that the effect of the series' length is diminished when calculating cross-distance matrices.
+Parallelization actually seems to be detrimental for these distances,
+and in the case of sequential calculations (i.e. with one worker),
+`lb_improved` was once again slightly faster than `lb_keogh`.
+As expected, increasing the number of series in `y` increases the running times.
+
+The behavior of `dtw_lb` is more consistent.
+The length of the series increased the running times of sequential calculations more or less by a constant factor,
+although this effect disappeared for parallel calculations.
+Using 2 parallel workers helped quite a bit,
+but increasing that number to 4 was actually marginally worse.
+As in the previous case,
+the number of series in `y` is directly proportional to the running times.
+
 ### Shape-based distance
+
+As mentioned before,
+the shape-based distance is based on the FFT.
+Similarly to the DTW lower bounds,
+the optimization applied here consists in calculating the FFTs only once,
+although in this case they must be calculated for both `x` and `y`.
+The results are summarized in the next figure.
 
 ```{r dist-multiple-sbd-plot, fig.height=5, fig.cap="*The facets' columns indicate the number of parallel workers.*"}
 id_gg <- grepl("^sbd$", dist_multiple_results$distance)
@@ -173,7 +221,23 @@ ggplot(dist_multiple_results[id_gg,],
     theme(legend.position = "bottom")
 ```
 
+For sequential calculations,
+we see here the expected effect of the series' lengths.
+Adjusting them to powers of 2 for the FFT meant that the calculations were faster for series of length 109,
+and for series of length 152 and 196,
+the times were more or less equal.
+Parallelization removed this effect somewhat,
+and helped reduce times slightly,
+although once again only with 2 parallel workers.
+This might be different for cross-distance matrices that are much larger.
+
 ### Dynamic time warping
+
+The DTW distance doesn't allow for many optimizations.
+The version implemented in `dtw_basic` for cross-distance matrices uses less RAM by saving only 2 columns of the local cost matrix (LCM) at all times
+(since no back-tracking is performed in this case).
+Moreover, this LCM is only allocated once.
+The results are shown in the next figure.
 
 ```{r dist-multiple-dtw-plot, fig.height=8, fig.cap="*The facets' columns indicate the number of parallel workers, whereas the rows indicate the length of the series being considered (all series had the same length for each case). All times are in milliseconds.*"}
 id_gg <- grepl("^dtw_[um]", dist_multiple_results$distance)
@@ -189,7 +253,38 @@ ggplot(dist_multiple_results[id_gg,],
     theme(legend.position = "bottom")
 ```
 
+The DTW distance presents a much more constant behavior across the board.
+The difference between univariate and multivariate series is very small,
+but window sizes and series lengths can have a very significant effect,
+especially for sequential calculations.
+Additionally, DTW benefits a lot from parallelization almost linearly,
+since using 2 workers reduced times in half,
+and using 4 workers reduced them practically by a factor of 4.
+Also note that the growth is very linear,
+which indicates that DTW cannot be optimized much more,
+something which was already pointed out before [@keogh2004].
+
 ### Triangular global alignment kernel
+
+Finally we look at the computations with the GAK distance.
+As shown in the previous section,
+this distance is considerably slower,
+which is why less experiments were made in this section.
+Moreover, only the normalized version can be used as a *distance* measure
+(as opposed to a similarity),
+so only the normalized version was tested.
+
+There are 2 optimizations in place here.
+As mentioned before,
+normalization effectively requires calculating a GAK for `x` and `y` by themselves,
+so in order to avoid repeated calculations,
+these normalization factors are only computed once for cross-distance matrices.
+GAK also uses a matrix to save logarithms during the intermediate calculations,
+and this matrix is allocated only once.
+
+It is worth pointing out that, in principle, the GAK code is very similar to that of DTW.
+However, GAK relies on logarithms, whereas DTW only uses arithmetic operations.
+This means that, unfortunately, GAK probably cannot be optimized much more.
 
 ```{r dist-multiple-gak-plot, fig.height=8, fig.cap="*The facets' columns indicate the number of parallel workers, whereas the rows indicate the length of the series being considered (all series had the same length for each case). All times are in milliseconds.*"}
 id_gg <- grepl("^gak_", dist_multiple_results$distance)
@@ -203,9 +298,21 @@ ggplot(dist_multiple_results[id_gg,],
     theme(legend.position = "bottom")
 ```
 
+Here we see a much clearer effect of window sizes and series' lengths and,
+as was the case for DTW,
+parallelization can be very beneficial for GAK.
+
 # Prototyping experiments
 
+In this section, we briefly look at the running times of 2 centroid functions:
+shape extraction and DBA.
+Each experiment was run `r attr(cent_results, "times")` times and the median value was computed.
+
 ## Shape extraction
+
+Shape extraction is based on SBD,
+and thus has no window constraints.
+The multivariate version simply applies the univariate algorithm to each of the variables in the series.
 
 ```{r cent-shape-plot, fig.height=5}
 id_gg <- grepl("^shape_", cent_results$cent)
@@ -219,28 +326,69 @@ ggplot(cent_results[id_gg,],
     theme(legend.position = "bottom")
 ```
 
+As expected,
+the multivariate version is proportionally slower than the univariate version.
+The length of the series can indeed have a significant effect,
+and using more series naturally increases running times,
+albeit linearly.
+
 ## DTW barycenter averaging
 
-```{r cent-dba-plot, fig.height=8, fig.cap="*The facets' rows indicate the length of the considered series. In the columns, 'byS' means 'by series' and 'byV' means 'by variable' (see DBA documentation).*"}
+DBA is based on DTW,
+so it can use window constraints.
+Additionally, it supports multivariate series for the same reason,
+but in 2 variations.
+One variation simply uses the same strategy as shape extraction:
+it applies the univariate version to each of the variables and binds the resulting series.
+However, DBA uses the backtracking feature of DTW,
+and this can be computed based on an LCM calculated from two multivariate series as a whole.
+In `dtwclust`,
+the former variation is the `by-variable` version,
+and the latter is the `by-series` version.
+Also note that this implementation of DBA allocates the LCM used for backtracking only once;
+it does not matter if series have different lengths,
+as long as the LCM's dimensions are defined based on the longest series.
+
+```{r cent-dba-plot, fig.height=8, fig.cap="*The facets' rows indicate the length of the considered series. In the columns, 'byS' means 'by series' and 'byV' means 'by variable' (see DBA documentation). Note the different vertical scales for each row of the facets.*"}
 id_gg <- grepl("^dba_", cent_results$cent)
 ggplot(cent_results[id_gg,],
        aes(x = num_series,
            y = median_time_ms,
            colour = window_size)) +
     geom_line() +
-    facet_grid(series_length ~ cent) +
+    facet_grid(series_length ~ cent, scales = "free") +
     theme_bw() + 
     theme(legend.position = "bottom")
 ```
 
+Both series' length and window size have a somewhat constant effect on running times.
+As expected, the `by-series` multivariate version is more or less as fast as the univariate version,
+and the `by-variable` version is proportionally slower.
+In all cases, however, the growth is linear in the number of series considered.
+
 # Clustering experiments
 
-With `tsclust`.
+In this section we look at particular cases of time-series clustering,
+namely TADPole and some special variations of partitional clustering.
+Hierarchical is not considered here because its complexity essentially depends on the complexity of the whole cross-distance matrix computation,
+which was shown indirectly in Section 2.2.
+This also applies to fuzzy c-medoids.
+For fuzzy clustering with fuzzy c-means,
+the whole cross-distance matrix is not computed,
+but the running times also depend on the distance used,
+so the results of Section 2.2 are also applicable here.
 
 ## TADPole
 
-No parallel here because it is only parallelized with multiple `dc` values,
-and that wasn't tested.
+TADPole is a very particular algorithm.
+It is mostly limited by RAM,
+since it requires 3 `N x N` matrices for `N` series.
+It is based on DTW but also requires a cutoff distance (`dc`) parameter which can directly affect how many DTW calculations are performed.
+Hence, its run-time behavior cannot be generalized easily.
+Nevertheless, here we look at its characteristics for the given dataset and a `dc` value of 10.
+Each experiment was repeated `r attr(clus_tadpole_results, "times")` times and the median value was computed.
+No parallel tests were made here because the current implementation of TADPole is only parallelized for multiple `dc` values,
+and that was not explored.
 
 ```{r clust-tadpole-plot, fig.cap="*In the facets, lbk stands for lb_keogh and lbi for lb_improved.*"}
 ggplot(clus_tadpole_results,
@@ -253,14 +401,35 @@ ggplot(clus_tadpole_results,
     theme(legend.position = "bottom")
 ```
 
+As expected (from Section 2.2),
+the choice of DTW lower bound has practically no effect.
+On the other hand,
+the choice of window size can have very significant effects.
+Finally, we can see that the growth is not linear in the number of series.
+
 ## DTW special cases
+
+Even if we were to test only time-series clusterings with the DTW distance,
+we would have several options to choose from.
+In this section,
+we look at the differences between clustering with `dtw_basic` and `dtw_lb` when using 2 centroids:
+partition around medoids (PAM) and DBA.
+For PAM, we also look briefly at the usage of sparse matrices.
+These tests were repeated `r attr(partitional_results, "times")` times and the median value was computed.
 
 ### PAM centroids
 
-The different flavors of PAM centroids.
-The remarks about sparse matrices apply for other distances too.
+There are currently 3 different strategies to apply PAM centroids implemented:
+pre-computing the whole distance matrix once,
+performing no pre-computation and using a sparse matrix that is updated iteratively,
+and performing no pre-computation without a sparse matrix.
+In this section, we briefly look at the differences between the first 2.
+Even though **the remarks apply to any distance**,
+we only use DTW here.
+The value of `k` was fixed at 20.
+For the next figure, only 1 repetition was made in each experiment.
 
-```{r clust-part-dtw-pam-plot, fig.height=5}
+```{r clust-part-dtw-pam-plot, fig.height=5, fig.cap="*All values are in seconds.*"}
 ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$pam, 
                        id.vars=c("num_series", "k", "window_size"))
 ggplot(ggdf,
@@ -273,7 +442,13 @@ ggplot(ggdf,
     theme(legend.position = "bottom")
 ```
 
-```{r clust-part-dtw-pam-reps-plot, fig.height=5}
+We see above that using `dtw_lb` can be considerably faster than using `dtw_basic`,
+and that using a sparse matrix appears to be the fastest.
+However, performing only 1 repetition for partitional clustering is a poor choice,
+and performing more repetitions changes things entirely,
+as the next figure shows.
+
+```{r clust-part-dtw-pam-reps-plot, fig.height=5, fig.cap="*The window size case fixed at 20 for these experiments.*"}
 cols <- setdiff(colnames(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps),
                 "sparse_distmat_filled_percent")
 ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps[,cols], 
@@ -288,6 +463,19 @@ ggplot(ggdf,
     theme(legend.position = "bottom")
 ```
 
+Pre-computing the whole distance matrix once means that it can be re-used across all repetitions
+(left-most facet above),
+so it makes sense that the running times are practically the same there.
+As we can see, using `dtw_lb` is a bad idea even for only 2 repetitions;
+for more repetitions, the time required is much larger.
+Using a sparse matrix can indeed be faster,
+but by the time we use 10 repetitions,
+the running times are almost the same as when pre-computing the whole matrix.
+This makes sense,
+since more repetitions means that there is a higher chance of filling the sparse matrix,
+and there is an overhead for keeping track of how many cells of the sparse matrix are already set.
+The next figure shows the percentage of the sparse matrix that was filled for the experiments in the middle facet above.
+
 ```{r clust-part-dtw-pam-reps-distmat-plot, fig.height=5}
 ggplot(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps,
        aes(x = num_series,
@@ -298,11 +486,23 @@ ggplot(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps,
     theme(legend.position = "bottom")
 ```
 
+It can be argued that 10 repetitions is still too few for partitional clustering,
+so using sparse matrices or, for DTW distance, using `dtw_lb` is not a very good choice.
+Unfortunately, pre-computing the whole distance matrix requires much more RAM,
+and this increases quadratically with the number of series in the dataset.
+In cases where RAM is a limitation,
+using `dtw_lb` may be an appropriate alternative.
+
 ### DBA centroids
 
-This probably applies to other non-PAM centroids too.
+The previous section looked solely at PAM centroids because there are several specific nuances for them.
+However, for other centroids, the story changes.
+For all non-PAM centroids, the centroid time-series change at every iteration and for every repetition,
+so there can be no pre-computation of the cross-distance matrix.
+With that in mind, we look here at the difference between `dtw_basic` and `dtw_lb` for DBA centroids.
+This comparison of DTW-based distances probably **applies to other centroids too**.
 
-```{r clust-part-dtw-dba-plot, fig.height=5}
+```{r clust-part-dtw-dba-plot, fig.height=5, fig.cap="*All values are in seconds.*"}
 ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$dba, 
                        id.vars=c("num_series", "k", "window_size"))
 ggplot(ggdf,
@@ -315,14 +515,28 @@ ggplot(ggdf,
     theme(legend.position = "bottom")
 ```
 
-## Effect of `k` on PAM centroids with sparse matrices
+We can see that,
+depending on the value of the window size,
+using `dtw_lb` can be 20% to 50% faster.
+Since partitional clustering with `dtw_lb` should provide the **same** results as using `dtw_basic`,
+there seems to be no reason not to use it for non-PAM centroids.
 
-Test different `k` values.
-Using non-symmetric DTW and symmetric SBD.
+## Effect of `k` on PAM centroids with sparse cross-distance matrices
+
+In the previous section we looked at some characteristics of PAM centroids with a sparse cross-distance matrix,
+where the value of `k` was fixed.
+In this section, we briefly explore the effect of `k`.
+A sparse matrix can be further optimized if it is symmetric,
+i.e. if the lower and upper triangulars are equal.
+A cross-distance sparse matrix is symmetric if the distance used to compute it is itself symmetric.
+Therefore, we perform the following experiments for a non-symmetric case of DTW and the symmetric SBD.
+Note that a non-sparse version of the clustering simply means that the whole matrix was pre-computed.
+These experiments were also repeated `r attr(partitional_results, "times")` times and the median value computed.
+Only 1 repetition was made in each case.
 
 ### Non-symmetric
 
-```{r clust-part-sparse-pam-k-nonsymmetric-plot, fig.height=5}
+```{r clust-part-sparse-pam-k-nonsymmetric-plot, fig.height=5, fig.cap="*Note the different vertical scales.*"}
 ggdf <- reshape2::melt(partitional_results$sparse_pam_k$non_symmetric, 
                        id.vars=c("num_series", "k"))
 ggplot(ggdf,
@@ -335,9 +549,13 @@ ggplot(ggdf,
     theme(legend.position = "bottom")
 ```
 
+As expected, smaller values of `k` cause the sparse matrix to be more full,
+and the associated overhead causes greater running times,
+although they are still lower than those with pre-computation of the whole matrix.
+
 ### Symmetric
 
-```{r clust-part-sparse-pam-k-symmetric-plot, fig.height=5}
+```{r clust-part-sparse-pam-k-symmetric-plot, fig.height=5, fig.cap="*Note the different vertical scales.*"}
 ggdf <- reshape2::melt(partitional_results$sparse_pam_k$symmetric, 
                        id.vars=c("num_series", "k"))
 ggplot(ggdf,
@@ -350,11 +568,13 @@ ggplot(ggdf,
     theme(legend.position = "bottom")
 ```
 
+Here we see a similar behavior as in the previous section,
+except that using a sparse matrix was actually slower in the case of `k = 2`.
+
 ### Remarks
 
-The effect of `k` is small,
-and as expected smaller values fill the matrix faster.
-But if we consider the results with many repetitions above,
-then it doesn't make much sense to use sparse matrices.
+There is indeed a dependency on the value of `k`,
+but if we also consider the results from Section 4.2.1 for many repetitions,
+it can be argued that using sparse matrices with PAM centroids would be seldom useful.
 
 # References

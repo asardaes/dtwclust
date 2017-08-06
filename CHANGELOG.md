@@ -4,6 +4,7 @@
 * Deactivating PAM precomputation will no longer use sparse matrices by default, explicitly set `pam.sparse` to `TRUE` if you want this functionality.
 * Fixed multivariate plots (#18).
 * Fixed `zscore` for data frame input (it was still coercing column-wise instead of row-wise).
+* Added an additional vignette with some timing experiments.
 
 ## Version 4.0.2
 * Ported the `proxy` versions of `lb_keogh`, `lb_improved`, `SBD`, `GAK` and `dtw_basic` to `C++` and improved them by using the `bigmemory` package.
