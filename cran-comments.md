@@ -1,5 +1,5 @@
-## Update to version 4.0.3
-* Bug fixes and additional vignette.
+## Update to version 4.0.4
+
 
 ## Test environments
 * Local GNU/Linux, R 3.4.1

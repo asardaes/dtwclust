@@ -102,9 +102,9 @@
 #'   have this same length.
 #'
 #'   As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid
-#'   function that takes a list of series as input and returns a single centroid series. These
-#'   centroids are returned in the `centroids` slot. By default, a type of PAM centroid function is
-#'   used.
+#'   function that takes a list of series as first input. It will also receive the contents of `...`
+#'   that match its formal arguments, and should return a single centroid series. These centroids
+#'   are returned in the `centroids` slot. By default, a type of PAM centroid function is used.
 #'
 #' @section Distance Measures:
 #'
@@ -678,7 +678,10 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                     assign("centroid", centroid, environment(allcent))
 
                     centroids <- lapply(1L:k, function(kcent) {
-                        centroid(series[R$cl == kcent])
+                        do.call(centroid,
+                                enlist(series[R$cl == kcent],
+                                       dots = subset_dots(args$cent, centroid)),
+                                TRUE)
                     })
 
                 } else {

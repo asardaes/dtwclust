@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 4.0.4
+* When using `TADPole` clustering through `tsclust`, custom parameters can now be passed to a custom centroid function if provided.
+
 ## Version 4.0.3
 * Deactivating PAM precomputation will no longer use sparse matrices by default, explicitly set `pam.sparse` to `TRUE` if you want this functionality.
 * Fixed multivariate plots (#18).

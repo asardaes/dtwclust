@@ -129,9 +129,9 @@ desired, and the initial choice selects two series with length of 10, the final 
 have this same length.
 
 As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid
-function that takes a list of series as input and returns a single centroid series. These
-centroids are returned in the \code{centroids} slot. By default, a type of PAM centroid function is
-used.
+function that takes a list of series as first input. It will also receive the contents of \code{...}
+that match its formal arguments, and should return a single centroid series. These centroids
+are returned in the \code{centroids} slot. By default, a type of PAM centroid function is used.
 }
 
 \section{Distance Measures}{
