@@ -102,9 +102,10 @@
 #'   have this same length.
 #'
 #'   As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid
-#'   function that takes a list of series as first input. It will also receive the contents of `...`
-#'   that match its formal arguments, and should return a single centroid series. These centroids
-#'   are returned in the `centroids` slot. By default, a type of PAM centroid function is used.
+#'   function that takes a list of series as first input. It will also receive the contents of
+#'   `args$cent` that match its formal arguments, and should return a single centroid series. These
+#'   centroids are returned in the `centroids` slot. By default, a type of PAM centroid function is
+#'   used.
 #'
 #' @section Distance Measures:
 #'
