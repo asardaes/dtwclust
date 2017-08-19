@@ -379,7 +379,7 @@ t1 <- proc.time()
 # Parameters
 # --------------------------------------------------------------------------------------------------
 
-#' NOTE: these cases is almost the same as above, except we take all series for each character
+#' NOTE: these cases are almost the same as above, except we take all series for each character
 #' (initially). Some new parameters are explained below.
 
 length_diff_threshold <- 40L
@@ -541,7 +541,7 @@ dist_dtwlb_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num
     cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
-    
+
     id_series <- rbind(
         expand.grid(seq(from = 10L, to = 50L, by = 10L), 10L),
         expand.grid(50L, seq(from = 20L, to = 100L, by = 10L)),

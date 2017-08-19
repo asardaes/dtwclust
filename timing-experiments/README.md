@@ -1,6 +1,6 @@
 This folder contains all the scripts to execute a set of timing experiments for `dtwclust`.
 
-The `CreateCharTraj.m` script should be run with MATLAB or Octave.
+The `CreateCharTrajCSV.m` script should be run with MATLAB or Octave.
 It will download the data and convert it to a series of CSV files that can be imported into `R`.
 
 The `00-main.R` file is the entry point for the experiments.
