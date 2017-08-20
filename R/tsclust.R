@@ -1,8 +1,8 @@
 #' Time series clustering
 #'
 #' This is the main function to perform time series clustering. See the details and the examples for
-#' more information, as well as the included package vignette (which can be loaded by typing
-#' `vignette("dtwclust")`). A convenience wrapper is available in [compare_clusterings()].
+#' more information, as well as the included package vignettes (which can be found by typing
+#' `browseVignettes("dtwclust")`). A convenience wrapper is available in [compare_clusterings()].
 #'
 #' @export
 #'

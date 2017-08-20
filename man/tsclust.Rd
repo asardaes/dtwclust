@@ -50,8 +50,8 @@ hierarchical procedures are used, or \code{length(k)} \code{>} \code{1}, a list 
 }
 \description{
 This is the main function to perform time series clustering. See the details and the examples for
-more information, as well as the included package vignette (which can be loaded by typing
-\code{vignette("dtwclust")}). A convenience wrapper is available in \code{\link[=compare_clusterings]{compare_clusterings()}}.
+more information, as well as the included package vignettes (which can be found by typing
+\code{browseVignettes("dtwclust")}). A convenience wrapper is available in \code{\link[=compare_clusterings]{compare_clusterings()}}.
 }
 \details{
 Partitional and fuzzy clustering procedures use a custom implementation. Hierarchical clustering

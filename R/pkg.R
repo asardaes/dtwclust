@@ -32,8 +32,8 @@
 #' in an attempt to preserve reproducibility. You are free to change this afterwards if you wish.
 #' See [base::RNGkind()].
 #'
-#' For more information, please read the included package vignette, which can be accessed by typing
-#' `vignette("dtwclust")`.
+#' For more information, please read the included package vignettes, which can be accessed by typing
+#' `browseVignettes("dtwclust")`.
 #'
 #' @note
 #'

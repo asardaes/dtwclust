@@ -32,8 +32,8 @@ Please note the random number generator is set to L'Ecuyer-CMRG when \pkg{dtwclu
 in an attempt to preserve reproducibility. You are free to change this afterwards if you wish.
 See \code{\link[base:RNGkind]{base::RNGkind()}}.
 
-For more information, please read the included package vignette, which can be accessed by typing
-\code{vignette("dtwclust")}.
+For more information, please read the included package vignettes, which can be accessed by typing
+\code{browseVignettes("dtwclust")}.
 }
 \note{
 This software package was developed independently of any organization or institution that is or
