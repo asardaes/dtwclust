@@ -1,6 +1,7 @@
 # Changelog
 
-## Version 4.0.4
+## Version 4.1.0
+* Added some fuzzy cluster validity indices to `cvi`.
 * When using `TADPole` clustering through `tsclust`, custom parameters can now be passed to a custom centroid function if provided.
 
 ## Version 4.0.3

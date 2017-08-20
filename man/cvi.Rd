@@ -4,22 +4,28 @@
 \docType{methods}
 \name{cvi}
 \alias{cvi}
-\alias{cvi,dtwclust-method}
+\alias{cvi,dtwclust,ANY-method}
 \alias{cvi,dtwclust}
-\alias{cvi,PartitionalTSClusters-method}
+\alias{cvi,PartitionalTSClusters,ANY-method}
 \alias{cvi,PartitionalTSClusters}
-\alias{cvi,HierarchicalTSClusters-method}
+\alias{cvi,HierarchicalTSClusters,ANY-method}
 \alias{cvi,HierarchicalTSClusters}
+\alias{cvi,FuzzyTSClusters,missing-method}
+\alias{cvi,FuzzyTSClusters}
 \title{Cluster validity indices}
 \usage{
 cvi(a, b = NULL, type = "valid", ..., log.base = 10)
 
-\S4method{cvi}{dtwclust}(a, b = NULL, type = "valid", ..., log.base = 10)
-
-\S4method{cvi}{PartitionalTSClusters}(a, b = NULL, type = "valid", ...,
+\S4method{cvi}{dtwclust,ANY}(a, b = NULL, type = "valid", ...,
   log.base = 10)
 
-\S4method{cvi}{HierarchicalTSClusters}(a, b = NULL, type = "valid", ...,
+\S4method{cvi}{PartitionalTSClusters,ANY}(a, b = NULL, type = "valid", ...,
+  log.base = 10)
+
+\S4method{cvi}{HierarchicalTSClusters,ANY}(a, b = NULL, type = "valid", ...,
+  log.base = 10)
+
+\S4method{cvi}{FuzzyTSClusters,missing}(a, b = NULL, type = "valid", ...,
   log.base = 10)
 }
 \arguments{
@@ -34,7 +40,7 @@ below.}
 
 \item{...}{Arguments to pass to and from other methods.}
 
-\item{log.base}{Base of the logarithm to be used in the calculation of VI.}
+\item{log.base}{Base of the logarithm to be used in the calculation of VI (see details).}
 }
 \value{
 The chosen CVIs
@@ -48,29 +54,31 @@ Clustering is commonly considered to be an unsupervised procedure, so evaluating
 can be rather subjective. However, a great amount of effort has been invested in trying to
 standardize cluster evaluation metrics by using cluster validity indices (CVIs).
 
-CVIs can be classified as internal, external or relative depending on how they are computed.
-Focusing on the first two, the crucial difference is that internal CVIs only consider the
-partitioned data and try to define a measure of cluster purity, whereas external CVIs compare the
-obtained partition to the correct one. Thus, external CVIs can only be used if the ground truth
-is known. Each index defines their range of values and whether they are to be minimized or
-maximized. In many cases, these CVIs can be used to evaluate the result of a clustering algorithm
-regardless of how the clustering works internally, or how the partition came to be.
+In general, CVIs can be either tailored to crisp or fuzzy partitions. For the former, CVIs can be
+classified as internal, external or relative depending on how they are computed. Focusing on the
+first two, the crucial difference is that internal CVIs only consider the partitioned data and
+try to define a measure of cluster purity, whereas external CVIs compare the obtained partition
+to the correct one. Thus, external CVIs can only be used if the ground truth is known.
+
+Note that even though a fuzzy partition can be changed into a crisp one, making it compatible
+with many of the existing crisp CVIs, there are also fuzzy CVIs tailored specifically to fuzzy
+clustering, and these may be more suitable in those situations. Naturally, fuzzy partitions
+usually have no ground truth associated with them.
+
+Each index defines their range of values and whether they are to be minimized or maximized. In
+many cases, these CVIs can be used to evaluate the result of a clustering algorithm regardless of
+how the clustering works internally, or how the partition came to be.
 
 Knowing which CVI will work best cannot be determined a priori, so they should be tested for each
 specific application. Usually, many CVIs are utilized and compared to each other, maybe using a
 majority vote to decide on a final result. Furthermore, it should be noted that many CVIs perform
 additional distance calculations when being computed, which can be very considerable if using
 DTW.
-
-Note that even though a fuzzy partition can be changed into a crisp one, making it compatible
-with many of the existing CVIs, there are also fuzzy CVIs tailored specifically to fuzzy
-clustering, and these may be more suitable in those situations, but have not been implemented
-here yet.
 }
 \note{
-In the original definition of many internal CVIs, the Euclidean distance and a mean centroid was
-used. The implementations here change this, making use of whatever distance/centroid was chosen
-during clustering.
+In the original definition of many internal and fuzzy CVIs, the Euclidean distance and a mean
+centroid was used. The implementations here change this, making use of whatever distance/centroid
+was chosen during clustering.
 
 The formula for the SF index in Saitta et al. (2007) does not correspond to the one in Arbelaitz
 et al. (2013). The one specified in the former is used here.
@@ -114,6 +122,20 @@ minimized).
 }
 }
 
+\section{Fuzzy CVIs}{
+
+
+The names here follow the nomenclature used in Wang and Zhang (2007). The marks defined above
+are also applied.
+\itemize{
+\item \code{"MPC"}: to be maximized.
+\item \code{"K"} (~): to be minimized.
+\item \code{"T"}: to be minimized.
+\item \code{"SC"} (~): to be maximized.
+\item \code{"PBMF"}: to be maximized.
+}
+}
+
 \section{Additionally}{
 
 \itemize{
@@ -121,7 +143,8 @@ minimized).
 provided or not.
 \item \code{"internal"}: Returns all internal CVIs. Only supported for \linkS4class{dtwclust} and
 \linkS4class{TSClusters} objects.
-\item \code{"external"}: Returns all external CVIs. Requires \code{b} to be provided.
+\item \code{"external"}: Returns all external CVIs. Requires \code{b} to be provided. Not valid for fuzzy
+clustering.
 }
 }
 
@@ -138,4 +161,7 @@ kernel machines (pp. 173-187). Springer Berlin Heidelberg.
 Saitta, S., Raphael, B., & Smith, I. F. (2007). A bounded index for cluster validity. In
 International Workshop on Machine Learning and Data Mining in Pattern Recognition (pp. 174-187).
 Springer Berlin Heidelberg.
+
+Wang, W., & Zhang, Y. (2007). On fuzzy cluster validity indices. Fuzzy sets and systems, 158(19),
+2095-2117.
 }

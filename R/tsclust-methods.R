@@ -822,6 +822,130 @@ setMethod("cvi", methods::signature(a = "PartitionalTSClusters"), cvi_TSClusters
 #'
 setMethod("cvi", methods::signature(a = "HierarchicalTSClusters"), cvi_TSClusters)
 
+#' @rdname cvi
+#' @aliases cvi,FuzzyTSClusters
+#' @exportMethod cvi
+#'
+setMethod("cvi", methods::signature(a = "FuzzyTSClusters", b = "missing"),
+          function(a, b = NULL, type = "valid", ...) {
+              type <- match.arg(type, several.ok = TRUE,
+                                c("MPC", "K", "T", "SC", "PBMF",
+                                  "valid", "internal"))
+
+              if (any(type %in% c("valid", "internal"))) {
+                  type <- c("MPC", "K", "T", "SC", "PBMF")
+              }
+
+              if (length(a@datalist) == 0L && any(type %in% c("K", "T" ,"SC", "PBMF"))) {
+                  warning("Fuzzy CVIs: the original series must be in the object to calculate ",
+                          "the following indices:\n",
+                          "\tK\tT\tSC\tPBMF")
+
+                  type <- setdiff(type, c("K", "T" ,"SC", "PBMF"))
+              }
+
+              ## are no valid indices left?
+              if (length(type) == 0L) return(numeric(0L))
+
+              ## calculate global centroids if needed
+              if (any(type %in% c("K", "SC", "PBMF"))) {
+                  N <- length(a@datalist)
+
+                  global_cent <- do.call(a@family@allcent,
+                                         args = enlist(x = a@datalist,
+                                                       cl_id = cbind(rep(1L, N)),
+                                                       k = 1L,
+                                                       dots = a@args$cent),
+                                         TRUE)
+                  dist_global_cent <- do.call(a@family@dist,
+                                              args = enlist(x = a@centroids,
+                                                            centroids = global_cent,
+                                                            dots = a@args$dist),
+                                              TRUE)
+                  dim(dist_global_cent) <- NULL
+              }
+
+              ## distance between centroids
+              if (any(type %in% c("K", "T", "PBMF"))) {
+                  distcent <- do.call(a@family@dist,
+                                      args = enlist(x = a@centroids,
+                                                    centroids = NULL,
+                                                    dots = a@args$dist),
+                                      TRUE)
+              }
+
+              ## distance between series and centroids
+              if (any(type %in% c("K", "SC", "PBMF"))) {
+                  dsc <- do.call(a@family@dist,
+                                 args = enlist(x = a@datalist,
+                                               centroids = a@centroids,
+                                               dots = a@args$dist),
+                                 TRUE)
+              }
+
+              CVIs <- sapply(type, function(CVI) {
+                  switch(EXPR = CVI,
+                         # -------------------------------------------------------------------------
+                         "MPC" = {
+                             PC <- sum(a@fcluster ^ 2) / nrow(a@fcluster)
+                             1 - (a@k / (a@k - 1L)) * (1 - PC)
+                         },
+
+                         # -------------------------------------------------------------------------
+                         "K" = {
+                             numerator <- sum((a@fcluster ^ 2) * (dsc ^ 2)) +
+                                 sum(dist_global_cent ^ 2) / a@k
+                             denominator <- min(distcent[!diag(a@k)] ^ 2)
+                             numerator / denominator
+                         },
+
+                         # -------------------------------------------------------------------------
+                         "T" = {
+                             numerator <- sum((a@fcluster ^ 2) * (dsc ^ 2)) +
+                                 sum(distcent[!diag(a@k)] ^ 2) / (a@k * (a@k - 1L))
+                             denominator <- min(distcent[!diag(a@k)] ^ 2) + 1 / a@k
+                             numerator / denominator
+                         },
+
+                         # -------------------------------------------------------------------------
+                         "SC" = {
+                             u <- a@fcluster
+                             m <- a@control$fuzziness
+
+                             SC1_numerator <- sum((dist_global_cent ^ 2) / a@k)
+                             SC1_denominator <- sum(apply((u ^ m) * (dsc ^ 2), 2L, sum) /
+                                                        apply(u, 2L, sum))
+                             SC1 <- SC1_numerator / SC1_denominator
+
+                             SC2_numerator <- sum(sapply(1L:(a@k - 1L), function(i) {
+                                 sum(sapply(1L:(a@k - i), function(r) {
+                                     j <- r + i
+                                     temp <- apply(u[, c(i,j)], 1L, min)
+                                     sum(temp ^ 2) / sum(temp)
+                                 }))
+                             }))
+                             SC2_denominator <- apply(u, 1L, max)
+                             SC2_denominator <- sum(SC2_denominator ^ 2) / sum(SC2_denominator)
+                             SC2 <- SC2_numerator / SC2_denominator
+
+                             SC1 - SC2
+                         },
+
+                         # -------------------------------------------------------------------------
+                         "PBMF" = {
+                             u <- a@fcluster
+                             m <- a@control$fuzziness
+                             factor1 <- 1 / a@k
+                             factor2 <- sum(u[,1L] * dsc[,1L]) / sum(dsc * (u ^ m))
+                             factor3 <- max(distcent[!diag(a@k)])
+                             (factor1 * factor2 * factor3) ^ 2
+                         })
+              })
+
+              ## return
+              CVIs
+          })
+
 # ==================================================================================================
 # Functions to support package 'clue'
 # ==================================================================================================

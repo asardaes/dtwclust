@@ -110,7 +110,7 @@ opts_knit$set(self.contained = TRUE)
 \section{Introduction}
 \label{sec:introduction}
 
-\blankfootnote{This manuscript was last updated in version 4.0.3 of \dtwclust{}.}
+\blankfootnote{This manuscript was last updated in version 4.1.0 of \dtwclust{}.}
 Cluster analysis is a task which concerns itself with the creation of groups of objects,
 where each group is called a cluster.
 Ideally, all members of the same cluster are similar to each other,
@@ -809,6 +809,7 @@ Technically, for multivariate series,
 the shape extraction algorithm could be applied for each variable $v$ of all involved series,
 but this was not explored by the authors of \kshape{}.
 
+\newpage
 \subsection{Fuzzy-based prototypes}
 \label{sec:fuzzy-cent}
 
@@ -965,7 +966,6 @@ Finally, the allocation of several distance matrices is required,
 making it similar to hierarchical procedures memory-wise,
 so its applicability is limited to relatively small datasets.
 
-\newpage
 \subsubsection[k-Shape clustering]{\kshape{} clustering}
 \label{sec:kshape}
 
@@ -1135,14 +1135,22 @@ However, a great amount of effort has been invested in trying to standardize clu
 Many indices have been developed over the years,
 and they form a research area of their own,
 but there are some overall details that are worth mentioning.
-The discussion here is based on \citet{arbelaitz2013},
-which provides a much more comprehensive overview.
+The discussion here is based on \citet{arbelaitz2013} and \citet{wang2007},
+which provide a much more comprehensive overview.
 
+In general, CVIs can be either tailored to crisp or fuzzy partitions.
+For the former,
 CVIs can be classified as internal, external or relative depending on how they are computed.
 Focusing on the first two,
 the crucial difference is that internal CVIs only consider the partitioned data and try to define a measure of cluster purity,
 whereas external CVIs compare the obtained partition to the correct one.
 Thus, external CVIs can only be used if the ground truth is known.
+
+Note that even though a fuzzy partition can be changed into a crisp one,
+making it compatible with many of the existing ``crisp'' CVIs,
+there are also fuzzy CVIs tailored specifically to fuzzy clustering,
+and these may be more suitable in those situations.
+Naturally, fuzzy partitions usually have no ground truth associated with them.
 
 Each index defines its range of values and whether they are to be minimized or maximized.
 In many cases, these CVIs can be used to evaluate the result of a clustering algorithm regardless of how the clustering works internally,
@@ -1150,9 +1158,9 @@ or how the partition came to be.
 The Silhouette index is an example of an internal CVI,
 whereas the Variation of Information \citep{meilua2003} is an external CVI.
 
-Several of the best-performing CVIs according to \citet{arbelaitz2013} are implemented in \dtwclust{} in the \code{cvi} function,
+Several of the best-performing CVIs according to \citet{arbelaitz2013} and \citet{wang2007} are implemented in \dtwclust{} in the \code{cvi} function,
 although other indices can be implemented by the user.
-However, in the original definition of many internal CVIs,
+However, in the original definition of many internal and fuzzy CVIs,
 the Euclidean distance and a mean centroid was used.
 The implementations in \dtwclust{} change this,
 making use of whatever distance/centroid was utilized during clustering,
@@ -1166,11 +1174,6 @@ Furthermore, it should be noted that many CVIs perform additional distance and/o
 which can be very considerable if using DTW.
 For example, the Silhouette index effectively needs the whole distance matrix between the original series to be calculated,
 making it prohibitive in some cases.
-
-Note that even though a fuzzy partition can be changed into a crisp one,
-making it compatible with many of the existing CVIs,
-there are also fuzzy CVIs tailored specifically to fuzzy clustering,
-and these may be more suitable in those situations.
 
 CVIs are not the only way to evaluate clustering results.
 The \pkg{clue} package \citep{hornik2005, clue} includes its own extensible framework for evaluation of cluster ensembles.

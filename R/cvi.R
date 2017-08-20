@@ -13,7 +13,7 @@
 #' @param type Character vector indicating which indices are to be computed. See supported values
 #'   below.
 #' @param ... Arguments to pass to and from other methods.
-#' @param log.base Base of the logarithm to be used in the calculation of VI.
+#' @param log.base Base of the logarithm to be used in the calculation of VI (see details).
 #'
 #' @details
 #'
@@ -21,24 +21,26 @@
 #' can be rather subjective. However, a great amount of effort has been invested in trying to
 #' standardize cluster evaluation metrics by using cluster validity indices (CVIs).
 #'
-#' CVIs can be classified as internal, external or relative depending on how they are computed.
-#' Focusing on the first two, the crucial difference is that internal CVIs only consider the
-#' partitioned data and try to define a measure of cluster purity, whereas external CVIs compare the
-#' obtained partition to the correct one. Thus, external CVIs can only be used if the ground truth
-#' is known. Each index defines their range of values and whether they are to be minimized or
-#' maximized. In many cases, these CVIs can be used to evaluate the result of a clustering algorithm
-#' regardless of how the clustering works internally, or how the partition came to be.
+#' In general, CVIs can be either tailored to crisp or fuzzy partitions. For the former, CVIs can be
+#' classified as internal, external or relative depending on how they are computed. Focusing on the
+#' first two, the crucial difference is that internal CVIs only consider the partitioned data and
+#' try to define a measure of cluster purity, whereas external CVIs compare the obtained partition
+#' to the correct one. Thus, external CVIs can only be used if the ground truth is known.
+#'
+#' Note that even though a fuzzy partition can be changed into a crisp one, making it compatible
+#' with many of the existing crisp CVIs, there are also fuzzy CVIs tailored specifically to fuzzy
+#' clustering, and these may be more suitable in those situations. Naturally, fuzzy partitions
+#' usually have no ground truth associated with them.
+#'
+#' Each index defines their range of values and whether they are to be minimized or maximized. In
+#' many cases, these CVIs can be used to evaluate the result of a clustering algorithm regardless of
+#' how the clustering works internally, or how the partition came to be.
 #'
 #' Knowing which CVI will work best cannot be determined a priori, so they should be tested for each
 #' specific application. Usually, many CVIs are utilized and compared to each other, maybe using a
 #' majority vote to decide on a final result. Furthermore, it should be noted that many CVIs perform
 #' additional distance calculations when being computed, which can be very considerable if using
 #' DTW.
-#'
-#' Note that even though a fuzzy partition can be changed into a crisp one, making it compatible
-#' with many of the existing CVIs, there are also fuzzy CVIs tailored specifically to fuzzy
-#' clustering, and these may be more suitable in those situations, but have not been implemented
-#' here yet.
 #'
 #' @return The chosen CVIs
 #'
@@ -75,19 +77,31 @@
 #'   - `"CH"` (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
 #'   - `"SF"` (~): Score Function (Saitta et al. (2007); to be maximized).
 #'
+#' @section Fuzzy CVIs:
+#'
+#'  The names here follow the nomenclature used in Wang and Zhang (2007). The marks defined above
+#'  are also applied.
+#'
+#'  - `"MPC"`: to be maximized.
+#'  - `"K"` (~): to be minimized.
+#'  - `"T"`: to be minimized.
+#'  - `"SC"` (~): to be maximized.
+#'  - `"PBMF"`: to be maximized.
+#'
 #' @section Additionally:
 #'
 #'   - `"valid"`: Returns all valid indices depending on the type of `a` and whether `b` was
 #'     provided or not.
 #'   - `"internal"`: Returns all internal CVIs. Only supported for [dtwclust-class] and
 #'     [TSClusters-class] objects.
-#'   - `"external"`: Returns all external CVIs. Requires `b` to be provided.
+#'   - `"external"`: Returns all external CVIs. Requires `b` to be provided. Not valid for fuzzy
+#'     clustering.
 #'
 #' @note
 #'
-#' In the original definition of many internal CVIs, the Euclidean distance and a mean centroid was
-#' used. The implementations here change this, making use of whatever distance/centroid was chosen
-#' during clustering.
+#' In the original definition of many internal and fuzzy CVIs, the Euclidean distance and a mean
+#' centroid was used. The implementations here change this, making use of whatever distance/centroid
+#' was chosen during clustering.
 #'
 #' The formula for the SF index in Saitta et al. (2007) does not correspond to the one in Arbelaitz
 #' et al. (2013). The one specified in the former is used here.
@@ -106,6 +120,9 @@
 #' Saitta, S., Raphael, B., & Smith, I. F. (2007). A bounded index for cluster validity. In
 #' International Workshop on Machine Learning and Data Mining in Pattern Recognition (pp. 174-187).
 #' Springer Berlin Heidelberg.
+#'
+#' Wang, W., & Zhang, Y. (2007). On fuzzy cluster validity indices. Fuzzy sets and systems, 158(19),
+#' 2095-2117.
 #'
 setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10) {
     ## Only external CVIs for default, dtwclust-methods.R has the internal ones

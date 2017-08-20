@@ -1,5 +1,5 @@
-## Update to version 4.0.4
-
+## Update to version 4.1.0
+* Added more cluster validity indices
 
 ## Test environments
 * Local GNU/Linux, R 3.4.1
