@@ -86,6 +86,7 @@
 #'  - `"K"` (~): to be minimized.
 #'  - `"T"`: to be minimized.
 #'  - `"SC"` (~): to be maximized.
+#'  - `"PBMF"`: to be maximized.
 #'
 #' @section Additionally:
 #'
