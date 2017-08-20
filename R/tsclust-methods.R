@@ -708,7 +708,11 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                                                      dots = a@args$cent),
                                        TRUE)
             } else {
-                global_cent <- a@family@allcent(a@datalist)
+                global_cent <- do.call(a@family@allcent,
+                                       args = enlist(a@datalist,
+                                                     dots = subset_dots(a@args$cent,
+                                                                        a@family@allcent)),
+                                       TRUE)
             }
 
             dist_global_cent <- do.call(a@family@dist,
