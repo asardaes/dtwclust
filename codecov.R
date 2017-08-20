@@ -3,7 +3,6 @@ options(covr.exclude_pattern = TRUE, covr.exclude_start = TRUE, covr.exclude_end
 codecov(type = "all",
         line_exclusions = list(
             "R/pkg.R",
-            "R/tslist.R",
             "R/dtwclust.R",
             "R/all-cent.R",
             "R/ddist.R",
