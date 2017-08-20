@@ -829,26 +829,26 @@ setMethod("cvi", methods::signature(a = "HierarchicalTSClusters"), cvi_TSCluster
 setMethod("cvi", methods::signature(a = "FuzzyTSClusters", b = "missing"),
           function(a, b = NULL, type = "valid", ...) {
               type <- match.arg(type, several.ok = TRUE,
-                                c("MPC", "K", "T", "SC", "PBMF",
+                                c("MPC", "K", "T", "SC",
                                   "valid", "internal"))
 
               if (any(type %in% c("valid", "internal"))) {
-                  type <- c("MPC", "K", "T", "SC", "PBMF")
+                  type <- c("MPC", "K", "T", "SC")
               }
 
-              if (length(a@datalist) == 0L && any(type %in% c("K", "T" ,"SC", "PBMF"))) {
+              if (length(a@datalist) == 0L && any(type %in% c("K", "T" ,"SC"))) {
                   warning("Fuzzy CVIs: the original series must be in the object to calculate ",
                           "the following indices:\n",
-                          "\tK\tT\tSC\tPBMF")
+                          "\tK\tT\tSC")
 
-                  type <- setdiff(type, c("K", "T" ,"SC", "PBMF"))
+                  type <- setdiff(type, c("K", "T" ,"SC"))
               }
 
               ## are no valid indices left?
               if (length(type) == 0L) return(numeric(0L))
 
               ## calculate global centroids if needed
-              if (any(type %in% c("K", "SC", "PBMF"))) {
+              if (any(type %in% c("K", "SC"))) {
                   N <- length(a@datalist)
 
                   global_cent <- do.call(a@family@allcent,
@@ -866,7 +866,7 @@ setMethod("cvi", methods::signature(a = "FuzzyTSClusters", b = "missing"),
               }
 
               ## distance between centroids
-              if (any(type %in% c("K", "T", "PBMF"))) {
+              if (any(type %in% c("K", "T"))) {
                   distcent <- do.call(a@family@dist,
                                       args = enlist(x = a@centroids,
                                                     centroids = NULL,
@@ -875,7 +875,7 @@ setMethod("cvi", methods::signature(a = "FuzzyTSClusters", b = "missing"),
               }
 
               ## distance between series and centroids
-              if (any(type %in% c("K", "SC", "PBMF"))) {
+              if (any(type %in% c("K", "SC"))) {
                   dsc <- do.call(a@family@dist,
                                  args = enlist(x = a@datalist,
                                                centroids = a@centroids,
@@ -929,16 +929,6 @@ setMethod("cvi", methods::signature(a = "FuzzyTSClusters", b = "missing"),
                              SC2 <- SC2_numerator / SC2_denominator
 
                              SC1 - SC2
-                         },
-
-                         # -------------------------------------------------------------------------
-                         "PBMF" = {
-                             u <- a@fcluster
-                             m <- a@control$fuzziness
-                             factor1 <- 1 / a@k
-                             factor2 <- sum(u[,1L] * dsc[,1L]) / sum(dsc * (u ^ m))
-                             factor3 <- max(distcent[!diag(a@k)])
-                             (factor1 * factor2 * factor3) ^ 2
                          })
               })
 
