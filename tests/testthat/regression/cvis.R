@@ -16,6 +16,7 @@ with(persistent, {
         skip_on_cran()
 
         expect_equal_to_reference(base_cvis, file_name(base_cvis))
+        expect_equal_to_reference(base_fcvis, file_name(base_fcvis))
         expect_equal_to_reference(cvis_tadp, file_name(cvis_tadp))
         expect_equal_to_reference(cvis_hc, file_name(cvis_hc))
         expect_equal_to_reference(cvis_tadp, file_name(cvis_tadp_cent))

@@ -875,7 +875,7 @@ setMethod("cvi", methods::signature(a = "FuzzyTSClusters", b = "missing"),
               }
 
               ## distance between series and centroids
-              if (any(type %in% c("K", "SC"))) {
+              if (any(type %in% c("K", "T", "SC"))) {
                   dsc <- do.call(a@family@dist,
                                  args = enlist(x = a@datalist,
                                                centroids = a@centroids,

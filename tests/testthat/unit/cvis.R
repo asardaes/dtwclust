@@ -9,6 +9,7 @@ ols <- ls()
 
 internal_cvis <- c("Sil", "D", "DB", "DBstar", "CH", "SF", "COP")
 external_cvis <- c("RI", "ARI", "J", "FM", "VI")
+fuzzy_cvis <- c("MPC", "K", "T", "SC")
 
 # =================================================================================================
 # both internal and external
@@ -79,7 +80,38 @@ test_that("external CVI calculations are consistent regardless of quantity or or
 })
 
 # =================================================================================================
-# hierarchical/tadpole/fuzzy cases
+# fuzzy
+# =================================================================================================
+
+test_that("CVI calculations are consistent regardless of quantity or order of CVIs computed", {
+    fc <- tsclust(data_subset, "f", 4L, distance = "sbd", centroid = "fcmdd", seed = 32890L)
+
+    base_fcvis <- cvi(fc)
+    cvis <- fuzzy_cvis
+    `%op%` <- dtwclust:::`%op%` # avoid stupid parallel warnings
+
+    expect_true(all(
+        times(50L) %op% {
+            considered_cvis <- sample(cvis, sample(length(cvis), 1L))
+            this_cvis <- cvi(fc, type = considered_cvis)
+            all(base_fcvis[considered_cvis] == this_cvis[considered_cvis])
+        }
+    ),
+    info = paste0("A random number of fuzzy CVIs are calculated and compared against the base ones, ",
+                  "and should always be equal."))
+
+    ## when missing elements
+    fc@datalist <- list()
+    expect_warning(this_cvis <- cvi(fc))
+    considered_cvis <- names(this_cvis)
+    expect_true(all(base_fcvis[considered_cvis] == this_cvis))
+
+    ## refs
+    assign("base_fcvis", base_fcvis, persistent)
+})
+
+# =================================================================================================
+# hierarchical/tadpole cases
 # =================================================================================================
 
 test_that("CVIs work also for hierarchical and TADPole", {
@@ -90,15 +122,11 @@ test_that("CVIs work also for hierarchical and TADPole", {
                    distance = "gak", sigma = 100,
                    control = list(window.size = 18L))
 
-    fc <- dtwclust(data_reinterpolated_subset, type = "f", k = 4L, distance = "L2")
-
-    expect_error(cvi(fc, labels_subset))
     cvis_tadp <- cvi(tadp, labels_subset)
     cvis_hc <- cvi(hc, labels_subset)
     cvis_tadp2 <- cvi(as(tadp, "TSClusters"), labels_subset)
     cvis_hc2 <- cvi(as(hc, "TSClusters"), labels_subset)
 
-    expect_error(cvi(as(fc, "TSClusters"), labels_subset))
     expect_identical(cvis_tadp2, cvis_tadp)
     expect_identical(cvis_hc2, cvis_hc)
 
