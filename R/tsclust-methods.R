@@ -18,7 +18,7 @@ NULL
 #' @param .Object A `TSClusters` prototype. You shouldn't use this, see Initialize section and the
 #'   examples.
 #' @param ... For `initialize`, any valid slots. For `plot`, passed to [ggplot2::geom_line()] for
-#'   the plotting of the *cluster centroids*, or to [stats::plot.hclust()]. See Plotting section.
+#'   the plotting of the *cluster centroids*, or to [stats::plot.hclust()]; see Plotting section.
 #'   For `update`, any supported argument. Otherwise ignored.
 #' @param override.family Logical. Attempt to substitute the default family with one that conforms
 #'   to the provided elements? See Initialize section.
@@ -58,13 +58,16 @@ NULL
 #'               control = partitional_control(),
 #'               args = tsclust_args(cent = list(window.size = 8L, norm = "L2")))
 #'
+#' plot(pc_obj, type = "c", linetype = "solid",
+#'      labs.arg = list(title = "Clusters' centroids"))
+#'
 #' fc_obj <- new("FuzzyTSClusters",
 #'               type = "fuzzy", datalist = CharTraj,
 #'               centroids = centroids, cluster = cluster,
 #'               distance = "sbd", centroid = "fcm",
 #'               control = fuzzy_control())
 #'
-#' fc_obj
+#' show(fc_obj)
 #'
 setMethod("initialize", "TSClusters", function(.Object, ..., override.family = TRUE) {
     tic <- proc.time()
@@ -351,11 +354,19 @@ setMethod("update", methods::signature(object = "TSClusters"), update.TSClusters
 #'   [tsclust()]. Note that for multivariate series, this means that it **must** be a list of
 #'   matrices, even if the list has only one element.
 #'
-#' @details
+#' @section Prediction:
 #'
-#' The `predict` generic can take the usual `newdata` argument and it returns the cluster(s) to
-#' which the data belongs; if `NULL`, it simply returns the obtained cluster indices. It
-#' preprocesses the data with the corresponding function if available.
+#'   The `predict` generic can take the usual `newdata` argument. If `NULL`, the method simply
+#'   returns the obtained cluster indices. Otherwise, a nearest-neighbor classification based on the
+#'   centroids obtained from clustering is performed:
+#'
+#'   1. `newdata` is preprocessed with `object@family@preproc` using the parameters in
+#'      `object@args$preproc`.
+#'   2. A cross-distance matrix between the processed series and `object@centroids` is computed with
+#'      `object@family@dist` using the parameters in `object@args$dist`.
+#'   3. For non-fuzzy clustering, the series are assigned to their nearest centroid's cluster. For
+#'      fuzzy clustering, the fuzzy membership matrix for the series is calculated. In both cases,
+#'      `object@family@cluster` is used.
 #'
 predict.TSClusters <- function(object, newdata = NULL, ...) {
     if (is.null(newdata)) {
@@ -407,8 +418,8 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #'
 #' @param y Ignored.
 #' @param clus A numeric vector indicating which clusters to plot.
-#' @param labs.arg Arguments to change the title and/or axis labels. See [ggplot2::labs()] for more
-#'   information
+#' @param labs.arg A list with arguments to change the title and/or axis labels. See the examples
+#'   and [ggplot2::labs()] for more information.
 #' @param series Optionally, the data in the same format as it was provided to [tsclust()].
 #' @param time Optional values for the time axis. If series have different lengths, provide the time
 #'   values of the longest series.
@@ -422,11 +433,11 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #'
 #'   The default depends on whether a hierarchical method was used or not. In those cases, the
 #'   dendrogram is plotted by default; you can pass any extra parameters to [stats::plot.hclust()]
-#'   via `...`.
+#'   via the ellipsis (`...`).
 #'
 #'   Otherwise, the function plots the time series of each cluster along with the obtained centroid.
 #'   The default values for cluster centroids are: `linetype = "dashed"`, `size = 1.5`, `colour =
-#'   "black"`, `alpha = 0.5`. You can change this by means of `...`.
+#'   "black"`, `alpha = 0.5`. You can change this by means of the ellipsis (`...`).
 #'
 #'   You can choose what to plot with the `type` parameter. Possible options are:
 #'
@@ -440,7 +451,7 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #'
 #'   If you want to free the scale of the X axis, you can do the following:
 #'
-#'   `plot(object, plot = FALSE)` `+` `facet_wrap(~cl, scales = "free")`
+#'   `plot(x, plot = FALSE)` `+` `facet_wrap(~cl, scales = "free")`
 #'
 #' @return
 #'

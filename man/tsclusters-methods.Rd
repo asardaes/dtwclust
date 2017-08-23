@@ -42,7 +42,7 @@
 examples.}
 
 \item{...}{For \code{initialize}, any valid slots. For \code{plot}, passed to \code{\link[ggplot2:geom_line]{ggplot2::geom_line()}} for
-the plotting of the \emph{cluster centroids}, or to \code{\link[stats:plot.hclust]{stats::plot.hclust()}}. See Plotting section.
+the plotting of the \emph{cluster centroids}, or to \code{\link[stats:plot.hclust]{stats::plot.hclust()}}; see Plotting section.
 For \code{update}, any supported argument. Otherwise ignored.}
 
 \item{override.family}{Logical. Attempt to substitute the default family with one that conforms
@@ -61,8 +61,8 @@ matrices, even if the list has only one element.}
 
 \item{clus}{A numeric vector indicating which clusters to plot.}
 
-\item{labs.arg}{Arguments to change the title and/or axis labels. See \code{\link[ggplot2:labs]{ggplot2::labs()}} for more
-information}
+\item{labs.arg}{A list with arguments to change the title and/or axis labels. See the examples
+and \code{\link[ggplot2:labs]{ggplot2::labs()}} for more information.}
 
 \item{series}{Optionally, the data in the same format as it was provided to \code{\link[=tsclust]{tsclust()}}.}
 
@@ -85,10 +85,6 @@ The \code{update} method takes the original function call, replaces any provided
 optionally evaluates the call again. Use \code{evaluate = FALSE} if you want to get the unevaluated
 call. If no arguments are provided, the object is updated to a new version if necessary (this is
 due to changes in the internal functions of the package, here for backward compatibility).
-
-The \code{predict} generic can take the usual \code{newdata} argument and it returns the cluster(s) to
-which the data belongs; if \code{NULL}, it simply returns the obtained cluster indices. It
-preprocesses the data with the corresponding function if available.
 }
 \section{Initialize}{
 
@@ -113,6 +109,23 @@ clustering).
 prediction. Maybe not always needed, e.g. for plotting.
 }
 
+\section{Prediction}{
+
+
+The \code{predict} generic can take the usual \code{newdata} argument. If \code{NULL}, the method simply
+returns the obtained cluster indices. Otherwise, a nearest-neighbor classification based on the
+centroids obtained from clustering is performed:
+\enumerate{
+\item \code{newdata} is preprocessed with \code{object@family@preproc} using the parameters in
+\code{object@args$preproc}.
+\item A cross-distance matrix between the processed series and \code{object@centroids} is computed with
+\code{object@family@dist} using the parameters in \code{object@args$dist}.
+\item For non-fuzzy clustering, the series are assigned to their nearest centroid's cluster. For
+fuzzy clustering, the fuzzy membership matrix for the series is calculated. In both cases,
+\code{object@family@cluster} is used.
+}
+}
+
 \section{Plotting}{
 
 
@@ -120,10 +133,10 @@ The plot method uses the \code{ggplot2} plotting system (see \code{\link[ggplot2
 
 The default depends on whether a hierarchical method was used or not. In those cases, the
 dendrogram is plotted by default; you can pass any extra parameters to \code{\link[stats:plot.hclust]{stats::plot.hclust()}}
-via \code{...}.
+via the ellipsis (\code{...}).
 
 Otherwise, the function plots the time series of each cluster along with the obtained centroid.
-The default values for cluster centroids are: \code{linetype = "dashed"}, \code{size = 1.5}, \code{colour = "black"}, \code{alpha = 0.5}. You can change this by means of \code{...}.
+The default values for cluster centroids are: \code{linetype = "dashed"}, \code{size = 1.5}, \code{colour = "black"}, \code{alpha = 0.5}. You can change this by means of the ellipsis (\code{...}).
 
 You can choose what to plot with the \code{type} parameter. Possible options are:
 \itemize{
@@ -138,7 +151,7 @@ your liking. You might want to look at \code{\link[ggplot2:ggplot_build]{ggplot2
 
 If you want to free the scale of the X axis, you can do the following:
 
-\code{plot(object, plot = FALSE)} \code{+} \code{facet_wrap(~cl, scales = "free")}
+\code{plot(x, plot = FALSE)} \code{+} \code{facet_wrap(~cl, scales = "free")}
 }
 
 \examples{
@@ -156,12 +169,15 @@ pc_obj <- new("PartitionalTSClusters",
               control = partitional_control(),
               args = tsclust_args(cent = list(window.size = 8L, norm = "L2")))
 
+plot(pc_obj, type = "c", linetype = "solid",
+     labs.arg = list(title = "Clusters' centroids"))
+
 fc_obj <- new("FuzzyTSClusters",
               type = "fuzzy", datalist = CharTraj,
               centroids = centroids, cluster = cluster,
               distance = "sbd", centroid = "fcm",
               control = fuzzy_control())
 
-fc_obj
+show(fc_obj)
 
 }
