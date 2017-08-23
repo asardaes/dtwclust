@@ -444,7 +444,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'
 #' [compare_clusterings_configs()], [tsclust()]
 #'
-#' @example inst/comparison-examples.R
+#' @example man-examples/comparison-examples.R
 #'
 compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ...,
                                 configs = compare_clusterings_configs(types),

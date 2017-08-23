@@ -211,7 +211,7 @@
 #' [TSClusters-class], [tsclusters-methods], [tsclustFamily-class], [tsclust-controls],
 #' [compare_clusterings()].
 #'
-#' @example inst/tsclust-examples.R
+#' @example man-examples/tsclust-examples.R
 #'
 tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                     preproc = NULL, distance = "dtw_basic",

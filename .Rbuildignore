@@ -1,6 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 
+^man-examples
 ^man-roxygen
 ^timing-experiments
 
@@ -11,13 +12,11 @@
 ^codecov\.R
 ^LICENSE$
 
-^inst/.*\.R$
-
+^vignettes/cache/
+^vignettes/figure/
 ^vignettes/.*\.gz
 ^vignettes/.*\.bbl
 ^vignettes/.*\.log
 ^vignettes/.*\.tex
-^vignettes/cache/.*
-^vignettes/figure/.*
 
 # ^tests/.*\.rds$
