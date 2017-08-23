@@ -66,13 +66,13 @@ pc.dtwlb <- tsclust(series, k = 20L,
                     seed = 3247, trace = TRUE,
                     control = partitional_control(pam.precompute = FALSE),
                     args = tsclust_args(dist = list(window.size = 20L)))
-#> Loading required package: bigmemory.sri
+#> Repetition 1 for k = 20
 #> Iteration 1: Changes / Distsum = 100 / 3214.899
 #> Iteration 2: Changes / Distsum = 16 / 2684.667
 #> Iteration 3: Changes / Distsum = 7 / 2617.178
 #> Iteration 4: Changes / Distsum = 0 / 2611.894
 #> 
-#>  Elapsed time is 2.333 seconds.
+#>  Elapsed time is 2.344 seconds.
 
 plot(pc.dtwlb)
 ```
@@ -92,7 +92,7 @@ hc.sbd <- tsclust(CharTraj, type = "hierarchical", k = 20L,
 #> 
 #>  Performing hierarchical clustering...
 #> 
-#>  Elapsed time is 0.932 seconds.
+#>  Elapsed time is 0.936 seconds.
 
 # CVIs for HC+SBD
 print(cvis <- sapply(hc.sbd, cvi, b = CharTrajLabels))
@@ -139,16 +139,15 @@ pc.tadp <- tsclust(series, type = "tadpole", k = 20L,
 #> Entering TADPole...
 #> 
 #>  Computing lower and upper bound matrices
-#> 
 #>  Pruning during local density calculation
 #>  Pruning during nearest-neighbor distance calculation (phase 1)
 #>  Pruning during nearest-neighbor distance calculation (phase 2)
 #>  Pruning percentage = 77.8%
-#>  Performing cluster assignmnet
+#>  Performing cluster assignment
 #> 
 #> TADPole completed for k = 20 & dc = 1.5
 #> 
-#>  Elapsed time is 0.788 seconds.
+#>  Elapsed time is 0.363 seconds.
 
 plot(pc.tadp, clus = 1L:4L)
 ```
@@ -170,13 +169,13 @@ fc <- tsclust(series[1L:25L], type = "fuzzy", k = 5L,
 
 fc
 #> fuzzy clustering with 5 clusters
-#> Using L2 distance
+#> Using l2 distance
 #> Using fcm centroids
 #> Using acf_fun preprocessing
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.240   0.000   0.242 
+#>    0.27    0.00    0.27 
 #> 
 #> Head of fuzzy memberships:
 #> 
@@ -223,12 +222,7 @@ hc <- tsclust(CharTraj, k = 20L,
               args = tsclust_args(dist = list(window.size = 20L),
                                   cent = list(window.size = 20L,
                                               max.iter = 15L)))
-#> Iteration 1: Changes / Distsum = 100 / 1531.018
-#> Iteration 2: Changes / Distsum = 3 / 886.4687
-#> Iteration 3: Changes / Distsum = 2 / 873.7354
-#> Iteration 4: Changes / Distsum = 0 / 864.1794
-#> 
-#>  Elapsed time is 1.426 seconds.
+#>  Elapsed time is 1.558 seconds.
 
 ## Returning to sequential calculations
 stopCluster(cl)
@@ -240,7 +234,9 @@ plot(hc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
 
 ![](README-parallel-1.png)
 
-Disclaimer
-==========
+License
+=======
+
+GNU General Public License v3.0. See [license](LICENSE) and [copyright](inst/COPYRIGHT.txt).
 
 This software package was developed independently of any organization or institution that is or has been associated with the author.
