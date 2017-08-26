@@ -9,12 +9,12 @@ namespace dtwclust {
 /* shared variables */
 // =================================================================================================
 
-SEXP window, norm, step, backtrack, gcm;
-Rcpp::List series;
-Rcpp::IntegerVector index1, index2;
-int max_iter, nx, ny, nv, begin;
-double delta;
-bool trace;
+static SEXP window, norm, step, backtrack, gcm;
+static Rcpp::List series;
+static Rcpp::IntegerVector index1, index2;
+static int max_iter, nx, ny, nv, begin;
+static double delta;
+static bool trace;
 
 // =================================================================================================
 /* set alignment with dtw_basic (yes, it looks ugly) */
