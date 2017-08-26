@@ -470,9 +470,7 @@ Therefore, it follows that the $l_p$ norms used for DTW and LB calculations must
 such that $\text{LB}_p \leq \dtwp{}$.
 Moreover, $\text{LB\_Keogh}_p \leq \text{LB\_Improved}_p \leq \dtwp{}$,
 meaning that \code{LB_Improved} can provide a tighter LB.
-It must be noted that the LBs are only defined for series of equal length and,
-similar to DTW,
-are not symmetric regardless of the $l_p$ norm used to compute them.
+It must be noted that the LBs are only defined for series of equal length and are not symmetric regardless of the $l_p$ norm used to compute them.
 Also note that the choice of step pattern affects the value of the DTW distance,
 changing the tightness of a given LB.
 
@@ -1213,7 +1211,7 @@ thanks to the open-source nature of \R{} and the fact that \dtwclust{} is hosted
 \section{Conclusion}
 \label{sec:conclusion}
 
-In this manuscript, a general overview of the current state of the art in time-series clustering was provided.
+In this manuscript a general overview of the current state of the art in time-series clustering was provided.
 This included a lot of information related to the DTW distance and its corresponding optimizations,
 such as constraints and lower bounding techniques.
 At the same time, the \dtwclust{} package for \R{} was described and showcased,
@@ -1281,7 +1279,9 @@ The random number generator of \R{} is set to L'Ecuyer-CMRG when \dtwclust{} is 
 The user is free to change this afterwards by using the \code{RNGkind} function.
 
 This manuscript summarizes some of the theory behind the algorithms.
-However, the documentation of the different functions includes additional information regarding usability,
+However, the documentation of the different functions and the other vignette%
+\footnote{\url{https://cran.r-project.org/web/packages/dtwclust/vignettes/timing-experiments.html}}
+include additional information regarding usability,
 and should also be considered when using the package.
 
 \section[Using the proxy package]{Using the \pkg{proxy} package}
