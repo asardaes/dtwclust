@@ -9,7 +9,7 @@ ols <- ls()
 
 internal_cvis <- c("Sil", "D", "DB", "DBstar", "CH", "SF", "COP")
 external_cvis <- c("RI", "ARI", "J", "FM", "VI")
-fuzzy_cvis <- c("MPC", "K", "T", "SC")
+fuzzy_cvis <- c("MPC", "K", "T", "SC", "PBMF")
 
 # =================================================================================================
 # both internal and external

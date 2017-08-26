@@ -946,8 +946,13 @@ setMethod("cvi", methods::signature(a = "FuzzyTSClusters", b = "missing"),
                          "PBMF" = {
                              u <- a@fcluster
                              m <- a@control$fuzziness
+                             dsgc <- do.call(a@family@dist,
+                                             args = enlist(x = a@datalist,
+                                                           centroids = global_cent,
+                                                           dots = a@args$dist),
+                                             TRUE)
                              factor1 <- 1 / a@k
-                             factor2 <- sum(u[,1L] * dsc[,1L]) / sum(dsc * (u ^ m))
+                             factor2 <- sum(dsgc) / sum(dsc * (u ^ m))
                              factor3 <- max(distcent[!diag(a@k)])
                              (factor1 * factor2 * factor3) ^ 2
                          })

@@ -132,7 +132,7 @@ are also applied.
 \item \code{"K"} (~): to be minimized.
 \item \code{"T"}: to be minimized.
 \item \code{"SC"} (~): to be maximized.
-\item \code{"PBMF"}: to be maximized.
+\item \code{"PBMF"} (~): to be maximized.
 }
 }
 
