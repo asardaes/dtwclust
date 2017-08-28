@@ -736,6 +736,17 @@ so it is done by default by \dtwclust{}.
 However, this is not suitable for large datasets since the whole distance matrix has to be allocated at once,
 so it is also possible to deactivate this precomputation.
 
+In the implementation included in the package,
+$k$ series from the data are randomly chosen as initial centroids.
+Then the distance between all series and the centroids is calculated
+(or retrieved from the whole distance matrix if it was precomputed),
+and each series is assigned to the cluster of its nearest centroid.
+For each created cluster,
+the distance between all member series is computed (if necessary),
+and the series with minimum sum of distances is chosen as the new centroid.
+This continues iteratively until no series change clusters,
+or the maximum number of allowed iterations has been exceeded.
+
 \subsection{DTW barycenter averaging}
 \label{sec:dba}
 
@@ -751,9 +762,10 @@ and it usually begins by randomly selecting one of the series in the data.
 On each iteration, the DTW alignment between each series in the cluster $C$ and the centroid is computed.
 Because of the warping performed in DTW,
 it can be that several time-points from a given time-series map to a single time-point in the centroid series,
-so for each time-point in the centroid, all the corresponding values from all series in $C$ are grouped together according to the DTW alignments,
+so for each time-point in the centroid,
+all the corresponding values from all series in $C$ are grouped together according to the DTW alignments,
 and the mean is computed for each centroid point using the values contained in each group.
-This is then iteratively repeated until a certain number of iterations are reached,
+This is iteratively repeated until a certain number of iterations are reached,
 or until convergence is assumed.
 
 The \dtwclust{} implementation of DBA is done in \proglang{C++} and includes several memory optimizations.
@@ -807,7 +819,6 @@ Technically, for multivariate series,
 the shape extraction algorithm could be applied for each variable $v$ of all involved series,
 but this was not explored by the authors of \kshape{}.
 
-\newpage
 \subsection{Fuzzy-based prototypes}
 \label{sec:fuzzy-cent}
 
@@ -946,8 +957,7 @@ It adopts a relatively new clustering framework and adapts it to time-series clu
 Because of the way the algorithm works,
 it can be considered a kind of PAM clustering,
 since the centroids are always elements of the data.
-However, this algorithm is deterministic,
-depending on the value of a cutoff distance ($d_c$).
+However, this algorithm is deterministic depending on the value of a cutoff distance ($d_c$).
 
 The algorithm first uses the DTW distance's upper and lower bounds (Euclidean distance and \code{LB_Keogh} respectively) to find series with many close neighbors (in DTW space).
 Anything below $d_c$ is considered a neighbor.
