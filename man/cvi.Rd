@@ -82,6 +82,9 @@ was chosen during clustering.
 
 The formula for the SF index in Saitta et al. (2007) does not correspond to the one in Arbelaitz
 et al. (2013). The one specified in the former is used here.
+
+The formulas for the PBMF index are not entirely unambiguous in the literature. The ones given in
+Lin (2013) are used here.
 }
 \section{External CVIs}{
 
@@ -118,7 +121,7 @@ these indices might not be appropriate for those centroids.
 \item \code{"DBstar"} (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005); to be
 minimized).
 \item \code{"CH"} (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
-\item \code{"SF"} (~): Score Function (Saitta et al. (2007); to be maximized).
+\item \code{"SF"} (~): Score Function (Saitta et al. (2007); to be maximized; see notes).
 }
 }
 
@@ -132,7 +135,7 @@ are also applied.
 \item \code{"K"} (~): to be minimized.
 \item \code{"T"}: to be minimized.
 \item \code{"SC"} (~): to be maximized.
-\item \code{"PBMF"} (~): to be maximized.
+\item \code{"PBMF"} (~): to be maximized (see notes).
 }
 }
 
@@ -154,6 +157,9 @@ comparative study of cluster validity indices. Pattern Recognition, 46(1), 243-2
 
 Kim, M., & Ramakrishna, R. S. (2005). New indices for cluster validity assessment. Pattern
 Recognition Letters, 26(15), 2353-2363.
+
+Lin, H. Y. (2013). Effective Feature Selection for Multi-class Classification Models. In
+Proceedings of the World Congress on Engineering (Vol. 3).
 
 Meila, M. (2003). Comparing clusterings by the variation of information. In Learning theory and
 kernel machines (pp. 173-187). Springer Berlin Heidelberg.

@@ -75,7 +75,7 @@
 #'   - `"DBstar"` (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005); to be
 #'     minimized).
 #'   - `"CH"` (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
-#'   - `"SF"` (~): Score Function (Saitta et al. (2007); to be maximized).
+#'   - `"SF"` (~): Score Function (Saitta et al. (2007); to be maximized; see notes).
 #'
 #' @section Fuzzy CVIs:
 #'
@@ -86,7 +86,7 @@
 #'  - `"K"` (~): to be minimized.
 #'  - `"T"`: to be minimized.
 #'  - `"SC"` (~): to be maximized.
-#'  - `"PBMF"` (~): to be maximized.
+#'  - `"PBMF"` (~): to be maximized (see notes).
 #'
 #' @section Additionally:
 #'
@@ -106,6 +106,9 @@
 #' The formula for the SF index in Saitta et al. (2007) does not correspond to the one in Arbelaitz
 #' et al. (2013). The one specified in the former is used here.
 #'
+#' The formulas for the PBMF index are not entirely unambiguous in the literature. The ones given in
+#' Lin (2013) are used here.
+#'
 #' @references
 #'
 #' Arbelaitz, O., Gurrutxaga, I., Muguerza, J., Perez, J. M., & Perona, I. (2013). An extensive
@@ -113,6 +116,9 @@
 #'
 #' Kim, M., & Ramakrishna, R. S. (2005). New indices for cluster validity assessment. Pattern
 #' Recognition Letters, 26(15), 2353-2363.
+#'
+#' Lin, H. Y. (2013). Effective Feature Selection for Multi-class Classification Models. In
+#' Proceedings of the World Congress on Engineering (Vol. 3).
 #'
 #' Meila, M. (2003). Comparing clusterings by the variation of information. In Learning theory and
 #' kernel machines (pp. 173-187). Springer Berlin Heidelberg.
