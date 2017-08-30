@@ -519,7 +519,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                     stop("Dimensions of provided cross-distance matrix don't correspond to ",
                          "length of provided data")
 
-                if (trace) cat("\n\tDistance matrix provided...\n")
+                if (trace) cat("\nDistance matrix provided...\n")
 
                 if (is.null(attr(distmat, "method")))
                     distance <- "unknown"
@@ -527,7 +527,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                     distance <- attr(distmat, "method")
 
             } else {
-                if (trace) cat("\n\tCalculating distance matrix...\n")
+                if (trace) cat("\nCalculating distance matrix...\n")
                 distmat <- do.call(distfun,
                                    enlist(x = series, centroids = NULL, dots = args$dist),
                                    TRUE)
@@ -537,7 +537,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             ## Cluster
             ## -------------------------------------------------------------------------------------
 
-            if (trace) cat("\n\tPerforming hierarchical clustering...\n\n")
+            if (trace) cat("Performing hierarchical clustering...\n\n")
 
             if (is.character(method)) {
                 ## Using hclust
@@ -649,7 +649,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             ## Cluster
             ## -------------------------------------------------------------------------------------
 
-            if (trace) cat("\nEntering TADPole...\n\n")
+            if (trace) cat("\n\tEntering TADPole...\n\n")
 
             R <- TADPole(series,
                          k = k,

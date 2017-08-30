@@ -516,9 +516,10 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     ## Preprocessings
     ## =============================================================================================
 
-    if (trace) cat("Preprocessing series...\n")
+    if (trace) message("=================================== Preprocessing ",
+                       "series ===================================\n")
 
-    processed_series <- lapply(configs, function(config) {
+    processed_series <- Map(configs, types, f = function(config, type) {
         preproc_cols <- grepl("_?preproc$", names(config))
         preproc_df <- config[, preproc_cols, drop = FALSE]
 
@@ -528,6 +529,11 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
             return(NULL)
 
         preproc_args <- grepl("_preproc$", names(preproc_df))
+
+        if (trace) {
+            message("-------------- Applying ", type, " preprocessings: --------------")
+            print(preproc_df)
+        }
 
         lapply(seq_len(nrow(preproc_df)), function(i) {
             if (preproc_df$preproc[i] != "none") {
@@ -666,7 +672,6 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
             if (trace) {
                 message("-------------- Using configuration: --------------")
                 print(cfg)
-                cat("\n")
             }
 
             ## ---------------------------------------------------------------------------------

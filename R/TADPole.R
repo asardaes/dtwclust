@@ -68,7 +68,7 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     if (any(k > n)) stop("Number of clusters should be less than the number of time series")
     lb <- match.arg(lb, c("lbk", "lbi"))
 
-    if (trace) cat("\tComputing lower and upper bound matrices\n")
+    if (trace) cat("Computing lower and upper bound matrices\n")
 
     ## Calculate matrices with bounds (error check in lbk/lbi)
     LBM <- proxy::dist(x, x,

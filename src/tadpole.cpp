@@ -330,7 +330,7 @@ void cluster_assignment(const Rcpp::IntegerVector& k_vec,
                 "At least one series wasn't assigned to a cluster. This shouldn't happen, please contact maintainer."
             ); // nocov end
         if (trace)
-            Rcpp::Rcout << "TADPole completed for k = " << k << " & dc = " << dc << "\n\n";
+            Rcpp::Rcout << "TADPole completed for k = " << k << " & dc = " << dc << "\n";
 
         list(counter) = Rcpp::List::create(
             Rcpp::_["cl"] = cl,
@@ -338,6 +338,7 @@ void cluster_assignment(const Rcpp::IntegerVector& k_vec,
             Rcpp::_["distCalcPercentage"] = dist_op_percent
         );
     }
+    if (trace) Rcpp::Rcout << "\n";
 }
 
 // =================================================================================================
@@ -358,14 +359,14 @@ SEXP tadpole_cpp(const Rcpp::List& series,
     LowerTriMat<int> flags(num_series, -1);
     int num_dist_op = 0;
 
-    if (trace) Rcpp::Rcout << "\tPruning during local density calculation\n";
+    if (trace) Rcpp::Rcout << "Pruning during local density calculation\n";
     Rflush();
     std::vector<double> rho = local_density(series, num_series,
                                             dc, dtw_args,
                                             LBM, UBM,
                                             distmat, flags, num_dist_op);
 
-    if (trace) Rcpp::Rcout << "\tPruning during nearest-neighbor distance calculation (phase 1)\n";
+    if (trace) Rcpp::Rcout << "Pruning during nearest-neighbor distance calculation (phase 1)\n";
     Rflush();
     std::vector<double> delta_ub = nn_dist_1(rho, num_series, distmat, UBM);
 
@@ -374,7 +375,7 @@ SEXP tadpole_cpp(const Rcpp::List& series,
     for (int i = 0; i < num_series; i++) helper[i] *= delta_ub[i];
     auto id_cl = stable_sort_ind(helper, true);
 
-    if (trace) Rcpp::Rcout << "\tPruning during nearest-neighbor distance calculation (phase 2)\n";
+    if (trace) Rcpp::Rcout << "Pruning during nearest-neighbor distance calculation (phase 2)\n";
     Rflush();
     std::vector<int> nearest_neighbors(num_series);
     std::vector<double> delta = nn_dist_2(series, num_series,
@@ -389,8 +390,8 @@ SEXP tadpole_cpp(const Rcpp::List& series,
     double dist_op_percent = (num_dist_op / ((double)num_series * (num_series + 1) / 2 - num_series)) * 100;
 
     if (trace) {
-        Rcpp::Rcout << "\tPruning percentage = " << std::setprecision(3) << 100 - dist_op_percent << "%\n";
-        Rcpp::Rcout << "\tPerforming cluster assignment\n\n";
+        Rcpp::Rcout << "Pruning percentage = " << std::setprecision(3) << 100 - dist_op_percent << "%\n";
+        Rcpp::Rcout << "Performing cluster assignment\n\n";
         Rflush();
     }
     cluster_assignment(k, dc, id_cent, id_cl, nearest_neighbors, dist_op_percent, trace, list);
