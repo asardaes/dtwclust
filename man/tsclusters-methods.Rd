@@ -38,12 +38,12 @@
   type = NULL)
 }
 \arguments{
-\item{.Object}{A \code{TSClusters} prototype. You shouldn't use this, see Initialize section and the
+\item{.Object}{A \code{TSClusters} prototype. You \emph{shouldn't} use this, see Initialize section and the
 examples.}
 
 \item{...}{For \code{initialize}, any valid slots. For \code{plot}, passed to \code{\link[ggplot2:geom_line]{ggplot2::geom_line()}} for
-the plotting of the \emph{cluster centroids}, or to \code{\link[stats:plot.hclust]{stats::plot.hclust()}}; see Plotting section.
-For \code{update}, any supported argument. Otherwise ignored.}
+the plotting of the \emph{cluster centroids}, or to \code{\link[stats:plot.hclust]{stats::plot.hclust()}}; see Plotting section and
+the examples. For \code{update}, any supported argument. Otherwise ignored.}
 
 \item{override.family}{Logical. Attempt to substitute the default family with one that conforms
 to the provided elements? See Initialize section.}
@@ -55,7 +55,7 @@ a new \code{TSClusters} object. Otherwise, it returns the unevaluated call.}
 
 \item{newdata}{New data to be assigned to a cluster. It can take any of the supported formats of
 \code{\link[=tsclust]{tsclust()}}. Note that for multivariate series, this means that it \strong{must} be a list of
-matrices, even if the list has only one element.}
+matrices, even if the list has only one matrix.}
 
 \item{y}{Ignored.}
 
@@ -152,6 +152,10 @@ your liking. You might want to look at \code{\link[ggplot2:ggplot_build]{ggplot2
 If you want to free the scale of the X axis, you can do the following:
 
 \code{plot(x, plot = FALSE)} \code{+} \code{facet_wrap(~cl, scales = "free")}
+
+For more complicated changes, you're better off looking at the source code at
+\url{https://github.com/asardaes/dtwclust/blob/master/R/tsclust-methods.R} and creating your
+own plotting function.
 }
 
 \examples{

@@ -22,7 +22,8 @@
 #' it only uses it when creating the LCM, and not when calculating the final aggregated cost, i.e.
 #' the DTW distance.
 #'
-#' This wrapper simply returns the appropriate DTW distance using L2 norm (Euclidean norm).
+#' This wrapper simply returns the appropriate DTW distance using L2 norm (Euclidean norm). A
+#' [proxy::dist()] version is also registered.
 #'
 #' @template window
 #'

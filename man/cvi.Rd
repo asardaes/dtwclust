@@ -29,11 +29,11 @@ cvi(a, b = NULL, type = "valid", ..., log.base = 10)
   log.base = 10)
 }
 \arguments{
-\item{a}{An object returned by the \code{\link[=dtwclust]{dtwclust()}} or \code{\link[=tsclust]{tsclust()}} function, or a vector that can be
+\item{a}{An object returned by \code{\link[=tsclust]{tsclust()}} or, for non-fuzzy clusterings, a vector that can be
 coerced to integers which indicate the cluster memeberships.}
 
 \item{b}{If needed, a vector that can be coerced to integers which indicate the cluster
-memeberships. The ground truth (if known) should be provided here.}
+memeberships. The ground truth (if known) should be provided here. Only for non-fuzzy.}
 
 \item{type}{Character vector indicating which indices are to be computed. See supported values
 below.}
@@ -63,7 +63,7 @@ to the correct one. Thus, external CVIs can only be used if the ground truth is 
 Note that even though a fuzzy partition can be changed into a crisp one, making it compatible
 with many of the existing crisp CVIs, there are also fuzzy CVIs tailored specifically to fuzzy
 clustering, and these may be more suitable in those situations. Naturally, fuzzy partitions
-usually have no ground truth associated with them.
+have no ground truth associated with them.
 
 Each index defines their range of values and whether they are to be minimized or maximized. In
 many cases, these CVIs can be used to evaluate the result of a clustering algorithm regardless of
@@ -73,7 +73,7 @@ Knowing which CVI will work best cannot be determined a priori, so they should b
 specific application. Usually, many CVIs are utilized and compared to each other, maybe using a
 majority vote to decide on a final result. Furthermore, it should be noted that many CVIs perform
 additional distance calculations when being computed, which can be very considerable if using
-DTW.
+DTW or GAK.
 }
 \note{
 In the original definition of many internal and fuzzy CVIs, the Euclidean distance and a mean
@@ -144,8 +144,7 @@ are also applied.
 \itemize{
 \item \code{"valid"}: Returns all valid indices depending on the type of \code{a} and whether \code{b} was
 provided or not.
-\item \code{"internal"}: Returns all internal CVIs. Only supported for \linkS4class{dtwclust} and
-\linkS4class{TSClusters} objects.
+\item \code{"internal"}: Returns all internal CVIs. Only supported for \linkS4class{TSClusters} objects.
 \item \code{"external"}: Returns all external CVIs. Requires \code{b} to be provided. Not valid for fuzzy
 clustering.
 }

@@ -5,6 +5,7 @@
 #' @name dtwclust-methods
 #' @rdname dtwclust-methods
 #' @include dtwclust-classes.R
+#' @keywords internal
 #'
 #' @details
 #'
@@ -604,6 +605,7 @@ setMethod("cvi", methods::signature(a = "dtwclust"),
 #' @name randIndex
 #' @rdname randIndex
 #' @exportMethod randIndex
+#' @keywords internal
 #'
 #' @param x,y,correct,original See [flexclust::randIndex()].
 #'
@@ -648,6 +650,7 @@ setMethod("randIndex", methods::signature(x="dtwclust", y="dtwclust"),
 #' @rdname clusterSim
 #' @aliases clusterSim,dtwclust-method
 #' @exportMethod clusterSim
+#' @keywords internal
 #'
 #' @param object,data,method,symmetric,... See [flexclust::clusterSim()].
 #'

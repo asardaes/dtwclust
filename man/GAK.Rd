@@ -2,9 +2,13 @@
 % Please edit documentation in R/GAK.R
 \name{GAK}
 \alias{GAK}
+\alias{gak}
 \title{Fast global alignment kernels}
 \usage{
 GAK(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
+  logs = NULL, error.check = TRUE)
+
+gak(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
   logs = NULL, error.check = TRUE)
 }
 \arguments{

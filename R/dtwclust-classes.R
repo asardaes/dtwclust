@@ -7,6 +7,7 @@
 #' @include tsclust-classes.R
 #' @aliases dtwclustFamily
 #' @exportClass dtwclustFamily
+#' @keywords internal
 #'
 #' @details
 #'
@@ -43,6 +44,7 @@ methods::setClassUnion("intORnull", c("integer", "NULL"))
 #' @rdname dtwclustControl-class
 #' @aliases dtwclustControl
 #' @exportClass dtwclustControl
+#' @keywords internal
 #'
 #' @details
 #'
@@ -134,6 +136,7 @@ setClass("dtwclustControl",
 #' @name dtwclust-class
 #' @rdname dtwclust-class
 #' @exportClass dtwclust
+#' @keywords internal
 #'
 #' @details
 #'

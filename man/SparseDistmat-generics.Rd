@@ -32,3 +32,4 @@ Generics with methods for \linkS4class{SparseDistmat}.
 \details{
 Accessing matrix elements with \code{[]} first calculates the values if necessary.
 }
+\keyword{internal}

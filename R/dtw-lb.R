@@ -7,7 +7,7 @@
 #'
 #' @param x,y A matrix or data frame where rows are time series, or a list of time series.
 #' @param window.size Window size to use with the LB and DTW calculation. See details.
-#' @param norm Pointwise distance. Either `"L1"` for Manhattan distance or `"L2"` for Euclidean.
+#' @param norm Either `"L1"` for Manhattan distance or `"L2"` for Euclidean.
 #' @template error-check
 #' @param pairwise Calculate pairwise distances?
 #' @param dtw.func Which function to use for core DTW the calculations, either "dtw" or "dtw_basic".

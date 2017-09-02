@@ -41,7 +41,7 @@
 #' has been associated with the author.
 #'
 #' There are a couple of reasons why this package will **not** work if it is not attached (via
-#' [base::library()]). For the specifics, see below.
+#' [base::library()]). For the specifics, continue reading.
 #'
 #' The \pkg{methods} [package][methods::methods-package] must be attached in order for some internal
 #' inheritance to work properly. This is usually done automatically by `R`, with [utils::Rscript()]

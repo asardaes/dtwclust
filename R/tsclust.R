@@ -10,18 +10,18 @@
 #'   coerced to a list row-wise (see [tslist()]).
 #' @param type What type of clustering method to use: `"partitional"`, `"hierarchical"`, `"tadpole"`
 #'   or `"fuzzy"`.
-#' @param k Number of desired clusters. It may be a numeric vector with different values.
+#' @param k Number of desired clusters. It can be a numeric vector with different values.
 #' @param ... Arguments to pass to preprocessing, centroid **and** distance functions (added to
 #'   `args`). Also passed to `method` from [hierarchical_control()] if it happens to be a function,
 #'   and to [stats::hclust()] if it contains the `members` parameter.
 #' @param preproc Function to preprocess data. Defaults to [zscore()] *only* if `centroid` `=`
 #'   `"shape"`, but will be replaced by a custom function if provided.
 #' @param distance A registered distance from [proxy::dist()]. Ignored for `type` `=` `"tadpole"`.
-#' @param centroid Either a supported string or an appropriate function to calculate centroids when
-#'   using partitional or prototypes for hierarchical/tadpole methods.
-#' @param control An appropriate list of controls. See [tsclust-controls]
+#' @param centroid Either a supported string, an appropriate function to calculate centroids when
+#'   using partitional/hierarchical/tadpole methods. See Centroids section.
+#' @param control An appropriate list of controls. See [tsclust-controls].
 #' @param args An appropriate list of arguments for preprocessing, distance and centroid functions.
-#'   See [tsclust_args()]
+#'   See [tsclust_args()] and the examples.
 #' @param seed Random seed for reproducibility.
 #' @param trace Logical flag. If `TRUE`, more output regarding the progress is printed to screen.
 #' @template error-check
@@ -41,8 +41,8 @@
 #'
 #' In the case of multivariate time series, they should be provided as a list of matrices, where
 #' time spans the rows of each matrix and the variables span the columns (see [CharTrajMV] for an
-#' example). At the moment, only `DTW`, `DTW2` and `GAK` support such series. You can of course
-#' create your own custom distances. All included centroid functions should work with the
+#' example). At the moment, only `dtw_basic`, `DTW`, `DTW2` and `GAK` support such series. You can
+#' of course create your own custom distances. All included centroid functions should work with the
 #' aforementioned format, although `shape` is *not* recommended. Note that the `plot` method will
 #' simply append all dimensions (columns) one after the other.
 #'
@@ -56,7 +56,7 @@
 #' @section Centroid Calculation:
 #'
 #'   In the case of partitional/fuzzy algorithms, a suitable function should calculate the cluster
-#'   centroids at every iteration. In this case, the centroids are themselves time series. Fuzzy
+#'   centroids at every iteration. In this case, the centroids may also be time series. Fuzzy
 #'   clustering uses the standard fuzzy c-means centroid by default.
 #'
 #'   In either case, a custom function can be provided. If one is provided, it will receive the
@@ -117,27 +117,21 @@
 #'   Note that you are free to create your own distance functions and register them. Optionally, you
 #'   can use one of the following custom implementations (all registered with `proxy`):
 #'
-#'   - `"dtw"`: DTW, optionally with a Sakoe-Chiba/Slanted-band constraint.
-#'   - `"dtw2"`: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint. Read
-#'     details below.
+#'   - `"dtw"`: DTW, optionally with a Sakoe-Chiba/Slanted-band constraint. Done with [dtw::dtw()].
+#'   - `"dtw2"`: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint. See
+#'     [dtw2()].
 #'   - `"dtw_basic"`: A custom version of DTW with less functionality, but faster. See
 #'     [dtw_basic()].
 #'   - `"dtw_lb"`: DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some
 #'     computations are avoided by first estimating the distance matrix with Lemire's lower bound
 #'     and then iteratively refining with DTW. See [dtw_lb()]. Not suitable for `pam.precompute` =
 #'     `TRUE` nor hierarchical clustering.
-#'   - `"lbk"`: Keogh's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint. See
-#'     [lb_keogh()].
-#'   - `"lbi"`: Lemire's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint. See
-#'     [lb_improved()].
+#'   - `"lbk"`: Keogh's lower bound for DTW with either L1 or L2 norm for the Sakoe-Chiba
+#'     constraint. See [lb_keogh()].
+#'   - `"lbi"`: Lemire's lower bound for DTW with either L1 or L2 norm for the Sakoe-Chiba
+#'     constraint. See [lb_improved()].
 #'   - `"sbd"`: Shape-based distance. See [SBD()].
 #'   - `"gak"`: Global alignment kernels. See [GAK()].
-#'
-#'   DTW2 is done with [dtw::dtw()], but it differs from the result you would obtain if you specify
-#'   `L2` as `dist.method`: with `DTW2`, pointwise distances (the local cost matrix) are calculated
-#'   with `L1` norm, *each* element of the matrix is squared and the result is fed into
-#'   [dtw::dtw()], which finds the optimum warping path. The square root of the resulting distance
-#'   is *then* computed. See [dtw2()].
 #'
 #'   Out of the aforementioned, only the distances based on DTW lower bounds *don't* support series
 #'   of different length. The lower bounds are probably unsuitable for direct clustering unless
@@ -146,7 +140,7 @@
 #'   If you know that the distance function is symmetric, and you use a hierarchical algorithm, or a
 #'   partitional algorithm with PAM centroids, or fuzzy c-medoids, some time can be saved by
 #'   calculating only half the distance matrix. Therefore, consider setting the symmetric control
-#'   parameter to `TRUE` if this is the case.
+#'   parameter to `TRUE` if this is the case (see [tsclust-controls]).
 #'
 #' @section Preprocessing:
 #'

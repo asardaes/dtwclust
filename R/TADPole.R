@@ -8,14 +8,14 @@
 #'   is a time series. Multivariate series are **not** supported.
 #' @param window.size Window size constraint for DTW (Sakoe-Chiba). See details.
 #' @param k The number of desired clusters. Can be a vector with several values.
-#' @param dc The cutoff distance(s). May be a vector with several values.
+#' @param dc The cutoff distance(s). Can be a vector with several values.
 #' @template error-check
 #' @param lb Which lower bound to use, "lbk" for [lb_keogh()] or "lbi" for [lb_improved()].
 #' @param trace Logical flag. If `TRUE`, more output regarding the progress is printed to screen.
 #'
 #' @details
 #'
-#' This function can be called either directly or through [dtwclust()] and [tsclust()].
+#' This function can be called either directly or through [tsclust()].
 #'
 #' TADPole clustering adopts a relatively new clustering framework and adapts it to time series
 #' clustering with DTW. See the cited article for the details of the algorithm.
@@ -33,8 +33,8 @@
 #' The algorithm relies on the DTW bounds, which are only defined for univariate time series of
 #' equal length.
 #'
-#' Parallelization is supported, but given the internal optimizations, it may only be useful if
-#' multiple `dc` values are specified in the same call.
+#' Parallelization is supported, but it will only be used if multiple `dc` values are specified in
+#' the same call.
 #'
 #' @template window
 #'
@@ -107,3 +107,8 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
 call_tadpole <- function(x, k, dc, dtw_args, LBM, UBM, trace, ret) {
     .Call(C_tadpole, x, k, dc, dtw_args, LBM, UBM, trace, ret, PACKAGE = "dtwclust")
 }
+
+#' @rdname TADPole
+#' @export
+#'
+tadpole <- TADPole

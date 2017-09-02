@@ -4,8 +4,8 @@
 
 #' Sparse distance matrix
 #'
-#' Reference class that is used internally for PAM centroids when `pam.precompute = FALSE`. It
-#' allows for mutable state. It contains [Distmat-class].
+#' Reference class that is used internally for PAM centroids when `pam.precompute = FALSE` and
+#' `pam.sparse = TRUE`. It allows for mutable state. It contains [Distmat-class].
 #'
 #' @include Distmat.R
 #' @include pkg.R
@@ -14,6 +14,8 @@
 #' @field symmetric Logical indicating if the matrix is symmetric.
 #' @field distmat_indices External pointer (C++ class) with the indices of existing values within
 #'   the matrix, and the method to update them.
+#'
+#' @keywords internal
 #'
 SparseDistmat <- setRefClass(
     "SparseDistmat",
@@ -58,6 +60,7 @@ SparseDistmat <- setRefClass(
 #'
 #' @name SparseDistmat-generics
 #' @rdname SparseDistmat-generics
+#' @keywords internal
 #'
 NULL
 

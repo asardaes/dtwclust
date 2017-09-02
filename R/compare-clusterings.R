@@ -1,13 +1,12 @@
 #' Helper function for preprocessing/distance/centroid configurations
 #'
 #' Create preprocessing, distance and centroid configurations for [compare_clusterings_configs()].
-#' All functions use [base::expand.grid()].
 #'
 #' @export
 #'
 #' @param type Which type of function is being targeted by this configuration.
-#' @param ... Any number of named nested lists with functions and arguments that will be shared by
-#'   all clusterings. See details.
+#' @param ... Any number of named lists with functions and arguments that will be shared by all
+#'   clusterings. See details.
 #' @param partitional A named list of lists with functions and arguments for partitional
 #'   clusterings.
 #' @param hierarchical A named list of lists with functions and arguments for hierarchical
@@ -20,10 +19,12 @@
 #'
 #' @details
 #'
-#' The named lists are interpreted in the following way: the name of each element of the list will
-#' be considered to be a function name, and the elements of the nested list will be the possible
-#' parameters for the function. Each function must have at least an empty list. The parameters may
-#' be vectors that specify different values to be tested.
+#' All functions use [base::expand.grid()].
+#'
+#' The named lists are interpreted in the following way: the name of the list will be considered to
+#' be a function name, and the elements of the list will be the possible parameters for the
+#' function. Each function must have at least an empty list. The parameters may be vectors that
+#' specify different values to be tested.
 #'
 #' For preprocessing, the special name `none` signifies no preprocessing.
 #'
@@ -326,7 +327,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #' @export
 #'
 #' @param series A list of series, a numeric matrix or a data frame. Matrices and data frames are
-#'   coerced to a list row-wise.
+#'   coerced to a list row-wise (see [tslist()]).
 #' @param types Clustering types. It must be any combination of (possibly abbreviated): partitional,
 #'   hierarchical, fuzzy, tadpole.
 #' @param ... Further arguments for [tsclust()], `score.clus` or `pick.clus`.

@@ -6,8 +6,8 @@
 \alias{SparseDistmat}
 \title{Sparse distance matrix}
 \description{
-Reference class that is used internally for PAM centroids when \code{pam.precompute = FALSE}. It
-allows for mutable state. It contains \linkS4class{Distmat}.
+Reference class that is used internally for PAM centroids when \code{pam.precompute = FALSE} and
+\code{pam.sparse = TRUE}. It allows for mutable state. It contains \linkS4class{Distmat}.
 }
 \section{Fields}{
 
@@ -26,3 +26,4 @@ the matrix, and the method to update them.}
 \item{\code{initialize(..., distmat, series, distance, control, error.check = TRUE)}}{Initialization based on needed parameters}
 }}
 
+\keyword{internal}

@@ -11,7 +11,7 @@
 #'
 #' @template window
 #'
-#' @return A list with two elements (lower and upper envelopes): `lower` and `upper`.
+#' @return A list with two elements (lower and upper envelopes respectively): `lower` and `upper`.
 #'
 #' @note
 #'

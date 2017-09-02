@@ -4,6 +4,7 @@
 #' new interface.
 #'
 #' @export
+#' @keywords internal
 #'
 #' @param data A list of series, a numeric matrix or a data frame. Matrices and data frames are
 #'   coerced row-wise.

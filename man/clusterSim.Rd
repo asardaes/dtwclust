@@ -18,3 +18,4 @@ No longer supported directly in \pkg{dtwclust}.
 \seealso{
 \code{\link[flexclust:clusterSim]{flexclust::clusterSim()}}
 }
+\keyword{internal}

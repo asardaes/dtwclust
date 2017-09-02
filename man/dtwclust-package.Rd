@@ -40,7 +40,7 @@ This software package was developed independently of any organization or institu
 has been associated with the author.
 
 There are a couple of reasons why this package will \strong{not} work if it is not attached (via
-\code{\link[base:library]{base::library()}}). For the specifics, see below.
+\code{\link[base:library]{base::library()}}). For the specifics, continue reading.
 
 The \pkg{methods} \link[methods:methods-package]{package} must be attached in order for some internal
 inheritance to work properly. This is usually done automatically by \code{R}, with \code{\link[utils:Rscript]{utils::Rscript()}}

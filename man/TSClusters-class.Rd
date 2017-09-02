@@ -9,7 +9,7 @@
 \title{Class definition for \code{TSClusters} and derived classes}
 \description{
 Formal S4 classes for time-series clusters. See class hierarchy and slot organization at the
-bottom.
+\strong{bottom}.
 }
 \details{
 The base class is \code{TSClusters}. The 3 classes that inherit from it are: \code{PartitionalTSClusters},

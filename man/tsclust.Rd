@@ -16,7 +16,7 @@ coerced to a list row-wise (see \code{\link[=tslist]{tslist()}}).}
 \item{type}{What type of clustering method to use: \code{"partitional"}, \code{"hierarchical"}, \code{"tadpole"}
 or \code{"fuzzy"}.}
 
-\item{k}{Number of desired clusters. It may be a numeric vector with different values.}
+\item{k}{Number of desired clusters. It can be a numeric vector with different values.}
 
 \item{...}{Arguments to pass to preprocessing, centroid \strong{and} distance functions (added to
 \code{args}). Also passed to \code{method} from \code{\link[=hierarchical_control]{hierarchical_control()}} if it happens to be a function,
@@ -27,13 +27,13 @@ and to \code{\link[stats:hclust]{stats::hclust()}} if it contains the \code{memb
 
 \item{distance}{A registered distance from \code{\link[proxy:dist]{proxy::dist()}}. Ignored for \code{type} \code{=} \code{"tadpole"}.}
 
-\item{centroid}{Either a supported string or an appropriate function to calculate centroids when
-using partitional or prototypes for hierarchical/tadpole methods.}
+\item{centroid}{Either a supported string, an appropriate function to calculate centroids when
+using partitional/hierarchical/tadpole methods. See Centroids section.}
 
-\item{control}{An appropriate list of controls. See \link{tsclust-controls}}
+\item{control}{An appropriate list of controls. See \link{tsclust-controls}.}
 
 \item{args}{An appropriate list of arguments for preprocessing, distance and centroid functions.
-See \code{\link[=tsclust_args]{tsclust_args()}}}
+See \code{\link[=tsclust_args]{tsclust_args()}} and the examples.}
 
 \item{seed}{Random seed for reproducibility.}
 
@@ -67,8 +67,8 @@ missing values are allowed.
 
 In the case of multivariate time series, they should be provided as a list of matrices, where
 time spans the rows of each matrix and the variables span the columns (see \link{CharTrajMV} for an
-example). At the moment, only \code{DTW}, \code{DTW2} and \code{GAK} support such series. You can of course
-create your own custom distances. All included centroid functions should work with the
+example). At the moment, only \code{dtw_basic}, \code{DTW}, \code{DTW2} and \code{GAK} support such series. You can
+of course create your own custom distances. All included centroid functions should work with the
 aforementioned format, although \code{shape} is \emph{not} recommended. Note that the \code{plot} method will
 simply append all dimensions (columns) one after the other.
 }
@@ -81,7 +81,7 @@ The lower bounds are \strong{not} symmetric, and \code{DTW} is not symmetric in 
 
 
 In the case of partitional/fuzzy algorithms, a suitable function should calculate the cluster
-centroids at every iteration. In this case, the centroids are themselves time series. Fuzzy
+centroids at every iteration. In this case, the centroids may also be time series. Fuzzy
 clustering uses the standard fuzzy c-means centroid by default.
 
 In either case, a custom function can be provided. If one is provided, it will receive the
@@ -146,28 +146,22 @@ via \code{\link[proxy:pr_DB]{proxy::pr_DB()}}, and extra parameters can be provi
 Note that you are free to create your own distance functions and register them. Optionally, you
 can use one of the following custom implementations (all registered with \code{proxy}):
 \itemize{
-\item \code{"dtw"}: DTW, optionally with a Sakoe-Chiba/Slanted-band constraint.
-\item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint. Read
-details below.
+\item \code{"dtw"}: DTW, optionally with a Sakoe-Chiba/Slanted-band constraint. Done with \code{\link[dtw:dtw]{dtw::dtw()}}.
+\item \code{"dtw2"}: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint. See
+\code{\link[=dtw2]{dtw2()}}.
 \item \code{"dtw_basic"}: A custom version of DTW with less functionality, but faster. See
 \code{\link[=dtw_basic]{dtw_basic()}}.
 \item \code{"dtw_lb"}: DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some
 computations are avoided by first estimating the distance matrix with Lemire's lower bound
 and then iteratively refining with DTW. See \code{\link[=dtw_lb]{dtw_lb()}}. Not suitable for \code{pam.precompute} =
 \code{TRUE} nor hierarchical clustering.
-\item \code{"lbk"}: Keogh's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint. See
-\code{\link[=lb_keogh]{lb_keogh()}}.
-\item \code{"lbi"}: Lemire's lower bound with either L1 or L2 norm for the Sakoe-Chiba constraint. See
-\code{\link[=lb_improved]{lb_improved()}}.
+\item \code{"lbk"}: Keogh's lower bound for DTW with either L1 or L2 norm for the Sakoe-Chiba
+constraint. See \code{\link[=lb_keogh]{lb_keogh()}}.
+\item \code{"lbi"}: Lemire's lower bound for DTW with either L1 or L2 norm for the Sakoe-Chiba
+constraint. See \code{\link[=lb_improved]{lb_improved()}}.
 \item \code{"sbd"}: Shape-based distance. See \code{\link[=SBD]{SBD()}}.
 \item \code{"gak"}: Global alignment kernels. See \code{\link[=GAK]{GAK()}}.
 }
-
-DTW2 is done with \code{\link[dtw:dtw]{dtw::dtw()}}, but it differs from the result you would obtain if you specify
-\code{L2} as \code{dist.method}: with \code{DTW2}, pointwise distances (the local cost matrix) are calculated
-with \code{L1} norm, \emph{each} element of the matrix is squared and the result is fed into
-\code{\link[dtw:dtw]{dtw::dtw()}}, which finds the optimum warping path. The square root of the resulting distance
-is \emph{then} computed. See \code{\link[=dtw2]{dtw2()}}.
 
 Out of the aforementioned, only the distances based on DTW lower bounds \emph{don't} support series
 of different length. The lower bounds are probably unsuitable for direct clustering unless
@@ -176,7 +170,7 @@ series are very easily distinguishable.
 If you know that the distance function is symmetric, and you use a hierarchical algorithm, or a
 partitional algorithm with PAM centroids, or fuzzy c-medoids, some time can be saved by
 calculating only half the distance matrix. Therefore, consider setting the symmetric control
-parameter to \code{TRUE} if this is the case.
+parameter to \code{TRUE} if this is the case (see \link{tsclust-controls}).
 }
 
 \section{Preprocessing}{

@@ -1,8 +1,8 @@
 #' Basic DTW distance
 #'
 #' This is a custom implementation of the DTW algorithm without all the functionality included in
-#' [dtw::dtw()]. Because of that, it should be slightly faster, while still supporting the most
-#' common options.
+#' [dtw::dtw()]. Because of that, it should be faster, while still supporting the most common
+#' options.
 #'
 #' @export
 #'

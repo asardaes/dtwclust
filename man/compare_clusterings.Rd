@@ -13,7 +13,7 @@ compare_clusterings(series = NULL, types = c("p", "h", "f", "t"), ...,
 }
 \arguments{
 \item{series}{A list of series, a numeric matrix or a data frame. Matrices and data frames are
-coerced to a list row-wise.}
+coerced to a list row-wise (see \code{\link[=tslist]{tslist()}}).}
 
 \item{types}{Clustering types. It must be any combination of (possibly abbreviated): partitional,
 hierarchical, fuzzy, tadpole.}

@@ -11,8 +11,8 @@ pdc_configs(type = c("preproc", "distance", "centroid"), ...,
 \arguments{
 \item{type}{Which type of function is being targeted by this configuration.}
 
-\item{...}{Any number of named nested lists with functions and arguments that will be shared by
-all clusterings. See details.}
+\item{...}{Any number of named lists with functions and arguments that will be shared by all
+clusterings. See details.}
 
 \item{partitional}{A named list of lists with functions and arguments for partitional
 clusterings.}
@@ -33,13 +33,14 @@ A list for each clustering, each of which includes a data frame with the compute
 }
 \description{
 Create preprocessing, distance and centroid configurations for \code{\link[=compare_clusterings_configs]{compare_clusterings_configs()}}.
-All functions use \code{\link[base:expand.grid]{base::expand.grid()}}.
 }
 \details{
-The named lists are interpreted in the following way: the name of each element of the list will
-be considered to be a function name, and the elements of the nested list will be the possible
-parameters for the function. Each function must have at least an empty list. The parameters may
-be vectors that specify different values to be tested.
+All functions use \code{\link[base:expand.grid]{base::expand.grid()}}.
+
+The named lists are interpreted in the following way: the name of the list will be considered to
+be a function name, and the elements of the list will be the possible parameters for the
+function. Each function must have at least an empty list. The parameters may be vectors that
+specify different values to be tested.
 
 For preprocessing, the special name \code{none} signifies no preprocessing.
 

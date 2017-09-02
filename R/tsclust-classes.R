@@ -10,7 +10,7 @@ methods::removeClass("hclust4")
 #' Class definition for `TSClusters` and derived classes
 #'
 #' Formal S4 classes for time-series clusters. See class hierarchy and slot organization at the
-#' bottom.
+#' **bottom**.
 #'
 #' @rdname TSClusters-class
 #' @exportClass TSClusters

@@ -7,7 +7,7 @@
 \alias{CharTrajLabels}
 \alias{CharTrajMV}
 \title{Subset of character trajectories data set}
-\format{Lists with 100 elements each. Each element is a time series. Labels included as factor vector.}
+\format{Lists with 100 elements. Each element is a time series. Labels included as factor vector.}
 \source{
 \url{https://archive.ics.uci.edu/ml/datasets/Character+Trajectories}
 }

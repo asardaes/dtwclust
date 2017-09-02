@@ -31,7 +31,8 @@ The \code{\link[dtw:dtw]{dtw::dtw()}} function allows changing the norm by means
 it only uses it when creating the LCM, and not when calculating the final aggregated cost, i.e.
 the DTW distance.
 
-This wrapper simply returns the appropriate DTW distance using L2 norm (Euclidean norm).
+This wrapper simply returns the appropriate DTW distance using L2 norm (Euclidean norm). A
+\code{\link[proxy:dist]{proxy::dist()}} version is also registered.
 
 The windowing constraint uses a centered window. The calculations expect a value in
 \code{window.size} that represents the distance between the point considered and one of the edges

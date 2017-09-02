@@ -13,8 +13,8 @@ NCCc(x, y)
 The cross-correlation sequence with length \code{length(x) + length(y) - 1L}.
 }
 \description{
-This function uses FFT to compute the cross-correlation sequence between two series. They need
-not be of equal length.
+This function uses the FFT to compute the cross-correlation sequence between two series. They
+need \emph{not} be of equal length.
 }
 \references{
 Paparrizos J and Gravano L (2015). ``k-Shape: Efficient and Accurate Clustering of Time Series.''

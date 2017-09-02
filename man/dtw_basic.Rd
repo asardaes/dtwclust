@@ -43,8 +43,8 @@ The DTW distance. For \code{backtrack} \code{=} \code{TRUE}, a list with:
 }
 \description{
 This is a custom implementation of the DTW algorithm without all the functionality included in
-\code{\link[dtw:dtw]{dtw::dtw()}}. Because of that, it should be slightly faster, while still supporting the most
-common options.
+\code{\link[dtw:dtw]{dtw::dtw()}}. Because of that, it should be faster, while still supporting the most common
+options.
 }
 \details{
 If \code{backtrack} is \code{TRUE}, the mapping of indices between series is returned in a list.

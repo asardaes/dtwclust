@@ -2,9 +2,12 @@
 % Please edit documentation in R/SBD.R
 \name{SBD}
 \alias{SBD}
+\alias{sbd}
 \title{Shape-based distance}
 \usage{
 SBD(x, y, znorm = FALSE, error.check = TRUE, return.shifted = TRUE)
+
+sbd(x, y, znorm = FALSE, error.check = TRUE, return.shifted = TRUE)
 }
 \arguments{
 \item{x, y}{Univariate time series.}

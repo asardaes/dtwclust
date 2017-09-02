@@ -69,3 +69,4 @@ without printing anything to screen}
 \details{
 Please refer to \link{tsclusters-methods} for the updated versions.
 }
+\keyword{internal}

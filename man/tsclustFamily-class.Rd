@@ -41,7 +41,7 @@ optimized symmetric calculations. If you like, you can use the function more or 
 but provide a control argument when creating the family. However, bear in mind the following
 considerations.
 \itemize{
-\item The second argument is call \code{centroids} (inconsistent with \code{\link[proxy:dist]{proxy::dist()}}).
+\item The second argument is called \code{centroids} (inconsistent with \code{\link[proxy:dist]{proxy::dist()}}).
 \item If \code{control$distmat} is \emph{not} \code{NULL}, the function will try to subset it.
 \item If \code{control$symmetric} is \code{TRUE}, \code{centroids} is \code{NULL}, \emph{and} there is no argument
 \code{pairwise} that is \code{TRUE}, only half the distance matrix will be computed.
@@ -56,7 +56,7 @@ sequential with \code{\link[proxy:dist]{proxy::dist()}}.
 Note that all distances implemented as part of \pkg{dtwclust} have custom proxy loops, so see
 their respective documentation to see what optimizations apply to each one.
 
-For distances not included in \pkg{dtwclust}, the symmetric, parallel case mentioned above
+For distances \emph{not} included in \pkg{dtwclust}, the symmetric, parallel case mentioned above
 makes chunks for parallel workers, but they are not perfectly balanced, so some workers might
 finish before the others.
 }
@@ -73,6 +73,7 @@ formal arguments are described in the Centroid Calculation section from \code{\l
 
 \dontrun{
 data(uciCT)
+# See "GAK" documentation
 fam <- new("tsclustFamily", dist = "gak")
 
 # This is done with symmetric optimizations, regardless of control$symmetric

@@ -23,6 +23,8 @@
 #' The function assumes that indexing the matrix/data.frame with `series[i, ]` will return something
 #' that can be coerced to a numeric vector.
 #'
+#' No consistency checks are performed by this function.
+#'
 tslist <- function(series) {
     if (is.matrix(series) || is.data.frame(series)) {
         rnms <- rownames(series)

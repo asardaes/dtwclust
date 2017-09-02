@@ -6,8 +6,7 @@
 \alias{Distmat}
 \title{Distance matrix}
 \description{
-Reference class that is used internally for PAM centroids when both \code{pam.precompute} and
-\code{pam.sparse} are \code{FALSE} (see \link{tsclust-controls}).
+Reference class that is used internally for cross-distance matrices.
 }
 \section{Fields}{
 
@@ -29,3 +28,4 @@ Reference class that is used internally for PAM centroids when both \code{pam.pr
 \item{\code{initialize(..., distmat, series, distance, control, error.check = TRUE)}}{Initialization based on needed parameters}
 }}
 
+\keyword{internal}

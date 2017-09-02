@@ -119,6 +119,11 @@ SBD <- function(x, y, znorm = FALSE, error.check = TRUE, return.shifted = TRUE) 
     list(dist = 1 - m, yshift = yshift)
 }
 
+#' @rdname SBD
+#' @export
+#'
+sbd <- SBD
+
 # ==================================================================================================
 # Wrapper for proxy::dist
 # ==================================================================================================

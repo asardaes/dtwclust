@@ -6,10 +6,10 @@
 #' @export
 #' @exportMethod cvi
 #'
-#' @param a An object returned by the [dtwclust()] or [tsclust()] function, or a vector that can be
+#' @param a An object returned by [tsclust()] or, for non-fuzzy clusterings, a vector that can be
 #'   coerced to integers which indicate the cluster memeberships.
 #' @param b If needed, a vector that can be coerced to integers which indicate the cluster
-#'   memeberships. The ground truth (if known) should be provided here.
+#'   memeberships. The ground truth (if known) should be provided here. Only for non-fuzzy.
 #' @param type Character vector indicating which indices are to be computed. See supported values
 #'   below.
 #' @param ... Arguments to pass to and from other methods.
@@ -30,7 +30,7 @@
 #' Note that even though a fuzzy partition can be changed into a crisp one, making it compatible
 #' with many of the existing crisp CVIs, there are also fuzzy CVIs tailored specifically to fuzzy
 #' clustering, and these may be more suitable in those situations. Naturally, fuzzy partitions
-#' usually have no ground truth associated with them.
+#' have no ground truth associated with them.
 #'
 #' Each index defines their range of values and whether they are to be minimized or maximized. In
 #' many cases, these CVIs can be used to evaluate the result of a clustering algorithm regardless of
@@ -40,7 +40,7 @@
 #' specific application. Usually, many CVIs are utilized and compared to each other, maybe using a
 #' majority vote to decide on a final result. Furthermore, it should be noted that many CVIs perform
 #' additional distance calculations when being computed, which can be very considerable if using
-#' DTW.
+#' DTW or GAK.
 #'
 #' @return The chosen CVIs
 #'
@@ -92,8 +92,7 @@
 #'
 #'   - `"valid"`: Returns all valid indices depending on the type of `a` and whether `b` was
 #'     provided or not.
-#'   - `"internal"`: Returns all internal CVIs. Only supported for [dtwclust-class] and
-#'     [TSClusters-class] objects.
+#'   - `"internal"`: Returns all internal CVIs. Only supported for [TSClusters-class] objects.
 #'   - `"external"`: Returns all external CVIs. Requires `b` to be provided. Not valid for fuzzy
 #'     clustering.
 #'

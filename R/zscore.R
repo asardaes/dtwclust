@@ -32,7 +32,7 @@ zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE) {
         scale <- if (is.null(dots$scale)) formals(base::scale)$scale else dots$scale
         x <- t(base::scale(t(base::as.matrix(x)), center = center, scale = scale))
         x[is.nan(x)] <- 0
-        if (!keep.attributes) attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL
+        if (!keep.attributes) { attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL }
 
     } else {
         check_consistency(x, "ts")

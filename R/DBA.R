@@ -13,7 +13,7 @@
 #' @param ... Further arguments for [dtw_basic()]. However, the following are already pre-
 #'   specified: `window.size`, `norm` (passed along), and `backtrack`.
 #' @param window.size Window constraint for the DTW calculations. `NULL` means no constraint. A
-#'   slanted band is used by default.
+#'   slanted band is used.
 #' @param norm Norm for the local cost matrix of DTW. Either "L1" for Manhattan distance or "L2" for
 #'   Euclidean distance.
 #' @param max.iter Maximum number of iterations allowed.
@@ -49,7 +49,7 @@
 #'     variable.
 #'   - If `mv.ver = "by-series"`, then all variables are considered at the same time, so the DTW
 #'     backtracking is computed based on each multivariate series as a whole. This version was
-#'     implemented in version 4.0.0 of \pkg{dtwclust}, and it might be faster.
+#'     implemented in version 4.0.0 of \pkg{dtwclust}, and it is faster.
 #'
 #' @note
 #'
@@ -145,3 +145,8 @@ DBA <- function(X, centroid = NULL, ...,
     if (mv) dimnames(new_cent) <- dimnames(centroid)
     new_cent
 }
+
+#' @rdname DBA
+#' @export
+#'
+dba <- DBA

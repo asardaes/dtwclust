@@ -87,3 +87,4 @@ section Repetitions in \code{\link[=dtwclust]{dtwclust()}}.}
 }
 }
 
+\keyword{internal}

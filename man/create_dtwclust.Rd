@@ -21,3 +21,4 @@ A \linkS4class{dtwclust} object.
 \details{
 Please see the initialize section in \link{tsclusters-methods} for the new objects..
 }
+\keyword{internal}

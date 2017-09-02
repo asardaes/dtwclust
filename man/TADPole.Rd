@@ -2,9 +2,13 @@
 % Please edit documentation in R/TADPole.R
 \name{TADPole}
 \alias{TADPole}
+\alias{tadpole}
 \title{TADPole clustering}
 \usage{
 TADPole(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk",
+  trace = FALSE)
+
+tadpole(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk",
   trace = FALSE)
 }
 \arguments{
@@ -13,7 +17,7 @@ is a time series. Multivariate series are \strong{not} supported.}
 
 \item{k}{The number of desired clusters. Can be a vector with several values.}
 
-\item{dc}{The cutoff distance(s). May be a vector with several values.}
+\item{dc}{The cutoff distance(s). Can be a vector with several values.}
 
 \item{window.size}{Window size constraint for DTW (Sakoe-Chiba). See details.}
 
@@ -39,7 +43,7 @@ aforementioned elements.
 Time-series Anytime Density Peaks Clustering as proposed by Begum et al. (2015).
 }
 \details{
-This function can be called either directly or through \code{\link[=dtwclust]{dtwclust()}} and \code{\link[=tsclust]{tsclust()}}.
+This function can be called either directly or through \code{\link[=tsclust]{tsclust()}}.
 
 TADPole clustering adopts a relatively new clustering framework and adapts it to time series
 clustering with DTW. See the cited article for the details of the algorithm.
@@ -57,8 +61,8 @@ that lie in dense areas (i.e. that have lots of neighbors) are taken as cluster 
 The algorithm relies on the DTW bounds, which are only defined for univariate time series of
 equal length.
 
-Parallelization is supported, but given the internal optimizations, it may only be useful if
-multiple \code{dc} values are specified in the same call.
+Parallelization is supported, but it will only be used if multiple \code{dc} values are specified in
+the same call.
 
 The windowing constraint uses a centered window. The calculations expect a value in
 \code{window.size} that represents the distance between the point considered and one of the edges

@@ -41,8 +41,8 @@ details.}
 detected and overridden for the distances included in \pkg{dtwclust}.}
 
 \item{packages}{Character vector with the names of any packages required for custom \code{proxy}
-functions. Since the distance entries are re-registered in each parallel worker if needed, this
-is probably useless, but just in case.}
+functions. Relevant for parallel computation, although since the distance entries are
+re-registered in each parallel worker if needed, this is probably useless, but just in case.}
 
 \item{distmat}{If available, the cross-distance matrix can be provided here. Only relevant for
 partitional with PAM centroids or hierarchical procedures.}
@@ -81,11 +81,10 @@ are performed.
 \section{Partitional}{
 
 
-Using \code{pam.sparse = TRUE} defines a sparse matrix (see \code{\link[Matrix:sparseMatrix]{Matrix::sparseMatrix()}}) and updates it
-every iteration (except for \code{"dtw_lb"} distance). For smaller datasets, precomputing the whole
-distance matrix is still probably faster. Explicitly setting both \code{pam.precompute} and
-\code{pam.sparse} to \code{FALSE} might be faster if the distance matrix is very big but the distance
-function is very quick.
+When \code{pam.precompute = FALSE}, using \code{pam.sparse = TRUE} defines a sparse matrix (see
+\code{\link[Matrix:sparseMatrix]{Matrix::sparseMatrix()}}) and updates it every iteration (except for \code{"dtw_lb"} distance). For
+most cases, precomputing the whole distance matrix is still probably faster. See the timing
+experiments in \code{browseVignettes("dtwclust")}.
 
 Parallel computations for PAM centroids have the following considerations:
 \itemize{

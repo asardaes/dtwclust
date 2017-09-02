@@ -3,6 +3,7 @@
 #' **Deprecated** helper function to manually create formal [dtwclust-class] objects
 #'
 #' @export
+#' @keywords internal
 #'
 #' @param ... Any valid slots of [dtwclust-class].
 #' @param override.family Attempt to substitute the default family with one that conforms to the

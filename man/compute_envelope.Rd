@@ -18,7 +18,7 @@ compute_envelop(x, window.size, error.check = TRUE)
 and give more informative errors messages. Also used internally to avoid repeating checks.}
 }
 \value{
-A list with two elements (lower and upper envelopes): \code{lower} and \code{upper}.
+A list with two elements (lower and upper envelopes respectively): \code{lower} and \code{upper}.
 }
 \description{
 This function computes the envelopes for DTW lower bound calculations with a Sakoe-Chiba band for

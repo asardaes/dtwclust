@@ -15,11 +15,11 @@ NULL
 #' @rdname tsclusters-methods
 #' @aliases initialize,TSClusters
 #'
-#' @param .Object A `TSClusters` prototype. You shouldn't use this, see Initialize section and the
+#' @param .Object A `TSClusters` prototype. You *shouldn't* use this, see Initialize section and the
 #'   examples.
 #' @param ... For `initialize`, any valid slots. For `plot`, passed to [ggplot2::geom_line()] for
-#'   the plotting of the *cluster centroids*, or to [stats::plot.hclust()]; see Plotting section.
-#'   For `update`, any supported argument. Otherwise ignored.
+#'   the plotting of the *cluster centroids*, or to [stats::plot.hclust()]; see Plotting section and
+#'   the examples. For `update`, any supported argument. Otherwise ignored.
 #' @param override.family Logical. Attempt to substitute the default family with one that conforms
 #'   to the provided elements? See Initialize section.
 #'
@@ -352,7 +352,7 @@ setMethod("update", methods::signature(object = "TSClusters"), update.TSClusters
 #'
 #' @param newdata New data to be assigned to a cluster. It can take any of the supported formats of
 #'   [tsclust()]. Note that for multivariate series, this means that it **must** be a list of
-#'   matrices, even if the list has only one element.
+#'   matrices, even if the list has only one matrix.
 #'
 #' @section Prediction:
 #'
@@ -452,6 +452,10 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #'   If you want to free the scale of the X axis, you can do the following:
 #'
 #'   `plot(x, plot = FALSE)` `+` `facet_wrap(~cl, scales = "free")`
+#'
+#'   For more complicated changes, you're better off looking at the source code at
+#'   \url{https://github.com/asardaes/dtwclust/blob/master/R/tsclust-methods.R} and creating your
+#'   own plotting function.
 #'
 #' @return
 #'

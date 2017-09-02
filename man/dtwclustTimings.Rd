@@ -11,5 +11,5 @@ Refer to the timing experiments vignette.
 }
 \description{
 This is the list with data frames containing the results of the timing experiments vignette
-included with \pkg{dtwclust}.
+included with \pkg{dtwclust}. See \code{browseVignettes("dtwclust")}.
 }

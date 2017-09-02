@@ -4,14 +4,15 @@
 
 #' Distance matrix
 #'
-#' Reference class that is used internally for PAM centroids when both `pam.precompute` and
-#' `pam.sparse` are `FALSE` (see [tsclust-controls]).
+#' Reference class that is used internally for cross-distance matrices.
 #'
 #' @field distmat A distance matrix.
 #' @field series Time series list.
 #' @field distfun The distance function to calculate the distance matrix.
 #' @field dist_args Arguments for the distance function.
 #' @field id_cent Indices of the centroids (if any).
+#'
+#' @keywords internal
 #'
 Distmat <- setRefClass("Distmat",
                        fields = list(
@@ -60,6 +61,7 @@ Distmat <- setRefClass("Distmat",
 #'
 #' @name Distmat-generics
 #' @rdname Distmat-generics
+#' @keywords internal
 #'
 NULL
 

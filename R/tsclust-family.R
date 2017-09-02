@@ -26,7 +26,7 @@
 #'   but provide a control argument when creating the family. However, bear in mind the following
 #'   considerations.
 #'
-#'   - The second argument is call `centroids` (inconsistent with [proxy::dist()]).
+#'   - The second argument is called `centroids` (inconsistent with [proxy::dist()]).
 #'   - If `control$distmat` is *not* `NULL`, the function will try to subset it.
 #'   - If `control$symmetric` is `TRUE`, `centroids` is `NULL`, *and* there is no argument
 #'     `pairwise` that is `TRUE`, only half the distance matrix will be computed.
@@ -38,7 +38,7 @@
 #'   Note that all distances implemented as part of \pkg{dtwclust} have custom proxy loops, so see
 #'   their respective documentation to see what optimizations apply to each one.
 #'
-#'   For distances not included in \pkg{dtwclust}, the symmetric, parallel case mentioned above
+#'   For distances *not* included in \pkg{dtwclust}, the symmetric, parallel case mentioned above
 #'   makes chunks for parallel workers, but they are not perfectly balanced, so some workers might
 #'   finish before the others.
 #'
@@ -58,6 +58,7 @@
 #'
 #' \dontrun{
 #' data(uciCT)
+#' # See "GAK" documentation
 #' fam <- new("tsclustFamily", dist = "gak")
 #'
 #' # This is done with symmetric optimizations, regardless of control$symmetric

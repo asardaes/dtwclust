@@ -26,3 +26,4 @@
 \description{
 No longer supported directly in \pkg{dtwclust}. Please refer to \code{\link[=cvi]{cvi()}}
 }
+\keyword{internal}

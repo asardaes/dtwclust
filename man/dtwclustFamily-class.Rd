@@ -23,3 +23,4 @@ Please refer to \linkS4class{tsclustFamily} for the new class.
 \item{\code{preproc}}{The function used to preprocess the data (relevant for \code{\link[stats:predict]{stats::predict()}}).}
 }}
 
+\keyword{internal}

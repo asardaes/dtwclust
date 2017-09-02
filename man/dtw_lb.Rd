@@ -12,7 +12,7 @@ dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
 
 \item{window.size}{Window size to use with the LB and DTW calculation. See details.}
 
-\item{norm}{Pointwise distance. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.}
+\item{norm}{Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.}
 
 \item{error.check}{Logical indicating whether the function should try to detect inconsistencies
 and give more informative errors messages. Also used internally to avoid repeating checks.}

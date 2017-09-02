@@ -16,8 +16,8 @@
 #'   == `dist(y,x)`? If `TRUE`, only half the distance matrix needs to be computed. Automatically
 #'   detected and overridden for the distances included in \pkg{dtwclust}.
 #' @param packages Character vector with the names of any packages required for custom `proxy`
-#'   functions. Since the distance entries are re-registered in each parallel worker if needed, this
-#'   is probably useless, but just in case.
+#'   functions. Relevant for parallel computation, although since the distance entries are
+#'   re-registered in each parallel worker if needed, this is probably useless, but just in case.
 #' @param distmat If available, the cross-distance matrix can be provided here. Only relevant for
 #'   partitional with PAM centroids or hierarchical procedures.
 #' @param pam.sparse Attempt to use a sparse matrix for PAM centroids. See details.
@@ -29,11 +29,10 @@
 #'
 #' @section Partitional:
 #'
-#'   Using `pam.sparse = TRUE` defines a sparse matrix (see [Matrix::sparseMatrix()]) and updates it
-#'   every iteration (except for `"dtw_lb"` distance). For smaller datasets, precomputing the whole
-#'   distance matrix is still probably faster. Explicitly setting both `pam.precompute` and
-#'   `pam.sparse` to `FALSE` might be faster if the distance matrix is very big but the distance
-#'   function is very quick.
+#'   When `pam.precompute = FALSE`, using `pam.sparse = TRUE` defines a sparse matrix (see
+#'   [Matrix::sparseMatrix()]) and updates it every iteration (except for `"dtw_lb"` distance). For
+#'   most cases, precomputing the whole distance matrix is still probably faster. See the timing
+#'   experiments in `browseVignettes("dtwclust")`.
 #'
 #'   Parallel computations for PAM centroids have the following considerations:
 #'
@@ -152,6 +151,11 @@ fuzzy_control <- function(fuzziness = 2,
 #' @param window.size The window.size specifically for the TADPole algorithm.
 #' @param lb The lower bound to use with TADPole. Either `"lbk"` or `"lbi"`.
 #'
+#' @section TADPole:
+#'
+#'   When using TADPole, the `dist` argument list includes the `window.size` and specifies `norm =
+#'   "L2"`.
+#'
 tadpole_control <- function(dc,
                             window.size,
                             lb = "lbk")
@@ -175,11 +179,6 @@ tadpole_control <- function(dc,
 #' @param preproc A list of arguments for a preprocessing function to be used in [tsclust()].
 #' @param dist A list of arguments for a distance function to be used in [tsclust()].
 #' @param cent A list of arguments for a centroid function to be used in [tsclust()].
-#'
-#' @section TADPole:
-#'
-#'   When using TADPole, the `dist` argument list includes the `window.size` and specifies `norm =
-#'   "L2"`.
 #'
 tsclust_args <- function(preproc = list(), dist = list(), cent = list())
 {

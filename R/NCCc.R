@@ -1,7 +1,7 @@
 #' Cross-correlation with coefficient normalization
 #'
-#' This function uses FFT to compute the cross-correlation sequence between two series. They need
-#' not be of equal length.
+#' This function uses the FFT to compute the cross-correlation sequence between two series. They
+#' need *not* be of equal length.
 #'
 #' @export
 #'

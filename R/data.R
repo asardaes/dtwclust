@@ -7,7 +7,7 @@
 #'
 #' @format
 #'
-#' Lists with 100 elements each. Each element is a time series. Labels included as factor vector.
+#' Lists with 100 elements. Each element is a time series. Labels included as factor vector.
 #'
 #' @details
 #'
@@ -34,7 +34,7 @@ NULL
 #' Results of timing experiments
 #'
 #' This is the list with data frames containing the results of the timing experiments vignette
-#' included with \pkg{dtwclust}.
+#' included with \pkg{dtwclust}. See `browseVignettes("dtwclust")`.
 #'
 #' @name dtwclustTimings
 #'

@@ -83,3 +83,4 @@ Please refer to the package vignette references.
 \author{
 Alexis Sarda-Espinosa
 }
+\keyword{internal}

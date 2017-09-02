@@ -67,3 +67,4 @@ corresponding centroid (crisp partition).}
 \item{\code{dots}}{The contents of the original call's ellipsis (...).}
 }}
 
+\keyword{internal}
