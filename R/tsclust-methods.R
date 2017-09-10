@@ -382,7 +382,8 @@ predict.TSClusters <- function(object, newdata = NULL, ...) {
 
         newdata <- do.call(object@family@preproc,
                            args = enlist(newdata,
-                                         dots = object@args$preproc),
+                                         dots = subset_dots(object@args$preproc,
+                                                            object@family@preproc)),
                            TRUE)
 
         distmat <- do.call(object@family@dist,
