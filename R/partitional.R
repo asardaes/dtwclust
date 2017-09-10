@@ -5,6 +5,7 @@
 pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, args) {
     N <- length(x)
     k <- as.integer(k)
+    if (is.null(control$version)) control$version <- 1L
 
     if (fuzzy && cent == "fcm") {
         cluster <- matrix(0, N, k)
