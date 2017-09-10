@@ -10,5 +10,5 @@ codecov(type = "all",
             "R/dtwclust-classes.R",
             "R/dtwclust-methods.R",
             "R/compute-envelope.R" = 55L:58L,
-            "R/partitional.R" = 132L:255L
+            "R/partitional.R" = 145L:268L
         ))

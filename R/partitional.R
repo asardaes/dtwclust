@@ -26,20 +26,23 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
     }
 
     iter <- 1L
+    clustold <- cluster
     objective_old <- Inf
+    dmi <- cbind(1L:N, integer(N))
 
     while (iter <= control$iter.max) {
-        clustold <- if (cent != "fcmdd") cluster else control$distmat$id_cent
         distmat <- do.call(family@dist, enlist(x = x, centroids = centroids, dots = args$dist), TRUE)
         cluster <- family@cluster(distmat = distmat, m = control$fuzziness)
-        centroids <- do.call(family@allcent,
-                             enlist(x = x,
-                                    cl_id = cluster,
-                                    k = k,
-                                    cent = centroids,
-                                    cl_old = clustold,
-                                    dots = subset_dots(args$cent, family@allcent)),
-                             TRUE)
+        if (control$version < 2L) {
+            centroids <- do.call(family@allcent,
+                                 enlist(x = x,
+                                        cl_id = cluster,
+                                        k = k,
+                                        cent = centroids,
+                                        cl_old = clustold,
+                                        dots = subset_dots(args$cent, family@allcent)),
+                                 TRUE)
+        }
 
         if (fuzzy && cent == "fcm") {
             ## fuzzy.R
@@ -60,13 +63,11 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
             objective_old <- objective
 
         } else {
-            if (cent != "fcmdd")
-                changes <- sum(cluster != clustold)
-            else
-                changes <- sum(control$distmat$id_cent != clustold)
+            dmi[,2L] <- if (cent != "fcmdd") cluster else apply(cluster, 1L, which.max)
+            changes <- sum(dmi[,2L] != clustold)
 
             if (trace) {
-                td <- sum(distmat[cbind(1L:N, cluster)])
+                td <- sum(distmat[dmi])
                 txt <- paste(changes, format(td), sep = " / ")
                 cat("Iteration ", iter, ": ",
                     "Changes / Distsum = ",
@@ -81,6 +82,16 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         }
 
         iter <- iter + 1L
+        clustold <- dmi[,2L]
+        if (control$version > 1L)
+            centroids <- do.call(family@allcent,
+                                 enlist(x = x,
+                                        cl_id = cluster,
+                                        k = k,
+                                        cent = centroids,
+                                        cl_old = clustold,
+                                        dots = subset_dots(args$cent, family@allcent)),
+                                 TRUE)
     }
 
     if (iter > control$iter.max) {
@@ -93,8 +104,10 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         converged <- TRUE
     }
 
-    distmat <- do.call(family@dist, enlist(x = x, centroids = centroids, dots = args$dist), TRUE)
-    cluster <- family@cluster(distmat = distmat, m = control$fuzziness)
+    if (control$version < 2L) {
+        distmat <- do.call(family@dist, enlist(x = x, centroids = centroids, dots = args$dist), TRUE)
+        cluster <- family@cluster(distmat = distmat, m = control$fuzziness)
+    }
 
     if (fuzzy) {
         fcluster <- cluster

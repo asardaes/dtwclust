@@ -15,13 +15,13 @@
 \usage{
 partitional_control(pam.precompute = TRUE, iter.max = 100L, nrep = 1L,
   symmetric = FALSE, packages = character(0L), distmat = NULL,
-  pam.sparse = FALSE)
+  pam.sparse = FALSE, version = 1L)
 
 hierarchical_control(method = "average", symmetric = FALSE,
   packages = character(0L), distmat = NULL)
 
 fuzzy_control(fuzziness = 2, iter.max = 100L, delta = 0.001,
-  packages = character(0L), symmetric = FALSE)
+  packages = character(0L), symmetric = FALSE, version = 1L)
 
 tadpole_control(dc, window.size, lb = "lbk")
 
@@ -48,6 +48,8 @@ re-registered in each parallel worker if needed, this is probably useless, but j
 partitional with PAM centroids or hierarchical procedures.}
 
 \item{pam.sparse}{Attempt to use a sparse matrix for PAM centroids. See details.}
+
+\item{version}{Which version of partitional/fuzzy clustering to use. See details.}
 
 \item{method}{Character vector with one or more linkage methods to use in hierarchical procedures
 (see \code{\link[stats:hclust]{stats::hclust()}}), the character \code{"all"} to use all of the available ones, or a function
@@ -77,6 +79,10 @@ Control parameters for fine-grained control.
 \details{
 The functions essentially return their function arguments in a classed list, although some checks
 are performed.
+
+Regarding parameter \code{version}: the first version of partitional/fuzzy clustering implemented
+in the package always performed an extra iteration, which is unnecessary. Use version 2 to avoid
+this, but bear in mind that the results may vary slightly due to the missing iteration.
 }
 \section{Partitional}{
 

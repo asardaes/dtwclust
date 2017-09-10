@@ -246,6 +246,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                                    iter.max = control$iter.max,
                                    nrep = control$nrep,
                                    symmetric = control$symmetric,
+                                   version = control$version,
                                    stringsAsFactors = FALSE),
                             TRUE)
                 },
@@ -264,6 +265,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                                    iter.max = control$iter.max,
                                    delta = control$delta,
                                    symmetric = control$symmetric,
+                                   version = control$version,
                                    stringsAsFactors = FALSE),
                             TRUE)
                 },

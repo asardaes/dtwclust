@@ -3,6 +3,7 @@
 ## Version 4.1.0
 * Added some fuzzy cluster validity indices to `cvi`.
 * When using `TADPole` clustering through `tsclust`, custom parameters can now be passed to a custom centroid function if provided.
+* Modified the partitional/fuzzy loops, which were doing an extra iteration. Previous version still available for backwards compatibility.
 
 ## Version 4.0.3
 * Deactivating PAM precomputation will no longer use sparse matrices by default, explicitly set `pam.sparse` to `TRUE` if you want this functionality.

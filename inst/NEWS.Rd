@@ -11,5 +11,6 @@
     \itemize{
         \item Added some fuzzy cluster validity indices to \code{cvi}.
         \item When using \code{TADPole} clustering through \code{tsclust}, custom parameters can now be passed to a custom centroid function if provided.
+        \item Modified the partitional/fuzzy loops, which were doing an extra iteration. Previous version still available for backwards compatibility.
     }
 }
