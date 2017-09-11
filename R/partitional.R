@@ -83,7 +83,6 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         }
 
         iter <- iter + 1L
-        clustold <- dmi[,2L]
         if (control$version > 1L)
             centroids <- do.call(family@allcent,
                                  enlist(x = x,
@@ -93,6 +92,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
                                         cl_old = clustold,
                                         dots = subset_dots(args$cent, family@allcent)),
                                  TRUE)
+        clustold <- dmi[,2L]
     }
 
     if (iter > control$iter.max) {
