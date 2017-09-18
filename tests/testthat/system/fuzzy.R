@@ -25,6 +25,7 @@ test_that("Multiple k works as expected.", {
 
     fc_k2 <- tsclust(data_subset, type = "f", k = 2L:5L,
                      preproc = acf_fun, distance = "L2",
+                     control = fuzzy_control(version = 1L),
                      seed = 123)
 
     for (i in seq_along(fc_k)) {
@@ -48,6 +49,7 @@ test_that("Fuzzy clustering works as expected.", {
 
     fcm2 <- tsclust(data_subset, type = "fuzzy", k = 4L,
                     preproc = acf_fun, distance = "L2",
+                    control = fuzzy_control(version = 1L),
                     seed = 123)
 
     expect_identical(fcm@fcluster, fcm2@fcluster)
@@ -64,7 +66,8 @@ test_that("Fuzzy clustering works as expected.", {
 
     fcmdd2 <- tsclust(data_subset, type = "fuzzy", k = 4L,
                       preproc = acf_fun, distance = "L2",
-                      centroid = "fcmdd", seed = 123)
+                      centroid = "fcmdd", seed = 123,
+                      control = fuzzy_control(version = 1L))
 
     expect_identical(fcmdd@fcluster, fcmdd2@fcluster)
     expect_identical(fcmdd@centroids, fcmdd2@centroids)
@@ -82,6 +85,7 @@ test_that("Fuzzy clustering works as expected.", {
 
     fcm_mv2 <- tsclust(dmv, type = "fuzzy", k = 4L,
                        distance = "dtw_basic",
+                       control = fuzzy_control(version = 1L),
                        seed = 123)
 
     expect_identical(fcm_mv@fcluster, fcm_mv2@fcluster)
@@ -98,6 +102,7 @@ test_that("Fuzzy clustering works as expected.", {
 
     fcmdd_mv2 <- tsclust(data_multivariate, type = "fuzzy", k = 4L,
                          distance = "dtw_basic", centroid = "fcmdd",
+                         control = fuzzy_control(version = 1L),
                          seed = 123)
 
     expect_identical(fcmdd_mv@fcluster, fcmdd_mv2@fcluster)

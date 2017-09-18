@@ -57,13 +57,10 @@ partitional_control <- function(pam.precompute = TRUE,
                                 packages = character(0L),
                                 distmat = NULL,
                                 pam.sparse = FALSE,
-                                version = 1L)
+                                version = 2L)
 {
     if (any(iter.max <= 0L)) stop("Maximum iterations must be positive")
     if (any(nrep < 1L)) stop("Number of repetitions must be at least one")
-    if (any(version < 2L) && !isTRUE(getOption("dtwclust_no_version_warning")))
-        warning("Next dtwclust update will use version 2 of the partitional loop by default. ",
-                'See help("tsclust-controls")')
 
     structure(
         list(pam.precompute = as.logical(pam.precompute),
@@ -138,14 +135,11 @@ fuzzy_control <- function(fuzziness = 2,
                           delta = 1e-3,
                           packages = character(0L),
                           symmetric = FALSE,
-                          version = 1L)
+                          version = 2L)
 {
     if (any(fuzziness <= 1)) stop("Fuzziness exponent should be greater than one")
     if (any(iter.max <= 0L)) stop("Maximum iterations must be positive")
     if (any(delta < 0)) stop("Delta should be positive")
-    if (any(version < 2L) && !isTRUE(getOption("dtwclust_no_version_warning")))
-        warning("Next dtwclust update will use version 2 of the fuzzy loop by default. ",
-                'See help("tsclust-controls")')
 
     structure(
         list(fuzziness = fuzziness,

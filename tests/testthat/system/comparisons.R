@@ -41,7 +41,8 @@ cfgs <- compare_clusterings_configs(c("p", "h", "f", "t"), k = 2L:3L,
                                         partitional = partitional_control(
                                             pam.precompute = c(FALSE, TRUE),
                                             iter.max = 10L,
-                                            nrep = 2L
+                                            nrep = 2L,
+                                            version = 1L
                                         ),
                                         hierarchical = hierarchical_control(
                                             method = "all"
@@ -49,7 +50,8 @@ cfgs <- compare_clusterings_configs(c("p", "h", "f", "t"), k = 2L:3L,
                                         fuzzy = fuzzy_control(
                                             fuzziness = c(2, 2.5),
                                             iter.max = 10L,
-                                            delta = c(0.1, 0.01)
+                                            delta = c(0.1, 0.01),
+                                            version = 1L
                                         ),
                                         tadpole = tadpole_control(
                                             dc = c(1.5, 2),
@@ -106,7 +108,8 @@ cfgs_gak <- compare_clusterings_configs(types = "p", k = 2L:3L,
                                         controls = list(
                                             partitional = partitional_control(
                                                 iter.max = 5L,
-                                                nrep = 2L
+                                                nrep = 2L,
+                                                version = 1L
                                             )
                                         ),
                                         preprocs = pdc_configs(

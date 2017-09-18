@@ -22,17 +22,20 @@ test_that("Calling dtwclust after registering a custom distance works as expecte
                                description = "Normalized DTW with L1 norm")
 
     ## ---------------------------------------------------------- non-symmetric
-    pc_ndtw <- tsclust(data_subset, k = 4, distance = "nDTW", seed = 8319L)
+    pc_ndtw <- tsclust(data_subset, k = 4, distance = "nDTW", seed = 8319L,
+                       control = partitional_control(version = 1L))
     pc_ndtw <- reset_nondeterministic(pc_ndtw)
 
     ## ---------------------------------------------------------- symmetric
     pc_ndtw_sym <- tsclust(data_subset, k = 4, distance = "nDTW",
-                           seed = 8319, control = partitional_control(symmetric = TRUE))
+                           seed = 8319, control = partitional_control(symmetric = TRUE,
+                                                                      version = 1L))
     pc_ndtw_sym <- reset_nondeterministic(pc_ndtw_sym)
 
     ## just for expect below
     pc_ndtw@control$symmetric <- TRUE
     pc_ndtw@call <- pc_ndtw_sym@call <- as.call(list("foo", bar = 1))
+
     expect_identical(pc_ndtw, pc_ndtw_sym)
 
     ## ---------------------------------------------------------- custom params

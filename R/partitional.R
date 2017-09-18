@@ -5,12 +5,12 @@
 pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, args) {
     N <- length(x)
     k <- as.integer(k)
-    if (is.null(control$version)) control$version <- 1L
+    if (is.null(control$version)) control$version <- 2L
 
     if (fuzzy && cent == "fcm") {
         cluster <- matrix(0, N, k)
-        cluster[ , -1L] <- stats::runif(N *(k - 1)) / (k - 1)
-        cluster[ , 1L] <- 1 - apply(cluster[ , -1L, drop = FALSE], 1L, sum)
+        cluster[, -1L] <- stats::runif(N * (k - 1L)) / (k - 1L)
+        cluster[, 1L] <- 1 - apply(cluster[, -1L, drop = FALSE], 1L, sum)
         centroids <- do.call(family@allcent,
                              enlist(x = x,
                                     cl_id = cluster,
@@ -34,7 +34,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
     while (iter <= control$iter.max) {
         distmat <- do.call(family@dist, enlist(x = x, centroids = centroids, dots = args$dist), TRUE)
         cluster <- family@cluster(distmat = distmat, m = control$fuzziness)
-        if (control$version < 2L) {
+        if (control$version < 2L) { # nocov start
             centroids <- do.call(family@allcent,
                                  enlist(x = x,
                                         cl_id = cluster,
@@ -43,30 +43,26 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
                                         cl_old = clustold,
                                         dots = subset_dots(args$cent, family@allcent)),
                                  TRUE)
-        }
+        } # nocov end
 
         if (fuzzy && cent == "fcm") {
             ## fuzzy.R
             objective <- fuzzy_objective(cluster, distmat = distmat, m = control$fuzziness)
-
             if (trace) {
                 cat("Iteration ", iter, ": ",
                     "Objective = ",
                     formatC(objective, width = 6, format = "f"),
                     "\n", sep = "")
             }
-
             if (abs(objective - objective_old) < control$delta) {
                 if (trace) cat("\n")
                 break
             }
-
             objective_old <- objective
 
         } else {
-            dmi[,2L] <- if (cent != "fcmdd") cluster else apply(cluster, 1L, which.max)
-            changes <- sum(dmi[,2L] != clustold)
-
+            dmi[, 2L] <- if (cent != "fcmdd") cluster else apply(cluster, 1L, which.max)
+            changes <- sum(dmi[, 2L] != clustold)
             if (trace) {
                 td <- sum(distmat[dmi])
                 txt <- paste(changes, format(td), sep = " / ")
@@ -75,7 +71,6 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
                     formatC(txt, width = 12, format = "f"),
                     "\n", sep = "")
             }
-
             if (changes == 0L) {
                 if (trace) cat("\n")
                 break
@@ -92,7 +87,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
                                         cl_old = clustold,
                                         dots = subset_dots(args$cent, family@allcent)),
                                  TRUE)
-        clustold <- dmi[,2L]
+        clustold <- dmi[, 2L]
     }
 
     if (iter > control$iter.max) {
@@ -105,16 +100,16 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         converged <- TRUE
     }
 
-    if (control$version < 2L) {
+    if (control$version < 2L) { # nocov start
         distmat <- do.call(family@dist, enlist(x = x, centroids = centroids, dots = args$dist), TRUE)
         cluster <- family@cluster(distmat = distmat, m = control$fuzziness)
-    }
+    } # nocov end
 
     if (fuzzy) {
         fcluster <- cluster
         cluster <- max.col(-distmat, "first")
         rownames(fcluster) <- names(x)
-        colnames(fcluster) <- paste0("cluster_", 1:k)
+        colnames(fcluster) <- paste0("cluster_", 1L:k)
 
     } else {
         fcluster <- matrix(NA_real_)

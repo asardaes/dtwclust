@@ -15,13 +15,13 @@
 \usage{
 partitional_control(pam.precompute = TRUE, iter.max = 100L, nrep = 1L,
   symmetric = FALSE, packages = character(0L), distmat = NULL,
-  pam.sparse = FALSE, version = 1L)
+  pam.sparse = FALSE, version = 2L)
 
 hierarchical_control(method = "average", symmetric = FALSE,
   packages = character(0L), distmat = NULL)
 
 fuzzy_control(fuzziness = 2, iter.max = 100L, delta = 0.001,
-  packages = character(0L), symmetric = FALSE, version = 1L)
+  packages = character(0L), symmetric = FALSE, version = 2L)
 
 tadpole_control(dc, window.size, lb = "lbk")
 

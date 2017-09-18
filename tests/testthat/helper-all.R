@@ -1,5 +1,5 @@
 data(uciCT)
-options(deparse.max.lines = 2L, dtwclust_no_version_warning = TRUE)
+options(deparse.max.lines = 2L)
 
 ## environment to save objects for regression tests
 persistent <- new.env()

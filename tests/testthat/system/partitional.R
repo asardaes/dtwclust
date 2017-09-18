@@ -36,7 +36,8 @@ test_that("Multiple k and multiple repetitions work as expected.", {
 
     pc_rep2 <- tsclust(data_reinterpolated, type = "p", k = 20L,
                        distance = "L2", centroid = "pam",
-                       seed = 938, control = partitional_control(nrep = 2L))
+                       seed = 938, control = partitional_control(nrep = 2L,
+                                                                 version = 1L))
 
     for (i in seq_along(pc_rep)) {
         expect_identical(pc_rep[[i]]@cluster, pc_rep2[[i]]@cluster)
@@ -52,7 +53,8 @@ test_that("Multiple k and multiple repetitions work as expected.", {
 
     pc_krep2 <- tsclust(data_reinterpolated, type = "p", k = 20L:22L,
                         distance = "L2", centroid = "pam",
-                        seed = 938, control = partitional_control(nrep = 2L))
+                        seed = 938, control = partitional_control(nrep = 2L,
+                                                                  version = 1L))
 
     for (i in seq_along(pc_krep)) {
         expect_identical(pc_krep[[i]]@cluster, pc_krep2[[i]]@cluster)
@@ -103,13 +105,15 @@ test_that("Partitional clustering works as expected.", {
                                 distance = "dtw_basic", centroid = "pam", seed = 938,
                                 args = tsclust_args(dist = list(window.size = 20L)),
                                 control = partitional_control(pam.precompute = FALSE,
-                                                              pam.sparse = TRUE))
+                                                              pam.sparse = TRUE,
+                                                              version = 1L))
 
     pc_dtwb_npampre3 <- tsclust(data_reinterpolated_subset, type = "p", k = 4L,
                                 distance = "dtw_basic", centroid = "pam", seed = 938,
                                 args = tsclust_args(dist = list(window.size = 20L)),
                                 control = partitional_control(pam.precompute = FALSE,
-                                                              pam.sparse = FALSE))
+                                                              pam.sparse = FALSE,
+                                                              version = 1L))
 
     pc_dtwb_distmat <- dtwclust(data_reinterpolated_subset, type = "p", k = 4L,
                                 distance = "dtw_basic", centroid = "pam",
@@ -119,7 +123,8 @@ test_that("Partitional clustering works as expected.", {
     pc_dtwb_distmat2 <- tsclust(data_reinterpolated_subset, type = "p", k = 4L,
                                 distance = "dtw_basic", centroid = "pam", seed = 938,
                                 args = tsclust_args(dist = list(window.size = 20L)),
-                                control = partitional_control(distmat = pc_dtwb@distmat))
+                                control = partitional_control(distmat = pc_dtwb@distmat,
+                                                              version = 1L))
 
     pc_dtwlb <- dtwclust(data_reinterpolated_subset, type = "p", k = 4L,
                          distance = "dtw_lb", centroid = "pam",
@@ -292,7 +297,7 @@ test_that("Cluster reinitialization in partitional dtwclust works.", {
     suppressWarnings(pc_cr2 <- tsclust(data_reinterpolated, k = 20,
                                        distance = "lbk", centroid = "mean",
                                        seed = 31231,
-                                       control = partitional_control(iter.max = 10L),
+                                       control = partitional_control(iter.max = 10L, version = 1L),
                                        args = tsclust_args(dist = list(window.size = 19L))))
 
     expect_false(pc_cr2@converged)
@@ -315,7 +320,7 @@ test_that("Cluster reinitialization in partitional dtwclust works.", {
     suppressWarnings(pc_cr2 <- tsclust(data_reinterpolated, k = 20,
                                        distance = "lbk", centroid = "pam",
                                        seed = 31231,
-                                       control = partitional_control(iter.max = 10L),
+                                       control = partitional_control(iter.max = 10L, version = 1L),
                                        args = tsclust_args(dist = list(window.size = 19L))))
 
     expect_false(pc_cr2@converged)
