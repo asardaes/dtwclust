@@ -20,7 +20,7 @@ Sys.setenv("R_TESTS" = "")
 test_that("Parallel computation gives the same results as sequential", {
     skip_on_cran()
 
-    if (getOption("skip_par_tests", FALSE))
+    if (getOption("dtwclust_skip_par_tests", FALSE))
         skip("Parallel tests disabled explicitly.")
 
     cat("with", num_workers, "workers\n")
@@ -46,7 +46,7 @@ test_that("Parallel FORK computation gives the same results as sequential", {
     skip_on_travis()
     skip_on_os("windows")
 
-    if (getOption("skip_par_tests", FALSE))
+    if (getOption("dtwclust_skip_par_tests", FALSE))
         skip("Parallel tests disabled explicitly.")
 
     ## Also test FORK in Linux

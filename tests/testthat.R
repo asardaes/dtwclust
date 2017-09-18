@@ -9,6 +9,6 @@ library(testthat)
 #'
 #' To disable parallel tests, before calling test() run:
 #'
-#' options(skip_par_tests = TRUE)
+#' options(dtwclust_skip_par_tests = TRUE)
 #'
 testthat::test_check("dtwclust")
