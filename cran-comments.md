@@ -1,6 +1,4 @@
-## Update to version 4.1.1
-Short-term update: a modification introduced in v4.1.0 produces erroneous clustering results due to wrong logic.
-Sorry for that.
+## Update to version 4.1.1.9000
 
 ## Test environments
 * Local GNU/Linux, R 3.4.1
