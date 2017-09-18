@@ -20,16 +20,22 @@
 #'
 #' @note
 #'
-#' The function assumes that indexing the matrix/data.frame with `series[i, ]` will return something
-#' that can be coerced to a numeric vector.
+#' The function assumes that matrix-like objects can be first coerced via [base::as.matrix()], so
+#' that the result can be indexed with `series[i, ]`.
 #'
 #' No consistency checks are performed by this function.
 #'
 tslist <- function(series) {
     if (is.matrix(series) || is.data.frame(series)) {
         rnms <- rownames(series)
-        series <- lapply(seq_len(nrow(series)), function(i) { as.numeric(series[i, ]) })
+        mat <- unname(base::as.matrix(series))
+        series <- vector("list", nrow(mat))
         if (!is.null(rnms)) setnames_inplace(series, rnms)
+        i <- 1L
+        while (i <= nrow(mat)) {
+            series[[i]] <- mat[i,]
+            i <- i + 1L
+        }
 
     } else if (is.numeric(series))
         series <- list(series)

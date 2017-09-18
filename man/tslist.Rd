@@ -23,8 +23,8 @@ For matrices and data frames, each \strong{row} is considered as one time series
 simply passed through.
 }
 \note{
-The function assumes that indexing the matrix/data.frame with \code{series[i, ]} will return something
-that can be coerced to a numeric vector.
+The function assumes that matrix-like objects can be first coerced via \code{\link[base:as.matrix]{base::as.matrix()}}, so
+that the result can be indexed with \code{series[i, ]}.
 
 No consistency checks are performed by this function.
 }
