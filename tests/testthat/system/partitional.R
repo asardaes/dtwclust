@@ -207,17 +207,20 @@ test_that("Partitional clustering works as expected.", {
     ## ---------------------------------------------------------- multivariate dba
     pc_mv_dba <- dtwclust(data_multivariate, type = "p", k = 4L,
                           distance = "dtw_basic", centroid = "dba",
+                          mv.ver = "by-v",
                           seed = 938)
 
     pc_mv_dba2 <- tsclust(data_multivariate, type = "p", k = 4L,
                           distance = "dtw_basic", centroid = "dba",
-                          args = tsclust_args(cent = list(max.iter = 15L)),
+                          args = tsclust_args(cent = list(max.iter = 15L, mv.ver = "by-v")),
                           seed = 938)
 
     expect_identical(pc_mv_dba@cluster, pc_mv_dba2@cluster)
     expect_identical(pc_mv_dba@centroids, pc_mv_dba2@centroids)
 
     pc_mv_dba <- reset_nondeterministic(pc_mv_dba)
+    pc_mv_dba@call$mv.ver <- NULL
+    pc_mv_dba@dots <- list()
 
     assign("pc_mv_dba", pc_mv_dba, persistent)
 })
