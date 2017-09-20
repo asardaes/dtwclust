@@ -72,7 +72,7 @@ pc.dtwlb <- tsclust(series, k = 20L,
 #> Iteration 3: Changes / Distsum = 7 / 2617.178
 #> Iteration 4: Changes / Distsum = 0 / 2611.894
 #> 
-#>  Elapsed time is 2.344 seconds.
+#>  Elapsed time is 2.083 seconds.
 
 plot(pc.dtwlb)
 ```
@@ -88,11 +88,10 @@ hc.sbd <- tsclust(CharTraj, type = "hierarchical", k = 20L,
                   control = hierarchical_control(method = "all"),
                   trace = TRUE)
 #> 
-#>  Calculating distance matrix...
+#> Calculating distance matrix...
+#> Performing hierarchical clustering...
 #> 
-#>  Performing hierarchical clustering...
-#> 
-#>  Elapsed time is 0.936 seconds.
+#>  Elapsed time is 0.912 seconds.
 
 # CVIs for HC+SBD
 print(cvis <- sapply(hc.sbd, cvi, b = CharTrajLabels))
@@ -136,18 +135,18 @@ pc.tadp <- tsclust(series, type = "tadpole", k = 20L,
                    trace = TRUE,
                    control = tadpole_control(dc = 1.5, window.size = 20L))
 #> 
-#> Entering TADPole...
+#>  Entering TADPole...
 #> 
-#>  Computing lower and upper bound matrices
-#>  Pruning during local density calculation
-#>  Pruning during nearest-neighbor distance calculation (phase 1)
-#>  Pruning during nearest-neighbor distance calculation (phase 2)
-#>  Pruning percentage = 77.8%
-#>  Performing cluster assignment
+#> Computing lower and upper bound matrices
+#> Pruning during local density calculation
+#> Pruning during nearest-neighbor distance calculation (phase 1)
+#> Pruning during nearest-neighbor distance calculation (phase 2)
+#> Pruning percentage = 77.8%
+#> Performing cluster assignment
 #> 
 #> TADPole completed for k = 20 & dc = 1.5
 #> 
-#>  Elapsed time is 0.363 seconds.
+#>  Elapsed time is 0.355 seconds.
 
 plot(pc.tadp, clus = 1L:4L)
 ```
@@ -175,17 +174,17 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>    0.27    0.00    0.27 
+#>   0.270   0.000   0.268 
 #> 
 #> Head of fuzzy memberships:
 #> 
-#>       cluster_1   cluster_2   cluster_3   cluster_4 cluster_5
-#> A.V1 0.04732715 0.017695266 0.002662067 0.008402290 0.9239132
-#> A.V2 0.01494997 0.005368273 0.000809054 0.002611058 0.9762616
-#> A.V3 0.06605890 0.027250783 0.002808192 0.008388257 0.8954939
-#> A.V4 0.14725836 0.350302464 0.025041488 0.070074292 0.4073234
-#> A.V5 0.14528435 0.227567379 0.024316156 0.074457217 0.5283749
-#> B.V1 0.49030359 0.077478929 0.067994926 0.150767814 0.2134547
+#>       cluster_1   cluster_2    cluster_3   cluster_4 cluster_5
+#> A.V1 0.04732844 0.017488756 0.0026332040 0.008325063 0.9242245
+#> A.V2 0.01457851 0.005171223 0.0007800123 0.002521617 0.9769486
+#> A.V3 0.06903925 0.027825249 0.0028701917 0.008586875 0.8916784
+#> A.V4 0.14868285 0.349944504 0.0250225304 0.070086628 0.4062635
+#> A.V5 0.14642795 0.227211257 0.0242881075 0.074452121 0.5276206
+#> B.V1 0.48283724 0.078487945 0.0689223100 0.153092291 0.2166602
 ```
 
 ### (Some) multivariate support
@@ -206,13 +205,13 @@ plot(mvc)
 ### Parallel support
 
 ``` r
-require(doParallel)
+require("doParallel")
 #> Loading required package: doParallel
 #> Loading required package: foreach
 #> Loading required package: iterators
 
 # Create and register parallel workers
-cl <- makeCluster(detectCores(), "FORK")
+cl <- makeCluster(detectCores())
 registerDoParallel(cl)
 
 # Parallel backend detected automatically
@@ -222,7 +221,7 @@ hc <- tsclust(CharTraj, k = 20L,
               args = tsclust_args(dist = list(window.size = 20L),
                                   cent = list(window.size = 20L,
                                               max.iter = 15L)))
-#>  Elapsed time is 1.558 seconds.
+#>  Elapsed time is 2.91 seconds.
 
 ## Returning to sequential calculations
 stopCluster(cl)

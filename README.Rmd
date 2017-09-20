@@ -147,10 +147,10 @@ plot(mvc)
 ### Parallel support
 
 ```{r parallel}
-require(doParallel)
+require("doParallel")
 
 # Create and register parallel workers
-cl <- makeCluster(detectCores(), "FORK")
+cl <- makeCluster(detectCores())
 registerDoParallel(cl)
 
 # Parallel backend detected automatically
