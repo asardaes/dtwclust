@@ -84,7 +84,7 @@ DBA <- function(X, centroid = NULL, ...,
                 window.size = NULL, norm = "L1",
                 max.iter = 20L, delta = 1e-3,
                 error.check = TRUE, trace = FALSE,
-                gcm = NULL, mv.ver = "by-series")
+                gcm = NULL, mv.ver = "by-variable")
 {
     X <- tslist(X)
     mv.ver <- match.arg(mv.ver, c("by-variable", "by-series"))

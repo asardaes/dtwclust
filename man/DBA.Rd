@@ -7,11 +7,11 @@
 \usage{
 DBA(X, centroid = NULL, ..., window.size = NULL, norm = "L1",
   max.iter = 20L, delta = 0.001, error.check = TRUE, trace = FALSE,
-  gcm = NULL, mv.ver = "by-series")
+  gcm = NULL, mv.ver = "by-variable")
 
 dba(X, centroid = NULL, ..., window.size = NULL, norm = "L1",
   max.iter = 20L, delta = 0.001, error.check = TRUE, trace = FALSE,
-  gcm = NULL, mv.ver = "by-series")
+  gcm = NULL, mv.ver = "by-variable")
 }
 \arguments{
 \item{X}{A matrix or data frame where each row is a time series, or a list where each element is

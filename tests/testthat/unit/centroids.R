@@ -234,8 +234,7 @@ test_that("Operations with dba centroid complete successfully.", {
                                   cl_old = 0L,
                                   window.size = 18L,
                                   max.iter = 15L,
-                                  norm = "L2",
-                                  mv.ver = "by-v")
+                                  norm = "L2")
 
     expect_identical(length(cent_mv_dba), k)
     expect_identical(dim(cent_mv_dba[[1L]]), dim(x_mv[[1L]]))
