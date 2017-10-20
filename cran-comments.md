@@ -1,13 +1,14 @@
 ## Update to version 4.1.1.9000
+* Miscellaneous bug fixes and optimizations.
 
 ## Test environments
-* Local GNU/Linux, R 3.4.2
-* Local Windows 10, R 3.4.2
+* Local GNU/Linux, R release
+* Local Windows 10, R release
 * win-builder (devel and release)
 * Travis CI
   + Linux: devel and release
   + OSX: release
-* AppVeyor
+* AppVeyor (x32 and x64)
 
 ## R CMD check results
 * There were no ERRORs or WARNINGs
