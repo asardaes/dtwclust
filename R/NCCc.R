@@ -20,7 +20,7 @@
 #' [SBD()]
 #'
 NCCc <- function(x, y) {
-    den <- lnorm(x, 2) * lnorm(y, 2)
+    den <- l2norm(x) * l2norm(y) # utils.R
     # Notice that the native 'convolve' function already uses FFT for the calculation
     if (den == 0) Inf else { stats::convolve(x, y, conj = TRUE, type = "open") / den }
 }

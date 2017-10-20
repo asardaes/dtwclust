@@ -11,7 +11,7 @@ estimate_sigma <- function(x, y, within_proxy) {
     med2 <- median(replicate(rep, {
         xx <- sample(pool, n)
         yy <- sample(pool, n)
-        lnorm(xx - yy)
+        l2norm(xx - yy) # utils.R
     }))
     # return
     med1 * med2

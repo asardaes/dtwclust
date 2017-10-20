@@ -105,8 +105,9 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check
     P <- diag(nc) - 1 / nc * matrix(1, nc, nc)
     M <- P %*% S %*% P
     ksc <- Re(RSpectra::eigs_sym(M, 1L)$vectors[ , 1L, drop = TRUE])
-    d1 <- lnorm(A[1L, , drop = TRUE] - ksc, 2)
-    d2 <- lnorm(A[1L, , drop = TRUE] + ksc, 2)
+    # utils.R
+    d1 <- l2norm(A[1L, , drop = TRUE] - ksc)
+    d2 <- l2norm(A[1L, , drop = TRUE] + ksc)
     if (d1 >= d2) ksc <- -ksc
     ksc <- zscore(ksc, ...)
     ksc
