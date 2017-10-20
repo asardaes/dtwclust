@@ -176,9 +176,17 @@ NULL ## remember to check methods imports after removing dtwclust()
 #'
 NULL
 
-.onAttach <- function(lib, pkg) {
-    ## proxy_prefun is in utils.R
+# PREFUN for some of my proxy distances so that they support 'pairwise' directly
+proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
+    params$pairwise <- pairwise
 
+    list(x = x, y = y,
+         pairwise = pairwise,
+         p = params,
+         reg_entry = reg_entry)
+}
+
+.onAttach <- function(lib, pkg) {
     ## Register DTW2
     if (!check_consistency("DTW2", "dist", silent = TRUE))
         proxy::pr_DB$set_entry(FUN = dtw2.proxy, names=c("DTW2", "dtw2"),

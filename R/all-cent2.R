@@ -1,4 +1,35 @@
 # ==================================================================================================
+# Helpers
+# ==================================================================================================
+
+# column-wise medians
+colMedians <- function(mat) { apply(mat, 2L, stats::median) }
+
+# Reinitialize empty clusters
+reinit_clusters <- function(x, cent, cent_case, num_empty, empty_clusters, control) {
+    ## Make sure no centroid is repeated (especially in case of PAM)
+    any_rep <- logical(num_empty)
+
+    while(TRUE) {
+        id_cent_extra <- sample(length(x), num_empty)
+        extra_cent <- x[id_cent_extra]
+
+        for (id_extra in 1L:num_empty) {
+            any_rep[id_extra] <- any(sapply(cent, function(i.centroid) {
+                identical(i.centroid, extra_cent[[id_extra]])
+            }))
+
+            if (cent_case == "pam")
+                control$distmat$id_cent[empty_clusters[id_extra]] <- id_cent_extra[id_extra]
+        }
+
+        if (all(!any_rep)) break
+    }
+
+    extra_cent
+}
+
+# ==================================================================================================
 # Custom functions to calculate centroids
 # ==================================================================================================
 
@@ -94,7 +125,7 @@ all_cent2 <- function(case = NULL, control) {
 
             } else {
                 xx <- do.call(rbind, xx, TRUE)
-                colMedians(xx) # utils.R
+                colMedians(xx)
             }
         })
     }

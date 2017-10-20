@@ -135,30 +135,6 @@ adjust_args <- function(args, dots) {
     })
 }
 
-# Reinitialize empty clusters
-reinit_clusters <- function(x, cent, cent_case, num_empty, empty_clusters, control) {
-    ## Make sure no centroid is repeated (especially in case of PAM)
-    any_rep <- logical(num_empty)
-
-    while(TRUE) {
-        id_cent_extra <- sample(length(x), num_empty)
-        extra_cent <- x[id_cent_extra]
-
-        for (id_extra in 1L:num_empty) {
-            any_rep[id_extra] <- any(sapply(cent, function(i.centroid) {
-                identical(i.centroid, extra_cent[[id_extra]])
-            }))
-
-            if (cent_case == "pam")
-                control$distmat$id_cent[empty_clusters[id_extra]] <- id_cent_extra[id_extra]
-        }
-
-        if (all(!any_rep)) break
-    }
-
-    extra_cent
-}
-
 # Like dynGet() I assume, but that one is supposed to be experimental...
 get_from_callers <- function(obj_name, mode = "any") {
     ret <- get0(obj_name, mode = mode, inherits = TRUE)
@@ -170,61 +146,6 @@ get_from_callers <- function(obj_name, mode = "any") {
     }
 
     stop("Could not find object '", obj_name, "' of mode '", mode, "'")
-}
-
-# Get an appropriate distance matrix object for internal use with PAM/FCMdd centroids
-pam_distmat <- function(series, control, distance, cent_char, family, args, trace) {
-    distmat <- control$distmat
-    distmat_provided <- FALSE
-
-    if (!is.null(distmat)) {
-        if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
-            stop("Dimensions of provided cross-distance matrix don't correspond ",
-                 "to length of provided data")
-
-        ## see Distmat.R
-        if (!inherits(distmat, "Distmat")) distmat <- Distmat$new(distmat = distmat)
-        distmat_provided <- TRUE
-
-        if (trace) cat("\n\tDistance matrix provided...\n\n")
-
-    } else if (isTRUE(control$pam.precompute) || cent_char == "fcmdd") {
-        if (distance == "dtw_lb")
-            warning("Using dtw_lb with control$pam.precompute = TRUE is not ",
-                    "advised.")
-
-        if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
-
-        ## see Distmat.R
-        distmat <- Distmat$new(distmat = do.call(
-            family@dist,
-            enlist(x = series,
-                   centroids = NULL,
-                   dots = args$dist),
-            TRUE
-        ))
-
-    } else {
-        if (isTRUE(control$pam.sparse) && distance != "dtw_lb") {
-            ## see SparseDistmat.R
-            distmat <- SparseDistmat$new(series = series,
-                                         distance = distance,
-                                         control = control,
-                                         dist_args = args$dist,
-                                         error.check = FALSE)
-
-        } else {
-            ## see Distmat.R
-            distmat <- Distmat$new(series = series,
-                                   distance = distance,
-                                   control = control,
-                                   dist_args = args$dist,
-                                   error.check = FALSE)
-        }
-    }
-
-    ## return
-    list(distmat = distmat, distmat_provided = distmat_provided)
 }
 
 # ==================================================================================================
@@ -303,52 +224,6 @@ validate_pairwise <- function(x, y) {
     invisible(NULL)
 }
 
-# Function to split indices for the symmetric, parallel, proxy case
-split_parallel_symmetric <- function(n, num_workers, adjust = 0L) {
-    if (num_workers <= 2L || n <= 4L) {
-        mid_point <- as.integer(n / 2)
-        ## indices for upper part of the lower triangular
-        ul_trimat <- 1L:mid_point + adjust
-        ## indices for lower part of the lower triangular
-        ll_trimat <- (mid_point + 1L):n + adjust
-        ## put triangular parts together for load balance
-        trimat <- list(ul = ul_trimat, ll = ll_trimat)
-
-        attr(trimat, "trimat") <- TRUE
-        trimat <- list(trimat)
-
-        mid_point <- mid_point + adjust
-        attr(ul_trimat, "rows") <- ll_trimat
-        mat <- list(ul_trimat)
-
-        ids <- c(trimat, mat)
-
-    } else {
-        mid_point <- as.integer(n / 2)
-
-        ## recursion
-        rec1 <- split_parallel_symmetric(mid_point, as.integer(num_workers / 4), adjust)
-        rec2 <- split_parallel_symmetric(n - mid_point, as.integer(num_workers / 4), mid_point + adjust)
-
-        endpoints <- parallel::splitIndices(mid_point, max(length(rec1) + length(rec2), num_workers))
-        endpoints <- endpoints[lengths(endpoints) > 0L]
-        mat <- lapply(endpoints, function(ids) {
-            ids <- ids + adjust
-            attr(ids, "rows") <- (mid_point + 1L):n + adjust
-            ids
-        })
-
-        ids <- c(rec1, rec2, mat)
-    }
-
-    chunk_sizes <- unlist(lapply(ids, function(x) {
-        if (is.null(attr(x, "trimat"))) length(x) else median(lengths(x))
-    }))
-
-    ## return
-    ids[sort(chunk_sizes, index.return = TRUE)$ix]
-}
-
 # ==================================================================================================
 # Helper distance-related
 # ==================================================================================================
@@ -418,21 +293,8 @@ symmetric_loop_endpoints <- function(n) {
     })
 }
 
-# column-wise medians
-colMedians <- function(mat) { apply(mat, 2L, stats::median) }
-
 # Euclidean norm
 l2norm <- function(x) { sqrt(sum(x * x)) }
-
-# PREFUN for some of my proxy distances so that they support 'pairwise' directly
-proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
-    params$pairwise <- pairwise
-
-    list(x = x, y = y,
-         pairwise = pairwise,
-         p = params,
-         reg_entry = reg_entry)
-}
 
 # ==================================================================================================
 # Multivariate helpers
