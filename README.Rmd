@@ -53,7 +53,7 @@ The latest version from CRAN can be installed with `install.packages("dtwclust")
 
 If you want to test the latest version from github, first install the [prerequisites for R package development](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites) (LaTeX is only neccesary if you want to build the vignette) as well as the [remotes package](https://cran.r-project.org/package=remotes), and then type `remotes::install_github("asardaes/dtwclust")`.
 
-If you're wondering about which version to install, take a look at the [CHANGELOG](CHANGELOG.md) file, I try to keep it updated.
+If you're wondering about which version to install, take a look at the [CHANGELOG](CHANGELOG.md) file, I try to keep it updated. Check the [Unix](https://travis-ci.org/asardaes/dtwclust) and [Windows](https://ci.appveyor.com/project/asardaes/dtwclust) continuous integration builds to make sure everything is working, but do note that they tend to fail for reasons unrelated to the package's functionality.
 
 ## Dependencies
 
