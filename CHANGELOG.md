@@ -1,9 +1,9 @@
 # Changelog
 
 ## Version 4.1.1.9000
+* Fixed GAK's `sigma` estimation in the non-proxy version. The estimation routine in the proxy version also changed slightly.
 * Modified `tslist` to hopefully make it faster.
 * Partitional and fuzzy controls (`tsclust-controls`) now specify version 2 of the main loop by default.
-* The multivariate version of `DBA` now uses the `by-series` version by default.
 * Packages `clue` and `ggplot2` are no longer automatically loaded by default.
 
 ## Version 4.1.1

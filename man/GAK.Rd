@@ -42,7 +42,7 @@ Distance based on (triangular) global alignment kernels.
 \details{
 This function uses the Triangular Global Alignment Kernel (TGAK) described in Cuturi (2011). It
 supports series of different length and multivariate series, so long as the ratio of the series'
-lengths don't differ by more than 2 (or less than 0.5).
+lengths doesn't differ by more than 2 (or less than 0.5).
 
 The \code{window.size} parameter is similar to the one used in DTW, so \code{NULL} signifies no constraint,
 and its value should be greater than 1 if used with series of different length.

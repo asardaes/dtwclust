@@ -1,3 +1,22 @@
+estimate_sigma <- function(x, y, within_proxy) {
+    if (within_proxy)
+        L <- c(sapply(x, NROW), sapply(y, NROW))
+    else
+        L <- c(NROW(x), NROW(y))
+
+    pool <- unlist(c(x,y))
+    rep <- median(L)
+    n <- round(0.5 * min(L))
+    med1 <- sqrt(median(L))
+    med2 <- median(replicate(rep, {
+        xx <- sample(pool, n)
+        yy <- sample(pool, n)
+        lnorm(xx - yy)
+    }))
+    # return
+    med1 * med2
+}
+
 #' Fast global alignment kernels
 #'
 #' Distance based on (triangular) global alignment kernels.
@@ -21,7 +40,7 @@
 #'
 #' This function uses the Triangular Global Alignment Kernel (TGAK) described in Cuturi (2011). It
 #' supports series of different length and multivariate series, so long as the ratio of the series'
-#' lengths don't differ by more than 2 (or less than 0.5).
+#' lengths doesn't differ by more than 2 (or less than 0.5).
 #'
 #' The `window.size` parameter is similar to the one used in DTW, so `NULL` signifies no constraint,
 #' and its value should be greater than 1 if used with series of different length.
@@ -90,7 +109,7 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
         check_consistency(y, "ts")
     }
 
-    ## check dimension consistency
+    # checks dimension consistency
     is_multivariate(list(x,y))
 
     if (is.null(logs))
@@ -105,24 +124,10 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
     else
         window.size <- check_consistency(window.size, "window")
 
-    if (is.null(sigma)) {
-        med1 <- sqrt(median(c(NROW(x), NROW(y))))
-        n <- round(0.5 * min(NROW(x), NROW(y)))
-
-        if (is.null(dim(x)))
-            xx <- sample(x, n)
-        else
-            xx <- sapply(1L:ncol(x), function(idc) { sample(x[, idc], n) })
-
-        if (is.null(dim(y)))
-            yy <- sample(y, n)
-        else
-            yy <- sapply(1L:ncol(y), function(idc) { sample(y[, idc], n) })
-
-        med2 <- median(replicate(100L, lnorm(xx - yy, 2)))
-        sigma <- med1 * med2
-
-    } else if (sigma <= 0) stop("Parameter 'sigma' must be positive.")
+    if (is.null(sigma))
+        sigma <- estimate_sigma(x, y, FALSE)
+    else if (sigma <= 0)
+        stop("Parameter 'sigma' must be positive.")
 
     logGAK <- .Call(C_logGAK, x, y,
                     NROW(x), NROW(y), NCOL(x),
@@ -144,8 +149,7 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
     }
 
     attr(logGAK, "sigma") <- sigma
-
-    ## return
+    # return
     logGAK
 }
 
@@ -161,7 +165,7 @@ gak <- GAK
 GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
                       logs = NULL, error.check = TRUE, pairwise = FALSE, .internal_ = FALSE)
 {
-    ## normalization will be done manually to avoid multiple calculations of gak_x and gak_y
+    # normalization will be done manually to avoid multiple calculations of gak_x and gak_y
     if (!.internal_ && !normalize) { # nocov start
         warning("The proxy::dist version of GAK is always normalized.")
         normalize <- TRUE
@@ -180,33 +184,12 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         if (error.check) check_consistency(y, "vltslist")
     }
 
-    if (is.null(sigma)) {
-        L <- c(sapply(x, NROW), sapply(y, NROW))
-        n <- round(0.5 * min(L))
-        med1 <- sqrt(median(L))
+    if (is.null(sigma))
+        sigma <- estimate_sigma(x, y, TRUE)
+    else if (sigma <= 0)
+        stop("Parameter 'sigma' must be positive.")
 
-        med2 <- median(replicate(length(x) + length(y), {
-            x <- sample(x, 1L)[[1L]]
-            y <- sample(y, 1L)[[1L]]
-
-            if (is.null(dim(x)))
-                xx <- sample(x, n)
-            else
-                xx <- sapply(1L:ncol(x), function(idc) { sample(x[, idc], n) })
-
-            if (is.null(dim(y)))
-                yy <- sample(y, n)
-            else
-                yy <- sapply(1L:ncol(y), function(idc) { sample(y[, idc], n) })
-
-            lnorm(xx - yy, 2)
-        }))
-
-        sigma <- med1 * med2
-
-    } else if (sigma <= 0) stop("Parameter 'sigma' must be positive.")
-
-    ## parallel chunks are made column-wise, so flip x and y if necessary
+    # parallel chunks are made column-wise, so flip x and y if necessary
     flip <- NULL
     num_workers <- foreach::getDoParWorkers()
 
@@ -216,7 +199,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         x <- flip
     }
 
-    ## pre-allocate logs
+    # pre-allocate logs
     if (is.null(logs)) logs <- matrix(0, max(sapply(x, NROW), sapply(y, NROW)) + 1L, 3L)
     pairwise <- isTRUE(pairwise)
     dim_out <- c(length(x), length(y))
@@ -224,7 +207,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     D <- allocate_distmat(length(x), length(y), pairwise, symmetric) ## utils.R
 
     if (normalize) {
-        ## calculation of normalization factors
+        # calculation of normalization factors
         # x
         gak_x <- GAK_proxy(x, x,
                            sigma = sigma, window.size = window.size, logs = logs,
@@ -240,7 +223,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
                                .internal_ = TRUE)
     }
 
-    ## Wrap as needed for foreach
+    # Wrap as needed for foreach
     if (pairwise) {
         x <- split_parallel(x)
         y <- split_parallel(y)
@@ -269,7 +252,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         packages <- c("dtwclust")
     }
 
-    ## Calculate distance matrix
+    # Calculate distance matrix
     foreach(x = x, y = y, endpoints = endpoints,
             .combine = c,
             .multicombine = TRUE,
@@ -308,7 +291,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     if (!is.null(flip)) D <- t(D)
     attr(D, "method") <- "GAK"
     attr(D, "sigma") <- sigma
-    ## return
+    # return
     D
 }
 
@@ -319,7 +302,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
 gak_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ...,
                      window.size, sigma, logs)
 {
-    ## check dimension consistency
+    # checks dimension consistency
     mv <- is_multivariate(c(x,y))
 
     nr <- max(sapply(x, NROW), sapply(y, NROW)) + 1L
