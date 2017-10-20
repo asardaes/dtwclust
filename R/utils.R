@@ -108,14 +108,6 @@ check_consistency <- function(obj, case, ..., clus_type,
     invisible(NULL)
 }
 
-# Coerce to list
-any2list <- function(obj) { # nocov start
-    warning("dtwclust: If you're seeing this, ",
-            "you're probably using an old dtwclust/TSClusters object. ",
-            "Try using update() on it.")
-    tslist(obj)
-} # nocov end
-
 # Check if list of series have different length
 different_lengths <- function(x) { any(diff(lengths(x)) != 0L) }
 
