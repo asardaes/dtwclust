@@ -122,20 +122,12 @@ bool mv_average_step(Rcpp::NumericMatrix& new_cent,
 /* helper functions for all */
 // =================================================================================================
 
-int max_lengths(const bool mv)
+int max_lengths_mv()
 {
-    int max_length = 0;
+    int max_length = 0, temp;
     for (int i = 0; i < series.length(); i++) {
-        int temp;
-        if (mv) {
-            Rcpp::NumericMatrix x = series[i];
-            temp = x.nrow();
-
-        } else {
-            Rcpp::NumericVector x = series[i];
-            temp = x.length();
-        }
-
+        Rcpp::NumericMatrix x = series[i];
+        temp = x.nrow();
         if (temp > max_length) max_length = temp;
     }
     return max_length;
@@ -225,7 +217,7 @@ SEXP dba_mv_by_variable(const Rcpp::NumericMatrix& mv_ref_cent)
     ny = mv_ref_cent.nrow();
     nv = 1; // careful! this is used by the uv_* functions so it must be 1
     Rcpp::NumericMatrix mat_cent(ny, mv_ref_cent.ncol());
-    Rcpp::NumericVector x(max_lengths(true));
+    Rcpp::NumericVector x(max_lengths_mv());
     Rcpp::NumericVector ref_cent(ny);
     Rcpp::NumericVector new_cent(ny);
     Rcpp::IntegerVector num_vals(ny);
