@@ -4,7 +4,8 @@
 \alias{zscore}
 \title{Wrapper for z-normalization}
 \usage{
-zscore(x, ..., multivariate = FALSE, keep.attributes = FALSE)
+zscore(x, ..., multivariate = FALSE, keep.attributes = FALSE,
+  error.check = TRUE)
 }
 \arguments{
 \item{x}{Data to normalize. Either a vector, a matrix/data.frame where each row is to be
@@ -17,6 +18,9 @@ list is provided in \code{x}.}
 
 \item{keep.attributes}{Should the mean and standard deviation returned by \code{\link[base:scale]{base::scale()}} be
 preserved?}
+
+\item{error.check}{Logical indicating whether the function should try to detect inconsistencies
+and give more informative errors messages. Also used internally to avoid repeating checks.}
 }
 \value{
 Normalized data in the same format as provided.

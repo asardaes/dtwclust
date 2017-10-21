@@ -73,7 +73,7 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check
         return(do.call(cbind, new_c, TRUE))
     }
 
-    Xz <- if (znorm) zscore(X, ...) else X
+    Xz <- if (znorm) zscore(X, ..., error.check = FALSE) else X
 
     ## make sure at least one series is not just a flat line at zero
     if (all(sapply(Xz, sum) == 0)) {
@@ -94,12 +94,12 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check
         }
 
     } else {
-        centroid <- zscore(centroid, ...) # use given reference
+        centroid <- zscore(centroid, ..., error.check = FALSE) # use given reference
         A <- lapply(Xz, function(a) { SBD(centroid, a)$yshift })
         A <- do.call(rbind, A, TRUE)
     }
 
-    Y <- zscore(A, ...)
+    Y <- zscore(A, ..., error.check = FALSE)
     S <- if (is.matrix(Y)) t(Y) %*% Y else Y %*% t(Y)
     nc <- ncol(A)
     P <- diag(nc) - 1 / nc * matrix(1, nc, nc)
@@ -109,6 +109,6 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check
     d1 <- l2norm(A[1L, , drop = TRUE] - ksc)
     d2 <- l2norm(A[1L, , drop = TRUE] + ksc)
     if (d1 >= d2) ksc <- -ksc
-    ksc <- zscore(ksc, ...)
+    ksc <- zscore(ksc, ..., error.check = FALSE)
     ksc
 }

@@ -87,9 +87,11 @@ SBD <- function(x, y, znorm = FALSE, error.check = TRUE, return.shifted = TRUE) 
     }
 
     if (znorm)
-        CCseq <- NCCc(zscore(x), zscore(y))
+        CCseq <- NCCc(zscore(x, error.check = FALSE),
+                      zscore(y, error.check = FALSE),
+                      error.check = FALSE)
     else
-        CCseq <- NCCc(x,y)
+        CCseq <- NCCc(x, y, error.check = FALSE)
 
     m <- max(CCseq)
     if (!return.shifted) return(1 - m)
@@ -132,7 +134,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     x <- tslist(x)
 
     if (error.check) check_consistency(x, "vltslist")
-    if (znorm) x <- zscore(x)
+    if (znorm) x <- zscore(x, error.check = FALSE)
 
     if (is.null(y)) {
         symmetric <- TRUE
@@ -148,7 +150,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         symmetric <- FALSE
         y <- tslist(y)
         if (error.check) check_consistency(y, "vltslist")
-        if (znorm) y <- zscore(y)
+        if (znorm) y <- zscore(y, error.check = FALSE)
 
         ## Precompute FFTs, padding with zeros as necessary, which will be compensated later
         L <- max(lengths(x)) + max(lengths(y)) - 1L

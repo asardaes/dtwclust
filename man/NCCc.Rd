@@ -4,10 +4,13 @@
 \alias{NCCc}
 \title{Cross-correlation with coefficient normalization}
 \usage{
-NCCc(x, y)
+NCCc(x, y, error.check = TRUE)
 }
 \arguments{
 \item{x, y}{Univariate time series.}
+
+\item{error.check}{Logical indicating whether the function should try to detect inconsistencies
+and give more informative errors messages. Also used internally to avoid repeating checks.}
 }
 \value{
 The cross-correlation sequence with length \code{length(x) + length(y) - 1L}.

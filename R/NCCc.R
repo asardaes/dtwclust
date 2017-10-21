@@ -6,6 +6,7 @@
 #' @export
 #'
 #' @param x,y Univariate time series.
+#' @template error-check
 #'
 #' @return The cross-correlation sequence with length `length(x) + length(y) - 1L`.
 #'
@@ -19,7 +20,12 @@
 #'
 #' [SBD()]
 #'
-NCCc <- function(x, y) {
+NCCc <- function(x, y, error.check = TRUE) {
+    if (error.check) {
+        check_consistency(x, "ts")
+        check_consistency(y, "ts")
+        if (is_multivariate(list(x,y))) stop("NCCc does not support multivariate series.")
+    }
     den <- l2norm(x) * l2norm(y) # utils.R
     # Notice that the native 'convolve' function already uses FFT for the calculation
     if (den == 0) Inf else { stats::convolve(x, y, conj = TRUE, type = "open") / den }
