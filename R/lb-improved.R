@@ -94,6 +94,8 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
         upper.env <- envelopes$upper
 
     } else {
+        check_consistency(lower.env, "ts")
+        check_consistency(upper.env, "ts")
         if (length(lower.env) != length(x))
             stop("Length mismatch between 'x' and the lower envelope")
         if (length(upper.env) != length(x))
