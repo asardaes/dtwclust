@@ -4,7 +4,7 @@ context("\tGenerics for included classes")
 # setup
 # ==================================================================================================
 
-## Original objects in env
+# Original objects in env
 ols <- ls()
 
 # ==================================================================================================
@@ -54,7 +54,7 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
         "FuzzyTSClusters"
     )
 
-    ## extra argument for preproc so that it is used in predict
+    # extra argument for preproc so that it is used in predict
     expect_s4_class(
         hierarchical_object <- new("HierarchicalTSClusters",
                                    hclust(proxy::dist(data_reinterpolated_subset, method = "L2")),
@@ -96,7 +96,7 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
     expect_identical(body(hc_update@family@allcent), body(hc_update@family@allcent),
                      info = "Updating hierarchical object with no parameters creates new identical allcent function in family")
 
-    ## for artificial update test below
+    # for artificial update test below
     partitional_object@call <- call("tsclust",
                                     quote(data_subset),
                                     k = 4L,
@@ -151,41 +151,11 @@ test_that("Included as.* methods are dispatched correctly.", {
                      info = "Changing a crossdist class to matrix/data.frame does not alter dimensions")
 
     pairdist <- proxy::dist(data_reinterpolated_subset[1L:10L], data_reinterpolated_subset[11L:20L],
-                      pairwise = TRUE)
+                            pairwise = TRUE)
     expect_true(class(base::as.matrix(pairdist)) == "matrix")
     expect_s3_class(base::as.data.frame(pairdist), "data.frame")
     expect_identical(dim(base::as.matrix(pairdist)), dim(as.data.frame(pairdist)),
                      info = "Changing a pairdist class to matrix/data.frame results in equal dimensions")
-})
-
-# ==================================================================================================
-# coercion to TSClusters from dtwclust
-# ==================================================================================================
-
-test_that("Coercion from dtwclust to TSClusters class works correctly.", {
-    skip_on_cran()
-
-    ndtw <- function(x, y, ...) {
-        dtw::dtw(x, y, distance.only = TRUE, ...)$normalizedDistance
-    }
-
-    coercion <- function(file) {
-        if (grepl("x32$", file)) return(TRUE)
-        obj <- readRDS(file)
-        if (inherits(obj, "dtwclust")) obj <- as(obj, "TSClusters")
-        else if (is.list(obj)) obj <- lapply(obj, function(o) { if (inherits(o, "dtwclust")) as(o, "TSClusters") else NULL })
-        TRUE
-    }
-
-    if (!pr_DB$entry_exists("nDTW"))
-        proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
-                               loop = TRUE, type = "metric", distance = TRUE,
-                               description = "Normalized DTW with L1 norm")
-
-    for (file in list.files("rds", full.names = TRUE, include.dirs = FALSE, no.. = TRUE)) {
-        expect_true(coercion(file), info = paste("File =", file))
-    }
-
 })
 
 # ==================================================================================================
