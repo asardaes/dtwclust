@@ -172,13 +172,13 @@ test_that("Passing pre-computed envelopes to the lower bounds works correctly.",
                              lower.env = wrong_lower_envelope,
                              upper.env = correct_upper_envelope),
                  regexp = "mismatch.*envelope")
-    expect_error(lb_keogh(x_uv, y_uv_same_length, window.size = 15L,
-                          lower.env = correct_lower_envelope,
-                          upper.env = wrong_upper_envelope),
+    expect_error(lb_improved(x_uv, y_uv_same_length, window.size = 15L,
+                             lower.env = correct_lower_envelope,
+                             upper.env = wrong_upper_envelope),
                  regexp = "mismatch.*envelope")
-    expect_gt(lb_keogh(x_uv, y_uv_same_length, window.size = 15L,
-                       lower.env = correct_lower_envelope,
-                       upper.env = correct_upper_envelope)$d,
+    expect_gt(lb_improved(x_uv, y_uv_same_length, window.size = 15L,
+                          lower.env = correct_lower_envelope,
+                          upper.env = correct_upper_envelope),
               0)
 })
 
