@@ -38,9 +38,10 @@ reinterpolate <- function(x, new.length, multivariate = FALSE) {
         x <- t(apply(x, 1L, reinterpolate, new.length = new.length))
 
     } else {
+        if (is.data.frame(x)) x <- base::as.matrix(x)
         check_consistency(x, "ts")
 
-        if (multivariate)
+        if (multivariate && !is.null(dim(x)))
             x <- apply(x, 2L, reinterpolate, new.length = new.length)
         else
             x <- stats::approx(x, method = "linear", n = new.length)$y
