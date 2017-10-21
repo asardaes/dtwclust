@@ -129,6 +129,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 {
     norm <- match.arg(norm, c("L1", "L2"))
     dtw.func <- match.arg(dtw.func, c("dtw", "dtw_basic"))
+    nn.margin <- as.integer(nn.margin)
     if (nn.margin != 1L) nn.margin <- 2L
 
     if (dtw.func == "dtw")
