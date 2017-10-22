@@ -81,7 +81,8 @@ binding the results by column. Therefore, the DTW backtracking is different for 
 variable.
 \item If \code{mv.ver = "by-series"}, then all variables are considered at the same time, so the DTW
 backtracking is computed based on each multivariate series as a whole. This version was
-implemented in version 4.0.0 of \pkg{dtwclust}, and it is faster.
+implemented in version 4.0.0 of \pkg{dtwclust}, and it is faster, but not necessarily more
+correct.
 }
 }
 
