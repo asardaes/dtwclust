@@ -105,12 +105,13 @@
 #' @importFrom methods callNextMethod
 #' @importFrom methods initialize
 #' @importFrom methods new
+#' @importFrom methods removeClass
 #' @importFrom methods setClass
 #' @importFrom methods setGeneric
+#' @importFrom methods setOldClass
 #' @importFrom methods show
 #' @importFrom methods signature
 #' @importFrom methods slot
-#' @importFrom methods slot<-
 #'
 #' @importFrom parallel splitIndices
 #'
