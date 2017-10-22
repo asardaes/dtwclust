@@ -1,15 +1,15 @@
 context("\tPartitional")
 
-# =================================================================================================
+# ==================================================================================================
 # setup
-# =================================================================================================
+# ==================================================================================================
 
 ## Original objects in env
 ols <- ls()
 
-# =================================================================================================
+# ==================================================================================================
 # multiple k and repetitions
-# =================================================================================================
+# ==================================================================================================
 
 test_that("Multiple k and multiple repetitions work as expected.", {
     pc_k <- dtwclust(data_reinterpolated, type = "p", k = 2L:5L,
@@ -82,9 +82,9 @@ test_that("Multiple k and multiple repetitions work as expected.", {
     assign("pc_krep", pc_krep, persistent)
 })
 
-# =================================================================================================
+# ==================================================================================================
 # partitional algorithms
-# =================================================================================================
+# ==================================================================================================
 
 test_that("Partitional clustering works as expected.", {
     ## ---------------------------------------------------------- dtw
@@ -222,9 +222,9 @@ test_that("Partitional clustering works as expected.", {
     assign("pc_mv_dba", pc_mv_dba, persistent)
 })
 
-# =================================================================================================
+# ==================================================================================================
 # TADPole
-# =================================================================================================
+# ==================================================================================================
 
 test_that("TADPole works as expected", {
     ## ---------------------------------------------------------- TADPole
@@ -280,9 +280,9 @@ test_that("TADPole works as expected", {
     assign("pc_tadp_cent", pc_tadp_cent, persistent)
 })
 
-# =================================================================================================
+# ==================================================================================================
 # cluster reinitialization
-# =================================================================================================
+# ==================================================================================================
 
 ## this case causes clusters to become empty
 test_that("Cluster reinitialization in partitional dtwclust works.", {
@@ -317,19 +317,58 @@ test_that("Cluster reinitialization in partitional dtwclust works.", {
 
     expect_false(pc_cr@converged)
 
-    suppressWarnings(pc_cr2 <- tsclust(data_reinterpolated, k = 20,
-                                       distance = "lbk", centroid = "pam",
-                                       seed = 31231,
-                                       control = partitional_control(iter.max = 10L, version = 1L),
-                                       args = tsclust_args(dist = list(window.size = 19L))))
+    expect_warning(
+        pc_cr2 <- tsclust(data_reinterpolated, k = 20,
+                          distance = "lbk", centroid = "pam",
+                          seed = 31231,
+                          control = partitional_control(iter.max = 10L, version = 1L),
+                          args = tsclust_args(dist = list(window.size = 19L))),
+        regexp = "converge"
+    )
 
     expect_false(pc_cr2@converged)
-
     expect_identical(pc_cr@cluster, pc_cr2@cluster)
     expect_identical(pc_cr@centroids, pc_cr2@centroids)
 })
 
-# =================================================================================================
+# ==================================================================================================
+# custom centroid
+# ==================================================================================================
+
+test_that("Operations with custom centroid complete successfully.", {
+    ## ---------------------------------------------------------- with dots
+    mycent <- function(x, cl_id, k, cent, cl_old, ...) {
+        x_split <- split(x, cl_id)
+        x_split <- lapply(x_split, function(xx) do.call(rbind, xx))
+        new_cent <- lapply(x_split, colMeans)
+        new_cent
+    }
+
+    cent_colMeans <- tsclust(data_matrix, k = 20L,
+                             distance = "sbd", centroid = mycent, seed = 123)
+
+    cent_colMeans <- reset_nondeterministic(cent_colMeans)
+
+    ## ---------------------------------------------------------- without dots
+    mycent <- function(x, cl_id, k, cent, cl_old) {
+        x_split <- split(x, cl_id)
+        x_split <- lapply(x_split, function(xx) do.call(rbind, xx))
+        new_cent <- lapply(x_split, colMeans)
+        new_cent
+    }
+
+    cent_colMeans_nd <- tsclust(data_matrix, k = 20L,
+                                distance = "sbd", centroid = mycent, seed = 123)
+
+    cent_colMeans_nd <- reset_nondeterministic(cent_colMeans_nd)
+
+    ## ---------------------------------------------------------- refs
+    assign("cent_colMeans", cent_colMeans, persistent)
+    assign("cent_colMeans_nd", cent_colMeans_nd, persistent)
+})
+
+# ==================================================================================================
 # clean
-# =================================================================================================
+# ==================================================================================================
+
 rm(list = setdiff(ls(), ols))

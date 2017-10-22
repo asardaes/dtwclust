@@ -45,8 +45,10 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
                                  TRUE)
         } # nocov end
 
-        if (fuzzy && cent == "fcm") {
-            ## fuzzy.R
+        # NOTE: a custom fuzzy centroid function that doesn't want to rely on the usual fuzzy
+        # objective would not be able to customize this convergence criterion...
+        if (fuzzy && cent != "fcmdd") {
+            # fuzzy.R
             objective <- fuzzy_objective(cluster, distmat = distmat, m = control$fuzziness)
             if (trace) {
                 cat("Iteration ", iter, ": ",
@@ -92,7 +94,6 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
 
     if (iter > control$iter.max) {
         if (trace) cat("\n")
-        warning("Clustering did not converge within the allowed iterations.")
         converged <- FALSE
         iter <- control$iter.max
 
@@ -118,12 +119,12 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
     cldist <- base::as.matrix(distmat[cbind(1L:N, cluster)])
     size <- tabulate(cluster)
 
-    ## if some clusters are empty, tapply() would not return enough rows
+    # if some clusters are empty, tapply() would not return enough rows
     clusinfo <- data.frame(size = size, av_dist = 0)
     clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(cldist[ , 1L], cluster, mean))
     names(centroids) <- NULL
 
-    ## return
+    # return
     list(k = k,
          cluster = cluster,
          fcluster = fcluster,
@@ -246,7 +247,7 @@ kcca.list <- function (x, k, family, control, fuzzy = FALSE, cent, ...) {
     cldist <- base::as.matrix(distmat[cbind(1L:N, cluster)])
     size <- tabulate(cluster)
 
-    ## if some clusters are empty, tapply() would not return enough rows
+    # if some clusters are empty, tapply() would not return enough rows
     clusinfo <- data.frame(size = size, av_dist = 0)
     clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(cldist[ , 1L], cluster, mean))
     names(centroids) <- NULL
