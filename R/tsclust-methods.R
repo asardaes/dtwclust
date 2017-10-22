@@ -971,18 +971,11 @@ setMethod("cvi", methods::signature(a = "FuzzyTSClusters", b = "missing"),
 # Functions to support package 'clue'
 # ==================================================================================================
 
-#' @method n_of_classes TSClusters
+#' @method as.cl_membership TSClusters
 #' @export
 #'
-n_of_classes.TSClusters <- function(x) {
-    x@k
-}
-
-#' @method n_of_objects TSClusters
-#' @export
-#'
-n_of_objects.TSClusters <- function(x) {
-    length(x@cluster)
+as.cl_membership.TSClusters <- function(x) {
+    clue::as.cl_membership(x@cluster)
 }
 
 #' @method cl_class_ids TSClusters
@@ -992,25 +985,18 @@ cl_class_ids.TSClusters <- function(x) {
     clue::as.cl_class_ids(x@cluster)
 }
 
-#' @method as.cl_membership TSClusters
-#' @export
-#'
-as.cl_membership.TSClusters <- function(x) {
-    as.cl_membership(x@cluster)
-}
-
 #' @method cl_membership TSClusters
 #' @export
 #'
 cl_membership.TSClusters <- function(x, k = n_of_classes(x)) {
-    as.cl_membership(x)
+    clue::as.cl_membership(x)
 }
 
-#' @method is.cl_partition TSClusters
+#' @method is.cl_dendrogram TSClusters
 #' @export
 #'
-is.cl_partition.TSClusters <- function(x) {
-    TRUE
+is.cl_dendrogram.TSClusters <- function(x) {
+    x@type == "hierarchical"
 }
 
 #' @method is.cl_hard_partition TSClusters
@@ -1027,9 +1013,23 @@ is.cl_hierarchy.TSClusters <- function(x) {
     x@type == "hierarchical"
 }
 
-#' @method is.cl_dendrogram TSClusters
+#' @method is.cl_partition TSClusters
 #' @export
 #'
-is.cl_dendrogram.TSClusters <- function(x) {
-    x@type == "hierarchical"
+is.cl_partition.TSClusters <- function(x) {
+    TRUE
+}
+
+#' @method n_of_classes TSClusters
+#' @export
+#'
+n_of_classes.TSClusters <- function(x) {
+    x@k
+}
+
+#' @method n_of_objects TSClusters
+#' @export
+#'
+n_of_objects.TSClusters <- function(x) {
+    length(x@cluster)
 }
