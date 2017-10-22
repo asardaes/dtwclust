@@ -73,6 +73,55 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
     )
 
     # ----------------------------------------------------------------------------------------------
+    # clue
+    # ----------------------------------------------------------------------------------------------
+
+    expect_identical(clue::as.cl_membership(partitional_object),
+                     clue::as.cl_membership(partitional_object@cluster))
+    expect_identical(clue::as.cl_membership(fuzzy_object),
+                     clue::as.cl_membership(fuzzy_object@cluster))
+    expect_identical(clue::as.cl_membership(hierarchical_object),
+                     clue::as.cl_membership(hierarchical_object@cluster))
+
+    expect_identical(clue::cl_class_ids(partitional_object),
+                     clue::as.cl_class_ids(partitional_object@cluster))
+    expect_identical(clue::cl_class_ids(fuzzy_object),
+                     clue::as.cl_class_ids(fuzzy_object@cluster))
+    expect_identical(clue::cl_class_ids(hierarchical_object),
+                     clue::as.cl_class_ids(hierarchical_object@cluster))
+
+    expect_identical(clue::cl_membership(partitional_object),
+                     clue::as.cl_membership(partitional_object@cluster))
+    expect_identical(clue::cl_membership(fuzzy_object),
+                     clue::as.cl_membership(fuzzy_object@cluster))
+    expect_identical(clue::cl_membership(hierarchical_object),
+                     clue::as.cl_membership(hierarchical_object@cluster))
+
+    expect_false(clue::is.cl_dendrogram(partitional_object))
+    expect_false(clue::is.cl_dendrogram(fuzzy_object))
+    expect_true(clue::is.cl_dendrogram(hierarchical_object))
+
+    expect_true(clue::is.cl_hard_partition(partitional_object))
+    expect_false(clue::is.cl_hard_partition(fuzzy_object))
+    expect_true(clue::is.cl_hard_partition(hierarchical_object))
+
+    expect_false(clue::is.cl_hierarchy(partitional_object))
+    expect_false(clue::is.cl_hierarchy(fuzzy_object))
+    expect_true(clue::is.cl_hierarchy(hierarchical_object))
+
+    expect_true(clue::is.cl_partition(partitional_object))
+    expect_true(clue::is.cl_partition(fuzzy_object))
+    expect_true(clue::is.cl_partition(hierarchical_object))
+
+    expect_identical(clue::n_of_classes(partitional_object), partitional_object@k)
+    expect_identical(clue::n_of_classes(fuzzy_object), fuzzy_object@k)
+    expect_identical(clue::n_of_classes(hierarchical_object), hierarchical_object@k)
+
+    expect_identical(clue::n_of_objects(partitional_object), length(partitional_object@cluster))
+    expect_identical(clue::n_of_objects(fuzzy_object), length(fuzzy_object@cluster))
+    expect_identical(clue::n_of_objects(hierarchical_object), length(hierarchical_object@cluster))
+
+    # ----------------------------------------------------------------------------------------------
     # show
     # ----------------------------------------------------------------------------------------------
 
