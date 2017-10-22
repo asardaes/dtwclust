@@ -1,27 +1,25 @@
 context("\tCVIs")
 
-# =================================================================================================
+# ==================================================================================================
 # setup
-# =================================================================================================
+# ==================================================================================================
 
-## Original objects in env
+# Original objects in env
 ols <- ls()
 
 internal_cvis <- c("Sil", "D", "DB", "DBstar", "CH", "SF", "COP")
 external_cvis <- c("RI", "ARI", "J", "FM", "VI")
 fuzzy_cvis <- c("MPC", "K", "T", "SC", "PBMF")
 
-# =================================================================================================
+# ==================================================================================================
 # both internal and external
-# =================================================================================================
+# ==================================================================================================
 
 test_that("CVI calculations are consistent regardless of quantity or order of CVIs computed", {
-    pc_mv <- dtwclust(data_multivariate, type = "partitional", k = 4L,
-                      distance = "dtw_basic", centroid = "pam",
-                      preproc = NULL, control = list(window.size = 18L), seed = 123,
-                      dist.method = "L1")
-
-    pc_mv2 <- as(pc_mv, "TSClusters")
+    pc_mv <- tsclust(data_multivariate, type = "partitional", k = 4L,
+                     distance = "dtw_basic", centroid = "pam",
+                     args = tsclust_args(dist = list(window.size = 18L)),
+                     seed = 123)
 
     base_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), "valid")
     i_cvis <- cvi(pc_mv, type = "internal")
@@ -34,35 +32,30 @@ test_that("CVI calculations are consistent regardless of quantity or order of CV
         times(50L) %dopar% {
             considered_cvis <- sample(cvis, sample(length(cvis), 1L))
             this_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), considered_cvis)
-            this_cvis2 <- cvi(pc_mv2, rep(1L:4L, each = 5L), considered_cvis)
-            all(base_cvis[considered_cvis] == this_cvis[considered_cvis]) &&
-                identical(this_cvis, this_cvis2)
+            all(base_cvis[considered_cvis] == this_cvis[considered_cvis])
         }
     ),
-    info = "A random number of CVIs are calculated and compared against the base ones, and should always be equal.")
+    info = paste("A random number of CVIs are calculated and compared against the base ones,",
+                 "and should always be equal."))
 
-    ## when missing elements
-    pc_mv2@distmat <- pc_mv@distmat <- NULL
+    # when missing elements
+    pc_mv@distmat <- NULL
     this_cvis <- cvi(pc_mv, type = "internal")
-    this_cvis2 <- cvi(pc_mv2, type = "internal")
     considered_cvis <- names(this_cvis)
     expect_true(all(base_cvis[considered_cvis] == this_cvis))
-    expect_identical(this_cvis, this_cvis2)
 
-    pc_mv2@datalist <- pc_mv@datalist <- list()
+    pc_mv@datalist <- list()
     expect_warning(this_cvis <- cvi(pc_mv, type = "internal"))
-    expect_warning(this_cvis2 <- cvi(pc_mv2, type = "internal"))
     considered_cvis <- names(this_cvis)
     expect_true(all(base_cvis[considered_cvis] == this_cvis))
-    expect_identical(this_cvis, this_cvis2)
 
-    ## refs
+    # refs
     assign("base_cvis", base_cvis, persistent)
 })
 
-# =================================================================================================
+# ==================================================================================================
 # external
-# =================================================================================================
+# ==================================================================================================
 
 test_that("external CVI calculations are consistent regardless of quantity or order of CVIs computed", {
     expect_error(cvi(labels_shuffled, type = "external"))
@@ -76,12 +69,13 @@ test_that("external CVI calculations are consistent regardless of quantity or or
             all(base_cvis[considered_cvis] == this_cvis[considered_cvis])
         }
     ),
-    info = "A random number of CVIs are calculated and compared against the base ones, and should always be equal.")
+    info = paste("A random number of CVIs are calculated and compared against the base ones,",
+                 "and should always be equal."))
 })
 
-# =================================================================================================
+# ==================================================================================================
 # fuzzy
-# =================================================================================================
+# ==================================================================================================
 
 test_that("CVI calculations are consistent regardless of quantity or order of CVIs computed", {
     fc <- tsclust(data_subset, "f", 4L, distance = "sbd", centroid = "fcmdd", seed = 32890L)
@@ -97,40 +91,35 @@ test_that("CVI calculations are consistent regardless of quantity or order of CV
             all(base_fcvis[considered_cvis] == this_cvis[considered_cvis])
         }
     ),
-    info = paste0("A random number of fuzzy CVIs are calculated and compared against the base ones, ",
-                  "and should always be equal."))
+    info = paste("A random number of fuzzy CVIs are calculated and compared against the base ones,",
+                 "and should always be equal."))
 
-    ## when missing elements
+    # when missing elements
     fc@datalist <- list()
     expect_warning(this_cvis <- cvi(fc))
     considered_cvis <- names(this_cvis)
     expect_true(all(base_fcvis[considered_cvis] == this_cvis))
 
-    ## refs
+    # refs
     assign("base_fcvis", base_fcvis, persistent)
 })
 
-# =================================================================================================
+# ==================================================================================================
 # hierarchical/tadpole cases
-# =================================================================================================
+# ==================================================================================================
 
 test_that("CVIs work also for hierarchical and TADPole", {
-    tadp <- dtwclust(data_reinterpolated_subset, type = "t", k = 4L,
-                     dc = 1.5, control = list(window.size = 18L))
+    tadp <- tsclust(data_reinterpolated_subset, type = "t", k = 4L,
+                    control = tadpole_control(1.5, 18L))
 
-    hc <- dtwclust(data_reinterpolated_subset, type = "h", k = 4L,
-                   distance = "gak", sigma = 100,
-                   control = list(window.size = 18L))
+    hc <- tsclust(data_reinterpolated_subset, type = "h", k = 4L,
+                  distance = "gak", sigma = 100,
+                  window.size = 18L)
 
     cvis_tadp <- cvi(tadp, labels_subset)
     cvis_hc <- cvi(hc, labels_subset)
-    cvis_tadp2 <- cvi(as(tadp, "TSClusters"), labels_subset)
-    cvis_hc2 <- cvi(as(hc, "TSClusters"), labels_subset)
 
-    expect_identical(cvis_tadp2, cvis_tadp)
-    expect_identical(cvis_hc2, cvis_hc)
-
-    ## refs
+    # refs
     assign("cvis_tadp", cvis_tadp, persistent)
     assign("cvis_hc", cvis_hc, persistent)
 })
@@ -146,12 +135,13 @@ test_that("CVIs work also for hierarchical and TADPole with custom centroid", {
     cvis_tadp_cent <- cvi(tadp, labels_subset)
     cvis_hc_cent <- cvi(hc, labels_subset)
 
-    ## refs
+    # refs
     assign("cvis_tadp_cent", cvis_tadp_cent, persistent)
     assign("cvis_hc_cent", cvis_hc_cent, persistent)
 })
 
-# =================================================================================================
+# ==================================================================================================
 # clean
-# =================================================================================================
+# ==================================================================================================
+
 rm(list = setdiff(ls(), ols))
