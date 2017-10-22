@@ -52,6 +52,32 @@ test_that("NCCc function works correctly for supported inputs.", {
 })
 
 # ==================================================================================================
+# zscore
+# ==================================================================================================
+
+test_that("zscore function works correctly for supported inputs.", {
+    normalized_series <- zscore(data[[1L]])
+    expect_length(normalized_series, length(data[[1L]]))
+    expect_true(!is.null(attributes(zscore(data[[1L]], keep.attributes = TRUE))))
+
+    normalized_matrix <- zscore(data_matrix, multivariate = FALSE, keep.attributes = TRUE)
+    expect_identical(ncol(normalized_matrix), ncol(data_matrix))
+    expect_true(!is.null(attributes(normalized_matrix)))
+
+    normalized_matrix <- zscore(data_matrix, multivariate = TRUE, keep.attributes = TRUE)
+    expect_identical(nrow(normalized_matrix), nrow(data_matrix))
+    expect_true(!is.null(attributes(normalized_matrix)))
+
+    normalized_data_frame <- zscore(data_frame, multivariate = FALSE, keep.attributes = TRUE)
+    expect_identical(ncol(normalized_data_frame), ncol(data_frame))
+    expect_true(!is.null(attributes(normalized_data_frame)))
+
+    normalized_data_frame <- zscore(data_frame, multivariate = TRUE, keep.attributes = TRUE)
+    expect_identical(nrow(normalized_data_frame), nrow(data_frame))
+    expect_true(!is.null(attributes(normalized_data_frame)))
+})
+
+# ==================================================================================================
 # clean
 # ==================================================================================================
 

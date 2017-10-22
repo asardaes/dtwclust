@@ -27,15 +27,17 @@ zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE, error.
                     keep.attributes = keep.attributes)
 
     } else if (!multivariate && (is.matrix(x) || is.data.frame(x))) {
+        if (is.data.frame(x)) x <- base::as.matrix(x)
         if (error.check) check_consistency(x, "ts")
         dots <- list(...)
         center <- if (is.null(dots$center)) formals(base::scale)$center else dots$center
         scale <- if (is.null(dots$scale)) formals(base::scale)$scale else dots$scale
-        x <- t(base::scale(t(base::as.matrix(x)), center = center, scale = scale))
+        x <- t(base::scale(t(x), center = center, scale = scale))
         x[is.nan(x)] <- 0
         if (!keep.attributes) { attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL }
 
     } else {
+        if (is.data.frame(x)) x <- base::as.matrix(x)
         if (error.check) check_consistency(x, "ts")
         dots <- list(...)
         center <- if (is.null(dots$center)) formals(base::scale)$center else dots$center
