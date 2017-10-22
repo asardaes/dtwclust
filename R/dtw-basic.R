@@ -47,7 +47,7 @@
 #' installations compared to 64 bit ones.
 #'
 dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
-                      step.pattern = symmetric2, backtrack = FALSE,
+                      step.pattern = dtw::symmetric2, backtrack = FALSE,
                       normalize = FALSE, ..., gcm = NULL, error.check = TRUE)
 {
     if (error.check) {
@@ -62,9 +62,9 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 
     if (NCOL(x) != NCOL(y)) stop("Multivariate series must have the same number of variables.")
 
-    if (identical(step.pattern, symmetric1))
+    if (identical(step.pattern, dtw::symmetric1))
         step.pattern <- 1
-    else if (identical(step.pattern, symmetric2))
+    else if (identical(step.pattern, dtw::symmetric2))
         step.pattern <- 2
     else
         stop("step.pattern must be either symmetric1 or symmetric2 (without quotes)")
@@ -212,16 +212,16 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
 # ==================================================================================================
 
 dtwb_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ..., normalize = FALSE,
-                      window.size = NULL, norm = "L1", step.pattern = symmetric2, gcm = NULL)
+                      window.size = NULL, norm = "L1", step.pattern = dtw::symmetric2, gcm = NULL)
 {
     if (is.null(window.size))
         window.size <- -1L
     else
         window.size <- check_consistency(window.size, "window")
 
-    if (identical(step.pattern, symmetric1))
+    if (identical(step.pattern, dtw::symmetric1))
         step.pattern <- 1
-    else if (identical(step.pattern, symmetric2))
+    else if (identical(step.pattern, dtw::symmetric2))
         step.pattern <- 2
     else
         stop("step.pattern must be either symmetric1 or symmetric2 (without quotes)")

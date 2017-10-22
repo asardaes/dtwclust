@@ -37,12 +37,12 @@ args <- list(
         list(znorm = TRUE)
     ),
     dtw_basic = list(
-        list(window.size = 15L, norm = "L1", step.pattern = symmetric1),
-        list(window.size = 15L, norm = "L1", step.pattern = symmetric2),
-        list(window.size = 15L, norm = "L2", step.pattern = symmetric1),
-        list(window.size = 15L, norm = "L2", step.pattern = symmetric2),
-        list(window.size = 15L, norm = "L1", step.pattern = symmetric2, normalize = TRUE),
-        list(window.size = 15L, norm = "L2", step.pattern = symmetric2, normalize = TRUE)
+        list(window.size = 15L, norm = "L1", step.pattern = dtw::symmetric1),
+        list(window.size = 15L, norm = "L1", step.pattern = dtw::symmetric2),
+        list(window.size = 15L, norm = "L2", step.pattern = dtw::symmetric1),
+        list(window.size = 15L, norm = "L2", step.pattern = dtw::symmetric2),
+        list(window.size = 15L, norm = "L1", step.pattern = dtw::symmetric2, normalize = TRUE),
+        list(window.size = 15L, norm = "L2", step.pattern = dtw::symmetric2, normalize = TRUE)
     ),
     GAK = list(
         sigma = 100, window.size = 15L,
@@ -188,9 +188,9 @@ test_that("Passing pre-computed envelopes to the lower bounds works correctly.",
 
 test_that("dtw_lb gives the same result regardless of dtw.func.", {
     distmat_with_dtwbasic <- dtw_lb(data_reinterpolated[1L:50L], data_reinterpolated[51L:100L],
-                                    window.size = 15L, step.pattern = symmetric1)
+                                    window.size = 15L, step.pattern = dtw::symmetric1)
     distmat_with_dtw <- dtw_lb(data_reinterpolated[1L:50L], data_reinterpolated[51L:100L],
-                               window.size = 15L, step.pattern = symmetric1, dtw.func = "dtw")
+                               window.size = 15L, step.pattern = dtw::symmetric1, dtw.func = "dtw")
     expect_equal(distmat_with_dtwbasic, distmat_with_dtw)
 })
 

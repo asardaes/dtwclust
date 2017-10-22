@@ -334,8 +334,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
         # unconstrained and with symmetric1/symmetric2 is always symmetric, regardless of lengths
         # constrained and same lengths with symmetric1/symmetric2 is also symmetric
         symmetric_pattern <- is.null(args$dist$step.pattern) ||
-            identical(args$dist$step.pattern, symmetric1) ||
-            identical(args$dist$step.pattern, symmetric2)
+            identical(args$dist$step.pattern, dtw::symmetric1) ||
+            identical(args$dist$step.pattern, dtw::symmetric2)
 
         if (distance %in% c("dtw", "dtw2", "dtw_basic"))
             control$symmetric <- symmetric_pattern && (is.null(args$dist$window.size) || !diff_lengths)

@@ -68,7 +68,7 @@ clus_dtwb_dtwlb_pam_results <- plyr::rbind.fill(lapply(num_series, function(num_
                                                               iter.max = 10L),
                                 args = tsclust_args(dist = list(window.size = window_size,
                                                                 norm = "L1",
-                                                                step.pattern = symmetric1)))
+                                                                step.pattern = dtw::symmetric1)))
 
             tsc_dtwbs <- tsclust(series = series, k = 20L, type = "partitional",
                                  distance = "dtw_basic", centroid = "pam",
@@ -78,7 +78,7 @@ clus_dtwb_dtwlb_pam_results <- plyr::rbind.fill(lapply(num_series, function(num_
                                                                iter.max = 10L),
                                  args = tsclust_args(dist = list(window.size = window_size,
                                                                  norm = "L1",
-                                                                 step.pattern = symmetric1)))
+                                                                 step.pattern = dtw::symmetric1)))
 
             tsc_dtwlb <- tsclust(series = series, k = 20L, type = "partitional",
                                  distance = "dtw_lb", centroid = "pam",
@@ -88,7 +88,7 @@ clus_dtwb_dtwlb_pam_results <- plyr::rbind.fill(lapply(num_series, function(num_
                                                                iter.max = 10L),
                                  args = tsclust_args(dist = list(window.size = window_size,
                                                                  norm = "L1",
-                                                                 step.pattern = symmetric1)))
+                                                                 step.pattern = dtw::symmetric1)))
 
             c(dtwb = tsc_dtwb@proctime[["elapsed"]],
               dtwbs = tsc_dtwbs@proctime[["elapsed"]],
@@ -134,7 +134,7 @@ clus_dtwb_dtwlb_pamrep_results <- plyr::rbind.fill(lapply(num_series, function(n
                                                               nrep = nrep),
                                 args = tsclust_args(dist = list(window.size = 20L,
                                                                 norm = "L1",
-                                                                step.pattern = symmetric1)))
+                                                                step.pattern = dtw::symmetric1)))
 
             tsc_dtwbs <- tsclust(series = series, k = 20L, type = "partitional",
                                  distance = "dtw_basic", centroid = "pam",
@@ -145,7 +145,7 @@ clus_dtwb_dtwlb_pamrep_results <- plyr::rbind.fill(lapply(num_series, function(n
                                                                nrep = nrep),
                                  args = tsclust_args(dist = list(window.size = 20L,
                                                                  norm = "L1",
-                                                                 step.pattern = symmetric1)))
+                                                                 step.pattern = dtw::symmetric1)))
 
             tsc_dtwlb <- tsclust(series = series, k = 20L, type = "partitional",
                                  distance = "dtw_lb", centroid = "pam",
@@ -156,7 +156,7 @@ clus_dtwb_dtwlb_pamrep_results <- plyr::rbind.fill(lapply(num_series, function(n
                                                                nrep = nrep),
                                  args = tsclust_args(dist = list(window.size = 20L,
                                                                  norm = "L1",
-                                                                 step.pattern = symmetric1)))
+                                                                 step.pattern = dtw::symmetric1)))
 
             distmat <- if (nrep > 1L) tsc_dtwbs[[1L]]@distmat else tsc_dtwbs@distmat
 
@@ -204,10 +204,10 @@ clus_dtwb_dtwlb_dba_results <- plyr::rbind.fill(lapply(num_series, function(num_
                                 control = partitional_control(iter.max = 10L),
                                 args = tsclust_args(dist = list(window.size = window_size,
                                                                 norm = "L1",
-                                                                step.pattern = symmetric1),
+                                                                step.pattern = dtw::symmetric1),
                                                     cent = list(window.size = window_size,
                                                                 max.iter = 15L,
-                                                                step.pattern = symmetric1)))
+                                                                step.pattern = dtw::symmetric1)))
 
             tsc_dtwlb <- tsclust(series = series, k = 20L, type = "partitional",
                                  distance = "dtw_lb", centroid = "dba",
@@ -215,10 +215,10 @@ clus_dtwb_dtwlb_dba_results <- plyr::rbind.fill(lapply(num_series, function(num_
                                  control = partitional_control(iter.max = 10L),
                                  args = tsclust_args(dist = list(window.size = window_size,
                                                                  norm = "L1",
-                                                                 step.pattern = symmetric1),
+                                                                 step.pattern = dtw::symmetric1),
                                                      cent = list(window.size = window_size,
                                                                  max.iter = 15L,
-                                                                 step.pattern = symmetric1)))
+                                                                 step.pattern = dtw::symmetric1)))
 
             c(dtwb = tsc_dtwb@proctime[["elapsed"]],
               dtwlb = tsc_dtwlb@proctime[["elapsed"]])
@@ -265,7 +265,7 @@ clus_pam_sparse_k_results <- plyr::rbind.fill(lapply(num_series, function(num_se
                                                                    iter.max = 10L),
                                      args = tsclust_args(dist = list(window.size = 20L,
                                                                      norm = "L1",
-                                                                     step.pattern = symmetric1)))
+                                                                     step.pattern = dtw::symmetric1)))
 
             tsc_sparse <- tsclust(series = series, k = k, type = "partitional",
                                   distance = "dtw_basic", centroid = "pam",
@@ -275,7 +275,7 @@ clus_pam_sparse_k_results <- plyr::rbind.fill(lapply(num_series, function(num_se
                                                                 iter.max = 10L),
                                   args = tsclust_args(dist = list(window.size = 20L,
                                                                   norm = "L1",
-                                                                  step.pattern = symmetric1)))
+                                                                  step.pattern = dtw::symmetric1)))
 
             distmat <- tsc_sparse@distmat
 

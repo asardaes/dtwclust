@@ -255,9 +255,9 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 call_dtwlb <- function(x, y, distmat, ..., window.size, norm, margin,
                        step.pattern = NULL, gcm = NULL)
 {
-    if (is.null(step.pattern) || identical(step.pattern, symmetric2))
+    if (is.null(step.pattern) || identical(step.pattern, dtw::symmetric2))
         step.pattern <- 2
-    else if (identical(step.pattern, symmetric1))
+    else if (identical(step.pattern, dtw::symmetric1))
         step.pattern <- 1
     else
         stop("step.pattern must be either symmetric1 or symmetric2 (without quotes)")
