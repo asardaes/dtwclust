@@ -7,40 +7,23 @@
  * All possible combinations in pairs
  * =================================================================================================
  */
-
-void pairs_c(const int n, const int nrow, int *out, const int lower)
+void pairs_c(const int n, const int nrow, int *out)
 {
     int i, j;
     int p = 0;
-
-    if(lower)
+    for(j = 1; j < n; j++)
     {
-        for(j = 1; j < n; j++)
+        for(i = j+1; i <= n; i++)
         {
-            for(i = j+1; i <= n; i++)
-            {
-                out[p] = i;
-                out[p+nrow] = j;
-                p++;
-            }
-        }
-    }
-    else
-    {
-        for(j = 2; j <= n; j++)
-        {
-            for(i = 1; i < j; i++)
-            {
-                out[p] = i;
-                out[p+nrow] = j;
-                p++;
-            }
+            out[p] = i;
+            out[p+nrow] = j;
+            p++;
         }
     }
 }
 
 // the gateway function
-SEXP pairs(SEXP L, SEXP lower)
+SEXP pairs(SEXP L)
 {
     int n = asInteger(L);
     int nrow = n * (n+1) / 2 - n;
@@ -49,7 +32,7 @@ SEXP pairs(SEXP L, SEXP lower)
     SEXP ret = PROTECT(allocMatrix(INTSXP, nrow, 2));
 
     // dispatch to C function
-    pairs_c(n, nrow, INTEGER(ret), asLogical(lower));
+    pairs_c(n, nrow, INTEGER(ret));
 
     // release protection
     UNPROTECT(1);

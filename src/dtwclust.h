@@ -15,7 +15,7 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
 
 SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP dim, SEXP sigma, SEXP window, SEXP logs);
 
-SEXP pairs(SEXP L, SEXP lower);
+SEXP pairs(SEXP L);
 
 SEXP setnames_inplace(SEXP vec, SEXP names);
 

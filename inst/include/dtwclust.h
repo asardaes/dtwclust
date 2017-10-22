@@ -28,12 +28,12 @@ SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP dim, SEXP sigma, SEXP window,
     return fun(x, y, nx, ny, dim, sigma, window, logs);
 }
 
-SEXP pairs(SEXP L, SEXP lower)
+SEXP pairs(SEXP L)
 {
-    static SEXP(*fun)(SEXP, SEXP) = NULL;
+    static SEXP(*fun)(SEXP) = NULL;
     if(fun == NULL)
-        fun = (SEXP(*)(SEXP, SEXP)) R_GetCCallable("dtwclust", "pairs");
-    return fun(L, lower);
+        fun = (SEXP(*)(SEXP)) R_GetCCallable("dtwclust", "pairs");
+    return fun(L);
 }
 
 SEXP setnames_inplace(SEXP vec, SEXP names)

@@ -153,20 +153,10 @@ get_from_callers <- function(obj_name, mode = "any") {
 # ==================================================================================================
 
 # Create combinations of all possible pairs
-call_pairs <- function(n = 2L, lower = TRUE) {
+call_pairs <- function(n = 2L) {
+    n <- as.integer(n)
     if (n < 2L) stop("At least two elements are needed to create pairs.")
-    pairs <- try(.Call(C_pairs, n, lower, PACKAGE = "dtwclust"), silent = TRUE)
-
-    if (inherits(pairs, "try-error")) { # nocov start
-        message("There was an error calculating the distance matrix. ",
-                "This usually indicates that the matrix is too big to fit in RAM.\n",
-                "If it applies, try using a non-hierarchical algorithm, ",
-                "or set pam.precompute = FALSE in the control.")
-
-        stop(pairs, call. = FALSE)
-    } # nocov end
-
-    pairs
+    .Call(C_pairs, n, PACKAGE = "dtwclust")
 }
 
 # Modify names in place
