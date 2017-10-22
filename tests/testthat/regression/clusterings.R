@@ -36,10 +36,10 @@ with(persistent, {
         skip_on_cran()
 
         expect_equal_to_reference(hc_k, file_name(hc_k))
-        expect_equal_to_reference(hc_all, file_name(hc_all, x32 = TRUE))
+        expect_equal_to_reference(hc_all, file_name(hc_all))
         expect_equal_to_reference(hc_lbi, file_name(hc_lbi))
         expect_equal_to_reference(hc_cent, file_name(hc_cent))
-        expect_equal_to_reference(hc_diana, file_name(hc_diana, x32 = TRUE))
+        expect_equal_to_reference(hc_diana, file_name(hc_diana))
     })
 })
 
@@ -63,7 +63,7 @@ with(persistent, {
         expect_equal_to_reference(pc_kshape, file_name(pc_kshape))
         expect_equal_to_reference(pc_dba, file_name(pc_dba))
         expect_equal_to_reference(pc_mv_pam, file_name(pc_mv_pam))
-        expect_equal_to_reference(pc_mv_dba, file_name(pc_mv_dba, x32 = TRUE))
+        expect_equal_to_reference(pc_mv_dba, file_name(pc_mv_dba))
 
         expect_equal_to_reference(pc_tadp, file_name(pc_tadp))
         expect_equal_to_reference(pc_tadp_lbi, file_name(pc_tadp_lbi))
