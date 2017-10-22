@@ -221,13 +221,13 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
     # avoids default message if no backend exists
     if (is.null(foreach::getDoParName())) foreach::registerDoSEQ()
 
-    packageStartupMessage("\ndtwclust:\n",
+    packageStartupMessage("dtwclust:\n",
                           "Setting random number generator to L'Ecuyer-CMRG (see RNGkind()).\n",
                           'To read the included vignettes type: browseVignettes("dtwclust").\n',
                           'Please see news(package = "dtwclust") for important information.')
 
     if (grepl("\\.9000$", utils::packageVersion("dtwclust")))
-        packageStartupMessage("\nThis is a developer version of 'dtwclust'.\n",
+        packageStartupMessage("This is a developer version of dtwclust:\n",
                               "Using devtools::test() is currently broken, see tests/testthat.R")
 }
 
