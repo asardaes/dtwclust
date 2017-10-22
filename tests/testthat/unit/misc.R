@@ -68,6 +68,8 @@ test_that("zscore function works correctly for supported inputs.", {
     expect_identical(nrow(normalized_matrix), nrow(data_matrix))
     expect_true(!is.null(attributes(normalized_matrix)))
 
+    data_frame <- base::as.data.frame(data_matrix)
+
     normalized_data_frame <- zscore(data_frame, multivariate = FALSE, keep.attributes = TRUE)
     expect_identical(ncol(normalized_data_frame), ncol(data_frame))
     expect_true(!is.null(attributes(normalized_data_frame)))

@@ -66,6 +66,8 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check
 
     ## utils.R
     if (is_multivariate(X)) {
+        if (!is.null(centroid) && dim(X[[1L]]) != dim(centroid))
+            stop("Dimension inconsistency between the series in 'X' and the provided 'centroid'.")
         mv <- reshape_multivariate(X, centroid) # utils.R
         new_c <- Map(mv$series, mv$cent, f = function(xx, cc, ...) {
             new_c <- shape_extraction(xx, cc, znorm = znorm, ..., error.check = FALSE)

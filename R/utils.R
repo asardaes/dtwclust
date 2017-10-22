@@ -291,6 +291,7 @@ l2norm <- function(x) { sqrt(sum(x * x)) }
 # ==================================================================================================
 
 is_multivariate <- function(x) {
+    if (length(x) == 0L) stop("Empty list of series received.")
     ncols <- sapply(x, NCOL)
     if (any(diff(ncols) != 0L)) stop("Inconsistent dimensions across series.")
     any(ncols > 1L)

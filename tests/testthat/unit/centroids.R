@@ -104,6 +104,14 @@ test_that("Operations with shape centroid complete successfully.", {
     ## ---------------------------------------------------------- refs
     assign("cent_shape", cent_shape, persistent)
     assign("cent_mv_shape", cent_mv_shape, persistent)
+
+    ## ---------------------------------------------------------- directly
+    zero_shape_centroid <- shape_extraction(matrix(0, 2L, 10L))
+    expect_identical(sum(zero_shape_centroid), 0)
+    zero_shape_centroid_reference <- shape_extraction(matrix(0, 2L, 10L), x[[1L]])
+    expect_identical(zero_shape_centroid_reference, x[[1L]])
+
+    expect_error(shape_extraction(data_subset, data_multivariate[[1L]]), regexp = "dimension")
 })
 
 # ==================================================================================================
