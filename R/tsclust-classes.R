@@ -26,12 +26,6 @@ methods::removeClass("hclust4")
 #' Package \pkg{clue} is supported, but generics from \pkg{flexclust} are not. See also
 #' [tsclusters-methods].
 #'
-#' If you want to transform a [dtwclust-class] object to TSClusters, just use:
-#'
-#' `as(dtwclust_obj, "TSClusters")`
-#'
-#' although it may not work perfectly.
-#'
 #' @slot call The function call.
 #' @slot family An object of class [tsclustFamily-class].
 #' @slot control An appropriate control object for [tsclust()]. See [tsclust-controls].

@@ -19,12 +19,6 @@ The base class is \code{TSClusters}. The 3 classes that inherit from it are: \co
 
 Package \pkg{clue} is supported, but generics from \pkg{flexclust} are not. See also
 \link{tsclusters-methods}.
-
-If you want to transform a \linkS4class{dtwclust} object to TSClusters, just use:
-
-\code{as(dtwclust_obj, "TSClusters")}
-
-although it may not work perfectly.
 }
 \section{Slots}{
 

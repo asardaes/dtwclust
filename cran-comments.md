@@ -1,4 +1,5 @@
 ## Update to version 4.1.1.9000
+* Removed deprecated code.
 * Miscellaneous bug fixes and optimizations.
 
 ## Test environments

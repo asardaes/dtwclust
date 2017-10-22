@@ -1,6 +1,7 @@
 # Changelog
 
 ## Version 4.1.1.9000
+* Removed all deprecated code.
 * Fixed GAK's `sigma` estimation in the non-proxy version. The estimation routine in the proxy version also changed slightly.
 * Modified `tslist` to hopefully make it faster.
 * Partitional and fuzzy controls (`tsclust-controls`) now specify version 2 of the main loop by default.

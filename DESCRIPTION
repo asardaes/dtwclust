@@ -3,7 +3,7 @@ Type: Package
 Title: Time Series Clustering Along with Optimizations for the Dynamic Time
     Warping Distance
 Version: 4.1.1.9000
-Date: 2017-09-20
+Date: 2017-10-22
 Depends:
     R (>= 3.2.0),
     methods,
@@ -65,24 +65,16 @@ Collate:
     'pkg.R'
     'SparseDistmat.R'
     'TADPole.R'
-    'all-cent.R'
     'all-cent2.R'
     'as-methods.R'
     'compare-clusterings.R'
     'compute-envelope.R'
-    'create-dtwclust.R'
     'cvi.R'
     'data.R'
-    'ddist.R'
     'ddist2.R'
     'dtw-basic.R'
     'dtw-lb.R'
     'dtw2.R'
-    'tsclust-family.R'
-    'tsclust-classes.R'
-    'dtwclust-classes.R'
-    'dtwclust-methods.R'
-    'dtwclust.R'
     'fuzzy.R'
     'globals-internal.R'
     'lb-improved.R'
@@ -90,6 +82,8 @@ Collate:
     'partitional.R'
     'reinterpolate.R'
     'shape-extraction.R'
+    'tsclust-family.R'
+    'tsclust-classes.R'
     'tsclust-controls.R'
     'tsclust-methods.R'
     'tsclust.R'

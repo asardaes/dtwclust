@@ -48,11 +48,3 @@ compute_envelope <- function(x, window.size, error.check = TRUE) {
 
     .Call(C_envelope, x, window.size, PACKAGE = "dtwclust")
 }
-
-#' @rdname compute_envelope
-#' @export
-#'
-compute_envelop <- function(x, window.size, error.check = TRUE) {
-    .Deprecated("compute_envelope", "dtwclust")
-    compute_envelope(x, window.size, error.check)
-}

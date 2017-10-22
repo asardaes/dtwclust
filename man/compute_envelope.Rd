@@ -2,12 +2,9 @@
 % Please edit documentation in R/compute-envelope.R
 \name{compute_envelope}
 \alias{compute_envelope}
-\alias{compute_envelop}
 \title{Time series warping envelopes}
 \usage{
 compute_envelope(x, window.size, error.check = TRUE)
-
-compute_envelop(x, window.size, error.check = TRUE)
 }
 \arguments{
 \item{x}{A univariate time series.}
