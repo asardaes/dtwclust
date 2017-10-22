@@ -11,22 +11,23 @@ ts_ctrl <- partitional_control()
 x <- data_reinterpolated_subset
 centroids <- x[c(1L, 15L)]
 attr(centroids, "id_cent") <- c(1L, 15L)
+window.size <- 18L
 
 # ==================================================================================================
 # lbk
 # ==================================================================================================
 
 test_that("Operations with tsclustFamily@dist and lbk give expected results", {
-    distmat <- proxy::dist(x, x, method = "lbk", window.size = ctrl@window.size)
+    distmat <- proxy::dist(x, x, method = "lbk", window.size = window.size)
 
     ## ---------------------------------------------------------- tsclustFamily, no distmat
     family <- new("tsclustFamily",
                   control = ts_ctrl,
                   dist = "lbk")
 
-    whole_distmat <- family@dist(x, window.size = ctrl@window.size)
-    sub_distmat <- family@dist(x, centroids, window.size = ctrl@window.size)
-    pdist <- family@dist(x, window.size = ctrl@window.size, pairwise = TRUE)
+    whole_distmat <- family@dist(x, window.size = window.size)
+    sub_distmat <- family@dist(x, centroids, window.size = window.size)
+    pdist <- family@dist(x, window.size = window.size, pairwise = TRUE)
     class(pdist) <- NULL
     class(sub_distmat) <- "matrix"
 
@@ -47,8 +48,8 @@ test_that("Operations with tsclustFamily@dist and lbk give expected results", {
                   control = ts_ctrl,
                   dist = "lbk")
 
-    whole_distmat <- family@dist(x, window.size = ctrl@window.size)
-    sub_distmat <- family@dist(x, centroids, window.size = ctrl@window.size)
+    whole_distmat <- family@dist(x, window.size = window.size)
+    sub_distmat <- family@dist(x, centroids, window.size = window.size)
 
     expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
@@ -64,7 +65,7 @@ test_that("Operations with tsclustFamily@dist and lbk give expected results", {
     dm <- dtwclust:::SparseDistmat$new(series = x,
                                        control = ts_ctrl,
                                        distance = "lbk",
-                                       dist_args = list(window.size = ctrl@window.size),
+                                       dist_args = list(window.size = window.size),
                                        id_cent = attr(centroids, "id_cent"))
     ts_ctrl$distmat <- dm
 
@@ -87,16 +88,16 @@ test_that("Operations with tsclustFamily@dist and lbk give expected results", {
 # ==================================================================================================
 
 test_that("Operations with tsclustFamily@dist and lbi give expected results", {
-    distmat <- proxy::dist(x, x, method = "lbi", window.size = ctrl@window.size)
+    distmat <- proxy::dist(x, x, method = "lbi", window.size = window.size)
 
     ## ---------------------------------------------------------- tsclustFamily, no distmat
     family <- new("tsclustFamily",
                   control = ts_ctrl,
                   dist = "lbi")
 
-    whole_distmat <- family@dist(x, window.size = ctrl@window.size)
-    sub_distmat <- family@dist(x, centroids, window.size = ctrl@window.size)
-    pdist <- family@dist(x, window.size = ctrl@window.size, pairwise = TRUE)
+    whole_distmat <- family@dist(x, window.size = window.size)
+    sub_distmat <- family@dist(x, centroids, window.size = window.size)
+    pdist <- family@dist(x, window.size = window.size, pairwise = TRUE)
     class(pdist) <- NULL
     class(sub_distmat) <- "matrix"
 
@@ -117,8 +118,8 @@ test_that("Operations with tsclustFamily@dist and lbi give expected results", {
                   control = ts_ctrl,
                   dist = "lbi")
 
-    whole_distmat <- family@dist(x, window.size = ctrl@window.size)
-    sub_distmat <- family@dist(x, centroids, window.size = ctrl@window.size)
+    whole_distmat <- family@dist(x, window.size = window.size)
+    sub_distmat <- family@dist(x, centroids, window.size = window.size)
 
     expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
@@ -134,7 +135,7 @@ test_that("Operations with tsclustFamily@dist and lbi give expected results", {
     dm <- dtwclust:::SparseDistmat$new(series = x,
                                        control = ts_ctrl,
                                        distance = "lbi",
-                                       dist_args = list(window.size = ctrl@window.size),
+                                       dist_args = list(window.size = window.size),
                                        id_cent = attr(centroids, "id_cent"))
     ts_ctrl$distmat <- dm
 
@@ -227,17 +228,17 @@ test_that("Operations with tsclustFamily@dist and sbd give expected results", {
 # ==================================================================================================
 
 test_that("Operations with tsclustFamily@dist and dtw_lb give expected results", {
-    distmat <- proxy::dist(x, x, method = "dtw_lb", window.size = ctrl@window.size)
-    sdm <- proxy::dist(x, centroids, method = "dtw_lb", window.size = ctrl@window.size)
+    distmat <- proxy::dist(x, x, method = "dtw_lb", window.size = window.size)
+    sdm <- proxy::dist(x, centroids, method = "dtw_lb", window.size = window.size)
 
     ## ---------------------------------------------------------- tsclustFamily, no distmat
     family <- new("tsclustFamily",
                   control = ts_ctrl,
                   dist = "dtw_lb")
 
-    whole_distmat <- family@dist(x, window.size = ctrl@window.size)
-    sub_distmat <- family@dist(x, centroids, window.size = ctrl@window.size)
-    pdist <- family@dist(x, window.size = ctrl@window.size, pairwise = TRUE)
+    whole_distmat <- family@dist(x, window.size = window.size)
+    sub_distmat <- family@dist(x, centroids, window.size = window.size)
+    pdist <- family@dist(x, window.size = window.size, pairwise = TRUE)
     class(pdist) <- NULL
 
     expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
@@ -256,8 +257,8 @@ test_that("Operations with tsclustFamily@dist and dtw_lb give expected results",
                   control = ts_ctrl,
                   dist = "dtw_lb")
 
-    whole_distmat <- family@dist(x, window.size = ctrl@window.size)
-    sub_distmat <- family@dist(x, centroids, window.size = ctrl@window.size)
+    whole_distmat <- family@dist(x, window.size = window.size)
+    sub_distmat <- family@dist(x, centroids, window.size = window.size)
 
     expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
@@ -276,16 +277,16 @@ test_that("Operations with tsclustFamily@dist and dtw_lb give expected results",
 # ==================================================================================================
 
 test_that("Operations with tsclustFamily@dist and dtw give expected results", {
-    distmat <- proxy::dist(x, x, method = "dtw", window.type = "slantedband", window.size = ctrl@window.size)
+    distmat <- proxy::dist(x, x, method = "dtw", window.type = "slantedband", window.size = window.size)
 
     ## ---------------------------------------------------------- tsclustFamily, no distmat
     family <- new("tsclustFamily",
                   control = ts_ctrl,
                   dist = "dtw")
 
-    whole_distmat <- family@dist(x, window.size = ctrl@window.size)
-    sub_distmat <- family@dist(x, centroids, window.size = ctrl@window.size)
-    pdist <- family@dist(x, window.size = ctrl@window.size, pairwise = TRUE)
+    whole_distmat <- family@dist(x, window.size = window.size)
+    sub_distmat <- family@dist(x, centroids, window.size = window.size)
+    pdist <- family@dist(x, window.size = window.size, pairwise = TRUE)
     class(pdist) <- NULL
     class(sub_distmat) <- "matrix"
 
@@ -306,8 +307,8 @@ test_that("Operations with tsclustFamily@dist and dtw give expected results", {
                   control = ts_ctrl,
                   dist = "dtw")
 
-    whole_distmat <- family@dist(x, window.size = ctrl@window.size)
-    sub_distmat <- family@dist(x, centroids, window.size = ctrl@window.size)
+    whole_distmat <- family@dist(x, window.size = window.size)
+    sub_distmat <- family@dist(x, centroids, window.size = window.size)
 
     expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
@@ -324,16 +325,16 @@ test_that("Operations with tsclustFamily@dist and dtw give expected results", {
 # ==================================================================================================
 
 test_that("Operations with tsclustFamily@dist and dtw2 give expected results", {
-    distmat <- proxy::dist(x, x, method = "dtw2", window.type = "slantedband", window.size = ctrl@window.size)
+    distmat <- proxy::dist(x, x, method = "dtw2", window.type = "slantedband", window.size = window.size)
 
     ## ---------------------------------------------------------- tsclustFamily, no distmat
     family <- new("tsclustFamily",
                   control = ts_ctrl,
                   dist = "dtw2")
 
-    whole_distmat <- family@dist(x, window.size = ctrl@window.size)
-    sub_distmat <- family@dist(x, centroids, window.size = ctrl@window.size)
-    pdist <- family@dist(x, window.size = ctrl@window.size, pairwise = TRUE)
+    whole_distmat <- family@dist(x, window.size = window.size)
+    sub_distmat <- family@dist(x, centroids, window.size = window.size)
+    pdist <- family@dist(x, window.size = window.size, pairwise = TRUE)
     class(pdist) <- NULL
     class(sub_distmat) <- "matrix"
 
@@ -354,8 +355,8 @@ test_that("Operations with tsclustFamily@dist and dtw2 give expected results", {
                   control = ts_ctrl,
                   dist = "dtw2")
 
-    whole_distmat <- family@dist(x, window.size = ctrl@window.size)
-    sub_distmat <- family@dist(x, centroids, window.size = ctrl@window.size)
+    whole_distmat <- family@dist(x, window.size = window.size)
+    sub_distmat <- family@dist(x, centroids, window.size = window.size)
 
     expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
@@ -372,16 +373,16 @@ test_that("Operations with tsclustFamily@dist and dtw2 give expected results", {
 # ==================================================================================================
 
 test_that("Operations with tsclustFamily@dist and dtw_basic give expected results", {
-    distmat <- proxy::dist(x, x, method = "dtw_basic", window.size = ctrl@window.size)
+    distmat <- proxy::dist(x, x, method = "dtw_basic", window.size = window.size)
 
     ## ---------------------------------------------------------- tsclustFamily, no distmat
     family <- new("tsclustFamily",
                   control = ts_ctrl,
                   dist = "dtw_basic")
 
-    whole_distmat <- family@dist(x, window.size = ctrl@window.size)
-    sub_distmat <- family@dist(x, centroids, window.size = ctrl@window.size)
-    pdist <- family@dist(x, window.size = ctrl@window.size, pairwise = TRUE)
+    whole_distmat <- family@dist(x, window.size = window.size)
+    sub_distmat <- family@dist(x, centroids, window.size = window.size)
+    pdist <- family@dist(x, window.size = window.size, pairwise = TRUE)
     class(pdist) <- NULL
     class(sub_distmat) <- "matrix"
 
@@ -402,8 +403,8 @@ test_that("Operations with tsclustFamily@dist and dtw_basic give expected result
                   control = ts_ctrl,
                   dist = "dtw_basic")
 
-    whole_distmat <- family@dist(x, window.size = ctrl@window.size)
-    sub_distmat <- family@dist(x, centroids, window.size = ctrl@window.size)
+    whole_distmat <- family@dist(x, window.size = window.size)
+    sub_distmat <- family@dist(x, centroids, window.size = window.size)
 
     expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
@@ -419,7 +420,7 @@ test_that("Operations with tsclustFamily@dist and dtw_basic give expected result
     dm <- dtwclust:::SparseDistmat$new(series = x,
                                        control = ts_ctrl,
                                        distance = "dtw_basic",
-                                       dist_args = list(window.size = ctrl@window.size),
+                                       dist_args = list(window.size = window.size),
                                        id_cent = attr(centroids, "id_cent"))
     ts_ctrl$distmat <- dm
 
@@ -443,7 +444,7 @@ test_that("Operations with tsclustFamily@dist and dtw_basic give expected result
 
 test_that("Operations with tsclustFamily@dist and gak give expected results", {
     distmat <- proxy::dist(x, x, method = "gak",
-                           window.size = ctrl@window.size,
+                           window.size = window.size,
                            sigma = 100)
 
     ## ---------------------------------------------------------- tsclustFamily, no distmat
@@ -451,9 +452,9 @@ test_that("Operations with tsclustFamily@dist and gak give expected results", {
                   control = ts_ctrl,
                   dist = "gak")
 
-    whole_distmat <- family@dist(x, window.size = ctrl@window.size, sigma = 100)
-    sub_distmat <- family@dist(x, centroids, window.size = ctrl@window.size, sigma = 100)
-    pdist <- family@dist(x, window.size = ctrl@window.size, pairwise = TRUE, sigma = 100)
+    whole_distmat <- family@dist(x, window.size = window.size, sigma = 100)
+    sub_distmat <- family@dist(x, centroids, window.size = window.size, sigma = 100)
+    pdist <- family@dist(x, window.size = window.size, pairwise = TRUE, sigma = 100)
     class(pdist) <- NULL
     class(sub_distmat) <- "matrix"
 
@@ -474,8 +475,8 @@ test_that("Operations with tsclustFamily@dist and gak give expected results", {
                   control = ts_ctrl,
                   dist = "gak")
 
-    whole_distmat <- family@dist(x, window.size = ctrl@window.size, sigma = 100)
-    sub_distmat <- family@dist(x, centroids, window.size = ctrl@window.size, sigma = 100)
+    whole_distmat <- family@dist(x, window.size = window.size, sigma = 100)
+    sub_distmat <- family@dist(x, centroids, window.size = window.size, sigma = 100)
 
     expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
@@ -491,7 +492,7 @@ test_that("Operations with tsclustFamily@dist and gak give expected results", {
     dm <- dtwclust:::SparseDistmat$new(series = x,
                                        control = ts_ctrl,
                                        distance = "gak",
-                                       dist_args = list(window.size = ctrl@window.size,
+                                       dist_args = list(window.size = window.size,
                                                         sigma = 100),
                                        id_cent = attr(centroids, "id_cent"))
     ts_ctrl$distmat <- dm
