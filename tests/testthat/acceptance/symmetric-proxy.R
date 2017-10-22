@@ -15,7 +15,7 @@ test_that("The indices for load balancing always cover the whole distance matrix
     ## random test
     set.seed(as.integer(Sys.time()))
 
-    for (i in seq_len(100L)) {
+    for (i in seq_len(30L)) {
         num_series <- round(runif(1L, 5, 100))
         num_workers <- round(runif(1L, 3, 100))
         info <- paste("#series = ", num_series, ", #workers = ", num_workers, collapse = "")
