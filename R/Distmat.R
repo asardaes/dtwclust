@@ -41,7 +41,7 @@ Distmat <- setRefClass("Distmat",
                                            stop("Invalid control provided.")
                                    }
 
-                                   ## need another dist closure, otherwise it would be recursive
+                                   # need another dist closure, otherwise it would be recursive
                                    control$distmat <- NULL
                                    initFields(...,
                                               series = series,
@@ -80,6 +80,7 @@ NULL
 #'
 setMethod(`[`, "Distmat", function(x, i, j, ..., drop = TRUE) {
     if (inherits(x$distmat, "uninitializedField")) {
+        if (inherits(x$distfun, "uninitializedField")) stop("Invalid internal Distmat instance.")
         centroids <- if (identical(i,j)) NULL else x$series[j]
         dm <- do.call(x$distfun,
                       enlist(x = x$series[i],

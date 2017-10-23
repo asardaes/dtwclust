@@ -45,7 +45,7 @@ all_cent2 <- function(case = NULL, control) {
             d <- rowSums(d)
             id_cent <- i_x[which.min(d)]
             i_cent <- x[[id_cent]]
-            if (inherits(control$distmat, "Distmat")) control$distmat$id_cent[i_cl] <- id_cent
+            control$distmat$id_cent[i_cl] <- id_cent
             i_cent
         })
     }

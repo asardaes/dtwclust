@@ -112,9 +112,16 @@ setMethod("initialize", "tsclustFamily",
               }
 
               if (!missing(allcent)) {
-                  if (is.character(allcent))
+                  if (is.character(allcent)) {
+                      if (allcent %in% c("pam", "fcmdd")) {
+                          if (!is.null(control$distmat) && !inherits(control$distmat, "Distmat"))
+                              control$distmat <- Distmat$new( # see Distmat.R
+                                  distmat = base::as.matrix(control$distmat)
+                              )
+                      }
                       dots$allcent <- all_cent2(allcent, control)
-                  else if (is.function(allcent))
+
+                  } else if (is.function(allcent))
                       dots$allcent <- allcent
                   else
                       stop("Centroid definition must be either a function or a character")

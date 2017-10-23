@@ -21,7 +21,7 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
                               dist = "sbd",
                               allcent = "pam",
                               preproc = zscore,
-                              control = partitional_control()),
+                              control = partitional_control(distmat = matrix(0, 1L, 1L))),
         "tsclustFamily"
     )
 
