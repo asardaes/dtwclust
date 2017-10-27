@@ -247,36 +247,45 @@ test_that("Operations with dba centroid complete successfully.", {
     )
 
     ## ---------------------------------------------------------- univariate
-    cent_dba <- family@allcent(x,
-                               cl_id = cl_id,
-                               k = k,
-                               cent = x[c(1L,20L)],
-                               cl_old = 0L,
-                               window.size = 18L,
-                               max.iter = 15L)
+    expect_output(
+        cent_dba <- family@allcent(x,
+                                   cl_id = cl_id,
+                                   k = k,
+                                   cent = x[c(1L,20L)],
+                                   cl_old = 0L,
+                                   window.size = 18L,
+                                   max.iter = 15L,
+                                   trace = TRUE)
+    )
 
     expect_identical(length(cent_dba), k)
 
     ## ---------------------------------------------------------- multivariate
-    cent_mv_dba <- family@allcent(x_mv,
-                                  cl_id = cl_id,
-                                  k = k,
-                                  cent = x_mv[c(1L,20L)],
-                                  cl_old = 0L,
-                                  window.size = 18L,
-                                  max.iter = 15L,
-                                  norm = "L2")
+    expect_output(
+        cent_mv_dba <- family@allcent(x_mv,
+                                      cl_id = cl_id,
+                                      k = k,
+                                      cent = x_mv[c(1L,20L)],
+                                      cl_old = 0L,
+                                      window.size = 18L,
+                                      max.iter = 15L,
+                                      norm = "L2",
+                                      trace = TRUE)
+    )
 
     expect_identical(length(cent_mv_dba), k)
     expect_identical(dim(cent_mv_dba[[1L]]), dim(x_mv[[1L]]))
 
     ## ---------------------------------------------------------- multivariate v2
-    cent_mv_dba_bys <- family@allcent(x_mv,
-                                      cl_id = cl_id,
-                                      k = k,
-                                      cent = x_mv[c(1L,20L)],
-                                      cl_old = 0L,
-                                      mv.ver = "by-s")
+    expect_output(
+        cent_mv_dba_bys <- family@allcent(x_mv,
+                                          cl_id = cl_id,
+                                          k = k,
+                                          cent = x_mv[c(1L,20L)],
+                                          cl_old = 0L,
+                                          mv.ver = "by-s",
+                                          trace = TRUE)
+    )
 
     expect_identical(length(cent_mv_dba_bys), k)
     expect_identical(dim(cent_mv_dba_bys[[1L]]), dim(x_mv[[1L]]))
