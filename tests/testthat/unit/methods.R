@@ -35,7 +35,7 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
                                   cluster = rep(1L:4L, each = 5L)[-2L],
                                   preproc = "zscore",
                                   distance = "sbd",
-                                  centroid = "pam",
+                                  centroid = "shape",
                                   override.family = TRUE),
         "PartitionalTSClusters"
     )
