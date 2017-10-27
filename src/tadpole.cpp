@@ -19,7 +19,7 @@ public:
 
     LowerTriMat(int size) : _size(size)
     {
-        if (size < 1) Rcpp::stop("TADPole: invalid dimension for a distance matrix");
+        if (size < 1) Rcpp::stop("TADPole: invalid dimension for a distance matrix"); // nocov
         _len = size * (size + 1) / 2 - size;
         _data = new T[_len];
         for (int i = 0; i < _len; i++) _data[i] = T(0);
@@ -27,7 +27,7 @@ public:
 
     LowerTriMat(int size, T init_val) : _size(size)
     {
-        if (size < 1) Rcpp::stop("TADPole: invalid dimension for a distance matrix");
+        if (size < 1) Rcpp::stop("TADPole: invalid dimension for a distance matrix"); // nocov
         _len = size * (size + 1) / 2 - size;
         _data = new T[_len];
         for (int i = 0; i < _len; i++) _data[i] = init_val;
