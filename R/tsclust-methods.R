@@ -240,6 +240,7 @@ setMethod("initialize", "FuzzyTSClusters",
 
                       .Object@fcluster <- .Object@family@cluster(dm, m = .Object@control$fuzziness)
                       colnames(.Object@fcluster) <- paste0("cluster_", 1:.Object@k)
+                      .Object@cluster <- max.col(.Object@fcluster, "first")
 
                   } else {
                       .Object@fcluster <- matrix(NA_real_)

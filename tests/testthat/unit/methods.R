@@ -45,11 +45,11 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
                             type = "fuzzy",
                             k = 4L,
                             control = fuzzy_control(),
-                            datalist = data_reinterpolated_subset[-2L],
-                            centroids = data_reinterpolated_subset[seq(from = 1L, to = 16L, by = 5L)],
+                            datalist = data_multivariate[-2L],
+                            centroids = data_multivariate[seq(from = 1L, to = 16L, by = 5L)],
                             preproc = "zscore",
-                            distance = "sbd",
-                            centroid = "fcm",
+                            distance = "dtw_basic",
+                            centroid = "fcmdd",
                             override.family = TRUE),
         "FuzzyTSClusters"
     )
@@ -166,8 +166,10 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
     expect_silent(plot(hierarchical_object, type = "dendrogram"))
     expect_true(inherits(plot(hierarchical_object, type = "sc", plot = FALSE), "ggplot"),
                 info = "Plotting series and centroids returns a gg object invisibly")
-    expect_true(inherits(plot(hierarchical_object, type = "sc", series = data_subset[-1L], plot = FALSE), "ggplot"),
+    expect_true(inherits(plot(hierarchical_object, type = "sc", series = data_subset[-2L], plot = FALSE), "ggplot"),
                 info = "Plotting series and centroids providing data returns a gg object invisibly")
+    expect_true(inherits(plot(fuzzy_object, type = "series", plot = FALSE), "ggplot"),
+                info = "Plotting multivariate series returns a gg object invisibly")
 
     # ----------------------------------------------------------------------------------------------
     # predict
@@ -180,11 +182,11 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
     expect_identical(predict(hierarchical_object), hierarchical_object@cluster,
                      info = "Predicting with hierarchical clusters and no arguments simply returns existing cluster slot")
 
-    expect_true(is.integer(predict(partitional_object, newdata = data_subset[1L])),
+    expect_true(is.integer(predict(partitional_object, newdata = data_subset[2L])),
                 info = "Predicting with partitional clusters and newdata returns a new integer index")
-    expect_true(is.matrix(predict(fuzzy_object, newdata = data_reinterpolated_subset[1L])),
+    expect_true(is.matrix(predict(fuzzy_object, newdata = data_multivariate[2L])),
                 info = "Predicting with fuzzy clusters and newdata returns a new matrix of indices")
-    expect_true(is.integer(predict(hierarchical_object, newdata = data_subset[1L])),
+    expect_true(is.integer(predict(hierarchical_object, newdata = data_subset[2L])),
                 info = "Predicting with hierarchical clusters and newdata returns a new integer index")
 })
 
