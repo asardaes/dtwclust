@@ -30,6 +30,38 @@ test_that("Hierarchical clustering works as expected.", {
     hc_all <- lapply(hc_all, reset_nondeterministic)
     assign("hc_all", hc_all, persistent)
 
+    ## ---------------------------------------------------------- with provided distmat
+    id_avg <- which(sapply(hc_all, slot, "method") == "average")
+    distmat <- hc_all[[1L]]@distmat
+    expect_output(
+        hc_avg <- tsclust(data, type = "hierarchical", k = 20L,
+                          distance = "sbd", trace = TRUE,
+                          control = hierarchical_control(method = "average",
+                                                         distmat = distmat)),
+        "provided"
+    )
+    expect_identical(hc_all[[id_avg]]@cluster, hc_avg@cluster)
+    expect_identical(hc_all[[id_avg]]@centroids, hc_avg@centroids)
+    expect_identical(hc_avg@distance, "SBD")
+
+    ## ---------------------------------------------------------- errors with provided distmat
+    expect_error(
+        hc_avg <- tsclust(data, type = "hierarchical", k = 20L,
+                          distance = "sbd",
+                          control = hierarchical_control(method = "average",
+                                                         distmat = distmat[1L:2L, 1L:2L])),
+        "distance matrix"
+    )
+
+    attr(distmat, "method") <- NULL
+    expect_error(
+        hc_avg <- tsclust(data, type = "hierarchical", k = 20L,
+                          distance = "sbd",
+                          control = hierarchical_control(method = "average",
+                                                         distmat = distmat)),
+        "'method' attribute"
+    )
+
     ## ---------------------------------------------------------- non-symmetric
     hc_lbi <- tsclust(data_reinterpolated, type = "hierarchical", k = 20L,
                       distance = "lbi",

@@ -580,7 +580,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 if (trace) cat("\nDistance matrix provided...\n")
 
                 if (is.null(attr(distmat, "method")))
-                    distance <- "unknown"
+                    stop("Provided distance matrix does not include the 'method' attribute")
                 else
                     distance <- attr(distmat, "method")
 
