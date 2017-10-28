@@ -139,13 +139,11 @@ adjust_args <- function(args, dots) {
 get_from_callers <- function(obj_name, mode = "any") {
     ret <- get0(obj_name, mode = mode, inherits = TRUE)
     if (!is.null(ret)) return(ret)
-
     for (env in sys.frames()) {
         ret <- get0(obj_name, env, mode = mode, inherits = FALSE)
         if (!is.null(ret)) return(ret)
     }
-
-    stop("Could not find object '", obj_name, "' of mode '", mode, "'")
+    stop("Could not find object '", obj_name, "' of mode '", mode, "'") # nocov
 }
 
 # ==================================================================================================

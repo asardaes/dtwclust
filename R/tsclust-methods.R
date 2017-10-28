@@ -117,9 +117,9 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
             else if (.Object@type == "hierarchical" && length(formals(.Object@family@allcent)))
                 allcent <- .Object@family@allcent
             else if (.Object@type == "hierarchical" && length(centroids))
-                allcent <- function(dummy) {
+                allcent <- function(dummy) { # nocov start
                     datalist[which.min(apply(.Object@distmat, 1L, sum))] # for CVI's global_cent
-                }
+                } # nocov end
             else if (.Object@type == "tadpole" && length(centroids))
                 allcent <- function(dummy) { centroids[1L] } # for CVI's global_cent
             else if (.Object@type == "fuzzy")
@@ -241,7 +241,7 @@ setMethod("initialize", "FuzzyTSClusters", function(.Object, ...) {
             .Object@cluster <- max.col(.Object@fcluster, "first")
 
         } else {
-            .Object@fcluster <- matrix(NA_real_)
+            .Object@fcluster <- matrix(NA_real_) # nocov
         }
     }
 

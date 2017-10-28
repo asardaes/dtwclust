@@ -63,7 +63,7 @@ public:
     T& operator() (int row, int col)
     {
         if (row >= _size || col >= _size || row == col)
-            Rcpp::stop("TADPole: invalid indices for a distance matrix");
+            Rcpp::stop("TADPole: invalid indices for a distance matrix"); // nocov
         if (col > row) {
             int swap = row;
             row = col;
@@ -75,7 +75,7 @@ public:
     const T operator() (int row, int col) const
     {
         if (row >= _size || col >= _size || row == col)
-            Rcpp::stop("TADPole: invalid indices for a distance matrix");
+            Rcpp::stop("TADPole: invalid indices for a distance matrix"); // nocov
         if (col > row) {
             int swap = row;
             row = col;
@@ -95,7 +95,7 @@ private:
         for (int k = col; k >= 0; k--) adjustment += k + 1;
         int id = row + col*_size - adjustment;
         if (id >= _len)
-            Rcpp::stop("Something went wrong, an invalid distance matrix index was computed");
+            Rcpp::stop("Something went wrong, an invalid distance matrix index was computed"); // nocov
         return id;
     }
 };
@@ -143,7 +143,7 @@ std::vector<double> local_density(const Rcpp::List& series,
             } else if (LBM(i,j) > dc) {
                 flags(i,j) = 3;
             } else {
-                flags(i,j) = 4;
+                flags(i,j) = 4; // nocov
             }
         }
     }
@@ -158,8 +158,7 @@ std::vector<double> local_density(const Rcpp::List& series,
         if (rho[i] > 0) no_peaks = false;
     }
 
-    if (no_peaks)
-        Rcpp::stop("No density peaks detected, choose a different value for cutoff distance 'dc'");
+    if (no_peaks) Rcpp::stop("No density peaks detected, choose a different value for cutoff distance 'dc'");
 
     // get min and max
     double min_rho = num_series+1, max_rho = -1;
@@ -172,7 +171,7 @@ std::vector<double> local_density(const Rcpp::List& series,
     double den = max_rho - min_rho;
     for (double& this_rho : rho) {
         if (den == 0)
-            this_rho = 1;
+            this_rho = 1; // nocov
         else
             this_rho = (this_rho - min_rho) / den;
     }
@@ -279,7 +278,7 @@ std::vector<double> nn_dist_2(const Rcpp::List& series,
     double den = max_delta - min_delta;
     for (double& this_delta : delta) {
         if (den == 0)
-            this_delta = 1;
+            this_delta = 1; // nocov
         else
             this_delta = (this_delta - min_delta) / den;
     }
