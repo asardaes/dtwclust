@@ -247,6 +247,12 @@ test_that("Operations with dba centroid complete successfully.", {
     )
 
     ## ---------------------------------------------------------- univariate
+
+    expect_output(
+        dba(x[1L:5L], centroid = x[[1L]], max.iter = 20L, trace = TRUE),
+        "Converged!"
+    )
+
     expect_output(
         cent_dba <- family@allcent(x,
                                    cl_id = cl_id,
