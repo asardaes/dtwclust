@@ -232,7 +232,18 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
                               "Using devtools::test() is currently broken, see tests/testthat.R")
 }
 
-.onUnload <- function(libpath) { library.dynam.unload("dtwclust", libpath) }
+.onUnload <- function(libpath) {
+    # Unegister distances
+    if (check_consistency("DTW2", "dist", silent = TRUE)) proxy::pr_DB$delete_entry("DTW2")
+    if (check_consistency("DTW_BASIC", "dist", silent = TRUE)) proxy::pr_DB$delete_entry("DTW_BASIC")
+    if (check_consistency("LB_Keogh", "dist", silent = TRUE)) proxy::pr_DB$delete_entry("LB_Keogh")
+    if (check_consistency("LB_Improved", "dist", silent = TRUE)) proxy::pr_DB$delete_entry("LB_Improved")
+    if (check_consistency("SBD", "dist", silent = TRUE)) proxy::pr_DB$delete_entry("SBD")
+    if (check_consistency("DTW_LB", "dist", silent = TRUE)) proxy::pr_DB$delete_entry("DTW_LB")
+    if (check_consistency("GAK", "dist", silent = TRUE)) proxy::pr_DB$delete_entry("GAK")
+    if (check_consistency("uGAK", "dist", silent = TRUE)) proxy::pr_DB$delete_entry("uGAK")
+    library.dynam.unload("dtwclust", libpath)
+}
 
 release_questions <- function() {
     c(
