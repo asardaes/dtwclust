@@ -5,7 +5,6 @@
 #'
 #' @docType package
 #' @name dtwclust-package
-#' @include utils.R
 #'
 #' @details
 #'
@@ -108,7 +107,9 @@
 #' @importFrom methods removeClass
 #' @importFrom methods setClass
 #' @importFrom methods setGeneric
+#' @importFrom methods setMethod
 #' @importFrom methods setOldClass
+#' @importFrom methods setRefClass
 #' @importFrom methods show
 #' @importFrom methods signature
 #' @importFrom methods slot
@@ -150,11 +151,7 @@ NULL
 # PREFUN for some of my proxy distances so that they support 'pairwise' directly
 proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
     params$pairwise <- pairwise
-
-    list(x = x, y = y,
-         pairwise = pairwise,
-         p = params,
-         reg_entry = reg_entry)
+    list(x = x, y = y, pairwise = pairwise, p = params, reg_entry = reg_entry)
 }
 
 .onAttach <- function(lib, pkg) {

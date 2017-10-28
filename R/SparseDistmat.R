@@ -8,7 +8,6 @@
 #' `pam.sparse = TRUE`. It allows for mutable state. It contains [Distmat-class].
 #'
 #' @include Distmat.R
-#' @include pkg.R
 #'
 #' @field distmat The sparse matrix.
 #' @field symmetric Logical indicating if the matrix is symmetric.
