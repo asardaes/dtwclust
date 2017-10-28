@@ -4,6 +4,7 @@
 #'
 #' @name tsclusters-methods
 #' @rdname tsclusters-methods
+#' @aliases TSClusters-methods
 #' @include tsclust-classes.R
 #'
 NULL
@@ -126,12 +127,12 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
             else
                 allcent <- .Object@family@allcent
 
-            .Object@family <- new("tsclustFamily",
-                                  dist = .Object@distance,
-                                  allcent = allcent,
-                                  preproc = preproc,
-                                  control = .Object@control,
-                                  fuzzy = isTRUE(.Object@type == "fuzzy"))
+            .Object@family <- methods::new("tsclustFamily",
+                                           dist = .Object@distance,
+                                           allcent = allcent,
+                                           preproc = preproc,
+                                           control = .Object@control,
+                                           fuzzy = isTRUE(.Object@type == "fuzzy"))
 
             if (.Object@type == "partitional" && .Object@centroid == "shape") {
                 .Object@family@preproc <- zscore
@@ -148,108 +149,105 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
 })
 
 ## for derived classes
-setMethod("initialize", "PartitionalTSClusters",
-          function(.Object, ...) {
-              .Object <- methods::callNextMethod()
+setMethod("initialize", "PartitionalTSClusters", function(.Object, ...) {
+    .Object <- methods::callNextMethod()
 
-              ## some "defaults"
-              if (!length(.Object@iter)) .Object@iter <- 1L
-              if (!length(.Object@converged)) .Object@converged <- TRUE
+    ## some "defaults"
+    if (!length(.Object@iter)) .Object@iter <- 1L
+    if (!length(.Object@converged)) .Object@converged <- TRUE
 
-              if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
-                  ## no cldist available, but dist and cluster can be used to calculate it
-                  dm <- do.call(.Object@family@dist,
-                                enlist(.Object@datalist,
-                                       .Object@centroids,
-                                       dots = .Object@args$dist),
-                                TRUE)
+    if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
+        ## no cldist available, but dist and cluster can be used to calculate it
+        dm <- do.call(.Object@family@dist,
+                      enlist(.Object@datalist,
+                             .Object@centroids,
+                             dots = .Object@args$dist),
+                      TRUE)
 
-                  .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist),
-                                                             .Object@cluster)])
+        .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist),
+                                                   .Object@cluster)])
 
-                  dimnames(.Object@cldist) <- NULL
-              }
+        dimnames(.Object@cldist) <- NULL
+    }
 
-              if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
-                  ## no clusinfo available, but cluster and cldist can be used to calculate it
-                  size <- as.vector(table(.Object@cluster))
-                  clusinfo <- data.frame(size = size, av_dist = 0)
-                  clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(.Object@cldist[ , 1L],
-                                                                              .Object@cluster,
-                                                                              mean))
-                  .Object@clusinfo <- clusinfo
-              }
+    if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
+        ## no clusinfo available, but cluster and cldist can be used to calculate it
+        size <- as.vector(table(.Object@cluster))
+        clusinfo <- data.frame(size = size, av_dist = 0)
+        clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(.Object@cldist[ , 1L],
+                                                                    .Object@cluster,
+                                                                    mean))
+        .Object@clusinfo <- clusinfo
+    }
 
-              ## return
-              .Object
-          })
+    ## return
+    .Object
+})
 
-setMethod("initialize", "HierarchicalTSClusters",
-          function(.Object, ...) {
-              .Object <- methods::callNextMethod()
+setMethod("initialize", "HierarchicalTSClusters", function(.Object, ...) {
+    .Object <- methods::callNextMethod()
 
-              ## Replace distmat with NULL so that, if the distance function is called again,
-              ## it won't subset it
-              if (length(formals(.Object@family@dist)))
-                  eval(quote(control$distmat <- NULL), environment(.Object@family@dist))
+    ## Replace distmat with NULL so that, if the distance function is called again,
+    ## it won't subset it
+    if (length(formals(.Object@family@dist)))
+        eval(quote(control$distmat <- NULL), environment(.Object@family@dist))
 
-              if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
-                  ## no cldist available, but dist and cluster can be used to calculate it
-                  dm <- do.call(.Object@family@dist,
-                                enlist(.Object@datalist,
-                                       .Object@centroids,
-                                       dots = .Object@args$dist),
-                                TRUE)
+    if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
+        ## no cldist available, but dist and cluster can be used to calculate it
+        dm <- do.call(.Object@family@dist,
+                      enlist(.Object@datalist,
+                             .Object@centroids,
+                             dots = .Object@args$dist),
+                      TRUE)
 
-                  .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist),
-                                                             .Object@cluster)])
+        .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist),
+                                                   .Object@cluster)])
 
-                  dimnames(.Object@cldist) <- NULL
-              }
+        dimnames(.Object@cldist) <- NULL
+    }
 
-              if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
-                  ## no clusinfo available, but cluster and cldist can be used to calculate it
-                  size <- as.vector(table(.Object@cluster))
-                  clusinfo <- data.frame(size = size, av_dist = 0)
-                  clusinfo[clusinfo$size > 0L, "av_dist"] <-
-                      as.vector(tapply(.Object@cldist[ , 1L], .Object@cluster, mean))
+    if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
+        ## no clusinfo available, but cluster and cldist can be used to calculate it
+        size <- as.vector(table(.Object@cluster))
+        clusinfo <- data.frame(size = size, av_dist = 0)
+        clusinfo[clusinfo$size > 0L, "av_dist"] <-
+            as.vector(tapply(.Object@cldist[ , 1L], .Object@cluster, mean))
 
-                  .Object@clusinfo <- clusinfo
-              }
+        .Object@clusinfo <- clusinfo
+    }
 
-              ## return
-              .Object
-          })
+    ## return
+    .Object
+})
 
-setMethod("initialize", "FuzzyTSClusters",
-          function(.Object, ...) {
-              .Object <- methods::callNextMethod()
+setMethod("initialize", "FuzzyTSClusters", function(.Object, ...) {
+    .Object <- methods::callNextMethod()
 
-              ## some "defaults"
-              if (!length(.Object@iter)) .Object@iter <- 1L
-              if (!length(.Object@converged)) .Object@converged <- TRUE
+    ## some "defaults"
+    if (!length(.Object@iter)) .Object@iter <- 1L
+    if (!length(.Object@converged)) .Object@converged <- TRUE
 
-              if (!nrow(.Object@fcluster)) {
-                  if (length(formals(.Object@family@dist))) {
-                      ## no fcluster available, but dist and cluster function can be used to calculate it
-                      dm <- do.call(.Object@family@dist,
-                                    enlist(.Object@datalist,
-                                           .Object@centroids,
-                                           dots = .Object@args$dist),
-                                    TRUE)
+    if (!nrow(.Object@fcluster)) {
+        if (length(formals(.Object@family@dist))) {
+            ## no fcluster available, but dist and cluster function can be used to calculate it
+            dm <- do.call(.Object@family@dist,
+                          enlist(.Object@datalist,
+                                 .Object@centroids,
+                                 dots = .Object@args$dist),
+                          TRUE)
 
-                      .Object@fcluster <- .Object@family@cluster(dm, m = .Object@control$fuzziness)
-                      colnames(.Object@fcluster) <- paste0("cluster_", 1:.Object@k)
-                      .Object@cluster <- max.col(.Object@fcluster, "first")
+            .Object@fcluster <- .Object@family@cluster(dm, m = .Object@control$fuzziness)
+            colnames(.Object@fcluster) <- paste0("cluster_", 1:.Object@k)
+            .Object@cluster <- max.col(.Object@fcluster, "first")
 
-                  } else {
-                      .Object@fcluster <- matrix(NA_real_)
-                  }
-              }
+        } else {
+            .Object@fcluster <- matrix(NA_real_)
+        }
+    }
 
-              ## return
-              .Object
-          })
+    ## return
+    .Object
+})
 
 # ==================================================================================================
 # Show
@@ -261,31 +259,30 @@ setMethod("initialize", "FuzzyTSClusters",
 #'
 #' @param object,x An object that inherits from [TSClusters-class] as returned by [tsclust()].
 #'
-setMethod("show", "TSClusters",
-          function(object) {
-              cat(object@type, "clustering with", object@k, "clusters\n")
-              cat("Using", object@distance, "distance\n")
-              cat("Using", object@centroid, "centroids\n")
+setMethod("show", "TSClusters", function(object) {
+    cat(object@type, "clustering with", object@k, "clusters\n")
+    cat("Using", object@distance, "distance\n")
+    cat("Using", object@centroid, "centroids\n")
 
-              if (inherits(object, "HierarchicalTSClusters"))
-                  cat("Using method", object@method, "\n")
-              if (object@preproc != "none")
-                  cat("Using", object@preproc, "preprocessing\n")
+    if (inherits(object, "HierarchicalTSClusters"))
+        cat("Using method", object@method, "\n")
+    if (object@preproc != "none")
+        cat("Using", object@preproc, "preprocessing\n")
 
-              cat("\nTime required for analysis:\n")
-              print(object@proctime)
+    cat("\nTime required for analysis:\n")
+    print(object@proctime)
 
-              if (inherits(object, "FuzzyTSClusters")) {
-                  cat("\nHead of fuzzy memberships:\n\n")
-                  print(utils::head(object@fcluster))
+    if (inherits(object, "FuzzyTSClusters")) {
+        cat("\nHead of fuzzy memberships:\n\n")
+        print(utils::head(object@fcluster))
 
-              } else if (!is.null(attr(object, "clusinfo"))) {
-                  cat("\nCluster sizes with average intra-cluster distance:\n\n")
-                  print(object@clusinfo)
-              }
+    } else if (!is.null(attr(object, "clusinfo"))) {
+        cat("\nCluster sizes with average intra-cluster distance:\n\n")
+        print(object@clusinfo)
+    }
 
-              invisible(NULL)
-          })
+    invisible(NULL)
+})
 
 # ==================================================================================================
 # update from stats
@@ -843,130 +840,132 @@ setMethod("cvi", methods::signature(a = "HierarchicalTSClusters"), cvi_TSCluster
 #' @aliases cvi,FuzzyTSClusters
 #' @exportMethod cvi
 #'
-setMethod("cvi", methods::signature(a = "FuzzyTSClusters", b = "missing"),
-          function(a, b = NULL, type = "valid", ...) {
-              type <- match.arg(type, several.ok = TRUE,
-                                c("MPC", "K", "T", "SC", "PBMF",
-                                  "valid", "internal"))
+setMethod(
+    "cvi", methods::signature(a = "FuzzyTSClusters", b = "missing"),
+    function(a, b = NULL, type = "valid", ...) {
+        type <- match.arg(type, several.ok = TRUE,
+                          c("MPC", "K", "T", "SC", "PBMF",
+                            "valid", "internal"))
 
-              if (any(type %in% c("valid", "internal"))) {
-                  type <- c("MPC", "K", "T", "SC", "PBMF")
-              }
+        if (any(type %in% c("valid", "internal"))) {
+            type <- c("MPC", "K", "T", "SC", "PBMF")
+        }
 
-              if (length(a@datalist) == 0L && any(type %in% c("K", "T" ,"SC", "PBMF"))) {
-                  warning("Fuzzy CVIs: the original series must be in the object to calculate ",
-                          "the following indices:\n",
-                          "\tK\tT\tSC\tPBMF")
+        if (length(a@datalist) == 0L && any(type %in% c("K", "T" ,"SC", "PBMF"))) {
+            warning("Fuzzy CVIs: the original series must be in the object to calculate ",
+                    "the following indices:\n",
+                    "\tK\tT\tSC\tPBMF")
 
-                  type <- setdiff(type, c("K", "T" ,"SC", "PBMF"))
-              }
+            type <- setdiff(type, c("K", "T" ,"SC", "PBMF"))
+        }
 
-              ## are no valid indices left?
-              if (length(type) == 0L) return(numeric(0L))
+        ## are no valid indices left?
+        if (length(type) == 0L) return(numeric(0L))
 
-              ## calculate global centroids if needed
-              if (any(type %in% c("K", "SC", "PBMF"))) {
-                  N <- length(a@datalist)
+        ## calculate global centroids if needed
+        if (any(type %in% c("K", "SC", "PBMF"))) {
+            N <- length(a@datalist)
 
-                  global_cent <- do.call(a@family@allcent,
-                                         args = enlist(x = a@datalist,
-                                                       cl_id = cbind(rep(1L, N)),
-                                                       k = 1L,
-                                                       dots = a@args$cent),
-                                         TRUE)
-                  dist_global_cent <- do.call(a@family@dist,
-                                              args = enlist(x = a@centroids,
-                                                            centroids = global_cent,
-                                                            dots = a@args$dist),
-                                              TRUE)
-                  dim(dist_global_cent) <- NULL
-              }
+            global_cent <- do.call(a@family@allcent,
+                                   args = enlist(x = a@datalist,
+                                                 cl_id = cbind(rep(1L, N)),
+                                                 k = 1L,
+                                                 dots = a@args$cent),
+                                   TRUE)
+            dist_global_cent <- do.call(a@family@dist,
+                                        args = enlist(x = a@centroids,
+                                                      centroids = global_cent,
+                                                      dots = a@args$dist),
+                                        TRUE)
+            dim(dist_global_cent) <- NULL
+        }
 
-              ## distance between centroids
-              if (any(type %in% c("K", "T", "PBMF"))) {
-                  distcent <- do.call(a@family@dist,
-                                      args = enlist(x = a@centroids,
-                                                    centroids = NULL,
-                                                    dots = a@args$dist),
-                                      TRUE)
-              }
+        ## distance between centroids
+        if (any(type %in% c("K", "T", "PBMF"))) {
+            distcent <- do.call(a@family@dist,
+                                args = enlist(x = a@centroids,
+                                              centroids = NULL,
+                                              dots = a@args$dist),
+                                TRUE)
+        }
 
-              ## distance between series and centroids
-              if (any(type %in% c("K", "T", "SC", "PBMF"))) {
-                  dsc <- do.call(a@family@dist,
-                                 args = enlist(x = a@datalist,
-                                               centroids = a@centroids,
-                                               dots = a@args$dist),
-                                 TRUE)
-              }
+        ## distance between series and centroids
+        if (any(type %in% c("K", "T", "SC", "PBMF"))) {
+            dsc <- do.call(a@family@dist,
+                           args = enlist(x = a@datalist,
+                                         centroids = a@centroids,
+                                         dots = a@args$dist),
+                           TRUE)
+        }
 
-              CVIs <- sapply(type, function(CVI) {
-                  switch(EXPR = CVI,
-                         # -------------------------------------------------------------------------
-                         "MPC" = {
-                             PC <- sum(a@fcluster ^ 2) / nrow(a@fcluster)
-                             1 - (a@k / (a@k - 1L)) * (1 - PC)
-                         },
+        CVIs <- sapply(type, function(CVI) {
+            switch(EXPR = CVI,
+                   # -------------------------------------------------------------------------------
+                   "MPC" = {
+                       PC <- sum(a@fcluster ^ 2) / nrow(a@fcluster)
+                       1 - (a@k / (a@k - 1L)) * (1 - PC)
+                   },
 
-                         # -------------------------------------------------------------------------
-                         "K" = {
-                             numerator <- sum((a@fcluster ^ 2) * (dsc ^ 2)) +
-                                 sum(dist_global_cent ^ 2) / a@k
-                             denominator <- min(distcent[!diag(a@k)] ^ 2)
-                             numerator / denominator
-                         },
+                   # -------------------------------------------------------------------------------
+                   "K" = {
+                       numerator <- sum((a@fcluster ^ 2) * (dsc ^ 2)) +
+                           sum(dist_global_cent ^ 2) / a@k
+                       denominator <- min(distcent[!diag(a@k)] ^ 2)
+                       numerator / denominator
+                   },
 
-                         # -------------------------------------------------------------------------
-                         "T" = {
-                             numerator <- sum((a@fcluster ^ 2) * (dsc ^ 2)) +
-                                 sum(distcent[!diag(a@k)] ^ 2) / (a@k * (a@k - 1L))
-                             denominator <- min(distcent[!diag(a@k)] ^ 2) + 1 / a@k
-                             numerator / denominator
-                         },
+                   # -------------------------------------------------------------------------------
+                   "T" = {
+                       numerator <- sum((a@fcluster ^ 2) * (dsc ^ 2)) +
+                           sum(distcent[!diag(a@k)] ^ 2) / (a@k * (a@k - 1L))
+                       denominator <- min(distcent[!diag(a@k)] ^ 2) + 1 / a@k
+                       numerator / denominator
+                   },
 
-                         # -------------------------------------------------------------------------
-                         "SC" = {
-                             u <- a@fcluster
-                             m <- a@control$fuzziness
+                   # -------------------------------------------------------------------------------
+                   "SC" = {
+                       u <- a@fcluster
+                       m <- a@control$fuzziness
 
-                             SC1_numerator <- sum((dist_global_cent ^ 2) / a@k)
-                             SC1_denominator <- sum(apply((u ^ m) * (dsc ^ 2), 2L, sum) /
-                                                        apply(u, 2L, sum))
-                             SC1 <- SC1_numerator / SC1_denominator
+                       SC1_numerator <- sum((dist_global_cent ^ 2) / a@k)
+                       SC1_denominator <- sum(apply((u ^ m) * (dsc ^ 2), 2L, sum) /
+                                                  apply(u, 2L, sum))
+                       SC1 <- SC1_numerator / SC1_denominator
 
-                             SC2_numerator <- sum(sapply(1L:(a@k - 1L), function(i) {
-                                 sum(sapply(1L:(a@k - i), function(r) {
-                                     j <- r + i
-                                     temp <- apply(u[, c(i,j)], 1L, min)
-                                     sum(temp ^ 2) / sum(temp)
-                                 }))
-                             }))
-                             SC2_denominator <- apply(u, 1L, max)
-                             SC2_denominator <- sum(SC2_denominator ^ 2) / sum(SC2_denominator)
-                             SC2 <- SC2_numerator / SC2_denominator
+                       SC2_numerator <- sum(sapply(1L:(a@k - 1L), function(i) {
+                           sum(sapply(1L:(a@k - i), function(r) {
+                               j <- r + i
+                               temp <- apply(u[, c(i,j)], 1L, min)
+                               sum(temp ^ 2) / sum(temp)
+                           }))
+                       }))
+                       SC2_denominator <- apply(u, 1L, max)
+                       SC2_denominator <- sum(SC2_denominator ^ 2) / sum(SC2_denominator)
+                       SC2 <- SC2_numerator / SC2_denominator
 
-                             SC1 - SC2
-                         },
+                       SC1 - SC2
+                   },
 
-                         # -------------------------------------------------------------------------
-                         "PBMF" = {
-                             u <- a@fcluster
-                             m <- a@control$fuzziness
-                             dsgc <- do.call(a@family@dist,
-                                             args = enlist(x = a@datalist,
-                                                           centroids = global_cent,
-                                                           dots = a@args$dist),
-                                             TRUE)
-                             factor1 <- 1 / a@k
-                             factor2 <- sum(dsgc) / sum(dsc * (u ^ m))
-                             factor3 <- max(distcent[!diag(a@k)])
-                             (factor1 * factor2 * factor3) ^ 2
-                         })
-              })
+                   # -------------------------------------------------------------------------------
+                   "PBMF" = {
+                       u <- a@fcluster
+                       m <- a@control$fuzziness
+                       dsgc <- do.call(a@family@dist,
+                                       args = enlist(x = a@datalist,
+                                                     centroids = global_cent,
+                                                     dots = a@args$dist),
+                                       TRUE)
+                       factor1 <- 1 / a@k
+                       factor2 <- sum(dsgc) / sum(dsc * (u ^ m))
+                       factor3 <- max(distcent[!diag(a@k)])
+                       (factor1 * factor2 * factor3) ^ 2
+                   })
+        })
 
-              ## return
-              CVIs
-          })
+        ## return
+        CVIs
+    }
+)
 
 # ==================================================================================================
 # Functions to support package 'clue'

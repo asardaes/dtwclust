@@ -3,6 +3,7 @@
 \docType{class}
 \name{tsclustFamily-class}
 \alias{tsclustFamily-class}
+\alias{tsclustFamily}
 \title{Class definition for \code{tsclustFamily}}
 \description{
 Formal S4 class with a family of functions used in \code{\link[=tsclust]{tsclust()}}.

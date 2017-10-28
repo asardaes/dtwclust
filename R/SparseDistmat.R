@@ -16,7 +16,7 @@
 #'
 #' @keywords internal
 #'
-SparseDistmat <- setRefClass(
+SparseDistmat <- methods::setRefClass(
     "SparseDistmat",
     contains = "Distmat",
     fields = list(
@@ -68,7 +68,7 @@ NULL
 #'
 #' @param object A [SparseDistmat-class] object.
 #'
-setMethod("show", "SparseDistmat", function(object) { show(object$distmat) }) # nocov
+setMethod("show", "SparseDistmat", function(object) { methods::show(object$distmat) }) # nocov
 
 #' @rdname SparseDistmat-generics
 #' @aliases [,SparseDistmat,ANY,ANY,ANY

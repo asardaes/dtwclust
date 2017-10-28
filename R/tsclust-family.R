@@ -78,15 +78,16 @@
 #' ffam <- new("tsclustFamily", control = fuzzy_control(), fuzzy = TRUE)
 #'
 #'
-setClass("tsclustFamily",
-         slots = c(dist = "function",
-                   allcent = "function",
-                   cluster = "function",
-                   preproc = "function"),
-         prototype = prototype(preproc = function(x, ...) { x },
-                               cluster = function(distmat = NULL, ...) {
-                                   max.col(-distmat, "first")
-                               })
+tsclustFamily <- methods::setClass(
+    "tsclustFamily",
+    slots = c(dist = "function",
+              allcent = "function",
+              cluster = "function",
+              preproc = "function"),
+    prototype = prototype(preproc = function(x, ...) { x },
+                          cluster = function(distmat = NULL, ...) {
+                              max.col(-distmat, "first")
+                          })
 )
 
 # ==================================================================================================

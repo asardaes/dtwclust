@@ -14,7 +14,7 @@
 #'
 #' @keywords internal
 #'
-Distmat <- setRefClass("Distmat",
+Distmat <- methods::setRefClass("Distmat",
                        fields = list(
                            distmat = "ANY",
                            series = "list",

@@ -19,7 +19,7 @@ labels_shuffled <- sample(labels)
 
 # family (environments) and proctime will vary from run to run, that's unavoidable
 reset_nondeterministic <- function(obj, clear.data = TRUE) {
-    if (inherits(obj, "TSClusters") && validObject(obj)) {
+    if (inherits(obj, "TSClusters") && methods::validObject(obj)) {
         obj@family <- new("tsclustFamily")
         obj@proctime[1L:5L] <- 0
         if (inherits(obj@control$distmat, "Distmat")) obj@control$distmat <- obj@distmat

@@ -70,26 +70,28 @@ methods::removeClass("hclust4")
 #'
 #' [tsclusters-methods]
 #'
-setClass("TSClusters",
-         slots = c(call = "call",
-                   family = "tsclustFamily",
-                   control = "ANY",
-                   datalist = "list",
+TSClusters <- methods::setClass(
+    "TSClusters",
+    slots = c(call = "call",
+              family = "tsclustFamily",
+              control = "ANY",
+              datalist = "list",
 
-                   type = "character",
-                   distance = "character",
-                   centroid = "character",
-                   preproc = "character",
+              type = "character",
+              distance = "character",
+              centroid = "character",
+              preproc = "character",
 
-                   k = "integer",
-                   cluster = "integer",
-                   centroids = "list",
-                   distmat = "ANY",
+              k = "integer",
+              cluster = "integer",
+              centroids = "list",
+              distmat = "ANY",
 
-                   proctime = "proc_time",
-                   dots = "list",
-                   args = "ANY",
-                   seed = "integer"))
+              proctime = "proc_time",
+              dots = "list",
+              args = "ANY",
+              seed = "integer")
+)
 
 #' @rdname TSClusters-class
 #' @exportClass PartitionalTSClusters
@@ -111,11 +113,13 @@ setClass("TSClusters",
 #'   - `clusinfo`
 #'   - `cldist`
 #'
-setClass("PartitionalTSClusters", contains = c("TSClusters"),
-         slots = c(iter = "integer",
-                   converged = "logical",
-                   clusinfo = "data.frame",
-                   cldist = "matrix"))
+PartitionalTSClusters <- methods::setClass(
+    "PartitionalTSClusters", contains = c("TSClusters"),
+    slots = c(iter = "integer",
+              converged = "logical",
+              clusinfo = "data.frame",
+              cldist = "matrix")
+)
 
 #' @rdname TSClusters-class
 #' @exportClass HierarchicalTSClusters
@@ -130,10 +134,12 @@ setClass("PartitionalTSClusters", contains = c("TSClusters"),
 #'   - `clusinfo`
 #'   - `cldist`
 #'
-setClass("HierarchicalTSClusters", contains = c("TSClusters", "hclust"),
-         slots = c(method = "character",
-                   clusinfo = "data.frame",
-                   cldist = "matrix"))
+HierarchicalTSClusters <- methods::setClass(
+    "HierarchicalTSClusters", contains = c("TSClusters", "hclust"),
+    slots = c(method = "character",
+              clusinfo = "data.frame",
+              cldist = "matrix")
+)
 
 #' @rdname TSClusters-class
 #' @exportClass FuzzyTSClusters
@@ -150,7 +156,9 @@ setClass("HierarchicalTSClusters", contains = c("TSClusters", "hclust"),
 #'   - `converged`
 #'   - `fcluster`
 #'
-setClass("FuzzyTSClusters", contains = c("TSClusters"),
-         slots = c(iter = "integer",
-                   converged = "logical",
-                   fcluster = "matrix"))
+FuzzyTSClusters <- methods::setClass(
+    "FuzzyTSClusters", contains = c("TSClusters"),
+    slots = c(iter = "integer",
+              converged = "logical",
+              fcluster = "matrix")
+)

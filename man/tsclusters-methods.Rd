@@ -3,6 +3,7 @@
 \docType{methods}
 \name{tsclusters-methods}
 \alias{tsclusters-methods}
+\alias{TSClusters-methods}
 \alias{initialize,TSClusters-method}
 \alias{initialize,TSClusters}
 \alias{show,TSClusters-method}

@@ -3,9 +3,13 @@
 \docType{class}
 \name{TSClusters-class}
 \alias{TSClusters-class}
+\alias{TSClusters}
 \alias{PartitionalTSClusters-class}
+\alias{PartitionalTSClusters}
 \alias{HierarchicalTSClusters-class}
+\alias{HierarchicalTSClusters}
 \alias{FuzzyTSClusters-class}
+\alias{FuzzyTSClusters}
 \title{Class definition for \code{TSClusters} and derived classes}
 \description{
 Formal S4 classes for time-series clusters. See class hierarchy and slot organization at the

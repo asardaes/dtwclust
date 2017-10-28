@@ -392,12 +392,12 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # Family creation, see initialization in tsclust-family.R
             # --------------------------------------------------------------------------------------
 
-            family <- new("tsclustFamily",
-                          dist = distance,
-                          allcent = centroid,
-                          preproc = preproc,
-                          control = control,
-                          fuzzy = isTRUE(type == "fuzzy"))
+            family <- methods::new("tsclustFamily",
+                                   dist = distance,
+                                   allcent = centroid,
+                                   preproc = preproc,
+                                   control = control,
+                                   fuzzy = isTRUE(type == "fuzzy"))
 
             if (!all(c("x", "cl_id", "k", "cent", "cl_old") %in% names(formals(family@allcent))))
                 stop("The provided centroid function must have at least the following ",
@@ -490,57 +490,57 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # Create objects
             RET <- lapply(pc_list, function(pc) {
                 if (type == "partitional") {
-                    new("PartitionalTSClusters",
-                        call = MYCALL,
-                        family = family,
-                        control = control,
-                        datalist = series,
+                    methods::new("PartitionalTSClusters",
+                                 call = MYCALL,
+                                 family = family,
+                                 control = control,
+                                 datalist = series,
 
-                        type = type,
-                        distance = distance,
-                        centroid = cent_char,
-                        preproc = preproc_char,
+                                 type = type,
+                                 distance = distance,
+                                 centroid = cent_char,
+                                 preproc = preproc_char,
 
-                        k = pc$k,
-                        cluster = pc$cluster,
-                        centroids = pc$centroids,
-                        distmat = distmat,
+                                 k = pc$k,
+                                 cluster = pc$cluster,
+                                 centroids = pc$centroids,
+                                 distmat = distmat,
 
-                        dots = dots,
-                        args = args,
+                                 dots = dots,
+                                 args = args,
 
-                        iter = pc$iter,
-                        converged = pc$converged,
-                        clusinfo = pc$clusinfo,
-                        cldist = pc$cldist,
+                                 iter = pc$iter,
+                                 converged = pc$converged,
+                                 clusinfo = pc$clusinfo,
+                                 cldist = pc$cldist,
 
-                        override.family = FALSE)
+                                 override.family = FALSE)
 
                 } else {
-                    new("FuzzyTSClusters",
-                        call = MYCALL,
-                        family = family,
-                        control = control,
-                        datalist = series,
+                    methods::new("FuzzyTSClusters",
+                                 call = MYCALL,
+                                 family = family,
+                                 control = control,
+                                 datalist = series,
 
-                        type = type,
-                        distance = distance,
-                        centroid = cent_char,
-                        preproc = preproc_char,
+                                 type = type,
+                                 distance = distance,
+                                 centroid = cent_char,
+                                 preproc = preproc_char,
 
-                        k = pc$k,
-                        cluster = pc$cluster,
-                        centroids = pc$centroids,
-                        distmat = distmat,
+                                 k = pc$k,
+                                 cluster = pc$cluster,
+                                 centroids = pc$centroids,
+                                 distmat = distmat,
 
-                        dots = dots,
-                        args = args,
+                                 dots = dots,
+                                 args = args,
 
-                        iter = pc$iter,
-                        converged = pc$converged,
-                        fcluster = pc$fcluster,
+                                 iter = pc$iter,
+                                 converged = pc$converged,
+                                 fcluster = pc$fcluster,
 
-                        override.family = FALSE)
+                                 override.family = FALSE)
                 }
             })
 
@@ -650,32 +650,32 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                         centroids <- series[centroids]
                     }
 
-                    new("HierarchicalTSClusters",
-                        stats::as.hclust(hc),
-                        call = MYCALL,
-                        family = new("tsclustFamily",
-                                     dist = distfun,
-                                     allcent = allcent,
-                                     preproc = preproc),
-                        control = control,
-                        datalist = series,
+                    methods::new("HierarchicalTSClusters",
+                                 stats::as.hclust(hc),
+                                 call = MYCALL,
+                                 family = methods::new("tsclustFamily",
+                                                       dist = distfun,
+                                                       allcent = allcent,
+                                                       preproc = preproc),
+                                 control = control,
+                                 datalist = series,
 
-                        type = type,
-                        distance = distance,
-                        centroid = cent_char,
-                        preproc = preproc_char,
+                                 type = type,
+                                 distance = distance,
+                                 centroid = cent_char,
+                                 preproc = preproc_char,
 
-                        k = as.integer(k),
-                        cluster = cluster,
-                        centroids = centroids,
-                        distmat = distmat,
+                                 k = as.integer(k),
+                                 cluster = cluster,
+                                 centroids = centroids,
+                                 distmat = distmat,
 
-                        dots = dots,
-                        args = args,
+                                 dots = dots,
+                                 args = args,
 
-                        method = if (!is.null(hc$method)) hc$method else method,
+                                 method = if (!is.null(hc$method)) hc$method else method,
 
-                        override.family = !is.function(centroid))
+                                 override.family = !is.function(centroid))
                 })
             })
 
@@ -750,29 +750,29 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
                 if (dba_allocated) args$cent$gcm <- NULL
 
-                obj <- new("PartitionalTSClusters",
-                           call = MYCALL,
-                           family = new("tsclustFamily",
-                                        dist = distfun,
-                                        allcent = allcent,
-                                        preproc = preproc),
-                           control = control,
-                           datalist = series,
+                obj <- methods::new("PartitionalTSClusters",
+                                    call = MYCALL,
+                                    family = methods::new("tsclustFamily",
+                                                          dist = distfun,
+                                                          allcent = allcent,
+                                                          preproc = preproc),
+                                    control = control,
+                                    datalist = series,
 
-                           type = type,
-                           distance = "dtw_lb",
-                           centroid = cent_char,
-                           preproc = preproc_char,
+                                    type = type,
+                                    distance = "dtw_lb",
+                                    centroid = cent_char,
+                                    preproc = preproc_char,
 
-                           k = as.integer(k),
-                           cluster = R$cl,
-                           centroids = centroids,
-                           distmat = NULL,
+                                    k = as.integer(k),
+                                    cluster = R$cl,
+                                    centroids = centroids,
+                                    distmat = NULL,
 
-                           dots = dots,
-                           args = args,
+                                    dots = dots,
+                                    args = args,
 
-                           override.family = !is.function(centroid))
+                                    override.family = !is.function(centroid))
 
                 obj@distance <- "LB+DTW2"
                 obj
