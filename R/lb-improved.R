@@ -10,9 +10,9 @@
 #' @param window.size Window size for envelope calculation. See details.
 #' @param norm Vector norm. Either `"L1"` for Manhattan distance or `"L2"` for Euclidean.
 #' @param lower.env Optionally, a pre-computed lower envelope for **`y`** can be provided (non-proxy
-#'   version only).
+#'   version only). See [compute_envelope()].
 #' @param upper.env Optionally, a pre-computed upper envelope for **`y`** can be provided (non-proxy
-#'   version only).
+#'   version only). See [compute_envelope()].
 #' @param force.symmetry If `TRUE`, a second lower bound is calculated by swapping `x` and `y`, and
 #'   whichever result has a *higher* distance value is returned. The proxy version can only work if
 #'   a square matrix is obtained, but use carefully.

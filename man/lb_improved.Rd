@@ -17,10 +17,10 @@ lb_improved(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
 \item{norm}{Vector norm. Either \code{"L1"} for Manhattan distance or \code{"L2"} for Euclidean.}
 
 \item{lower.env}{Optionally, a pre-computed lower envelope for \strong{\code{y}} can be provided (non-proxy
-version only).}
+version only). See \code{\link[=compute_envelope]{compute_envelope()}}.}
 
 \item{upper.env}{Optionally, a pre-computed upper envelope for \strong{\code{y}} can be provided (non-proxy
-version only).}
+version only). See \code{\link[=compute_envelope]{compute_envelope()}}.}
 
 \item{force.symmetry}{If \code{TRUE}, a second lower bound is calculated by swapping \code{x} and \code{y}, and
 whichever result has a \emph{higher} distance value is returned. The proxy version can only work if
