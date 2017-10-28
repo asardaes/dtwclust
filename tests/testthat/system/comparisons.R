@@ -36,6 +36,8 @@ type_score_fun <- list(fuzzy = function(obj_list, lbls, ...) {
     })
 })
 
+bad_score_fun <- list(fuzzy = function(...) { list(1L:2L, 3L:5L) })
+
 cfgs <- compare_clusterings_configs(c("p", "h", "f", "t"), k = 2L:3L,
                                     controls = list(
                                         partitional = partitional_control(
@@ -195,21 +197,37 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
     expect_null(no_pick$pick)
     expect_true(!is.null(no_pick$scores))
 
+    expect_warning(compare_clusterings(data_reinterpolated_subset, c("f"),
+                                       configs = cfgs, seed = 392L,
+                                       score.clus = bad_score_fun,
+                                       lbls = labels_subset),
+                   "scores.*not.*appended")
+
     type_score <- compare_clusterings(data_reinterpolated_subset, c("f"),
                                       configs = cfgs, seed = 392L,
                                       score.clus = type_score_fun,
                                       lbls = labels_subset)
-    expect_identical(no_pick$results, type_score$results)
 
-    mute <- capture.output(all_comparisons <- compare_clusterings(data_reinterpolated_subset,
-                                                                  c("p", "h", "f", "t"),
-                                                                  configs = cfgs, seed = 392L,
-                                                                  trace = TRUE,
-                                                                  score.clus = score_fun,
-                                                                  pick.clus = pick_fun,
-                                                                  return.objects = TRUE,
-                                                                  shuffle.configs = TRUE,
-                                                                  lbls = labels_subset))
+    type_score_objs <- compare_clusterings(data_reinterpolated_subset, c("f"),
+                                           configs = cfgs, seed = 392L,
+                                           return.objects = TRUE,
+                                           score.clus = type_score_fun,
+                                           lbls = labels_subset)
+
+    expect_identical(no_pick$results, type_score$results)
+    expect_identical(no_pick$results, type_score_objs$results)
+
+    expect_output(
+        all_comparisons <- compare_clusterings(data_reinterpolated_subset,
+                                               c("p", "h", "f", "t"),
+                                               configs = cfgs, seed = 392L,
+                                               trace = TRUE,
+                                               score.clus = score_fun,
+                                               pick.clus = pick_fun,
+                                               return.objects = TRUE,
+                                               shuffle.configs = TRUE,
+                                               lbls = labels_subset)
+    )
 
     gak_comparison <- compare_clusterings(data_subset, "p",
                                           configs = cfgs_gak, seed = 190L,
