@@ -6,6 +6,7 @@
 * Modified `tslist` to hopefully make it faster.
 * Partitional and fuzzy controls (`tsclust-controls`) now specify version 2 of the main loop by default.
 * Packages `clue` and `ggplot2` are no longer automatically loaded by default.
+* Fixed minor potential bugs in several functions.
 
 ## Version 4.1.1
 * Added some fuzzy cluster validity indices to `cvi`.
