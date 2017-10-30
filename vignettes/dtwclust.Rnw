@@ -76,7 +76,20 @@ that is or has been associated with the author.
 }
 
 \Abstract{%
-Most clustering strategies have not changed considerably since their initial definition. Most of the improvements are either related to the distance measure used to assess dissimilarity, or the function used to calculate prototypes or centroids. Time-series clustering is no exception, with the Dynamic Time Warping distance being particularly popular in that context. This distance is computationally expensive, so many related optimizations have been developed over the years. Since no single clustering algorithm can be said to perform best on all datasets, different strategies must be tested and compared, so a common infrastructure can be advantageous. In this manuscript, a general overview of time-series clustering is given, including many specifics related to Dynamic Time Warping and other recently proposed techniques. At the same time, a description of the \dtwclust{} package for the \R{} statistical software is provided, showcasing how it can be used to evaluate many different time-series clustering procedures.
+Most clustering strategies have not changed considerably since their initial definition.
+Most of the improvements are either related to the distance measure used to assess dissimilarity,
+or the function used to calculate prototypes or centroids.
+Time-series clustering is no exception,
+with the Dynamic Time Warping distance being particularly popular in that context.
+This distance is computationally expensive,
+so many related optimizations have been developed over the years.
+Since no single clustering algorithm can be said to perform best on all datasets,
+different strategies must be tested and compared,
+so a common infrastructure can be advantageous.
+In this manuscript, a general overview of time-series clustering is given,
+including many specifics related to Dynamic Time Warping and other recently proposed techniques.
+At the same time, a description of the \dtwclust{} package for the \R{} statistical software is provided,
+showcasing how it can be used to evaluate many different time-series clustering procedures.
 }
 
 \Keywords{time-series, clustering, \R{}, dynamic time warping, lower bound, cluster validity}
