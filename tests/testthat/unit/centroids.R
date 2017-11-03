@@ -12,6 +12,7 @@ x <- data_reinterpolated_subset
 k <- 2L
 cl_id <- rep(c(1L, 2L), each = length(x) / 2L)
 x_mv <- reinterpolate(data_multivariate, 205L)
+expect_trace <- if (foreach::getDoParWorkers() > 1L) testthat::expect_silent else testthat::expect_output
 
 # ==================================================================================================
 # mean
@@ -253,7 +254,7 @@ test_that("Operations with dba centroid complete successfully.", {
         "Converged!"
     )
 
-    expect_output(
+    expect_trace(
         cent_dba <- family@allcent(x,
                                    cl_id = cl_id,
                                    k = k,
@@ -267,7 +268,7 @@ test_that("Operations with dba centroid complete successfully.", {
     expect_identical(length(cent_dba), k)
 
     ## ---------------------------------------------------------- multivariate
-    expect_output(
+    expect_trace(
         cent_mv_dba <- family@allcent(x_mv,
                                       cl_id = cl_id,
                                       k = k,
@@ -283,7 +284,7 @@ test_that("Operations with dba centroid complete successfully.", {
     expect_identical(dim(cent_mv_dba[[1L]]), dim(x_mv[[1L]]))
 
     ## ---------------------------------------------------------- multivariate v2
-    expect_output(
+    expect_trace(
         cent_mv_dba_bys <- family@allcent(x_mv,
                                           cl_id = cl_id,
                                           k = k,
