@@ -111,7 +111,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         if (error.check) check_consistency(y, "tslist")
     }
 
-    if (is_multivariate(x) || is_multivariate(y))
+    if (is_multivariate(c(x,y)))
         stop("lb_keogh does not support multivariate series.")
 
     pairwise <- isTRUE(pairwise)

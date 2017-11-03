@@ -159,7 +159,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         ffty <- lapply(y, function(v) { Conj(stats::fft(c(v, rep(0, fftlen - length(v))))) })
     }
 
-    if (is_multivariate(x) || is_multivariate(y)) stop("SBD does not support multivariate series.")
+    if (is_multivariate(c(x,y))) stop("SBD does not support multivariate series.")
     pairwise <- isTRUE(pairwise)
     dim_out <- c(length(x), length(y))
     dim_names <- list(names(x), names(y))

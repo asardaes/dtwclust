@@ -140,7 +140,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     X <- tslist(x)
     Y <- if (is.null(y)) X else tslist(y)
 
-    if (is_multivariate(X) || is_multivariate(Y))
+    if (is_multivariate(c(X,Y)))
         stop("dtw_lb does not support multivariate series.")
 
     dots <- list(...)
