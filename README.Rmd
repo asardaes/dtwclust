@@ -26,14 +26,23 @@ knitr::opts_chunk$set(
 
 # Time Series Clustering Along with Optimizations for the Dynamic Time Warping (DTW) Distance
 
-Time series clustering with a wide variety of strategies and a series of optimizations specific to the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs). There are implementations of both traditional clustering algorithms, and more recent procedures such as k-Shape and TADPole clustering. Functionality can be easily extended with custom distance measures and centroid definitions.
+Time series clustering with a wide variety of strategies and a series of optimizations specific to the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs).
+There are implementations of both traditional clustering algorithms,
+and more recent procedures such as k-Shape and TADPole clustering.
+Functionality can be easily extended with custom distance measures and centroid definitions.
 
-Many of the algorithms implemented in this package are specifically tailored to DTW, hence its name. However, the main clustering function is flexible so that one can test many different clustering approaches, using either the time series directly, or by applying suitable transformations and then clustering in the resulting space. Other implementations included in the package provide some alternatives to DTW.
+Many of the algorithms implemented in this package are specifically tailored to DTW, hence its name.
+However, the main clustering function is flexible so that one can test many different clustering approaches,
+using either the time series directly,
+or by applying suitable transformations and then clustering in the resulting space.
+Other implementations included in the package provide some alternatives to DTW.
 
-DTW is a dynamic programming algorithm that tries to find the optimum warping path between two series. Over the years, several variations have appeared in order to make the procedure faster or more efficient. Please refer to the included references for more information, especially Giorgino
-(2009), which is a good practical introduction.
+For more information:
 
-Most optimizations require equal dimensionality, which means time series should have equal length. DTW itself does not require this, but it is relatively expensive to compute. Other distance definitions may be used, or series could be reinterpolated to a matching length (Ratanamahatana and Keogh, 2004).
+* [Vignette with theory](https://cran.r-project.org/web/packages/dtwclust/vignettes/dtwclust.pdf) (with examples in the appendices)
+* [Timing experiments](https://cran.r-project.org/web/packages/dtwclust/vignettes/timing-experiments.html)
+* [Functions' documentation](https://cran.r-project.org/web/packages/dtwclust/dtwclust.pdf)
+* [CRAN's time series view](https://cran.r-project.org/web/views/TimeSeries.html)
 
 ## Implementations
 
@@ -44,75 +53,62 @@ Most optimizations require equal dimensionality, which means time series should 
     + TADPole clustering
 * DTW Barycenter Averaging
 * Keogh's and Lemire's DTW lower bounds
-* Global alignment kernel distance
+* Global alignment kernel (GAK) distance
+* Some multivariate support (GAK and DTW)
 * Parallelization for most functions
 
 ## Installation
 
 The latest version from CRAN can be installed with `install.packages("dtwclust")`.
 
-If you want to test the latest version from github, first install the [prerequisites for R package development](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites) (LaTeX is only neccesary if you want to build the vignette) as well as the [remotes package](https://cran.r-project.org/package=remotes), and then type `remotes::install_github("asardaes/dtwclust")`.
+If you want to test the latest version from github,
+first install the
+[prerequisites for R package development](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites)
+(LaTeX is only neccesary if you want to build the vignette)
+as well as the
+[remotes package](https://cran.r-project.org/package=remotes),
+and then type `remotes::install_github("asardaes/dtwclust")`.
 
-If you're wondering about which version to install, take a look at the [CHANGELOG](CHANGELOG.md) file, I try to keep it updated. Check the [Unix](https://travis-ci.org/asardaes/dtwclust) and [Windows](https://ci.appveyor.com/project/asardaes/dtwclust) continuous integration builds to make sure everything is working, but do note that they tend to fail for reasons unrelated to the package's functionality.
+If you're wondering about which version to install,
+take a look at the [CHANGELOG](CHANGELOG.md) file,
+I try to keep it updated.
+Check the
+[Unix](https://travis-ci.org/asardaes/dtwclust)
+and
+[Windows](https://ci.appveyor.com/project/asardaes/dtwclust)
+continuous integration builds to make sure everything is working,
+but do note that they tend to fail for reasons unrelated to the package's functionality.
 
-## Dependencies
+## License
 
-* Partitional procedures are inspired by the `flexclust` package.
-* Hierarchical procedures use the native `hclust` function by default.
-* Cross-distance matrix calculations make use of the `proxy` package.
-* The core DTW calculations can be done by the `dtw` package or the included `dtw_basic` function.
-* Plotting is done with the `ggplot2` package.
-* Parallel computation depends on the `foreach` package, and also uses `bigmemory` for some optimizations.
-* Cluster evaluation can be done with package `clue` or the `cvi` function.
+GNU General Public License v3.0. See [license](LICENSE) and [copyrights](inst/COPYRIGHTS).
+
+This software package was developed independently of any organization or institution that is or has been associated with the author.
 
 ## Examples
 
 ```{r set-up}
 # Load series
-data(uciCT)
-
-# Reinterpolate series to equal length and normalize
-series <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
-series <- zscore(series)
+data("uciCT")
 ```
 
 ### Partitional
 
 ```{r partitional}
-# Using DTW with help of lower bounds and PAM centroids
-pc.dtwlb <- tsclust(series, k = 20L, 
-                    distance = "dtw_lb", centroid = "pam", 
-                    seed = 3247, trace = TRUE,
-                    control = partitional_control(pam.precompute = FALSE),
-                    args = tsclust_args(dist = list(window.size = 20L)))
-
-plot(pc.dtwlb)
+pc <- tsclust(CharTraj, type = "partitional", k = 20L, 
+              distance = "dtw_basic", centroid = "pam", 
+              seed = 3247L, trace = TRUE,
+              args = tsclust_args(dist = list(window.size = 20L)))
+plot(pc)
 ```
 
 ### Hierarchical
 
 ```{r hierarchical}
-# Based on shape-based distance
-hc.sbd <- tsclust(CharTraj, type = "hierarchical", k = 20L, 
-                  distance = "sbd", preproc = zscore,
-                  control = hierarchical_control(method = "all"),
-                  trace = TRUE)
-
-# CVIs for HC+SBD
-print(cvis <- sapply(hc.sbd, cvi, b = CharTrajLabels))
-
-# Best according to variation of information
-plot(hc.sbd[[which.min(cvis["VI", ])]])
-```
-
-### TADPole
-
-```{r tadpole}
-pc.tadp <- tsclust(series, type = "tadpole", k = 20L,
-                   trace = TRUE,
-                   control = tadpole_control(dc = 1.5, window.size = 20L))
-
-plot(pc.tadp, clus = 1L:4L)
+hc <- tsclust(CharTraj, type = "hierarchical", k = 20L, 
+              distance = "sbd", trace = TRUE,
+              control = hierarchical_control(method = "average"))
+plot(hc)
 ```
 
 ### Fuzzy
@@ -122,24 +118,18 @@ plot(pc.tadp, clus = 1L:4L)
 acf_fun <- function(dat, ...) {
     lapply(dat, function(x) as.numeric(acf(x, lag.max = 50L, plot = FALSE)$acf))
 }
-
 # Autocorrelation-based fuzzy c-means
-fc <- tsclust(series[1L:25L], type = "fuzzy", k = 5L,
+fc <- tsclust(CharTraj[1L:25L], type = "fuzzy", k = 5L,
               preproc = acf_fun, distance = "L2",
-              seed = 123)
-
+              seed = 123L)
 fc
 ```
 
-### (Some) multivariate support
+### *Some* multivariate support
 
 ```{r multivariate}
-# Multivariate series, provided as a list of matrices
-mv <- CharTrajMV[1L:20L]
-
-# Using GAK distance
-mvc <- tsclust(mv, k = 4L, distance = "gak", seed = 390)
-
+# Multivariate series provided as a list of matrices, using GAK distance
+mvc <- tsclust(CharTrajMV[1L:20L], k = 4L, distance = "gak", seed = 390L)
 # Note how the variables of each series are appended one after the other in the plot
 plot(mvc)
 ```
@@ -148,29 +138,19 @@ plot(mvc)
 
 ```{r parallel}
 require("doParallel")
-
 # Create and register parallel workers
 cl <- makeCluster(detectCores())
 registerDoParallel(cl)
-
-# Parallel backend detected automatically
-hc <- tsclust(CharTraj, k = 20L,
-              distance = "dtw_basic", centroid = "dba",
-              seed = 9421, trace = TRUE,
-              args = tsclust_args(dist = list(window.size = 20L),
-                                  cent = list(window.size = 20L,
-                                              max.iter = 15L)))
-
-## Returning to sequential calculations
+# Registered parallel backend detected automatically
+plc <- tsclust(CharTraj, k = 20L,
+               distance = "dtw_basic", centroid = "dba",
+               seed = 9421L, trace = TRUE,
+               args = tsclust_args(dist = list(window.size = 20L),
+                                   cent = list(window.size = 20L,
+                                               max.iter = 15L)))
+# Return to sequential calculations
 stopCluster(cl)
 registerDoSEQ()
-
-## Modifying some plot parameters
-plot(hc, labs.arg = list(title = "DBA Centroids", x = "time", y = "series"))
+# Modify some plot parameters
+plot(plc, labs.arg = list(title = "DTW distance + DBA Centroids", x = "time", y = "series"))
 ```
-
-# License
-
-GNU General Public License v3.0. See [license](LICENSE) and [copyright](inst/COPYRIGHTS).
-
-This software package was developed independently of any organization or institution that is or has been associated with the author.
