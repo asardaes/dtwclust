@@ -15,8 +15,8 @@ compare_clusterings(series = NULL, types = c("p", "h", "f", "t"), ...,
 \item{series}{A list of series, a numeric matrix or a data frame. Matrices and data frames are
 coerced to a list row-wise (see \code{\link[=tslist]{tslist()}}).}
 
-\item{types}{Clustering types. It must be any combination of (possibly abbreviated): partitional,
-hierarchical, fuzzy, tadpole.}
+\item{types}{Clustering types. It must be any combination of (possibly abbreviated):
+"partitional", "hierarchical", "fuzzy", "tadpole."}
 
 \item{...}{Further arguments for \code{\link[=tsclust]{tsclust()}}, \code{score.clus} or \code{pick.clus}.}
 
@@ -378,7 +378,7 @@ id_redundant <- p_cfgs$partitional$preproc == "none" &
     p_cfgs$partitional$centroid == "shape"
 p_cfgs$partitional <- p_cfgs$partitional[!id_redundant, ]
 
-# LONG! 20 minutes or so, sequentially
+# LONG! 30 minutes or so, sequentially
 comparison_partitional <- compare_clusterings(CharTraj, types = "p",
                                               configs = p_cfgs,
                                               seed = 32903L, trace = TRUE,

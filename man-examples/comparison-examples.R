@@ -223,7 +223,7 @@ id_redundant <- p_cfgs$partitional$preproc == "none" &
     p_cfgs$partitional$centroid == "shape"
 p_cfgs$partitional <- p_cfgs$partitional[!id_redundant, ]
 
-# LONG! 20 minutes or so, sequentially
+# LONG! 30 minutes or so, sequentially
 comparison_partitional <- compare_clusterings(CharTraj, types = "p",
                                               configs = p_cfgs,
                                               seed = 32903L, trace = TRUE,

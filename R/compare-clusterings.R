@@ -330,8 +330,8 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'
 #' @param series A list of series, a numeric matrix or a data frame. Matrices and data frames are
 #'   coerced to a list row-wise (see [tslist()]).
-#' @param types Clustering types. It must be any combination of (possibly abbreviated): partitional,
-#'   hierarchical, fuzzy, tadpole.
+#' @param types Clustering types. It must be any combination of (possibly abbreviated):
+#'   "partitional", "hierarchical", "fuzzy", "tadpole."
 #' @param ... Further arguments for [tsclust()], `score.clus` or `pick.clus`.
 #' @param configs The list of data frames with the desired configurations to run. See
 #'   [pdc_configs()] and [compare_clusterings_configs()].
