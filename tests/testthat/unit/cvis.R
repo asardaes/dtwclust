@@ -79,13 +79,21 @@ test_that("external CVI calculations are consistent regardless of quantity or or
 # ==================================================================================================
 
 fc <- tsclust(data_subset, "f", 4L, distance = "sbd", centroid = "fcmdd", seed = 32890L)
-base_fcvis <- cvi(fc, labels_subset)
+base_fcvis <- cvi(fc, labels_subset, type = "valid")
+
+test_that("Internal and external fuzzy CVIs are identical to the valid ones", {
+    icvis <- cvi(fc, type = "internal")
+    ecvis <- cvi(fc, labels_subset, type = "external")
+    expect_identical(icvis[internal_fuzzy_cvis], base_fcvis[internal_fuzzy_cvis])
+    expect_identical(ecvis[external_fuzzy_cvis], base_fcvis[external_fuzzy_cvis])
+    expect_error(cvi(fc@fcluster, type = "internal"))
+    expect_error(cvi(fc, type = "external"))
+})
 
 # Internal
 test_that("Internal fuzzy CVI calculations are consistent regardless of quantity or order of CVIs computed", {
     # parallel times() below won't detect 'fc' otherwise -.-
     fc <- fc
-    expect_error(cvi(fc@fcluster, type = "internal"))
 
     internal_fcvis <- base_fcvis[internal_fuzzy_cvis]
     cvis <- internal_fuzzy_cvis
@@ -115,7 +123,6 @@ test_that("Internal fuzzy CVI calculations are consistent regardless of quantity
 test_that("External fuzzy CVI calculations are consistent regardless of quantity or order of CVIs computed", {
     # parallel times() below won't detect 'fc' otherwise -.-
     fc <- fc
-    expect_error(cvi(fc, type = "external"))
 
     external_fcvis <- base_fcvis[external_fuzzy_cvis]
     cvis <- external_fuzzy_cvis
