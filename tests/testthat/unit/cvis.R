@@ -83,8 +83,10 @@ base_fcvis <- cvi(fc, labels_subset)
 
 # Internal
 test_that("Internal fuzzy CVI calculations are consistent regardless of quantity or order of CVIs computed", {
-    # times() below won't detect 'fc' otherwise -.-
+    # parallel times() below won't detect 'fc' otherwise -.-
     fc <- fc
+    expect_error(cvi(fc@fcluster, type = "internal"))
+
     internal_fcvis <- base_fcvis[internal_fuzzy_cvis]
     cvis <- internal_fuzzy_cvis
     `%op%` <- dtwclust:::`%op%` # avoid stupid parallel warnings
@@ -111,7 +113,7 @@ test_that("Internal fuzzy CVI calculations are consistent regardless of quantity
 
 # External
 test_that("External fuzzy CVI calculations are consistent regardless of quantity or order of CVIs computed", {
-    # times() below won't detect 'fc' otherwise -.-
+    # parallel times() below won't detect 'fc' otherwise -.-
     fc <- fc
     expect_error(cvi(fc, type = "external"))
 
