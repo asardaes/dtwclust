@@ -9,7 +9,8 @@ ols <- ls()
 
 internal_cvis <- c("Sil", "D", "DB", "DBstar", "CH", "SF", "COP")
 external_cvis <- c("RI", "ARI", "J", "FM", "VI")
-fuzzy_cvis <- c("MPC", "K", "T", "SC", "PBMF")
+internal_fuzzy_cvis <- c("MPC", "K", "T", "SC", "PBMF")
+external_fuzzy_cvis <- c("ARI", "RI", "VI", "NMIM")
 
 # ==================================================================================================
 # both internal and external
@@ -77,31 +78,59 @@ test_that("external CVI calculations are consistent regardless of quantity or or
 # fuzzy
 # ==================================================================================================
 
-test_that("CVI calculations are consistent regardless of quantity or order of CVIs computed", {
-    fc <- tsclust(data_subset, "f", 4L, distance = "sbd", centroid = "fcmdd", seed = 32890L)
+fc <- tsclust(data_subset, "f", 4L, distance = "sbd", centroid = "fcmdd", seed = 32890L)
+base_fcvis <- cvi(fc, labels_subset)
 
-    base_fcvis <- cvi(fc)
-    cvis <- fuzzy_cvis
+# Internal
+test_that("Internal fuzzy CVI calculations are consistent regardless of quantity or order of CVIs computed", {
+    # times() below won't detect 'fc' otherwise -.-
+    fc <- fc
+    internal_fcvis <- base_fcvis[internal_fuzzy_cvis]
+    cvis <- internal_fuzzy_cvis
     `%op%` <- dtwclust:::`%op%` # avoid stupid parallel warnings
 
     expect_true(all(
         times(50L) %op% {
             considered_cvis <- sample(cvis, sample(length(cvis), 1L))
             this_cvis <- cvi(fc, type = considered_cvis)
-            all(base_fcvis[considered_cvis] == this_cvis[considered_cvis])
+            all(internal_fcvis[considered_cvis] == this_cvis[considered_cvis])
         }
     ),
-    info = paste("A random number of fuzzy CVIs are calculated and compared against the base ones,",
+    info = paste("A random number of internal fuzzy CVIs are calculated and compared against the base ones,",
                  "and should always be equal."))
 
     # when missing elements
     fc@datalist <- list()
     expect_warning(this_cvis <- cvi(fc))
     considered_cvis <- names(this_cvis)
-    expect_true(all(base_fcvis[considered_cvis] == this_cvis))
+    expect_true(all(internal_fcvis[considered_cvis] == this_cvis))
 
     # refs
-    assign("base_fcvis", base_fcvis, persistent)
+    assign("internal_fcvis", internal_fcvis, persistent)
+})
+
+# External
+test_that("External fuzzy CVI calculations are consistent regardless of quantity or order of CVIs computed", {
+    # times() below won't detect 'fc' otherwise -.-
+    fc <- fc
+    expect_error(cvi(fc, type = "external"))
+
+    external_fcvis <- base_fcvis[external_fuzzy_cvis]
+    cvis <- external_fuzzy_cvis
+    `%op%` <- dtwclust:::`%op%` # avoid stupid parallel warnings
+
+    expect_true(all(
+        times(50L) %op% {
+            considered_cvis <- sample(cvis, sample(length(cvis), 1L))
+            this_cvis <- cvi(fc, rep(1L:4L, each = 5L), type = considered_cvis)
+            all(external_fcvis[considered_cvis] == this_cvis[considered_cvis])
+        }
+    ),
+    info = paste("A random number of external fuzzy CVIs are calculated and compared against the base ones,",
+                 "and should always be equal."))
+
+    # refs
+    assign("external_fcvis", external_fcvis, persistent)
 })
 
 # ==================================================================================================

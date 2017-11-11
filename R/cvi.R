@@ -6,10 +6,10 @@
 #' @export
 #' @exportMethod cvi
 #'
-#' @param a An object returned by [tsclust()] or, for non-fuzzy clusterings, a vector that can be
-#'   coerced to integers which indicate the cluster memeberships.
+#' @param a An object returned by [tsclust()], for crisp partitions a vector that can be coerced to
+#'   integers which indicate the cluster memeberships, or the membership matrix for soft clustering.
 #' @param b If needed, a vector that can be coerced to integers which indicate the cluster
-#'   memeberships. The ground truth (if known) should be provided here. Only for non-fuzzy.
+#'   memeberships. The ground truth (if known) should be provided here.
 #' @param type Character vector indicating which indices are to be computed. See supported values
 #'   below.
 #' @param ... Arguments to pass to and from other methods.
@@ -21,16 +21,16 @@
 #' can be rather subjective. However, a great amount of effort has been invested in trying to
 #' standardize cluster evaluation metrics by using cluster validity indices (CVIs).
 #'
-#' In general, CVIs can be either tailored to crisp or fuzzy partitions. For the former, CVIs can be
-#' classified as internal, external or relative depending on how they are computed. Focusing on the
-#' first two, the crucial difference is that internal CVIs only consider the partitioned data and
-#' try to define a measure of cluster purity, whereas external CVIs compare the obtained partition
-#' to the correct one. Thus, external CVIs can only be used if the ground truth is known.
+#' In general, CVIs can be either tailored to crisp or fuzzy partitions. CVIs can be classified as
+#' internal, external or relative depending on how they are computed. Focusing on the first two, the
+#' crucial difference is that internal CVIs only consider the partitioned data and try to define a
+#' measure of cluster purity, whereas external CVIs compare the obtained partition to the correct
+#' one. Thus, external CVIs can only be used if the ground truth is known.
 #'
 #' Note that even though a fuzzy partition can be changed into a crisp one, making it compatible
 #' with many of the existing crisp CVIs, there are also fuzzy CVIs tailored specifically to fuzzy
-#' clustering, and these may be more suitable in those situations. Naturally, fuzzy partitions
-#' have no ground truth associated with them.
+#' clustering, and these may be more suitable in those situations. Fuzzy partitions usually have no
+#' ground truth associated with them, but there are exceptions depending on the task's goal.
 #'
 #' Each index defines their range of values and whether they are to be minimized or maximized. In
 #' many cases, these CVIs can be used to evaluate the result of a clustering algorithm regardless of
@@ -39,20 +39,24 @@
 #' Knowing which CVI will work best cannot be determined a priori, so they should be tested for each
 #' specific application. Usually, many CVIs are utilized and compared to each other, maybe using a
 #' majority vote to decide on a final result. Furthermore, it should be noted that many CVIs perform
-#' additional distance calculations when being computed, which can be very considerable if using
-#' DTW or GAK.
+#' additional distance calculations when being computed, which can be very considerable if using DTW
+#' or GAK.
 #'
 #' @return The chosen CVIs
 #'
 #' @section External CVIs:
 #'
-#'   The first 4 CVIs are calculated via [flexclust::comPart()], so please refer to that function.
-#'
-#'   - `"RI"`: Rand Index (to be maximized).
-#'   - `"ARI"`: Adjusted Rand Index (to be maximized).
-#'   - `"J"`: Jaccard Index (to be maximized).
-#'   - `"FM"`: Fowlkes-Mallows (to be maximized).
-#'   - `"VI"`: Variation of Information (Meila (2003); to be minimized).
+#'   - Crisp partitions (the first 4 are calculated via [flexclust::comPart()])
+#'     + `"RI"`: Rand Index (to be maximized).
+#'     + `"ARI"`: Adjusted Rand Index (to be maximized).
+#'     + `"J"`: Jaccard Index (to be maximized).
+#'     + `"FM"`: Fowlkes-Mallows (to be maximized).
+#'     + `"VI"`: Variation of Information (Meila (2003); to be minimized).
+#'   - Fuzzy partitions (based on Lei et al. (2017))
+#'     + `"RI"`: Soft Rand Index (to be maximized).
+#'     + `"ARI"`: Soft Adjusted Rand Index (to be maximized).
+#'     + `"VI"`: Soft Variation of Information (to be minimized).
+#'     + `"NMIM"`: Soft Normalized Mutual Information based on Max entropy (to be maximized).
 #'
 #' @section Internal CVIs:
 #'
@@ -68,33 +72,28 @@
 #'   and [shape_extraction()] (for series of different length) have some randomness associated,
 #'   these indices might not be appropriate for those centroids.
 #'
-#'   - `"Sil"` (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
-#'   - `"D"` (!): Dunn index (Arbelaitz et al. (2013); to be maximized).
-#'   - `"COP"` (!): COP index (Arbelaitz et al. (2013); to be minimized).
-#'   - `"DB"` (?): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
-#'   - `"DBstar"` (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005); to be
-#'     minimized).
-#'   - `"CH"` (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
-#'   - `"SF"` (~): Score Function (Saitta et al. (2007); to be maximized; see notes).
-#'
-#' @section Fuzzy CVIs:
-#'
-#'  The names here follow the nomenclature used in Wang and Zhang (2007). The marks defined above
-#'  are also applied.
-#'
-#'  - `"MPC"`: to be maximized.
-#'  - `"K"` (~): to be minimized.
-#'  - `"T"`: to be minimized.
-#'  - `"SC"` (~): to be maximized.
-#'  - `"PBMF"` (~): to be maximized (see notes).
+#'   - Crisp partitions
+#'     + `"Sil"` (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
+#'     + `"D"` (!): Dunn index (Arbelaitz et al. (2013); to be maximized).
+#'     + `"COP"` (!): COP index (Arbelaitz et al. (2013); to be minimized).
+#'     + `"DB"` (?): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
+#'     + `"DBstar"` (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005); to be
+#'       minimized).
+#'     + `"CH"` (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
+#'     + `"SF"` (~): Score Function (Saitta et al. (2007); to be maximized; see notes).
+#'   - Fuzzy partitions (using the nomenclature used in Wang and Zhang (2007))
+#'     + `"MPC"`: to be maximized.
+#'     + `"K"` (~): to be minimized.
+#'     + `"T"`: to be minimized.
+#'     + `"SC"` (~): to be maximized.
+#'     + `"PBMF"` (~): to be maximized (see notes).
 #'
 #' @section Additionally:
 #'
 #'   - `"valid"`: Returns all valid indices depending on the type of `a` and whether `b` was
 #'     provided or not.
 #'   - `"internal"`: Returns all internal CVIs. Only supported for [TSClusters-class] objects.
-#'   - `"external"`: Returns all external CVIs. Requires `b` to be provided. Not valid for fuzzy
-#'     clustering.
+#'   - `"external"`: Returns all external CVIs. Requires `b` to be provided.
 #'
 #' @note
 #'
@@ -115,6 +114,10 @@
 #'
 #' Kim, M., & Ramakrishna, R. S. (2005). New indices for cluster validity assessment. Pattern
 #' Recognition Letters, 26(15), 2353-2363.
+#'
+#' Lei, Y., Bezdek, J. C., Chan, J., Vinh, N. X., Romano, S., & Bailey, J. (2017). Extending
+#' information-theoretic validity indices for fuzzy clustering. IEEE Transactions on Fuzzy Systems,
+#' 25(4), 1013-1018.
 #'
 #' Lin, H. Y. (2013). Effective Feature Selection for Multi-class Classification Models. In
 #' Proceedings of the World Congress on Engineering (Vol. 3).
@@ -156,8 +159,7 @@ setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10
 
         # entropy
         ent <- function(cl) {
-            n <- length(cl)
-            p <- table(cl) / n
+            p <- table(cl) / length(cl)
             -sum(p * log(p, base = log.base))
         }
 
@@ -171,6 +173,87 @@ setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10
         VI <- ent(a) + ent(b) - 2 * mi(a, b)
         CVIs <- c(CVIs, VI = VI)
     }
-
+    # return
     CVIs
 })
+
+# For external fuzzy CVIs
+#' @rdname cvi
+#' @export
+#' @exportMethod cvi
+setMethod(
+    "cvi", signature = methods::signature(a = "matrix"),
+    function(a, b = NULL, type = "valid", ..., log.base = 10) {
+        if (is.null(b)) stop("A second set of cluster membership indices is required in 'b' for this/these CVI(s).")
+        dim_b <- dim(b)
+        b <- as.integer(b)
+        dim(b) <- dim_b
+
+        if (is.null(dim_b)) {
+            if (nrow(a) != length(b)) stop("External CVIs: 'a'-rows and 'b'-length must match.")
+            temp <- matrix(0L, nrow(a), max(b))
+            temp[cbind(1L:nrow(temp), b)] <- 1L
+            b <- temp
+        }
+
+        type <- match.arg(type, several.ok = TRUE,
+                          choices = c("ARI", "RI", "VI", "NMIM", "valid", "external"))
+        if (any(type %in% c("valid", "external"))) type <- c("ARI", "RI", "VI", "NMIM")
+
+        num_objects <- nrow(a)
+        contingency_table <- t(a) %*% b
+
+        if (any(c("ARI", "RI") %in% type)) {
+            total_sum <- sum(contingency_table)
+            squared_sum <- sum(contingency_table ^ 2L)
+            row_sum <- sum(base::rowSums(contingency_table) ^ 2L)
+            col_sum <- sum(base::colSums(contingency_table) ^ 2L)
+            pairs_in_both <- (squared_sum - total_sum) / 2
+            pairs_in_neither <- (num_objects ^ 2L + squared_sum - row_sum - col_sum) / 2
+            just_in_a <- (col_sum - squared_sum) / 2
+            just_in_b <- (row_sum - squared_sum) / 2
+        }
+
+        if (any(c("VI", "NMIM") %in% type)) {
+            joint_distribution <- contingency_table / num_objects
+            joint_entropy <- -sum(joint_distribution * log(joint_distribution + .Machine$double.eps,
+                                                           base = log.base))
+            jdx <- base::rowSums(joint_distribution)
+            jdy <- base::colSums(joint_distribution)
+            entropy_x <- -sum(jdx * log(jdx + .Machine$double.eps, base = log.base))
+            entropy_y <- -sum(jdy * log(jdy + .Machine$double.eps, base = log.base))
+            mutual_information <- entropy_x + entropy_y - joint_entropy
+        }
+
+        CVIs <- sapply(type, function(CVI) {
+            switch(EXPR = CVI,
+                   # -------------------------------------------------------------------------------
+                   "ARI" = {
+                       sum_all <- pairs_in_both + pairs_in_neither + just_in_a + just_in_b
+                       both_and_a <- pairs_in_both + just_in_a
+                       both_and_b <- pairs_in_both + just_in_b
+                       temp_sum <- both_and_a + both_and_b
+                       temp_mul <- both_and_a * both_and_b
+                       (pairs_in_both - temp_mul / sum_all) / (0.5 * temp_sum - temp_mul / sum_all)
+                   },
+
+                   # -------------------------------------------------------------------------------
+                   "RI" = {
+                       (pairs_in_both + pairs_in_neither) /
+                           (pairs_in_both + pairs_in_neither + just_in_a + just_in_b)
+                   },
+
+                   # -------------------------------------------------------------------------------
+                   "VI" = {
+                       entropy_x + entropy_y - 2 * mutual_information
+                   },
+
+                   # -------------------------------------------------------------------------------
+                   "NMIM" = {
+                       mutual_information / max(entropy_x, entropy_y)
+                   })
+        })
+        # return
+        CVIs
+    }
+)

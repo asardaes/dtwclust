@@ -1171,7 +1171,8 @@ Note that even though a fuzzy partition can be changed into a crisp one,
 making it compatible with many of the existing ``crisp'' CVIs,
 there are also fuzzy CVIs tailored specifically to fuzzy clustering,
 and these may be more suitable in those situations.
-Naturally, fuzzy partitions usually have no ground truth associated with them.
+Fuzzy partitions usually have no ground truth associated with them,
+but there are exceptions depending on the task's goal \citep{lei2017}.
 
 Each index defines its range of values and whether they are to be minimized or maximized.
 In many cases, these CVIs can be used to evaluate the result of a clustering algorithm regardless of how the clustering works internally,
@@ -1179,7 +1180,7 @@ or how the partition came to be.
 The Silhouette index is an example of an internal CVI,
 whereas the Variation of Information \citep{meilua2003} is an external CVI.
 
-Several of the best-performing CVIs according to \citet{arbelaitz2013} and \citet{wang2007} are implemented in \dtwclust{} in the \code{cvi} function,
+Several of the best-performing CVIs according to \citet{wang2007}, \citet{arbelaitz2013}, and \cite{lei2017} are implemented in \dtwclust{} in the \code{cvi} function,
 although other indices can be implemented by the user.
 However, in the original definition of many internal and fuzzy CVIs,
 the Euclidean distance and a mean centroid was used.

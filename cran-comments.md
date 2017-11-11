@@ -1,5 +1,6 @@
 ## Update to version 4.1.1.9000
 * Removed deprecated code.
+* New external fuzzy CVIs.
 * Miscellaneous bug fixes and optimizations.
 
 ## Test environments

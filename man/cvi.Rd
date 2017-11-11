@@ -3,31 +3,34 @@
 \docType{methods}
 \name{cvi}
 \alias{cvi}
-\alias{cvi,PartitionalTSClusters,ANY-method}
+\alias{cvi,matrix-method}
+\alias{cvi,PartitionalTSClusters-method}
 \alias{cvi,PartitionalTSClusters}
-\alias{cvi,HierarchicalTSClusters,ANY-method}
+\alias{cvi,HierarchicalTSClusters-method}
 \alias{cvi,HierarchicalTSClusters}
-\alias{cvi,FuzzyTSClusters,missing-method}
+\alias{cvi,FuzzyTSClusters-method}
 \alias{cvi,FuzzyTSClusters}
 \title{Cluster validity indices}
 \usage{
 cvi(a, b = NULL, type = "valid", ..., log.base = 10)
 
-\S4method{cvi}{PartitionalTSClusters,ANY}(a, b = NULL, type = "valid", ...,
+\S4method{cvi}{matrix}(a, b = NULL, type = "valid", ..., log.base = 10)
+
+\S4method{cvi}{PartitionalTSClusters}(a, b = NULL, type = "valid", ...,
   log.base = 10)
 
-\S4method{cvi}{HierarchicalTSClusters,ANY}(a, b = NULL, type = "valid", ...,
+\S4method{cvi}{HierarchicalTSClusters}(a, b = NULL, type = "valid", ...,
   log.base = 10)
 
-\S4method{cvi}{FuzzyTSClusters,missing}(a, b = NULL, type = "valid", ...,
+\S4method{cvi}{FuzzyTSClusters}(a, b = NULL, type = "valid", ...,
   log.base = 10)
 }
 \arguments{
-\item{a}{An object returned by \code{\link[=tsclust]{tsclust()}} or, for non-fuzzy clusterings, a vector that can be
-coerced to integers which indicate the cluster memeberships.}
+\item{a}{An object returned by \code{\link[=tsclust]{tsclust()}}, for crisp partitions a vector that can be coerced to
+integers which indicate the cluster memeberships, or the membership matrix for soft clustering.}
 
 \item{b}{If needed, a vector that can be coerced to integers which indicate the cluster
-memeberships. The ground truth (if known) should be provided here. Only for non-fuzzy.}
+memeberships. The ground truth (if known) should be provided here.}
 
 \item{type}{Character vector indicating which indices are to be computed. See supported values
 below.}
@@ -48,16 +51,16 @@ Clustering is commonly considered to be an unsupervised procedure, so evaluating
 can be rather subjective. However, a great amount of effort has been invested in trying to
 standardize cluster evaluation metrics by using cluster validity indices (CVIs).
 
-In general, CVIs can be either tailored to crisp or fuzzy partitions. For the former, CVIs can be
-classified as internal, external or relative depending on how they are computed. Focusing on the
-first two, the crucial difference is that internal CVIs only consider the partitioned data and
-try to define a measure of cluster purity, whereas external CVIs compare the obtained partition
-to the correct one. Thus, external CVIs can only be used if the ground truth is known.
+In general, CVIs can be either tailored to crisp or fuzzy partitions. CVIs can be classified as
+internal, external or relative depending on how they are computed. Focusing on the first two, the
+crucial difference is that internal CVIs only consider the partitioned data and try to define a
+measure of cluster purity, whereas external CVIs compare the obtained partition to the correct
+one. Thus, external CVIs can only be used if the ground truth is known.
 
 Note that even though a fuzzy partition can be changed into a crisp one, making it compatible
 with many of the existing crisp CVIs, there are also fuzzy CVIs tailored specifically to fuzzy
-clustering, and these may be more suitable in those situations. Naturally, fuzzy partitions
-have no ground truth associated with them.
+clustering, and these may be more suitable in those situations. Fuzzy partitions usually have no
+ground truth associated with them, but there are exceptions depending on the task's goal.
 
 Each index defines their range of values and whether they are to be minimized or maximized. In
 many cases, these CVIs can be used to evaluate the result of a clustering algorithm regardless of
@@ -66,8 +69,8 @@ how the clustering works internally, or how the partition came to be.
 Knowing which CVI will work best cannot be determined a priori, so they should be tested for each
 specific application. Usually, many CVIs are utilized and compared to each other, maybe using a
 majority vote to decide on a final result. Furthermore, it should be noted that many CVIs perform
-additional distance calculations when being computed, which can be very considerable if using
-DTW or GAK.
+additional distance calculations when being computed, which can be very considerable if using DTW
+or GAK.
 }
 \note{
 In the original definition of many internal and fuzzy CVIs, the Euclidean distance and a mean
@@ -82,14 +85,22 @@ Lin (2013) are used here.
 }
 \section{External CVIs}{
 
-
-The first 4 CVIs are calculated via \code{\link[flexclust:comPart]{flexclust::comPart()}}, so please refer to that function.
+\itemize{
+\item Crisp partitions (the first 4 are calculated via \code{\link[flexclust:comPart]{flexclust::comPart()}})
 \itemize{
 \item \code{"RI"}: Rand Index (to be maximized).
 \item \code{"ARI"}: Adjusted Rand Index (to be maximized).
 \item \code{"J"}: Jaccard Index (to be maximized).
 \item \code{"FM"}: Fowlkes-Mallows (to be maximized).
 \item \code{"VI"}: Variation of Information (Meila (2003); to be minimized).
+}
+\item Fuzzy partitions (based on Lei et al. (2017))
+\itemize{
+\item \code{"RI"}: Soft Rand Index (to be maximized).
+\item \code{"ARI"}: Soft Adjusted Rand Index (to be maximized).
+\item \code{"VI"}: Soft Variation of Information (to be minimized).
+\item \code{"NMIM"}: Soft Normalized Mutual Information based on Max entropy (to be maximized).
+}
 }
 }
 
@@ -108,6 +119,8 @@ The indices marked with a tilde (~) require the calculation of a global centroid
 and \code{\link[=shape_extraction]{shape_extraction()}} (for series of different length) have some randomness associated,
 these indices might not be appropriate for those centroids.
 \itemize{
+\item Crisp partitions
+\itemize{
 \item \code{"Sil"} (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
 \item \code{"D"} (!): Dunn index (Arbelaitz et al. (2013); to be maximized).
 \item \code{"COP"} (!): COP index (Arbelaitz et al. (2013); to be minimized).
@@ -117,19 +130,14 @@ minimized).
 \item \code{"CH"} (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
 \item \code{"SF"} (~): Score Function (Saitta et al. (2007); to be maximized; see notes).
 }
-}
-
-\section{Fuzzy CVIs}{
-
-
-The names here follow the nomenclature used in Wang and Zhang (2007). The marks defined above
-are also applied.
+\item Fuzzy partitions (using the nomenclature used in Wang and Zhang (2007))
 \itemize{
 \item \code{"MPC"}: to be maximized.
 \item \code{"K"} (~): to be minimized.
 \item \code{"T"}: to be minimized.
 \item \code{"SC"} (~): to be maximized.
 \item \code{"PBMF"} (~): to be maximized (see notes).
+}
 }
 }
 
@@ -139,8 +147,7 @@ are also applied.
 \item \code{"valid"}: Returns all valid indices depending on the type of \code{a} and whether \code{b} was
 provided or not.
 \item \code{"internal"}: Returns all internal CVIs. Only supported for \linkS4class{TSClusters} objects.
-\item \code{"external"}: Returns all external CVIs. Requires \code{b} to be provided. Not valid for fuzzy
-clustering.
+\item \code{"external"}: Returns all external CVIs. Requires \code{b} to be provided.
 }
 }
 
@@ -150,6 +157,10 @@ comparative study of cluster validity indices. Pattern Recognition, 46(1), 243-2
 
 Kim, M., & Ramakrishna, R. S. (2005). New indices for cluster validity assessment. Pattern
 Recognition Letters, 26(15), 2353-2363.
+
+Lei, Y., Bezdek, J. C., Chan, J., Vinh, N. X., Romano, S., & Bailey, J. (2017). Extending
+information-theoretic validity indices for fuzzy clustering. IEEE Transactions on Fuzzy Systems,
+25(4), 1013-1018.
 
 Lin, H. Y. (2013). Effective Feature Selection for Multi-class Classification Models. In
 Proceedings of the World Congress on Engineering (Vol. 3).
