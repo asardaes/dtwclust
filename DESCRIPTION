@@ -76,7 +76,6 @@ Collate:
     'dtw-basic.R'
     'dtw-lb.R'
     'dtw2.R'
-    'fuzzy.R'
     'globals-internal.R'
     'lb-improved.R'
     'lb-keogh.R'
