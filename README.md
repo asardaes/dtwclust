@@ -27,6 +27,7 @@ Implementations
 -   Keogh's and Lemire's DTW lower bounds
 -   Global alignment kernel (GAK) distance
 -   Some multivariate support (GAK and DTW)
+-   Cluster validity indices (crisp and fuzzy, internal and external)
 -   Parallelization for most functions
 
 Installation
