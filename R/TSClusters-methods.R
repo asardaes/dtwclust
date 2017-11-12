@@ -5,7 +5,7 @@
 #' @name tsclusters-methods
 #' @rdname tsclusters-methods
 #' @aliases TSClusters-methods
-#' @include tsclust-classes.R
+#' @include TSClusters-classes.R
 #'
 NULL
 
@@ -453,7 +453,7 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #'   `plot(x, plot = FALSE)` `+` `facet_wrap(~cl, scales = "free")`
 #'
 #'   For more complicated changes, you're better off looking at the source code at
-#'   \url{https://github.com/asardaes/dtwclust/blob/master/R/tsclust-methods.R} and creating your
+#'   \url{https://github.com/asardaes/dtwclust/blob/master/R/TSClusters-methods.R} and creating your
 #'   own plotting function.
 #'
 #' @return
@@ -824,6 +824,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
 #' @rdname cvi
 #' @aliases cvi,PartitionalTSClusters
 #' @exportMethod cvi
+#' @include cvi.R
 #'
 setMethod("cvi", methods::signature(a = "PartitionalTSClusters"), cvi_TSClusters)
 

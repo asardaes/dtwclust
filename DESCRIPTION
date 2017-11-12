@@ -3,7 +3,7 @@ Type: Package
 Title: Time Series Clustering Along with Optimizations for the Dynamic Time
     Warping Distance
 Version: 4.1.1.9000
-Date: 2017-10-28
+Date: 2017-11-12
 Depends:
     R (>= 3.2.0),
     methods,
@@ -25,13 +25,13 @@ Imports:
     reshape2,
     rngtools
 Suggests:
-    TSdist,
-    TSclust,
     cluster,
     doParallel,
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+    TSclust,
+    TSdist
 LinkingTo:
     BH,
     bigmemory,
@@ -63,11 +63,14 @@ Collate:
     'SBD.R'
     'SparseDistmat.R'
     'TADPole.R'
+    'tsclust-family.R'
+    'TSClusters-classes.R'
+    'cvi.R'
+    'TSClusters-methods.R'
     'all-cent2.R'
     'as-methods.R'
     'compare-clusterings.R'
     'compute-envelope.R'
-    'cvi.R'
     'data.R'
     'ddist2.R'
     'dtw-basic.R'
@@ -77,14 +80,11 @@ Collate:
     'globals-internal.R'
     'lb-improved.R'
     'lb-keogh.R'
-    'partitional.R'
+    'partitional-fuzzy.R'
     'pkg.R'
     'reinterpolate.R'
     'shape-extraction.R'
-    'tsclust-family.R'
-    'tsclust-classes.R'
     'tsclust-controls.R'
-    'tsclust-methods.R'
     'tsclust.R'
     'tslist.R'
     'utils.R'
