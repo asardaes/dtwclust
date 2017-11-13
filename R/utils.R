@@ -183,6 +183,8 @@ setnames_inplace <- function(vec, names) {
 }
 
 # Split a given object into chunks for parallel workers
+#' @importFrom parallel splitIndices
+#'
 split_parallel <- function(obj, margin = NULL) {
     num_workers <- foreach::getDoParWorkers()
     if (num_workers == 1L) return(structure(list(obj), endpoints = 1L))
@@ -217,6 +219,8 @@ validate_pairwise <- function(x, y) {
 # ==================================================================================================
 
 # allocate distance matrix for custom proxy loops
+#' @importFrom bigmemory big.matrix
+#'
 allocate_distmat <- function(x_len, y_len, pairwise, symmetric) {
     if (foreach::getDoParWorkers() > 1L) {
         seed <- get0(".Random.seed", .GlobalEnv, mode = "integer") # undo big.matrix() seed change...

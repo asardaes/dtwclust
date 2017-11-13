@@ -8,6 +8,9 @@
 #' `pam.sparse = TRUE`. It allows for mutable state. It contains [Distmat-class].
 #'
 #' @include Distmat.R
+#' @importClassesFrom Matrix sparseMatrix
+#' @importFrom Matrix sparseMatrix
+#' @importFrom methods setRefClass
 #'
 #' @field distmat The sparse matrix.
 #' @field symmetric Logical indicating if the matrix is symmetric.
@@ -60,11 +63,13 @@ SparseDistmat <- methods::setRefClass(
 #' @name SparseDistmat-generics
 #' @rdname SparseDistmat-generics
 #' @keywords internal
+#' @importFrom methods setMethod
 #'
 NULL
 
 #' @rdname SparseDistmat-generics
 #' @aliases show,SparseDistmat
+#' @importFrom methods show
 #'
 #' @param object A [SparseDistmat-class] object.
 #'
@@ -72,6 +77,7 @@ setMethod("show", "SparseDistmat", function(object) { methods::show(object$distm
 
 #' @rdname SparseDistmat-generics
 #' @aliases [,SparseDistmat,ANY,ANY,ANY
+#' @importFrom Matrix forceSymmetric
 #'
 #' @param x A [SparseDistmat-class] object.
 #' @param i Row indices.

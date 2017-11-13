@@ -130,6 +130,12 @@ sbd <- SBD
 # Wrapper for proxy::dist
 # ==================================================================================================
 
+#' @importFrom bigmemory attach.big.matrix
+#' @importFrom bigmemory describe
+#' @importFrom bigmemory is.big.matrix
+#' @importFrom stats fft
+#' @importFrom stats nextn
+#'
 SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairwise = FALSE) {
     x <- tslist(x)
 

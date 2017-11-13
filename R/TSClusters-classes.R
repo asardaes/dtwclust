@@ -1,4 +1,8 @@
 # Needed old classes
+#' @importFrom methods removeClass
+#' @importFrom methods setClass
+#' @importFrom methods setOldClass
+#'
 methods::setClass("proc_time4", contains = "numeric", slots = c(names = "character"))
 methods::setOldClass("proc_time", S4Class = "proc_time4")
 methods::removeClass("proc_time4")
@@ -14,6 +18,7 @@ methods::removeClass("hclust4")
 #'
 #' @rdname TSClusters-class
 #' @exportClass TSClusters
+#' @importFrom methods setClass
 #' @include tsclust-family.R
 #'
 #' @details

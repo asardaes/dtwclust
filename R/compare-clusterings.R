@@ -3,6 +3,7 @@
 #' Create preprocessing, distance and centroid configurations for [compare_clusterings_configs()].
 #'
 #' @export
+#' @importFrom plyr rbind.fill
 #'
 #' @param type Which type of function is being targeted by this configuration.
 #' @param ... Any number of named lists with functions and arguments that will be shared by all
@@ -327,6 +328,9 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #' Compare many different clustering algorithms with support for parallelization.
 #'
 #' @export
+#' @importFrom plyr rbind.fill
+#' @importFrom proxy pr_DB
+#' @importFrom rngtools RNGseq
 #'
 #' @param series A list of series, a numeric matrix or a data frame. Matrices and data frames are
 #'   coerced to a list row-wise (see [tslist()]).

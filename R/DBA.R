@@ -3,6 +3,8 @@
 #' A global averaging method for time series under DTW (Petitjean, Ketterlin and Gancarski 2011).
 #'
 #' @export
+#' @importFrom dtw symmetric1
+#' @importFrom dtw symmetric2
 #'
 #' @param X A matrix or data frame where each row is a time series, or a list where each element is
 #'   a time series. Multivariate series should be provided as a list of matrices where time spans

@@ -1,3 +1,5 @@
+#' @importFrom stats median
+#'
 estimate_sigma <- function(x, y, within_proxy) {
     if (within_proxy)
         L <- c(sapply(x, NROW), sapply(y, NROW))
@@ -5,9 +7,9 @@ estimate_sigma <- function(x, y, within_proxy) {
         L <- c(NROW(x), NROW(y))
 
     pool <- unlist(c(x,y))
-    rep <- median(L)
+    rep <- stats::median(L)
     n <- round(0.5 * min(L))
-    med1 <- sqrt(median(L))
+    med1 <- sqrt(stats::median(L))
     med2 <- median(replicate(rep, {
         xx <- sample(pool, n)
         yy <- sample(pool, n)
@@ -162,6 +164,10 @@ gak <- GAK
 # Wrapper for proxy::dist
 # ==================================================================================================
 
+#' @importFrom bigmemory attach.big.matrix
+#' @importFrom bigmemory describe
+#' @importFrom bigmemory is.big.matrix
+#'
 GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
                       logs = NULL, error.check = TRUE, pairwise = FALSE, .internal_ = FALSE)
 {

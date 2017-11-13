@@ -58,93 +58,8 @@
 #' [tsclust()], [compare_clusterings()], [proxy::dist()], [dtw::dtw()]
 #'
 #' @useDynLib dtwclust, .registration = TRUE
-#'
 #' @import foreach
-#'
-#' @importFrom bigmemory attach.big.matrix
-#' @importFrom bigmemory big.matrix
-#' @importFrom bigmemory describe
-#' @importFrom bigmemory is.big.matrix
-#'
-#' @importFrom clue as.cl_class_ids
-#' @importFrom clue as.cl_membership
-#' @importFrom clue cl_class_ids
-#' @importFrom clue cl_membership
-#' @importFrom clue is.cl_dendrogram
-#' @importFrom clue is.cl_hard_partition
-#' @importFrom clue is.cl_hierarchy
-#' @importFrom clue is.cl_partition
-#' @importFrom clue n_of_classes
-#' @importFrom clue n_of_objects
-#'
-#' @importFrom dtw dtw
-#' @importFrom dtw symmetric1
-#' @importFrom dtw symmetric2
-#'
-#' @importFrom flexclust comPart
-#'
-#' @importFrom ggplot2 aes_string
-#' @importFrom ggplot2 facet_wrap
-#' @importFrom ggplot2 geom_line
-#' @importFrom ggplot2 geom_vline
-#' @importFrom ggplot2 ggplot
-#' @importFrom ggplot2 guides
-#' @importFrom ggplot2 labs
-#' @importFrom ggplot2 theme_bw
-#'
-#' @importFrom graphics plot
-#'
-#' @importClassesFrom Matrix sparseMatrix
-#' @importFrom Matrix forceSymmetric
-#' @importFrom Matrix rowSums
-#' @importFrom Matrix sparseMatrix
-#' @importFrom Matrix summary
-#'
-#' @importFrom methods S3Part
-#' @importFrom methods callNextMethod
-#' @importFrom methods initialize
-#' @importFrom methods new
-#' @importFrom methods removeClass
-#' @importFrom methods setClass
-#' @importFrom methods setGeneric
-#' @importFrom methods setMethod
-#' @importFrom methods setOldClass
-#' @importFrom methods setRefClass
-#' @importFrom methods show
-#' @importFrom methods signature
-#' @importFrom methods slot
-#'
-#' @importFrom parallel splitIndices
-#'
-#' @importFrom plyr rbind.fill
-#'
-#' @importFrom proxy dist
-#' @importFrom proxy pr_DB
-#'
-#' @importFrom RSpectra eigs_sym
-#'
 #' @importFrom Rcpp evalCpp
-#'
-#' @importFrom reshape2 melt
-#'
-#' @importFrom rngtools RNGseq
-#' @importFrom rngtools setRNG
-#'
-#' @importFrom stats approx
-#' @importFrom stats as.dist
-#' @importFrom stats as.hclust
-#' @importFrom stats convolve
-#' @importFrom stats cutree
-#' @importFrom stats fft
-#' @importFrom stats hclust
-#' @importFrom stats median
-#' @importFrom stats nextn
-#' @importFrom stats predict
-#' @importFrom stats runif
-#' @importFrom stats update
-#'
-#' @importFrom utils head
-#' @importFrom utils packageVersion
 #'
 NULL
 
@@ -154,6 +69,8 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
     list(x = x, y = y, pairwise = pairwise, p = params, reg_entry = reg_entry)
 }
 
+#' @importFrom utils packageVersion
+#'
 .onAttach <- function(lib, pkg) {
     # Register DTW2
     if (!check_consistency("DTW2", "dist", silent = TRUE))

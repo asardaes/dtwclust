@@ -4,6 +4,7 @@
 #' reinterpolation. It also supports matrices, data frames, and lists of time series.
 #'
 #' @export
+#' @importFrom stats approx
 #'
 #' @param x Data to reinterpolate. Either a vector, a matrix/data.frame where each row is to be
 #'   reinterpolated, or a list of vectors/matrices.

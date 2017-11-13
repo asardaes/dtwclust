@@ -3,6 +3,8 @@
 # ==================================================================================================
 
 # Function to split indices for the symmetric, parallel, proxy case
+#' @importFrom parallel splitIndices
+#'
 split_parallel_symmetric <- function(n, num_workers, adjust = 0L) {
     if (num_workers <= 2L || n <= 4L) {
         mid_point <- as.integer(n / 2)
@@ -52,6 +54,12 @@ split_parallel_symmetric <- function(n, num_workers, adjust = 0L) {
 # Return a custom distance function that calls registered functions of proxy
 # ==================================================================================================
 
+#' @importFrom bigmemory attach.big.matrix
+#' @importFrom bigmemory big.matrix
+#' @importFrom bigmemory describe
+#' @importFrom proxy dist
+#' @importFrom proxy pr_DB
+#'
 ddist2 <- function(distance, control) {
     # I need to re-register any custom distances in each parallel worker
     dist_entry <- proxy::pr_DB$get_entry(distance)

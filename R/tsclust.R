@@ -68,6 +68,18 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #' `browseVignettes("dtwclust")`). A convenience wrapper is available in [compare_clusterings()].
 #'
 #' @export
+#' @importFrom dtw symmetric1
+#' @importFrom dtw symmetric2
+#' @importFrom methods new
+#' @importFrom methods slot
+#' @importFrom parallel splitIndices
+#' @importFrom proxy pr_DB
+#' @importFrom rngtools RNGseq
+#' @importFrom rngtools setRNG
+#' @importFrom stats as.dist
+#' @importFrom stats as.hclust
+#' @importFrom stats cutree
+#' @importFrom stats hclust
 #'
 #' @param series A list of series, a numeric matrix or a data frame. Matrices and data frames are
 #'   coerced to a list row-wise (see [tslist()]).

@@ -4,6 +4,7 @@
 #' improved lower bound (LB_Improved).
 #'
 #' @export
+#' @importFrom proxy dist
 #'
 #' @param x,y A matrix or data frame where rows are time series, or a list of time series.
 #' @param window.size Window size to use with the LB and DTW calculation. See details.
@@ -252,6 +253,9 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 }
 
 # helper function
+#' @importFrom dtw symmetric1
+#' @importFrom dtw symmetric2
+#'
 call_dtwlb <- function(x, y, distmat, ..., window.size, norm, margin,
                        step.pattern = NULL, gcm = NULL)
 {

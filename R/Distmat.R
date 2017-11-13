@@ -6,6 +6,8 @@
 #'
 #' Reference class that is used internally for cross-distance matrices.
 #'
+#' @importFrom methods setRefClass
+#'
 #' @field distmat A distance matrix.
 #' @field series Time series list.
 #' @field distfun The distance function to calculate the distance matrix.
@@ -62,6 +64,7 @@ Distmat <- methods::setRefClass("Distmat",
 #' @name Distmat-generics
 #' @rdname Distmat-generics
 #' @keywords internal
+#' @importFrom methods setMethod
 #'
 NULL
 

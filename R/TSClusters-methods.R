@@ -6,6 +6,7 @@
 #' @rdname tsclusters-methods
 #' @aliases TSClusters-methods
 #' @include TSClusters-classes.R
+#' @importFrom methods setMethod
 #'
 NULL
 
@@ -15,6 +16,9 @@ NULL
 
 #' @rdname tsclusters-methods
 #' @aliases initialize,TSClusters
+#' @importFrom methods callNextMethod
+#' @importFrom methods initialize
+#' @importFrom methods new
 #'
 #' @param .Object A `TSClusters` prototype. You *shouldn't* use this, see Initialize section and the
 #'   examples.
@@ -149,6 +153,9 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
 })
 
 # for derived classes
+#' @importFrom methods callNextMethod
+#' @importFrom methods initialize
+#'
 setMethod("initialize", "PartitionalTSClusters", function(.Object, ...) {
     .Object <- methods::callNextMethod()
 
@@ -184,6 +191,9 @@ setMethod("initialize", "PartitionalTSClusters", function(.Object, ...) {
     .Object
 })
 
+#' @importFrom methods callNextMethod
+#' @importFrom methods initialize
+#'
 setMethod("initialize", "HierarchicalTSClusters", function(.Object, ...) {
     .Object <- methods::callNextMethod()
 
@@ -220,6 +230,9 @@ setMethod("initialize", "HierarchicalTSClusters", function(.Object, ...) {
     .Object
 })
 
+#' @importFrom methods callNextMethod
+#' @importFrom methods initialize
+#'
 setMethod("initialize", "FuzzyTSClusters", function(.Object, ...) {
     .Object <- methods::callNextMethod()
 
@@ -256,6 +269,7 @@ setMethod("initialize", "FuzzyTSClusters", function(.Object, ...) {
 #' @rdname tsclusters-methods
 #' @aliases show,TSClusters
 #' @exportMethod show
+#' @importFrom utils head
 #'
 #' @param object,x An object that inherits from [TSClusters-class] as returned by [tsclust()].
 #'
@@ -291,6 +305,7 @@ setMethod("show", "TSClusters", function(object) {
 #' @rdname tsclusters-methods
 #' @method update TSClusters
 #' @export
+#' @importFrom stats update
 #'
 #' @param evaluate Logical. Defaults to `TRUE` and evaluates the updated call, which will result in
 #'   a new `TSClusters` object. Otherwise, it returns the unevaluated call.
@@ -337,6 +352,7 @@ update.TSClusters <- function(object, ..., evaluate = TRUE) {
 #' @rdname tsclusters-methods
 #' @aliases update,TSClusters
 #' @exportMethod update
+#' @importFrom methods signature
 #'
 setMethod("update", methods::signature(object = "TSClusters"), update.TSClusters)
 
@@ -347,6 +363,7 @@ setMethod("update", methods::signature(object = "TSClusters"), update.TSClusters
 #' @rdname tsclusters-methods
 #' @method predict TSClusters
 #' @export
+#' @importFrom stats predict
 #'
 #' @param newdata New data to be assigned to a cluster. It can take any of the supported formats of
 #'   [tsclust()]. Note that for multivariate series, this means that it **must** be a list of
@@ -404,6 +421,7 @@ predict.TSClusters <- function(object, newdata = NULL, ...) {
 #' @rdname tsclusters-methods
 #' @aliases predict,TSClusters
 #' @exportMethod predict
+#' @importFrom methods signature
 #'
 setMethod("predict", methods::signature(object = "TSClusters"), predict.TSClusters)
 
@@ -414,6 +432,17 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #' @rdname tsclusters-methods
 #' @method plot TSClusters
 #' @export
+#' @importFrom methods S3Part
+#' @importFrom ggplot2 aes_string
+#' @importFrom ggplot2 facet_wrap
+#' @importFrom ggplot2 geom_line
+#' @importFrom ggplot2 geom_vline
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 guides
+#' @importFrom ggplot2 labs
+#' @importFrom ggplot2 theme_bw
+#' @importFrom graphics plot
+#' @importFrom reshape2 melt
 #'
 #' @param y Ignored.
 #' @param clus A numeric vector indicating which clusters to plot.
@@ -626,6 +655,7 @@ plot.TSClusters <- function(x, y, ...,
 #' @rdname tsclusters-methods
 #' @aliases plot,TSClusters,missing
 #' @exportMethod plot
+#' @importFrom methods signature
 #'
 setMethod("plot", methods::signature(x = "TSClusters", y = "missing"), plot.TSClusters)
 
@@ -743,7 +773,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
 
                        ab <- lapply(unique(a@cluster), function(k) {
                            idx <- a@cluster == k
-                           this_a <- rowSums(distmat[idx, idx, drop = FALSE]) / c_k[idx]
+                           this_a <- base::rowSums(distmat[idx, idx, drop = FALSE]) / c_k[idx]
                            this_b <- apply(distmat[idx, !idx, drop = FALSE], 1L, function(row) {
                                ret <- row / c_k[!idx]
                                ret <- min(tapply(ret, a@cluster[!idx], sum))
@@ -824,6 +854,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
 #' @rdname cvi
 #' @aliases cvi,PartitionalTSClusters
 #' @exportMethod cvi
+#' @importFrom methods signature
 #' @include cvi.R
 #'
 setMethod("cvi", methods::signature(a = "PartitionalTSClusters"), cvi_TSClusters)
@@ -831,12 +862,14 @@ setMethod("cvi", methods::signature(a = "PartitionalTSClusters"), cvi_TSClusters
 #' @rdname cvi
 #' @aliases cvi,HierarchicalTSClusters
 #' @exportMethod cvi
+#' @importFrom methods signature
 #'
 setMethod("cvi", methods::signature(a = "HierarchicalTSClusters"), cvi_TSClusters)
 
 #' @rdname cvi
 #' @aliases cvi,FuzzyTSClusters
 #' @exportMethod cvi
+#' @importFrom methods signature
 #'
 setMethod(
     "cvi", methods::signature(a = "FuzzyTSClusters", b = "ANY"),
@@ -991,6 +1024,7 @@ setMethod(
 
 #' @method as.cl_membership TSClusters
 #' @export
+#' @importFrom clue as.cl_membership
 #'
 as.cl_membership.TSClusters <- function(x) {
     clue::as.cl_membership(x@cluster)
@@ -998,6 +1032,8 @@ as.cl_membership.TSClusters <- function(x) {
 
 #' @method cl_class_ids TSClusters
 #' @export
+#' @importFrom clue as.cl_class_ids
+#' @importFrom clue cl_class_ids
 #'
 cl_class_ids.TSClusters <- function(x) {
     clue::as.cl_class_ids(x@cluster)
@@ -1005,6 +1041,8 @@ cl_class_ids.TSClusters <- function(x) {
 
 #' @method cl_membership TSClusters
 #' @export
+#' @importFrom clue as.cl_membership
+#' @importFrom clue cl_membership
 #'
 cl_membership.TSClusters <- function(x, k = n_of_classes(x)) {
     clue::as.cl_membership(x)
@@ -1012,6 +1050,7 @@ cl_membership.TSClusters <- function(x, k = n_of_classes(x)) {
 
 #' @method is.cl_dendrogram TSClusters
 #' @export
+#' @importFrom clue is.cl_dendrogram
 #'
 is.cl_dendrogram.TSClusters <- function(x) {
     x@type == "hierarchical"
@@ -1019,6 +1058,7 @@ is.cl_dendrogram.TSClusters <- function(x) {
 
 #' @method is.cl_hard_partition TSClusters
 #' @export
+#' @importFrom clue is.cl_hard_partition
 #'
 is.cl_hard_partition.TSClusters <- function(x) {
     x@type != "fuzzy"
@@ -1026,6 +1066,7 @@ is.cl_hard_partition.TSClusters <- function(x) {
 
 #' @method is.cl_hierarchy TSClusters
 #' @export
+#' @importFrom clue is.cl_hierarchy
 #'
 is.cl_hierarchy.TSClusters <- function(x) {
     x@type == "hierarchical"
@@ -1033,6 +1074,7 @@ is.cl_hierarchy.TSClusters <- function(x) {
 
 #' @method is.cl_partition TSClusters
 #' @export
+#' @importFrom clue is.cl_partition
 #'
 is.cl_partition.TSClusters <- function(x) {
     TRUE
@@ -1040,6 +1082,7 @@ is.cl_partition.TSClusters <- function(x) {
 
 #' @method n_of_classes TSClusters
 #' @export
+#' @importFrom clue n_of_classes
 #'
 n_of_classes.TSClusters <- function(x) {
     x@k
@@ -1047,6 +1090,7 @@ n_of_classes.TSClusters <- function(x) {
 
 #' @method n_of_objects TSClusters
 #' @export
+#' @importFrom clue n_of_objects
 #'
 n_of_objects.TSClusters <- function(x) {
     length(x@cluster)

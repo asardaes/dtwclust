@@ -118,6 +118,10 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
 # Loop without using native 'proxy' looping (to avoid multiple calculations of the envelope)
 # ==================================================================================================
 
+#' @importFrom bigmemory attach.big.matrix
+#' @importFrom bigmemory describe
+#' @importFrom bigmemory is.big.matrix
+#'
 lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                               force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE)
 {

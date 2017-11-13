@@ -3,6 +3,8 @@
 # ==================================================================================================
 
 # column-wise medians
+#' @importFrom stats median
+#'
 colMedians <- function(mat) { apply(mat, 2L, stats::median) }
 
 # Reinitialize empty clusters
@@ -33,6 +35,8 @@ reinit_clusters <- function(x, cent, cent_case, num_empty, empty_clusters, contr
 # Custom functions to calculate centroids
 # ==================================================================================================
 
+#' @importFrom Matrix rowSums
+#'
 all_cent2 <- function(case = NULL, control) {
     # ----------------------------------------------------------------------------------------------
     # pam
@@ -42,7 +46,7 @@ all_cent2 <- function(case = NULL, control) {
         # return
         Map(id_x, id_changed, f = function(i_x, i_cl) {
             d <- control$distmat[i_x, i_x, drop = FALSE]
-            d <- rowSums(d)
+            d <- rowSums(d) # d can be normal matrix or from Matrix package, so no namespace here
             id_cent <- i_x[which.min(d)]
             i_cent <- x[[id_cent]]
             control$distmat$id_cent[i_cl] <- id_cent

@@ -3,6 +3,7 @@
 #' Time-series Anytime Density Peaks Clustering as proposed by Begum et al. (2015).
 #'
 #' @export
+#' @importFrom proxy dist
 #'
 #' @param data A matrix or data frame where each row is a time series, or a list where each element
 #'   is a time series. Multivariate series are **not** supported.

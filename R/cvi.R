@@ -5,6 +5,8 @@
 #'
 #' @export
 #' @exportMethod cvi
+#' @importFrom flexclust comPart
+#' @importFrom methods setGeneric
 #'
 #' @param a An object returned by [tsclust()], for crisp partitions a vector that can be coerced to
 #'   integers which indicate the cluster memeberships, or the membership matrix for soft clustering.
@@ -181,6 +183,8 @@ setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10
 #' @rdname cvi
 #' @export
 #' @exportMethod cvi
+#' @importFrom methods signature
+#'
 setMethod(
     "cvi", signature = methods::signature(a = "matrix"),
     function(a, b = NULL, type = "valid", ..., log.base = 10) {

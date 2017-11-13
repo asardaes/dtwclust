@@ -3,6 +3,7 @@
 #' Formal S4 class with a family of functions used in [tsclust()].
 #'
 #' @exportClass tsclustFamily
+#' @importFrom methods setClass
 #'
 #' @details
 #'
@@ -106,6 +107,10 @@ fcm_cluster <- function(distmat, m) {
 # Custom initialize
 # ==================================================================================================
 
+#' @importFrom methods callNextMethod
+#' @importFrom methods initialize
+#' @importFrom methods setMethod
+#'
 setMethod("initialize", "tsclustFamily",
           function(.Object, dist, allcent, ..., control = list(), fuzzy = FALSE) {
               dots <- list(...)

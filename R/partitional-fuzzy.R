@@ -8,6 +8,8 @@ fuzzy_objective <- function(u, distmat, m) { sum(u^m * distmat^2) }
 # Partitional/fuzzy clustering
 # ==================================================================================================
 
+#' @importFrom stats runif
+#'
 pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, args) {
     N <- length(x)
     k <- as.integer(k)

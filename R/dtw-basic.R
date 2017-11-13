@@ -5,6 +5,8 @@
 #' options.
 #'
 #' @export
+#' @importFrom dtw symmetric1
+#' @importFrom dtw symmetric2
 #'
 #' @param x,y Time series. Multivariate series must have time spanning the rows and variables
 #'   spanning the columns.
@@ -117,6 +119,10 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 # Wrapper for proxy::dist
 # ==================================================================================================
 
+#' @importFrom bigmemory attach.big.matrix
+#' @importFrom bigmemory describe
+#' @importFrom bigmemory is.big.matrix
+#'
 dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pairwise = FALSE) {
     x <- tslist(x)
     if (error.check) check_consistency(x, "vltslist")
@@ -211,6 +217,9 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
 # Wrapper for C++
 # ==================================================================================================
 
+#' @importFrom dtw symmetric1
+#' @importFrom dtw symmetric2
+#'
 dtwb_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ..., normalize = FALSE,
                       window.size = NULL, norm = "L1", step.pattern = dtw::symmetric2, gcm = NULL)
 {

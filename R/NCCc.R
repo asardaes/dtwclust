@@ -4,6 +4,7 @@
 #' need *not* be of equal length.
 #'
 #' @export
+#' @importFrom stats convolve
 #'
 #' @param x,y Univariate time series.
 #' @template error-check
