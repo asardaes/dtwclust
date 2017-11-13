@@ -204,7 +204,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     pairwise <- isTRUE(pairwise)
     dim_out <- c(length(x), length(y))
     dim_names <- list(names(x), names(y))
-    D <- allocate_distmat(length(x), length(y), pairwise, symmetric) ## utils.R
+    D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # utils.R
 
     if (normalize) {
         # calculation of normalization factors
@@ -231,7 +231,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         endpoints <- attr(x, "endpoints")
 
     } else if (symmetric) {
-        endpoints <- symmetric_loop_endpoints(length(x)) ## utils.R
+        endpoints <- symmetric_loop_endpoints(length(x)) # utils.R
         x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
         y <- x
 

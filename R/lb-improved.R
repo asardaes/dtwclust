@@ -110,7 +110,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
         if (d2 > d) d <- d2
     }
 
-    ## return
+    # return
     d
 }
 
@@ -140,7 +140,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     pairwise <- isTRUE(pairwise)
     dim_out <- c(length(x), length(y))
     dim_names <- list(names(x), names(y))
-    D <- allocate_distmat(length(x), length(y), pairwise, FALSE) ## utils.R
+    D <- allocate_distmat(length(x), length(y), pairwise, FALSE) # utils.R
 
     envelopes <- lapply(y, function(s) { compute_envelope(s, window.size, error.check = FALSE) })
     lower.env <- lapply(envelopes, "[[", "lower")
@@ -149,7 +149,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     upper.env <- split_parallel(upper.env)
     y <- split_parallel(y)
 
-    ## Wrap as needed for foreach
+    # Wrap as needed for foreach
     if (pairwise) {
         x <- split_parallel(x)
         validate_pairwise(x, y)
@@ -173,7 +173,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         packages <- c("dtwclust")
     }
 
-    ## Calculate distance matrix
+    # Calculate distance matrix
     foreach(x = x, y = y, lower.env = lower.env, upper.env = upper.env, endpoints = endpoints,
             .combine = c,
             .multicombine = TRUE,
@@ -214,7 +214,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     }
 
     attr(D, "method") <- "LB_Improved"
-    ## return
+    # return
     D
 }
 

@@ -64,7 +64,7 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check
         if (!is.null(centroid)) check_consistency(centroid, "ts")
     }
 
-    ## utils.R
+    # utils.R
     if (is_multivariate(X)) {
         if (!is.null(centroid) && dim(X[[1L]]) != dim(centroid))
             stop("Dimension inconsistency between the series in 'X' and the provided 'centroid'.")
@@ -77,7 +77,7 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check
 
     Xz <- if (znorm) zscore(X, ..., error.check = FALSE) else X
 
-    ## make sure at least one series is not just a flat line at zero
+    # make sure at least one series is not just a flat line at zero
     if (all(sapply(Xz, sum) == 0)) {
         if (is.null(centroid))
             return(rep(0, sample(lengths(Xz), 1L)))

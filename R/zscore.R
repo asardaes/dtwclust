@@ -48,6 +48,6 @@ zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE, error.
         if (!keep.attributes) { attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL }
     }
 
-    ## return
+    # return
     x
 }

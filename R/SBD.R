@@ -77,7 +77,7 @@ SBD <- function(x, y, znorm = FALSE, error.check = TRUE, return.shifted = TRUE) 
     ny <- length(y)
 
     if (nx > ny) {
-        ## The order in which I provide the arguments to NCCc affects 'shift'
+        # The order in which I provide the arguments to NCCc affects 'shift'
         flip <- x
         x <- y
         y <- flip
@@ -104,7 +104,7 @@ SBD <- function(x, y, znorm = FALSE, error.check = TRUE, return.shifted = TRUE) 
             yshift <- c( rep(0, shift), y )
 
     } else {
-        ## Remember, if I flipped them, then I have to shift what is now saved in 'x'
+        # Remember, if I flipped them, then I have to shift what is now saved in 'x'
         if (shift < 0L)
             yshift <- c( rep(0, -shift), x )
         else
@@ -140,7 +140,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         symmetric <- TRUE
         y <- x
 
-        ## Precompute FFTs, padding with zeros as necessary, which will be compensated later
+        # Precompute FFTs, padding with zeros as necessary, which will be compensated later
         L <- max(lengths(x)) * 2L - 1L
         fftlen <- stats::nextn(L, 2L)
         fftx <- lapply(x, function(u) { stats::fft(c(u, rep(0, fftlen - length(u)))) })
@@ -152,7 +152,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         if (error.check) check_consistency(y, "vltslist")
         if (znorm) y <- zscore(y, error.check = FALSE)
 
-        ## Precompute FFTs, padding with zeros as necessary, which will be compensated later
+        # Precompute FFTs, padding with zeros as necessary, which will be compensated later
         L <- max(lengths(x)) + max(lengths(y)) - 1L
         fftlen <- stats::nextn(L, 2L)
         fftx <- lapply(x, function(u) { stats::fft(c(u, rep(0, fftlen - length(u)))) })
@@ -163,9 +163,9 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     pairwise <- isTRUE(pairwise)
     dim_out <- c(length(x), length(y))
     dim_names <- list(names(x), names(y))
-    D <- allocate_distmat(length(x), length(y), pairwise, symmetric) ## utils.R
+    D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # utils.R
 
-    ## Wrap as needed for foreach
+    # Wrap as needed for foreach
     if (pairwise) {
         x <- split_parallel(x)
         y <- split_parallel(y)
@@ -175,7 +175,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         endpoints <- attr(x, "endpoints")
 
     } else if (symmetric) {
-        endpoints <- symmetric_loop_endpoints(length(x)) ## utils.R
+        endpoints <- symmetric_loop_endpoints(length(x)) # utils.R
         x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
         y <- x
         fftx <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { fftx })
@@ -200,7 +200,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         packages <- c("dtwclust")
     }
 
-    ## Calculate distance matrix
+    # Calculate distance matrix
     foreach(x = x, y = y, fftx = fftx, ffty = ffty, endpoints = endpoints,
             .combine = c,
             .multicombine = TRUE,
@@ -223,7 +223,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     }
 
     attr(D, "method") <- "SBD"
-    ## return
+    # return
     D
 }
 

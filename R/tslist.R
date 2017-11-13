@@ -42,6 +42,6 @@ tslist <- function(series) {
     else if (!is.list(series))
         stop("Unsupported data type.")
 
-    ## return
+    # return
     series
 }

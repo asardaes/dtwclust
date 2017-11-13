@@ -38,7 +38,7 @@ SparseDistmat <- methods::setRefClass(
 
             if (isTRUE(control$symmetric) && distmat@uplo != "L") distmat <<- t(distmat)
 
-            ## initialize C++ class
+            # initialize C++ class
             distmat_indices <<- .Call(C_SparseDistmatIndices__new,
                                       nrow(distmat),
                                       PACKAGE = "dtwclust")
@@ -88,7 +88,7 @@ setMethod(`[`, "SparseDistmat", function(x, i, j, ..., drop = TRUE) {
                     x$distmat_indices, i, j, x$symmetric,
                     PACKAGE = "dtwclust")
 
-    ## update distmat if necessary
+    # update distmat if necessary
     if (nrow(id_new) > 0L) {
         x$distmat[id_new] <- as.numeric(do.call(x$distfun,
                                                 enlist(x = x$series[id_new[, 1L]],

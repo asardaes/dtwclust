@@ -74,11 +74,11 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
     tic <- proc.time()
     dots <- list(...)
 
-    ## some minor checks
+    # some minor checks
     if (!is.null(dots$datalist)) dots$datalist <- tslist(dots$datalist)
     if (!is.null(dots$centroids)) dots$centroids <- tslist(dots$centroids)
 
-    ## avoid infinite recursion (see https://bugs.r-project.org/bugzilla/show_bug.cgi?id=16629)
+    # avoid infinite recursion (see https://bugs.r-project.org/bugzilla/show_bug.cgi?id=16629)
     if (is.null(dots$call)) {
         call <- match.call()
 
@@ -90,7 +90,7 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
     .Object <- do.call(methods::callNextMethod, enlist(.Object = .Object, dots = dots), TRUE)
     .Object@call <- call
 
-    ## some "defaults"
+    # some "defaults"
     if (is.null(dots$preproc)) .Object@preproc <- "none"
     if (is.null(dots$k)) .Object@k <- length(.Object@centroids)
     if (is.null(dots$args))
@@ -98,9 +98,9 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
                                      dist = .Object@dots,
                                      cent = .Object@dots)
     else
-        .Object@args <- adjust_args(.Object@args, .Object@dots) ## utils.R
+        .Object@args <- adjust_args(.Object@args, .Object@dots) # utils.R
 
-    ## more helpful for hierarchical/tadpole
+    # more helpful for hierarchical/tadpole
     if (override.family) {
         if (length(.Object@type) == 0L)
             warning("Could not override family, 'type' slot is missing.")
@@ -141,23 +141,23 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
         }
     }
 
-    ## just a filler
+    # just a filler
     if (!length(.Object@proctime)) .Object@proctime <- proc.time() - tic
 
-    ## return
+    # return
     .Object
 })
 
-## for derived classes
+# for derived classes
 setMethod("initialize", "PartitionalTSClusters", function(.Object, ...) {
     .Object <- methods::callNextMethod()
 
-    ## some "defaults"
+    # some "defaults"
     if (!length(.Object@iter)) .Object@iter <- 1L
     if (!length(.Object@converged)) .Object@converged <- TRUE
 
     if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
-        ## no cldist available, but dist and cluster can be used to calculate it
+        # no cldist available, but dist and cluster can be used to calculate it
         dm <- do.call(.Object@family@dist,
                       enlist(.Object@datalist,
                              .Object@centroids,
@@ -171,7 +171,7 @@ setMethod("initialize", "PartitionalTSClusters", function(.Object, ...) {
     }
 
     if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
-        ## no clusinfo available, but cluster and cldist can be used to calculate it
+        # no clusinfo available, but cluster and cldist can be used to calculate it
         size <- as.vector(table(.Object@cluster))
         clusinfo <- data.frame(size = size, av_dist = 0)
         clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(.Object@cldist[ , 1L],
@@ -180,20 +180,20 @@ setMethod("initialize", "PartitionalTSClusters", function(.Object, ...) {
         .Object@clusinfo <- clusinfo
     }
 
-    ## return
+    # return
     .Object
 })
 
 setMethod("initialize", "HierarchicalTSClusters", function(.Object, ...) {
     .Object <- methods::callNextMethod()
 
-    ## Replace distmat with NULL so that, if the distance function is called again,
-    ## it won't subset it
+    # Replace distmat with NULL so that, if the distance function is called again,
+    # it won't subset it
     if (length(formals(.Object@family@dist)))
         eval(quote(control$distmat <- NULL), environment(.Object@family@dist))
 
     if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
-        ## no cldist available, but dist and cluster can be used to calculate it
+        # no cldist available, but dist and cluster can be used to calculate it
         dm <- do.call(.Object@family@dist,
                       enlist(.Object@datalist,
                              .Object@centroids,
@@ -207,7 +207,7 @@ setMethod("initialize", "HierarchicalTSClusters", function(.Object, ...) {
     }
 
     if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
-        ## no clusinfo available, but cluster and cldist can be used to calculate it
+        # no clusinfo available, but cluster and cldist can be used to calculate it
         size <- as.vector(table(.Object@cluster))
         clusinfo <- data.frame(size = size, av_dist = 0)
         clusinfo[clusinfo$size > 0L, "av_dist"] <-
@@ -216,20 +216,20 @@ setMethod("initialize", "HierarchicalTSClusters", function(.Object, ...) {
         .Object@clusinfo <- clusinfo
     }
 
-    ## return
+    # return
     .Object
 })
 
 setMethod("initialize", "FuzzyTSClusters", function(.Object, ...) {
     .Object <- methods::callNextMethod()
 
-    ## some "defaults"
+    # some "defaults"
     if (!length(.Object@iter)) .Object@iter <- 1L
     if (!length(.Object@converged)) .Object@converged <- TRUE
 
     if (!nrow(.Object@fcluster)) {
         if (length(formals(.Object@family@dist))) {
-            ## no fcluster available, but dist and cluster function can be used to calculate it
+            # no fcluster available, but dist and cluster function can be used to calculate it
             dm <- do.call(.Object@family@dist,
                           enlist(.Object@datalist,
                                  .Object@centroids,
@@ -245,7 +245,7 @@ setMethod("initialize", "FuzzyTSClusters", function(.Object, ...) {
         }
     }
 
-    ## return
+    # return
     .Object
 })
 
@@ -308,14 +308,14 @@ update.TSClusters <- function(object, ..., evaluate = TRUE) {
     if (length(args) == 0L) {
         if (evaluate) {
             if (object@type != "tadpole") {
-                ## update dist closure
+                # update dist closure
                 object@family@dist <- ddist2(object@distance, object@control)
 
-                ## update allcent closure
+                # update allcent closure
                 if (object@centroid %in% centroids_included)
                     object@family@allcent <- all_cent2(object@centroid, object@control)
 
-                ## update distmat in allcent environment with internal class?
+                # update distmat in allcent environment with internal class?
                 if (object@centroid %in% c("pam", "fcmdd"))
                     environment(object@family@allcent)$control$distmat <- object@control$distmat
             }
@@ -465,7 +465,7 @@ plot.TSClusters <- function(x, y, ...,
                             series = NULL, time = NULL,
                             plot = TRUE, type = NULL)
 {
-    ## set default type if none was provided
+    # set default type if none was provided
     if (!is.null(type))
         type <- match.arg(type, c("dendrogram", "series", "centroids", "sc"))
     else if (x@type == "hierarchical")
@@ -473,7 +473,7 @@ plot.TSClusters <- function(x, y, ...,
     else
         type <- "sc"
 
-    ## plot dendrogram?
+    # plot dendrogram?
     if (inherits(x, "HierarchicalTSClusters") && type == "dendrogram") {
         x <- methods::S3Part(x, strictS3 = TRUE)
         if (plot) graphics::plot(x, ...)
@@ -483,7 +483,7 @@ plot.TSClusters <- function(x, y, ...,
         stop("Dendrogram plot only applies to hierarchical clustering.")
     }
 
-    ## Obtain data, the priority is: provided data > included data list
+    # Obtain data, the priority is: provided data > included data list
     if (!is.null(series)) {
         data <- tslist(series)
 
@@ -494,17 +494,17 @@ plot.TSClusters <- function(x, y, ...,
         data <- x@datalist
     }
 
-    ## centroids consistency
+    # centroids consistency
     check_consistency(centroids <- x@centroids, "vltslist")
 
-    ## force same length for all multivariate series/centroids in the same cluster by
-    ## adding NAs
+    # force same length for all multivariate series/centroids in the same cluster by
+    # adding NAs
     if (mv <- is_multivariate(data)) {
         clusters <- split(data, factor(x@cluster, levels = 1L:x@k), drop = FALSE)
 
         for (id_clus in 1L:x@k) {
             cluster <- clusters[[id_clus]]
-            if (length(cluster) < 1L) next ## empty cluster
+            if (length(cluster) < 1L) next # empty cluster
 
             nc <- NCOL(cluster[[1L]])
             len <- sapply(cluster, NROW)
@@ -519,31 +519,31 @@ plot.TSClusters <- function(x, y, ...,
             centroids[[id_clus]] <- rbind(centroids[[id_clus]], matrix(NA, trail, nc))
         }
 
-        ## split returns the result in order of the factor levels,
-        ## but I want to keep the original order as returned from clustering
+        # split returns the result in order of the factor levels,
+        # but I want to keep the original order as returned from clustering
         ido <- sort(sort(x@cluster, index.return = TRUE)$ix, index.return = TRUE)$ix
         data <- unlist(clusters, recursive = FALSE)[ido]
     }
 
-    ## helper values (lengths() here, see issue #18 in GitHub)
+    # helper values (lengths() here, see issue #18 in GitHub)
     L1 <- lengths(data)
     L2 <- lengths(centroids)
 
-    ## timestamp consistency
+    # timestamp consistency
     if (!is.null(time) && length(time) < max(L1, L2))
         stop("Length mismatch between values and timestamps")
 
-    ## Check if data was z-normalized
+    # Check if data was z-normalized
     if (x@preproc == "zscore")
         title_str <- "Clusters' members (z-normalized)"
     else
         title_str <- "Clusters' members"
 
-    ## transform to data frames
+    # transform to data frames
     dfm <- reshape2::melt(data)
     dfcm <- reshape2::melt(centroids)
 
-    ## time, cluster and colour indices
+    # time, cluster and colour indices
     color_ids <- integer(x@k)
     dfm_tcc <- mapply(x@cluster, L1, USE.NAMES = FALSE, SIMPLIFY = FALSE,
                       FUN = function(clus, len) {
@@ -561,16 +561,16 @@ plot.TSClusters <- function(x, y, ...,
                           data.frame(t = t, cl = cl)
                       })
 
-    ## bind
+    # bind
     dfm <- data.frame(dfm, do.call(rbind, dfm_tcc, TRUE))
     dfcm <- data.frame(dfcm, do.call(rbind, dfcm_tc, TRUE))
 
-    ## make factor
+    # make factor
     dfm$cl <- factor(dfm$cl)
     dfcm$cl <- factor(dfcm$cl)
     dfm$color <- factor(dfm$color)
 
-    ## create gg object
+    # create gg object
     gg <- ggplot2::ggplot(data.frame(t = integer(),
                                      variable = factor(),
                                      value = numeric(),
@@ -580,7 +580,7 @@ plot.TSClusters <- function(x, y, ...,
                                               y = "value",
                                               group = "L1"))
 
-    ## add centroids first if appropriate, so that they are at the very back
+    # add centroids first if appropriate, so that they are at the very back
     if (type %in% c("sc", "centroids")) {
         if (length(list(...)) == 0L)
             gg <- gg + ggplot2::geom_line(data = dfcm[dfcm$cl %in% clus, ],
@@ -592,11 +592,11 @@ plot.TSClusters <- function(x, y, ...,
             gg <- gg + ggplot2::geom_line(data = dfcm[dfcm$cl %in% clus, ], ...)
     }
 
-    ## add series next if appropriate
+    # add series next if appropriate
     if (type %in% c("sc", "series"))
         gg <- gg + ggplot2::geom_line(data = dfm[dfm$cl %in% clus, ], aes_string(colour = "color"))
 
-    ## add vertical lines to separate variables of multivariate series
+    # add vertical lines to separate variables of multivariate series
     if (mv) {
         ggdata <- data.frame(cl = rep(1L:x@k, each = (nc - 1L)),
                              vbreaks = as.numeric(1L:(nc - 1L) %o% sapply(centroids, NROW)))
@@ -606,19 +606,19 @@ plot.TSClusters <- function(x, y, ...,
                                        ggplot2::aes_string(xintercept = "vbreaks"))
     }
 
-    ## add facets, remove legend, apply kinda black-white theme
+    # add facets, remove legend, apply kinda black-white theme
     gg <- gg +
         ggplot2::facet_wrap(~cl, scales = "free_y") +
         ggplot2::guides(colour = FALSE) +
         ggplot2::theme_bw()
 
-    ## labels
+    # labels
     if (!is.null(labs.arg))
         gg <- gg + ggplot2::labs(labs.arg)
     else
         gg <- gg + ggplot2::labs(title = title_str)
 
-    ## plot without warnings in case I added NAs for multivariate cases
+    # plot without warnings in case I added NAs for multivariate cases
     if (plot) suppressWarnings(graphics::plot(gg))
     invisible(gg)
 }
@@ -670,7 +670,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
             type <- setdiff(type, c("SF", "CH"))
         }
 
-        ## calculate distmat if needed
+        # calculate distmat if needed
         if (any(type %in% c("Sil", "D", "COP"))) {
             if (is.null(a@distmat)) {
                 if (length(a@datalist) == 0L) {
@@ -691,13 +691,13 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
             }
         }
 
-        ## are no valid indices left?
+        # are no valid indices left?
         if (length(type) == 0L) return(CVIs)
 
-        ## calculate some values that both Davies-Bouldin indices use
+        # calculate some values that both Davies-Bouldin indices use
         if (any(type %in% c("DB", "DBstar"))) {
             S <- a@clusinfo$av_dist
-            ## distance between centroids
+            # distance between centroids
             distcent <- do.call(a@family@dist,
                                 args = enlist(x = a@centroids,
                                               centroids = NULL,
@@ -705,7 +705,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                                 TRUE)
         }
 
-        ## calculate global centroids if needed
+        # calculate global centroids if needed
         if (any(type %in% c("SF", "CH"))) {
             N <- length(a@datalist)
 
@@ -737,7 +737,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
 
         CVIs <- c(CVIs, sapply(type, function(CVI) {
             switch(EXPR = CVI,
-                   ## Silhouette
+                   # Silhouette
                    Sil = {
                        c_k <- as.numeric(table(a@cluster)[a@cluster])
 
@@ -757,7 +757,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                        sum((ab$b - ab$a) / apply(ab, 1L, max)) / nrow(distmat)
                    },
 
-                   ## Dunn
+                   # Dunn
                    D = {
                        pairs <- call_pairs(a@k)
 
@@ -776,21 +776,21 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                        min(deltas) / max(Deltas)
                    },
 
-                   ## Davies-Bouldin
+                   # Davies-Bouldin
                    DB = {
                        mean(sapply(1L:a@k, function(k) {
                            max((S[k] + S[-k]) / distcent[k, -k])
                        }))
                    },
 
-                   ## Modified DB -> DB*
+                   # Modified DB -> DB*
                    DBstar = {
                        mean(sapply(1L:a@k, function(k) {
                            max(S[k] + S[-k]) / min(distcent[k, -k, drop = TRUE])
                        }))
                    },
 
-                   ## Calinski-Harabasz
+                   # Calinski-Harabasz
                    CH = {
                        (N - a@k) /
                            (a@k - 1) *
@@ -798,14 +798,14 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                            sum(a@cldist[ , 1L, drop = TRUE])
                    },
 
-                   ## Score function
+                   # Score function
                    SF = {
                        bcd <- sum(a@clusinfo$size * dist_global_cent) / (N * a@k)
                        wcd <- sum(a@clusinfo$av_dist)
                        1 - 1 / exp(exp(bcd - wcd))
                    },
 
-                   ## COP
+                   # COP
                    COP = {
                        1 / nrow(distmat) * sum(sapply(1L:a@k, function(k) {
                            sum(a@cldist[a@cluster == k, 1L]) / min(apply(distmat[a@cluster != k,

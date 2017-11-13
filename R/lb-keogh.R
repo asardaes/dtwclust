@@ -87,7 +87,7 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
         }
     }
 
-    ## return
+    # return
     list(d = d, upper.env = upper.env, lower.env = lower.env)
 }
 
@@ -117,7 +117,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     pairwise <- isTRUE(pairwise)
     dim_out <- c(length(x), length(y))
     dim_names <- list(names(x), names(y))
-    D <- allocate_distmat(length(x), length(y), pairwise, FALSE) ## utils.R
+    D <- allocate_distmat(length(x), length(y), pairwise, FALSE) # utils.R
 
     envelopes <- lapply(y, function(s) { compute_envelope(s, window.size, error.check = FALSE) })
     lower.env <- lapply(envelopes, "[[", "lower")
@@ -125,7 +125,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     lower.env <- split_parallel(lower.env)
     upper.env <- split_parallel(upper.env)
 
-    ## Wrap as needed for foreach
+    # Wrap as needed for foreach
     if (pairwise) {
         x <- split_parallel(x)
         validate_pairwise(x, lower.env)
@@ -148,7 +148,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         packages <- c("dtwclust")
     }
 
-    ## Calculate distance matrix
+    # Calculate distance matrix
     foreach(x = x, lower.env = lower.env, upper.env = upper.env, endpoints = endpoints,
             .combine = c,
             .multicombine = TRUE,
@@ -187,7 +187,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     }
 
     attr(D, "method") <- "LB_Keogh"
-    ## return
+    # return
     D
 }
 

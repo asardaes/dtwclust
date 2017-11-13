@@ -45,7 +45,7 @@ check_consistency <- function(obj, case, ..., clus_type,
                         "Please confirm that the provided distance function supports this.")
         }
 
-        ## valid registered distance
+        # valid registered distance
         return(TRUE)
 
     } else if (case == "cent") {
@@ -66,7 +66,7 @@ check_consistency <- function(obj, case, ..., clus_type,
                     cent_char <- as.character(substitute(obj))[1L]
                 }
 
-                ## return partitional switch
+                # return partitional switch
                 cent_char
             },
             fuzzy = {
@@ -80,7 +80,7 @@ check_consistency <- function(obj, case, ..., clus_type,
                     cent_char <- as.character(substitute(obj))[1L]
                 }
 
-                ## return fuzzy switch
+                # return fuzzy switch
                 cent_char
             },
             hierarchical =, tadpole = {
@@ -96,12 +96,12 @@ check_consistency <- function(obj, case, ..., clus_type,
                             "so it was ignored.",
                             call. = FALSE, immediate. = TRUE)
 
-                ## return hierarchical/tadpole switch
+                # return hierarchical/tadpole switch
                 cent_char
             }
         )
 
-        ## cent case
+        # cent case
         return(cent_char)
     }
 
@@ -219,7 +219,7 @@ validate_pairwise <- function(x, y) {
 # allocate distance matrix for custom proxy loops
 allocate_distmat <- function(x_len, y_len, pairwise, symmetric) {
     if (foreach::getDoParWorkers() > 1L) {
-        seed <- get0(".Random.seed", .GlobalEnv, mode = "integer") ## undo big.matrix() seed change...
+        seed <- get0(".Random.seed", .GlobalEnv, mode = "integer") # undo big.matrix() seed change...
         if (pairwise)
             D <- bigmemory::big.matrix(x_len, 1L, "double", 0)
         else if (symmetric)
@@ -236,7 +236,7 @@ allocate_distmat <- function(x_len, y_len, pairwise, symmetric) {
         else
             D <- matrix(0, x_len, y_len)
     }
-    ## return
+    # return
     D
 }
 
@@ -248,27 +248,27 @@ symmetric_loop_endpoints <- function(n) {
         start = list(i = 2L, j = 1L), end = list(i = n, j = n - 1L))
     ))
 
-    ## single to double index for symmetric matrices
+    # single to double index for symmetric matrices
     s2d <- function(id, n) {
         if (id < n) return(list(i = id + 1L, j = 1L))
-        ## start at second column
+        # start at second column
         i <- 3L
         j <- 2L
         start_pair <- n
         end_pair <- n * 2L - 3L
-        ## j is ready after this while loop finishes
+        # j is ready after this while loop finishes
         while (!(id >= start_pair && id <= end_pair)) {
             start_pair <- end_pair + 1L
             end_pair <- start_pair + n - j - 2L
             i <- i + 1L
             j <- j + 1L
         }
-        ## while loop for i
+        # while loop for i
         while (start_pair < id) {
             i <- i + 1L
             start_pair <- start_pair + 1L
         }
-        ## return
+        # return
         list(i = i, j = j)
     }
 

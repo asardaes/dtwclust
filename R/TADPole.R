@@ -70,7 +70,7 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
 
     if (trace) cat("Computing lower and upper bound matrices\n")
 
-    ## Calculate matrices with bounds (error check in lbk/lbi)
+    # Calculate matrices with bounds (error check in lbk/lbi)
     LBM <- proxy::dist(x, x,
                        method = lb,
                        window.size = window.size,
@@ -78,7 +78,7 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
                        norm = "L2",
                        error.check = error.check)
 
-    ## NOTE: Euclidean is only valid as upper bound if 'symmetric1' step pattern is used
+    # NOTE: Euclidean is only valid as upper bound if 'symmetric1' step pattern is used
     UBM <- proxy::dist(x, x, method = "L2")
 
     len <- max(lengths(data)) + 1L
@@ -92,18 +92,18 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
         dc = dc, .combine = c, .multicombine = TRUE,
         .packages = "dtwclust", .export = "call_tadpole") %op%
         {
-            ret <- lapply(k, function(dummy) { list() }) ## modified in place in C++
-            call_tadpole(x, k, dc, dtw_args, LBM, UBM, trace, ret) ## foreach can't see C objects
-            ## return
+            ret <- lapply(k, function(dummy) { list() }) # modified in place in C++
+            call_tadpole(x, k, dc, dtw_args, LBM, UBM, trace, ret) # foreach can't see C objects
+            # return
             ret
         }
 
-    ## Return
+    # Return
     if (length(RET) == 1L) RET[[1L]] else RET
 }
 
-## a parallel foreach loop will not see the C objects, so I need to pass a function from the
-## dtwclust namespace (via the .export parameter)
+# a parallel foreach loop will not see the C objects, so I need to pass a function from the
+# dtwclust namespace (via the .export parameter)
 call_tadpole <- function(x, k, dc, dtw_args, LBM, UBM, trace, ret) {
     .Call(C_tadpole, x, k, dc, dtw_args, LBM, UBM, trace, ret, PACKAGE = "dtwclust")
 }

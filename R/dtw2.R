@@ -44,7 +44,7 @@ dtw2 <- function(x, y, ...) {
         d$normalizedDistance <- d$distance / normalization
     }
 
-    ## return
+    # return
     d
 }
 

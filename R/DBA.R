@@ -122,11 +122,11 @@ DBA <- function(X, centroid = NULL, ...,
     trace <- isTRUE(trace)
     norm <- match.arg(norm, c("L1", "L2"))
     norm <- switch(norm, "L1" = 1, "L2" = 2)
-    L <- max(sapply(X, NROW)) + 1L ## maximum length of considered series + 1L
+    L <- max(sapply(X, NROW)) + 1L # maximum length of considered series + 1L
     mv <- is_multivariate(c(X, list(centroid)))
     nr <- NROW(centroid) + 1L
 
-    ## pre-allocate cost matrices
+    # pre-allocate cost matrices
     if (is.null(gcm))
         gcm <- matrix(0, L, nr)
     else if (!is.matrix(gcm) || nrow(gcm) < L || ncol(gcm) < nr)
@@ -134,14 +134,14 @@ DBA <- function(X, centroid = NULL, ...,
     else if (storage.mode(gcm) != "double")
         stop("DBA: If provided, 'gcm' must have 'double' storage mode.")
 
-    ## All parameters for dtw_basic()
+    # All parameters for dtw_basic()
     dots <- list(window.size = window.size,
                  norm = norm,
                  gcm = gcm,
                  step.pattern = step.pattern,
                  backtrack = TRUE)
 
-    ## C++ code
+    # C++ code
     new_cent <- .Call(C_dba, X, centroid, max.iter, delta, trace, mv, mv.ver, dots, PACKAGE = "dtwclust")
     if (mv) dimnames(new_cent) <- dimnames(centroid)
     new_cent

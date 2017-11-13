@@ -183,17 +183,17 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     dots$window.size <- window.size
     dots$window.type <- "slantedband"
 
-    ## NOTE: I tried starting with LBK estimate, refining with LBI and then DTW but, overall,
-    ## it was usually slower, almost the whole matrix had to be recomputed for LBI
+    # NOTE: I tried starting with LBK estimate, refining with LBI and then DTW but, overall,
+    # it was usually slower, almost the whole matrix had to be recomputed for LBI
 
-    ## Initial estimate
+    # Initial estimate
     D <- proxy::dist(X, Y, method = "LBI",
                      window.size = window.size,
                      norm = norm,
                      error.check = error.check,
                      ...)
 
-    ## y = NULL means diagonal is zero and NNs are themselves
+    # y = NULL means diagonal is zero and NNs are themselves
     if (is.null(y)) {
         class(D) <- "crossdist"
         attr(D, "method") <- "DTW_LB"
@@ -203,7 +203,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     D <- split_parallel(D, 1L)
     X <- split_parallel(X)
 
-    ## Update with DTW in parallel
+    # Update with DTW in parallel
     D <- foreach(X = X,
                  distmat = D,
                  .combine = rbind,
@@ -211,7 +211,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                  .packages = "dtwclust",
                  .export = c("enlist", "call_dtwlb")) %op% {
                      if (method == "DTW_BASIC") {
-                         ## modifies distmat in place
+                         # modifies distmat in place
                          dots$margin <- nn.margin
                          do.call(call_dtwlb,
                                  enlist(x = X, y = Y, distmat = distmat, dots = dots),
@@ -240,18 +240,18 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                          }
                      }
 
-                     ## return from foreach()
+                     # return from foreach()
                      distmat
                  }
 
     class(D) <- "crossdist"
     attr(D, "method") <- "DTW_LB"
 
-    ## return
+    # return
     D
 }
 
-## helper function
+# helper function
 call_dtwlb <- function(x, y, distmat, ..., window.size, norm, margin,
                        step.pattern = NULL, gcm = NULL)
 {
@@ -277,6 +277,6 @@ call_dtwlb <- function(x, y, distmat, ..., window.size, norm, margin,
                  backtrack = FALSE,
                  gcm = gcm)
 
-    ## return
+    # return
     .Call(C_dtw_lb, x, y, distmat, margin, dots, PACKAGE = "dtwclust")
 }
