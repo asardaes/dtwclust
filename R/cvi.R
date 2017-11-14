@@ -183,6 +183,7 @@ setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10
 #' @rdname cvi
 #' @export
 #' @exportMethod cvi
+#' @importFrom methods setMethod
 #' @importFrom methods signature
 #'
 setMethod(

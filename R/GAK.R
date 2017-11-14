@@ -10,7 +10,7 @@ estimate_sigma <- function(x, y, within_proxy) {
     rep <- stats::median(L)
     n <- round(0.5 * min(L))
     med1 <- sqrt(stats::median(L))
-    med2 <- median(replicate(rep, {
+    med2 <- stats::median(replicate(rep, {
         xx <- sample(pool, n)
         yy <- sample(pool, n)
         l2norm(xx - yy) # utils.R
