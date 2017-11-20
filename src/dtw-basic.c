@@ -19,21 +19,20 @@ double *D;
 double volatile *tuple;
 
 // double to single index, matrices are always vectors in R
-int inline d2s(int const i, int const j, int const nx, int const backtrack) __attribute__((always_inline));
-
+int inline d2s(int const i, int const j, int const nx, int const backtrack)
+    __attribute__((always_inline));
 int inline d2s(int const i, int const j, int const nx, int const backtrack) {
     return backtrack ? (i + j * (nx + 1)) : ((i % 2) + j * 2);
 }
 
 // vector norm
 double lnorm(double const *x, double const *y, double const norm,
-             int const nx, int const ny, int const dim,
+             int const nx, int const ny, int const num_var,
              int const i, int const j)
 {
     double res = 0;
     double temp;
-
-    for (int k = 0; k < dim; k++) {
+    for (int k = 0; k < num_var; k++) {
         temp = x[i + nx * k] - y[j + ny * k];
 
         if (norm == 1)
@@ -43,7 +42,6 @@ double lnorm(double const *x, double const *y, double const norm,
 
         res += temp;
     }
-
     return (norm == 1) ? res : sqrt(res);
 }
 
@@ -98,7 +96,7 @@ int backtrack_steps(int const nx, int const ny,
 
 // the C code
 double dtw_basic_c(double const *x, double const *y, int const w,
-                   int const nx, int const ny, int const dim,
+                   int const nx, int const ny, int const num_var,
                    double const norm, double const step,
                    int const backtrack)
 {
@@ -110,7 +108,7 @@ double dtw_basic_c(double const *x, double const *y, int const w,
     for (i = 0; i <= (backtrack ? nx : 2); i++) D[d2s(i, 0, nx, backtrack)] = NOT_VISITED;
 
     // first value, must set here to avoid multiplying by step
-    D[d2s(1, 1, nx, backtrack)] = lnorm(x, y, norm, nx, ny, dim, 0, 0);
+    D[d2s(1, 1, nx, backtrack)] = lnorm(x, y, norm, nx, ny, num_var, 0, 0);
     if (norm == 2) D[d2s(1, 1, nx, backtrack)] *= D[d2s(1, 1, nx, backtrack)];
 
     // dynamic programming
@@ -140,7 +138,7 @@ double dtw_basic_c(double const *x, double const *y, int const w,
                 continue;
             }
 
-            local_cost = lnorm(x, y, norm, nx, ny, dim, i-1, j-1);
+            local_cost = lnorm(x, y, norm, nx, ny, num_var, i-1, j-1);
             if (norm == 2) local_cost = local_cost * local_cost;
 
             // set the value of 'direction'
@@ -164,7 +162,7 @@ double dtw_basic_c(double const *x, double const *y, int const w,
 
 // the gateway function
 SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
-               SEXP m, SEXP n, SEXP dim,
+               SEXP m, SEXP n, SEXP num_var,
                SEXP norm, SEXP step, SEXP backtrack,
                SEXP distmat)
 {
@@ -181,7 +179,7 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
 
         // calculate distance
         d = dtw_basic_c(REAL(x), REAL(y), asInteger(window),
-                        nx, ny, asInteger(dim),
+                        nx, ny, asInteger(num_var),
                         asReal(norm), asReal(step), 1);
 
         // actual length of path
@@ -208,7 +206,7 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
     } else {
         // calculate distance
         d = dtw_basic_c(REAL(x), REAL(y), asInteger(window),
-                        nx, ny, asInteger(dim),
+                        nx, ny, asInteger(num_var),
                         asReal(norm), asReal(step), 0);
 
         SEXP ret = PROTECT(ScalarReal(d));

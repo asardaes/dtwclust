@@ -9,11 +9,11 @@ extern "C" {
 #define _DTWCLUST_H
 
 SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
-               SEXP m, SEXP n, SEXP dim,
+               SEXP m, SEXP n, SEXP num_var,
                SEXP norm, SEXP step, SEXP backtrack,
                SEXP distmat);
 
-SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP dim, SEXP sigma, SEXP window, SEXP logs);
+SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var, SEXP sigma, SEXP window, SEXP logs);
 
 SEXP pairs(SEXP L);
 

@@ -68,7 +68,7 @@ double inline LOGP(double const x, double const y) {
 
 // global alignment kernel
 double logGAK_c(double const *seq1 , double const *seq2,
-                int const nX, int const nY, int const dim,
+                int const nX, int const nY, int const num_var,
                 double const sigma, int const triangular,
                 double *logs)
 {
@@ -81,7 +81,7 @@ double logGAK_c(double const *seq1 , double const *seq2,
      * seq1 is a first sequence represented as a matrix of real elements.
      *   Each line i corresponds to the vector of observations at time i.
      * seq2 is the second sequence formatted in the same way.
-     * nX, nY and dim provide the number of lines of seq1 and seq2.
+     * nX, nY and num_var provide the number of lines of seq1 and seq2.
      * sigma stands for the bandwidth of the \phi_\sigma distance used kernel
      * triangular is a parameter which parameterizes the triangular kernel
      */
@@ -145,7 +145,7 @@ double logGAK_c(double const *seq1 , double const *seq2,
 
                 // We first compute the kernel value
                 sum = 0;
-                for (ii = 0; ii < dim; ii++) {
+                for (ii = 0; ii < num_var; ii++) {
                     sum += pow(seq1[i-1 + ii*nX] - seq2[j-1 + ii*nY], 2);
                 }
 
@@ -173,7 +173,7 @@ double logGAK_c(double const *seq1 , double const *seq2,
 }
 
 // The gateway function
-SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP dim, SEXP sigma, SEXP window, SEXP logs) {
+SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var, SEXP sigma, SEXP window, SEXP logs) {
     /*
      * Inputs are, in this order
      * A N1 x d matrix (d-variate time series with N1 observations)
@@ -198,7 +198,7 @@ SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP dim, SEXP sigma, SEXP window,
     if (triangular > 0 && abs(nX - nY) > triangular)
         d = R_NegInf;
     else
-        d = logGAK_c(REAL(x), REAL(y), nX, nY, asInteger(dim), asReal(sigma), triangular, REAL(logs));
+        d = logGAK_c(REAL(x), REAL(y), nX, nY, asInteger(num_var), asReal(sigma), triangular, REAL(logs));
 
     return ScalarReal(d);
 }
