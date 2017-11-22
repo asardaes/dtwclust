@@ -48,6 +48,8 @@
 #' The DTW algorithm (and the functions that depend on it) might return different values in 32 bit
 #' installations compared to 64 bit ones.
 #'
+#' @example man-examples/multivariate-dtw.R
+#'
 dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
                       step.pattern = dtw::symmetric2, backtrack = FALSE,
                       normalize = FALSE, ..., gcm = NULL, error.check = TRUE)
