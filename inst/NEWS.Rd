@@ -11,7 +11,8 @@
     \itemize{
         \item Removed all deprecated code.
         \item Added external fuzzy cluster validity indices.
-        \item Fixed GAK's \code{sigma} estimation in the non-proxy version. The estimation routine in the proxy version also changed slightly.
+        \item Fixed GAK's \code{sigma} estimation in the non-proxy version. The estimation routine in the proxy version also changed slightly, and the estimates will be different due to randomness.
+        \item Fixed the calculation of the Silhouette CVI.
         \item Modified \code{tslist} to hopefully make it faster.
         \item Partitional and fuzzy controls (\code{tsclust-controls}) now specify version 2 of the main loop by default.
         \item Packages \code{clue} and \code{ggplot2} are no longer automatically loaded by default.

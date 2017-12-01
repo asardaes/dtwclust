@@ -663,6 +663,8 @@ setMethod("plot", methods::signature(x = "TSClusters", y = "missing"), plot.TSCl
 # Cluster validity indices
 # ==================================================================================================
 
+#' @importFrom cluster silhouette
+#'
 cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
     type <- match.arg(type, several.ok = TRUE,
                       c("RI", "ARI", "J", "FM", "VI",
@@ -769,22 +771,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
             switch(EXPR = CVI,
                    # Silhouette
                    Sil = {
-                       c_k <- as.numeric(table(a@cluster)[a@cluster])
-
-                       ab <- lapply(unique(a@cluster), function(k) {
-                           idx <- a@cluster == k
-                           this_a <- base::rowSums(distmat[idx, idx, drop = FALSE]) / c_k[idx]
-                           this_b <- apply(distmat[idx, !idx, drop = FALSE], 1L, function(row) {
-                               ret <- row / c_k[!idx]
-                               ret <- min(tapply(ret, a@cluster[!idx], sum))
-                               ret
-                           })
-
-                           data.frame(a = this_a, b = this_b)
-                       })
-
-                       ab <- do.call(rbind, ab, TRUE)
-                       sum((ab$b - ab$a) / apply(ab, 1L, max)) / nrow(distmat)
+                       mean(cluster::silhouette(a@cluster, dmatrix = distmat)[,3L])
                    },
 
                    # Dunn

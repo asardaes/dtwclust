@@ -75,7 +75,7 @@
 #'   these indices might not be appropriate for those centroids.
 #'
 #'   - Crisp partitions
-#'     + `"Sil"` (!): Silhouette index (Arbelaitz et al. (2013); to be maximized).
+#'     + `"Sil"` (!): Silhouette index (Rousseeuw (1987); to be maximized).
 #'     + `"D"` (!): Dunn index (Arbelaitz et al. (2013); to be maximized).
 #'     + `"COP"` (!): COP index (Arbelaitz et al. (2013); to be minimized).
 #'     + `"DB"` (?): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
@@ -106,6 +106,9 @@
 #' The formula for the SF index in Saitta et al. (2007) does not correspond to the one in Arbelaitz
 #' et al. (2013). The one specified in the former is used here.
 #'
+#' The formulas for the Silhouette index are not entirely correct in Arbelaitz et al. (2013), refer
+#' to Rousseeuw (1987) for the correct ones.
+#'
 #' The formulas for the PBMF index are not entirely unambiguous in the literature. The ones given in
 #' Lin (2013) are used here.
 #'
@@ -126,6 +129,9 @@
 #'
 #' Meila, M. (2003). Comparing clusterings by the variation of information. In Learning theory and
 #' kernel machines (pp. 173-187). Springer Berlin Heidelberg.
+#'
+#' Rousseeuw, P. J. (1987). Silhouettes: a graphical aid to the interpretation and validation of
+#' cluster analysis. Journal of computational and applied mathematics, 20, 53-65.
 #'
 #' Saitta, S., Raphael, B., & Smith, I. F. (2007). A bounded index for cluster validity. In
 #' International Workshop on Machine Learning and Data Mining in Pattern Recognition (pp. 174-187).
