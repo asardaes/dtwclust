@@ -703,6 +703,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
         }
 
         # calculate distmat if needed
+        distmat <- NULL
         if (any(type %in% c("Sil", "D", "COP"))) {
             if (is.null(a@distmat)) {
                 if (length(a@datalist) == 0L) {
@@ -722,6 +723,13 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                 distmat <- a@distmat
             }
         }
+        if (!is.null(distmat)) {
+            distmat <- base::as.matrix(distmat)
+            if (!base::isSymmetric(distmat))
+                warning("Internal CVIs: series' cross-distance matrix is NOT symmetric, ",
+                        "which can be problematic for:",
+                        "\n\tSil\tD\tCOP")
+        }
 
         # are no valid indices left?
         if (length(type) == 0L) return(CVIs)
@@ -735,6 +743,11 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                                               centroids = NULL,
                                               dots = a@args$dist),
                                 TRUE)
+            distcent <- base::as.matrix(distcent)
+            if (!base::isSymmetric(distcent))
+                warning("Internal CVIs: centroids' cross-distance matrix is NOT symmetric, ",
+                        "which can be problematic for:",
+                        "\n\tDB\tDB*")
         }
 
         # calculate global centroids if needed

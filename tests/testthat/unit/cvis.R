@@ -22,8 +22,8 @@ test_that("CVI calculations are consistent regardless of quantity or order of CV
                      args = tsclust_args(dist = list(window.size = 18L)),
                      seed = 123)
 
-    base_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), "valid")
-    i_cvis <- cvi(pc_mv, type = "internal")
+    expect_warning(base_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), "valid"))
+    expect_warning(i_cvis <- cvi(pc_mv, type = "internal"))
     e_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), type = "external")
     expect_identical(base_cvis, c(e_cvis, i_cvis))
 
@@ -32,7 +32,9 @@ test_that("CVI calculations are consistent regardless of quantity or order of CV
     expect_true(all(
         times(50L) %dopar% {
             considered_cvis <- sample(cvis, sample(length(cvis), 1L))
-            this_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), considered_cvis)
+            suppressWarnings(
+                this_cvis <- cvi(pc_mv, rep(1L:4L, each = 5L), considered_cvis)
+            )
             all(base_cvis[considered_cvis] == this_cvis[considered_cvis])
         }
     ),
@@ -41,7 +43,7 @@ test_that("CVI calculations are consistent regardless of quantity or order of CV
 
     # when missing elements
     pc_mv@distmat <- NULL
-    this_cvis <- cvi(pc_mv, type = "internal")
+    expect_warning(this_cvis <- cvi(pc_mv, type = "internal"))
     considered_cvis <- names(this_cvis)
     expect_true(all(base_cvis[considered_cvis] == this_cvis))
 
@@ -154,7 +156,7 @@ test_that("CVIs work also for hierarchical and TADPole", {
                   distance = "gak", sigma = 100,
                   window.size = 18L)
 
-    cvis_tadp <- cvi(tadp, labels_subset)
+    expect_warning(cvis_tadp <- cvi(tadp, labels_subset))
     cvis_hc <- cvi(hc, labels_subset)
 
     # refs
@@ -170,7 +172,7 @@ test_that("CVIs work also for hierarchical and TADPole with custom centroid", {
     hc <- tsclust(data_reinterpolated_subset, type = "h", k = 4L,
                   distance = "sbd", centroid = shape_extraction)
 
-    cvis_tadp_cent <- cvi(tadp, labels_subset)
+    expect_warning(cvis_tadp_cent <- cvi(tadp, labels_subset))
     cvis_hc_cent <- cvi(hc, labels_subset)
 
     # refs
