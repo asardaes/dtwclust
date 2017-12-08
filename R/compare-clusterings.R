@@ -3,7 +3,7 @@
 #' Create preprocessing, distance and centroid configurations for [compare_clusterings_configs()].
 #'
 #' @export
-#' @importFrom plyr rbind.fill
+#' @importFrom dplyr bind_rows
 #'
 #' @param type Which type of function is being targeted by this configuration.
 #' @param ... Any number of named lists with functions and arguments that will be shared by all
@@ -81,7 +81,7 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
             cfg
         })
 
-        shared_cfg <- plyr::rbind.fill(shared_cfg)
+        shared_cfg <- dplyr::bind_rows(shared_cfg)
         shared_cfgs <- lapply(share.config, function(dummy) { shared_cfg })
         names(shared_cfgs) <- share.config
         shared_cfgs <- shared_cfgs[setdiff(share.config, names(specific))]
@@ -113,8 +113,8 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
                 cfg
             })
 
-            cfg <- plyr::rbind.fill(cfg)
-            if (clus_type %in% share.config) cfg <- plyr::rbind.fill(shared_cfg, cfg)
+            cfg <- dplyr::bind_rows(cfg)
+            if (clus_type %in% share.config) cfg <- dplyr::bind_rows(shared_cfg, cfg)
             cfg
         })
 
@@ -328,7 +328,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #' Compare many different clustering algorithms with support for parallelization.
 #'
 #' @export
-#' @importFrom plyr rbind.fill
+#' @importFrom dplyr bind_rows
 #' @importFrom proxy pr_DB
 #' @importFrom rngtools RNGseq
 #'
@@ -880,7 +880,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
             if (any(sapply(passed_objs, function(score) { is.null(dim(score)) })))
                 unlist(passed_objs, recursive = FALSE)
             else
-                plyr::rbind.fill(lapply(passed_objs, base::as.data.frame))
+                dplyr::bind_rows(lapply(passed_objs, base::as.data.frame))
         })
 
         pick <- try(pick.clus(scores, ...), silent = TRUE)
@@ -966,7 +966,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         )
 
         # return Map
-        plyr::rbind.fill(dfs)
+        dplyr::bind_rows(dfs)
     })
 
     # ----------------------------------------------------------------------------------------------

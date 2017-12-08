@@ -3,7 +3,7 @@ Type: Package
 Title: Time Series Clustering Along with Optimizations for the Dynamic Time
     Warping Distance
 Version: 4.1.1.9000
-Date: 2017-12-01
+Date: 2017-12-08
 Depends:
     R (>= 3.2.0),
     methods,
@@ -16,11 +16,11 @@ Imports:
     bigmemory,
     clue,
     cluster,
+    dplyr,
     flexclust,
     foreach,
     ggplot2,
     Matrix,
-    plyr,
     RSpectra,
     Rcpp,
     reshape2,
