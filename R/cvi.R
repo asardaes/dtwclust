@@ -101,7 +101,9 @@
 #'
 #' In the original definition of many internal and fuzzy CVIs, the Euclidean distance and a mean
 #' centroid was used. The implementations here change this, making use of whatever distance/centroid
-#' was chosen during clustering.
+#' was chosen during clustering. However, some of the CVIs assume that the distances are symmetric,
+#' since cross-distance matrices are calculated and only the upper/lower triangulars are considered.
+#' A warning will be given if the matrices are not symmetric and the CVI assumes so.
 #'
 #' The formula for the SF index in Saitta et al. (2007) does not correspond to the one in Arbelaitz
 #' et al. (2013). The one specified in the former is used here.
