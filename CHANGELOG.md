@@ -1,14 +1,16 @@
 # Changelog
 
-## Version 4.1.1.9000
+## Version 5.0.0
 * Removed all deprecated code.
 * Added external fuzzy cluster validity indices.
 * Fixed GAK's `sigma` estimation in the non-proxy version. The estimation routine in the proxy version also changed slightly, and the estimates will be different due to randomness.
 * Fixed the calculation of the Silhouette CVI (#21).
 * Modified `tslist` to hopefully make it faster.
 * Partitional and fuzzy controls (`tsclust-controls`) now specify version 2 of the main loop by default.
-* Packages `clue` and `ggplot2` are no longer automatically loaded by default.
+* Packages `clue` and `ggplot2` are no longer automatically attached by default.
 * Fixed minor potential bugs in several functions.
+* Changed `plyr` dependency for `dplyr`.
+* Minor vignette updates.
 
 ## Version 4.1.1
 * Added some fuzzy cluster validity indices to `cvi`.

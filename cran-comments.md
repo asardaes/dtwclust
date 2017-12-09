@@ -1,4 +1,4 @@
-## Update to version 4.1.1.9000
+## Update to version 5.0.0
 * Removed deprecated code.
 * New external fuzzy CVIs.
 * Miscellaneous bug fixes and optimizations.
