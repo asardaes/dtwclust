@@ -1,7 +1,4 @@
-## Update to version 5.0.0
-* Removed deprecated code.
-* New external fuzzy CVIs.
-* Miscellaneous bug fixes and optimizations.
+## Update to version 5.0.0.9000
 
 ## Test environments
 * Local GNU/Linux, R release
