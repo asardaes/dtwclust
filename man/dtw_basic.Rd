@@ -81,11 +81,12 @@ In order for symmetry to apply here, the following must be true: no window const
 
 \examples{
 \dontrun{
-# ==================================================================================================
+# ====================================================================================
 # Understanding multivariate DTW
-# ==================================================================================================
+# ====================================================================================
 
-# The variables for each multivariate time series are: tip force, x velocity, and y velocity
+# The variables for each multivariate time series are:
+# tip force, x velocity, and y velocity
 A1 <- CharTrajMV[[1L]] # A character
 B1 <- CharTrajMV[[6L]] # B character
 
@@ -114,10 +115,12 @@ dtw_basic(A1_VelY, B1_VelY, norm = "L1", step.pattern = symmetric1)
 # Corresponding LCM
 proxy::dist(A1_VelY, B1_VelY, method = "L1")
 
-# NOTE: notice how in the previous examples there was one LCM for each *pair* of series.
+# NOTES:
+# In the previous examples there was one LCM for each *pair* of series.
 # Additionally, each LCM has dimensions length(A1_*) x length(B1_*)
 
-# proxy::dist won't return the LCM for multivariate series, but we can do it manually:
+# proxy::dist won't return the LCM for multivariate series,
+# but we can do it manually:
 mv_lcm <- function(mvts1, mvts2) {
     # Notice how the number of variables (columns) doesn't come into play here
     num_obs1 <- nrow(mvts1)
@@ -155,7 +158,8 @@ all.equal(
 mvts1 <- cbind(mvts1, A1_TipForce)
 mvts2 <- cbind(mvts2, B1_TipForce)
 
-# Notice how the next code is exactly the same as before, even though we have one extra variable now
+# Notice how the next code is exactly the same as before,
+# even though we have one extra variable now
 
 # DTW distance
 dtw_d <- dtw_basic(mvts1, mvts2, norm = "L1", step.pattern = symmetric1)
@@ -167,9 +171,11 @@ all.equal(
     dtw::dtw(lcm, step.pattern = symmetric1)$distance # supports LCM as input
 )
 
-# By putting things in a list, proxy::dist will give return the *cross-distance matrix*, not the LCM
+# By putting things in a list,
+# proxy::dist returns the *cross-distance matrix*, not the LCM
 series_list <- list(mvts1, mvts2)
-distmat <- proxy::dist(series_list, method = "dtw_basic", norm = "L1", step.pattern = symmetric1)
+distmat <- proxy::dist(series_list, method = "dtw_basic",
+                       norm = "L1", step.pattern = symmetric1)
 # So this should be TRUE
 all.equal(distmat[1L, 2L], dtw_d)
 
