@@ -1,4 +1,4 @@
-context("\tHierarchical")
+context("    Hierarchical")
 
 # ==================================================================================================
 # setup
@@ -90,6 +90,7 @@ test_that("A valid custom hierarchical function works as expected.", {
     hc_diana <- tsclust(data, type = "hierarchical", k = 20L,
                         distance = "sbd",
                         control = hierarchical_control(method = diana))
+    expect_s4_class(hc_diana, "HierarchicalTSClusters")
     hc_diana <- reset_nondeterministic(hc_diana)
     hc_diana$call <- NULL
     assign("hc_diana", hc_diana, persistent)

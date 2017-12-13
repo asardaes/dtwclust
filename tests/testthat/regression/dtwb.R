@@ -1,4 +1,4 @@
-context("\tDTW basic")
+context("    DTW basic")
 
 # =================================================================================================
 # setup
@@ -17,8 +17,8 @@ test_that("Pairwise proxy distances give the same result as references", {
     D2_L1 <- proxy::dist(data[31L:46L], data[71L:86L], method = "dtw_basic")
     D2_L2 <- proxy::dist(data[31L:16L], data[71L:16L], method = "dtw_basic", norm = "L2")
 
-    expect_equal_to_reference(D2_L1, "rds/dtwb_l1.rds")
-    expect_equal_to_reference(D2_L2, "rds/dtwb_l2.rds")
+    expect_known_value(D2_L1, "rds/dtwb_l1.rds")
+    expect_known_value(D2_L2, "rds/dtwb_l2.rds")
 })
 
 # =================================================================================================

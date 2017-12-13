@@ -1,4 +1,4 @@
-context("\tConsistency of dtw_basic")
+context("    Consistency of dtw_basic")
 
 # ==================================================================================================
 # setup

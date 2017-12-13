@@ -14,16 +14,13 @@ if (nzchar(chk) && chk == "TRUE") {
     num_workers <- parallel::detectCores()
 }
 
-## see https://github.com/hadley/testthat/issues/129
-Sys.setenv("R_TESTS" = "")
-
 test_that("Parallel computation gives the same results as sequential", {
     skip_on_cran()
 
     if (getOption("dtwclust_skip_par_tests", FALSE))
         skip("Parallel tests disabled explicitly.")
 
-    cat("with", num_workers, "workers\n")
+    cat(" (with", num_workers, "workers)\n")
 
     require(doParallel)
 

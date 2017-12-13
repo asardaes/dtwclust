@@ -1,4 +1,5 @@
 ## Update to version 5.0.0.9000
+* Adjusted tests for modified testthat API
 
 ## Test environments
 * Local GNU/Linux, R release

@@ -1,4 +1,4 @@
-context("\tFamilies and proxy distances")
+context("    Families and proxy distances")
 
 # ==================================================================================================
 # setup

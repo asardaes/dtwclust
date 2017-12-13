@@ -1,4 +1,4 @@
-context("\tFuzzy")
+context("    Fuzzy")
 
 # ==================================================================================================
 # setup
@@ -36,6 +36,7 @@ test_that("Fuzzy clustering works as expected.", {
                    preproc = acf_fun, distance = "L2",
                    control = fuzzy_control(version = 1L),
                    seed = 123)
+    expect_s4_class(fcm, "FuzzyTSClusters")
     fcm <- reset_nondeterministic(fcm)
     assign("fcm", fcm, persistent)
 
@@ -44,6 +45,7 @@ test_that("Fuzzy clustering works as expected.", {
                      preproc = acf_fun, distance = "L2",
                      centroid = "fcmdd", seed = 123,
                      control = fuzzy_control(version = 1L))
+    expect_s4_class(fcmdd, "FuzzyTSClusters")
     fcmdd <- reset_nondeterministic(fcmdd)
     assign("fcmdd", fcmdd, persistent)
 
@@ -54,6 +56,7 @@ test_that("Fuzzy clustering works as expected.", {
                       distance = "dtw_basic",
                       control = fuzzy_control(version = 1L),
                       seed = 123)
+    expect_s4_class(fcm_mv, "FuzzyTSClusters")
     fcm_mv <- reset_nondeterministic(fcm_mv)
     assign("fcm_mv", fcm_mv, persistent)
 
@@ -62,6 +65,7 @@ test_that("Fuzzy clustering works as expected.", {
                         distance = "dtw_basic", centroid = "fcmdd",
                         control = fuzzy_control(version = 1L),
                         seed = 123)
+    expect_s4_class(fcmdd_mv, "FuzzyTSClusters")
     fcmdd_mv <- reset_nondeterministic(fcmdd_mv)
     assign("fcmdd_mv", fcmdd_mv, persistent)
 })

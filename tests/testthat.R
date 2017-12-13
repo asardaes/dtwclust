@@ -5,10 +5,10 @@ library(testthat)
 #' To test in a local machine:
 #' Sys.setenv(NOT_CRAN = "true"); test_dir("tests/testthat/")
 #' OR
-#' devtools::test() ## broken since adding tsclustFamily, can't figure out why
+#' devtools::test() # broken, can't figure out why
 #'
 #' To disable parallel tests, before calling test() run:
 #'
-#' options(dtwclust_skip_par_tests = TRUE)
+#'   options(dtwclust_skip_par_tests = TRUE)
 #'
 testthat::test_check("dtwclust")

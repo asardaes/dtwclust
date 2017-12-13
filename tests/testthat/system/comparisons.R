@@ -1,4 +1,4 @@
-context("\tCompare clusterings")
+context("    Compare clusterings")
 
 # ==================================================================================================
 # setup

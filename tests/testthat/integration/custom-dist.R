@@ -1,4 +1,4 @@
-context("\tCustom proxy distances and tsclust")
+context("    Custom proxy distances and tsclust")
 
 # ==================================================================================================
 # setup

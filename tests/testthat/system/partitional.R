@@ -1,4 +1,4 @@
-context("\tPartitional")
+context("    Partitional")
 
 # ==================================================================================================
 # setup
@@ -133,6 +133,7 @@ test_that("TADPole works as expected", {
     pc_tadp <- tsclust(data_reinterpolated_subset, type = "t", k = 4L,
                        control = tadpole_control(dc = 1.5, window.size = 20L),
                        seed = 938)
+    expect_s4_class(pc_tadp, "PartitionalTSClusters")
     pc_tadp <- reset_nondeterministic(pc_tadp)
     assign("pc_tadp", pc_tadp, persistent)
 
@@ -140,6 +141,7 @@ test_that("TADPole works as expected", {
     pc_tadp_lbi <- tsclust(data_reinterpolated_subset, type = "t", k = 4L,
                            control = tadpole_control(dc = 1.5, window.size = 20L, lb = "lbi"),
                            seed = 938)
+    expect_s4_class(pc_tadp_lbi, "PartitionalTSClusters")
     pc_tadp_lbi <- reset_nondeterministic(pc_tadp_lbi)
     assign("pc_tadp_lbi", pc_tadp_lbi, persistent)
 
@@ -148,6 +150,7 @@ test_that("TADPole works as expected", {
                             preproc = zscore, centroid = shape_extraction,
                             control = tadpole_control(dc = 1.5, window.size = 20L),
                             seed = 938)
+    expect_s4_class(pc_tadp_cent, "PartitionalTSClusters")
     pc_tadp_cent <- reset_nondeterministic(pc_tadp_cent)
     assign("pc_tadp_cent", pc_tadp_cent, persistent)
 })
@@ -197,7 +200,7 @@ test_that("Operations with custom centroid complete successfully.", {
 
     cent_colMeans <- tsclust(data_matrix, k = 20L,
                              distance = "sbd", centroid = mycent, seed = 123)
-
+    expect_s4_class(cent_colMeans, "PartitionalTSClusters")
     cent_colMeans <- reset_nondeterministic(cent_colMeans)
 
     ## ---------------------------------------------------------- without dots
@@ -210,7 +213,7 @@ test_that("Operations with custom centroid complete successfully.", {
 
     cent_colMeans_nd <- tsclust(data_matrix, k = 20L,
                                 distance = "sbd", centroid = mycent, seed = 123)
-
+    expect_s4_class(cent_colMeans_nd, "PartitionalTSClusters")
     cent_colMeans_nd <- reset_nondeterministic(cent_colMeans_nd)
 
     ## ---------------------------------------------------------- refs

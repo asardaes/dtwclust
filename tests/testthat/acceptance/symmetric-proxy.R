@@ -1,4 +1,4 @@
-context("\tLoad balancing for parallel symmetric proxy")
+context("    Load balancing for parallel symmetric proxy")
 
 # ==================================================================================================
 # setup

@@ -1,4 +1,4 @@
-context("\tProxy distances")
+context("    Proxy distances")
 
 # =================================================================================================
 # setup
@@ -23,8 +23,8 @@ test_that("Pairwise proxy distances give the same result as references", {
                          window.size = 15L, sigma = 100,
                          pairwise = TRUE)
 
-        expect_equal_to_reference(d, paste0("rds/pdist_", distance, ".rds"),
-                                  check.attributes = FALSE)
+        expect_known_value(d, paste0("rds/pdist_", distance, ".rds"),
+                           check.attributes = FALSE)
     }
 })
 
@@ -39,7 +39,7 @@ test_that("Included (valid) distances can accept multivariate series.", {
         mv <- proxy::dist(data_multivariate, method = distance,
                           window.size = 18L, sigma = 100)
 
-        expect_equal_to_reference(mv, paste0("rds/mv_", distance, ".rds"))
+        expect_known_value(mv, paste0("rds/mv_", distance, ".rds"))
     }
 })
 
