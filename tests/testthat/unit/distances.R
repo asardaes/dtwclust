@@ -45,9 +45,10 @@ args <- list(
         list(window.size = 15L, norm = "L2", step.pattern = dtw::symmetric2, normalize = TRUE)
     ),
     GAK = list(
-        sigma = 100, window.size = 15L,
-        sigma = 100, window.size = NULL,
-        sigma = 100, normalize = FALSE)
+        list(sigma = 100, window.size = 15L),
+        list(sigma = 100, window.size = NULL),
+        list(sigma = 100, normalize = FALSE)
+    )
 )
 
 # Univariate series
