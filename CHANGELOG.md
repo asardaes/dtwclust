@@ -1,6 +1,7 @@
 # Changelog
 
 ## Version 5.0.0.9000
+* Fixed the calculation of the `clusinfo` slot for `TSClusters` class for clusterings that ended with empty clusters.
 
 ## Version 5.0.0
 * Removed all deprecated code.

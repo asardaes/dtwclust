@@ -178,13 +178,8 @@ setMethod("initialize", "PartitionalTSClusters", function(.Object, ...) {
     }
 
     if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
-        # no clusinfo available, but cluster and cldist can be used to calculate it
-        size <- as.vector(table(.Object@cluster))
-        clusinfo <- data.frame(size = size, av_dist = 0)
-        clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(.Object@cldist[ , 1L],
-                                                                    .Object@cluster,
-                                                                    mean))
-        .Object@clusinfo <- clusinfo
+        # no clusinfo available, but cluster and cldist can be used to calculate it (see utils.R)
+        .Object@clusinfo <- compute_clusinfo(.Object@k, .Object@cluster, .Object@cldist)
     }
 
     # return
@@ -217,13 +212,8 @@ setMethod("initialize", "HierarchicalTSClusters", function(.Object, ...) {
     }
 
     if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
-        # no clusinfo available, but cluster and cldist can be used to calculate it
-        size <- as.vector(table(.Object@cluster))
-        clusinfo <- data.frame(size = size, av_dist = 0)
-        clusinfo[clusinfo$size > 0L, "av_dist"] <-
-            as.vector(tapply(.Object@cldist[ , 1L], .Object@cluster, mean))
-
-        .Object@clusinfo <- clusinfo
+        # no clusinfo available, but cluster and cldist can be used to calculate it (see utils.R)
+        .Object@clusinfo <- compute_clusinfo(.Object@k, .Object@cluster, .Object@cldist)
     }
 
     # return
@@ -825,7 +815,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                        (N - a@k) /
                            (a@k - 1) *
                            sum(a@clusinfo$size * dist_global_cent) /
-                           sum(a@cldist[ , 1L, drop = TRUE])
+                           sum(a@cldist[, 1L])
                    },
 
                    # Score function

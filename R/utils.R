@@ -288,6 +288,16 @@ symmetric_loop_endpoints <- function(n) {
 # Euclidean norm
 l2norm <- function(x) { sqrt(sum(x * x)) }
 
+# Get the clusinfo slot for TSClusters
+compute_clusinfo <- function(k, cluster, cldist) {
+    cluster <- factor(cluster, levels = 1L:k)
+    # return
+    data.frame(
+        size = as.integer(table(cluster)),
+        av_dist = as.numeric(tapply(cldist[, 1L], list(cluster), mean, default = 0))
+    )
+}
+
 # ==================================================================================================
 # Multivariate helpers
 # ==================================================================================================

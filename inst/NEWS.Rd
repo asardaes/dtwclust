@@ -8,7 +8,7 @@
 }
 
 \section{Changes in version 5.0.0.9000}{
-    \itemize{
-        \item TBA
-    }
+\itemize{
+    \item Fixed the calculation of the \code{clusinfo} slot for \code{TSClusters} class for clusterings that ended with empty clusters.
+}
 }

@@ -125,11 +125,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
     }
 
     cldist <- base::as.matrix(distmat[cbind(1L:N, cluster)])
-    size <- tabulate(cluster)
-
-    # if some clusters are empty, tapply() would not return enough rows
-    clusinfo <- data.frame(size = size, av_dist = 0)
-    clusinfo[clusinfo$size > 0L, "av_dist"] <- as.vector(tapply(cldist[ , 1L], cluster, mean))
+    clusinfo <- compute_clusinfo(k, cluster, cldist) # utils.R
     names(centroids) <- NULL
 
     # return
