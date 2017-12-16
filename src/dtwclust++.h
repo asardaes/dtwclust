@@ -51,6 +51,13 @@ RcppExport SEXP lbi_loop(SEXP D, SEXP X, SEXP Y, SEXP L, SEXP U,
 RcppExport SEXP sbd_loop(SEXP D, SEXP X, SEXP Y, SEXP FFTX, SEXP FFTY,
                          SEXP FFTLEN, SEXP SYMMETRIC, SEXP PAIRWISE, SEXP ENDPOINTS, SEXP BIGMAT);
 
+RcppExport SEXP sdtw_loop(SEXP D, SEXP X, SEXP Y, SEXP DISTARGS,
+                          SEXP SYMMETRIC, SEXP PAIRWISE,
+                          SEXP BIGMAT, SEXP MULTIVARIATE,
+                          SEXP ENDPOINTS);
+
+RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP DISTMAT, SEXP MV);
+
 RcppExport SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
                         SEXP LB, SEXP UB, SEXP TRACE,
                         SEXP LIST);

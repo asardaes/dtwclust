@@ -161,6 +161,7 @@ constraint. See \code{\link[=lb_keogh]{lb_keogh()}}.
 constraint. See \code{\link[=lb_improved]{lb_improved()}}.
 \item \code{"sbd"}: Shape-based distance. See \code{\link[=SBD]{SBD()}}.
 \item \code{"gak"}: Global alignment kernels. See \code{\link[=GAK]{GAK()}}.
+\item \code{"sdtw"}: Soft-DTW. See \code{\link[=sdtw]{sdtw()}}.
 }
 
 Out of the aforementioned, only the distances based on DTW lower bounds \emph{don't} support series

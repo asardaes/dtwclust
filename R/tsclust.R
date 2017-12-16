@@ -207,6 +207,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'     constraint. See [lb_improved()].
 #'   - `"sbd"`: Shape-based distance. See [SBD()].
 #'   - `"gak"`: Global alignment kernels. See [GAK()].
+#'   - `"sdtw"`: Soft-DTW. See [sdtw()].
 #'
 #'   Out of the aforementioned, only the distances based on DTW lower bounds *don't* support series
 #'   of different length. The lower bounds are probably unsuitable for direct clustering unless
@@ -353,7 +354,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             control$symmetric <- symmetric_pattern && (is.null(args$dist$window.size) || !diff_lengths)
         else if (distance %in% c("lbk", "lbi"))
             control$symmetric <- FALSE
-        else if (distance %in% c("sbd", "gak"))
+        else if (distance %in% c("sbd", "gak", "sdtw"))
             control$symmetric <- TRUE
 
         if (distance == "dtw_lb" && isTRUE(args$dist$nn.margin != 1L)) { # nocov start
@@ -374,6 +375,12 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             N <- max(sapply(series, NROW))
             args$dist$logs <- matrix(0, N + 1L, 3L)
             matrices_allocated <- TRUE
+
+        } else if (distance == "sdtw" && is.null(args$dist$cm)) {
+            N <- max(sapply(series, NROW))
+            args$dist$cm <- matrix(0, N + 1L, N + 1L)
+            matrices_allocated <- TRUE
+
         }
     }
 
@@ -496,7 +503,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             }
 
             if (inherits(distmat, "Distmat")) distmat <- distmat$distmat
-            if (matrices_allocated) { args$dist$gcm <- args$dist$logs <- NULL }
+            if (matrices_allocated) { args$dist$cm <- args$dist$gcm <- args$dist$logs <- NULL }
             if (dba_allocated) args$cent$gcm <- NULL
 
             # Create objects
@@ -629,7 +636,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # Prepare results
             # --------------------------------------------------------------------------------------
 
-            if (matrices_allocated) { args$dist$gcm <- args$dist$logs <- NULL }
+            if (matrices_allocated) { args$dist$cm <- args$dist$gcm <- args$dist$logs <- NULL }
             if (dba_allocated) args$cent$gcm <- NULL
 
             RET <- lapply(k, function(k) {

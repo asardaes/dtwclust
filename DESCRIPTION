@@ -81,6 +81,7 @@ Collate:
     'partitional-fuzzy.R'
     'pkg.R'
     'reinterpolate.R'
+    'sdtw.R'
     'shape-extraction.R'
     'tsclust-controls.R'
     'tsclust.R'

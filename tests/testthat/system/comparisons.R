@@ -135,7 +135,8 @@ cfgs_dba <- compare_clusterings_configs(types = "h", k = 2L:3L,
                                         ),
                                         distances = pdc_configs(
                                             "distance",
-                                            dtw_basic = list(window.size = 20L)
+                                            dtw_basic = list(window.size = 20L),
+                                            sdtw = list()
                                         ),
                                         centroids = pdc_configs(
                                             "centroid",
@@ -152,7 +153,8 @@ cfgs_mats <- compare_clusterings_configs(types = "h", k = 2L:3L,
                                          distances = pdc_configs(
                                              "distance",
                                              gak = list(window.size = 20L,
-                                                        sigma = 100)
+                                                        sigma = 100),
+                                             sdtw = list()
                                          ),
                                          centroids = pdc_configs(
                                              "centroid",
@@ -242,17 +244,20 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
     N <- max(lengths(data_subset)) + 1L
     logs <- matrix(0, N, 3L)
     gcm <- matrix(0, N, N)
+    cm <- matrix(0, N, N)
     mats_comparison <- compare_clusterings(data_subset, "h",
                                            configs = cfgs_mats, seed = 9430L,
                                            logs = logs,
                                            gcm = gcm,
+                                           cm = cm,
                                            return.objects = TRUE)
 
-    expect_true(all(c("gcm", "logs") %in% names(mats_comparison$objects.hierarchical$config1_1@dots)))
+    expect_true(all(c("gcm", "logs", "cm") %in% names(mats_comparison$objects.hierarchical$config1_1@dots)))
 
     if (foreach::getDoParWorkers() == 1L) {
         expect_false(all(logs == 0))
         expect_false(all(gcm == 0))
+        expect_false(all(cm == 0))
     }
 
     ## rds

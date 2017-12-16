@@ -53,15 +53,17 @@ test_that("Included proxy distances can be called for pairwise = TRUE and give e
         class(d) <- "numeric"
         expect_null(dim(d))
         expect_identical(length(d), length(x), info = paste(distance, "pairwise single-arg"))
-        expect_equal(d, rep(0, length(d)), check.attributes = FALSE,
-                     info = paste(distance, "pairwise single all zero"))
+        if (distance != "sdtw")
+            expect_equal(d, rep(0, length(d)), check.attributes = FALSE,
+                         info = paste(distance, "pairwise single all zero"))
 
         d2 <- proxy::dist(x, x, method = distance, window.size = 15L, pairwise = TRUE)
         class(d2) <- "numeric"
         expect_null(dim(d2))
         expect_identical(length(d2), length(x), info = paste(distance, "pairwise double-arg"))
-        expect_equal(d, rep(0, length(d2)), check.attributes = FALSE,
-                     info = paste(distance, "pairwise double all zero"))
+        if (distance != "sdtw")
+            expect_equal(d, rep(0, length(d2)), check.attributes = FALSE,
+                         info = paste(distance, "pairwise double all zero"))
 
         expect_error(proxy::dist(x[1L:3L], x[4L:5L], method = distance,
                                  window.size = 15L, pairwise = TRUE),

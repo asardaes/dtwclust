@@ -577,7 +577,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     # Matrix allocation
     # ==============================================================================================
 
-    allocate_gcm <- allocate_logs <- allocate_dba <- FALSE
+    allocate_cm <- allocate_gcm <- allocate_logs <- allocate_dba <- FALSE
     if (any(types != "tadpole")) {
         allocate_gcm <- any(sapply(setdiff(types, "tadpole"), function(type) {
             any(grepl("^dtw_basic$|^dtw_lb$", configs[[type]]$distance, ignore.case = TRUE)) &&
@@ -594,7 +594,12 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                 !("gcm_centroid" %in% colnames(configs[[type]]))
         }))
 
-        if (allocate_gcm || allocate_logs || allocate_dba)
+        allocate_cm <- any(sapply(types, function(type) {
+            any(grepl("^sdtw$", configs[[type]]$distance, ignore.case = TRUE)) &&
+                !("cm_distance" %in% colnames(configs[[type]]))
+        }))
+
+        if (allocate_gcm || allocate_logs || allocate_dba || allocate_cm)
             N <- max(sapply(processed_series, function(series_by_type) {
                 max(sapply(series_by_type, function(series) {
                     max(sapply(series, NROW))
@@ -607,12 +612,17 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
             else if (allocate_gcm)
                 dots$gcm <- matrix(0, 2L, N + 1L)
 
-        } else allocate_dba <- allocate_gcm <- FALSE
+        } else { allocate_dba <- allocate_gcm <- FALSE }
 
         if (allocate_logs && is.null(dots$logs))
             dots$logs <- matrix(0, N + 1L, 3L)
         else
             allocate_logs <- FALSE
+
+        if (allocate_cm && is.null(dots$cm))
+            dots$cm <- matrix(0, N + 1L, N + 1L)
+        else
+            allocate_cm <- FALSE
     }
 
     # ==============================================================================================
@@ -652,7 +662,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
             assign(custom_centroid, get_from_callers(custom_centroid, "function"))
 
         export <- c("trace", "score.clus", "return.objects",
-                    "dots", "allocate_gcm", "allocate_logs", "allocate_dba",
+                    "dots", "allocate_gcm", "allocate_logs", "allocate_dba", "allocate_cm",
                     "centroids_included",
                     "check_consistency", "enlist", "subset_dots", "get_from_callers", "setnames_inplace",
                     custom_preprocs, custom_centroids)
@@ -803,6 +813,14 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                     tsc@dots$logs <- NULL
                     tsc@args <- lapply(tsc@args, function(arg) {
                         arg$logs <- NULL
+                        arg
+                    })
+                }
+
+                if (allocate_cm) {
+                    tsc@dots$cm <- NULL
+                    tsc@args <- lapply(tsc@args, function(arg) {
+                        arg$cm <- NULL
                         arg
                     })
                 }

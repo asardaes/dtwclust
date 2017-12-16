@@ -4,10 +4,10 @@
 
 supported_clusterings <- c("partitional", "hierarchical", "fuzzy", "tadpole")
 
-distances_known <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd", "dtw_basic", "gak")
-distances_included <- c("dtw_lb", "lbk", "lbi", "sbd", "dtw_basic", "gak")
-distances_difflength <- c("dtw", "dtw2", "sbd", "dtw_basic", "gak")
-distances_multivariate <- c("dtw", "dtw2", "dtw_basic", "gak")
+distances_known <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd", "dtw_basic", "gak", "sdtw")
+distances_included <- c("dtw_lb", "lb_keogh", "lb_improved", "sbd", "dtw_basic", "gak", "sdtw")
+distances_difflength <- c("dtw", "dtw2", "sbd", "dtw_basic", "gak", "sdtw")
+distances_multivariate <- c("dtw", "dtw2", "dtw_basic", "gak", "sdtw")
 
 centroids_included <- c("mean", "median", "shape", "dba", "pam", "fcm", "fcmdd")
 centroids_fuzzy <- c("fcm", "fcmdd")

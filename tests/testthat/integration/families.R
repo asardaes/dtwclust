@@ -512,6 +512,74 @@ test_that("Operations with tsclustFamily@dist and gak give expected results", {
 })
 
 # ==================================================================================================
+# sdtw
+# ==================================================================================================
+
+test_that("Operations with tsclustFamily@dist and sdtw give expected results", {
+    distmat <- proxy::dist(x, x, method = "sdtw")
+
+    ## ---------------------------------------------------------- tsclustFamily, no distmat
+    family <- new("tsclustFamily",
+                  control = ts_ctrl,
+                  dist = "sdtw")
+
+    whole_distmat <- family@dist(x)
+    sub_distmat <- family@dist(x, centroids)
+    pdist <- family@dist(x, pairwise = TRUE)
+    class(sub_distmat) <- "matrix"
+
+    # different because sdtw(x,x) != 0
+    expect_identical(length(pdist), length(x), info = "Pairwise")
+
+    expect_equal(whole_distmat, distmat, info = "Whole, NULL distmat",
+                 check.attributes = FALSE)
+
+    expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, NULL distmat",
+                 check.attributes = FALSE)
+
+    ## ---------------------------------------------------------- tsclustFamily, with distmat
+    ts_ctrl$distmat <- dtwclust:::Distmat$new(distmat = distmat,
+                                              id_cent = attr(centroids, "id_cent"))
+
+    family <- new("tsclustFamily",
+                  control = ts_ctrl,
+                  dist = "sdtw")
+
+    whole_distmat <- family@dist(x)
+    sub_distmat <- family@dist(x, centroids)
+
+    expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
+                 tolerance = 0, check.attributes = FALSE)
+
+    expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
+                 tolerance = 0, check.attributes = FALSE)
+
+    ## ---------------------------------------------------------- ref
+    assign("distmat_sdtw", whole_distmat, persistent)
+
+    ## ---------------------------------------------------------- tsclustFamily, sparse distmat
+    ts_ctrl$symmetric <- FALSE
+    dm <- dtwclust:::SparseDistmat$new(series = x,
+                                       control = ts_ctrl,
+                                       distance = "sdtw",
+                                       id_cent = attr(centroids, "id_cent"))
+    ts_ctrl$distmat <- dm
+
+    family <- new("tsclustFamily",
+                  control = ts_ctrl,
+                  dist = "sdtw")
+
+    sub_distmat <- base::as.matrix(family@dist(x, centroids))
+    whole_distmat <- base::as.matrix(family@dist(x))
+
+    expect_equal(whole_distmat, base::as.matrix(distmat), info = "Whole, sparse distmat",
+                 check.attributes = FALSE)
+
+    expect_equal(sub_distmat, base::as.matrix(distmat[ , c(1L, 15L), drop = FALSE]),
+                 info = "Sub, sparse distmat", check.attributes = FALSE)
+})
+
+# ==================================================================================================
 # clean
 # ==================================================================================================
 
