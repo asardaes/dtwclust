@@ -38,6 +38,21 @@ test_that("Included proxy distances can be called and give expected dimensions."
                      info = paste(distance, "one-vs-many-vs-distmat"))
         expect_equal(d4, d[ , 1L, drop = FALSE], check.attributes = FALSE,
                      info = paste(distance, "many-vs-one-vs-distmat"))
+
+        dots <- list()
+        if (distance %in% c("dtw_lb", "lb_keogh", "lb_improved", "dtw_basic"))
+            dots <- list(window.size = 15L)
+        else if (distance %in% c("gak"))
+            dots <- list(window.size = 15L, sigma = 100)
+        manual_distmat <- sapply(x, function(j) {
+            sapply(x, function(i) {
+                d <- do.call(distance, dtwclust:::enlist(x = i, y = j, dots = dots), TRUE)
+                if (distance %in% c("lb_keogh", "sbd")) d <- d$d
+                d
+            })
+        })
+        expect_equal(as.matrix(d), manual_distmat, check.attributes = FALSE,
+                     info = paste("manual distmat vs proxy version using", distance))
     }
 })
 
