@@ -46,7 +46,7 @@ sdtw <- function(x, y, gamma = 0.01, ..., cm = NULL, error.check = TRUE)
         stop("sdtw: If provided, 'cm' must have 'double' storage mode.")
 
     # return
-    .Call(C_soft_dtw, x, y, gamma, cm, mv, PACKAGE = "dtwclust")
+    .Call(C_soft_dtw, x, y, gamma, cm, NULL, mv, PACKAGE = "dtwclust")
 }
 
 # ==================================================================================================
