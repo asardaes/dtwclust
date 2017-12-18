@@ -160,6 +160,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'     resulting centroids will also have this normalization. See [shape_extraction()] for more
 #'     details.
 #'   - "dba": DTW Barycenter Averaging. See [DBA()] for more details.
+#'   - "sdtw_cent": Soft-DTW centroids, See [sdtw_cent()] for more details.
 #'   - "pam": Partition around medoids (PAM). This basically means that the cluster centroids are
 #'     always one of the time series in the data. In this case, the distance matrix can be
 #'     pre-computed once using all time series in the data and then re-used at each iteration. It
@@ -168,13 +169,13 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'   - "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering. It **always** precomputes the
 #'     whole cross-distance matrix.
 #'
-#'   These check for the special cases where parallelization might be desired. Note that only
-#'   `shape`, `dba`, `pam` and `fcmdd` support series of different length. Also note that, for
-#'   `shape` and `dba`, this support has a caveat: the final centroids' length will depend on the
-#'   length of those series that were randomly chosen at the beginning of the clustering algorithm.
-#'   For example, if the series in the dataset have a length of either 10 or 15, 2 clusters are
-#'   desired, and the initial choice selects two series with length of 10, the final centroids will
-#'   have this same length.
+#'   The `dba`, `shape` and `sdtw_cent` implementations check for parallelization. Note that only
+#'   `shape`, `dba`, `sdtw_cent`, `pam` and `fcmdd` support series of different length. Also note
+#'   that for `shape`, `dba` and `sdtw_cent`, this support has a caveat: the final centroids' length
+#'   will depend on the length of those series that were randomly chosen at the beginning of the
+#'   clustering algorithm. For example, if the series in the dataset have a length of either 10 or
+#'   15, 2 clusters are desired, and the initial choice selects two series with length of 10, the
+#'   final centroids will have this same length.
 #'
 #'   As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid
 #'   function that takes a list of series as first input. It will also receive the contents of
@@ -392,6 +393,16 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
     } else dba_allocated <- FALSE
 
+    # pre-allocate matrix for sdtw_cent
+    if (grepl("^sdtw_cent$", cent_char, ignore.case = TRUE) && is.null(args$cent$cm)) {
+        sdtwc_allocated <- TRUE
+        if (!exists("N", mode = "integer", inherits = FALSE)) N <- max(sapply(series, NROW))
+        args$cent$cm <- matrix(0, N + 2L, N + 2L)
+        args$cent$dm <- matrix(0, N + 1L, N + 1L)
+        args$cent$em <- matrix(0, 2L, N + 2L)
+
+    } else sdtwc_allocated <- FALSE
+
     RET <- switch(
         type,
         partitional =, fuzzy = {
@@ -505,6 +516,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             if (inherits(distmat, "Distmat")) distmat <- distmat$distmat
             if (matrices_allocated) { args$dist$cm <- args$dist$gcm <- args$dist$logs <- NULL }
             if (dba_allocated) args$cent$gcm <- NULL
+            if (sdtwc_allocated) { args$cent$cm <- args$cent$dm <- args$cent$em <- NULL }
 
             # Create objects
             RET <- lapply(pc_list, function(pc) {
@@ -614,7 +626,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # Cluster
             # --------------------------------------------------------------------------------------
 
-            if (trace) cat("Performing hierarchical clustering...\n\n")
+            if (trace) cat("Performing hierarchical clustering...\n")
 
             if (is.character(method)) {
                 # Using hclust
@@ -638,6 +650,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             if (matrices_allocated) { args$dist$cm <- args$dist$gcm <- args$dist$logs <- NULL }
             if (dba_allocated) args$cent$gcm <- NULL
+            if (sdtwc_allocated) { args$cent$cm <- args$cent$dm <- args$cent$em <- NULL }
+            if (trace) cat("Extracting centroids...\n\n")
 
             RET <- lapply(k, function(k) {
                 lapply(hc, function(hc) {
@@ -768,6 +782,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 }
 
                 if (dba_allocated) args$cent$gcm <- NULL
+                if (sdtwc_allocated) { args$cent$cm <- args$cent$dm <- args$cent$em <- NULL }
 
                 obj <- methods::new("PartitionalTSClusters",
                                     call = MYCALL,

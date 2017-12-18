@@ -13,14 +13,14 @@ namespace dtwclust {
 void sdtw_loop_pairwise(Rcpp::NumericMatrix& dist,
                         const Rcpp::List& X, const Rcpp::List& Y,
                         const SEXP& GAMMA, SEXP& COSTMAT,
-                        int index, const SEXP& MULTIVARIATE)
+                        int index, const SEXP& MV)
 {
     index--;
     for (int i = 0; i < X.length(); i++) {
         R_CheckUserInterrupt();
         SEXP x = X[i];
         SEXP y = Y[i];
-        double d = Rcpp::as<double>(soft_dtw(x, y, GAMMA, COSTMAT, R_NilValue, MULTIVARIATE));
+        double d = Rcpp::as<double>(soft_dtw(x, y, GAMMA, COSTMAT, R_NilValue, MV));
         dist(index++, 0) = d;
     }
 }
@@ -29,14 +29,14 @@ void sdtw_loop_pairwise(Rcpp::NumericMatrix& dist,
 void sdtw_loop_pairwise(MatrixAccessor<double>& dist,
                         const Rcpp::List& X, const Rcpp::List& Y,
                         const SEXP& GAMMA, SEXP& COSTMAT,
-                        int index, const SEXP& MULTIVARIATE)
+                        int index, const SEXP& MV)
 {
     index--;
     for (int i = 0; i < X.length(); i++) {
         R_CheckUserInterrupt();
         SEXP x = X[i];
         SEXP y = Y[i];
-        double d = Rcpp::as<double>(soft_dtw(x, y, GAMMA, COSTMAT, R_NilValue, MULTIVARIATE));
+        double d = Rcpp::as<double>(soft_dtw(x, y, GAMMA, COSTMAT, R_NilValue, MV));
         // bigmemory operator[][] is backwards
         dist[0][index++] = d;
     }
@@ -49,7 +49,7 @@ void sdtw_loop_pairwise(MatrixAccessor<double>& dist,
 // R matrix
 void sdtw_loop_symmetric(Rcpp::NumericMatrix& dist, const Rcpp::List& X,
                          const SEXP& GAMMA, SEXP& COSTMAT,
-                         const Rcpp::List& endpoints, const SEXP& MULTIVARIATE)
+                         const Rcpp::List& endpoints, const SEXP& MV)
 {
     Rcpp::List start = Rcpp::as<Rcpp::List>(endpoints["start"]);
     Rcpp::List end = Rcpp::as<Rcpp::List>(endpoints["end"]);
@@ -68,7 +68,7 @@ void sdtw_loop_symmetric(Rcpp::NumericMatrix& dist, const Rcpp::List& X,
         while (i < i_max) {
             R_CheckUserInterrupt();
             SEXP x = X[i];
-            double d = Rcpp::as<double>(soft_dtw(x, y, GAMMA, COSTMAT, R_NilValue, MULTIVARIATE));
+            double d = Rcpp::as<double>(soft_dtw(x, y, GAMMA, COSTMAT, R_NilValue, MV));
             dist(i,j) = d;
             dist(j,i) = d;
             i++;
@@ -81,7 +81,7 @@ void sdtw_loop_symmetric(Rcpp::NumericMatrix& dist, const Rcpp::List& X,
 // big.matrix
 void sdtw_loop_symmetric(MatrixAccessor<double>& dist, const Rcpp::List& X,
                          const SEXP& GAMMA, SEXP& COSTMAT,
-                         const Rcpp::List& endpoints, const SEXP& MULTIVARIATE)
+                         const Rcpp::List& endpoints, const SEXP& MV)
 {
     Rcpp::List start = Rcpp::as<Rcpp::List>(endpoints["start"]);
     Rcpp::List end = Rcpp::as<Rcpp::List>(endpoints["end"]);
@@ -100,7 +100,7 @@ void sdtw_loop_symmetric(MatrixAccessor<double>& dist, const Rcpp::List& X,
         while (i < i_max) {
             R_CheckUserInterrupt();
             SEXP x = X[i];
-            double d = Rcpp::as<double>(soft_dtw(x, y, GAMMA, COSTMAT, R_NilValue, MULTIVARIATE));
+            double d = Rcpp::as<double>(soft_dtw(x, y, GAMMA, COSTMAT, R_NilValue, MV));
             dist[i][j] = d;
             dist[j][i] = d;
             i++;
@@ -116,7 +116,7 @@ void sdtw_loop_symmetric(MatrixAccessor<double>& dist, const Rcpp::List& X,
 
 // R matrix
 void sdtw_loop_general(Rcpp::NumericMatrix& dist, const Rcpp::List& X, const Rcpp::List& Y,
-                       const SEXP& GAMMA, SEXP& COSTMAT, int index, const SEXP& MULTIVARIATE)
+                       const SEXP& GAMMA, SEXP& COSTMAT, int index, const SEXP& MV)
 {
     index--;
     for (int j = 0; j < Y.length(); j++) {
@@ -124,7 +124,7 @@ void sdtw_loop_general(Rcpp::NumericMatrix& dist, const Rcpp::List& X, const Rcp
         for (int i = 0; i < X.length(); i++) {
             R_CheckUserInterrupt();
             SEXP x = X[i];
-            double d = Rcpp::as<double>(soft_dtw(x, y, GAMMA, COSTMAT, R_NilValue, MULTIVARIATE));
+            double d = Rcpp::as<double>(soft_dtw(x, y, GAMMA, COSTMAT, R_NilValue, MV));
             dist(i,index) = d;
         }
         index++;
@@ -133,7 +133,7 @@ void sdtw_loop_general(Rcpp::NumericMatrix& dist, const Rcpp::List& X, const Rcp
 
 // big.matrix
 void sdtw_loop_general(MatrixAccessor<double>& dist, const Rcpp::List& X, const Rcpp::List& Y,
-                       const SEXP& GAMMA, SEXP& COSTMAT, int index, const SEXP& MULTIVARIATE)
+                       const SEXP& GAMMA, SEXP& COSTMAT, int index, const SEXP& MV)
 {
     index--;
     for (int j = 0; j < Y.length(); j++) {
@@ -141,7 +141,7 @@ void sdtw_loop_general(MatrixAccessor<double>& dist, const Rcpp::List& X, const 
         for (int i = 0; i < X.length(); i++) {
             R_CheckUserInterrupt();
             SEXP x = X[i];
-            double d = Rcpp::as<double>(soft_dtw(x, y, GAMMA, COSTMAT, R_NilValue, MULTIVARIATE));
+            double d = Rcpp::as<double>(soft_dtw(x, y, GAMMA, COSTMAT, R_NilValue, MV));
             // bigmemory operator[][] is backwards
             dist[index][i] = d;
         }
@@ -155,7 +155,7 @@ void sdtw_loop_general(MatrixAccessor<double>& dist, const Rcpp::List& X, const 
 
 RcppExport SEXP sdtw_loop(SEXP D, SEXP X, SEXP Y, SEXP DISTARGS,
                           SEXP SYMMETRIC, SEXP PAIRWISE,
-                          SEXP BIGMAT, SEXP MULTIVARIATE,
+                          SEXP BIGMAT, SEXP MV,
                           SEXP ENDPOINTS)
 {
     BEGIN_RCPP
@@ -170,15 +170,15 @@ RcppExport SEXP sdtw_loop(SEXP D, SEXP X, SEXP Y, SEXP DISTARGS,
         if (Rcpp::as<bool>(PAIRWISE))
             sdtw_loop_pairwise(dist, X, Y, GAMMA, COSTMAT,
                                Rcpp::as<int>(ENDPOINTS),
-                               MULTIVARIATE);
+                               MV);
         else if (Rcpp::as<bool>(SYMMETRIC))
             sdtw_loop_symmetric(dist, X, GAMMA, COSTMAT,
                                 ENDPOINTS,
-                                MULTIVARIATE);
+                                MV);
         else
             sdtw_loop_general(dist, X, Y, GAMMA, COSTMAT,
                               Rcpp::as<int>(ENDPOINTS),
-                              MULTIVARIATE);
+                              MV);
 
     } else {
         Rcpp::NumericMatrix dist(D);
@@ -186,15 +186,15 @@ RcppExport SEXP sdtw_loop(SEXP D, SEXP X, SEXP Y, SEXP DISTARGS,
         if (Rcpp::as<bool>(PAIRWISE))
             sdtw_loop_pairwise(dist, X, Y, GAMMA, COSTMAT,
                                Rcpp::as<int>(ENDPOINTS),
-                               MULTIVARIATE);
+                               MV);
         else if (Rcpp::as<bool>(SYMMETRIC))
             sdtw_loop_symmetric(dist, X, GAMMA, COSTMAT,
                                 ENDPOINTS,
-                                MULTIVARIATE);
+                                MV);
         else
             sdtw_loop_general(dist, X, Y, GAMMA, COSTMAT,
                               Rcpp::as<int>(ENDPOINTS),
-                              MULTIVARIATE);
+                              MV);
     }
 
     return R_NilValue;

@@ -18,6 +18,7 @@ with(persistent, {
         expect_known_value(comp_all, file_name(comp_all))
         expect_known_value(comp_gak, file_name(comp_gak))
         expect_known_value(comp_dba, file_name(comp_dba))
+        expect_known_value(comp_sdtwc, file_name(comp_sdtwc))
     })
 })
 

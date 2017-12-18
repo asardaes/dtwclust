@@ -20,6 +20,7 @@ Imports:
     foreach,
     ggplot2,
     Matrix,
+    nloptr,
     RSpectra,
     Rcpp,
     reshape2,
@@ -81,6 +82,7 @@ Collate:
     'partitional-fuzzy.R'
     'pkg.R'
     'reinterpolate.R'
+    'sdtw-cent.R'
     'sdtw.R'
     'shape-extraction.R'
     'tsclust-controls.R'
