@@ -167,14 +167,12 @@ cfgs_mats <- compare_clusterings_configs(types = "h", k = 2L,
                                          distances = pdc_configs(
                                              "distance",
                                              gak = list(window.size = 20L,
-                                                        sigma = 100),
-                                             sdtw = list()
+                                                        sigma = 100)
                                          ),
                                          centroids = pdc_configs(
                                              "centroid",
                                              DBA = list(window.size = 20L,
-                                                        max.iter = 5L),
-                                             sdtw_cent = list()
+                                                        max.iter = 5L)
                                          )
 )
 
@@ -267,17 +265,25 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
     cm <- matrix(0, N + 1L, N + 1L)
     dm <- matrix(0, N, N)
     em <- matrix(0, 2L, N + 1L)
+
     mats_comparison <- compare_clusterings(data_subset, "h",
                                            configs = cfgs_mats, seed = 9430L,
                                            logs = logs,
                                            gcm = gcm,
-                                           cm = cm,
-                                           dm = dm,
-                                           em = em,
                                            return.objects = TRUE)
 
     expect_true(all(
-        c("gcm", "logs", "cm", "dm", "em") %in%
+        c("gcm", "logs") %in%
+            names(mats_comparison$objects.hierarchical$config1@dots)
+    ))
+
+    mats_comparison <- compare_clusterings(data_subset, "h",
+                                           configs = cfgs_sdtwc, seed = 9430L,
+                                           cm = cm, dm = dm, em = em,
+                                           return.objects = TRUE)
+
+    expect_true(all(
+        c("cm", "dm", "em") %in%
             names(mats_comparison$objects.hierarchical$config1@dots)
     ))
 

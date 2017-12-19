@@ -624,17 +624,17 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         else
             allocate_logs <- FALSE
 
-        if (allocate_sdtwc && is.null(dots$cm)) {
+        if (allocate_cm && is.null(dots$cm))
+            dots$cm <- matrix(0, N + 1L, N + 1L)
+        else
+            allocate_cm <- FALSE
+
+        if (allocate_sdtwc && (is.null(dots$cm) || is.null(dots$dm) || is.null(dots$em))) {
             dots$cm <- matrix(0, N + 2L, N + 2L)
             dots$dm <- matrix(0, N + 1L, N + 1L)
             dots$em <- matrix(0, 2L, N + 2L)
 
         } else allocate_sdtwc <- FALSE
-
-        if (allocate_cm && is.null(dots$cm))
-            dots$cm <- matrix(0, N + 1L, N + 1L)
-        else
-            allocate_cm <- FALSE
     }
 
     # ==============================================================================================

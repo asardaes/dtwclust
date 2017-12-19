@@ -71,11 +71,10 @@ test_that("Hierarchical clustering works as expected.", {
     assign("hc_lbi", hc_lbi, persistent)
 
     ## ---------------------------------------------------------- custom centroid
-    hc_cent <- tsclust(data, type = "hierarchical", k = 20L,
+    hc_cent <- tsclust(data_subset, type = "hierarchical", k = 2L,
                        distance = "sbd",
-                       preproc = zscore, centroid = shape_extraction,
-                       seed = 320,
-                       control = hierarchical_control(method = "all"))
+                       preproc = zscore, centroid = sdtw_cent,
+                       seed = 320)
     hc_cent <- lapply(hc_cent, reset_nondeterministic)
     assign("hc_cent", hc_cent, persistent)
 })

@@ -394,7 +394,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     } else dba_allocated <- FALSE
 
     # pre-allocate matrix for sdtw_cent
-    if (grepl("^sdtw_cent$", cent_char, ignore.case = TRUE) && is.null(args$cent$cm)) {
+    if (grepl("^sdtw_cent$", cent_char, ignore.case = TRUE) &&
+        (is.null(args$cent$cm) || is.null(args$cent$dm) || is.null(args$cent$em)))
+    {
         sdtwc_allocated <- TRUE
         if (!exists("N", mode = "integer", inherits = FALSE)) N <- max(sapply(series, NROW))
         args$cent$cm <- matrix(0, N + 2L, N + 2L)
