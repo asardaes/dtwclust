@@ -26,6 +26,8 @@ with(persistent, {
         expect_known_value(cent_dba, file_name(cent_dba, x32 = TRUE), info = "Univariate")
         expect_known_value(cent_mv_dba, file_name(cent_mv_dba, x32 = TRUE), info = "Multivariate")
         expect_known_value(cent_mv_dba_bys, file_name(cent_mv_dba_bys), info = "DBA by series")
+        expect_known_value(cent_sdtwc, file_name(cent_sdtwc), info = "SDTWC Univariate")
+        expect_known_value(cent_mv_sdtwc, file_name(cent_mv_sdtwc), info = "SDTWC Multivariate")
     })
 })
 

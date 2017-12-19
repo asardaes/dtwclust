@@ -64,6 +64,7 @@ with(persistent, {
         expect_known_value(pc_dba, file_name(pc_dba))
         expect_known_value(pc_mv_pam, file_name(pc_mv_pam))
         expect_known_value(pc_mv_dba, file_name(pc_mv_dba))
+        expect_known_value(pc_sdtw, file_name(pc_sdtw))
 
         expect_known_value(pc_tadp, file_name(pc_tadp))
         expect_known_value(pc_tadp_lbi, file_name(pc_tadp_lbi))

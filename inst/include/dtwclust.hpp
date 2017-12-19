@@ -49,6 +49,23 @@ SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U)
     return fun(X, Y, WINDOW, P, L, U);
 }
 
+SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID, SEXP GAMMA, SEXP WEIGHTS, SEXP MV,
+               SEXP COSTMAT, SEXP DISTMAT, SEXP EM)
+{
+    static SEXP(*fun)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP) = NULL;
+    if(fun == NULL)
+        fun = (SEXP(*)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP)) R_GetCCallable("dtwclust", "sdtw_cent");
+    return fun(SERIES, CENTROID, GAMMA, WEIGHTS, MV, COSTMAT, DISTMAT, EM);
+}
+
+SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT, SEXP MV)
+{
+    static SEXP(*fun)(SEXP, SEXP, SEXP, SEXP, SEXP) = NULL;
+    if(fun == NULL)
+        fun = (SEXP(*)(SEXP, SEXP, SEXP, SEXP, SEXP)) R_GetCCallable("dtwclust", "soft_dtw");
+    return fun(X, Y, GAMMA, COSTMAT, DISTMAT, MV);
+}
+
 SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
                         SEXP LB, SEXP UB, SEXP TRACE,
                         SEXP LIST)

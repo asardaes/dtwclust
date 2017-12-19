@@ -33,10 +33,14 @@ SparseDistmat <- methods::setRefClass(
 
             callSuper(..., control = control)
             symmetric <<- control$symmetric
+            if (list(...)$distance != "sdtw")
+                x <- 0
+            else
+                x <- do.call(distfun, enlist(series, pairwise = TRUE, dots = dist_args), TRUE)
 
             distmat <<- Matrix::sparseMatrix(i = 1L:length(series),
                                              j = 1L:length(series),
-                                             x = 0,
+                                             x = as.numeric(x),
                                              symmetric = control$symmetric)
 
             if (isTRUE(control$symmetric) && distmat@uplo != "L") distmat <<- t(distmat)

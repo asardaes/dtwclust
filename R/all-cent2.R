@@ -97,6 +97,27 @@ all_cent2 <- function(case = NULL, control) {
     }
 
     # ----------------------------------------------------------------------------------------------
+    # sdtw_cent
+    sdtw_cent_cent <- function(x, x_split, cent, id_changed, cl_id, ...) {
+        # not all arguments are used, but I want them to be isolated from ellipsis
+        dots <- list(...)
+        dots$error.check <- FALSE
+        x_split <- split_parallel(x_split)
+        cent <- split_parallel(cent)
+
+        # return
+        foreach(x_split = x_split, cent = cent,
+                .combine = c,
+                .multicombine = TRUE,
+                .packages = "dtwclust",
+                .export = c("enlist")) %op% {
+                    Map(x_split, cent, f = function(x, cent) {
+                        do.call(sdtw_cent, enlist(series = x, centroid = cent, dots = dots), TRUE)
+                    })
+                }
+    }
+
+    # ----------------------------------------------------------------------------------------------
     # mean
     mean_cent <- function(x_split, ...) {
         # return

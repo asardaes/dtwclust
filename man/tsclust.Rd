@@ -111,6 +111,7 @@ among the \eqn{j} series that belong to the same cluster for all time points \eq
 resulting centroids will also have this normalization. See \code{\link[=shape_extraction]{shape_extraction()}} for more
 details.
 \item "dba": DTW Barycenter Averaging. See \code{\link[=DBA]{DBA()}} for more details.
+\item "sdtw_cent": Soft-DTW centroids, See \code{\link[=sdtw_cent]{sdtw_cent()}} for more details.
 \item "pam": Partition around medoids (PAM). This basically means that the cluster centroids are
 always one of the time series in the data. In this case, the distance matrix can be
 pre-computed once using all time series in the data and then re-used at each iteration. It
@@ -120,13 +121,13 @@ usually saves overhead overall for small datasets (see \link{tsclust-controls}).
 whole cross-distance matrix.
 }
 
-These check for the special cases where parallelization might be desired. Note that only
-\code{shape}, \code{dba}, \code{pam} and \code{fcmdd} support series of different length. Also note that, for
-\code{shape} and \code{dba}, this support has a caveat: the final centroids' length will depend on the
-length of those series that were randomly chosen at the beginning of the clustering algorithm.
-For example, if the series in the dataset have a length of either 10 or 15, 2 clusters are
-desired, and the initial choice selects two series with length of 10, the final centroids will
-have this same length.
+The \code{dba}, \code{shape} and \code{sdtw_cent} implementations check for parallelization. Note that only
+\code{shape}, \code{dba}, \code{sdtw_cent}, \code{pam} and \code{fcmdd} support series of different length. Also note
+that for \code{shape}, \code{dba} and \code{sdtw_cent}, this support has a caveat: the final centroids' length
+will depend on the length of those series that were randomly chosen at the beginning of the
+clustering algorithm. For example, if the series in the dataset have a length of either 10 or
+15, 2 clusters are desired, and the initial choice selects two series with length of 10, the
+final centroids will have this same length.
 
 As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid
 function that takes a list of series as first input. It will also receive the contents of
@@ -161,6 +162,7 @@ constraint. See \code{\link[=lb_keogh]{lb_keogh()}}.
 constraint. See \code{\link[=lb_improved]{lb_improved()}}.
 \item \code{"sbd"}: Shape-based distance. See \code{\link[=SBD]{SBD()}}.
 \item \code{"gak"}: Global alignment kernels. See \code{\link[=GAK]{GAK()}}.
+\item \code{"sdtw"}: Soft-DTW. See \code{\link[=sdtw]{sdtw()}}.
 }
 
 Out of the aforementioned, only the distances based on DTW lower bounds \emph{don't} support series

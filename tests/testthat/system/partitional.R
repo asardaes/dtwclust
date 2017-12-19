@@ -122,6 +122,13 @@ test_that("Partitional clustering works as expected.", {
                          seed = 938)
     pc_mv_dba <- reset_nondeterministic(pc_mv_dba)
     assign("pc_mv_dba", pc_mv_dba, persistent)
+
+    ## ---------------------------------------------------------- sdtw
+    pc_sdtw <- tsclust(data_multivariate, type = "p", k = 4L,
+                       distance = "sdtw", centroid = "sdtw_cent",
+                       seed = 938)
+    pc_sdtw <- reset_nondeterministic(pc_sdtw)
+    assign("pc_sdtw", pc_sdtw, persistent)
 })
 
 # ==================================================================================================

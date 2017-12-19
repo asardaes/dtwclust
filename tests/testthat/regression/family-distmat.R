@@ -23,6 +23,7 @@ with(persistent, {
         expect_known_value(distmat_dtw2, file_name(distmat_dtw2), info = "DTW2")
         expect_known_value(distmat_dtwb, file_name(distmat_dtwb), info = "DTW_BASIC")
         expect_known_value(distmat_gak, file_name(distmat_gak), info = "GAK")
+        expect_known_value(distmat_sdtw, file_name(distmat_sdtw), info = "SDTW")
     })
 })
 

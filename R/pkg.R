@@ -131,6 +131,13 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
                                description = "Fast (triangular) global alignment kernel similarity",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
+    # Register soft-DTW
+    if (!check_consistency("sdtw", "dist", silent = TRUE))
+        proxy::pr_DB$set_entry(FUN = sdtw_proxy, names=c("sdtw", "SDTW", "soft-DTW"),
+                               loop = FALSE, type = "metric", distance = TRUE,
+                               description = "Soft-DTW",
+                               PACKAGE = "dtwclust", PREFUN = proxy_prefun)
+
     RNGkind("L'Ecuyer")
 
     # avoids default message if no backend exists
@@ -156,6 +163,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
     if (check_consistency("DTW_LB", "dist", silent = TRUE)) proxy::pr_DB$delete_entry("DTW_LB")
     if (check_consistency("GAK", "dist", silent = TRUE)) proxy::pr_DB$delete_entry("GAK")
     if (check_consistency("uGAK", "dist", silent = TRUE)) proxy::pr_DB$delete_entry("uGAK")
+    if (check_consistency("sdtw", "dist", silent = TRUE)) proxy::pr_DB$delete_entry("sdtw")
     library.dynam.unload("dtwclust", libpath)
 }
 

@@ -8,11 +8,11 @@ context("    Included distances")
 ols <- ls()
 
 # Functions
-functions <- c("lb_keogh", "lb_improved", "dtw_lb", "SBD", "dtw_basic", "GAK")
+functions <- c("lb_keogh", "lb_improved", "dtw_lb", "SBD", "dtw_basic", "GAK", "sdtw")
 
 # Support
-supports_mv <- c("dtw_basic", "GAK")
-supports_diff_lengths <- c("SBD", "dtw_basic", "GAK")
+supports_mv <- c("dtw_basic", "GAK", "sdtw")
+supports_diff_lengths <- c("SBD", "dtw_basic", "GAK", "sdtw")
 
 # Extra arguments
 args <- list(
@@ -48,6 +48,9 @@ args <- list(
         list(sigma = 100, window.size = 15L),
         list(sigma = 100, window.size = NULL),
         list(sigma = 100, normalize = FALSE)
+    ),
+    sdtw = list(
+        list()
     )
 )
 
@@ -101,7 +104,7 @@ test_that("Invalid inputs are detected correctly in the distance functions.", {
 # valid inputs
 # ==================================================================================================
 
-test_that("Valid inputs provide a result greater than zero", {
+test_that("Valid inputs provide a result different than zero", {
     for (foo in functions) {
         for (arg in args[[foo]]) {
             distance_value <- do.call(foo,
@@ -110,7 +113,7 @@ test_that("Valid inputs provide a result greater than zero", {
                                         arg))
 
             if (foo %in% c("lb_keogh", "SBD")) distance_value <- distance_value$d
-            expect_gt(distance_value, 0, label = paste0("distance with ", foo))
+            expect_true(distance_value != 0, label = paste0("distance with ", foo))
 
             if (mv <- foo %in% supports_mv) {
                 distance_value <- do.call(foo,
@@ -118,7 +121,7 @@ test_that("Valid inputs provide a result greater than zero", {
                                                  y = y_mv_same_length),
                                             arg))
 
-                expect_gt(distance_value, 0, label = paste0("multivariate distance with ", foo))
+                expect_true(distance_value != 0, label = paste0("multivariate distance with ", foo))
             }
 
             if (dl <- foo %in% supports_diff_lengths) {
@@ -128,7 +131,7 @@ test_that("Valid inputs provide a result greater than zero", {
                                             arg))
 
                 if (foo %in% c("SBD")) distance_value <- distance_value$d
-                expect_gt(distance_value, 0, label = paste0("distance with different lengths with ", foo))
+                expect_true(distance_value != 0, label = paste0("distance with different lengths with ", foo))
             }
 
             if (mv && dl) {
@@ -137,7 +140,7 @@ test_that("Valid inputs provide a result greater than zero", {
                                                  y = y_mv_diff_length),
                                             arg))
 
-                expect_gt(distance_value, 0, label = paste0("multivariate distance with different lengths with ", foo))
+                expect_true(distance_value != 0, label = paste0("multivariate distance with different lengths with ", foo))
             }
         }
     }
@@ -256,6 +259,22 @@ test_that("Inconsistencies in parameter 'logs' for GAK() are detected.", {
 
     int_logs <- matrix(0L, length(x_uv) + 1L, 3L)
     expect_error(GAK(x_uv, x_uv, logs = int_logs),
+                 regexp = "storage mode")
+})
+
+# ==================================================================================================
+# sdtw
+# ==================================================================================================
+
+test_that("Inconsistencies in parameters for sdtw() are detected.", {
+    expect_error(sdtw(x_uv, x_uv, gamma = -0.01), "gamma.*positive")
+
+    cm_wrong_dim <- matrix(0, 2L, 2L)
+    expect_error(sdtw(x_uv, x_uv, cm = cm_wrong_dim),
+                 regexp = "inconsistency")
+
+    int_cm <- matrix(0L, length(x_uv) + 1L, length(x_uv) + 1L)
+    expect_error(sdtw(x_uv, x_uv, cm = int_cm),
                  regexp = "storage mode")
 })
 

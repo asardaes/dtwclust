@@ -44,7 +44,7 @@ cfgs <- compare_clusterings_configs(c("p", "h", "f", "t"), k = 2L:3L,
                                             pam.precompute = c(FALSE, TRUE),
                                             iter.max = 10L,
                                             nrep = 2L,
-                                            version = 1L
+                                            version = 2L
                                         ),
                                         hierarchical = hierarchical_control(
                                             method = "all"
@@ -53,7 +53,7 @@ cfgs <- compare_clusterings_configs(c("p", "h", "f", "t"), k = 2L:3L,
                                             fuzziness = c(2, 2.5),
                                             iter.max = 10L,
                                             delta = c(0.1, 0.01),
-                                            version = 1L
+                                            version = 2L
                                         ),
                                         tadpole = tadpole_control(
                                             dc = c(1.5, 2),
@@ -110,8 +110,8 @@ cfgs_gak <- compare_clusterings_configs(types = "p", k = 2L:3L,
                                         controls = list(
                                             partitional = partitional_control(
                                                 iter.max = 5L,
-                                                nrep = 2L,
-                                                version = 1L
+                                                nrep = 1L,
+                                                version = 2L
                                             )
                                         ),
                                         preprocs = pdc_configs(
@@ -144,7 +144,22 @@ cfgs_dba <- compare_clusterings_configs(types = "h", k = 2L:3L,
                                         )
 )
 
-cfgs_mats <- compare_clusterings_configs(types = "h", k = 2L:3L,
+cfgs_sdtwc <- compare_clusterings_configs(types = "h", k = 2L,
+                                          preprocs = pdc_configs(
+                                              "preproc",
+                                              none = list()
+                                          ),
+                                          distances = pdc_configs(
+                                              "distance",
+                                              sdtw = list()
+                                          ),
+                                          centroids = pdc_configs(
+                                              "centroid",
+                                              sdtw_cent = list()
+                                          )
+)
+
+cfgs_mats <- compare_clusterings_configs(types = "h", k = 2L,
                                          preprocs = pdc_configs(
                                              "preproc",
                                              none = list()
@@ -152,12 +167,14 @@ cfgs_mats <- compare_clusterings_configs(types = "h", k = 2L:3L,
                                          distances = pdc_configs(
                                              "distance",
                                              gak = list(window.size = 20L,
-                                                        sigma = 100)
+                                                        sigma = 100),
+                                             sdtw = list()
                                          ),
                                          centroids = pdc_configs(
                                              "centroid",
                                              DBA = list(window.size = 20L,
-                                                        max.iter = 5L)
+                                                        max.iter = 5L),
+                                             sdtw_cent = list()
                                          )
 )
 
@@ -239,20 +256,37 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                           score.clus = score_fun,
                                           lbls = labels_subset)
 
+    sdtwc_comparison <- compare_clusterings(data_subset, "h",
+                                            configs = cfgs_sdtwc, seed = 3290L,
+                                            score.clus = score_fun,
+                                            lbls = labels_subset)
+
     N <- max(lengths(data_subset)) + 1L
     logs <- matrix(0, N, 3L)
     gcm <- matrix(0, N, N)
+    cm <- matrix(0, N + 1L, N + 1L)
+    dm <- matrix(0, N, N)
+    em <- matrix(0, 2L, N + 1L)
     mats_comparison <- compare_clusterings(data_subset, "h",
                                            configs = cfgs_mats, seed = 9430L,
                                            logs = logs,
                                            gcm = gcm,
+                                           cm = cm,
+                                           dm = dm,
+                                           em = em,
                                            return.objects = TRUE)
 
-    expect_true(all(c("gcm", "logs") %in% names(mats_comparison$objects.hierarchical$config1_1@dots)))
+    expect_true(all(
+        c("gcm", "logs", "cm", "dm", "em") %in%
+            names(mats_comparison$objects.hierarchical$config1@dots)
+    ))
 
     if (foreach::getDoParWorkers() == 1L) {
         expect_false(all(logs == 0))
         expect_false(all(gcm == 0))
+        expect_false(all(cm == 0))
+        expect_false(all(dm == 0))
+        expect_false(all(em == 0))
     }
 
     ## rds
@@ -265,10 +299,12 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
     all_comparisons$objects.tadpole <- NULL
     gak_comparison$proc_time <- NULL
     dba_comparison$proc_time <- NULL
+    sdtwc_comparison$proc_time <- NULL
 
     assign("comp_all", all_comparisons, persistent)
     assign("comp_gak", gak_comparison, persistent)
     assign("comp_dba", dba_comparison, persistent)
+    assign("comp_sdtwc", sdtwc_comparison, persistent)
 })
 
 # ==================================================================================================

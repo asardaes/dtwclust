@@ -304,6 +304,96 @@ test_that("Operations with dba centroid complete successfully.", {
 })
 
 # ==================================================================================================
+# sdtw_cent
+# ==================================================================================================
+
+test_that("Operations with sdtw_cent centroid complete successfully.", {
+    family <- new("tsclustFamily", control = pt_ctrl, allcent = "sdtw_cent")
+
+    # cm
+    expect_error(
+        family@allcent(x,
+                       cl_id = cl_id,
+                       k = k,
+                       cent = x[c(1L,20L)],
+                       cl_old = 0L,
+                       cm = matrix(0, 2L, 2L)),
+        regexp = "Dimension inconsistency"
+    )
+    expect_error(
+        family@allcent(x,
+                       cl_id = cl_id,
+                       k = k,
+                       cent = x[c(1L,20L)],
+                       cl_old = 0L,
+                       cm = matrix(0L, 207L, 207L)),
+        regexp = "storage mode"
+    )
+    # dm
+    expect_error(
+        family@allcent(x,
+                       cl_id = cl_id,
+                       k = k,
+                       cent = x[c(1L,20L)],
+                       cl_old = 0L,
+                       dm = matrix(0, 2L, 2L)),
+        regexp = "Dimension inconsistency"
+    )
+    expect_error(
+        family@allcent(x,
+                       cl_id = cl_id,
+                       k = k,
+                       cent = x[c(1L,20L)],
+                       cl_old = 0L,
+                       dm = matrix(0L, 206L, 206L)),
+        regexp = "storage mode"
+    )
+    # em
+    expect_error(
+        family@allcent(x,
+                       cl_id = cl_id,
+                       k = k,
+                       cent = x[c(1L,20L)],
+                       cl_old = 0L,
+                       em = matrix(0, 2L, 2L)),
+        regexp = "Dimension inconsistency"
+    )
+    expect_error(
+        family@allcent(x,
+                       cl_id = cl_id,
+                       k = k,
+                       cent = x[c(1L,20L)],
+                       cl_old = 0L,
+                       em = matrix(0L, 2L, 207L)),
+        regexp = "storage mode"
+    )
+
+    ## ---------------------------------------------------------- univariate
+
+    cent_sdtwc <- family@allcent(x,
+                                 cl_id = cl_id,
+                                 k = k,
+                                 cent = x[c(1L,20L)],
+                                 cl_old = 0L)
+
+    expect_identical(length(cent_sdtwc), k)
+
+    ## ---------------------------------------------------------- multivariate
+    cent_mv_sdtwc <- family@allcent(x_mv,
+                                    cl_id = cl_id,
+                                    k = k,
+                                    cent = x_mv[c(1L,20L)],
+                                    cl_old = 0L)
+
+    expect_identical(length(cent_mv_sdtwc), k)
+    expect_identical(dim(cent_mv_sdtwc[[1L]]), dim(x_mv[[1L]]))
+
+    ## ---------------------------------------------------------- refs
+    assign("cent_sdtwc", cent_sdtwc, persistent)
+    assign("cent_mv_sdtwc", cent_mv_sdtwc, persistent)
+})
+
+# ==================================================================================================
 # clean
 # ==================================================================================================
 
