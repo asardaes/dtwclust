@@ -161,8 +161,8 @@ test_that("TADPole works as expected", {
     pc_tadp_cent <- reset_nondeterministic(pc_tadp_cent)
     assign("pc_tadp_cent", pc_tadp_cent, persistent)
 
-    pc_tadp_sdtwc <- tsclust(data_reinterpolated_subset, type = "t", k = 4L,
-                             preproc = zscore, centroid = sdtw_cent,
+    pc_tadp_sdtwc <- tsclust(data_reinterpolated_subset, type = "t", k = 2L,
+                             centroid = sdtw_cent,
                              control = tadpole_control(dc = 1.5, window.size = 20L),
                              seed = 938)
     expect_s4_class(pc_tadp_sdtwc, "PartitionalTSClusters")
