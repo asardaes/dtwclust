@@ -767,7 +767,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                 # do not specify centroid
                 tsc <- do.call(tsclust, this_args, TRUE)
 
-            } else if (centroid_char %in% centroids_included) {
+            } else if (type %in% c("partitional", "fuzzy") && centroid_char %in% centroids_included) {
                 # with included centroid
                 tsc <- do.call(tsclust,
                                enlist(centroid = centroid_char, dots = this_args),
