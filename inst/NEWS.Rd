@@ -7,7 +7,7 @@
     Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/master/CHANGELOG.md}
 }
 
-\section{Changes in version 5.0.0.9000}{
+\section{Changes in version 5.1.0}{
 \itemize{
     \item Added implementations of soft-DTW distance and centroid.
     \item Fixed the calculation of the \code{clusinfo} slot for \code{TSClusters} class for clusterings that ended with empty clusters.
