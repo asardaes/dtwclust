@@ -470,7 +470,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                                fuzzy = isTRUE(type == "fuzzy"),
                                                cent = cent_char,
                                                trace = trace,
-                                               args = args)))
+                                               args = args),
+                                        TRUE))
             } else {
                 # I need to re-register any custom distances in each parallel worker
                 dist_entry <- proxy::pr_DB$get_entry(distance)
