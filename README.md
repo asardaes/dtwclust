@@ -1,19 +1,41 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/dtwclust)](https://cran.r-project.org/package=dtwclust) [![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](http://cranlogs.r-pkg.org/badges/dtwclust) [![Travis-CI Build Status](https://travis-ci.org/asardaes/dtwclust.svg?branch=master)](https://travis-ci.org/asardaes/dtwclust) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/asardaes/dtwclust?branch=master&svg=true)](https://ci.appveyor.com/project/asardaes/dtwclust) [![codecov](https://codecov.io/gh/asardaes/dtwclust/branch/master/graph/badge.svg)](https://codecov.io/gh/asardaes/dtwclust)
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/dtwclust)](https://cran.r-project.org/package=dtwclust)
+[![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](http://cranlogs.r-pkg.org/badges/dtwclust)
+[![Travis-CI Build
+Status](https://travis-ci.org/asardaes/dtwclust.svg?branch=master)](https://travis-ci.org/asardaes/dtwclust)
+[![AppVeyor Build
+Status](https://ci.appveyor.com/api/projects/status/github/asardaes/dtwclust?branch=master&svg=true)](https://ci.appveyor.com/project/asardaes/dtwclust)
+[![codecov](https://codecov.io/gh/asardaes/dtwclust/branch/master/graph/badge.svg)](https://codecov.io/gh/asardaes/dtwclust)
 
 Time Series Clustering Along with Optimizations for the Dynamic Time Warping (DTW) Distance
 ===========================================================================================
 
-Time series clustering with a wide variety of strategies and a series of optimizations specific to the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs). There are implementations of both traditional clustering algorithms, and more recent procedures such as k-Shape and TADPole clustering. Functionality can be easily extended with custom distance measures and centroid definitions.
+Time series clustering with a wide variety of strategies and a series of
+optimizations specific to the Dynamic Time Warping (DTW) distance and
+its corresponding lower bounds (LBs). There are implementations of both
+traditional clustering algorithms, and more recent procedures such as
+k-Shape and TADPole clustering. Functionality can be easily extended
+with custom distance measures and centroid definitions.
 
-Many of the algorithms implemented in this package are specifically tailored to DTW, hence its name. However, the main clustering function is flexible so that one can test many different clustering approaches, using either the time series directly, or by applying suitable transformations and then clustering in the resulting space. Other implementations included in the package provide some alternatives to DTW.
+Many of the algorithms implemented in this package are specifically
+tailored to DTW, hence its name. However, the main clustering function
+is flexible so that one can test many different clustering approaches,
+using either the time series directly, or by applying suitable
+transformations and then clustering in the resulting space. Other
+implementations included in the package provide some alternatives to
+DTW.
 
 For more information:
 
--   [Vignette with theory](https://cran.r-project.org/web/packages/dtwclust/vignettes/dtwclust.pdf) (with examples in the appendices)
--   [Timing experiments](https://cran.r-project.org/web/packages/dtwclust/vignettes/timing-experiments.html)
--   [Functions' documentation](https://cran.r-project.org/web/packages/dtwclust/dtwclust.pdf)
--   [CRAN's time series view](https://cran.r-project.org/web/views/TimeSeries.html)
+-   [Vignette with
+    theory](https://cran.r-project.org/web/packages/dtwclust/vignettes/dtwclust.pdf)
+    (with examples in the appendices)
+-   [Timing
+    experiments](https://cran.r-project.org/web/packages/dtwclust/vignettes/timing-experiments.html)
+-   [Functions’
+    documentation](https://cran.r-project.org/web/packages/dtwclust/dtwclust.pdf)
+-   [CRAN’s time series
+    view](https://cran.r-project.org/web/views/TimeSeries.html)
 
 Implementations
 ---------------
@@ -23,28 +45,43 @@ Implementations
         -   Shape-based distance
         -   Shape extraction for time series
     -   TADPole clustering
--   DTW Barycenter Averaging
--   Keogh's and Lemire's DTW lower bounds
+-   An optimized version of DTW
+-   Keogh’s and Lemire’s DTW lower bounds
 -   Global alignment kernel (GAK) distance
--   Some multivariate support (GAK and DTW)
+-   DTW Barycenter Averaging
+-   Soft-DTW (distance and centroid)
+-   Some multivariate support (GAK, DTW and soft-DTW)
 -   Cluster validity indices (crisp and fuzzy, internal and external)
 -   Parallelization for most functions
 
 Installation
 ------------
 
-The latest version from CRAN can be installed with `install.packages("dtwclust")`.
+The latest version from CRAN can be installed with
+`install.packages("dtwclust")`.
 
-If you want to test the latest version from github, first install the [prerequisites for R package development](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites) (LaTeX is only neccesary if you want to build the vignette) as well as the [remotes package](https://cran.r-project.org/package=remotes), and then type `remotes::install_github("asardaes/dtwclust")`.
+If you want to test the latest version from github, first install the
+[prerequisites for R package
+development](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites)
+(LaTeX is only neccesary if you want to build the vignette) as well as
+the [remotes package](https://cran.r-project.org/package=remotes), and
+then type `remotes::install_github("asardaes/dtwclust")`.
 
-If you're wondering about which version to install, take a look at the [CHANGELOG](CHANGELOG.md) file, I try to keep it updated. Check the [Unix](https://travis-ci.org/asardaes/dtwclust) and [Windows](https://ci.appveyor.com/project/asardaes/dtwclust) continuous integration builds to make sure everything is working, but do note that they tend to fail for reasons unrelated to the package's functionality.
+If you’re wondering about which version to install, take a look at the
+[CHANGELOG](CHANGELOG.md) file, I try to keep it updated. Check the
+[Unix](https://travis-ci.org/asardaes/dtwclust) and
+[Windows](https://ci.appveyor.com/project/asardaes/dtwclust) continuous
+integration builds to make sure everything is working, but do note that
+they tend to fail for reasons unrelated to the package’s functionality.
 
 License
 -------
 
-GNU General Public License v3.0. See [license](LICENSE) and [copyrights](inst/COPYRIGHTS).
+GNU General Public License v3.0. See [license](LICENSE) and
+[copyrights](inst/COPYRIGHTS).
 
-This software package was developed independently of any organization or institution that is or has been associated with the author.
+This software package was developed independently of any organization or
+institution that is or has been associated with the author.
 
 Examples
 --------

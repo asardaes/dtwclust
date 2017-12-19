@@ -51,10 +51,12 @@ For more information:
         - Shape-based distance
         - Shape extraction for time series
     + TADPole clustering
-* DTW Barycenter Averaging
+* An optimized version of DTW
 * Keogh's and Lemire's DTW lower bounds
 * Global alignment kernel (GAK) distance
-* Some multivariate support (GAK and DTW)
+* DTW Barycenter Averaging
+* Soft-DTW (distance and centroid)
+* Some multivariate support (GAK, DTW and soft-DTW)
 * Cluster validity indices (crisp and fuzzy, internal and external)
 * Parallelization for most functions
 
