@@ -341,7 +341,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     distance <- tolower(distance)
     cent_missing <- missing(centroid)
     cent_char <- check_consistency(centroid, "cent", clus_type = type,
-                                   diff_lengths = diff_lengths, cent_missing = cent_missing)
+                                   diff_lengths = diff_lengths, cent_missing = cent_missing,
+                                   cent_char = as.character(substitute(centroid))[1L])
 
     if (type != "tadpole") {
         # symmetric versions of dtw that I know of
