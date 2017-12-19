@@ -3,7 +3,7 @@
 ## Version 5.1.0
 * Added implementations of soft-DTW distance and centroid.
 * Fixed the calculation of the `clusinfo` slot for `TSClusters` class for clusterings that ended with empty clusters.
-* Fixed logic in partitional/fuzzy clustering, which was preventing the usage of paralle backends when only one value of k and one repetition were made.
+* Fixed logic in partitional/fuzzy clustering, which was preventing the usage of parallel backends when only one value of k and one repetition were made.
 
 ## Version 5.0.0
 * Removed all deprecated code.
