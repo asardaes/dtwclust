@@ -82,7 +82,8 @@ test_that("Hierarchical clustering works as expected.", {
     hc_cent2 <- tsclust(data_subset, type = "hierarchical", k = 2L,
                         distance = "sbd", centroid = sdtw_cent,
                         seed = 320)
-    hc_cent2 <- lapply(hc_cent2, reset_nondeterministic)
+    hc_cent2 <- reset_nondeterministic(hc_cent2)
+    expect_identical(hc_cent2@centroid, "sdtw_cent")
     assign("hc_cent2", hc_cent2, persistent)
 })
 

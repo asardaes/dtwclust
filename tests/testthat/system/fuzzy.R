@@ -89,6 +89,7 @@ test_that("Operations with custom fuzzy centroid complete successfully.", {
                              seed = 123, trace = TRUE)
     )
     fcent_fcm <- reset_nondeterministic(fcent_fcm)
+    expect_identical(fcent_fcm@centroid, "myfcent")
 
     ## ---------------------------------------------------------- without dots
     myfcent <- allcent <- function(x, cl_id, k, cent, cl_old) {
@@ -104,6 +105,7 @@ test_that("Operations with custom fuzzy centroid complete successfully.", {
                                 seed = 123, trace = TRUE)
     )
     fcent_fcm_nd <- reset_nondeterministic(fcent_fcm_nd)
+    expect_identical(fcent_fcm@centroid, "myfcent")
 
     ## ---------------------------------------------------------- refs
     assign("fcent_fcm", fcent_fcm, persistent)

@@ -159,6 +159,7 @@ test_that("TADPole works as expected", {
                             seed = 938)
     expect_s4_class(pc_tadp_cent, "PartitionalTSClusters")
     pc_tadp_cent <- reset_nondeterministic(pc_tadp_cent)
+    expect_identical(pc_tadp_cent@centroid, "shape_extraction")
     assign("pc_tadp_cent", pc_tadp_cent, persistent)
 
     pc_tadp_sdtwc <- tsclust(data_reinterpolated_subset, type = "t", k = 2L,
@@ -166,6 +167,7 @@ test_that("TADPole works as expected", {
                              control = tadpole_control(dc = 1.5, window.size = 20L),
                              seed = 938)
     expect_s4_class(pc_tadp_sdtwc, "PartitionalTSClusters")
+    expect_identical(pc_tadp_sdtwc@centroid, "sdtw_cent")
 })
 
 # ==================================================================================================
