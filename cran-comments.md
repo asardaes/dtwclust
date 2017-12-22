@@ -1,8 +1,5 @@
 
-## Update to version 5.1.0
-* Adjusted tests for modified testthat API
-* New distance and centroid function
-* Minor bug fixes
+## Update to version 5.1.0.9000
 
 ## Test environments
 * Local GNU/Linux, R release
