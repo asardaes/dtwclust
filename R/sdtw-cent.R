@@ -19,7 +19,7 @@ sdtw_cent_nloptr <- function(centroid, series, gamma, weights, mv, dim0, cm, dm,
 #'   characteristics as the matrices in `series`.
 #' @param gamma Positive regularization parameter, with lower values resulting in less smoothing.
 #' @param weights A vector of weights for each element of `series`.
-#' @param ... Further arguments for [nloptr::nloptr()] (except `opts`).
+#' @param ... Further arguments for [nloptr::nloptr()] (except `opts` and `...`).
 #' @param opts List of options to pass to [nloptr::nloptr()].
 #' @template error-check
 #' @param cm,dm,em Optional helper matrices for the calculations. Used internally for memory
@@ -88,11 +88,24 @@ sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, le
     else if (storage.mode(em) != "double")
         stop("sdtw_cent: If provided, 'em' must have 'double' storage mode.")
 
+    dots <- list(...)
+    dots <- dots[intersect(names(dots), setdiff(names(formals(nloptr::nloptr)), "..."))]
     dim0 <- dim(centroid)
     if (mv) nm0 <- dimnames(centroid)
-    opt <- nloptr::nloptr(centroid, sdtw_cent_nloptr, opts = opts, ...,
-                          series = series, gamma = gamma, weights = weights, mv = mv, dim0 = dim0,
-                          cm = cm, dm = dm, em = em)
+    opt <- do.call(what = nloptr::nloptr, quote = TRUE, args = enlist(
+        x0 = centroid,
+        eval_f = sdtw_cent_nloptr,
+        opts = opts,
+        dots = dots,
+        series = series,
+        gamma = gamma,
+        weights = weights,
+        mv = mv,
+        dim0 = dim0,
+        cm = cm,
+        dm = dm,
+        em = em
+    ))
 
     cent_out <- opt$solution
     opt$solution <- NULL

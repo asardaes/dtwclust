@@ -21,7 +21,7 @@ characteristics as the matrices in \code{series}.}
 
 \item{weights}{A vector of weights for each element of \code{series}.}
 
-\item{...}{Further arguments for \code{\link[nloptr:nloptr]{nloptr::nloptr()}} (except \code{opts}).}
+\item{...}{Further arguments for \code{\link[nloptr:nloptr]{nloptr::nloptr()}} (except \code{opts} and \code{...}).}
 
 \item{opts}{List of options to pass to \code{\link[nloptr:nloptr]{nloptr::nloptr()}}.}
 
