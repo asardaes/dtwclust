@@ -108,7 +108,7 @@ sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, le
     ))
 
     cent_out <- opt$solution
-    opt$solution <- NULL
+    opt$call <- opt$solution <- NULL
     if (mv) {
         dim(cent_out) <- dim0
         dimnames(cent_out) <- nm0
