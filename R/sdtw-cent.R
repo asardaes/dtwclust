@@ -90,7 +90,7 @@ sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, le
 
     dim0 <- dim(centroid)
     if (mv) nm0 <- dimnames(centroid)
-    opt <- nloptr::nloptr(centroid, sdtw_cent_nloptr, opts = opts,
+    opt <- nloptr::nloptr(centroid, sdtw_cent_nloptr, opts = opts, ...,
                           series = series, gamma = gamma, weights = weights, mv = mv, dim0 = dim0,
                           cm = cm, dm = dm, em = em)
 

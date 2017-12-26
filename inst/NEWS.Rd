@@ -9,6 +9,6 @@
 
 \section{Changes in version 5.1.0.9000}{
 \itemize{
-    \item TBA
+    \item The ellipsis in \code{sdtw_cent} is now actually passed to \code{nloptr}.
 }
 }
