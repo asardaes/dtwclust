@@ -118,7 +118,6 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
 # Loop without using native 'proxy' looping (to avoid multiple calculations of the envelope)
 # ==================================================================================================
 
-#' @importFrom bigmemory attach.big.matrix
 #' @importFrom bigmemory describe
 #' @importFrom bigmemory is.big.matrix
 #'
@@ -127,6 +126,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 {
     norm <- match.arg(norm, c("L1", "L2"))
     window.size <- check_consistency(window.size, "window")
+    dots <- list(...)
     x <- tslist(x)
     if (error.check) check_consistency(x, "tslist")
 
@@ -138,12 +138,12 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         if (error.check) check_consistency(y, "tslist")
     }
 
-    if (is_multivariate(c(x,y)))
-        stop("lb_improved does not support multivariate series.")
-
+    if (is_multivariate(c(x,y))) stop("lb_improved does not support multivariate series.")
     pairwise <- isTRUE(pairwise)
     dim_out <- c(length(x), length(y))
     dim_names <- list(names(x), names(y))
+
+    # Get appropriate matrix/big.matrix
     D <- allocate_distmat(length(x), length(y), pairwise, FALSE) # utils.R
 
     envelopes <- lapply(y, function(s) { compute_envelope(s, window.size, error.check = FALSE) })
@@ -178,29 +178,15 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     }
 
     # Calculate distance matrix
-    foreach(x = x, y = y, lower.env = lower.env, upper.env = upper.env, endpoints = endpoints,
-            .combine = c,
-            .multicombine = TRUE,
-            .packages = packages,
-            .export = c("lbi_loop", "enlist"),
-            .noexport = noexport) %op% {
-                bigmat <- !is.null(D_desc)
-                d <- if (bigmat) bigmemory::attach.big.matrix(D_desc)@address else D
-                do.call(lbi_loop,
-                        enlist(d = d,
-                               x = x,
-                               y = y,
-                               lower.env = lower.env,
-                               upper.env = upper.env,
-                               pairwise = pairwise,
-                               endpoints = endpoints,
-                               bigmat = bigmat,
-                               window.size = window.size,
-                               norm = norm),
-                        TRUE)
-            }
+    foreach_extra_args <- list(lower.env = lower.env, upper.env = upper.env)
+    symmetric <- FALSE # needed to evaluate expression below
+    dots$window.size <- window.size
+    dots$norm <- norm
+    dots$lower.env <- quote(lower.env)
+    dots$upper.env <- quote(upper.env)
+    .distfun_ <- lbi_loop
+    eval(foreach_loop_expression) # expressions-proxy.R
 
-    D <- D[,]
     if (pairwise) {
         class(D) <- "pairdist"
 
@@ -226,8 +212,8 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 # Wrapper for C++
 # ==================================================================================================
 
-lbi_loop <- function(d, x, y, lower.env, upper.env, pairwise, endpoints, bigmat, ...,
-                     window.size, norm)
+lbi_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ...,
+                     lower.env, upper.env, window.size, norm)
 {
     p <- switch(norm, "L1" = 1L, "L2" = 2L)
     len <- length(x[[1L]])

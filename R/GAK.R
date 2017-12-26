@@ -164,7 +164,6 @@ gak <- GAK
 # Wrapper for proxy::dist
 # ==================================================================================================
 
-#' @importFrom bigmemory attach.big.matrix
 #' @importFrom bigmemory describe
 #' @importFrom bigmemory is.big.matrix
 #'
@@ -177,7 +176,9 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         normalize <- TRUE
     } # nocov end
 
+    dots <- list(...)
     x <- tslist(x)
+
     if (error.check) check_consistency(x, "vltslist")
 
     if (is.null(y)) {
@@ -198,18 +199,21 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     # parallel chunks are made column-wise, so flip x and y if necessary
     flip <- NULL
     num_workers <- foreach::getDoParWorkers()
-
     if (!pairwise && !symmetric && length(y) < num_workers && length(x) >= num_workers) {
         flip <- y
         y <- x
         x <- flip
     }
 
-    # pre-allocate logs
     if (is.null(logs)) logs <- matrix(0, max(sapply(x, NROW), sapply(y, NROW)) + 1L, 3L)
+    dots$logs <- logs
+    dots$sigma <- sigma
+    dots$window.size <- window.size
     pairwise <- isTRUE(pairwise)
     dim_out <- c(length(x), length(y))
     dim_names <- list(names(x), names(y))
+
+    # Get appropriate matrix/big.matrix
     D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # utils.R
 
     if (normalize) {
@@ -230,22 +234,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     }
 
     # Wrap as needed for foreach
-    if (pairwise) {
-        x <- split_parallel(x)
-        y <- split_parallel(y)
-        validate_pairwise(x, y)
-        endpoints <- attr(x, "endpoints")
-
-    } else if (symmetric) {
-        endpoints <- symmetric_loop_endpoints(length(x)) # utils.R
-        x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
-        y <- x
-
-    } else {
-        x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
-        y <- split_parallel(y)
-        endpoints <- attr(y, "endpoints")
-    }
+    eval(foreach_wrap_expression) # expressions-proxy.R
 
     if (bigmemory::is.big.matrix(D)) {
         D_desc <- bigmemory::describe(D)
@@ -259,29 +248,10 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     }
 
     # Calculate distance matrix
-    foreach(x = x, y = y, endpoints = endpoints,
-            .combine = c,
-            .multicombine = TRUE,
-            .packages = packages,
-            .export = c("gak_loop"),
-            .noexport = noexport) %op% {
-                bigmat <- !is.null(D_desc)
-                d <- if (bigmat) bigmemory::attach.big.matrix(D_desc)@address else D
-                do.call(gak_loop,
-                        list(d = d,
-                             x = x,
-                             y = y,
-                             symmetric = symmetric,
-                             pairwise = pairwise,
-                             endpoints = endpoints,
-                             bigmat = bigmat,
-                             window.size = window.size,
-                             sigma = sigma,
-                             logs = logs),
-                        TRUE)
-            }
+    foreach_extra_args <- list()
+    .distfun_ <- gak_loop
+    eval(foreach_loop_expression) # expressions-proxy.R
 
-    D <- D[,]
     if (pairwise) {
         if (normalize) D <- 1 - exp(D - 0.5 * (gak_x + gak_y))
         class(D) <- "pairdist"
@@ -306,15 +276,13 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
 # ==================================================================================================
 
 gak_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ...,
-                     window.size, sigma, logs)
+                     window.size = NULL, sigma, logs)
 {
     # checks dimension consistency
     mv <- is_multivariate(c(x,y))
 
     nr <- max(sapply(x, NROW), sapply(y, NROW)) + 1L
-    if (is.null(logs))
-        logs <- matrix(0, nr, 3L)
-    else if (!is.matrix(logs) || nrow(logs) < nr || ncol(logs) < 3L)
+    if (!is.matrix(logs) || nrow(logs) < nr || ncol(logs) < 3L)
         stop("GAK: Dimension inconsistency in 'logs'")
     else if (storage.mode(logs) != "double")
         stop("GAK: If provided, 'logs' must have 'double' storage mode.")

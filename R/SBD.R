@@ -130,13 +130,13 @@ sbd <- SBD
 # Wrapper for proxy::dist
 # ==================================================================================================
 
-#' @importFrom bigmemory attach.big.matrix
 #' @importFrom bigmemory describe
 #' @importFrom bigmemory is.big.matrix
 #' @importFrom stats fft
 #' @importFrom stats nextn
 #'
 SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairwise = FALSE) {
+    dots <- list(...)
     x <- tslist(x)
 
     if (error.check) check_consistency(x, "vltslist")
@@ -169,6 +169,8 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     pairwise <- isTRUE(pairwise)
     dim_out <- c(length(x), length(y))
     dim_names <- list(names(x), names(y))
+
+    # Get appropriate matrix/big.matrix
     D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # utils.R
 
     # Wrap as needed for foreach
@@ -207,18 +209,13 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     }
 
     # Calculate distance matrix
-    foreach(x = x, y = y, fftx = fftx, ffty = ffty, endpoints = endpoints,
-            .combine = c,
-            .multicombine = TRUE,
-            .packages = packages,
-            .export = "sbd_loop",
-            .noexport = noexport) %op% {
-                bigmat <- !is.null(D_desc)
-                d <- if (bigmat) bigmemory::attach.big.matrix(D_desc)@address else D
-                sbd_loop(d, x, y, fftx, ffty, fftlen, symmetric, pairwise, endpoints, bigmat)
-            }
+    foreach_extra_args <- list(fftx = fftx, ffty = ffty)
+    dots$fftlen <- fftlen
+    dots$fftx <- quote(fftx)
+    dots$ffty <- quote(ffty)
+    .distfun_ <- sbd_loop
+    eval(foreach_loop_expression) # expressions-proxy.R
 
-    D <- D[,]
     if (pairwise) {
         class(D) <- "pairdist"
 
@@ -237,7 +234,9 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
 # Wrapper for C++
 # ==================================================================================================
 
-sbd_loop <- function(d, x, y, fftx, ffty, fftlen, symmetric, pairwise, endpoints, bigmat) {
+sbd_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ...,
+                     fftx, ffty, fftlen)
+{
     .Call(C_sbd_loop,
           d, x, y, fftx, ffty, fftlen, symmetric, pairwise, endpoints, bigmat,
           PACKAGE = "dtwclust")

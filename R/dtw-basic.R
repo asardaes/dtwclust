@@ -121,16 +121,14 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 # Wrapper for proxy::dist
 # ==================================================================================================
 
-#' @importFrom bigmemory attach.big.matrix
 #' @importFrom bigmemory describe
 #' @importFrom bigmemory is.big.matrix
 #'
 dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pairwise = FALSE) {
-    x <- tslist(x)
-    if (error.check) check_consistency(x, "vltslist")
-
     dots <- list(...)
-    retclass <- "crossdist"
+    x <- tslist(x)
+
+    if (error.check) check_consistency(x, "vltslist")
 
     if (is.null(y)) {
         y <- x
@@ -142,30 +140,16 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
         symmetric <- FALSE
     }
 
-    # pre-allocate gcm
-    if(is.null(gcm)) gcm <- matrix(0, 2L, max(sapply(y, NROW)) + 1L)
+    if (is.null(gcm)) gcm <- matrix(0, 2L, max(sapply(y, NROW)) + 1L)
+    dots$gcm <- gcm
     pairwise <- isTRUE(pairwise)
     dim_out <- c(length(x), length(y))
     dim_names <- list(names(x), names(y))
+
+    # Get appropriate matrix/big.matrix
     D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # utils.R
-
     # Wrap as needed for foreach
-    if (pairwise) {
-        x <- split_parallel(x)
-        y <- split_parallel(y)
-        validate_pairwise(x, y)
-        endpoints <- attr(x, "endpoints")
-
-    } else if (symmetric) {
-        endpoints <- symmetric_loop_endpoints(length(x)) # utils.R
-        x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
-        y <- x
-
-    } else {
-        x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
-        y <- split_parallel(y)
-        endpoints <- attr(y, "endpoints")
-    }
+    eval(foreach_wrap_expression) # expressions-proxy.R
 
     if (bigmemory::is.big.matrix(D)) {
         D_desc <- bigmemory::describe(D)
@@ -179,28 +163,10 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
     }
 
     # Calculate distance matrix
-    foreach(x = x, y = y, endpoints = endpoints,
-            .combine = c,
-            .multicombine = TRUE,
-            .packages = packages,
-            .export = c("dtwb_loop", "enlist"),
-            .noexport = noexport) %op% {
-                bigmat <- !is.null(D_desc)
-                d <- if (bigmat) bigmemory::attach.big.matrix(D_desc)@address else D
-                do.call(dtwb_loop,
-                        enlist(d = d,
-                               x = x,
-                               y = y,
-                               symmetric = symmetric,
-                               pairwise = pairwise,
-                               endpoints = endpoints,
-                               bigmat = bigmat,
-                               gcm = gcm,
-                               dots = dots),
-                        TRUE)
-            }
+    foreach_extra_args <- list()
+    .distfun_ <- dtwb_loop
+    eval(foreach_loop_expression) # expressions-proxy.R
 
-    D <- D[,]
     if (pairwise) {
         class(D) <- "pairdist"
 
@@ -223,7 +189,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
 #' @importFrom dtw symmetric2
 #'
 dtwb_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ..., normalize = FALSE,
-                      window.size = NULL, norm = "L1", step.pattern = dtw::symmetric2, gcm = NULL)
+                      window.size = NULL, norm = "L1", step.pattern = dtw::symmetric2, gcm)
 {
     if (is.null(window.size))
         window.size <- -1L
@@ -245,9 +211,7 @@ dtwb_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ..., norm
     backtrack <- FALSE
 
     nc <- max(sapply(y, NROW)) + 1L
-    if (is.null(gcm))
-        gcm <- matrix(0, 2L, nc)
-    else if (!is.matrix(gcm) || nrow(gcm) < 2L || ncol(gcm) < nc)
+    if (!is.matrix(gcm) || nrow(gcm) < 2L || ncol(gcm) < nc)
         stop("dtw_basic: Dimension inconsistency in 'gcm'")
     if (storage.mode(gcm) != "double")
         stop("dtw_basic: If provided, 'gcm' must have 'double' storage mode.")

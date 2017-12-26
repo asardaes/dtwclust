@@ -53,16 +53,14 @@ sdtw <- function(x, y, gamma = 0.01, ..., cm = NULL, error.check = TRUE)
 # Wrapper for proxy::dist
 # ==================================================================================================
 
-#' @importFrom bigmemory attach.big.matrix
 #' @importFrom bigmemory describe
 #' @importFrom bigmemory is.big.matrix
 #'
 sdtw_proxy <- function(x, y = NULL, ..., cm = NULL, error.check = TRUE, pairwise = FALSE) {
-    x <- tslist(x)
-    if (error.check) check_consistency(x, "vltslist")
-
     dots <- list(...)
-    retclass <- "crossdist"
+    x <- tslist(x)
+
+    if (error.check) check_consistency(x, "vltslist")
 
     if (is.null(y)) {
         y <- x
@@ -74,31 +72,18 @@ sdtw_proxy <- function(x, y = NULL, ..., cm = NULL, error.check = TRUE, pairwise
         symmetric <- FALSE
     }
 
-    # pre-allocate cm
-    if(is.null(cm)) cm <- matrix(0, max(sapply(x, NROW)) + 1L, max(sapply(y, NROW)) + 1L)
+    if (is.null(cm)) cm <- matrix(0, max(sapply(x, NROW)) + 1L, max(sapply(y, NROW)) + 1L)
+    dots$cm <- cm
     pairwise <- isTRUE(pairwise)
     dim_out <- c(length(x), length(y))
     dim_names <- list(names(x), names(y))
+    if (!pairwise && symmetric) diagonal <- sdtw_proxy(x, ..., cm = cm,
+                                                       error.check = FALSE, pairwise = TRUE)
+
+    # Get appropriate matrix/big.matrix
     D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # utils.R
-
     # Wrap as needed for foreach
-    if (pairwise) {
-        x <- split_parallel(x)
-        y <- split_parallel(y)
-        validate_pairwise(x, y)
-        endpoints <- attr(x, "endpoints")
-
-    } else if (symmetric) {
-        endpoints <- symmetric_loop_endpoints(length(x)) # utils.R
-        diagonal <- sdtw_proxy(x, ..., cm = cm, error.check = FALSE, pairwise = TRUE)
-        x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
-        y <- x
-
-    } else {
-        x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
-        y <- split_parallel(y)
-        endpoints <- attr(y, "endpoints")
-    }
+    eval(foreach_wrap_expression) # expressions-proxy.R
 
     if (bigmemory::is.big.matrix(D)) {
         D_desc <- bigmemory::describe(D)
@@ -112,28 +97,10 @@ sdtw_proxy <- function(x, y = NULL, ..., cm = NULL, error.check = TRUE, pairwise
     }
 
     # Calculate distance matrix
-    foreach(x = x, y = y, endpoints = endpoints,
-            .combine = c,
-            .multicombine = TRUE,
-            .packages = packages,
-            .export = c("sdtw_loop", "enlist"),
-            .noexport = noexport) %op% {
-                bigmat <- !is.null(D_desc)
-                d <- if (bigmat) bigmemory::attach.big.matrix(D_desc)@address else D
-                do.call(sdtw_loop,
-                        enlist(d = d,
-                               x = x,
-                               y = y,
-                               symmetric = symmetric,
-                               pairwise = pairwise,
-                               endpoints = endpoints,
-                               bigmat = bigmat,
-                               cm = cm,
-                               dots = dots),
-                        TRUE)
-            }
+    foreach_extra_args <- list()
+    .distfun_ <- sdtw_loop
+    eval(foreach_loop_expression) # expressions-proxy.R
 
-    D <- D[,]
     if (pairwise) {
         class(D) <- "pairdist"
 
@@ -154,7 +121,7 @@ sdtw_proxy <- function(x, y = NULL, ..., cm = NULL, error.check = TRUE, pairwise
 # ==================================================================================================
 
 sdtw_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ...,
-                      gamma = 0.01, cm = NULL)
+                      gamma = 0.01, cm)
 {
     mv <- is_multivariate(c(x, y))
     if (gamma <= 0) stop("The gamma paramter must be positive")

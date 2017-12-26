@@ -76,6 +76,7 @@ Collate:
     'dtw-basic.R'
     'dtw-lb.R'
     'dtw2.R'
+    'expressions-proxy.R'
     'globals-internal.R'
     'lb-improved.R'
     'lb-keogh.R'
