@@ -16,22 +16,22 @@ x <- data_reinterpolated[3L:8L]
 
 test_that("Included proxy distances can be called and give expected dimensions.", {
     for (distance in dtwclust:::distances_included) {
-        d <- proxy::dist(x, method = distance, window.size = 15L, sigma = 100)
+        d <- proxy::dist(x, method = distance, window.size = 15L, sigma = 100, normalize = TRUE)
         expect_identical(dim(d), c(length(x), length(x)), info = paste(distance, "single-arg"))
 
-        d2 <- proxy::dist(x, x, method = distance, window.size = 15L, sigma = 100)
+        d2 <- proxy::dist(x, x, method = distance, window.size = 15L, sigma = 100, normalize = TRUE)
         expect_equal(d2, d, check.attributes = FALSE,
                      info = paste(distance, "double-arg"))
 
-        d3 <- proxy::dist(x[1L], x, method = distance, window.size = 15L, sigma = 100)
+        d3 <- proxy::dist(x[1L], x, method = distance, window.size = 15L, sigma = 100, normalize = TRUE)
         class(d3) <- "matrix"
         expect_identical(dim(d3), c(1L, length(x)), info = paste(distance, "one-vs-many"))
 
-        d4 <- proxy::dist(x, x[1L], method = distance, window.size = 15L, sigma = 100)
+        d4 <- proxy::dist(x, x[1L], method = distance, window.size = 15L, sigma = 100, normalize = TRUE)
         class(d4) <- "matrix"
         expect_identical(dim(d4), c(length(x), 1L), info = paste(distance, "many-vs-one"))
 
-        ## dtw_lb will give different results below because of how it works
+        # dtw_lb will give different results below because of how it works
         if (distance == "dtw_lb") next
 
         expect_equal(d3, d[1L, , drop = FALSE], check.attributes = FALSE,
@@ -40,10 +40,13 @@ test_that("Included proxy distances can be called and give expected dimensions."
                      info = paste(distance, "many-vs-one-vs-distmat"))
 
         dots <- list()
-        if (distance %in% c("dtw_lb", "lb_keogh", "lb_improved", "dtw_basic"))
+        if (distance %in% c("lb_keogh", "lb_improved"))
             dots <- list(window.size = 15L)
         else if (distance %in% c("gak"))
             dots <- list(window.size = 15L, sigma = 100)
+        else if (distance %in% c("dtw_basic"))
+            dots <- list(window.size = 15L, normalize = TRUE)
+
         manual_distmat <- sapply(x, function(j) {
             sapply(x, function(i) {
                 d <- do.call(distance, dtwclust:::enlist(x = i, y = j, dots = dots), TRUE)
