@@ -1,5 +1,4 @@
 #include "dtwclust++.h"
-#include "dtwclust.h"
 
 namespace dtwclust {
 

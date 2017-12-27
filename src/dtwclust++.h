@@ -2,7 +2,6 @@
 #include <algorithm> // stable_sort
 #include <memory> // *_ptr
 #include <numeric> // iota
-#include <string>
 #include <utility> // swap
 #include <vector>
 
