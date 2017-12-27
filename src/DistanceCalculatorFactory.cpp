@@ -25,7 +25,7 @@ DistanceCalculatorFactory::createCalculator(enum Distance distance, const SEXP& 
     case Distance::SBD:
         return std::make_shared<SbdDistanceCalculator>(DIST_ARGS);
     default:
-        Rcpp::stop("Unknown distance measure");
+        Rcpp::stop("Unknown distance measure"); // nocov
     }
 }
 
