@@ -4,9 +4,8 @@
  * Adapted from the code available at https://github.com/lemire/lbimproved/blob/master/dtw.h
  */
 
-#include <Rcpp.h>
-#include <deque>
 #include "dtwclust++.h"
+#include <deque>
 
 namespace dtwclust {
 

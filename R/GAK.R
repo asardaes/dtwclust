@@ -292,12 +292,14 @@ gak_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ...,
     else
         window.size <- check_consistency(window.size, "window")
 
-    distargs <- list(window.size = window.size,
-                     sigma = sigma,
-                     logs = logs)
+    distargs <- list(sigma = sigma,
+                     window.size = window.size,
+                     logs = logs,
+                     is.multivariate = mv)
 
     .Call(C_gak_loop,
-          d, x, y, symmetric, pairwise, bigmat, mv, distargs, endpoints,
+          d, x, y, distargs,
+          symmetric, pairwise, bigmat, endpoints,
           PACKAGE = "dtwclust")
 }
 

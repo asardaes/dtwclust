@@ -220,9 +220,12 @@ dtwb_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ..., norm
                      norm = norm,
                      step.pattern = step.pattern,
                      backtrack = backtrack,
-                     gcm = gcm)
-
+                     gcm = gcm,
+                     is.multivariate = mv,
+                     normalize = normalize)
+    # return
     .Call(C_dtwb_loop,
-          d, x, y, symmetric, pairwise, bigmat, normalize, mv, distargs, endpoints,
+          d, x, y, distargs,
+          symmetric, pairwise, bigmat, endpoints,
           PACKAGE = "dtwclust")
 }

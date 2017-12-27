@@ -200,9 +200,15 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 # ==================================================================================================
 
 lbk_loop <- function(d, x, lower.env, upper.env, pairwise, endpoints, bigmat, ..., norm = "L1") {
-    p <- switch(norm, "L1" = 1L, "L2" = 2L)
-    len <- length(x[[1L]])
+    distargs <- list()
+    distargs$p <- switch(norm, "L1" = 1L, "L2" = 2L)
+    distargs$len <- length(x[[1L]])
+    distargs$lower.env <- lower.env
+    distargs$upper.env <- upper.env
+    # lower.env is passed as it if were 'y', its length will be used for the loop
+    # symmetric is always FALSE here
     .Call(C_lbk_loop,
-          d, x, lower.env, upper.env, pairwise, bigmat, p, len, endpoints,
+          d, x, lower.env, distargs,
+          FALSE, pairwise, bigmat, endpoints,
           PACKAGE = "dtwclust")
 }

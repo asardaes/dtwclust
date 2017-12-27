@@ -1,7 +1,6 @@
-#include <Rcpp.h>
+#include "dtwclust++.h"
 #include <algorithm> // std::max
 #include <math.h> // exp, log, pow
-#include "dtwclust++.h"
 
 namespace dtwclust {
 

@@ -133,9 +133,10 @@ sdtw_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ...,
     if (storage.mode(cm) != "double")
         stop("sdtw: If provided, 'cm' must have 'double' storage mode.")
 
-    distargs <- list(gamma = gamma, cm = cm)
+    distargs <- list(gamma = gamma, cm = cm, mv = mv)
 
     .Call(C_sdtw_loop,
-          d, x, y, distargs, symmetric, pairwise, bigmat, mv, endpoints,
+          d, x, y, distargs,
+          symmetric, pairwise, bigmat, endpoints,
           PACKAGE = "dtwclust")
 }

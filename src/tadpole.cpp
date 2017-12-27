@@ -1,8 +1,7 @@
-#include <Rcpp.h>
+#include "dtwclust++.h"
 #include <algorithm> // std::stable_sort and std::sort
 #include <iomanip> // std::setprecision
 #include <vector>
-#include "dtwclust++.h"
 
 namespace dtwclust {
 
@@ -107,7 +106,7 @@ private:
 std::vector<double> local_density(const Rcpp::List& series,
                                   const int num_series,
                                   double dc,
-                                  const Rcpp::List& dtw_args,
+                                  const std::shared_ptr<DistanceCalculator>& dist_calculator,
                                   const Rcpp::NumericMatrix& LBM,
                                   const Rcpp::NumericMatrix& UBM,
                                   LowerTriMat<double>& distmat,
@@ -129,9 +128,7 @@ std::vector<double> local_density(const Rcpp::List& series,
         for (int j = 0; j < i; j++) {
             if (LBM(i,j) <= dc && UBM(i,j) > dc) {
                 num_dist_op++;
-                Rcpp::NumericVector x = series[i];
-                Rcpp::NumericVector y = series[j];
-                double dtw_dist = dtwb(x, y, dtw_args);
+                double dtw_dist = dist_calculator->calculateDistance(series, series, i, j);
                 distmat(i,j) = dtw_dist;
                 if (dtw_dist <= dc)
                     flags(i,j) = 0;
@@ -215,7 +212,7 @@ std::vector<double> nn_dist_1(const std::vector<double>& rho, const int num_seri
 
 std::vector<double> nn_dist_2(const Rcpp::List& series,
                               const int num_series,
-                              const Rcpp::List& dtw_args,
+                              const std::shared_ptr<DistanceCalculator>& dist_calculator,
                               const std::vector<size_t>& id_cl,
                               const std::vector<double>& delta_ub,
                               const Rcpp::NumericMatrix& LBM,
@@ -251,9 +248,7 @@ std::vector<double> nn_dist_2(const Rcpp::List& series,
                 }
             } else {
                 num_dist_op++;
-                Rcpp::NumericVector x = series[ii];
-                Rcpp::NumericVector y = series[jj];
-                double dtw_dist = dtwb(x, y, dtw_args);
+                double dtw_dist = dist_calculator->calculateDistance(series, series, ii, jj);
                 if (dtw_dist < min_delta) {
                     min_delta = dtw_dist;
                     which_min_delta = jj;
@@ -347,12 +342,15 @@ void cluster_assignment(const Rcpp::IntegerVector& k_vec,
 SEXP tadpole_cpp(const Rcpp::List& series,
                  const Rcpp::IntegerVector& k,
                  const double dc,
-                 const Rcpp::List& dtw_args,
+                 const SEXP& DTW_ARGS,
                  const Rcpp::NumericMatrix& LBM,
                  const Rcpp::NumericMatrix& UBM,
                  const bool trace,
                  Rcpp::List& list)
 {
+    DistanceCalculatorFactory factory;
+    auto dist_calculator = factory.createCalculator(Distance::DTW_BASIC, DTW_ARGS);
+
     int num_series = series.length();
     LowerTriMat<double> distmat(num_series, NA_REAL);
     LowerTriMat<int> flags(num_series, -1);
@@ -361,7 +359,7 @@ SEXP tadpole_cpp(const Rcpp::List& series,
     if (trace) Rcpp::Rcout << "Pruning during local density calculation\n";
     Rflush();
     std::vector<double> rho = local_density(series, num_series,
-                                            dc, dtw_args,
+                                            dc, dist_calculator,
                                             LBM, UBM,
                                             distmat, flags, num_dist_op);
 
@@ -378,7 +376,7 @@ SEXP tadpole_cpp(const Rcpp::List& series,
     Rflush();
     std::vector<int> nearest_neighbors(num_series);
     std::vector<double> delta = nn_dist_2(series, num_series,
-                                          dtw_args, id_cl, delta_ub,
+                                          dist_calculator, id_cl, delta_ub,
                                           LBM, UBM, flags, distmat,
                                           nearest_neighbors, num_dist_op);
 
@@ -407,12 +405,12 @@ RcppExport SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
                         SEXP LIST)
 {
     BEGIN_RCPP
-    Rcpp::List series(X), dtw_args(DTW_ARGS), list(LIST);
+    Rcpp::List list(LIST);
     Rcpp::NumericMatrix LBM(LB), UBM(UB);
     Rcpp::IntegerVector k(K);
     double dc = Rcpp::as<double>(DC);
     bool trace = Rcpp::as<bool>(TRACE);
-    return tadpole_cpp(series, k, dc, dtw_args, LBM, UBM, trace, list);
+    return tadpole_cpp(X, k, dc, DTW_ARGS, LBM, UBM, trace, list);
     END_RCPP
 }
 

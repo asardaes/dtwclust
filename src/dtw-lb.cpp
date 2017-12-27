@@ -1,4 +1,3 @@
-#include <Rcpp.h>
 #include "dtwclust++.h"
 
 namespace dtwclust {
@@ -61,12 +60,15 @@ bool check_finished(const Rcpp::IntegerVector& nn,
 /* main C++ function */
 // =================================================================================================
 
-void dtw_lb_cpp(const Rcpp::List& x,
-                const Rcpp::List& y,
+void dtw_lb_cpp(const Rcpp::List& X,
+                const Rcpp::List& Y,
                 Rcpp::NumericMatrix& distmat,
-                const Rcpp::List& dots,
+                const SEXP& DOTS,
                 const int margin)
 {
+    DistanceCalculatorFactory factory;
+    auto dist_calculator = factory.createCalculator(Distance::DTW_BASIC, DOTS);
+
     int len = margin == 1 ? distmat.nrow() : distmat.ncol();
     Rcpp::IntegerVector id_nn(len), id_nn_prev(len);
     Rcpp::LogicalVector id_changed(len);
@@ -85,16 +87,14 @@ void dtw_lb_cpp(const Rcpp::List& x,
             for (int i = 0; i < id_changed.length(); i++) {
                 if (id_changed[i]) {
                     int j = id_nn[i];
-                    Rcpp::NumericVector this_x = x(i), this_y = y(j);
-                    distmat(i,j) = dtwb(this_x, this_y, dots);
+                    distmat(i,j) = dist_calculator->calculateDistance(X, Y, i, j);
                 }
             }
         } else {
             for (int j = 0; j < id_changed.length(); j++) {
                 if (id_changed[j]) {
                     int i = id_nn[j];
-                    Rcpp::NumericVector this_x = x(i), this_y = y(j);
-                    distmat(i,j) = dtwb(this_x, this_y, dots);
+                    distmat(i,j) = dist_calculator->calculateDistance(X, Y, i, j);
                 }
             }
         }
@@ -111,9 +111,8 @@ void dtw_lb_cpp(const Rcpp::List& x,
 RcppExport SEXP dtw_lb(SEXP X, SEXP Y, SEXP D, SEXP MARGIN, SEXP DOTS)
 {
     BEGIN_RCPP
-    Rcpp::List x(X), y(Y), dots(DOTS);
     Rcpp::NumericMatrix distmat(D);
-    dtw_lb_cpp(x, y, distmat, dots, Rcpp::as<int>(MARGIN));
+    dtw_lb_cpp(X, Y, distmat, DOTS, Rcpp::as<int>(MARGIN));
     return R_NilValue;
     END_RCPP
 }

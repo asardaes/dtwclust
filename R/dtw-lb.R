@@ -279,7 +279,9 @@ call_dtwlb <- function(x, y, distmat, ..., window.size, norm, margin,
                  norm = switch(norm, "L1" = 1, "L2" = 2),
                  step.pattern = step.pattern,
                  backtrack = FALSE,
-                 gcm = gcm)
+                 gcm = gcm,
+                 is.multivariate = FALSE,
+                 normalize = FALSE)
 
     # return
     .Call(C_dtw_lb, x, y, distmat, margin, dots, PACKAGE = "dtwclust")

@@ -1,6 +1,5 @@
-#include <Rcpp.h>
-#include <math.h> // exp
 #include "dtwclust++.h"
+#include <math.h> // exp
 
 namespace dtwclust {
 
