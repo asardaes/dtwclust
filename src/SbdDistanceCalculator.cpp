@@ -21,8 +21,8 @@ SbdDistanceCalculator::SbdDistanceCalculator(const SEXP& DIST_ARGS)
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
-double SbdDistanceCalculator::calculateDistance(const arma::vec& x, const arma::vec& y,
-                                                const arma::cx_vec& fftx, const arma::cx_vec& ffty)
+double SbdDistanceCalculator::calculate(const arma::vec& x, const arma::vec& y,
+                                        const arma::cx_vec& fftx, const arma::cx_vec& ffty)
 {
     // already normalizes by length
     arma::vec cc_seq = arma::real(arma::ifft(fftx % ffty));
@@ -54,8 +54,8 @@ double SbdDistanceCalculator::calculateDistance(const arma::vec& x, const arma::
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double SbdDistanceCalculator::calculateDistance(const Rcpp::List& X, const Rcpp::List& Y,
-                                                const int i, const int j)
+double SbdDistanceCalculator::calculate(const Rcpp::List& X, const Rcpp::List& Y,
+                                        const int i, const int j)
 {
     // in two steps to avoid disambiguation
     Rcpp::NumericVector x_rcpp(X[i]);
@@ -64,7 +64,7 @@ double SbdDistanceCalculator::calculateDistance(const Rcpp::List& X, const Rcpp:
     Rcpp::ComplexVector ffty_rcpp(ffty_[j]);
     arma::vec x(x_rcpp), y(y_rcpp);
     arma::cx_vec fftx(fftx_rcpp), ffty(ffty_rcpp);
-    return this->calculateDistance(x, y, fftx, ffty);
+    return this->calculate(x, y, fftx, ffty);
 }
 
 } // namespace dtwclust

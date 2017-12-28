@@ -6,13 +6,13 @@ namespace dtwclust {
 /* pairwise */
 // =================================================================================================
 
-void PairwiseDistmatFiller::fillDistmat(const Rcpp::List& X, const Rcpp::List& Y) const
+void PairwiseDistmatFiller::fill(const Rcpp::List& X, const Rcpp::List& Y) const
 {
     int index = Rcpp::as<int>(endpoints_);
     index--; // R starts at 1, C++ at 0
     for (int i = 0; i < X.length(); i++) {
         R_CheckUserInterrupt();
-        (*distmat_)(index++, 0) = dist_calculator_->calculateDistance(X, Y, i, i);
+        (*distmat_)(index++, 0) = dist_calculator_->calculate(X, Y, i, i);
     }
 }
 
@@ -20,7 +20,7 @@ void PairwiseDistmatFiller::fillDistmat(const Rcpp::List& X, const Rcpp::List& Y
 /* symmetric */
 // =================================================================================================
 
-void SymmetricDistmatFiller::fillDistmat(const Rcpp::List& X, const Rcpp::List& Y) const
+void SymmetricDistmatFiller::fill(const Rcpp::List& X, const Rcpp::List& Y) const
 {
     Rcpp::List endpoints(endpoints_);
     Rcpp::List start = Rcpp::as<Rcpp::List>(endpoints["start"]);
@@ -38,7 +38,7 @@ void SymmetricDistmatFiller::fillDistmat(const Rcpp::List& X, const Rcpp::List& 
 
         while (i < i_max) {
             R_CheckUserInterrupt();
-            double d = dist_calculator_->calculateDistance(X, X, i, j);
+            double d = dist_calculator_->calculate(X, X, i, j);
             (*distmat_)(i,j) = d;
             (*distmat_)(j,i) = d;
             i++;
@@ -52,14 +52,14 @@ void SymmetricDistmatFiller::fillDistmat(const Rcpp::List& X, const Rcpp::List& 
 /* general */
 // =================================================================================================
 
-void GeneralDistmatFiller::fillDistmat(const Rcpp::List& X, const Rcpp::List& Y) const
+void GeneralDistmatFiller::fill(const Rcpp::List& X, const Rcpp::List& Y) const
 {
     int index = Rcpp::as<int>(endpoints_);
     index--; // R starts at 1, C++ at 0
     for (int j = 0; j < Y.length(); j++) {
         for (int i = 0; i < X.length(); i++) {
             R_CheckUserInterrupt();
-            (*distmat_)(i, index) = dist_calculator_->calculateDistance(X, Y, i, j);
+            (*distmat_)(i, index) = dist_calculator_->calculate(X, Y, i, j);
         }
         index++;
     }

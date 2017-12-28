@@ -237,12 +237,15 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
 sbd_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ...,
                      fftx, ffty, fftlen)
 {
+    fill_type <- if (pairwise) "PAIRWISE" else if (symmetric) "SYMMETRIC" else "GENERAL"
+    mat_type <- if (bigmat) "BIG_MATRIX" else "R_MATRIX"
     distargs <- list()
     distargs$fftlen <- fftlen
     distargs$fftx <- fftx
     distargs$ffty <- ffty
-    .Call(C_sbd_loop,
-          d, x, y, distargs,
-          symmetric, pairwise, bigmat, endpoints,
+    .Call(C_distmat_loop,
+          d, x, y,
+          "SBD", distargs,
+          fill_type, mat_type, endpoints,
           PACKAGE = "dtwclust")
 }

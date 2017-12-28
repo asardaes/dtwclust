@@ -1,4 +1,5 @@
 #include "dtwclust++.h"
+#include <string>
 
 namespace dtwclust {
 
@@ -66,8 +67,10 @@ void dtw_lb_cpp(const Rcpp::List& X,
                 const SEXP& DOTS,
                 const int margin)
 {
-    DistanceCalculatorFactory factory;
-    auto dist_calculator = factory.createCalculator(Distance::DTW_BASIC, DOTS);
+    string dist = "DTW_BASIC";
+    SEXP DIST = PROTECT(Rcpp::wrap(dist));
+    auto dist_calculator = DistanceCalculatorFactory().create(DIST, DOTS);
+    UNPROTECT(1);
 
     int len = margin == 1 ? distmat.nrow() : distmat.ncol();
     Rcpp::IntegerVector id_nn(len), id_nn_prev(len);
@@ -87,14 +90,14 @@ void dtw_lb_cpp(const Rcpp::List& X,
             for (int i = 0; i < id_changed.length(); i++) {
                 if (id_changed[i]) {
                     int j = id_nn[i];
-                    distmat(i,j) = dist_calculator->calculateDistance(X, Y, i, j);
+                    distmat(i,j) = dist_calculator->calculate(X, Y, i, j);
                 }
             }
         } else {
             for (int j = 0; j < id_changed.length(); j++) {
                 if (id_changed[j]) {
                     int i = id_nn[j];
-                    distmat(i,j) = dist_calculator->calculateDistance(X, Y, i, j);
+                    distmat(i,j) = dist_calculator->calculate(X, Y, i, j);
                 }
             }
         }

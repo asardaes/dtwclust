@@ -1,5 +1,6 @@
 #include "dtwclust++.h"
 #include <memory> // make_shared
+#include <string>
 
 namespace dtwclust {
 
@@ -8,14 +9,15 @@ namespace dtwclust {
 // =================================================================================================
 
 std::shared_ptr<DistmatFiller>
-DistmatFillerFactory::createFiller(const bool pairwise, const bool symmetric,
-                                   Distmat* distmat, const SEXP& ENDPOINTS,
-                                   const std::shared_ptr<DistanceCalculator>& dist_calculator)
+DistmatFillerFactory::create(const SEXP& FILL_TYPE,
+                             std::shared_ptr<Distmat>& distmat, const SEXP& ENDPOINTS,
+                             const std::shared_ptr<DistanceCalculator>& dist_calculator)
 {
-    if (pairwise) {
+    string type = Rcpp::as<string>(FILL_TYPE);
+    if (type == "PAIRWISE") {
         return std::make_shared<PairwiseDistmatFiller>(distmat, ENDPOINTS, dist_calculator);
     }
-    else if (symmetric) {
+    else if (type == "SYMMETRIC") {
         return std::make_shared<SymmetricDistmatFiller>(distmat, ENDPOINTS, dist_calculator);
     }
     else {

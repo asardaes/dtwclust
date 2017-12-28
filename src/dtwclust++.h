@@ -17,62 +17,40 @@ namespace dtwclust {
 /* Functions that can be called from R */
 // =================================================================================================
 
+// -------------------------------------------------------------------------------------------------
+/* for sparse matrices in R */
+// -------------------------------------------------------------------------------------------------
 RcppExport SEXP SparseDistmatIndices__new(SEXP num_rows);
 RcppExport SEXP SparseDistmatIndices__getNewIndices(SEXP xptr, SEXP i, SEXP j, SEXP symmetric);
 
+// -------------------------------------------------------------------------------------------------
+/* distance functions */
+// -------------------------------------------------------------------------------------------------
+RcppExport SEXP dtw_lb(SEXP X, SEXP Y, SEXP D, SEXP MARGIN, SEXP DOTS);
+RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U);
+RcppExport SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U);
+RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT, SEXP MV);
+
+// -------------------------------------------------------------------------------------------------
+/* centroid functions */
+// -------------------------------------------------------------------------------------------------
 RcppExport SEXP dba(SEXP X, SEXP centroid,
                     SEXP max_iter, SEXP delta, SEXP trace,
                     SEXP multivariate, SEXP mv_ver, SEXP DOTS);
-
-RcppExport SEXP dtwb_loop(SEXP D, SEXP X, SEXP Y, SEXP DISTARGS,
-                          SEXP SYMMETRIC, SEXP PAIRWISE, SEXP BIGMAT, SEXP ENDPOINTS);
-
-RcppExport SEXP dtw_lb(SEXP X, SEXP Y, SEXP D, SEXP MARGIN, SEXP DOTS);
-
-RcppExport SEXP envelope(SEXP series, SEXP window);
-
-RcppExport SEXP force_lb_symmetry(SEXP X);
-
-RcppExport SEXP gak_loop(SEXP D, SEXP X, SEXP Y, SEXP DISTARGS,
-                         SEXP SYMMETRIC, SEXP PAIRWISE, SEXP BIGMAT, SEXP ENDPOINTS);
-
-RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U);
-
-RcppExport SEXP lbk_loop(SEXP D, SEXP X, SEXP Y, SEXP DISTARGS,
-                         SEXP SYMMETRIC, SEXP PAIRWISE, SEXP BIGMAT, SEXP ENDPOINTS);
-
-RcppExport SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U);
-
-RcppExport SEXP lbi_loop(SEXP D, SEXP X, SEXP Y, SEXP DISTARGS,
-                         SEXP SYMMETRIC, SEXP PAIRWISE, SEXP BIGMAT, SEXP ENDPOINTS);
-
-RcppExport SEXP sbd_loop(SEXP D, SEXP X, SEXP Y, SEXP DISTARGS,
-                         SEXP SYMMETRIC, SEXP PAIRWISE, SEXP BIGMAT, SEXP ENDPOINTS);
-
 RcppExport SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID, SEXP GAMMA, SEXP WEIGHTS, SEXP MV,
                           SEXP COSTMAT, SEXP DISTMAT, SEXP EM);
 
-RcppExport SEXP sdtw_loop(SEXP D, SEXP X, SEXP Y, SEXP DISTARGS,
-                          SEXP SYMMETRIC, SEXP PAIRWISE, SEXP BIGMAT, SEXP ENDPOINTS);
-
-RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT, SEXP MV);
-
+// -------------------------------------------------------------------------------------------------
+/* misc */
+// -------------------------------------------------------------------------------------------------
+RcppExport SEXP distmat_loop(SEXP D, SEXP X, SEXP Y,
+                             SEXP DIST, SEXP DIST_ARGS,
+                             SEXP FILL_TYPE, SEXP MAT_TYPE, SEXP ENDPOINTS);
+RcppExport SEXP envelope(SEXP series, SEXP window);
+RcppExport SEXP force_lb_symmetry(SEXP X);
 RcppExport SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
                         SEXP LB, SEXP UB, SEXP TRACE,
                         SEXP LIST);
-
-// =================================================================================================
-/* Enums */
-// =================================================================================================
-
-enum class Distance {
-    DTW_BASIC,
-    LBK,
-    LBI,
-    SDTW,
-    GAK,
-    SBD
-};
 
 // =================================================================================================
 /* DistanceCalculator (base + factory + concretes) */
@@ -85,8 +63,8 @@ class DistanceCalculator
 {
 public:
     virtual ~DistanceCalculator() {};
-    virtual double calculateDistance(const Rcpp::List& X, const Rcpp::List& Y,
-                                     const int i, const int j) = 0;
+    virtual double calculate(const Rcpp::List& X, const Rcpp::List& Y,
+                             const int i, const int j) = 0;
 protected:
     DistanceCalculator(const SEXP& DIST_ARGS) : dist_args_(DIST_ARGS) {};
     Rcpp::List dist_args_;
@@ -99,7 +77,7 @@ class DistanceCalculatorFactory
 {
 public:
     std::shared_ptr<DistanceCalculator>
-    createCalculator(enum Distance distance, const SEXP& DIST_ARGS);
+    create(const SEXP& DIST, const SEXP& DIST_ARGS);
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -109,10 +87,10 @@ class DtwBasicDistanceCalculator : public DistanceCalculator
 {
 public:
     DtwBasicDistanceCalculator(const SEXP& DIST_ARGS);
-    double calculateDistance(const Rcpp::List& X, const Rcpp::List& Y,
-                             const int i, const int j) override;
+    double calculate(const Rcpp::List& X, const Rcpp::List& Y,
+                     const int i, const int j) override;
 private:
-    double calculateDistance(const SEXP& X, const SEXP& Y);
+    double calculate(const SEXP& X, const SEXP& Y);
     SEXP window_, norm_, step_, backtrack_, gcm_;
     bool is_multivariate_, normalize_;
 };
@@ -124,12 +102,12 @@ class LbkDistanceCalculator : public DistanceCalculator
 {
 public:
     LbkDistanceCalculator(const SEXP& DIST_ARGS);
-    double calculateDistance(const Rcpp::List& X, const Rcpp::List& Y,
-                             const int i, const int j) override;
+    double calculate(const Rcpp::List& X, const Rcpp::List& Y,
+                     const int i, const int j) override;
 private:
-    double calculateDistance(const Rcpp::NumericVector& x,
-                             const Rcpp::NumericVector& lower_envelope,
-                             const Rcpp::NumericVector& upper_envelope);
+    double calculate(const Rcpp::NumericVector& x,
+                     const Rcpp::NumericVector& lower_envelope,
+                     const Rcpp::NumericVector& upper_envelope);
     Rcpp::List lower_envelopes_, upper_envelopes_;
     Rcpp::NumericVector H_;
     int p_;
@@ -142,13 +120,13 @@ class LbiDistanceCalculator : public DistanceCalculator
 {
 public:
     LbiDistanceCalculator(const SEXP& DIST_ARGS);
-    double calculateDistance(const Rcpp::List& X, const Rcpp::List& Y,
-                             const int i, const int j) override;
+    double calculate(const Rcpp::List& X, const Rcpp::List& Y,
+                     const int i, const int j) override;
 private:
-    double calculateDistance(const Rcpp::NumericVector& x,
-                             const Rcpp::NumericVector& y,
-                             const Rcpp::NumericVector& lower_envelope,
-                             const Rcpp::NumericVector& upper_envelope);
+    double calculate(const Rcpp::NumericVector& x,
+                     const Rcpp::NumericVector& y,
+                     const Rcpp::NumericVector& lower_envelope,
+                     const Rcpp::NumericVector& upper_envelope);
     Rcpp::List lower_envelopes_, upper_envelopes_;
     Rcpp::NumericVector H_, L2_, U2_, LB_;
     unsigned int window_size_;
@@ -162,10 +140,10 @@ class SdtwDistanceCalculator : public DistanceCalculator
 {
 public:
     SdtwDistanceCalculator(const SEXP& DIST_ARGS);
-    double calculateDistance(const Rcpp::List& X, const Rcpp::List& Y,
-                             const int i, const int j) override;
+    double calculate(const Rcpp::List& X, const Rcpp::List& Y,
+                     const int i, const int j) override;
 private:
-    double calculateDistance(const SEXP& X, const SEXP& Y);
+    double calculate(const SEXP& X, const SEXP& Y);
     SEXP gamma_, costmat_, mv_;
 };
 
@@ -176,10 +154,10 @@ class GakDistanceCalculator : public DistanceCalculator
 {
 public:
     GakDistanceCalculator(const SEXP& DIST_ARGS);
-    double calculateDistance(const Rcpp::List& X, const Rcpp::List& Y,
-                             const int i, const int j) override;
+    double calculate(const Rcpp::List& X, const Rcpp::List& Y,
+                     const int i, const int j) override;
 private:
-    double calculateDistance(const SEXP& X, const SEXP& Y);
+    double calculate(const SEXP& X, const SEXP& Y);
     SEXP sigma_, window_, logs_;
     bool is_multivariate_;
 };
@@ -191,18 +169,18 @@ class SbdDistanceCalculator : public DistanceCalculator
 {
 public:
     SbdDistanceCalculator(const SEXP& DIST_ARGS);
-    double calculateDistance(const Rcpp::List& X, const Rcpp::List& Y,
-                             const int i, const int j) override;
+    double calculate(const Rcpp::List& X, const Rcpp::List& Y,
+                     const int i, const int j) override;
 private:
-    double calculateDistance(const arma::vec& x, const arma::vec& y,
-                             const arma::cx_vec& fftx, const arma::cx_vec& ffty);
+    double calculate(const arma::vec& x, const arma::vec& y,
+                     const arma::cx_vec& fftx, const arma::cx_vec& ffty);
     arma::vec cc_seq_truncated_;
     Rcpp::List fftx_, ffty_;
     int fftlen_;
 };
 
 // =================================================================================================
-/* Distmat (base + concretes) */
+/* Distmat (base + factory + concretes) */
 // =================================================================================================
 
 // -------------------------------------------------------------------------------------------------
@@ -213,6 +191,16 @@ class Distmat
 public:
     virtual ~Distmat() {};
     virtual double& operator() (const int i, const int j) = 0;
+};
+
+// -------------------------------------------------------------------------------------------------
+/* concrete factory */
+// -------------------------------------------------------------------------------------------------
+class DistmatFactory
+{
+public:
+    std::shared_ptr<Distmat>
+    create(const SEXP& MAT_TYPE, const SEXP& D);
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -252,10 +240,10 @@ class DistmatFiller
 {
 public:
     virtual ~DistmatFiller() {};
-    virtual void fillDistmat(const Rcpp::List& X, const Rcpp::List& Y) const = 0;
+    virtual void fill(const Rcpp::List& X, const Rcpp::List& Y) const = 0;
 
 protected:
-    DistmatFiller(Distmat* distmat, const SEXP& ENDPOINTS,
+    DistmatFiller(std::shared_ptr<Distmat>& distmat, const SEXP& ENDPOINTS,
                   const std::shared_ptr<DistanceCalculator>& dist_calculator)
         : dist_calculator_(dist_calculator)
         , distmat_(distmat)
@@ -263,7 +251,7 @@ protected:
     { }
 
     std::shared_ptr<DistanceCalculator> dist_calculator_;
-    Distmat* distmat_;
+    std::shared_ptr<Distmat> distmat_;
     SEXP endpoints_;
 };
 
@@ -274,9 +262,8 @@ class DistmatFillerFactory
 {
 public:
     std::shared_ptr<DistmatFiller>
-    createFiller(const bool pairwise, const bool symmetric,
-                 Distmat* distmat, const SEXP& ENDPOINTS,
-                 const std::shared_ptr<DistanceCalculator>& dist_calculator);
+    create(const SEXP& FILL_TYPE, std::shared_ptr<Distmat>& distmat, const SEXP& ENDPOINTS,
+           const std::shared_ptr<DistanceCalculator>& dist_calculator);
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -285,12 +272,12 @@ public:
 class PairwiseDistmatFiller : public DistmatFiller
 {
 public:
-    PairwiseDistmatFiller(Distmat* distmat, const SEXP& ENDPOINTS,
+    PairwiseDistmatFiller(std::shared_ptr<Distmat>& distmat, const SEXP& ENDPOINTS,
                           const std::shared_ptr<DistanceCalculator>& dist_calculator)
         : DistmatFiller(distmat, ENDPOINTS, dist_calculator)
     { }
 
-    void fillDistmat(const Rcpp::List& X, const Rcpp::List& Y) const override;
+    void fill(const Rcpp::List& X, const Rcpp::List& Y) const override;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -299,12 +286,12 @@ public:
 class SymmetricDistmatFiller : public DistmatFiller
 {
 public:
-    SymmetricDistmatFiller(Distmat* distmat, const SEXP& ENDPOINTS,
+    SymmetricDistmatFiller(std::shared_ptr<Distmat>& distmat, const SEXP& ENDPOINTS,
                            const std::shared_ptr<DistanceCalculator>& dist_calculator)
         : DistmatFiller(distmat, ENDPOINTS, dist_calculator)
     { }
 
-    void fillDistmat(const Rcpp::List& X, const Rcpp::List& Y) const override;
+    void fill(const Rcpp::List& X, const Rcpp::List& Y) const override;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -313,12 +300,12 @@ public:
 class GeneralDistmatFiller : public DistmatFiller
 {
 public:
-    GeneralDistmatFiller(Distmat* distmat, const SEXP& ENDPOINTS,
+    GeneralDistmatFiller(std::shared_ptr<Distmat>& distmat, const SEXP& ENDPOINTS,
                          const std::shared_ptr<DistanceCalculator>& dist_calculator)
         : DistmatFiller(distmat, ENDPOINTS, dist_calculator)
     { }
 
-    void fillDistmat(const Rcpp::List& X, const Rcpp::List& Y) const override;
+    void fill(const Rcpp::List& X, const Rcpp::List& Y) const override;
 };
 
 // =================================================================================================

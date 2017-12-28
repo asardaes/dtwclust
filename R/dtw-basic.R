@@ -216,6 +216,8 @@ dtwb_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ..., norm
     if (storage.mode(gcm) != "double")
         stop("dtw_basic: If provided, 'gcm' must have 'double' storage mode.")
 
+    fill_type <- if (pairwise) "PAIRWISE" else if (symmetric) "SYMMETRIC" else "GENERAL"
+    mat_type <- if (bigmat) "BIG_MATRIX" else "R_MATRIX"
     distargs <- list(window.size = window.size,
                      norm = norm,
                      step.pattern = step.pattern,
@@ -224,8 +226,9 @@ dtwb_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ..., norm
                      is.multivariate = mv,
                      normalize = normalize)
     # return
-    .Call(C_dtwb_loop,
-          d, x, y, distargs,
-          symmetric, pairwise, bigmat, endpoints,
+    .Call(C_distmat_loop,
+          d, x, y,
+          "DTW_BASIC", distargs,
+          fill_type, mat_type, endpoints,
           PACKAGE = "dtwclust")
 }

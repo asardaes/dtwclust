@@ -25,7 +25,7 @@ DtwBasicDistanceCalculator::DtwBasicDistanceCalculator(const SEXP& DIST_ARGS)
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
-double DtwBasicDistanceCalculator::calculateDistance(const SEXP& X, const SEXP& Y)
+double DtwBasicDistanceCalculator::calculate(const SEXP& X, const SEXP& Y)
 {
     int x_len, y_len, num_vars;
     if (is_multivariate_) {
@@ -58,12 +58,12 @@ double DtwBasicDistanceCalculator::calculateDistance(const SEXP& X, const SEXP& 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double DtwBasicDistanceCalculator::calculateDistance(const Rcpp::List& X, const Rcpp::List& Y,
-                                                     const int i, const int j)
+double DtwBasicDistanceCalculator::calculate(const Rcpp::List& X, const Rcpp::List& Y,
+                                             const int i, const int j)
 {
     SEXP x = X[i];
     SEXP y = Y[j];
-    return this->calculateDistance(x, y);
+    return this->calculate(x, y);
 }
 
 } // namespace dtwclust

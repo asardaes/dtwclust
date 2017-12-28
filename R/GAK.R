@@ -292,14 +292,17 @@ gak_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ...,
     else
         window.size <- check_consistency(window.size, "window")
 
+    fill_type <- if (pairwise) "PAIRWISE" else if (symmetric) "SYMMETRIC" else "GENERAL"
+    mat_type <- if (bigmat) "BIG_MATRIX" else "R_MATRIX"
     distargs <- list(sigma = sigma,
                      window.size = window.size,
                      logs = logs,
                      is.multivariate = mv)
 
-    .Call(C_gak_loop,
-          d, x, y, distargs,
-          symmetric, pairwise, bigmat, endpoints,
+    .Call(C_distmat_loop,
+          d, x, y,
+          "GAK", distargs,
+          fill_type, mat_type, endpoints,
           PACKAGE = "dtwclust")
 }
 

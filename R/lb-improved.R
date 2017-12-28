@@ -215,15 +215,18 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
 lbi_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ...,
                      lower.env, upper.env, window.size, norm)
 {
+    # this is never symmetric
+    fill_type <- if (pairwise) "PAIRWISE" else "GENERAL"
+    mat_type <- if (bigmat) "BIG_MATRIX" else "R_MATRIX"
     distargs <- list()
     distargs$p <- switch(norm, "L1" = 1L, "L2" = 2L)
     distargs$len <- length(x[[1L]])
     distargs$window.size <- window.size
     distargs$lower.env <- lower.env
     distargs$upper.env <- upper.env
-    # symmetric is always FALSE here
-    .Call(C_lbi_loop,
-          d, x, y, distargs,
-          FALSE, pairwise, bigmat, endpoints,
+    .Call(C_distmat_loop,
+          d, x, y,
+          "LBI", distargs,
+          fill_type, mat_type, endpoints,
           PACKAGE = "dtwclust")
 }

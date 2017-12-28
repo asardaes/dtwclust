@@ -20,7 +20,7 @@ SdtwDistanceCalculator::SdtwDistanceCalculator(const SEXP& DIST_ARGS)
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
-double SdtwDistanceCalculator::calculateDistance(const SEXP& X, const SEXP& Y)
+double SdtwDistanceCalculator::calculate(const SEXP& X, const SEXP& Y)
 {
     // 'distmat' parameter is always NULL in here
     return Rcpp::as<double>(soft_dtw(X, Y, gamma_, costmat_, R_NilValue, mv_));
@@ -29,12 +29,12 @@ double SdtwDistanceCalculator::calculateDistance(const SEXP& X, const SEXP& Y)
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double SdtwDistanceCalculator::calculateDistance(const Rcpp::List& X, const Rcpp::List& Y,
-                                                 const int i, const int j)
+double SdtwDistanceCalculator::calculate(const Rcpp::List& X, const Rcpp::List& Y,
+                                         const int i, const int j)
 {
     SEXP x = X[i];
     SEXP y = Y[j];
-    return this->calculateDistance(x, y);
+    return this->calculate(x, y);
 }
 
 } // namespace dtwclust
