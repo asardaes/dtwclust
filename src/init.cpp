@@ -1,4 +1,5 @@
 #include <RcppArmadillo.h>
+#include <R_ext/Rdynload.h>
 
 #include "dtwclust++.h"
 #include "dtwclust.h"
