@@ -1,5 +1,5 @@
-#ifndef _DTWCLUST_HPP_
-#define _DTWCLUST_HPP_
+#ifndef DTWCLUST_HPP_
+#define DTWCLUST_HPP_
 
 #include <R.h>
 #include <Rinternals.h>
@@ -78,4 +78,4 @@ SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
 
 } // namespace dtwclust
 
-#endif // _DTWCLUST_HPP_
+#endif // DTWCLUST_HPP_

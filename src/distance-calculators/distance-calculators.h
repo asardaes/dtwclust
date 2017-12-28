@@ -1,5 +1,5 @@
-#ifndef _DTWCLUST_DISTANCE_CALCULATORS_HPP_
-#define _DTWCLUST_DISTANCE_CALCULATORS_HPP_
+#ifndef DTWCLUST_DISTANCE_CALCULATORS_HPP_
+#define DTWCLUST_DISTANCE_CALCULATORS_HPP_
 
 #include <RcppArmadillo.h> // arma:: referenced here
 #include <memory> // *_ptr
@@ -136,4 +136,4 @@ private:
 
 } // namespace dtwclust
 
-#endif // _DTWCLUST_DISTANCE_CALCULATORS_HPP_
+#endif // DTWCLUST_DISTANCE_CALCULATORS_HPP_

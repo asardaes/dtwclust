@@ -1,5 +1,5 @@
-#ifndef _DTWCLUST_DISTMAT_HPP_
-#define _DTWCLUST_DISTMAT_HPP_
+#ifndef DTWCLUST_DISTMAT_HPP_
+#define DTWCLUST_DISTMAT_HPP_
 
 #include <RcppArmadillo.h>
 #include <bigmemory/MatrixAccessor.hpp>
@@ -59,4 +59,4 @@ private:
 
 } // namespace dtwclust
 
-#endif // _DTWCLUST_DISTMAT_HPP_
+#endif // DTWCLUST_DISTMAT_HPP_

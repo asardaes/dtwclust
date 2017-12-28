@@ -2,13 +2,13 @@
 extern "C" {
 #endif
 
-#ifndef _DTWCLUST_H_
-#define _DTWCLUST_H_
+#ifndef DTWCLUST_H_
+#define DTWCLUST_H_
 
 #include "utils/utils.h"
 #include "distances/distances.h"
 
-#endif // _DTWCLUST_H_
+#endif // DTWCLUST_H_
 
 #ifdef __cplusplus
 }

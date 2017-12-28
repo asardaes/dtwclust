@@ -1,5 +1,5 @@
-#ifndef _DTWCLUST_DISTMAT_FILLERS_HPP_
-#define _DTWCLUST_DISTMAT_FILLERS_HPP_
+#ifndef DTWCLUST_DISTMAT_FILLERS_HPP_
+#define DTWCLUST_DISTMAT_FILLERS_HPP_
 
 #include <RcppArmadillo.h>
 #include <memory> // *_ptr
@@ -90,4 +90,4 @@ public:
 
 } // namespace dtwclust
 
-#endif // _DTWCLUST_DISTMAT_FILLERS_HPP_
+#endif // DTWCLUST_DISTMAT_FILLERS_HPP_

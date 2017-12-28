@@ -1,5 +1,5 @@
-#ifndef _DTWCLUST_DISTANCES_HPP_
-#define _DTWCLUST_DISTANCES_HPP_
+#ifndef DTWCLUST_DISTANCES_HPP_
+#define DTWCLUST_DISTANCES_HPP_
 
 #include <RcppArmadillo.h>
 
@@ -32,4 +32,4 @@ double lbi_core(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
 
 } // namespace dtwclust
 
-#endif // _DTWCLUST_DISTANCES_HPP_
+#endif // DTWCLUST_DISTANCES_HPP_

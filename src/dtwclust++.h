@@ -1,5 +1,5 @@
-#ifndef _DTWCLUST_HPP_
-#define _DTWCLUST_HPP_
+#ifndef DTWCLUST_HPP_
+#define DTWCLUST_HPP_
 
 #include "centroids/centroids.h"
 #include "distance-calculators/distance-calculators.h"
@@ -10,4 +10,4 @@
 #include "misc/misc.h"
 #include "tadpole/tadpole.h"
 
-#endif // _DTWCLUST_HPP_
+#endif // DTWCLUST_HPP_

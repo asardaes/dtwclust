@@ -1,5 +1,5 @@
-#ifndef _DTWCLUST_CENTROIDS_HPP_
-#define _DTWCLUST_CENTROIDS_HPP_
+#ifndef DTWCLUST_CENTROIDS_HPP_
+#define DTWCLUST_CENTROIDS_HPP_
 
 #include <RcppArmadillo.h>
 
@@ -14,4 +14,4 @@ RcppExport SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID, SEXP GAMMA, SEXP WEIGHTS, 
 
 } // namespace dtwclust
 
-#endif // _DTWCLUST_CENTROIDS_HPP_
+#endif // DTWCLUST_CENTROIDS_HPP_

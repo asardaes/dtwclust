@@ -1,5 +1,5 @@
-#ifndef _DTWCLUST_MISC_HPP_
-#define _DTWCLUST_MISC_HPP_
+#ifndef DTWCLUST_MISC_HPP_
+#define DTWCLUST_MISC_HPP_
 
 #include <R.h>
 #include <Rinternals.h>
@@ -15,4 +15,4 @@ RcppExport SEXP SparseDistmatIndices__getNewIndices(SEXP xptr, SEXP i, SEXP j, S
 
 } // namespace dtwclust
 
-#endif // _DTWCLUST_MISC_HPP_
+#endif // DTWCLUST_MISC_HPP_

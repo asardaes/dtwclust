@@ -1,5 +1,5 @@
-#ifndef _DTWCLUST_TADPOLE_HPP_
-#define _DTWCLUST_TADPOLE_HPP_
+#ifndef DTWCLUST_TADPOLE_HPP_
+#define DTWCLUST_TADPOLE_HPP_
 
 #include <RcppArmadillo.h>
 
@@ -56,4 +56,4 @@ void reorder(std::vector<T>& v, std::vector<size_t>& order)
 
 } // namespace dtwclust
 
-#endif // _DTWCLUST_TADPOLE_HPP_
+#endif // DTWCLUST_TADPOLE_HPP_

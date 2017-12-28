@@ -1,5 +1,5 @@
-#ifndef _DTWCLUST_DISTMAT_LOOPS_HPP_
-#define _DTWCLUST_DISTMAT_LOOPS_HPP_
+#ifndef DTWCLUST_DISTMAT_LOOPS_HPP_
+#define DTWCLUST_DISTMAT_LOOPS_HPP_
 
 #include <RcppArmadillo.h>
 
@@ -13,4 +13,4 @@ RcppExport SEXP dtw_lb(SEXP X, SEXP Y, SEXP D, SEXP MARGIN, SEXP DOTS);
 
 } // namespace dtwclust
 
-#endif // _DTWCLUST_DISTMAT_LOOPS_HPP_
+#endif // DTWCLUST_DISTMAT_LOOPS_HPP_
