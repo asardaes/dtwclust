@@ -30,7 +30,7 @@ double SdtwDistanceCalculator::calculateDistance(const SEXP& X, const SEXP& Y)
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
 double SdtwDistanceCalculator::calculateDistance(const Rcpp::List& X, const Rcpp::List& Y,
-                                                     const int i, const int j)
+                                                 const int i, const int j)
 {
     SEXP x = X[i];
     SEXP y = Y[j];
