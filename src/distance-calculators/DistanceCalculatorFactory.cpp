@@ -14,6 +14,12 @@ std::shared_ptr<DistanceCalculator>
 DistanceCalculatorFactory::create(const SEXP& DIST, const SEXP& DIST_ARGS)
 {
     std::string dist = Rcpp::as<std::string>(DIST);
+    return this->create(dist, DIST_ARGS);
+}
+
+std::shared_ptr<DistanceCalculator>
+DistanceCalculatorFactory::create(const std::string& dist, const SEXP& DIST_ARGS)
+{
     if (dist == "DTW_BASIC")
         return std::make_shared<DtwBasicDistanceCalculator>(DIST_ARGS);
     else if (dist == "LBK")

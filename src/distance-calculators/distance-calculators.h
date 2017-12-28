@@ -3,6 +3,7 @@
 
 #include <RcppArmadillo.h> // arma:: referenced here
 #include <memory> // *_ptr
+#include <string>
 
 namespace dtwclust {
 
@@ -30,8 +31,8 @@ protected:
 class DistanceCalculatorFactory
 {
 public:
-    std::shared_ptr<DistanceCalculator>
-    create(const SEXP& DIST, const SEXP& DIST_ARGS);
+    std::shared_ptr<DistanceCalculator> create(const SEXP& DIST, const SEXP& DIST_ARGS);
+    std::shared_ptr<DistanceCalculator> create(const std::string& dist, const SEXP& DIST_ARGS);
 };
 
 // -------------------------------------------------------------------------------------------------

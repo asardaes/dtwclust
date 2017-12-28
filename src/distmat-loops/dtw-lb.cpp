@@ -71,9 +71,7 @@ void dtw_lb_cpp(const Rcpp::List& X,
                 const int margin)
 {
     std::string dist = "DTW_BASIC";
-    SEXP DIST = PROTECT(Rcpp::wrap(dist));
-    auto dist_calculator = DistanceCalculatorFactory().create(DIST, DOTS);
-    UNPROTECT(1);
+    auto dist_calculator = DistanceCalculatorFactory().create(dist, DOTS);
 
     int len = margin == 1 ? distmat.nrow() : distmat.ncol();
     Rcpp::IntegerVector id_nn(len), id_nn_prev(len);

@@ -1,5 +1,5 @@
 #include <RcppArmadillo.h>
-#include <algorithm> // std::stable_sort and std::sort
+#include <algorithm> // std::sort
 #include <iomanip> // std::setprecision
 #include <memory> // *_ptr
 #include <string>
@@ -355,9 +355,7 @@ SEXP tadpole_cpp(const Rcpp::List& series,
                  Rcpp::List& list)
 {
     std::string dist = "DTW_BASIC";
-    SEXP DIST = PROTECT(Rcpp::wrap(dist));
-    auto dist_calculator = DistanceCalculatorFactory().create(DIST, DTW_ARGS);
-    UNPROTECT(1);
+    auto dist_calculator = DistanceCalculatorFactory().create(dist, DTW_ARGS);
 
     int num_series = series.length();
     LowerTriMat<double> distmat(num_series, NA_REAL);
