@@ -6,7 +6,7 @@ README_cache/
 
 # src
 src/*.dll
-src/*.o
+src/**/*.o
 src/*.so
 
 # Vignette
