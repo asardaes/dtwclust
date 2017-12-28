@@ -6,8 +6,24 @@ RcppExport SEXP sdtw_loop(SEXP D, SEXP X, SEXP Y, SEXP DISTARGS,
                           SEXP SYMMETRIC, SEXP PAIRWISE, SEXP BIGMAT, SEXP ENDPOINTS)
 {
     BEGIN_RCPP
-    DistmatFiller distmat_filler(BIGMAT, ENDPOINTS, Distance::SDTW, DISTARGS);
-    fill_distmat(distmat_filler, D, X, Y, Rcpp::as<bool>(PAIRWISE), Rcpp::as<bool>(SYMMETRIC));
+    DistanceCalculatorFactory distcalc_factory;
+    auto dist_calculator = distcalc_factory.createCalculator(Distance::SDTW, DISTARGS);
+
+    Distmat* distmat;
+    if (Rcpp::as<bool>(BIGMAT)) {
+        distmat = new BigmemoryDistmat(D);
+    }
+    else {
+        distmat = new RDistmat(D);
+    }
+
+    DistmatFillerFactory distfill_factory;
+    auto distmat_filler = distfill_factory.createFiller(
+        Rcpp::as<bool>(PAIRWISE), Rcpp::as<bool>(SYMMETRIC),
+        distmat, ENDPOINTS, dist_calculator
+    );
+    distmat_filler->fillDistmat(X, Y);
+
     return R_NilValue;
     END_RCPP
 }

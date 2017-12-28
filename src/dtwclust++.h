@@ -1,4 +1,7 @@
 #include <RcppArmadillo.h> // sbd uses fft
+
+#include <bigmemory/MatrixAccessor.hpp>
+
 #include <algorithm> // stable_sort
 #include <memory> // *_ptr
 #include <numeric> // iota
@@ -199,72 +202,123 @@ private:
 };
 
 // =================================================================================================
-/* DistmatFillStrategy (base + concretes) */
+/* Distmat (base + concretes) */
 // =================================================================================================
 
 // -------------------------------------------------------------------------------------------------
-/* abstract distmat fill strategy */
+/* abstract distmat */
 // -------------------------------------------------------------------------------------------------
-class DistmatFillStrategy
+class Distmat
 {
 public:
-    virtual ~DistmatFillStrategy() {};
-    virtual void fillDistmat(const SEXP& D, const Rcpp::List& X, const Rcpp::List& Y,
-                             const std::shared_ptr<DistanceCalculator>& dist_calculator,
-                             const SEXP& ENDPOINTS, const bool is_bigmat) const = 0;
+    virtual ~Distmat() {};
+    virtual double& operator() (const int i, const int j) = 0;
 };
 
 // -------------------------------------------------------------------------------------------------
-/* pairwise distmat fill strategy */
+/* R matrix distmat */
 // -------------------------------------------------------------------------------------------------
-class PairwiseDistmatFill : public DistmatFillStrategy
+class RDistmat : public Distmat
 {
 public:
-    void fillDistmat(const SEXP& D, const Rcpp::List& X, const Rcpp::List& Y,
-                     const std::shared_ptr<DistanceCalculator>& dist_calculator,
-                     const SEXP& ENDPOINTS, const bool is_bigmat) const override;
+    RDistmat(const SEXP& D);
+    double& operator() (const int i, const int j) override;
+
+private:
+    Rcpp::NumericMatrix distmat_;
 };
 
 // -------------------------------------------------------------------------------------------------
-/* symmetric distmat fill strategy */
+/* bigmemory big.matrix distmat */
 // -------------------------------------------------------------------------------------------------
-class SymmetricDistmatFill : public DistmatFillStrategy
+class BigmemoryDistmat : public Distmat
 {
 public:
-    void fillDistmat(const SEXP& D, const Rcpp::List& X, const Rcpp::List& Y,
-                     const std::shared_ptr<DistanceCalculator>& dist_calculator,
-                     const SEXP& ENDPOINTS, const bool is_bigmat) const override;
-};
+    BigmemoryDistmat(const SEXP& D);
+    double& operator() (const int i, const int j) override;
 
-// -------------------------------------------------------------------------------------------------
-/* general distmat fill strategy */
-// -------------------------------------------------------------------------------------------------
-class GeneralDistmatFill : public DistmatFillStrategy
-{
-public:
-    void fillDistmat(const SEXP& D, const Rcpp::List& X, const Rcpp::List& Y,
-                     const std::shared_ptr<DistanceCalculator>& dist_calculator,
-                     const SEXP& ENDPOINTS, const bool is_bigmat) const override;
+private:
+    MatrixAccessor<double> distmat_;
 };
 
 // =================================================================================================
-/* DistmatFiller */
+/* DistmatFillers (base + factory + concretes) */
 // =================================================================================================
 
+// -------------------------------------------------------------------------------------------------
+/* abstract distmat filler */
+// -------------------------------------------------------------------------------------------------
 class DistmatFiller
 {
 public:
-    DistmatFiller(const SEXP& IS_BIGMAT, const SEXP& ENDPOINTS,
-                  enum Distance distance, const SEXP& DIST_ARGS);
+    virtual ~DistmatFiller() {};
+    virtual void fillDistmat(const Rcpp::List& X, const Rcpp::List& Y) const = 0;
 
-    void chooseFillStrategy(const bool pairwise, const bool symmetric);
-    void fillDistmat(const SEXP& D, const SEXP& X, const SEXP& Y) const;
+protected:
+    DistmatFiller(Distmat* distmat, const SEXP& ENDPOINTS,
+                  const std::shared_ptr<DistanceCalculator>& dist_calculator)
+        : distmat_(distmat)
+        , endpoints_(ENDPOINTS)
+        , dist_calculator_(dist_calculator)
+    { }
 
-private:
-    std::unique_ptr<DistmatFillStrategy> fill_strategy_;
     std::shared_ptr<DistanceCalculator> dist_calculator_;
-    SEXP ENDPOINTS_;
-    bool is_bigmat_;
+    Distmat* distmat_;
+    SEXP endpoints_;
+};
+
+// -------------------------------------------------------------------------------------------------
+/* concrete factory */
+// -------------------------------------------------------------------------------------------------
+class DistmatFillerFactory
+{
+public:
+    std::shared_ptr<DistmatFiller>
+    createFiller(const bool pairwise, const bool symmetric,
+                 Distmat* distmat, const SEXP& ENDPOINTS,
+                 const std::shared_ptr<DistanceCalculator>& dist_calculator);
+};
+
+// -------------------------------------------------------------------------------------------------
+/* pairwise distmat filler */
+// -------------------------------------------------------------------------------------------------
+class PairwiseDistmatFiller : public DistmatFiller
+{
+public:
+    PairwiseDistmatFiller(Distmat* distmat, const SEXP& ENDPOINTS,
+                          const std::shared_ptr<DistanceCalculator>& dist_calculator)
+        : DistmatFiller(distmat, ENDPOINTS, dist_calculator)
+    { }
+
+    void fillDistmat(const Rcpp::List& X, const Rcpp::List& Y) const override;
+};
+
+// -------------------------------------------------------------------------------------------------
+/* symmetric distmat filler */
+// -------------------------------------------------------------------------------------------------
+class SymmetricDistmatFiller : public DistmatFiller
+{
+public:
+    SymmetricDistmatFiller(Distmat* distmat, const SEXP& ENDPOINTS,
+                           const std::shared_ptr<DistanceCalculator>& dist_calculator)
+        : DistmatFiller(distmat, ENDPOINTS, dist_calculator)
+    { }
+
+    void fillDistmat(const Rcpp::List& X, const Rcpp::List& Y) const override;
+};
+
+// -------------------------------------------------------------------------------------------------
+/* general distmat filler */
+// -------------------------------------------------------------------------------------------------
+class GeneralDistmatFiller : public DistmatFiller
+{
+public:
+    GeneralDistmatFiller(Distmat* distmat, const SEXP& ENDPOINTS,
+                         const std::shared_ptr<DistanceCalculator>& dist_calculator)
+        : DistmatFiller(distmat, ENDPOINTS, dist_calculator)
+    { }
+
+    void fillDistmat(const Rcpp::List& X, const Rcpp::List& Y) const override;
 };
 
 // =================================================================================================
@@ -273,11 +327,6 @@ private:
 
 // defined in utils.cpp
 void Rflush();
-
-// defined in utils.cpp
-void fill_distmat(DistmatFiller& distmat_filler,
-                  const SEXP& D, const SEXP& X, const SEXP& Y,
-                  const bool pairwise, const bool symmetric);
 
 // defined in envelope.cpp
 void envelope_cpp(const Rcpp::NumericVector& array, const unsigned int width,

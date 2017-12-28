@@ -1,41 +1,68 @@
 #include "dtwclust++.h"
-#include <memory> // *_ptr
 
 namespace dtwclust {
 
-// constructor
-DistmatFiller::DistmatFiller(const SEXP& IS_BIGMAT, const SEXP& ENDPOINTS,
-                             enum Distance distance, const SEXP& DIST_ARGS)
-    : is_bigmat_(Rcpp::as<bool>(IS_BIGMAT))
-    , ENDPOINTS_(ENDPOINTS)
-{
-    DistanceCalculatorFactory factory;
-    dist_calculator_ = factory.createCalculator(distance, DIST_ARGS);
-}
+// =================================================================================================
+/* pairwise */
+// =================================================================================================
 
-// chooseFillStrategy
-void DistmatFiller::chooseFillStrategy(const bool pairwise, const bool symmetric)
+void PairwiseDistmatFiller::fillDistmat(const Rcpp::List& X, const Rcpp::List& Y) const
 {
-    if (pairwise) {
-        fill_strategy_ = std::unique_ptr<PairwiseDistmatFill>(new PairwiseDistmatFill());
-    }
-    else if (symmetric) {
-        fill_strategy_ = std::unique_ptr<SymmetricDistmatFill>(new SymmetricDistmatFill());
-    }
-    else {
-        fill_strategy_ = std::unique_ptr<GeneralDistmatFill>(new GeneralDistmatFill());
+    int index = Rcpp::as<int>(endpoints_);
+    index--; // R starts at 1, C++ at 0
+    for (int i = 0; i < X.length(); i++) {
+        R_CheckUserInterrupt();
+        (*distmat_)(index++, 0) = dist_calculator_->calculateDistance(X, Y, i, i);
     }
 }
 
-// fillDistmat
-void DistmatFiller::fillDistmat(const SEXP& D, const SEXP& X, const SEXP& Y) const
+// =================================================================================================
+/* symmetric */
+// =================================================================================================
+
+void SymmetricDistmatFiller::fillDistmat(const Rcpp::List& X, const Rcpp::List& Y) const
 {
-    if (fill_strategy_ != nullptr) {
-        fill_strategy_->fillDistmat(D, X, Y, dist_calculator_, ENDPOINTS_, is_bigmat_);
+    Rcpp::List endpoints(endpoints_);
+    Rcpp::List start = Rcpp::as<Rcpp::List>(endpoints["start"]);
+    Rcpp::List end = Rcpp::as<Rcpp::List>(endpoints["end"]);
+    int i_start = start["i"], i_end = end["i"];
+    int j_start = start["j"], j_end = end["j"];
+
+    int i = i_start - 1, j = j_start - 1;
+    while (j < j_end) {
+        int i_max;
+        if (j == (j_end - 1))
+            i_max = i_end;
+        else
+            i_max = X.length();
+
+        while (i < i_max) {
+            R_CheckUserInterrupt();
+            double d = dist_calculator_->calculateDistance(X, X, i, j);
+            (*distmat_)(i,j) = d;
+            (*distmat_)(j,i) = d;
+            i++;
+        }
+        j++;
+        i = j + 1;
     }
-    else { // nocov start
-        Rcpp::stop("Attempting to fill a distance matrix without choosing strategy");
-    } // nocov end
+}
+
+// =================================================================================================
+/* general */
+// =================================================================================================
+
+void GeneralDistmatFiller::fillDistmat(const Rcpp::List& X, const Rcpp::List& Y) const
+{
+    int index = Rcpp::as<int>(endpoints_);
+    index--; // R starts at 1, C++ at 0
+    for (int j = 0; j < Y.length(); j++) {
+        for (int i = 0; i < X.length(); i++) {
+            R_CheckUserInterrupt();
+            (*distmat_)(i, index) = dist_calculator_->calculateDistance(X, Y, i, j);
+        }
+        index++;
+    }
 }
 
 } // namespace dtwclust
