@@ -257,9 +257,9 @@ public:
 protected:
     DistmatFiller(Distmat* distmat, const SEXP& ENDPOINTS,
                   const std::shared_ptr<DistanceCalculator>& dist_calculator)
-        : distmat_(distmat)
+        : dist_calculator_(dist_calculator)
+        , distmat_(distmat)
         , endpoints_(ENDPOINTS)
-        , dist_calculator_(dist_calculator)
     { }
 
     std::shared_ptr<DistanceCalculator> dist_calculator_;
