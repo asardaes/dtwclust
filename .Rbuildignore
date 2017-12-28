@@ -7,13 +7,16 @@
 
 ^\..*
 .*\.md
+.*\.o
+.*\.so
+.*\.dll
 ^README.*
 ^appveyor\.yml$
 ^codecov\.R
 ^LICENSE$
 
-^vignettes/cache/
-^vignettes/figure/
+^vignettes/cache
+^vignettes/figure
 ^vignettes/.*\.gz
 ^vignettes/.*\.bbl
 ^vignettes/.*\.log

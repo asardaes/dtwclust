@@ -1,3 +1,5 @@
+#include <RcppArmadillo.h>
+
 #include "dtwclust++.h"
 #include "dtwclust.h"
 

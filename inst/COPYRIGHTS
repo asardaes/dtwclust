@@ -27,7 +27,7 @@ Warping envelopes
 -----------------
 
 The code in:
-- src/envelope.cpp
+- src/distances/envelope.cpp
 
 was adapted from third-party code to which the following applies:
 
@@ -49,7 +49,7 @@ Global alignment kernel
 -----------------------
 
 The code in:
-- src/logGAK.c
+- src/distances/logGAK.c
 
 was adapted from third-party code to which the following applies:
 

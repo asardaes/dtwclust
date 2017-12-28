@@ -2,8 +2,8 @@
 extern "C" {
 #endif
 
-#ifndef _DTWCLUST_H
-#define _DTWCLUST_H
+#ifndef _DTWCLUST_H_
+#define _DTWCLUST_H_
 
 #include <R.h>
 #include <Rinternals.h>
@@ -44,7 +44,7 @@ SEXP setnames_inplace(SEXP vec, SEXP names)
     return fun(vec, names);
 }
 
-#endif
+#endif // _DTWCLUST_H_
 
 #ifdef __cplusplus
 }

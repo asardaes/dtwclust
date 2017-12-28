@@ -1,5 +1,5 @@
-#ifndef _DTWCLUST_HPP
-#define _DTWCLUST_HPP
+#ifndef _DTWCLUST_HPP_
+#define _DTWCLUST_HPP_
 
 #include <R.h>
 #include <Rinternals.h>
@@ -60,9 +60,9 @@ SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID, SEXP GAMMA, SEXP WEIGHTS, SEXP MV,
 
 SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT, SEXP MV)
 {
-    static SEXP(*fun)(SEXP, SEXP, SEXP, SEXP, SEXP) = NULL;
+    static SEXP(*fun)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP) = NULL;
     if(fun == NULL)
-        fun = (SEXP(*)(SEXP, SEXP, SEXP, SEXP, SEXP)) R_GetCCallable("dtwclust", "soft_dtw");
+        fun = (SEXP(*)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP)) R_GetCCallable("dtwclust", "soft_dtw");
     return fun(X, Y, GAMMA, COSTMAT, DISTMAT, MV);
 }
 
@@ -78,4 +78,4 @@ SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
 
 } // namespace dtwclust
 
-#endif
+#endif // _DTWCLUST_HPP_
