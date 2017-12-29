@@ -11,7 +11,7 @@
 #' @param norm Either `"L1"` for Manhattan distance or `"L2"` for Euclidean.
 #' @template error-check
 #' @param pairwise Calculate pairwise distances?
-#' @param dtw.func Which function to use for core DTW the calculations, either "dtw" or "dtw_basic".
+#' @param dtw.func Which function to use for the core DTW calculations, either "dtw" or "dtw_basic".
 #'   See [dtw::dtw()] and [dtw_basic()].
 #' @param nn.margin Either 1 to search for nearest neighbors row-wise, or 2 to search column-wise.
 #'   Only implemented for `dtw.func` = "dtw_basic".
@@ -132,80 +132,53 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     dtw.func <- match.arg(dtw.func, c("dtw", "dtw_basic"))
     nn.margin <- as.integer(nn.margin)
     if (nn.margin != 1L) nn.margin <- 2L
-
+    x <- tslist(x)
+    y_missing <- is.null(y)
+    y <- if (y_missing) x else tslist(y)
+    if (is_multivariate(c(x,y))) stop("dtw_lb does not support multivariate series.")
+    if (error.check) {
+        check_consistency(x, "tslist")
+        check_consistency(y, "tslist")
+    }
     if (dtw.func == "dtw")
         method <- if (norm == "L1") "DTW" else "DTW2"
     else
         method <- toupper(dtw.func)
 
-    X <- tslist(x)
-    Y <- if (is.null(y)) X else tslist(y)
-
-    if (is_multivariate(c(X,Y)))
-        stop("dtw_lb does not support multivariate series.")
-
     dots <- list(...)
-    dots$dist.method <- norm
+    dots$dist.method <- "L1"
     dots$norm <- norm
     dots$window.size <- window.size
-    dots$pairwise <- TRUE
 
     if (pairwise) {
-        if (error.check) {
-            check_consistency(X, "tslist")
-            check_consistency(Y, "tslist")
-        }
-
-        if (is.null(window.size))
-            dots$window.type <- "none"
-        else
-            dots$window.type <- "slantedband"
-
-        X <- split_parallel(X)
-        Y <- split_parallel(Y)
-        validate_pairwise(X, Y)
-
-        D <- foreach(X = X, Y = Y,
-                     .combine = c,
-                     .multicombine = TRUE,
-                     .packages = "dtwclust",
-                     .export = "enlist") %op% {
-                         do.call(proxy::dist,
-                                 enlist(x = X, y = Y,
-                                        method = method,
-                                        dots = dots),
-                                 TRUE)
-                     }
-
-        return(D)
+        dots$window.type <- if (is.null(window.size)) "none" else "slantedband"
+        distfun <- ddist2(method, list(packages = "dtwclust")) # parallelization here
+        return(do.call(distfun, quote = TRUE, args = enlist(
+            x = x, centroids = y, pairwise = TRUE, dots = dots
+        )))
     }
 
-    window.size <- check_consistency(window.size, "window")
-    dots$window.size <- window.size
+    dots$window.size <- check_consistency(window.size, "window")
     dots$window.type <- "slantedband"
 
     # NOTE: I tried starting with LBK estimate, refining with LBI and then DTW but, overall,
-    # it was usually slower, almost the whole matrix had to be recomputed for LBI
+    # it was usually slower, almost the whole matrix had to be recomputed for LBI.
 
     # Initial estimate
-    D <- proxy::dist(X, Y, method = "LBI",
-                     window.size = window.size,
-                     norm = norm,
-                     error.check = error.check,
-                     ...)
+    D <- proxy::dist(x, y, method = "LBI", ...,
+                     window.size = window.size, norm = norm, error.check = FALSE)
 
     # y = NULL means diagonal is zero and NNs are themselves
-    if (is.null(y)) {
+    if (y_missing) {
         class(D) <- "crossdist"
         attr(D, "method") <- "DTW_LB"
         return(D)
     }
 
     D <- split_parallel(D, 1L)
-    X <- split_parallel(X)
-
+    x <- split_parallel(x)
     # Update with DTW in parallel
-    D <- foreach(X = X,
+    D <- foreach(x = x,
                  distmat = D,
                  .combine = rbind,
                  .multicombine = TRUE,
@@ -215,12 +188,13 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                          # modifies distmat in place
                          dots$margin <- nn.margin
                          do.call(call_dtwlb,
-                                 enlist(x = X, y = Y, distmat = distmat, dots = dots),
+                                 enlist(x = x, y = y, distmat = distmat, dots = dots),
                                  TRUE)
 
                      } else {
                          if (nn.margin != 1L)
                              warning("Column-wise nearest neighbors are not implemented for dtw::dtw")
+                         dots$pairwise <- TRUE
                          id_nn <- apply(distmat, 1L, which.min) # index of nearest neighbors
                          id_nn_prev <- id_nn + 1L # initialize all different
                          id_mat <- cbind(1L:nrow(distmat), id_nn) # to index the distance matrix
@@ -229,25 +203,23 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                              id_nn_prev <- id_nn
 
                              d_sub <- do.call(proxy::dist,
-                                              enlist(x = X[id_changed],
-                                                     y = Y[id_nn[id_changed]],
+                                              enlist(x = x[id_changed],
+                                                     y = y[id_nn[id_changed]],
                                                      method = method,
                                                      dots = dots),
                                               TRUE)
 
                              distmat[id_mat[id_changed, , drop = FALSE]] <- d_sub
                              id_nn <- apply(distmat, 1L, which.min)
-                             id_mat[ , 2L] <- id_nn
+                             id_mat[, 2L] <- id_nn
                          }
                      }
-
                      # return from foreach()
                      distmat
                  }
 
     class(D) <- "crossdist"
     attr(D, "method") <- "DTW_LB"
-
     # return
     D
 }
@@ -267,7 +239,6 @@ call_dtwlb <- function(x, y, distmat, ..., window.size, norm, margin,
         stop("step.pattern must be either symmetric1 or symmetric2 (without quotes)")
 
     L <- max(lengths(y)) + 1L
-
     if (is.null(gcm))
         gcm <- matrix(0, 2L, L)
     else if (!is.matrix(gcm) || nrow(gcm) < 2L || ncol(gcm) < L)

@@ -19,7 +19,7 @@ and give more informative errors messages. Also used internally to avoid repeati
 
 \item{pairwise}{Calculate pairwise distances?}
 
-\item{dtw.func}{Which function to use for core DTW the calculations, either "dtw" or "dtw_basic".
+\item{dtw.func}{Which function to use for the core DTW calculations, either "dtw" or "dtw_basic".
 See \code{\link[dtw:dtw]{dtw::dtw()}} and \code{\link[=dtw_basic]{dtw_basic()}}.}
 
 \item{nn.margin}{Either 1 to search for nearest neighbors row-wise, or 2 to search column-wise.
