@@ -149,28 +149,23 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     dots$dist.method <- "L1"
     dots$norm <- norm
     dots$window.size <- window.size
-
+    dots$window.type <- if (is.null(window.size)) "none" else "slantedband"
     if (pairwise) {
-        dots$window.type <- if (is.null(window.size)) "none" else "slantedband"
         distfun <- ddist2(method, list(packages = "dtwclust")) # parallelization here
         return(do.call(distfun, quote = TRUE, args = enlist(
             x = x, centroids = y, pairwise = TRUE, dots = dots
         )))
     }
 
-    dots$window.size <- check_consistency(window.size, "window")
-    dots$window.type <- "slantedband"
-
     # NOTE: I tried starting with LBK estimate, refining with LBI and then DTW but, overall,
     # it was usually slower, almost the whole matrix had to be recomputed for LBI.
 
-    # Initial estimate
+    # Initial estimate (window.size checked here)
     D <- proxy::dist(x, y, method = "LBI", ...,
                      window.size = window.size, norm = norm, error.check = FALSE)
 
     # y = NULL means diagonal is zero and NNs are themselves
     if (y_missing) {
-        class(D) <- "crossdist"
         attr(D, "method") <- "DTW_LB"
         return(D)
     }
