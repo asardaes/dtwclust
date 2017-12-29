@@ -1,8 +1,7 @@
 #ifndef DTWCLUST_MISC_HPP_
 #define DTWCLUST_MISC_HPP_
 
-#include <R.h>
-#include <Rinternals.h>
+#include <RcppArmadillo.h>
 
 namespace dtwclust {
 
