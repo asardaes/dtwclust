@@ -2,7 +2,7 @@
 
 language: r
 cache: packages
-r_build_args: "--compact-vignettes"
+r_build_args: "--compact-vignettes --resave-data"
 
 r_packages:
   - covr
