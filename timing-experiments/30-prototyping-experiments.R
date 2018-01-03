@@ -85,7 +85,7 @@ cent_shape_univariate <- with(
         })
 
         # Bind results for all series and return to global environment
-        plyr::rbind.fill(benchmarks)
+        dplyr::bind_rows(benchmarks)
     })
 
 # --------------------------------------------------------------------------------------------------
@@ -119,7 +119,7 @@ cent_shape_multivariate <- with(
         })
 
         # Bind results for all series and return to global environment
-        plyr::rbind.fill(benchmarks)
+        dplyr::bind_rows(benchmarks)
     })
 
 # --------------------------------------------------------------------------------------------------
@@ -157,7 +157,7 @@ cent_dba_univariate <- with(
         })
 
         # Bind results for all series and return to global environment
-        plyr::rbind.fill(benchmarks)
+        dplyr::bind_rows(benchmarks)
     })
 
 # --------------------------------------------------------------------------------------------------
@@ -196,7 +196,7 @@ cent_dba_multivariate_byS <- with(
         })
 
         # Bind results for all series and return to global environment
-        plyr::rbind.fill(benchmarks)
+        dplyr::bind_rows(benchmarks)
     })
 
 # --------------------------------------------------------------------------------------------------
@@ -235,19 +235,89 @@ cent_dba_multivariate_byV <- with(
         })
 
         # Bind results for all series and return to global environment
-        plyr::rbind.fill(benchmarks)
+        dplyr::bind_rows(benchmarks)
+    })
+
+# --------------------------------------------------------------------------------------------------
+# univariate sdtw_cent
+# --------------------------------------------------------------------------------------------------
+
+cat("\tRunning sdtw_cent experiments for univariate series\n")
+cent_sdtw_univariate <- with(
+    new.env(),
+    {
+        # Loop along extracted subsets
+        benchmarks <- lapply(series, function(this_series) {
+            # Build expressions to evaluate, substituting number of series
+            expressions <- lapply(num_series, function(ns) {
+                bquote(
+                    sdtw_cent(this_series[1L:.(ns)], ref, error.check = FALSE)
+                )
+            })
+
+            # Extract reference series
+            ref <- this_series[[length(this_series)]]
+
+            # Evaluate expressions
+            benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
+
+            # Return data frame with results
+            data.frame(cent = "sdtw_cent_univariate",
+                       series_length = NROW(ref),
+                       num_series = num_series,
+                       median_time_ms = benchmark$median)
+        })
+
+        # Bind results for all series and return to global environment
+        dplyr::bind_rows(benchmarks)
+    })
+
+# --------------------------------------------------------------------------------------------------
+# multivariate sdtw_cent
+# --------------------------------------------------------------------------------------------------
+
+cat("\tRunning sdtw_cent experiments for multivariate series\n")
+cent_sdtw_multivariate <- with(
+    new.env(),
+    {
+        # Loop along extracted subsets
+        benchmarks <- lapply(series_mv, function(this_series) {
+            # Build expressions to evaluate, substituting number of series
+            expressions <- lapply(num_series, function(ns) {
+                bquote(
+                    sdtw_cent(this_series[1L:.(ns)], ref, error.check = FALSE)
+                )
+            })
+
+            # Extract reference series
+            ref <- this_series[[length(this_series)]]
+
+            # Evaluate expressions
+            benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
+
+            # Return data frame with results
+            data.frame(cent = "sdtw_cent_multivariate",
+                       series_length = NROW(ref),
+                       num_series = num_series,
+                       median_time_ms = benchmark$median)
+        })
+
+        # Bind results for all series and return to global environment
+        dplyr::bind_rows(benchmarks)
     })
 
 # --------------------------------------------------------------------------------------------------
 # aggregate
 # --------------------------------------------------------------------------------------------------
 
-cent_results <- plyr::rbind.fill(
+cent_results <- dplyr::bind_rows(
     cent_shape_univariate,
     cent_shape_multivariate,
     cent_dba_univariate,
     cent_dba_multivariate_byS,
-    cent_dba_multivariate_byV
+    cent_dba_multivariate_byV,
+    cent_sdtw_univariate,
+    cent_sdtw_multivariate
 )
 
 # Make factor with the given order

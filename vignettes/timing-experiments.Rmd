@@ -5,7 +5,7 @@ output:
     html_vignette:
         toc: true
         number_sections: true
-        fig_width: 7
+        fig_width: 6.5
         fig_height: 7
 vignette: >
     %\VignetteEngine{knitr::rmarkdown}
@@ -17,6 +17,7 @@ bibliography: REFERENCES.bib
 
 ```{r setup, include=FALSE}
 library("dtwclust")
+library("dplyr")
 library("ggplot2")
 data("dtwclustTimings")
 
@@ -46,6 +47,18 @@ partitional_results$dtwlb_vs_dtwbasic$dba <- adjust_factors(partitional_results$
 partitional_results$sparse_pam_k$non_symmetric <- adjust_factors(partitional_results$sparse_pam_k$non_symmetric)
 partitional_results$sparse_pam_k$symmetric <- adjust_factors(partitional_results$sparse_pam_k$symmetric)
 
+# execution time
+exec_time <- attr(dist_single_results, "proctime")["elapsed"] +
+    attr(dist_multiple_results, "proctime")["elapsed"] +
+    attr(cent_results, "proctime")["elapsed"] +
+    attr(clus_tadpole_results, "proctime")["elapsed"] +
+    attr(partitional_results, "proctime")["elapsed"]
+exec_time <- unname(round(exec_time / 3600))
+
+# ggplot defaults
+ggplot2::theme_set(ggplot2::theme_bw())
+ggplot2::theme_update(legend.position = "bottom")
+
 # knitr defaults
 knitr::opts_chunk$set(echo = FALSE, comment = "#>")
 ```
@@ -68,10 +81,11 @@ a series of timing experiments were made.
 Said experiments were not concerned with correctness or accuracy,
 only with timing characteristics.
 
-These experiments were run using `R` v3.4.1 and `dtwclust` v4.0.3.
+The distance and prototyping experiments were re-run with `R` v3.4.3 and `dtwclust` v5.1.0.9000.
+The rest were run using `R` v3.4.1 and `dtwclust` v4.0.3.
 The `microbenchmark` package (v1.4-2.1) was also used for most of them.
 The computer used was running GNU/Linux (LTS kernel v4.9) with an `i5-6500` Intel processor (4 cores) and 16GB of RAM.
-The whole set of experiments took almost 58 hours to complete.
+The whole set of experiments took approximately `r exec_time` hours to complete.
 The data used comes from the Character Trajectories set [@lichman2013],
 which have different lengths and are originally multivariate series with 3 variables;
 the univariate versions were extracted from these.
@@ -89,19 +103,23 @@ i.e., for distances calculated between two individual time-series.
 The distances tested are those included in the package.
 Here we look at the effect of window sizes and series' lengths.
 Each calculation was repeated `r attr(dist_single_results, "times")` times and the *median* value was extracted.
-An `NA` window size means that no constraint was used,
-and note that the vertical scale is different for each facet in the following figure.
+Note that the vertical scales differ for the following figures.
 
-```{r dist-single-plot, fig.height=7, fig.cap="*Note the different vertical scales for each facet, even though they are all in microseconds.*"}
-ggplot(dist_single_results,
-       aes(x = series_length,
-           y = median_time_us,
-           group = window_size,
-           colour = window_size)) +
+### DTW lower bounds
+
+```{r dist-single-lb, fig.height=4.5}
+id_gg <- grepl("^lb", dist_single_results$distance)
+gg <- ggplot(dist_single_results[id_gg,], aes(
+    x = series_length,
+    y = median_time_us,
+    group = window_size,
+    colour = window_size
+))
+gg +
     geom_line() +
-    facet_wrap(~distance, scales = "free_y") +
-    theme_bw() +
-    theme(legend.position = "bottom")
+    facet_wrap(~distance) +
+    labs(x = "Series' length",
+         y = expression("Median time ("*mu*"s)"))
 ```
 
 The first interesting result relates to the DTW lower bounds: `lb_keogh` and `lb_improved`.
@@ -111,6 +129,21 @@ However, `lb_improved` was faster that `lb_keogh`.
 Considering that `lb_improved` first needs to calculate `lb_keogh` and then perform additional calculations,
 this is somewhat puzzling,
 and the reason is not immediately evident.
+
+### Shape-based distance
+
+```{r dist-single-sbd, fig.height=3.5, fig.width=5}
+id_gg <- grepl("^sbd", dist_single_results$distance)
+gg <- ggplot(dist_single_results[id_gg,], aes(
+    x = series_length,
+    y = median_time_us,
+    group = 1
+))
+gg +
+    geom_line() +
+    labs(x = "Series' length",
+         y = expression("Median time ("*mu*"s)"))
+```
 
 The shape-based distance also presents weird behavior.
 While it was expected that its running time would increase with the series' length,
@@ -122,11 +155,65 @@ then the bump should have occurred for the series with length of 130,
 since the next power of 2 for 109 is 128,
 and it jumps to 256 for a length of 130.
 
-DTW and GAK are the only tested distances that support multivariate series.
+### DTW
+
+```{r dist-single-dtw, fig.height=4.5}
+id_gg <- grepl("^dtw", dist_single_results$distance)
+gg <- ggplot(dist_single_results[id_gg,], aes(
+    x = series_length,
+    y = median_time_us,
+    group = window_size,
+    colour = window_size
+))
+gg +
+    geom_line() +
+    facet_wrap(~distance) +
+    labs(x = "Series' length",
+         y = expression("Median time ("*mu*"s)"))
+```
+
 In the case of DTW,
 we can see that a window constraint can indeed have a very significant effect on running time,
 considering that a window size of 10 resulted in a calculation that was 4 times faster than when using no constraint.
 In this case, using multivariate series (with 3 variables) did not have a very significant effect.
+
+### Soft-DTW
+
+```{r dist-single-sdtw, fig.height=4.5}
+id_gg <- grepl("^sdtw", dist_single_results$distance)
+gg <- ggplot(dist_single_results[id_gg,], aes(
+    x = series_length,
+    y = median_time_us,
+    group = 1
+))
+gg +
+    geom_line() +
+    facet_wrap(~distance) +
+    labs(x = "Series' length",
+         y = expression("Median time ("*mu*"s)"))
+```
+
+In principle, the soft-DTW algorithm is very similar to that of unconstrained DTW.
+However, its run-time characteristics are clearly different,
+resulting in considerably slower calculations.
+The increase caused by considering multivariate time-series is not negligible.
+
+### Triangular global alignment kernel
+
+```{r dist-single-gak, fig.height=6}
+id_gg <- grepl("_gak_", dist_single_results$distance)
+gg <- ggplot(dist_single_results[id_gg,], aes(
+    x = series_length,
+    y = median_time_us,
+    group = window_size,
+    colour = window_size
+))
+gg +
+    geom_line() +
+    facet_wrap(~distance) +
+    labs(x = "Series' length",
+         y = expression("Median time ("*mu*"s)"))
+```
 
 The behavior of GAK was rather surprising.
 Its running times increase very fast with the series' length,
@@ -152,7 +239,7 @@ a window size where applicable,
 the effect of parallelization,
 and the size of the cross-distance matrix.
 
-### Lower bounds
+### DTW lower bounds
 
 First we assess the distances that involve the DTW lower bounds.
 In the following figure,
@@ -182,8 +269,8 @@ ggplot(dist_multiple_results[id_gg,],
            shape = series_length)) +
     geom_point(size = 3) +
     facet_grid(distance ~ num_workers, scales = "free_y") +
-    theme_bw() +
-    theme(legend.position = "bottom")
+    labs(x = "Total number of distance calculations",
+         y = "Median time (ms)")
 ```
 
 For `lb_keogh` and `lb_improved`,
@@ -218,8 +305,8 @@ ggplot(dist_multiple_results[id_gg,],
            colour = series_length)) +
     geom_point(size = 3) +
     facet_wrap(~num_workers) +
-    theme_bw() +
-    theme(legend.position = "bottom")
+    labs(x = "Total number of distance calculations",
+         y = "Median time (ms)")
 ```
 
 For sequential calculations,
@@ -232,7 +319,7 @@ and helped reduce times slightly,
 although once again only with 2 parallel workers.
 This might be different for cross-distance matrices that are much larger.
 
-### Dynamic time warping
+### DTW
 
 The DTW distance doesn't allow for many optimizations.
 The version implemented in `dtw_basic` for cross-distance matrices uses less RAM by saving only 2 columns of the local cost matrix (LCM) at all times
@@ -250,8 +337,8 @@ ggplot(dist_multiple_results[id_gg,],
     geom_point(size = 3) +
     scale_shape_manual(values = c(0, 3)) +
     facet_grid(series_length ~ num_workers) +
-    theme_bw() +
-    theme(legend.position = "bottom")
+    labs(x = "Total number of distance calculations",
+         y = "Median time (ms)")
 ```
 
 The DTW distance presents a much more constant behavior across the board.
@@ -264,6 +351,29 @@ and using 4 workers reduced them practically by a factor of 4.
 Also note that the growth is very linear,
 which indicates that DTW cannot be easily optimized much more,
 something which was already pointed out before [@keogh2004].
+
+### Soft-DTW
+
+As with DTW,
+soft-DTW has few optimizations:
+its helper matrix is allocated only once during the calculation.
+In this case,
+we look only at the univariate version.
+
+```{r dist-multiple-sdtw-plot, fig.height=8, fig.cap="*The facets' columns indicate the number of parallel workers, whereas the rows indicate the length of the series being considered (all series had the same length for each case). All times are in milliseconds.*"}
+id_gg <- grepl("^sdtw_[um]", dist_multiple_results$distance)
+ggplot(dist_multiple_results[id_gg,],
+       aes(x = num_total,
+           y = median_time_ms)) +
+    geom_point(size = 3) +
+    facet_grid(series_length ~ num_workers) +
+    labs(x = "Total number of distance calculations",
+         y = "Median time (ms)")
+```
+
+The benefits of parallelization are also very evident for soft-DTW,
+and present similar characteristics to the ones obtained for DTW.
+Unfortunately, running times also grow very fast with the series' length.
 
 ### Triangular global alignment kernel
 
@@ -295,8 +405,8 @@ ggplot(dist_multiple_results[id_gg,],
            colour = window_size)) +
     geom_point(size = 3) +
     facet_grid(series_length ~ num_workers) +
-    theme_bw() +
-    theme(legend.position = "bottom")
+    labs(x = "Total number of distance calculations",
+         y = "Median time (ms)")
 ```
 
 Here we see a much clearer effect of window sizes and series' lengths and,
@@ -323,8 +433,8 @@ ggplot(cent_results[id_gg,],
            colour = series_length)) +
     geom_line() +
     facet_wrap(~cent) +
-    theme_bw() + 
-    theme(legend.position = "bottom")
+    labs(x = "Amount of time-series considered",
+         y = "Median time (ms)")
 ```
 
 As expected,
@@ -358,14 +468,39 @@ ggplot(cent_results[id_gg,],
            colour = window_size)) +
     geom_line() +
     facet_grid(series_length ~ cent, scales = "free") +
-    theme_bw() + 
-    theme(legend.position = "bottom")
+    labs(x = "Amount of time-series considered",
+         y = "Median time (ms)")
 ```
 
 Both series' length and window size have a somewhat constant effect on running times.
 As expected, the `by-series` multivariate version is more or less as fast as the univariate version,
 and the `by-variable` version is proportionally slower.
 In all cases, however, the growth is linear in the number of series considered.
+
+## Soft-DTW centroid
+
+This centroid calculation is based on soft-DTW,
+so it also supports multivariate series.
+Additionally, it depends on numerical optimization,
+and uses the `nloptr::nloptr` function.
+Only the "NLOPT_LD_LBFGS" algorithm with a maximum of 20 evaluations was tested.
+Both `gamma` and the `weights` vector were left at their default values in all tests.
+
+```{r cent-sdtwc-plot, fig.height=8, fig.cap="*The facets' rows indicate the length of the considered series. Note the different vertical scales for each row of the facets.*"}
+id_gg <- grepl("^sdtw_", cent_results$cent)
+ggplot(cent_results[id_gg,],
+       aes(x = num_series,
+           y = median_time_ms)) +
+    geom_line() +
+    facet_grid(series_length ~ cent, scales = "free") +
+    labs(x = "Amount of time-series considered",
+         y = "Median time (ms)")
+```
+
+The series' length has a very considerable effect in this case.
+Surprisingly, the multivariate tests were faster than the univariate ones.
+Unfortunately, the optimization procedure is considerably slow for data with high dimensionality,
+making the centroid calculation orders of magnitude slower than the other options.
 
 # Clustering experiments
 
@@ -398,8 +533,8 @@ ggplot(clus_tadpole_results,
            colour = window_size)) +
     geom_line() +
     facet_wrap(~lb) +
-    theme_bw() + 
-    theme(legend.position = "bottom")
+    labs(x = "Number of time-series in the data",
+         y = "Median time (s)")
 ```
 
 As expected (from Section 2.2),
@@ -439,8 +574,8 @@ ggplot(ggdf,
            colour = window_size)) +
     geom_line() +
     facet_wrap(~variable) +
-    theme_bw() +
-    theme(legend.position = "bottom")
+    labs(x = "Number of time-series in the data",
+         y = "Median time (s)")
 ```
 
 We see above that using `dtw_lb` can be considerably faster than using `dtw_basic`,
@@ -460,8 +595,8 @@ ggplot(ggdf,
            colour = num_repetitions)) +
     geom_line() +
     facet_wrap(~variable) +
-    theme_bw() +
-    theme(legend.position = "bottom")
+    labs(x = "Number of time-series in the data",
+         y = "Median time (s)")
 ```
 
 Pre-computing the whole distance matrix once means that it can be re-used across all repetitions
@@ -483,8 +618,8 @@ ggplot(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps,
            y = sparse_distmat_filled_percent,
            colour = num_repetitions)) +
     geom_line() +
-    theme_bw() +
-    theme(legend.position = "bottom")
+    labs(x = "Number of time-series in the data",
+         y = "Percentage of non-zero entries in the sparse matrix")
 ```
 
 It can be argued that 10 repetitions is still too few for partitional clustering,
@@ -512,8 +647,8 @@ ggplot(ggdf,
            colour = window_size)) +
     geom_line() +
     facet_wrap(~variable) +
-    theme_bw() +
-    theme(legend.position = "bottom")
+    labs(x = "Number of time-series in the data",
+         y = "Median time (s)")
 ```
 
 We can see that,
@@ -546,8 +681,7 @@ ggplot(ggdf,
            colour = k)) +
     geom_line() +
     facet_wrap(~variable, scales = "free_y") +
-    theme_bw() +
-    theme(legend.position = "bottom")
+    labs(x = "Number of time-series in the data")
 ```
 
 As expected, smaller values of `k` cause the sparse matrix to be more full,
@@ -565,8 +699,7 @@ ggplot(ggdf,
            colour = k)) +
     geom_line() +
     facet_wrap(~variable, scales = "free_y") +
-    theme_bw() +
-    theme(legend.position = "bottom")
+    labs(x = "Number of time-series in the data")
 ```
 
 Here we see a similar behavior as in the previous section,

@@ -1,7 +1,7 @@
 path <- "CharTrajCSV"
 files <- list.files(path)
 
-univariate_labels <- as.factor(sapply(files, substr, start = 1L, stop = 1L))
+labels <- as.factor(sapply(files, substr, start = 1L, stop = 1L))
 
 univariate_series <- lapply(files, function(file) {
     df <- read.csv(file.path(path, file), header = FALSE)
@@ -21,7 +21,7 @@ multivariate_series <- lapply(i, function(i) {
         })
 })
 
-dtwclust:::setnames_inplace(multivariate_series, as.character(univariate_labels[i]))
+dtwclust:::setnames_inplace(multivariate_series, as.character(labels[i]))
 
 rm("path", "files", "i")
-save("univariate_labels", "univariate_series", "multivariate_series", file = "read-csv.RData")
+save("labels", "univariate_series", "multivariate_series", file = "read-csv.RData")

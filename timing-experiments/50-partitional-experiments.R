@@ -51,7 +51,7 @@ t1 <- proc.time()
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning dtw_basic vs dtw_lb clustering experiments (PAM)\n")
-clus_dtwb_dtwlb_pam_results <- plyr::rbind.fill(lapply(num_series, function(num_series) {
+clus_dtwb_dtwlb_pam_results <- dplyr::bind_rows(lapply(num_series, function(num_series) {
     cat("\t\t")
 
     # Get subset and reinterpolate to equal length
@@ -59,7 +59,7 @@ clus_dtwb_dtwlb_pam_results <- plyr::rbind.fill(lapply(num_series, function(num_
     series <- unlist(series, recursive = FALSE)
     series <- reinterpolate(series, new.length = new_length)
 
-    benchmarks <- plyr::rbind.fill(lapply(window_sizes, function(window_size) {
+    benchmarks <- dplyr::bind_rows(lapply(window_sizes, function(window_size) {
         times <- sapply(1L:times, function(dummy) {
             tsc_dtwb <- tsclust(series = series, k = 20L, type = "partitional",
                                 distance = "dtw_basic", centroid = "pam",
@@ -116,7 +116,7 @@ clus_dtwb_dtwlb_pam_results <- plyr::rbind.fill(lapply(num_series, function(num_
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning dtw_basic vs dtw_lb clustering experiments (PAM vs nrep)\n")
-clus_dtwb_dtwlb_pamrep_results <- plyr::rbind.fill(lapply(num_series, function(num_series) {
+clus_dtwb_dtwlb_pamrep_results <- dplyr::bind_rows(lapply(num_series, function(num_series) {
     cat("\t\t")
 
     # Get subset and reinterpolate to equal length
@@ -124,7 +124,7 @@ clus_dtwb_dtwlb_pamrep_results <- plyr::rbind.fill(lapply(num_series, function(n
     series <- unlist(series, recursive = FALSE)
     series <- reinterpolate(series, new.length = new_length)
 
-    benchmarks <- plyr::rbind.fill(lapply(repetitions, function(nrep) {
+    benchmarks <- dplyr::bind_rows(lapply(repetitions, function(nrep) {
         times <- sapply(1L:times, function(dummy) {
             tsc_dtwb <- tsclust(series = series, k = 20L, type = "partitional",
                                 distance = "dtw_basic", centroid = "pam",
@@ -188,7 +188,7 @@ clus_dtwb_dtwlb_pamrep_results <- plyr::rbind.fill(lapply(num_series, function(n
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning dtw_basic vs dtw_lb clustering experiments (DBA)\n")
-clus_dtwb_dtwlb_dba_results <- plyr::rbind.fill(lapply(num_series, function(num_series) {
+clus_dtwb_dtwlb_dba_results <- dplyr::bind_rows(lapply(num_series, function(num_series) {
     cat("\t\t")
 
     # Get subset and reinterpolate to equal length
@@ -196,7 +196,7 @@ clus_dtwb_dtwlb_dba_results <- plyr::rbind.fill(lapply(num_series, function(num_
     series <- unlist(series, recursive = FALSE)
     series <- reinterpolate(series, new.length = new_length)
 
-    benchmarks <- plyr::rbind.fill(lapply(window_sizes, function(window_size) {
+    benchmarks <- dplyr::bind_rows(lapply(window_sizes, function(window_size) {
         times <- sapply(1L:times, function(dummy) {
             tsc_dtwb <- tsclust(series = series, k = 20L, type = "partitional",
                                 distance = "dtw_basic", centroid = "dba",
@@ -248,14 +248,14 @@ clus_dtwb_dtwlb_dba_results <- plyr::rbind.fill(lapply(num_series, function(num_
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning experiments for sparse PAM vs different k \n")
-clus_pam_sparse_k_results <- plyr::rbind.fill(lapply(num_series, function(num_series) {
+clus_pam_sparse_k_results <- dplyr::bind_rows(lapply(num_series, function(num_series) {
     cat("\t\t")
 
     # Get subset
     series <- lapply(series, function(s) { s[1L:num_series] })
     series <- unlist(series, recursive = FALSE)
 
-    benchmarks <- plyr::rbind.fill(lapply(sparse_k, function(k) {
+    benchmarks <- dplyr::bind_rows(lapply(sparse_k, function(k) {
         times <- sapply(1L:times, function(dummy) {
             tsc_nonsparse <- tsclust(series = series, k = k, type = "partitional",
                                      distance = "dtw_basic", centroid = "pam",
@@ -304,14 +304,14 @@ clus_pam_sparse_k_results <- plyr::rbind.fill(lapply(num_series, function(num_se
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning experiments for sparse, symmetric PAM vs different k \n")
-clus_pam_sparse_symmetric_k_results <- plyr::rbind.fill(lapply(num_series, function(num_series) {
+clus_pam_sparse_symmetric_k_results <- dplyr::bind_rows(lapply(num_series, function(num_series) {
     cat("\t\t")
 
     # Get subset
     series <- lapply(series, function(s) { s[1L:num_series] })
     series <- unlist(series, recursive = FALSE)
 
-    benchmarks <- plyr::rbind.fill(lapply(sparse_k, function(k) {
+    benchmarks <- dplyr::bind_rows(lapply(sparse_k, function(k) {
         times <- sapply(1L:times, function(dummy) {
             tsc_nonsparse <- tsclust(series = series, k = k, type = "partitional",
                                      distance = "sbd", centroid = "pam",

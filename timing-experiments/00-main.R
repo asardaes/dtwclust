@@ -1,7 +1,7 @@
 suppressPackageStartupMessages({
     library("dtwclust")
     library("microbenchmark")
-    library("plyr")
+    library("dplyr")
     library("doParallel")
 })
 

@@ -43,7 +43,7 @@ t1 <- proc.time()
 # NOTE: all clustering experiments will use tsclust() to include overhead of corresponding checks
 
 cat("\tRunning TADPole experiments\n")
-clus_tadpole_results <- plyr::rbind.fill(lapply(num_series, function(num_series) {
+clus_tadpole_results <- dplyr::bind_rows(lapply(num_series, function(num_series) {
     cat("\t\t")
 
     # Get subset and reinterpolate to equal length
@@ -51,7 +51,7 @@ clus_tadpole_results <- plyr::rbind.fill(lapply(num_series, function(num_series)
     series <- unlist(series, recursive = FALSE)
     series <- reinterpolate(series, new.length = new_length)
 
-    benchmarks <- plyr::rbind.fill(lapply(lbs, function(lb) {
+    benchmarks <- dplyr::bind_rows(lapply(lbs, function(lb) {
         benchmark <- lapply(window_sizes, function(window_size) {
             median_time <- median(sapply(1L:times, function(dummy) {
                 tsc <- tsclust(series = series, k = 20L, type = "tadpole",
@@ -72,7 +72,7 @@ clus_tadpole_results <- plyr::rbind.fill(lapply(num_series, function(num_series)
                        median_time_s = median_time)
         })
 
-        plyr::rbind.fill(benchmark)
+        dplyr::bind_rows(benchmark)
     }))
 
     cat("\n")

@@ -81,7 +81,7 @@ dist_lbk_single <- with(
         })
 
         # Bind results for all series and return to global environment
-        plyr::rbind.fill(benchmarks)
+        dplyr::bind_rows(benchmarks)
     }
 )
 
@@ -111,7 +111,7 @@ dist_lbi_single <- with(
                        median_time_us = benchmark$median)
         })
 
-        plyr::rbind.fill(benchmarks)
+        dplyr::bind_rows(benchmarks)
     }
 )
 
@@ -137,7 +137,7 @@ dist_sbd_single <- with(
                        median_time_us = benchmark$median)
         })
 
-        plyr::rbind.fill(benchmarks)
+        dplyr::bind_rows(benchmarks)
     }
 )
 
@@ -169,7 +169,7 @@ dist_dtw_univariate_single <- with(
                        median_time_us = benchmark$median)
         })
 
-        plyr::rbind.fill(benchmarks)
+        dplyr::bind_rows(benchmarks)
     }
 )
 
@@ -201,7 +201,59 @@ dist_dtw_multivariate_single <- with(
                        median_time_us = benchmark$median)
         })
 
-        plyr::rbind.fill(benchmarks)
+        dplyr::bind_rows(benchmarks)
+    }
+)
+
+# --------------------------------------------------------------------------------------------------
+# sdtw univariate
+# --------------------------------------------------------------------------------------------------
+
+cat("\tRunning sdtw experiments for single univariate series\n")
+dist_sdtw_univariate_single <- with(
+    new.env(),
+    {
+        benchmarks <- lapply(series, function(this_series) {
+            x <- this_series[[1L]]
+            y <- this_series[[2L]]
+
+            benchmark <- summary(microbenchmark(
+                sdtw(x, y, error.check = FALSE),
+                times = times, unit = "us"
+            ))
+
+            data.frame(distance = "sdtw_univariate",
+                       series_length = NROW(x),
+                       median_time_us = benchmark$median)
+        })
+
+        dplyr::bind_rows(benchmarks)
+    }
+)
+
+# --------------------------------------------------------------------------------------------------
+# sdtw multivariate
+# --------------------------------------------------------------------------------------------------
+
+cat("\tRunning sdtw experiments for single multivariate series\n")
+dist_sdtw_multivariate_single <- with(
+    new.env(),
+    {
+        benchmarks <- lapply(series_mv, function(this_series) {
+            x <- this_series[[1L]]
+            y <- this_series[[2L]]
+
+            benchmark <- summary(microbenchmark(
+                sdtw(x, y, error.check = FALSE),
+                times = times, unit = "us"
+            ))
+
+            data.frame(distance = "sdtw_multivariate",
+                       series_length = NROW(x),
+                       median_time_us = benchmark$median)
+        })
+
+        dplyr::bind_rows(benchmarks)
     }
 )
 
@@ -235,7 +287,7 @@ dist_unnormalized_gak_univariate_single <- with(
                        median_time_us = benchmark$median)
         })
 
-        plyr::rbind.fill(benchmarks)
+        dplyr::bind_rows(benchmarks)
     }
 )
 
@@ -269,7 +321,7 @@ dist_unnormalized_gak_multivariate_single <- with(
                        median_time_us = benchmark$median)
         })
 
-        plyr::rbind.fill(benchmarks)
+        dplyr::bind_rows(benchmarks)
     }
 )
 
@@ -303,7 +355,7 @@ dist_normalized_gak_univariate_single <- with(
                        median_time_us = benchmark$median)
         })
 
-        plyr::rbind.fill(benchmarks)
+        dplyr::bind_rows(benchmarks)
     }
 )
 
@@ -337,7 +389,7 @@ dist_normalized_gak_multivariate_single <- with(
                        median_time_us = benchmark$median)
         })
 
-        plyr::rbind.fill(benchmarks)
+        dplyr::bind_rows(benchmarks)
     }
 )
 
@@ -345,12 +397,14 @@ dist_normalized_gak_multivariate_single <- with(
 # aggregate
 # --------------------------------------------------------------------------------------------------
 
-dist_single_results <- plyr::rbind.fill(
+dist_single_results <- dplyr::bind_rows(
     dist_lbk_single,
     dist_lbi_single,
     dist_sbd_single,
     dist_dtw_univariate_single,
     dist_dtw_multivariate_single,
+    dist_sdtw_univariate_single,
+    dist_sdtw_multivariate_single,
     dist_unnormalized_gak_univariate_single,
     dist_unnormalized_gak_multivariate_single,
     dist_normalized_gak_univariate_single,
@@ -442,7 +496,7 @@ cat("\n")
 
 cat("\tRunning lb_keogh experiments for multiple series\n")
 # Loop along number of parallel workers
-dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+dist_lbk_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
     cat("\t\t")
 
     # Create parallel workers and load dtwclust in each one
@@ -484,7 +538,7 @@ dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 
     cat("\n")
     # Bind results for all series and return
-    plyr::rbind.fill(benchmarks)
+    dplyr::bind_rows(benchmarks)
 }))
 
 # --------------------------------------------------------------------------------------------------
@@ -492,7 +546,7 @@ dist_lbk_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning lb_improved experiments for multiple series\n")
-dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+dist_lbi_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
     cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
@@ -526,7 +580,7 @@ dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
     rm(workers)
 
     cat("\n")
-    plyr::rbind.fill(benchmarks)
+    dplyr::bind_rows(benchmarks)
 }))
 
 # --------------------------------------------------------------------------------------------------
@@ -537,7 +591,7 @@ dist_lbi_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 #' id_series is different here.
 
 cat("\tRunning dtw_lb experiments for multiple series\n")
-dist_dtwlb_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+dist_dtwlb_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
     cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
@@ -579,7 +633,7 @@ dist_dtwlb_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num
     rm(workers)
 
     cat("\n")
-    plyr::rbind.fill(benchmarks)
+    dplyr::bind_rows(benchmarks)
 }))
 
 # --------------------------------------------------------------------------------------------------
@@ -587,7 +641,7 @@ dist_dtwlb_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning sbd experiments for multiple series\n")
-dist_sbd_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+dist_sbd_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
     cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
@@ -619,7 +673,7 @@ dist_sbd_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
     rm(workers)
 
     cat("\n")
-    plyr::rbind.fill(benchmarks)
+    dplyr::bind_rows(benchmarks)
 }))
 
 # --------------------------------------------------------------------------------------------------
@@ -627,7 +681,7 @@ dist_sbd_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_w
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning dtw experiments for multiple univariate series\n")
-dist_dtw_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+dist_dtw_univariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
     cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
@@ -664,7 +718,7 @@ dist_dtw_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fun
     rm(workers)
 
     cat("\n")
-    plyr::rbind.fill(benchmarks)
+    dplyr::bind_rows(benchmarks)
 }))
 
 # --------------------------------------------------------------------------------------------------
@@ -672,7 +726,7 @@ dist_dtw_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fun
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning dtw experiments for multiple multivariate series\n")
-dist_dtw_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+dist_dtw_multivariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
     cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
@@ -709,15 +763,16 @@ dist_dtw_multivariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, f
     rm(workers)
 
     cat("\n")
-    plyr::rbind.fill(benchmarks)
+    dplyr::bind_rows(benchmarks)
 }))
 
 # --------------------------------------------------------------------------------------------------
-# normalized gak univariate
+# sdtw univariate
 # --------------------------------------------------------------------------------------------------
 
-#' NOTE: GAK is much more time consuming, so I only test univariate, less window sizes, less series,
-#' and less repetitions. Based on the single experiments, this should be enough to give an idea.
+#' NOTE: GAK and soft-DTW are much more time consuming, so I only test univariate, less window
+#' sizes, less series, and less repetitions. Based on the single experiments, this should be enough
+#' to give an idea.
 
 window_sizes <- c(20L, 40L)
 id_series <- rbind(
@@ -729,8 +784,48 @@ id_series <- rbind(
 id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
 times <- 10L
 
+cat("\tRunning sdtw experiments for multiple univariate series\n")
+dist_sdtw_univariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
+    cat("\t\t")
+    registerDoParallel(workers <- makeCluster(num_workers))
+    invisible(clusterEvalQ(workers, library("dtwclust")))
+
+    benchmarks <- lapply(series, function(this_series) {
+        expressions <- lapply(1L:nrow(id_series), function(i) {
+            bquote(
+                proxy::dist(x = this_series[1L:.(id_series[i, 1L])],
+                            y = this_series[1L:.(id_series[i, 2L])],
+                            method = "sdtw",
+                            error.check = FALSE)
+            )
+        })
+
+        benchmark <- summary(microbenchmark(list = expressions, times = times, unit = "ms"))
+
+        cat(".")
+        data.frame(distance = "sdtw_univariate",
+                   num_workers = num_workers,
+                   num_x = id_series[,1L],
+                   num_y = id_series[,2L],
+                   num_total = id_series[,1L] * id_series[,2L],
+                   series_length = NROW(this_series[[1L]]),
+                   median_time_ms = benchmark$median)
+    })
+
+    stopCluster(workers)
+    registerDoSEQ()
+    rm(workers)
+
+    cat("\n")
+    dplyr::bind_rows(benchmarks)
+}))
+
+# --------------------------------------------------------------------------------------------------
+# normalized gak univariate
+# --------------------------------------------------------------------------------------------------
+
 cat("\tRunning normalized_gak experiments for multiple univariate series\n")
-dist_ngak_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, function(num_workers) {
+dist_ngak_univariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
     cat("\t\t")
     registerDoParallel(workers <- makeCluster(num_workers))
     invisible(clusterEvalQ(workers, library("dtwclust")))
@@ -768,20 +863,21 @@ dist_ngak_univariate_multiple <- plyr::rbind.fill(lapply(num_workers_to_test, fu
     rm(workers)
 
     cat("\n")
-    plyr::rbind.fill(benchmarks)
+    dplyr::bind_rows(benchmarks)
 }))
 
 # --------------------------------------------------------------------------------------------------
 # aggregate
 # --------------------------------------------------------------------------------------------------
 
-dist_multiple_results <- plyr::rbind.fill(
+dist_multiple_results <- dplyr::bind_rows(
     dist_lbk_multiple,
     dist_lbi_multiple,
     dist_dtwlb_multiple,
     dist_sbd_multiple,
     dist_dtw_univariate_multiple,
     dist_dtw_multivariate_multiple,
+    dist_sdtw_univariate_multiple,
     dist_ngak_univariate_multiple
 )
 
