@@ -29,6 +29,7 @@ DtwBasicDistanceCalculator::DtwBasicDistanceCalculator(const SEXP& DIST_ARGS)
 // -------------------------------------------------------------------------------------------------
 double DtwBasicDistanceCalculator::calculate(const SEXP& X, const SEXP& Y)
 {
+    bool backtrack = Rcpp::as<bool>(backtrack_);
     int x_len, y_len, num_vars;
     if (is_multivariate_) {
         Rcpp::NumericMatrix x(X), y(Y);
@@ -47,9 +48,15 @@ double DtwBasicDistanceCalculator::calculate(const SEXP& X, const SEXP& Y)
     SEXP ny = PROTECT(Rcpp::wrap(y_len));
     SEXP nv = PROTECT(Rcpp::wrap(num_vars));
 
-    double distance = Rcpp::as<double>(
-        dtw_basic(X, Y, window_, nx, ny, nv, norm_, step_, backtrack_, gcm_)
-    );
+    SEXP res = dtw_basic(X, Y, window_, nx, ny, nv, norm_, step_, backtrack_, gcm_);
+    double distance;
+    if (backtrack) { // nocov start
+        Rcpp::List temp(res);
+        distance = Rcpp::as<double>(temp["distance"]);
+    } // nocov end
+    else {
+        distance = Rcpp::as<double>(res);
+    }
     if (normalize_) {
         distance /= x_len + y_len;
     }
