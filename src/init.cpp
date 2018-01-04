@@ -38,8 +38,6 @@ void register_functions() {
     DTWCLUST_REGISTER(lbk);
     DTWCLUST_REGISTER(lbi);
     DTWCLUST_REGISTER(logGAK);
-    DTWCLUST_REGISTER(pairs);
-    DTWCLUST_REGISTER(setnames_inplace);
     DTWCLUST_REGISTER(sdtw_cent);
     DTWCLUST_REGISTER(soft_dtw);
     DTWCLUST_REGISTER(tadpole);
