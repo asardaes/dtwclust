@@ -65,11 +65,11 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check
         if (!is.null(centroid)) check_consistency(centroid, "ts")
     }
 
-    # utils.R
+    # UTILS-utils.R
     if (is_multivariate(X)) {
         if (!is.null(centroid) && dim(X[[1L]]) != dim(centroid))
             stop("Dimension inconsistency between the series in 'X' and the provided 'centroid'.")
-        mv <- reshape_multivariate(X, centroid) # utils.R
+        mv <- reshape_multivariate(X, centroid) # UTILS-utils.R
         new_c <- Map(mv$series, mv$cent, f = function(xx, cc, ...) {
             new_c <- shape_extraction(xx, cc, znorm = znorm, ..., error.check = FALSE)
         })
@@ -108,7 +108,7 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check
     P <- diag(nc) - 1 / nc * matrix(1, nc, nc)
     M <- P %*% S %*% P
     ksc <- Re(RSpectra::eigs_sym(M, 1L)$vectors[ , 1L, drop = TRUE])
-    # utils.R
+    # UTILS-utils.R
     d1 <- l2norm(A[1L, , drop = TRUE] - ksc)
     d2 <- l2norm(A[1L, , drop = TRUE] + ksc)
     if (d1 >= d2) ksc <- -ksc

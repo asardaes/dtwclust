@@ -5,7 +5,7 @@
 #' @name tsclusters-methods
 #' @rdname tsclusters-methods
 #' @aliases TSClusters-methods
-#' @include TSClusters-classes.R
+#' @include S4-TSClusters-classes.R
 #' @importFrom methods setMethod
 #'
 NULL
@@ -102,7 +102,7 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
                                      dist = .Object@dots,
                                      cent = .Object@dots)
     else
-        .Object@args <- adjust_args(.Object@args, .Object@dots) # utils.R
+        .Object@args <- adjust_args(.Object@args, .Object@dots) # UTILS-utils.R
 
     # more helpful for hierarchical/tadpole
     if (override.family) {
@@ -178,7 +178,7 @@ setMethod("initialize", "PartitionalTSClusters", function(.Object, ...) {
     }
 
     if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
-        # no clusinfo available, but cluster and cldist can be used to calculate it (see utils.R)
+        # no clusinfo available, but cluster and cldist can be used to calculate it (see UTILS-utils.R)
         .Object@clusinfo <- compute_clusinfo(.Object@k, .Object@cluster, .Object@cldist)
     }
 
@@ -212,7 +212,7 @@ setMethod("initialize", "HierarchicalTSClusters", function(.Object, ...) {
     }
 
     if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
-        # no clusinfo available, but cluster and cldist can be used to calculate it (see utils.R)
+        # no clusinfo available, but cluster and cldist can be used to calculate it (see UTILS-utils.R)
         .Object@clusinfo <- compute_clusinfo(.Object@k, .Object@cluster, .Object@cldist)
     }
 
@@ -472,7 +472,7 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #'   `plot(x, plot = FALSE)` `+` `facet_wrap(~cl, scales = "free")`
 #'
 #'   For more complicated changes, you're better off looking at the source code at
-#'   \url{https://github.com/asardaes/dtwclust/blob/master/R/TSClusters-methods.R} and creating your
+#'   \url{https://github.com/asardaes/dtwclust/blob/master/R/S4-TSClusters-methods.R} and creating your
 #'   own plotting function.
 #'
 #' @return
@@ -845,7 +845,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
 #' @aliases cvi,PartitionalTSClusters
 #' @exportMethod cvi
 #' @importFrom methods signature
-#' @include cvi.R
+#' @include GENERICS-cvi.R
 #'
 setMethod("cvi", methods::signature(a = "PartitionalTSClusters"), cvi_TSClusters)
 

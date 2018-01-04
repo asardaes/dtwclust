@@ -8,7 +8,7 @@ context("    Load balancing for parallel symmetric proxy")
 ols <- ls()
 
 # ==================================================================================================
-# split_parallel_symmetric in utils.R
+# split_parallel_symmetric in UTILS-utils.R
 # ==================================================================================================
 
 test_that("The indices for load balancing always cover the whole distance matrix.", {

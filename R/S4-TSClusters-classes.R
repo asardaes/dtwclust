@@ -19,7 +19,7 @@ methods::removeClass("hclust4")
 #' @rdname TSClusters-class
 #' @exportClass TSClusters
 #' @importFrom methods setClass
-#' @include tsclust-family.R
+#' @include S4-tsclustFamily.R
 #'
 #' @details
 #'

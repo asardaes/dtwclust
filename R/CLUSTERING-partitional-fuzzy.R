@@ -56,7 +56,6 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         # NOTE: a custom fuzzy centroid function that doesn't want to rely on the usual fuzzy
         # objective would not be able to customize this convergence criterion...
         if (fuzzy && cent != "fcmdd") {
-            # fuzzy.R
             objective <- fuzzy_objective(cluster, distmat = distmat, m = control$fuzziness)
             if (trace) {
                 cat("Iteration ", iter, ": ",
@@ -125,7 +124,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
     }
 
     cldist <- base::as.matrix(distmat[cbind(1L:N, cluster)])
-    clusinfo <- compute_clusinfo(k, cluster, cldist) # utils.R
+    clusinfo <- compute_clusinfo(k, cluster, cldist) # UTILS-utils.R
     names(centroids) <- NULL
 
     # return

@@ -171,7 +171,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     dim_names <- list(names(x), names(y))
 
     # Get appropriate matrix/big.matrix
-    D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # utils.R
+    D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # UTILS-utils.R
 
     # Wrap as needed for foreach
     if (pairwise) {
@@ -183,7 +183,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         endpoints <- attr(x, "endpoints")
 
     } else if (symmetric) {
-        endpoints <- symmetric_loop_endpoints(length(x)) # utils.R
+        endpoints <- symmetric_loop_endpoints(length(x)) # UTILS-utils.R
         x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
         y <- x
         fftx <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { fftx })
@@ -214,7 +214,7 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     dots$fftx <- quote(fftx)
     dots$ffty <- quote(ffty)
     .distfun_ <- sbd_loop
-    eval(foreach_loop_expression) # expressions-proxy.R
+    eval(foreach_loop_expression) # UTILS-expressions-proxy.R
 
     if (pairwise) {
         class(D) <- "pairdist"

@@ -158,7 +158,7 @@ all_cent2 <- function(case = NULL, control) {
     # ----------------------------------------------------------------------------------------------
     # fcm
     fcm_cent <- function(x, u, k, ...) {
-        # utils.R
+        # UTILS-utils.R
         if (is_multivariate(x)) {
             mv <- reshape_multivariate(x, NULL)
 

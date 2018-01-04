@@ -570,7 +570,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         })
     })
 
-    # utils.R
+    # UTILS-utils.R
     setnames_inplace(processed_series, names(configs))
 
     # ==============================================================================================

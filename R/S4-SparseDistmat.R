@@ -7,7 +7,7 @@
 #' Reference class that is used internally for PAM centroids when `pam.precompute = FALSE` and
 #' `pam.sparse = TRUE`. It allows for mutable state. It contains [Distmat-class].
 #'
-#' @include Distmat.R
+#' @include S4-Distmat.R
 #' @importClassesFrom Matrix sparseMatrix
 #' @importFrom Matrix sparseMatrix
 #' @importFrom methods setRefClass

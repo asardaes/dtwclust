@@ -147,9 +147,9 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
     dim_names <- list(names(x), names(y))
 
     # Get appropriate matrix/big.matrix
-    D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # utils.R
+    D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # UTILS-utils.R
     # Wrap as needed for foreach
-    eval(foreach_wrap_expression) # expressions-proxy.R
+    eval(foreach_wrap_expression) # UTILS-expressions-proxy.R
 
     if (bigmemory::is.big.matrix(D)) {
         D_desc <- bigmemory::describe(D)
@@ -165,7 +165,7 @@ dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pa
     # Calculate distance matrix
     foreach_extra_args <- list()
     .distfun_ <- dtwb_loop
-    eval(foreach_loop_expression) # expressions-proxy.R
+    eval(foreach_loop_expression) # UTILS-expressions-proxy.R
 
     if (pairwise) {
         class(D) <- "pairdist"

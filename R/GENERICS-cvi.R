@@ -143,7 +143,7 @@
 #' 2095-2117.
 #'
 setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10) {
-    # Only external CVIs for default, TSClusters-methods.R has the internal ones
+    # Only external CVIs for default, S4-TSClusters-methods.R has the internal ones
     if (is.null(b))
         stop("A second set of cluster membership indices is required in 'b' for this/these CVI(s).")
 

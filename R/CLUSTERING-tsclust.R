@@ -12,7 +12,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
             stop("Dimensions of provided cross-distance matrix don't correspond ",
                  "to length of provided data")
 
-        # see Distmat.R
+        # see S4-Distmat.R
         if (!inherits(distmat, "Distmat")) distmat <- Distmat$new(distmat = distmat)
         distmat_provided <- TRUE
 
@@ -25,7 +25,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 
         if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
 
-        # see Distmat.R
+        # see S4-Distmat.R
         distmat <- Distmat$new(distmat = do.call(
             family@dist,
             enlist(x = series,
@@ -36,7 +36,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 
     } else {
         if (isTRUE(control$pam.sparse) && distance != "dtw_lb") {
-            # see SparseDistmat.R
+            # see S4-SparseDistmat.R
             distmat <- SparseDistmat$new(series = series,
                                          distance = distance,
                                          control = control,
@@ -44,7 +44,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
                                          error.check = FALSE)
 
         } else {
-            # see Distmat.R
+            # see S4-Distmat.R
             distmat <- Distmat$new(series = series,
                                    distance = distance,
                                    control = control,
@@ -306,7 +306,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
     MYCALL <- match.call(expand.dots = TRUE)
     dots <- list(...)
-    args <- adjust_args(args, dots) # utils.R
+    args <- adjust_args(args, dots) # UTILS-utils.R
 
     # ----------------------------------------------------------------------------------------------
     # Preprocess
@@ -422,7 +422,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 control$distmat <- NULL
 
             # --------------------------------------------------------------------------------------
-            # Family creation, see initialization in tsclust-family.R
+            # Family creation, see initialization in S4-tsclustFamily.R
             # --------------------------------------------------------------------------------------
 
             family <- methods::new("tsclustFamily",

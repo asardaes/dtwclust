@@ -13,7 +13,7 @@ estimate_sigma <- function(x, y, within_proxy) {
     med2 <- stats::median(replicate(rep, {
         xx <- sample(pool, n)
         yy <- sample(pool, n)
-        l2norm(xx - yy) # utils.R
+        l2norm(xx - yy) # UTILS-utils.R
     }))
     # return
     med1 * med2
@@ -214,7 +214,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     dim_names <- list(names(x), names(y))
 
     # Get appropriate matrix/big.matrix
-    D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # utils.R
+    D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # UTILS-utils.R
 
     if (normalize) {
         # calculation of normalization factors
@@ -234,7 +234,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     }
 
     # Wrap as needed for foreach
-    eval(foreach_wrap_expression) # expressions-proxy.R
+    eval(foreach_wrap_expression) # UTILS-expressions-proxy.R
 
     if (bigmemory::is.big.matrix(D)) {
         D_desc <- bigmemory::describe(D)
@@ -250,7 +250,7 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     # Calculate distance matrix
     foreach_extra_args <- list()
     .distfun_ <- gak_loop
-    eval(foreach_loop_expression) # expressions-proxy.R
+    eval(foreach_loop_expression) # UTILS-expressions-proxy.R
 
     if (pairwise) {
         if (normalize) D <- 1 - exp(D - 0.5 * (gak_x + gak_y))

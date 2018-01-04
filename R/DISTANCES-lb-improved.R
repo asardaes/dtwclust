@@ -144,7 +144,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     dim_names <- list(names(x), names(y))
 
     # Get appropriate matrix/big.matrix
-    D <- allocate_distmat(length(x), length(y), pairwise, FALSE) # utils.R
+    D <- allocate_distmat(length(x), length(y), pairwise, FALSE) # UTILS-utils.R
 
     envelopes <- lapply(y, function(s) { compute_envelope(s, window.size, error.check = FALSE) })
     lower.env <- lapply(envelopes, "[[", "lower")
@@ -185,7 +185,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     dots$lower.env <- quote(lower.env)
     dots$upper.env <- quote(upper.env)
     .distfun_ <- lbi_loop
-    eval(foreach_loop_expression) # expressions-proxy.R
+    eval(foreach_loop_expression) # UTILS-expressions-proxy.R
 
     if (pairwise) {
         class(D) <- "pairdist"

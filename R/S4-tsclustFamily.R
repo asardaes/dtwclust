@@ -133,7 +133,7 @@ setMethod("initialize", "tsclustFamily",
                   if (is.character(allcent)) {
                       if (allcent %in% c("pam", "fcmdd")) {
                           if (!is.null(control$distmat) && !inherits(control$distmat, "Distmat"))
-                              control$distmat <- Distmat$new( # see Distmat.R
+                              control$distmat <- Distmat$new( # see S4-Distmat.R
                                   distmat = base::as.matrix(control$distmat)
                               )
                       }

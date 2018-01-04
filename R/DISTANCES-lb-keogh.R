@@ -4,7 +4,7 @@
 #' time series. It uses a Sakoe-Chiba constraint.
 #'
 #' @export
-#' @include lb-improved.R
+#' @include DISTANCES-lb-improved.R
 #'
 #' @inheritParams lb_improved
 #' @inherit lb_improved details
@@ -121,7 +121,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     pairwise <- isTRUE(pairwise)
     dim_out <- c(length(x), length(y))
     dim_names <- list(names(x), names(y))
-    D <- allocate_distmat(length(x), length(y), pairwise, FALSE) # utils.R
+    D <- allocate_distmat(length(x), length(y), pairwise, FALSE) # UTILS-utils.R
 
     envelopes <- lapply(y, function(s) { compute_envelope(s, window.size, error.check = FALSE) })
     lower.env <- lapply(envelopes, "[[", "lower")

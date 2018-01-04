@@ -11,7 +11,7 @@ foreach_wrap_expression <- expression({
         endpoints <- attr(x, "endpoints")
 
     } else if (symmetric) {
-        endpoints <- symmetric_loop_endpoints(length(x)) # utils.R
+        endpoints <- symmetric_loop_endpoints(length(x)) # UTILS-utils.R
         x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
         y <- x
 
