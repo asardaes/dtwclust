@@ -208,7 +208,7 @@ std::vector<double> nn_dist_1(const std::vector<double>& rho, const int num_seri
     delta_ub[0] = max_delta;
 
     auto id_orig = stable_sort_ind(id_rho_sorted, false);
-    reorder(delta_ub, id_orig); // template in dtwclust++.h
+    reorder(delta_ub, id_orig); // template in tadpole.h
     return delta_ub;
 }
 
@@ -373,7 +373,7 @@ SEXP tadpole_cpp(const Rcpp::List& series,
     Rflush();
     std::vector<double> delta_ub = nn_dist_1(rho, num_series, distmat, UBM);
 
-    // get indices of sorted rho (using template function from dtwclust++.h)
+    // get indices of sorted rho (using template function from tadpole.h)
     std::vector<double> helper = rho;
     for (int i = 0; i < num_series; i++) helper[i] *= delta_ub[i];
     auto id_cl = stable_sort_ind(helper, true);
