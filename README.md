@@ -100,7 +100,7 @@ pc <- tsclust(CharTraj, type = "partitional", k = 20L,
               args = tsclust_args(dist = list(window.size = 20L)))
 #> 
 #>  Precomputing distance matrix...
-#> Repetition 1 for k = 20
+#> 
 #> Iteration 1: Changes / Distsum = 100 / 1665.433
 #> Iteration 2: Changes / Distsum = 19 / 1433.538
 #> Iteration 3: Changes / Distsum = 3 / 1417.581
@@ -109,7 +109,7 @@ pc <- tsclust(CharTraj, type = "partitional", k = 20L,
 #> Iteration 6: Changes / Distsum = 1 / 1347.486
 #> Iteration 7: Changes / Distsum = 0 / 1346.886
 #> 
-#>  Elapsed time is 1.448 seconds.
+#>  Elapsed time is 1.365 seconds.
 plot(pc)
 ```
 
@@ -124,8 +124,9 @@ hc <- tsclust(CharTraj, type = "hierarchical", k = 20L,
 #> 
 #> Calculating distance matrix...
 #> Performing hierarchical clustering...
+#> Extracting centroids...
 #> 
-#>  Elapsed time is 0.467 seconds.
+#>  Elapsed time is 0.535 seconds.
 plot(hc)
 ```
 
@@ -150,7 +151,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.340   0.000   0.338 
+#>   0.220   0.000   0.221 
 #> 
 #> Head of fuzzy memberships:
 #> 
@@ -181,8 +182,9 @@ require("doParallel")
 #> Loading required package: doParallel
 #> Loading required package: foreach
 #> Loading required package: iterators
-# Create and register parallel workers
+# Create and register parallel workers, each with dtwclust loaded
 cl <- makeCluster(detectCores())
+invisible(clusterEvalQ(cl, library("dtwclust")))
 registerDoParallel(cl)
 # Registered parallel backend detected automatically
 plc <- tsclust(CharTraj, k = 20L,
@@ -191,7 +193,12 @@ plc <- tsclust(CharTraj, k = 20L,
                args = tsclust_args(dist = list(window.size = 20L),
                                    cent = list(window.size = 20L,
                                                max.iter = 15L)))
-#>  Elapsed time is 2.905 seconds.
+#> Iteration 1: Changes / Distsum = 100 / 1531.018
+#> Iteration 2: Changes / Distsum = 3 / 886.4687
+#> Iteration 3: Changes / Distsum = 2 / 873.7354
+#> Iteration 4: Changes / Distsum = 0 / 864.1794
+#> 
+#>  Elapsed time is 1.619 seconds.
 # Return to sequential calculations
 stopCluster(cl)
 registerDoSEQ()

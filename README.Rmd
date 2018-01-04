@@ -141,8 +141,9 @@ plot(mvc)
 
 ```{r parallel}
 require("doParallel")
-# Create and register parallel workers
+# Create and register parallel workers, each with dtwclust loaded
 cl <- makeCluster(detectCores())
+invisible(clusterEvalQ(cl, library("dtwclust")))
 registerDoParallel(cl)
 # Registered parallel backend detected automatically
 plc <- tsclust(CharTraj, k = 20L,
