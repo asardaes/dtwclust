@@ -1,5 +1,6 @@
 
 ## Update to version 5.1.0.9000
+* Vignette updates and minor fixes.
 
 ## Test environments
 * Local GNU/Linux, R release

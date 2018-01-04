@@ -2,6 +2,7 @@
 
 ## Version 5.1.0.9000
 * The ellipsis in `sdtw_cent` is now actually passed to `nloptr`.
+* Updated distance and centroid timing experiments.
 
 ## Version 5.1.0
 * Added implementations of soft-DTW distance and centroid.
