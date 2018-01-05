@@ -134,7 +134,7 @@ RcppExport SEXP force_lb_symmetry(SEXP X) {
     BEGIN_RCPP
     Rcpp::NumericMatrix matrix(X);
     for (int i = 1; i < matrix.nrow(); i++) {
-        R_CheckUserInterrupt();
+        Rcpp::checkUserInterrupt();
         for (int j = 0; j < i; j++) {
             double lb1 = matrix(i,j);
             double lb2 = matrix(j,i);

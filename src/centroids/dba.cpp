@@ -200,6 +200,7 @@ SEXP dba_uv(const Rcpp::NumericVector& centroid)
         print_trace(converged, iter);
         if (converged) break;
         iter++;
+        Rcpp::checkUserInterrupt();
     }
 
     if (iter > max_iter && trace) {
@@ -247,6 +248,7 @@ SEXP dba_mv_by_variable(const Rcpp::NumericMatrix& mv_ref_cent)
             print_trace(converged, iter);
             if (converged) break;
             iter++;
+            Rcpp::checkUserInterrupt();
         }
 
         if (iter > max_iter && trace) {
@@ -291,6 +293,7 @@ SEXP dba_mv_by_series(const Rcpp::NumericMatrix& centroid)
         print_trace(converged, iter);
         if (converged) break;
         iter++;
+        Rcpp::checkUserInterrupt();
     }
 
     if (iter > max_iter && trace) {

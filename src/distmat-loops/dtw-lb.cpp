@@ -81,7 +81,7 @@ void dtw_lb_cpp(const Rcpp::List& X,
     for (int i = 0; i < id_nn.length(); i++) id_nn_prev[i] = id_nn[i] + 1; // initialize different
 
     while (!check_finished(id_nn, id_nn_prev, id_changed)) {
-        R_CheckUserInterrupt();
+        Rcpp::checkUserInterrupt();
 
         // update nn_prev
         for (int i = 0; i < id_nn.length(); i++) id_nn_prev[i] = id_nn[i];
