@@ -1,12 +1,12 @@
 #ifndef DTWCLUST_TADPOLE_HPP_
 #define DTWCLUST_TADPOLE_HPP_
 
-#include <RcppArmadillo.h>
-
 #include <algorithm> // stable_sort
 #include <numeric> // iota
 #include <utility> // swap
 #include <vector>
+
+#include <RcppArmadillo.h>
 
 namespace dtwclust {
 

@@ -1,8 +1,9 @@
-#include <RcppArmadillo.h>
+#include "distances++.h"
+
 #include <algorithm> // std::max
 #include <math.h> // exp, log, pow
 
-#include "distances++.h"
+#include <RcppArmadillo.h>
 
 namespace dtwclust {
 

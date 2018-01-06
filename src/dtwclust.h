@@ -5,8 +5,8 @@ extern "C" {
 #ifndef DTWCLUST_H_
 #define DTWCLUST_H_
 
-#include "utils/utils.h"
 #include "distances/distances.h"
+#include "utils/utils.h"
 
 #endif // DTWCLUST_H_
 

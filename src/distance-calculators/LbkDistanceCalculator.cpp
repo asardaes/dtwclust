@@ -1,6 +1,7 @@
+#include "distance-calculators.h"
+
 #include <RcppArmadillo.h>
 
-#include "distance-calculators.h"
 #include "../distances/distances++.h" // lbk_core
 
 namespace dtwclust {

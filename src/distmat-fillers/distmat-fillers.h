@@ -1,8 +1,9 @@
 #ifndef DTWCLUST_DISTMAT_FILLERS_HPP_
 #define DTWCLUST_DISTMAT_FILLERS_HPP_
 
-#include <RcppArmadillo.h>
 #include <memory> // *_ptr
+
+#include <RcppArmadillo.h>
 
 #include "../distance-calculators/distance-calculators.h"
 #include "../distmat/distmat.h"

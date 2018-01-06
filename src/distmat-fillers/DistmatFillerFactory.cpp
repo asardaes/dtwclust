@@ -1,8 +1,9 @@
-#include <RcppArmadillo.h>
+#include "distmat-fillers.h"
+
 #include <memory> // make_shared
 #include <string>
 
-#include "distmat-fillers.h"
+#include <RcppArmadillo.h>
 
 namespace dtwclust {
 

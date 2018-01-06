@@ -50,12 +50,13 @@
  * v1.0 of Global Alignment Kernel, March 25th 2011.
  */
 
-#include <R.h>
-#include <Rinternals.h>
+#include "distances.h"
+
 #include <stdlib.h>
 #include <math.h>
 
-#include "distances.h"
+#include <R.h>
+#include <Rinternals.h>
 
 // Useful constants
 #define LOG0 -10000          // log(0)

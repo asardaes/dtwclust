@@ -1,13 +1,15 @@
-#include <RcppArmadillo.h>
+#include "tadpole.h"
+
 #include <algorithm> // std::sort
 #include <iomanip> // std::setprecision
 #include <memory> // *_ptr
 #include <string>
 #include <vector>
 
+#include <RcppArmadillo.h>
+
 #include "../distance-calculators/distance-calculators.h"
 #include "../utils/utils.h" // Rflush
-#include "tadpole.h"
 
 namespace dtwclust {
 

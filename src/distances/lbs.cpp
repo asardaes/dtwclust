@@ -1,7 +1,8 @@
-#include <RcppArmadillo.h>
+#include "distances++.h"
+
 #include <cmath>
 
-#include "distances++.h"
+#include <RcppArmadillo.h>
 
 namespace dtwclust {
 

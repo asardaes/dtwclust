@@ -1,8 +1,8 @@
+#include "distmat.h"
+
 #include <RcppArmadillo.h>
 #include <bigmemory/BigMatrix.h>
 #include <bigmemory/MatrixAccessor.hpp>
-
-#include "distmat.h"
 
 namespace dtwclust {
 

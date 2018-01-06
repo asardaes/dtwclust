@@ -1,8 +1,9 @@
-#include <RcppArmadillo.h>
+#include "distance-calculators.h"
+
 #include <memory> // make_shared
 #include <string>
 
-#include "distance-calculators.h"
+#include <RcppArmadillo.h>
 
 namespace dtwclust {
 

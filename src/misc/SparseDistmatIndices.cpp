@@ -1,8 +1,9 @@
-#include <RcppArmadillo.h>
+#include "misc.h"
+
 #include <unordered_set>
 #include <vector>
 
-#include "misc.h"
+#include <RcppArmadillo.h>
 
 namespace dtwclust {
 

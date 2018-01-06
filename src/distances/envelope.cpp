@@ -4,10 +4,11 @@
  * Adapted from the code available at https://github.com/lemire/lbimproved/blob/master/dtw.h
  */
 
-#include <RcppArmadillo.h>
+#include "distances++.h"
+
 #include <deque>
 
-#include "distances++.h"
+#include <RcppArmadillo.h>
 
 namespace dtwclust {
 

@@ -1,6 +1,6 @@
-#include <RcppArmadillo.h>
-
 #include "distance-calculators.h"
+
+#include <RcppArmadillo.h>
 
 namespace dtwclust {
 

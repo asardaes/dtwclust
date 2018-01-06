@@ -1,9 +1,10 @@
 #ifndef DTWCLUST_DISTMAT_HPP_
 #define DTWCLUST_DISTMAT_HPP_
 
+#include <memory> // *_ptr
+
 #include <RcppArmadillo.h>
 #include <bigmemory/MatrixAccessor.hpp>
-#include <memory> // *_ptr
 
 namespace dtwclust {
 

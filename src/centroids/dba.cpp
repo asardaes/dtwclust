@@ -1,9 +1,11 @@
-#include <RcppArmadillo.h>
+#include "centroids.h"
+
 #include <cmath>
+
+#include <RcppArmadillo.h>
 
 #include "../distances/distances.h" // dtw_basic
 #include "../utils/utils.h" // Rflush
-#include "centroids.h"
 
 namespace dtwclust {
 

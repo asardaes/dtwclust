@@ -1,7 +1,7 @@
+#include "utils.h"
+
 #include <R.h>
 #include <Rinternals.h>
-
-#include "utils.h"
 
 // =================================================================================================
 /* for Rcpp::Rcout */

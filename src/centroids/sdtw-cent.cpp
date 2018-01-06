@@ -1,8 +1,10 @@
-#include <RcppArmadillo.h>
+#include "centroids.h"
+
 #include <math.h> // exp
 
+#include <RcppArmadillo.h>
+
 #include "../distances/distances++.h" // soft_dtw
-#include "centroids.h"
 
 namespace dtwclust {
 
