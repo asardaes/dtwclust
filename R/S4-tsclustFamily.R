@@ -92,10 +92,10 @@ tsclustFamily <- methods::setClass(
 )
 
 # ==================================================================================================
-# Membership update for fuzzy c-means clustering
+# Membership update for fuzzy clustering
 # ==================================================================================================
 
-fcm_cluster <- function(distmat, m) {
+f_cluster <- function(distmat, m) {
     cprime <- apply(distmat, 1L, function(dist_row) { sum( (1 / dist_row) ^ (2 / (m - 1)) ) })
     u <- 1 / apply(distmat, 2L, function(dist_col) { cprime * dist_col ^ (2 / (m - 1)) })
     if (is.null(dim(u))) u <- rbind(u) # for predict generic
@@ -124,7 +124,7 @@ setMethod("initialize", "tsclustFamily",
               }
 
               if (fuzzy) {
-                  dots$cluster <- fcm_cluster
+                  dots$cluster <- f_cluster
                   if (!missing(allcent) && is.character(allcent))
                       allcent <- match.arg(allcent, c("fcm", "fcmdd"))
               }
