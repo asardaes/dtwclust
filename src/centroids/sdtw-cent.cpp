@@ -7,6 +7,39 @@
 namespace dtwclust {
 
 // =================================================================================================
+/* helpers */
+// =================================================================================================
+
+void init_matrices(const int m, const int n,
+                   Rcpp::NumericMatrix& cm, Rcpp::NumericMatrix& dm, Rcpp::NumericMatrix& em)
+{
+    for (int i = 1; i <= m; i++) {
+        dm(i-1, n) = 0;
+        cm(i, n+1) = R_NegInf;
+    }
+    for (int j = 1; j <= n; j++) {
+        dm(m, j-1) = 0;
+        cm(m+1, j) = R_NegInf;
+    }
+    cm(m+1, n+1) = cm(m,n);
+    dm(m,n) = 0;
+    em.fill(0);
+    em((m+1)%2, n+1) = 1;
+}
+
+void update_em(const int i, const int n, const double gamma,
+               Rcpp::NumericMatrix& cm, Rcpp::NumericMatrix& dm, Rcpp::NumericMatrix& em)
+{
+    double a, b, c;
+    for (int j = n; j > 0; j--) {
+        a = exp((cm(i+1, j) - cm(i,j) - dm(i, j-1)) / gamma);
+        b = exp((cm(i, j+1) - cm(i,j) - dm(i-1, j)) / gamma);
+        c = exp((cm(i+1, j+1) - cm(i,j) - dm(i,j)) / gamma);
+        em(i%2, j) = a * em((i+1)%2, j) + b * em(i%2, j+1) + c * em((i+1)%2, j+1);
+    }
+}
+
+// =================================================================================================
 /* backward recursions
  *   Includes the calculation of soft-DTW gradient + jacobian product.
  */
@@ -18,28 +51,13 @@ void update_gradient(Rcpp::NumericVector& gradient, const double weight, const d
                      const Rcpp::NumericVector& x, const Rcpp::NumericVector& y)
 {
     int m = x.length(), n = y.length();
-    double a, b, c, grad;
-    for (int i = 1; i <= m; i++) {
-        dm(i-1, n) = 0;
-        cm(i, n+1) = R_NegInf;
-    }
-    for (int j = 1; j <= n; j++) {
-        dm(m, j-1) = 0;
-        cm(m+1, j) = R_NegInf;
-    }
-    cm(m+1, n+1) = cm(m,n);
-    dm(m,n) = 0;
-    em.fill(0);
-    em((m+1)%2, n+1) = 1;
+    double grad;
+
+    init_matrices(m, n, cm, dm, em);
     for (int i = m; i > 0; i--) {
-        for (int j = n; j > 0; j--) {
-            a = exp((cm(i+1, j) - cm(i,j) - dm(i, j-1)) / gamma);
-            b = exp((cm(i, j+1) - cm(i,j) - dm(i-1, j)) / gamma);
-            c = exp((cm(i+1, j+1) - cm(i,j) - dm(i,j)) / gamma);
-            em(i%2, j) = a * em((i+1)%2, j) + b * em(i%2, j+1) + c * em((i+1)%2, j+1);
-        }
+        update_em(i, n, gamma, cm, dm, em);
         grad = 0;
-        for (int jj = 0; jj < n; jj++) grad += em(i%2, jj+1) * 2 * (x[i-1] - y[jj]);
+        for (int j = 0; j < n; j++) grad += em(i%2, j+1) * 2 * (x[i-1] - y[j]);
         gradient[i-1] += weight * grad;
         if (i == m) em((m+1)%2, n+1) = 0;
     }
@@ -51,31 +69,15 @@ void update_gradient(Rcpp::NumericMatrix& gradient, const double weight, const d
                      const Rcpp::NumericMatrix& x, const Rcpp::NumericMatrix& y)
 {
     int m = x.nrow(), n = y.nrow(), dim = x.ncol();
-    Rcpp::NumericVector grad = Rcpp::NumericVector(dim);
-    double a, b, c;
-    for (int i = 1; i <= m; i++) {
-        dm(i-1, n) = 0;
-        cm(i, n+1) = R_NegInf;
-    }
-    for (int j = 1; j <= n; j++) {
-        dm(m, j-1) = 0;
-        cm(m+1, j) = R_NegInf;
-    }
-    cm(m+1, n+1) = cm(m,n);
-    dm(m,n) = 0;
-    em.fill(0);
-    em((m+1)%2, n+1) = 1;
+    Rcpp::NumericVector grad(dim);
+
+    init_matrices(m, n, cm, dm, em);
     for (int i = m; i > 0; i--) {
-        for (int j = n; j > 0; j--) {
-            a = exp((cm(i+1, j) - cm(i,j) - dm(i, j-1)) / gamma);
-            b = exp((cm(i, j+1) - cm(i,j) - dm(i-1, j)) / gamma);
-            c = exp((cm(i+1, j+1) - cm(i,j) - dm(i,j)) / gamma);
-            em(i%2, j) = a * em((i+1)%2, j) + b * em(i%2, j+1) + c * em((i+1)%2, j+1);
-        }
+        update_em(i, n, gamma, cm, dm, em);
         grad.fill(0);
-        for (int jj = 0; jj < n; jj++) {
+        for (int j = 0; j < n; j++) {
             for (int k = 0; k < dim; k++) {
-                grad[k] += em(i%2, jj+1) * 2 * (x(i-1, k) - y(jj, k));
+                grad[k] += em(i%2, j+1) * 2 * (x(i-1, k) - y(j,k));
             }
         }
         for (int k = 0; k < dim; k++) gradient(i-1, k) += weight * grad[k];
@@ -94,8 +96,7 @@ SEXP sdtw_cent_uv(const Rcpp::List& series, const SEXP& CENT,
 {
     Rcpp::NumericMatrix cm(COSTMAT), dm(DISTMAT), em(EM);
     Rcpp::NumericVector cent(CENT);
-    Rcpp::NumericVector gradient = Rcpp::clone(cent);
-    gradient.fill(0);
+    Rcpp::NumericVector gradient(cent.length());
     double objective = 0;
     for (int i = 0; i < series.length(); i++) {
         SEXP X = series[i];
@@ -121,8 +122,7 @@ SEXP sdtw_cent_mv(const Rcpp::List& series, const SEXP& CENT,
 {
     Rcpp::NumericMatrix cm(COSTMAT), dm(DISTMAT), em(EM);
     Rcpp::NumericMatrix cent(CENT);
-    Rcpp::NumericMatrix gradient = Rcpp::clone(cent);
-    gradient.fill(0);
+    Rcpp::NumericMatrix gradient(cent.nrow(), cent.ncol());
     double objective = 0;
     for (int i = 0; i < series.length(); i++) {
         SEXP X = series[i];
