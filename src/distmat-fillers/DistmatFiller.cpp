@@ -15,7 +15,7 @@ void PairwiseDistmatFiller::fill(const Rcpp::List& X, const Rcpp::List& Y) const
     int index = Rcpp::as<int>(endpoints_);
     index--; // R starts at 1, C++ at 0
     for (int i = 0; i < X.length(); i++) {
-        Rcpp::checkUserInterrupt();
+        if (i % 1000 == 0) Rcpp::checkUserInterrupt();
         (*distmat_)(index++, 0) = dist_calculator_->calculate(X, Y, i, i);
     }
 }
@@ -34,6 +34,8 @@ void SymmetricDistmatFiller::fill(const Rcpp::List& X, const Rcpp::List& Y) cons
 
     int i = i_start - 1, j = j_start - 1;
     while (j < j_end) {
+        Rcpp::checkUserInterrupt();
+
         int i_max;
         if (j == (j_end - 1))
             i_max = i_end;
@@ -41,7 +43,6 @@ void SymmetricDistmatFiller::fill(const Rcpp::List& X, const Rcpp::List& Y) cons
             i_max = X.length();
 
         while (i < i_max) {
-            Rcpp::checkUserInterrupt();
             double d = dist_calculator_->calculate(X, X, i, j);
             (*distmat_)(i,j) = d;
             (*distmat_)(j,i) = d;
@@ -61,8 +62,8 @@ void GeneralDistmatFiller::fill(const Rcpp::List& X, const Rcpp::List& Y) const
     int index = Rcpp::as<int>(endpoints_);
     index--; // R starts at 1, C++ at 0
     for (int j = 0; j < Y.length(); j++) {
+        Rcpp::checkUserInterrupt();
         for (int i = 0; i < X.length(); i++) {
-            Rcpp::checkUserInterrupt();
             (*distmat_)(i, index) = dist_calculator_->calculate(X, Y, i, j);
         }
         index++;
