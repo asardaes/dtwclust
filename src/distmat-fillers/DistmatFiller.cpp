@@ -10,13 +10,13 @@ namespace dtwclust {
 /* pairwise */
 // =================================================================================================
 
-void PairwiseDistmatFiller::fill(const Rcpp::List& X, const Rcpp::List& Y) const
+void PairwiseDistmatFiller::fill() const
 {
     int index = Rcpp::as<int>(endpoints_);
     index--; // R starts at 1, C++ at 0
-    for (int i = 0; i < X.length(); i++) {
+    for (int i = 0; i < dist_calculator_->xLimit(); i++) {
         if (i % 1000 == 0) Rcpp::checkUserInterrupt();
-        (*distmat_)(index++, 0) = dist_calculator_->calculate(X, Y, i, i);
+        (*distmat_)(index++, 0) = dist_calculator_->calculate(i,i);
     }
 }
 
@@ -24,7 +24,7 @@ void PairwiseDistmatFiller::fill(const Rcpp::List& X, const Rcpp::List& Y) const
 /* symmetric */
 // =================================================================================================
 
-void SymmetricDistmatFiller::fill(const Rcpp::List& X, const Rcpp::List& Y) const
+void SymmetricDistmatFiller::fill() const
 {
     Rcpp::List endpoints(endpoints_);
     Rcpp::List start = Rcpp::as<Rcpp::List>(endpoints["start"]);
@@ -40,10 +40,10 @@ void SymmetricDistmatFiller::fill(const Rcpp::List& X, const Rcpp::List& Y) cons
         if (j == (j_end - 1))
             i_max = i_end;
         else
-            i_max = X.length();
+            i_max = dist_calculator_->xLimit();
 
         while (i < i_max) {
-            double d = dist_calculator_->calculate(X, X, i, j);
+            double d = dist_calculator_->calculate(i,j);
             (*distmat_)(i,j) = d;
             (*distmat_)(j,i) = d;
             i++;
@@ -57,14 +57,14 @@ void SymmetricDistmatFiller::fill(const Rcpp::List& X, const Rcpp::List& Y) cons
 /* general */
 // =================================================================================================
 
-void GeneralDistmatFiller::fill(const Rcpp::List& X, const Rcpp::List& Y) const
+void GeneralDistmatFiller::fill() const
 {
     int index = Rcpp::as<int>(endpoints_);
     index--; // R starts at 1, C++ at 0
-    for (int j = 0; j < Y.length(); j++) {
+    for (int j = 0; j < dist_calculator_->yLimit(); j++) {
         Rcpp::checkUserInterrupt();
-        for (int i = 0; i < X.length(); i++) {
-            (*distmat_)(i, index) = dist_calculator_->calculate(X, Y, i, j);
+        for (int i = 0; i < dist_calculator_->xLimit(); i++) {
+            (*distmat_)(i, index) = dist_calculator_->calculate(i,j);
         }
         index++;
     }

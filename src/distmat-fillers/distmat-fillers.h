@@ -20,7 +20,7 @@ class DistmatFiller
 {
 public:
     virtual ~DistmatFiller() {};
-    virtual void fill(const Rcpp::List& X, const Rcpp::List& Y) const = 0;
+    virtual void fill() const = 0;
 
 protected:
     DistmatFiller(std::shared_ptr<Distmat>& distmat, const SEXP& ENDPOINTS,
@@ -57,7 +57,7 @@ public:
         : DistmatFiller(distmat, ENDPOINTS, dist_calculator)
     { }
 
-    void fill(const Rcpp::List& X, const Rcpp::List& Y) const override;
+    void fill() const override;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ public:
         : DistmatFiller(distmat, ENDPOINTS, dist_calculator)
     { }
 
-    void fill(const Rcpp::List& X, const Rcpp::List& Y) const override;
+    void fill() const override;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ public:
         : DistmatFiller(distmat, ENDPOINTS, dist_calculator)
     { }
 
-    void fill(const Rcpp::List& X, const Rcpp::List& Y) const override;
+    void fill() const override;
 };
 
 } // namespace dtwclust

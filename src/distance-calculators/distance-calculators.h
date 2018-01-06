@@ -18,11 +18,18 @@ class DistanceCalculator
 {
 public:
     virtual ~DistanceCalculator() {};
-    virtual double calculate(const Rcpp::List& X, const Rcpp::List& Y,
-                             const int i, const int j) = 0;
+    virtual double calculate(const int i, const int j) = 0;
+    int xLimit() { return x_.length(); }
+    int yLimit() { return y_.length(); }
+
 protected:
-    DistanceCalculator(const SEXP& DIST_ARGS) : dist_args_(DIST_ARGS) {};
-    Rcpp::List dist_args_;
+    DistanceCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+        : dist_args_(DIST_ARGS)
+        , x_(X)
+        , y_(Y)
+    { }
+
+    Rcpp::List dist_args_, x_, y_;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -31,8 +38,10 @@ protected:
 class DistanceCalculatorFactory
 {
 public:
-    std::shared_ptr<DistanceCalculator> create(const SEXP& DIST, const SEXP& DIST_ARGS);
-    std::shared_ptr<DistanceCalculator> create(const std::string& dist, const SEXP& DIST_ARGS);
+    std::shared_ptr<DistanceCalculator> create(const SEXP& DIST, const SEXP& DIST_ARGS,
+                                               const SEXP& X, const SEXP& Y);
+    std::shared_ptr<DistanceCalculator> create(const std::string& dist, const SEXP& DIST_ARGS,
+                                               const SEXP& X, const SEXP& Y);
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -41,9 +50,9 @@ public:
 class DtwBasicDistanceCalculator : public DistanceCalculator
 {
 public:
-    DtwBasicDistanceCalculator(const SEXP& DIST_ARGS);
-    double calculate(const Rcpp::List& X, const Rcpp::List& Y,
-                     const int i, const int j) override;
+    DtwBasicDistanceCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    double calculate(const int i, const int j) override;
+
 private:
     double calculate(const SEXP& X, const SEXP& Y);
     SEXP window_, norm_, step_, backtrack_, gcm_;
@@ -56,9 +65,9 @@ private:
 class LbkDistanceCalculator : public DistanceCalculator
 {
 public:
-    LbkDistanceCalculator(const SEXP& DIST_ARGS);
-    double calculate(const Rcpp::List& X, const Rcpp::List& Y,
-                     const int i, const int j) override;
+    LbkDistanceCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    double calculate(const int i, const int j) override;
+
 private:
     double calculate(const Rcpp::NumericVector& x,
                      const Rcpp::NumericVector& lower_envelope,
@@ -74,9 +83,9 @@ private:
 class LbiDistanceCalculator : public DistanceCalculator
 {
 public:
-    LbiDistanceCalculator(const SEXP& DIST_ARGS);
-    double calculate(const Rcpp::List& X, const Rcpp::List& Y,
-                     const int i, const int j) override;
+    LbiDistanceCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    double calculate(const int i, const int j) override;
+
 private:
     double calculate(const Rcpp::NumericVector& x,
                      const Rcpp::NumericVector& y,
@@ -94,9 +103,9 @@ private:
 class SdtwDistanceCalculator : public DistanceCalculator
 {
 public:
-    SdtwDistanceCalculator(const SEXP& DIST_ARGS);
-    double calculate(const Rcpp::List& X, const Rcpp::List& Y,
-                     const int i, const int j) override;
+    SdtwDistanceCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    double calculate(const int i, const int j) override;
+
 private:
     double calculate(const SEXP& X, const SEXP& Y);
     SEXP gamma_, costmat_, mv_;
@@ -108,9 +117,9 @@ private:
 class GakDistanceCalculator : public DistanceCalculator
 {
 public:
-    GakDistanceCalculator(const SEXP& DIST_ARGS);
-    double calculate(const Rcpp::List& X, const Rcpp::List& Y,
-                     const int i, const int j) override;
+    GakDistanceCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    double calculate(const int i, const int j) override;
+
 private:
     double calculate(const SEXP& X, const SEXP& Y);
     SEXP sigma_, window_, logs_;
@@ -123,9 +132,9 @@ private:
 class SbdDistanceCalculator : public DistanceCalculator
 {
 public:
-    SbdDistanceCalculator(const SEXP& DIST_ARGS);
-    double calculate(const Rcpp::List& X, const Rcpp::List& Y,
-                     const int i, const int j) override;
+    SbdDistanceCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    double calculate(const int i, const int j) override;
+
 private:
     double calculate(const arma::vec& x, const arma::vec& y,
                      const arma::cx_vec& fftx, const arma::cx_vec& ffty);

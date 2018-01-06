@@ -12,8 +12,9 @@ namespace dtwclust {
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-LbiDistanceCalculator::LbiDistanceCalculator(const SEXP& DIST_ARGS)
-    : DistanceCalculator(DIST_ARGS)
+LbiDistanceCalculator::LbiDistanceCalculator(
+    const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+    : DistanceCalculator(DIST_ARGS, X, Y)
 {
     int length = Rcpp::as<int>((SEXP)dist_args_["len"]);
     p_ = Rcpp::as<int>((SEXP)dist_args_["p"]);
@@ -41,11 +42,10 @@ double LbiDistanceCalculator::calculate(const Rcpp::NumericVector& x,
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double LbiDistanceCalculator::calculate(const Rcpp::List& X, const Rcpp::List& Y,
-                                        const int i, const int j)
+double LbiDistanceCalculator::calculate(const int i, const int j)
 {
-    SEXP x = X[i];
-    SEXP y = Y[j];
+    SEXP x = x_[i];
+    SEXP y = y_[j];
     SEXP lower_envelope = lower_envelopes_[j];
     SEXP upper_envelope = upper_envelopes_[j];
     return this->calculate(x, y, lower_envelope, upper_envelope);

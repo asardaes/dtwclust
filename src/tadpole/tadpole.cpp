@@ -134,7 +134,7 @@ std::vector<double> local_density(const Rcpp::List& series,
         for (int j = 0; j < i; j++) {
             if (LBM(i,j) <= dc && UBM(i,j) > dc) {
                 num_dist_op++;
-                double dtw_dist = dist_calculator->calculate(series, series, i, j);
+                double dtw_dist = dist_calculator->calculate(i, j);
                 distmat(i,j) = dtw_dist;
                 if (dtw_dist <= dc)
                     flags(i,j) = 0;
@@ -253,7 +253,7 @@ std::vector<double> nn_dist_2(const Rcpp::List& series,
                 }
             } else {
                 num_dist_op++;
-                double dtw_dist = dist_calculator->calculate(series, series, ii, jj);
+                double dtw_dist = dist_calculator->calculate(ii, jj);
                 if (dtw_dist < min_delta) {
                     min_delta = dtw_dist;
                     which_min_delta = jj;
@@ -354,7 +354,7 @@ SEXP tadpole_cpp(const Rcpp::List& series,
                  Rcpp::List& list)
 {
     std::string dist = "DTW_BASIC";
-    auto dist_calculator = DistanceCalculatorFactory().create(dist, DTW_ARGS);
+    auto dist_calculator = DistanceCalculatorFactory().create(dist, DTW_ARGS, series, series);
 
     int num_series = series.length();
     LowerTriMat<double> distmat(num_series, NA_REAL);

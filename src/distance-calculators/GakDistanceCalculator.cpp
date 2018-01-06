@@ -12,8 +12,9 @@ namespace dtwclust {
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-GakDistanceCalculator::GakDistanceCalculator(const SEXP& DIST_ARGS)
-    : DistanceCalculator(DIST_ARGS)
+GakDistanceCalculator::GakDistanceCalculator(
+    const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+    : DistanceCalculator(DIST_ARGS, X, Y)
 {
     sigma_ = dist_args_["sigma"];
     window_ = dist_args_["window.size"];
@@ -54,11 +55,10 @@ double GakDistanceCalculator::calculate(const SEXP& X, const SEXP& Y)
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double GakDistanceCalculator::calculate(const Rcpp::List& X, const Rcpp::List& Y,
-                                        const int i, const int j)
+double GakDistanceCalculator::calculate(const int i, const int j)
 {
-    SEXP x = X[i];
-    SEXP y = Y[j];
+    SEXP x = x_[i];
+    SEXP y = y_[j];
     return this->calculate(x, y);
 }
 

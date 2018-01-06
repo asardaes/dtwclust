@@ -12,8 +12,9 @@ namespace dtwclust {
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-SdtwDistanceCalculator::SdtwDistanceCalculator(const SEXP& DIST_ARGS)
-    : DistanceCalculator(DIST_ARGS)
+SdtwDistanceCalculator::SdtwDistanceCalculator(
+    const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+    : DistanceCalculator(DIST_ARGS, X, Y)
 {
     gamma_ = dist_args_["gamma"];
     costmat_ = dist_args_["cm"];
@@ -32,11 +33,10 @@ double SdtwDistanceCalculator::calculate(const SEXP& X, const SEXP& Y)
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double SdtwDistanceCalculator::calculate(const Rcpp::List& X, const Rcpp::List& Y,
-                                         const int i, const int j)
+double SdtwDistanceCalculator::calculate(const int i, const int j)
 {
-    SEXP x = X[i];
-    SEXP y = Y[j];
+    SEXP x = x_[i];
+    SEXP y = y_[j];
     return this->calculate(x, y);
 }
 

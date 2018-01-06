@@ -11,8 +11,9 @@ namespace dtwclust {
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-SbdDistanceCalculator::SbdDistanceCalculator(const SEXP& DIST_ARGS)
-    : DistanceCalculator(DIST_ARGS)
+SbdDistanceCalculator::SbdDistanceCalculator(
+    const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+    : DistanceCalculator(DIST_ARGS, X, Y)
 {
     fftlen_ = Rcpp::as<int>((SEXP)dist_args_["fftlen"]);
     fftx_ = dist_args_["fftx"];
@@ -56,12 +57,11 @@ double SbdDistanceCalculator::calculate(const arma::vec& x, const arma::vec& y,
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double SbdDistanceCalculator::calculate(const Rcpp::List& X, const Rcpp::List& Y,
-                                        const int i, const int j)
+double SbdDistanceCalculator::calculate(const int i, const int j)
 {
     // in two steps to avoid disambiguation
-    Rcpp::NumericVector x_rcpp(X[i]);
-    Rcpp::NumericVector y_rcpp(Y[j]);
+    Rcpp::NumericVector x_rcpp(x_[i]);
+    Rcpp::NumericVector y_rcpp(y_[j]);
     Rcpp::ComplexVector fftx_rcpp(fftx_[i]);
     Rcpp::ComplexVector ffty_rcpp(ffty_[j]);
     arma::vec x(x_rcpp), y(y_rcpp);

@@ -12,8 +12,9 @@ namespace dtwclust {
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-DtwBasicDistanceCalculator::DtwBasicDistanceCalculator(const SEXP& DIST_ARGS)
-    : DistanceCalculator(DIST_ARGS)
+DtwBasicDistanceCalculator::DtwBasicDistanceCalculator(
+    const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+    : DistanceCalculator(DIST_ARGS, X, Y)
 {
     window_ = dist_args_["window.size"];
     norm_ = dist_args_["norm"];
@@ -67,11 +68,10 @@ double DtwBasicDistanceCalculator::calculate(const SEXP& X, const SEXP& Y)
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double DtwBasicDistanceCalculator::calculate(const Rcpp::List& X, const Rcpp::List& Y,
-                                             const int i, const int j)
+double DtwBasicDistanceCalculator::calculate(const int i, const int j)
 {
-    SEXP x = X[i];
-    SEXP y = Y[j];
+    SEXP x = x_[i];
+    SEXP y = y_[j];
     return this->calculate(x, y);
 }
 

@@ -71,7 +71,7 @@ void dtw_lb_cpp(const Rcpp::List& X,
                 const int margin)
 {
     std::string dist = "DTW_BASIC";
-    auto dist_calculator = DistanceCalculatorFactory().create(dist, DOTS);
+    auto dist_calculator = DistanceCalculatorFactory().create(dist, DOTS, X, Y);
 
     int len = margin == 1 ? distmat.nrow() : distmat.ncol();
     Rcpp::IntegerVector id_nn(len), id_nn_prev(len);
@@ -91,14 +91,14 @@ void dtw_lb_cpp(const Rcpp::List& X,
             for (int i = 0; i < id_changed.length(); i++) {
                 if (id_changed[i]) {
                     int j = id_nn[i];
-                    distmat(i,j) = dist_calculator->calculate(X, Y, i, j);
+                    distmat(i,j) = dist_calculator->calculate(i, j);
                 }
             }
         } else {
             for (int j = 0; j < id_changed.length(); j++) {
                 if (id_changed[j]) {
                     int i = id_nn[j];
-                    distmat(i,j) = dist_calculator->calculate(X, Y, i, j);
+                    distmat(i,j) = dist_calculator->calculate(i, j);
                 }
             }
         }
