@@ -65,23 +65,7 @@
 #' 0031-3203, \url{http://dx.doi.org/10.1016/j.patcog.2010.09.013},
 #' \url{http://www.sciencedirect.com/science/article/pii/S003132031000453X}.
 #'
-#' @examples
-#'
-#' # Sample data
-#' data(uciCT)
-#'
-#' # Obtain an average for the first 5 time series
-#' dtw_avg <- DBA(CharTraj[1:5], CharTraj[[1]], trace = TRUE)
-#'
-#' # Plot
-#' matplot(do.call(cbind, CharTraj[1:5]), type = "l")
-#' points(dtw_avg)
-#'
-#' # Change the provided order
-#' dtw_avg2 <- DBA(CharTraj[5:1], CharTraj[[1]], trace = TRUE)
-#'
-#' # Same result?
-#' all(dtw_avg2 == dtw_avg2)
+#' @example man-examples/dba.R
 #'
 DBA <- function(X, centroid = NULL, ...,
                 window.size = NULL, norm = "L1",
