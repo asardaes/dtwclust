@@ -2,9 +2,6 @@
 
 #include <RcppArmadillo.h>
 
-#include "../distance-calculators/distance-calculators.h"
-#include "../distmat/distmat.h"
-
 namespace dtwclust {
 
 // =================================================================================================
