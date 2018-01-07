@@ -23,6 +23,7 @@ Imports:
     nloptr,
     RSpectra,
     Rcpp,
+    RcppParallel,
     reshape2,
     rngtools
 Suggests:
@@ -36,7 +37,8 @@ LinkingTo:
     BH,
     bigmemory,
     Rcpp,
-    RcppArmadillo
+    RcppArmadillo,
+    RcppParallel
 Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
 Description: Time series clustering along with optimized techniques related
@@ -53,7 +55,7 @@ BugReports: https://github.com/asardaes/dtwclust/issues
 License: GPL-3
 LazyData: TRUE
 NeedsCompilation: yes
-SystemRequirements: C++11
+SystemRequirements: C++11, GNU make
 RoxygenNote: 6.0.1
 Collate: 
     'CENTROIDS-dba.R'

@@ -13,6 +13,8 @@
 
 ## R CMD check results
 * There were no ERRORs or WARNINGs
-* There was a NOTE regarding spelling: 
-TADPole is the name of an algorithm, and it is written as such. 
-Centroid/Partitional are maybe domain specific, but are written like that too.
+* There were 2 NOTEs:
+  + Regarding spelling, TADPole is the name of an algorithm,
+    and it is written as such. Centroid/Partitional are maybe domain specific, 
+    but are written like that too.
+  + GNU make is a system requirement due to RcppParallel

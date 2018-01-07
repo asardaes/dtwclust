@@ -60,6 +60,7 @@
 #' @useDynLib dtwclust, .registration = TRUE
 #' @import foreach
 #' @importFrom Rcpp evalCpp
+#' @importFrom RcppParallel RcppParallelLibs
 #'
 NULL
 
