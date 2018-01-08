@@ -1,10 +1,4 @@
-/*
- * Lemire's streaming algorithm to compute warping envelope using no more than 3n comparisons
- *
- * Adapted from the code available at https://github.com/lemire/lbimproved/blob/master/dtw.h
- */
-
-#include "distances++.h"
+#include "utils++.h"
 
 #include <deque>
 
@@ -12,6 +6,11 @@
 
 namespace dtwclust {
 
+/*
+ * Lemire's streaming algorithm to compute warping envelope using no more than 3n comparisons
+ *
+ * Adapted from the code available at https://github.com/lemire/lbimproved/blob/master/dtw.h
+ */
 void envelope_cpp(const Rcpp::NumericVector& array, const unsigned int width,
                   Rcpp::NumericVector& minvalues, Rcpp::NumericVector& maxvalues)
 {

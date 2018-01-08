@@ -4,7 +4,7 @@
 #include "centroids/centroids.h"
 #include "distances/distances++.h"
 #include "distmat-loops/distmat-loops.h"
-#include "misc/misc.h"
 #include "tadpole/tadpole.h"
+#include "utils/utils++.h"
 
 #endif // DTWCLUST_HPP_

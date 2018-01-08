@@ -5,7 +5,6 @@ extern "C" {
 #ifndef DTWCLUST_DISTANCES_H_
 #define DTWCLUST_DISTANCES_H_
 
-#include <R.h>
 #include <Rinternals.h>
 
 SEXP dtw_basic(SEXP x, SEXP y, SEXP window,

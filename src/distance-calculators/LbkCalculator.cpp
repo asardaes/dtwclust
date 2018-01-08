@@ -28,8 +28,8 @@ LbkCalculator::LbkCalculator(
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
 double LbkCalculator::calculate(const Rcpp::NumericVector& x,
-                                        const Rcpp::NumericVector& lower_envelope,
-                                        const Rcpp::NumericVector& upper_envelope)
+                                const Rcpp::NumericVector& lower_envelope,
+                                const Rcpp::NumericVector& upper_envelope)
 {
     return lbk_core(x, p_, lower_envelope, upper_envelope, H_);
 }

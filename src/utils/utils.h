@@ -5,7 +5,6 @@ extern "C" {
 #ifndef DTWCLUST_UTILS_H_
 #define DTWCLUST_UTILS_H_
 
-#include <R.h>
 #include <Rinternals.h>
 
 SEXP pairs(SEXP L);

@@ -32,9 +32,9 @@ LbiCalculator::LbiCalculator(
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
 double LbiCalculator::calculate(const Rcpp::NumericVector& x,
-                                        const Rcpp::NumericVector& y,
-                                        const Rcpp::NumericVector& lower_envelope,
-                                        const Rcpp::NumericVector& upper_envelope)
+                                const Rcpp::NumericVector& y,
+                                const Rcpp::NumericVector& lower_envelope,
+                                const Rcpp::NumericVector& upper_envelope)
 {
     return lbi_core(x, y, window_size_, p_, lower_envelope, upper_envelope,
                     L2_, U2_, H_, LB_);
