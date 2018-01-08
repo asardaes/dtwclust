@@ -20,7 +20,7 @@ public:
     DtwDistanceUpdater(const Rcpp::LogicalVector& id_changed,
                        const Rcpp::IntegerVector& id_nn,
                        Rcpp::NumericMatrix& distmat,
-                       const DtwBasicDistanceParallelCalculator&& dist_calculator,
+                       const DtwBasicParallelCalculator&& dist_calculator,
                        int margin,
                        int gcm_ncols)
         : id_changed_(id_changed)
@@ -38,7 +38,7 @@ public:
         double* gcm = new double[2 * gcm_ncols_];
         mutex_.unlock();
         // local copy of dist_calculator so that each has a different gcm
-        DtwBasicDistanceParallelCalculator dist_calculator(dist_calculator_);
+        DtwBasicParallelCalculator dist_calculator(dist_calculator_);
         dist_calculator.setGcm(gcm);
         // update distances
         if (margin_ == 1) {
@@ -70,7 +70,7 @@ private:
     // output matrix
     RcppParallel::RMatrix<double> distmat_;
     // distance calculator
-    const DtwBasicDistanceParallelCalculator dist_calculator_;
+    const DtwBasicParallelCalculator dist_calculator_;
     // margin for update
     int margin_;
     // dimension of dynamically allocated array
@@ -145,7 +145,7 @@ void dtw_lb_cpp(const Rcpp::List& X,
                 const int margin,
                 const int num_threads)
 {
-    auto dist_calculator = DtwBasicDistanceParallelCalculator(DOTS, X, Y);
+    auto dist_calculator = DtwBasicParallelCalculator(DOTS, X, Y);
 
     int len = margin == 1 ? distmat.nrow() : distmat.ncol();
     Rcpp::IntegerVector id_nn(len), id_nn_prev(len);

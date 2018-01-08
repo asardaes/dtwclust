@@ -15,7 +15,7 @@ namespace dtwclust {
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-DtwBasicDistanceParallelCalculator::DtwBasicDistanceParallelCalculator(
+DtwBasicParallelCalculator::DtwBasicParallelCalculator(
     const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
     : DistanceCalculator(DIST_ARGS, X, Y)
 {
@@ -49,7 +49,7 @@ DtwBasicDistanceParallelCalculator::DtwBasicDistanceParallelCalculator(
 // -------------------------------------------------------------------------------------------------
 /* set pointer to helper matrix */
 // -------------------------------------------------------------------------------------------------
-void DtwBasicDistanceParallelCalculator::setGcm(double * const gcm)
+void DtwBasicParallelCalculator::setGcm(double * const gcm)
 {
     gcm_ = gcm;
 }
@@ -59,7 +59,7 @@ void DtwBasicDistanceParallelCalculator::setGcm(double * const gcm)
 // -------------------------------------------------------------------------------------------------
 
 // univariate
-double DtwBasicDistanceParallelCalculator::calculate(
+double DtwBasicParallelCalculator::calculate(
         const RcppParallel::RVector<double>& x, const RcppParallel::RVector<double>& y)
 {
     if (gcm_ == nullptr) return -1;
@@ -70,7 +70,7 @@ double DtwBasicDistanceParallelCalculator::calculate(
 }
 
 // multivariate
-double DtwBasicDistanceParallelCalculator::calculate( // nocov start
+double DtwBasicParallelCalculator::calculate( // nocov start
         const RcppParallel::RMatrix<double>& x, const RcppParallel::RMatrix<double>& y)
 {
     if (gcm_ == nullptr) return -1;
@@ -83,7 +83,7 @@ double DtwBasicDistanceParallelCalculator::calculate( // nocov start
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double DtwBasicDistanceParallelCalculator::calculate(const int i, const int j)
+double DtwBasicParallelCalculator::calculate(const int i, const int j)
 {
     if (is_multivariate_) {
         return this->calculate(x_mv_[i], y_mv_[j]); // nocov

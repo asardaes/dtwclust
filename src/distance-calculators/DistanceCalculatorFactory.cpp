@@ -24,17 +24,17 @@ DistanceCalculatorFactory::create(const std::string& dist, const SEXP& DIST_ARGS
                                   const SEXP& X, const SEXP& Y)
 {
     if (dist == "DTW_BASIC")
-        return std::make_shared<DtwBasicDistanceCalculator>(DIST_ARGS, X, Y);
+        return std::make_shared<DtwBasicCalculator>(DIST_ARGS, X, Y);
     else if (dist == "LBK")
-        return std::make_shared<LbkDistanceCalculator>(DIST_ARGS, X, Y);
+        return std::make_shared<LbkCalculator>(DIST_ARGS, X, Y);
     else if (dist == "LBI")
-        return std::make_shared<LbiDistanceCalculator>(DIST_ARGS, X, Y);
+        return std::make_shared<LbiCalculator>(DIST_ARGS, X, Y);
     else if (dist == "SDTW")
-        return std::make_shared<SdtwDistanceCalculator>(DIST_ARGS, X, Y);
+        return std::make_shared<SdtwCalculator>(DIST_ARGS, X, Y);
     else if (dist == "GAK")
-        return std::make_shared<GakDistanceCalculator>(DIST_ARGS, X, Y);
+        return std::make_shared<GakCalculator>(DIST_ARGS, X, Y);
     else if (dist == "SBD")
-        return std::make_shared<SbdDistanceCalculator>(DIST_ARGS, X, Y);
+        return std::make_shared<SbdCalculator>(DIST_ARGS, X, Y);
     else
         Rcpp::stop("Unknown distance measure"); // nocov
 }

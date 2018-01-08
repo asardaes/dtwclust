@@ -50,10 +50,10 @@ public:
 // -------------------------------------------------------------------------------------------------
 /* dtw_basic calculator */
 // -------------------------------------------------------------------------------------------------
-class DtwBasicDistanceCalculator : public DistanceCalculator
+class DtwBasicCalculator : public DistanceCalculator
 {
 public:
-    DtwBasicDistanceCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
     double calculate(const int i, const int j) override;
 
 private:
@@ -65,10 +65,10 @@ private:
 // -------------------------------------------------------------------------------------------------
 /* dtw_basic parallel calculator */
 // -------------------------------------------------------------------------------------------------
-class DtwBasicDistanceParallelCalculator : public DistanceCalculator
+class DtwBasicParallelCalculator : public DistanceCalculator
 {
 public:
-    DtwBasicDistanceParallelCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    DtwBasicParallelCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
     double calculate(const int i, const int j) override;
     void setGcm(double * const gcm);
 
@@ -93,10 +93,10 @@ private:
 // -------------------------------------------------------------------------------------------------
 /* lb_keogh calculator */
 // -------------------------------------------------------------------------------------------------
-class LbkDistanceCalculator : public DistanceCalculator
+class LbkCalculator : public DistanceCalculator
 {
 public:
-    LbkDistanceCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    LbkCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
     double calculate(const int i, const int j) override;
 
 private:
@@ -111,10 +111,10 @@ private:
 // -------------------------------------------------------------------------------------------------
 /* lb_improved calculator */
 // -------------------------------------------------------------------------------------------------
-class LbiDistanceCalculator : public DistanceCalculator
+class LbiCalculator : public DistanceCalculator
 {
 public:
-    LbiDistanceCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    LbiCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
     double calculate(const int i, const int j) override;
 
 private:
@@ -131,10 +131,10 @@ private:
 // -------------------------------------------------------------------------------------------------
 /* soft-DTW calculator */
 // -------------------------------------------------------------------------------------------------
-class SdtwDistanceCalculator : public DistanceCalculator
+class SdtwCalculator : public DistanceCalculator
 {
 public:
-    SdtwDistanceCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    SdtwCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
     double calculate(const int i, const int j) override;
 
 private:
@@ -145,10 +145,10 @@ private:
 // -------------------------------------------------------------------------------------------------
 /* gak calculator */
 // -------------------------------------------------------------------------------------------------
-class GakDistanceCalculator : public DistanceCalculator
+class GakCalculator : public DistanceCalculator
 {
 public:
-    GakDistanceCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    GakCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
     double calculate(const int i, const int j) override;
 
 private:
@@ -160,10 +160,10 @@ private:
 // -------------------------------------------------------------------------------------------------
 /* sbd calculator */
 // -------------------------------------------------------------------------------------------------
-class SbdDistanceCalculator : public DistanceCalculator
+class SbdCalculator : public DistanceCalculator
 {
 public:
-    SbdDistanceCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    SbdCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
     double calculate(const int i, const int j) override;
 
 private:

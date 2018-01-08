@@ -11,7 +11,7 @@ namespace dtwclust {
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-SbdDistanceCalculator::SbdDistanceCalculator(
+SbdCalculator::SbdCalculator(
     const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
     : DistanceCalculator(DIST_ARGS, X, Y)
 {
@@ -24,7 +24,7 @@ SbdDistanceCalculator::SbdDistanceCalculator(
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
-double SbdDistanceCalculator::calculate(const arma::vec& x, const arma::vec& y,
+double SbdCalculator::calculate(const arma::vec& x, const arma::vec& y,
                                         const arma::cx_vec& fftx, const arma::cx_vec& ffty)
 {
     // already normalizes by length
@@ -57,7 +57,7 @@ double SbdDistanceCalculator::calculate(const arma::vec& x, const arma::vec& y,
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double SbdDistanceCalculator::calculate(const int i, const int j)
+double SbdCalculator::calculate(const int i, const int j)
 {
     // in two steps to avoid disambiguation
     Rcpp::NumericVector x_rcpp(x_[i]);

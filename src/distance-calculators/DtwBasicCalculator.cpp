@@ -13,7 +13,7 @@ namespace dtwclust {
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-DtwBasicDistanceCalculator::DtwBasicDistanceCalculator(
+DtwBasicCalculator::DtwBasicCalculator(
     const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
     : DistanceCalculator(DIST_ARGS, X, Y)
 {
@@ -29,7 +29,7 @@ DtwBasicDistanceCalculator::DtwBasicDistanceCalculator(
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
-double DtwBasicDistanceCalculator::calculate(const SEXP& X, const SEXP& Y)
+double DtwBasicCalculator::calculate(const SEXP& X, const SEXP& Y)
 {
     bool backtrack = Rcpp::as<bool>(backtrack_);
     int x_len, y_len, num_vars;
@@ -69,7 +69,7 @@ double DtwBasicDistanceCalculator::calculate(const SEXP& X, const SEXP& Y)
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double DtwBasicDistanceCalculator::calculate(const int i, const int j)
+double DtwBasicCalculator::calculate(const int i, const int j)
 {
     SEXP x = x_[i];
     SEXP y = y_[j];
