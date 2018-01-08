@@ -35,7 +35,7 @@
 #'
 #' @return The distance matrix with class `crossdist`.
 #'
-#' @template parallel
+#' @template rcpp-parallel
 #'
 #' @note
 #'
@@ -80,7 +80,7 @@
 #' NN2 <- apply(d2, 1L, which.min)
 #'
 #' # Calculate the DTW distances between all elements using dtw_basic
-#' # (actually faster, see notes)
+#' # (might be faster, see notes)
 #' system.time(d3 <- proxy::dist(data[1:5], data[6:50], method = "DTW_BASIC",
 #'                               window.size = 20L))
 #'
@@ -99,30 +99,6 @@
 #' identical(NN1, NN2)
 #' identical(NN1, NN3)
 #' identical(NN1, NN4)
-#'
-#' \dontrun{
-#' #### Running DTW_LB with parallel support
-#' # For such a small dataset, this is probably slower in parallel
-#' require(doParallel)
-#'
-#' # Create parallel workers
-#' cl <- makeCluster(detectCores())
-#' invisible(clusterEvalQ(cl, library(dtwclust)))
-#' registerDoParallel(cl)
-#'
-#' # Distance matrix
-#' D <- dtw_lb(data[1:50], data[51:100], window.size = 20)
-#'
-#' # Stop parallel workers
-#' stopCluster(cl)
-#'
-#' # Return to sequential computations
-#' registerDoSEQ()
-#'
-#' # Nearest neighbors
-#' NN <- apply(D, 1, which.min)
-#' cbind(names(data[1:50]), names(data[51:100][NN]))
-#' }
 #'
 dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                    error.check = TRUE, pairwise = FALSE,
@@ -170,23 +146,21 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
         return(D)
     }
 
-    D <- split_parallel(D, 1L)
-    x <- split_parallel(x)
-    # Update with DTW in parallel
-    D <- foreach(x = x,
-                 distmat = D,
-                 .combine = rbind,
-                 .multicombine = TRUE,
-                 .packages = "dtwclust",
-                 .export = c("enlist", "call_dtwlb")) %op% {
-                     if (method == "DTW_BASIC") {
-                         # modifies distmat in place
-                         dots$margin <- nn.margin
-                         do.call(call_dtwlb,
-                                 enlist(x = x, y = y, distmat = distmat, dots = dots),
-                                 TRUE)
-
-                     } else {
+    if (method == "DTW_BASIC") {
+        # modifies distmat in place
+        dots$margin <- nn.margin
+        do.call(call_dtwlb, enlist(x = x, y = y, distmat = D, dots = dots), TRUE)
+    }
+    else {
+        D <- split_parallel(D, 1L)
+        x <- split_parallel(x)
+        # Update with DTW in parallel
+        D <- foreach(x = x,
+                     distmat = D,
+                     .combine = rbind,
+                     .multicombine = TRUE,
+                     .packages = "dtwclust",
+                     .export = c("enlist", "call_dtwlb")) %op% {
                          if (nn.margin != 1L)
                              warning("Column-wise nearest neighbors are not implemented for dtw::dtw")
                          dots$pairwise <- TRUE
@@ -208,10 +182,10 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                              id_nn <- apply(distmat, 1L, which.min)
                              id_mat[, 2L] <- id_nn
                          }
+                         # return from foreach()
+                         distmat
                      }
-                     # return from foreach()
-                     distmat
-                 }
+    }
 
     class(D) <- "crossdist"
     attr(D, "method") <- "DTW_LB"
@@ -223,8 +197,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 #' @importFrom dtw symmetric1
 #' @importFrom dtw symmetric2
 #'
-call_dtwlb <- function(x, y, distmat, ..., window.size, norm, margin,
-                       step.pattern = NULL, gcm = NULL)
+call_dtwlb <- function(x, y, distmat, ..., window.size, norm, margin, step.pattern = NULL)
 {
     if (is.null(step.pattern) || identical(step.pattern, dtw::symmetric2))
         step.pattern <- 2
@@ -233,22 +206,16 @@ call_dtwlb <- function(x, y, distmat, ..., window.size, norm, margin,
     else
         stop("step.pattern must be either symmetric1 or symmetric2 (without quotes)")
 
-    L <- max(lengths(y)) + 1L
-    if (is.null(gcm))
-        gcm <- matrix(0, 2L, L)
-    else if (!is.matrix(gcm) || nrow(gcm) < 2L || ncol(gcm) < L)
-        stop("dtw_lb: Dimension inconsistency in 'gcm'")
-    else if (storage.mode(gcm) != "double")
-        stop("dtw_lb: If provided, 'gcm' must have 'double' storage mode.")
-
     dots <- list(window.size = window.size,
                  norm = switch(norm, "L1" = 1, "L2" = 2),
                  step.pattern = step.pattern,
                  backtrack = FALSE,
-                 gcm = gcm,
                  is.multivariate = FALSE,
                  normalize = FALSE)
 
+    num_threads <- Sys.getenv("RCPP_PARALLEL_NUM_THREADS")
+    num_threads <- if (nzchar(num_threads)) as.integer(num_threads) else parallel::detectCores()
+
     # return
-    .Call(C_dtw_lb, x, y, distmat, margin, dots, PACKAGE = "dtwclust")
+    .Call(C_dtw_lb, x, y, distmat, margin, dots, num_threads, PACKAGE = "dtwclust")
 }

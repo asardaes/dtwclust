@@ -13,6 +13,11 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
                SEXP norm, SEXP step, SEXP backtrack,
                SEXP distmat);
 
+double dtw_basic_par(double const * const x, double const * const y,
+                     int const nx, int const ny, int const num_var,
+                     int const window, double const norm, double const step,
+                     double * const distmat);
+
 SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var, SEXP sigma, SEXP window, SEXP logs);
 
 #endif // DTWCLUST_DISTANCES_H_

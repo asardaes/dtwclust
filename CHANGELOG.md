@@ -1,6 +1,7 @@
 # Changelog
 
 ## Version 5.1.0.9000
+* The `dtw_lb` function now uses `RcppParallel` for parallelization.
 * The ellipsis in `sdtw_cent` is now actually passed to `nloptr`.
 * Updated distance and centroid timing experiments.
 

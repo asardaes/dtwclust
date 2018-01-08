@@ -12,7 +12,7 @@ static R_CallMethodDef callMethods[] = {
     CALLDEFpp(SparseDistmatIndices__getNewIndices, 4),
     CALLDEFpp(dba, 8),
     CALLDEFpp(distmat_loop, 8),
-    CALLDEFpp(dtw_lb, 5),
+    CALLDEFpp(dtw_lb, 6),
     CALLDEFpp(envelope, 2),
     CALLDEFpp(force_lb_symmetry, 1),
     CALLDEFpp(lbk, 4),

@@ -215,3 +215,14 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
         return ret;
     }
 }
+
+// a version compatible with RcppParallel (no backtrack here)
+double dtw_basic_par(double const * const x, double const * const y,
+                     int const nx, int const ny, int const num_var,
+                     int const window, double const norm, double const step,
+                     double * const distmat)
+{
+    // volatile to avoid some comparison problems in which_min
+    volatile double tuple[3];
+    return dtw_basic_c(distmat, tuple, x, y, window, nx, ny, num_var, norm, step, 0);
+}

@@ -3,8 +3,10 @@
 
 #include <memory> // *_ptr
 #include <string>
+#include <vector>
 
 #include <RcppArmadillo.h> // arma:: referenced here
+#include <RcppParallel.h>
 
 namespace dtwclust {
 
@@ -58,6 +60,34 @@ private:
     double calculate(const SEXP& X, const SEXP& Y);
     SEXP window_, norm_, step_, backtrack_, gcm_;
     bool is_multivariate_, normalize_;
+};
+
+// -------------------------------------------------------------------------------------------------
+/* dtw_basic parallel calculator */
+// -------------------------------------------------------------------------------------------------
+class DtwBasicDistanceParallelCalculator : public DistanceCalculator
+{
+public:
+    DtwBasicDistanceParallelCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    double calculate(const int i, const int j) override;
+    void setGcm(double * const gcm);
+
+private:
+    // method calculate
+    double calculate(const RcppParallel::RVector<double>& x,
+                     const RcppParallel::RVector<double>& y);
+    double calculate(const RcppParallel::RMatrix<double>& x,
+                     const RcppParallel::RMatrix<double>& y);
+    // input series (univariate)
+    std::vector<RcppParallel::RVector<double>> x_uv_, y_uv_;
+    // input series (multivariate)
+    std::vector<RcppParallel::RMatrix<double>> x_mv_, y_mv_;
+    // helper "matrix"
+    double* gcm_;
+    // input parameters
+    bool is_multivariate_;
+    double norm_, step_;
+    int window_;
 };
 
 // -------------------------------------------------------------------------------------------------
