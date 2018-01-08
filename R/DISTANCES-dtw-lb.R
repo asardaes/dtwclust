@@ -213,9 +213,8 @@ call_dtwlb <- function(x, y, distmat, ..., window.size, norm, margin, step.patte
                  is.multivariate = FALSE,
                  normalize = FALSE)
 
-    num_threads <- Sys.getenv("RCPP_PARALLEL_NUM_THREADS")
-    num_threads <- if (nzchar(num_threads)) as.integer(num_threads) else parallel::detectCores()
-
+    # UTILS-utils.R
+    num_threads <- get_nthreads()
     # return
     .Call(C_dtw_lb, x, y, distmat, margin, dots, num_threads, PACKAGE = "dtwclust")
 }

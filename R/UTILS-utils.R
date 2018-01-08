@@ -214,6 +214,13 @@ validate_pairwise <- function(x, y) {
     invisible(NULL)
 }
 
+# Number of configured/available threads according to RcppParallel
+#' @importFrom RcppParallel defaultNumThreads
+#'
+get_nthreads <- function() {
+    as.integer(Sys.getenv("RCPP_PARALLEL_NUM_THREADS", RcppParallel::defaultNumThreads()))
+}
+
 # ==================================================================================================
 # Helper distance-related
 # ==================================================================================================
