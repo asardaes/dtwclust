@@ -195,7 +195,7 @@ test_that("dtw_lb gives the same result regardless of dtw.func.", {
                                     window.size = 15L, step.pattern = dtw::symmetric1)
     distmat_with_dtw <- dtw_lb(data_reinterpolated[1L:50L], data_reinterpolated[51L:100L],
                                window.size = 15L, step.pattern = dtw::symmetric1, dtw.func = "dtw")
-    expect_equal(distmat_with_dtwbasic, distmat_with_dtw)
+    expect_equal(distmat_with_dtwbasic, distmat_with_dtw, check.attributes = FALSE)
 })
 
 test_that("dtw_lb gives the same result for different nn.margin and corresponding inputs.", {

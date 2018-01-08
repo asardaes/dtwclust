@@ -189,6 +189,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
 
     class(D) <- "crossdist"
     attr(D, "method") <- "DTW_LB"
+    attr(D, "call") <- match.call()
     # return
     D
 }
