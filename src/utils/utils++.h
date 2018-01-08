@@ -20,7 +20,7 @@ RcppExport SEXP SparseDistmatIndices__new(SEXP num_rows);
 RcppExport SEXP SparseDistmatIndices__getNewIndices(SEXP xptr, SEXP i, SEXP j, SEXP symmetric);
 
 // -------------------------------------------------------------------------------------------------
-/* called by other C++ functions R */
+/* called by other C++ functions */
 // -------------------------------------------------------------------------------------------------
 
 // utils-cpp.cpp
