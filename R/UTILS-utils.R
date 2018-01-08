@@ -169,8 +169,31 @@ setnames_inplace <- function(vec, names) {
 # Parallel helper functions
 # ==================================================================================================
 
-# Custom binary operator for %dopar% to avoid unnecessary warnings
+# Custom binary operator for %dopar% to avoid unnecessary warnings and adjust available threads
 `%op%` <- function(obj, ex) {
+    # check to see if the workers have specified how many threads to use
+    num_workers <- foreach::getDoParWorkers()
+    if (num_workers > 1L) {
+        withCallingHandlers({
+            reset_workers <- foreach::foreach(
+                i = 1L:num_workers,
+                .combine = c,
+                .multicombine = TRUE,
+                .inorder = FALSE,
+                .packages = "dtwclust"
+            ) %dopar% {
+                num_threads <- Sys.getenv("RCPP_PARALLEL_NUM_THREADS")
+                if (nzchar(num_threads)) return(FALSE)
+                Sys.setenv("RCPP_PARALLEL_NUM_THREADS" = 1L)
+                return(TRUE)
+            }
+        },
+        warning = function(w) {
+            if (grepl("package:dtwclust", w$message, ignore.case = TRUE))
+                invokeRestart("muffleWarning")
+        })
+    }
+    # evaluate expression
     withCallingHandlers({
         ret <- eval.parent(substitute(obj %dopar% ex))
     },
@@ -178,7 +201,23 @@ setnames_inplace <- function(vec, names) {
         if (grepl("package:dtwclust", w$message, ignore.case = TRUE))
             invokeRestart("muffleWarning")
     })
-
+    # reset parallel workers if needed
+    if (num_workers > 1L && any(reset_workers)) {
+        withCallingHandlers({
+            foreach::foreach(
+                i = 1L:num_workers,
+                .inorder = FALSE,
+                .packages = "dtwclust"
+            ) %dopar% {
+                Sys.unsetenv("RCPP_PARALLEL_NUM_THREADS")
+            }
+        },
+        warning = function(w) {
+            if (grepl("package:dtwclust", w$message, ignore.case = TRUE))
+                invokeRestart("muffleWarning")
+        })
+    }
+    # return
     ret
 }
 
