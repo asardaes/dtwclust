@@ -1,5 +1,7 @@
 #include "distance-calculators.h"
 
+#include <complex>
+
 #include <RcppArmadillo.h>
 
 namespace dtwclust {
@@ -25,7 +27,7 @@ SbdCalculator::SbdCalculator(
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
 double SbdCalculator::calculate(const arma::vec& x, const arma::vec& y,
-                                        const arma::cx_vec& fftx, const arma::cx_vec& ffty)
+                                const arma::cx_vec& fftx, const arma::cx_vec& ffty)
 {
     // already normalizes by length
     arma::vec cc_seq = arma::real(arma::ifft(fftx % ffty));
@@ -64,8 +66,17 @@ double SbdCalculator::calculate(const int i, const int j)
     Rcpp::NumericVector y_rcpp(y_[j]);
     Rcpp::ComplexVector fftx_rcpp(fftx_[i]);
     Rcpp::ComplexVector ffty_rcpp(ffty_[j]);
-    arma::vec x(x_rcpp), y(y_rcpp);
-    arma::cx_vec fftx(fftx_rcpp), ffty(ffty_rcpp);
+    // avoid copying data (ptr, length, copy, strict)
+    arma::vec x(x_rcpp.begin(), x_rcpp.length(), false, true);
+    arma::vec y(y_rcpp.begin(), y_rcpp.length(), false, true);
+    // see http://rcpp-devel.r-forge.r-project.narkive.com/o5ubHVos/multiplication-of-complexvector
+    arma::cx_vec fftx(reinterpret_cast<std::complex<double>*>(fftx_rcpp.begin()),
+                      fftx_rcpp.length(),
+                      false, true);
+    arma::cx_vec ffty(reinterpret_cast<std::complex<double>*>(ffty_rcpp.begin()),
+                      ffty_rcpp.length(),
+                      false, true);
+    // calculate distance
     return this->calculate(x, y, fftx, ffty);
 }
 
