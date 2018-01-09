@@ -68,12 +68,12 @@ SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT, SEXP MV)
 
 SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
                         SEXP LB, SEXP UB, SEXP TRACE,
-                        SEXP LIST)
+                        SEXP LIST, SEXP NUM_THREADS)
 {
-    static SEXP(*fun)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP) = NULL;
+    static SEXP(*fun)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP) = NULL;
     if(fun == NULL)
-        fun = (SEXP(*)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP)) R_GetCCallable("dtwclust", "tadpole");
-    return fun(X, K, DC, DTW_ARGS, LB, UB, TRACE, LIST);
+        fun = (SEXP(*)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP)) R_GetCCallable("dtwclust", "tadpole");
+    return fun(X, K, DC, DTW_ARGS, LB, UB, TRACE, LIST, NUM_THREADS);
 }
 
 } // namespace dtwclust

@@ -50,6 +50,13 @@
 #' For multiple `k`/`dc` values, a list of lists is returned, each internal list having the
 #' aforementioned elements.
 #'
+#' @template rcpp-parallel
+#'
+#' @section Parallel Computing:
+#'
+#'   This function also takes advantage of multi-processing with a parallel backend (e.g. when using
+#'   the \pkg{doParallel} package), but only for multiple values of `dc`.
+#'
 #' @references
 #'
 #' Begum N, Ulanova L, Wang J and Keogh E (2015). ``Accelerating Dynamic Time Warping Clustering
@@ -108,7 +115,9 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
 # a parallel foreach loop will not see the C objects, so I need to pass a function from the
 # dtwclust namespace (via the .export parameter)
 call_tadpole <- function(x, k, dc, dtw_args, LBM, UBM, trace, ret) {
-    .Call(C_tadpole, x, k, dc, dtw_args, LBM, UBM, trace, ret, PACKAGE = "dtwclust")
+    # UTILS-utils.R
+    num_threads <- get_nthreads()
+    .Call(C_tadpole, x, k, dc, dtw_args, LBM, UBM, trace, ret, num_threads, PACKAGE = "dtwclust")
 }
 
 #' @rdname TADPole

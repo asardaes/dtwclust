@@ -12,7 +12,7 @@ namespace dtwclust {
 
 RcppExport SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
                         SEXP LB, SEXP UB, SEXP TRACE,
-                        SEXP LIST);
+                        SEXP LIST, SEXP NUM_THREADS);
 
 // =================================================================================================
 /* Templates */

@@ -1,17 +1,52 @@
 #include "tadpole.h"
 
 #include <algorithm> // std::sort
+#include <atomic> // atomic_int
 #include <iomanip> // std::setprecision
 #include <memory> // *_ptr
 #include <string>
 #include <vector>
 
-#include <RcppArmadillo.h>
+#include <RcppParallel.h>
 
 #include "../distance-calculators/distance-calculators.h"
 #include "../utils/utils.h" // Rflush
 
 namespace dtwclust {
+
+#define MIN_GRAIN 10
+
+// =================================================================================================
+/* helper functions */
+// =================================================================================================
+
+// single to double indices for symmetric matrices without diagonal
+void s2d(const int id, const int nrow, int& i, int& j)
+{
+    // check if it's the first column
+    if (id < (nrow - 1)) {
+        i = id + 1;
+        j = 0;
+        return;
+    }
+    // otherwise start at second column
+    i = 2;
+    j = 1;
+    int start_id = nrow - 1;
+    int end_id = nrow * 2 - 4;
+    // j is ready after this while loop finishes
+    while (!(id >= start_id && id <= end_id)) {
+        start_id = end_id + 1;
+        end_id = start_id + nrow - j - 3;
+        i++;
+        j++;
+    }
+    // while loop for i
+    while (start_id < id) {
+        i++;
+        start_id++;
+    }
+}
 
 // =================================================================================================
 /* class that stores lower triangular of a matrix and knows how to access it */
@@ -24,20 +59,20 @@ public:
     /* constructors */
     // ---------------------------------------------------------------------------------------------
 
-    LowerTriMat(int size) : _size(size)
+    LowerTriMat(int nrow) : nrow_(nrow)
     {
-        if (size < 1) Rcpp::stop("TADPole: invalid dimension for a distance matrix"); // nocov
-        _len = size * (size + 1) / 2 - size;
-        _data = new T[_len];
-        for (int i = 0; i < _len; i++) _data[i] = T(0);
+        if (nrow < 1) Rcpp::stop("TADPole: invalid dimension for a distance matrix"); // nocov
+        len_ = nrow * (nrow + 1) / 2 - nrow;
+        data_ = new T[len_];
+        for (int i = 0; i < len_; i++) data_[i] = T(0);
     }
 
-    LowerTriMat(int size, T init_val) : _size(size)
+    LowerTriMat(int nrow, T init_val) : nrow_(nrow)
     {
-        if (size < 1) Rcpp::stop("TADPole: invalid dimension for a distance matrix"); // nocov
-        _len = size * (size + 1) / 2 - size;
-        _data = new T[_len];
-        for (int i = 0; i < _len; i++) _data[i] = init_val;
+        if (nrow < 1) Rcpp::stop("TADPole: invalid dimension for a distance matrix"); // nocov
+        len_ = nrow * (nrow + 1) / 2 - nrow;
+        data_ = new T[len_];
+        for (int i = 0; i < len_; i++) data_[i] = init_val;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -46,65 +81,162 @@ public:
 
     LowerTriMat(const LowerTriMat& ltm)
     {
-        _size = ltm._size;
-        _len = ltm._len;
-        _data = new T[_len];
-        for (int i = 0; i < _len; i++) _data[i] = ltm._data[i];
+        nrow_ = ltm.nrow_;
+        len_ = ltm.len_;
+        data_ = new T[len_];
+        for (int i = 0; i < len_; i++) data_[i] = ltm.data_[i];
     }
 
     LowerTriMat& operator= (const LowerTriMat& ltm)
     {
-        _size = ltm._size;
-        _len = ltm._len;
-        _data = new T[_len];
-        for (int i = 0; i < _len; i++) _data[i] = ltm._data[i];
+        nrow_ = ltm.nrow_;
+        len_ = ltm.len_;
+        data_ = new T[len_];
+        for (int i = 0; i < len_; i++) data_[i] = ltm.data_[i];
         return *this;
     }
 
-    ~LowerTriMat() { delete[] _data; }
+    ~LowerTriMat() { delete[] data_; }
 
     // ---------------------------------------------------------------------------------------------
     /* operator() */
     // ---------------------------------------------------------------------------------------------
 
-    T& operator() (int row, int col)
+    T& operator()(int row, int col)
     {
-        if (row >= _size || col >= _size || row == col)
+        if (row >= nrow_ || col >= nrow_ || row == col)
             Rcpp::stop("TADPole: invalid indices for a distance matrix"); // nocov
         if (col > row) {
             int swap = row;
             row = col;
             col = swap;
         }
-        return _data[d2s(row, col)];
+        return data_[d2s(row, col)];
     }
 
-    const T operator() (int row, int col) const
+    const T operator()(int row, int col) const
     {
-        if (row >= _size || col >= _size || row == col)
+        if (row >= nrow_ || col >= nrow_ || row == col)
             Rcpp::stop("TADPole: invalid indices for a distance matrix"); // nocov
         if (col > row) {
             int swap = row;
             row = col;
             col = swap;
         }
-        return _data[d2s(row, col)];
+        return data_[d2s(row, col)];
     }
+
+    // ---------------------------------------------------------------------------------------------
+    /* operator[] */
+    // ---------------------------------------------------------------------------------------------
+
+    T& operator[](const int id) { return data_[id]; }
+    const T operator[](const int id) const { return data_[id]; }
+
+    // ---------------------------------------------------------------------------------------------
+    /* others */
+    // ---------------------------------------------------------------------------------------------
+
+    int length() { return len_; }
+
+    // ---------------------------------------------------------------------------------------------
+    /* private members */
+    // ---------------------------------------------------------------------------------------------
 
 private:
-    int _size, _len;
-    T* _data;
+    int nrow_, len_;
+    T* data_;
 
-    // double to single index with adjustment for missing upper triangular
+    // double to single index with adjustment for missing upper triangular and diagonal
     int d2s(const int row, const int col) const
     {
         int adjustment = 0;
         for (int k = col; k >= 0; k--) adjustment += k + 1;
-        int id = row + col*_size - adjustment;
-        if (id >= _len)
-            Rcpp::stop("Something went wrong, an invalid distance matrix index was computed"); // nocov
+        int id = row + col*nrow_ - adjustment;
         return id;
     }
+};
+
+// =================================================================================================
+/* helper classes for multi-threading */
+// =================================================================================================
+
+class LocalDensityHelper : public RcppParallel::Worker {
+public:
+    // constructor
+    LocalDensityHelper(const double dc,
+                       const DtwBasicParallelCalculator& dist_calculator,
+                       const Rcpp::NumericMatrix& LBM,
+                       const Rcpp::NumericMatrix& UBM,
+                       LowerTriMat<double>& distmat,
+                       LowerTriMat<int>& flags,
+                       std::atomic_int& num_dist_op,
+                       const int gcm_ncols)
+        : gcm_ncols_(gcm_ncols)
+        , dc_(dc)
+        , dist_calculator_(&dist_calculator)
+        , LBM_(LBM)
+        , UBM_(UBM)
+        , distmat_(&distmat)
+        , flags_(&flags)
+        , num_dist_op_(&num_dist_op)
+    { }
+
+    // parallel loop across specified range
+    void operator()(std::size_t begin, std::size_t end) {
+        int i, j;
+        // dynamic allocation might not be thread safe
+        mutex_.lock();
+        double* gcm = new double[2 * gcm_ncols_];
+        mutex_.unlock();
+        // local copy of dist_calculator so that each has a different gcm
+        DtwBasicParallelCalculator dist_calculator(*dist_calculator_);
+        dist_calculator.setGcm(gcm);
+        /*
+         * Flag definition
+         *   0 - DTW calculated, and it lies below dc
+         *   1 - calculate DTW
+         *   2 - within dc, prune
+         *   3 - not within dc, prune
+         *   4 - identical series
+         */
+        for (int id = begin; id < end; id++) {
+            s2d(id, LBM_.nrow(), i, j);
+            if (LBM_(i,j) <= dc_ && UBM_(i,j) > dc_) {
+                (*num_dist_op_)++;
+                double dtw_dist = dist_calculator.calculate(i, j);
+                (*distmat_)[id] = dtw_dist;
+                if (dtw_dist <= dc_)
+                    (*flags_)[id] = 0;
+                else
+                    (*flags_)[id] = 1;
+            }
+            else if (LBM_(i,j) <= dc_ && UBM_(i,j) < dc_) {
+                (*flags_)[id] = 2;
+            }
+            else if (LBM_(i,j) > dc_) {
+                (*flags_)[id] = 3;
+            }
+            else {
+                (*flags_)[id] = 4; // nocov
+            }
+        }
+        // release dynamic memory
+        mutex_.lock();
+        delete[] gcm;
+        mutex_.unlock();
+    }
+
+private:
+    const int gcm_ncols_;
+    const double dc_;
+    const DtwBasicParallelCalculator * const dist_calculator_;
+    const RcppParallel::RMatrix<double> LBM_, UBM_;
+    LowerTriMat<double>* const distmat_;
+    LowerTriMat<int>* const flags_;
+    std::atomic_int* const num_dist_op_;
+    // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
+    tthread::mutex mutex_;
 };
 
 // =================================================================================================
@@ -113,45 +245,32 @@ private:
 
 std::vector<double> local_density(const Rcpp::List& series,
                                   const int num_series,
-                                  double dc,
-                                  const std::shared_ptr<DistanceCalculator>& dist_calculator,
+                                  const double dc,
+                                  const DtwBasicParallelCalculator& dist_calculator,
                                   const Rcpp::NumericMatrix& LBM,
                                   const Rcpp::NumericMatrix& UBM,
                                   LowerTriMat<double>& distmat,
                                   LowerTriMat<int>& flags,
-                                  int& num_dist_op)
+                                  std::atomic_int& num_dist_op,
+                                  const int num_threads)
 {
     std::vector<double> rho(num_series, 0);
 
-    /*
-     * Flag definition
-     *   0 - DTW calculated, and it lies below dc
-     *   1 - calculate DTW
-     *   2 - within dc, prune
-     *   3 - not within dc, prune
-     *   4 - identical series
-     */
-    for (int i = 1; i < num_series; i++) {
-        Rcpp::checkUserInterrupt();
-        for (int j = 0; j < i; j++) {
-            if (LBM(i,j) <= dc && UBM(i,j) > dc) {
-                num_dist_op++;
-                double dtw_dist = dist_calculator->calculate(i, j);
-                distmat(i,j) = dtw_dist;
-                if (dtw_dist <= dc)
-                    flags(i,j) = 0;
-                else
-                    flags(i,j) = 1;
-
-            } else if (LBM(i,j) <= dc && UBM(i,j) < dc) {
-                flags(i,j) = 2;
-            } else if (LBM(i,j) > dc) {
-                flags(i,j) = 3;
-            } else {
-                flags(i,j) = 4; // nocov
-            }
-        }
-    }
+    Rcpp::NumericVector temp((SEXP)series[0]);
+    int gcm_ncols = temp.length() + 1;
+    int grain = distmat.length() / num_threads;
+    grain = (grain < MIN_GRAIN) ? MIN_GRAIN : grain;
+    LocalDensityHelper parallel_worker(
+            dc,
+            dist_calculator,
+            LBM,
+            UBM,
+            distmat,
+            flags,
+            num_dist_op,
+            gcm_ncols
+    );
+    RcppParallel::parallelFor(0, distmat.length(), parallel_worker, grain);
 
     bool no_peaks = true;
     for (int i = 0; i < num_series; i++) {
@@ -227,7 +346,7 @@ std::vector<double> nn_dist_2(const Rcpp::List& series,
                               const LowerTriMat<int>& flags,
                               const LowerTriMat<double>& distmat,
                               std::vector<int>& nearest_neighbors,
-                              int& num_dist_op)
+                              std::atomic_int& num_dist_op)
 {
     std::vector<double> delta(num_series);
     nearest_neighbors[0] = -1;
@@ -247,13 +366,15 @@ std::vector<double> nn_dist_2(const Rcpp::List& series,
                     min_delta = dtw_dist;
                     which_min_delta = jj;
                 }
-            } else if (prune) {
+            }
+            else if (prune) {
                 double ub = UBM(ii,jj);
                 if (ub < min_delta) {
                     min_delta = ub;
                     which_min_delta = jj;
                 }
-            } else {
+            }
+            else {
                 num_dist_op++;
                 double dtw_dist = dist_calculator->calculate(ii, jj);
                 if (dtw_dist < min_delta) {
@@ -302,13 +423,11 @@ void cluster_assignment(const Rcpp::IntegerVector& k_vec,
                         Rcpp::List& list)
 {
     int len = k_vec.length();
-
     for (int counter = 0; counter < len; counter++) {
         int k = k_vec[counter];
         int n = id_cl.size();
         Rcpp::IntegerVector cl = Rcpp::rep(-1, n); // cluster ids
         Rcpp::IntegerVector cent(k); // centroid ids
-
         // id_cent only contains distinct elements, so stable sorting is not needed
         std::sort(id_cent.begin(), id_cent.begin() + k);
         for (int i = 0; i < k; i++) {
@@ -325,7 +444,6 @@ void cluster_assignment(const Rcpp::IntegerVector& k_vec,
                 if (cl[ii] == -1) warn = true;
             }
         }
-
         if (warn) // nocov start
             Rcpp::warning(
                 "At least one series wasn't assigned to a cluster. This shouldn't happen, please contact maintainer."
@@ -353,22 +471,24 @@ SEXP tadpole_cpp(const Rcpp::List& series,
                  const Rcpp::NumericMatrix& LBM,
                  const Rcpp::NumericMatrix& UBM,
                  const bool trace,
-                 Rcpp::List& list)
+                 Rcpp::List& list,
+                 const int num_threads)
 {
-    std::string dist = "DTW_BASIC";
-    auto dist_calculator = DistanceCalculatorFactory().create(dist, DTW_ARGS, series, series);
+    auto parallel_calculator = DtwBasicParallelCalculator(DTW_ARGS, series, series);
+    auto sequential_calculator = DistanceCalculatorFactory().create(
+        "DTW_BASIC", DTW_ARGS, series, series);
 
     int num_series = series.length();
     LowerTriMat<double> distmat(num_series, NA_REAL);
     LowerTriMat<int> flags(num_series, -1);
-    int num_dist_op = 0;
+    std::atomic_int num_dist_op(0);
 
     if (trace) Rcpp::Rcout << "Pruning during local density calculation\n";
     Rflush();
-    std::vector<double> rho = local_density(series, num_series,
-                                            dc, dist_calculator,
-                                            LBM, UBM,
-                                            distmat, flags, num_dist_op);
+    std::vector<double> rho = local_density(
+        series, num_series, dc, parallel_calculator,
+        LBM, UBM, distmat, flags, num_dist_op, num_threads
+    );
 
     if (trace) Rcpp::Rcout << "Pruning during nearest-neighbor distance calculation (phase 1)\n";
     Rflush();
@@ -382,10 +502,10 @@ SEXP tadpole_cpp(const Rcpp::List& series,
     if (trace) Rcpp::Rcout << "Pruning during nearest-neighbor distance calculation (phase 2)\n";
     Rflush();
     std::vector<int> nearest_neighbors(num_series);
-    std::vector<double> delta = nn_dist_2(series, num_series,
-                                          dist_calculator, id_cl, delta_ub,
-                                          LBM, UBM, flags, distmat,
-                                          nearest_neighbors, num_dist_op);
+    std::vector<double> delta = nn_dist_2(
+        series, num_series, sequential_calculator, id_cl, delta_ub,
+        LBM, UBM, flags, distmat, nearest_neighbors, num_dist_op
+    );
 
     auto id_orig = stable_sort_ind(id_cl, false);
     reorder(delta, id_orig);
@@ -394,12 +514,12 @@ SEXP tadpole_cpp(const Rcpp::List& series,
     double dist_op_percent = (num_dist_op / ((double)num_series * (num_series + 1) / 2 - num_series)) * 100;
 
     if (trace) {
-        Rcpp::Rcout << "Pruning percentage = " << std::setprecision(3) << 100 - dist_op_percent << "%\n";
+        Rcpp::Rcout << "Pruning percentage = " <<
+            std::setprecision(3) << 100 - dist_op_percent << "%\n";
         Rcpp::Rcout << "Performing cluster assignment\n\n";
         Rflush();
     }
     cluster_assignment(k, dc, id_cent, id_cl, nearest_neighbors, dist_op_percent, trace, list);
-
     return R_NilValue;
 }
 
@@ -409,7 +529,7 @@ SEXP tadpole_cpp(const Rcpp::List& series,
 
 RcppExport SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
                         SEXP LB, SEXP UB, SEXP TRACE,
-                        SEXP LIST)
+                        SEXP LIST, SEXP NUM_THREADS)
 {
     BEGIN_RCPP
     Rcpp::List list(LIST);
@@ -417,7 +537,8 @@ RcppExport SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
     Rcpp::IntegerVector k(K);
     double dc = Rcpp::as<double>(DC);
     bool trace = Rcpp::as<bool>(TRACE);
-    return tadpole_cpp(X, k, dc, DTW_ARGS, LBM, UBM, trace, list);
+    int num_threads = Rcpp::as<int>(NUM_THREADS);
+    return tadpole_cpp(X, k, dc, DTW_ARGS, LBM, UBM, trace, list, num_threads);
     END_RCPP
 }
 
