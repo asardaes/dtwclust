@@ -18,31 +18,18 @@ namespace dtwclust {
 DtwBasicParallelCalculator::DtwBasicParallelCalculator(
     const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
     : DistanceCalculator(DIST_ARGS, X, Y)
+    , window_(Rcpp::as<int>(dist_args_["window.size"]))
+    , norm_(Rcpp::as<double>(dist_args_["norm"]))
+    , step_(Rcpp::as<double>(dist_args_["step.pattern"]))
+    , is_multivariate_(Rcpp::as<bool>(dist_args_["is.multivariate"]))
 {
-    window_ = Rcpp::as<int>(dist_args_["window.size"]);
-    norm_ = Rcpp::as<double>(dist_args_["norm"]);
-    step_ = Rcpp::as<double>(dist_args_["step.pattern"]);
-    is_multivariate_ = Rcpp::as<bool>(dist_args_["is.multivariate"]);
-
     if (is_multivariate_) { // nocov start
-        for (int i = 0; i < x_.length(); i++) {
-            Rcpp::NumericMatrix this_x((SEXP)x_[i]);
-            x_mv_.push_back(RcppParallel::RMatrix<double>(this_x));
-        }
-        for (int i = 0; i < y_.length(); i++) {
-            Rcpp::NumericMatrix this_y((SEXP)y_[i]);
-            y_mv_.push_back(RcppParallel::RMatrix<double>(this_y));
-        }
+        x_mv_ = TSTSList<Rcpp::NumericMatrix>(x_);
+        y_mv_ = TSTSList<Rcpp::NumericMatrix>(y_);
     } // nocov end
     else {
-        for (int i = 0; i < x_.length(); i++) {
-            Rcpp::NumericVector this_x((SEXP)x_[i]);
-            x_uv_.push_back(RcppParallel::RVector<double>(this_x));
-        }
-        for (int i = 0; i < y_.length(); i++) {
-            Rcpp::NumericVector this_y((SEXP)y_[i]);
-            y_uv_.push_back(RcppParallel::RVector<double>(this_y));
-        }
+        x_uv_ = TSTSList<Rcpp::NumericVector>(x_);
+        y_uv_ = TSTSList<Rcpp::NumericVector>(y_);
     }
 }
 
@@ -50,9 +37,7 @@ DtwBasicParallelCalculator::DtwBasicParallelCalculator(
 /* set pointer to helper matrix */
 // -------------------------------------------------------------------------------------------------
 void DtwBasicParallelCalculator::setGcm(double * const gcm)
-{
-    gcm_ = gcm;
-}
+{ gcm_ = gcm; }
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */

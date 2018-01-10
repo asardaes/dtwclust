@@ -3,12 +3,47 @@
 
 #include <memory> // *_ptr
 #include <string>
+#include <type_traits> // conditional, is_same
 #include <vector>
 
 #include <RcppArmadillo.h> // arma:: referenced here
 #include <RcppParallel.h>
 
 namespace dtwclust {
+
+// =================================================================================================
+/* Thread-Safe Time-Series List
+*   See https://www.ibm.com/developerworks/community/blogs/
+*     5894415f-be62-4bc0-81c5-3956e82276f3/entry/
+*     introduction_to_the_c_11_feature_trailing_return_types?lang=en
+*/
+// =================================================================================================
+
+template<typename SeriesType>
+class TSTSList
+{
+public:
+    typedef typename std::conditional<
+        std::is_same<SeriesType, Rcpp::NumericVector>::value,
+        RcppParallel::RVector<double>,
+        RcppParallel::RMatrix<double>
+    >::type TSTSType;
+    // constructors
+    TSTSList() {} // dummy
+    TSTSList(const Rcpp::List& series)
+    {
+        for (const SEXP& x : series) {
+            SeriesType x_rcpp(x);
+            series_.push_back(TSTSType(x_rcpp));
+        }
+    }
+    // operator[]
+    TSTSType& operator[](const int i) { return series_[i]; }
+    const TSTSType& operator[](const int i) const { return series_[i]; }
+
+private:
+    std::vector<TSTSType> series_;
+};
 
 // =================================================================================================
 /* DistanceCalculator (base + factory + concretes) */
@@ -78,16 +113,16 @@ private:
                      const RcppParallel::RVector<double>& y);
     double calculate(const RcppParallel::RMatrix<double>& x,
                      const RcppParallel::RMatrix<double>& y);
+    // input parameters
+    int window_;
+    double norm_, step_;
+    bool is_multivariate_;
     // input series (univariate)
-    std::vector<RcppParallel::RVector<double>> x_uv_, y_uv_;
+    TSTSList<Rcpp::NumericVector> x_uv_, y_uv_;
     // input series (multivariate)
-    std::vector<RcppParallel::RMatrix<double>> x_mv_, y_mv_;
+    TSTSList<Rcpp::NumericMatrix> x_mv_, y_mv_;
     // helper "matrix"
     double* gcm_;
-    // input parameters
-    bool is_multivariate_;
-    double norm_, step_;
-    int window_;
 };
 
 // -------------------------------------------------------------------------------------------------
