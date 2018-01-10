@@ -2,8 +2,11 @@
 
 #include <algorithm> // std::max
 #include <math.h> // exp, log, pow
+#include <utility> // std::move
 
 #include <RcppArmadillo.h>
+
+#include "../utils/utils.h" // d2s
 
 namespace dtwclust {
 
@@ -11,20 +14,13 @@ namespace dtwclust {
 /* point-wise squared Euclidean norm */
 // =================================================================================================
 
-// univariate
-double inline squared_euclidean(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
-                                const int i, const int j)
+double inline squared_euclidean(const double * const x, const double * const y,
+                                const int i, const int j,
+                                const int x_nrows, const int y_nrows, const int ncols)
 {
-    return pow(x[i] - y[j], 2);
-}
-
-// multivariate
-double inline squared_euclidean(const Rcpp::NumericMatrix& x, const Rcpp::NumericMatrix& y,
-                                const int i, const int j)
-{
-    int num_col = x.ncol(); // must be same as y.ncol(), checked in R
     double d = 0;
-    for (int k = 0; k < num_col; k++) d += pow(x(i,k) - y(j,k), 2);
+    for (int k = 0; k < ncols; k++)
+        d += pow(x[d2s(i, k, x_nrows)] - y[d2s(j, k, y_nrows)], 2);
     return d;
 }
 
@@ -49,50 +45,25 @@ double inline soft_min(double a, double b, double c, const double gamma)
 /* dynamic programming recursion */
 // =================================================================================================
 
-// univariate
-double dp_recursion(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
-                    Rcpp::NumericMatrix& costmat, const double gamma,
-                    SEXP& DISTMAT)
+template<typename SeriesType, typename MatrixType>
+double dp_recursion(const SeriesType& x, const SeriesType&y,
+                    MatrixType& costmat, const double gamma,
+                    const int nx, const int ny, const int num_vars,
+                    const bool save_norm, MatrixType& distmat)
 {
-    bool save_norm = !Rf_isNull(DISTMAT);
-    for (int i = 1; i <= x.length(); i++) {
-        for (int j = 1; j <= y.length(); j++)
-        {
-            double point_norm = squared_euclidean(x, y, i-1, j-1);
+    for (int i = 1; i <= nx; i++) {
+        for (int j = 1; j <= ny; j++) {
+            double point_norm = squared_euclidean(
+                &x[0], &y[0], i-1, j-1, nx, ny, num_vars);
             costmat(i,j) = point_norm + soft_min(costmat(i-1, j),
                                                  costmat(i-1, j-1),
                                                  costmat(i, j-1),
                                                  gamma);
-            if (save_norm) {
-                Rcpp::NumericMatrix dm(DISTMAT);
-                dm(i-1, j-1) = point_norm;
-            }
+            if (save_norm)
+                distmat(i-1, j-1) = point_norm;
         }
     }
-    return costmat(x.length(), y.length());
-}
-
-// multivariate
-double dp_recursion(const Rcpp::NumericMatrix& x, const Rcpp::NumericMatrix& y,
-                    Rcpp::NumericMatrix& costmat, const double gamma,
-                    SEXP& DISTMAT)
-{
-    bool save_norm = !Rf_isNull(DISTMAT);
-    for (int i = 1; i <= x.nrow(); i++) {
-        for (int j = 1; j <= y.nrow(); j++)
-        {
-            double point_norm = squared_euclidean(x, y, i-1, j-1);
-            costmat(i,j) = point_norm + soft_min(costmat(i-1, j),
-                                                 costmat(i-1, j-1),
-                                                 costmat(i, j-1),
-                                                 gamma);
-            if (save_norm) {
-                Rcpp::NumericMatrix dm(DISTMAT);
-                dm(i-1, j-1) = point_norm;
-            }
-        }
-    }
-    return costmat(x.nrow(), y.nrow());
+    return costmat(nx, ny);
 }
 
 // =================================================================================================
@@ -101,9 +72,11 @@ double dp_recursion(const Rcpp::NumericMatrix& x, const Rcpp::NumericMatrix& y,
 
 RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT, SEXP MV) {
     BEGIN_RCPP
+    Rcpp::NumericMatrix costmat(COSTMAT), distmat;
     bool is_multivariate = Rcpp::as<bool>(MV);
     double gamma = Rcpp::as<double>(GAMMA);
-    Rcpp::NumericMatrix costmat(COSTMAT);
+    bool save_norm = !Rf_isNull(DISTMAT);
+    if (save_norm) distmat = std::move(Rcpp::NumericMatrix(DISTMAT));
     // initialize costmat values
     costmat(0,0) = 0;
     for (int i = 1; i < costmat.nrow(); i++) costmat(i,0) = R_PosInf;
@@ -111,11 +84,15 @@ RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT,
     // compute distance
     if (is_multivariate) {
         Rcpp::NumericMatrix x(X), y(Y);
-        return Rcpp::wrap(dp_recursion(x, y, costmat, gamma, DISTMAT));
+        return Rcpp::wrap(
+            dp_recursion<Rcpp::NumericMatrix, Rcpp::NumericMatrix>(
+                    x, y, costmat, gamma, x.nrow(), y.nrow(), x.ncol(), save_norm, distmat));
 
     } else {
         Rcpp::NumericVector x(X), y(Y);
-        return Rcpp::wrap(dp_recursion(x, y, costmat, gamma, DISTMAT));
+        return Rcpp::wrap(
+            dp_recursion<Rcpp::NumericVector, Rcpp::NumericMatrix>(
+                    x, y, costmat, gamma, x.length(), y.length(), 1, save_norm, distmat));
     }
     END_RCPP
 }
