@@ -123,7 +123,7 @@ opts_knit$set(self.contained = TRUE)
 \section{Introduction}
 \label{sec:introduction}
 
-\blankfootnote{This manuscript was last updated in version 5.0.0 of \dtwclust{}.}
+\blankfootnote{This manuscript was last updated in version 5.1.0.9000 of \dtwclust{}.}
 Cluster analysis is a task which concerns itself with the creation of groups of objects,
 where each group is called a cluster.
 Ideally, all members of the same cluster are similar to each other,
@@ -973,9 +973,9 @@ Most of the proposed algorithms for time-series clustering use the same basic st
 
 Partitional clustering procedures are stochastic due to their random start.
 Thus, it is common practice to test different random starts to evaluate several local optima and choose the best result out of all the repetitions.
-They tend to produce spherical clusters,
-but have a lower complexity,
-so they can be applied to very large datasets.
+It tends to produce spherical clusters,
+but has a lower complexity,
+so it can be applied to very large datasets.
 An example is given in \cref{app:pc}.
 
 \subsubsection{TADPole clustering}
@@ -1576,10 +1576,10 @@ pc_ks <- tsclust(data, k = 4L,
                  distance = "sbd", centroid = "shape",
                  seed = 8, trace = TRUE)
 
-pc_tp <-tsclust(data, k = 4L, type = "t",
-                seed = 8, trace = TRUE,
-                control = tadpole_control(dc = 1.5,
-                                          window.size = 20L))
+pc_tp <- tsclust(data, k = 4L, type = "t",
+                 seed = 8, trace = TRUE,
+                 control = tadpole_control(dc = 1.5,
+                                           window.size = 20L))
 
 sapply(list(DTW = pc_dtw, DTW_LB = pc_dtwlb, kShape = pc_ks, TADPole = pc_tp),
        cvi, b = CharTrajLabels[60L:100L], type = "VI")
