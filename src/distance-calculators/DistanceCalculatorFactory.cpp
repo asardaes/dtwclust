@@ -25,6 +25,8 @@ DistanceCalculatorFactory::create(const std::string& dist, const SEXP& DIST_ARGS
 {
     if (dist == "DTW_BASIC")
         return std::make_shared<DtwBasicCalculator>(DIST_ARGS, X, Y);
+    else if (dist == "DTW_BASIC_PAR")
+        return std::make_shared<DtwBasicParallelCalculator>(DIST_ARGS, X, Y);
     else if (dist == "LBK")
         return std::make_shared<LbkCalculator>(DIST_ARGS, X, Y);
     else if (dist == "LBI")

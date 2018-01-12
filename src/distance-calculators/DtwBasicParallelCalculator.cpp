@@ -31,13 +31,33 @@ DtwBasicParallelCalculator::DtwBasicParallelCalculator(
         x_uv_ = TSTSList<Rcpp::NumericVector>(x_);
         y_uv_ = TSTSList<Rcpp::NumericVector>(y_);
     }
+    // set value of max_len_y_
+    max_len_y_ = this->maxLength(y_, is_multivariate_);
+    // make sure pointer is null
+    gcm_ = nullptr;
 }
 
 // -------------------------------------------------------------------------------------------------
-/* set pointer to helper matrix */
+/* destructor */
 // -------------------------------------------------------------------------------------------------
-void DtwBasicParallelCalculator::setGcm(double * const gcm)
-{ gcm_ = gcm; }
+DtwBasicParallelCalculator::~DtwBasicParallelCalculator()
+{
+    if (gcm_) delete[] gcm_;
+}
+
+// -------------------------------------------------------------------------------------------------
+/* clone that sets helper matrix
+ *   This is needed because instances of this class are supposed to be called from different
+ *   threads, and each one needs its own independent matrix to perform the calculations. Each thread
+ *   has to lock a mutex and then call this method before calculating the distance.
+ */
+// ------------------------------------------------------------------------------------------------
+DtwBasicParallelCalculator* DtwBasicParallelCalculator::clone() const
+{
+    DtwBasicParallelCalculator* ptr = new DtwBasicParallelCalculator(*this);
+    ptr->gcm_ = new double[2 * (max_len_y_ + 1)];
+    return ptr;
+}
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
@@ -47,7 +67,7 @@ void DtwBasicParallelCalculator::setGcm(double * const gcm)
 double DtwBasicParallelCalculator::calculate(
         const RcppParallel::RVector<double>& x, const RcppParallel::RVector<double>& y)
 {
-    if (gcm_ == nullptr) return -1;
+    if (!gcm_) return -1;
     int nx = x.length();
     int ny = y.length();
     int num_var = 1;
@@ -58,7 +78,7 @@ double DtwBasicParallelCalculator::calculate(
 double DtwBasicParallelCalculator::calculate( // nocov start
         const RcppParallel::RMatrix<double>& x, const RcppParallel::RMatrix<double>& y)
 {
-    if (gcm_ == nullptr) return -1;
+    if (!gcm_) return -1;
     int nx = x.nrow();
     int ny = y.nrow();
     int num_var = x.ncol();

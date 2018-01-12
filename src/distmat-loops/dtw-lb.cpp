@@ -1,6 +1,6 @@
 #include "distmat-loops.h"
 
-#include <utility> // move
+#include <memory> // shared_ptr
 
 #include <RcppParallel.h>
 
@@ -20,32 +20,27 @@ public:
     DtwDistanceUpdater(const Rcpp::LogicalVector& id_changed,
                        const Rcpp::IntegerVector& id_nn,
                        Rcpp::NumericMatrix& distmat,
-                       const DtwBasicParallelCalculator&& dist_calculator,
-                       int margin,
-                       int gcm_ncols)
+                       const std::shared_ptr<DistanceCalculator>& dist_calculator,
+                       int margin)
         : id_changed_(id_changed)
         , id_nn_(id_nn)
         , distmat_(distmat)
         , dist_calculator_(dist_calculator)
         , margin_(margin)
-        , gcm_ncols_(gcm_ncols)
     { }
 
     // parallel loop across specified range
     void operator()(std::size_t begin, std::size_t end) {
-        // dynamic allocation might not be thread safe
+        // local copy of dist_calculator so it is setup separately for each thread
         mutex_.lock();
-        double* gcm = new double[2 * gcm_ncols_];
+        DistanceCalculator* dist_calculator = dist_calculator_->clone();
         mutex_.unlock();
-        // local copy of dist_calculator so that each has a different gcm
-        DtwBasicParallelCalculator dist_calculator(dist_calculator_);
-        dist_calculator.setGcm(gcm);
         // update distances
         if (margin_ == 1) {
             for (std::size_t i = begin; i < end; i++) {
                 if (id_changed_[i]) {
                     int j = id_nn_[i];
-                    distmat_(i,j) = dist_calculator.calculate((int)i, j);
+                    distmat_(i,j) = dist_calculator->calculate(i,j);
                 }
             }
         }
@@ -53,13 +48,12 @@ public:
             for (std::size_t j = begin; j < end; j++) {
                 if (id_changed_[j]) {
                     int i = id_nn_[j];
-                    distmat_(i,j) = dist_calculator.calculate(i, (int)j);
+                    distmat_(i,j) = dist_calculator->calculate(i,j);
                 }
             }
         }
-        // release dynamic memory
         mutex_.lock();
-        delete[] gcm;
+        delete dist_calculator;
         mutex_.unlock();
     }
 
@@ -70,7 +64,7 @@ private:
     // output matrix
     RcppParallel::RMatrix<double> distmat_;
     // distance calculator
-    const DtwBasicParallelCalculator dist_calculator_;
+    const std::shared_ptr<DistanceCalculator> dist_calculator_;
     // margin for update
     int margin_;
     // dimension of dynamically allocated array
@@ -80,7 +74,7 @@ private:
 };
 
 // =================================================================================================
-/* find nearest neighbors row-wise */
+/* find nearest neighbors */
 // =================================================================================================
 
 void set_nn(const Rcpp::NumericMatrix& distmat, Rcpp::IntegerVector& nn, const int margin)
@@ -145,21 +139,13 @@ void dtw_lb_cpp(const Rcpp::List& X,
                 const int margin,
                 const int num_threads)
 {
-    auto dist_calculator = DtwBasicParallelCalculator(DOTS, X, Y);
-
+    auto dist_calculator = DistanceCalculatorFactory().create("DTW_BASIC_PAR", DOTS, X, Y);
     int len = margin == 1 ? distmat.nrow() : distmat.ncol();
     Rcpp::IntegerVector id_nn(len), id_nn_prev(len);
     Rcpp::LogicalVector id_changed(len);
-
-    Rcpp::NumericVector temp((SEXP)Y[0]);
-    int gcm_ncols = temp.length() + 1;
-    DtwDistanceUpdater dist_updater(id_changed, id_nn, distmat,
-                                    std::move(dist_calculator),
-                                    margin, gcm_ncols);
-
+    DtwDistanceUpdater dist_updater(id_changed, id_nn, distmat, dist_calculator, margin);
     set_nn(distmat, id_nn, margin);
     for (int i = 0; i < id_nn.length(); i++) id_nn_prev[i] = id_nn[i] + 1; // initialize different
-
     int grain = len / num_threads;
     grain = (grain < MIN_GRAIN) ? MIN_GRAIN : grain;
     while (!check_finished(id_nn, id_nn_prev, id_changed)) {

@@ -12,11 +12,7 @@
 namespace dtwclust {
 
 // =================================================================================================
-/* Thread-Safe Time-Series List
-*   See https://www.ibm.com/developerworks/community/blogs/
-*     5894415f-be62-4bc0-81c5-3956e82276f3/entry/
-*     introduction_to_the_c_11_feature_trailing_return_types?lang=en
-*/
+/* Thread-Safe Time-Series List */
 // =================================================================================================
 
 template<typename SeriesType>
@@ -55,8 +51,11 @@ private:
 class DistanceCalculator
 {
 public:
-    virtual ~DistanceCalculator() {};
+    virtual ~DistanceCalculator() {}
     virtual double calculate(const int i, const int j) = 0;
+    // a clone method to make life easier when copying objects in each thread
+    virtual DistanceCalculator* clone() const = 0;
+    // helpers for distmat filler
     int xLimit() { return x_.length(); }
     int yLimit() { return y_.length(); }
 
@@ -66,6 +65,23 @@ protected:
         , x_(X)
         , y_(Y)
     { }
+
+    int maxLength(const Rcpp::List& list, const bool is_multivariate) const {
+        int max_len = 0;
+        for (const SEXP& series : list) {
+            if (is_multivariate) {
+                Rcpp::NumericMatrix x(series);
+                int this_len = x.nrow();
+                if (this_len > max_len) max_len = this_len;
+            }
+            else {
+                Rcpp::NumericVector x(series);
+                int this_len = x.length();
+                if (this_len > max_len) max_len = this_len;
+            }
+        }
+        return max_len;
+    }
 
     Rcpp::List dist_args_, x_, y_;
 };
@@ -90,6 +106,8 @@ class DtwBasicCalculator : public DistanceCalculator
 public:
     DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
     double calculate(const int i, const int j) override;
+    DtwBasicCalculator* clone() const override
+        { return new DtwBasicCalculator(*this); }
 
 private:
     double calculate(const SEXP& X, const SEXP& Y);
@@ -104,8 +122,9 @@ class DtwBasicParallelCalculator : public DistanceCalculator
 {
 public:
     DtwBasicParallelCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
+    ~DtwBasicParallelCalculator();
     double calculate(const int i, const int j) override;
-    void setGcm(double * const gcm);
+    DtwBasicParallelCalculator* clone() const override;
 
 private:
     // method calculate
@@ -123,6 +142,8 @@ private:
     TSTSList<Rcpp::NumericMatrix> x_mv_, y_mv_;
     // helper "matrix"
     double* gcm_;
+    // to dimension gcm_
+    int max_len_y_;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -133,6 +154,7 @@ class LbkCalculator : public DistanceCalculator
 public:
     LbkCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
     double calculate(const int i, const int j) override;
+    LbkCalculator* clone() const override { return new LbkCalculator(*this); }
 
 private:
     double calculate(const Rcpp::NumericVector& x,
@@ -151,6 +173,7 @@ class LbiCalculator : public DistanceCalculator
 public:
     LbiCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
     double calculate(const int i, const int j) override;
+    LbiCalculator* clone() const override { return new LbiCalculator(*this); }
 
 private:
     double calculate(const Rcpp::NumericVector& x,
@@ -171,6 +194,8 @@ class SdtwCalculator : public DistanceCalculator
 public:
     SdtwCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
     double calculate(const int i, const int j) override;
+    SdtwCalculator* clone() const override
+        { return new SdtwCalculator(*this); }
 
 private:
     double calculate(const SEXP& X, const SEXP& Y);
@@ -185,6 +210,7 @@ class GakCalculator : public DistanceCalculator
 public:
     GakCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
     double calculate(const int i, const int j) override;
+    GakCalculator* clone() const override { return new GakCalculator(*this); }
 
 private:
     double calculate(const SEXP& X, const SEXP& Y);
@@ -200,6 +226,7 @@ class SbdCalculator : public DistanceCalculator
 public:
     SbdCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
     double calculate(const int i, const int j) override;
+    SbdCalculator* clone() const override { return new SbdCalculator(*this); }
 
 private:
     double calculate(const arma::vec& x, const arma::vec& y,

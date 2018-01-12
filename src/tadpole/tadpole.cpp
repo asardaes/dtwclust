@@ -3,7 +3,7 @@
 #include <algorithm> // std::sort
 #include <atomic> // atomic_int
 #include <iomanip> // std::setprecision
-#include <memory> // *_ptr
+#include <memory> // *_ptr, static_pointer_cast
 #include <string>
 #include <vector>
 
@@ -165,16 +165,14 @@ class LocalDensityHelper : public RcppParallel::Worker {
 public:
     // constructor
     LocalDensityHelper(const double dc,
-                       const DtwBasicParallelCalculator& dist_calculator,
+                       const std::shared_ptr<DistanceCalculator>& dist_calculator,
                        const Rcpp::NumericMatrix& LBM,
                        const Rcpp::NumericMatrix& UBM,
                        LowerTriMat<double>& distmat,
                        LowerTriMat<int>& flags,
-                       std::atomic_int& num_dist_op,
-                       const int gcm_ncols)
-        : gcm_ncols_(gcm_ncols)
-        , dc_(dc)
-        , dist_calculator_(&dist_calculator)
+                       std::atomic_int& num_dist_op)
+        : dc_(dc)
+        , dist_calculator_(dist_calculator)
         , LBM_(LBM)
         , UBM_(UBM)
         , distmat_(&distmat)
@@ -185,17 +183,14 @@ public:
     // parallel loop across specified range
     void operator()(std::size_t begin, std::size_t end) {
         int i, j;
-        // dynamic allocation might not be thread safe
+        // local copy of dist_calculator so it is setup separately for each thread
         mutex_.lock();
-        double* gcm = new double[2 * gcm_ncols_];
+        DistanceCalculator* dist_calculator = dist_calculator_->clone();
         mutex_.unlock();
-        // local copy of dist_calculator so that each has a different gcm
-        DtwBasicParallelCalculator dist_calculator(*dist_calculator_);
-        dist_calculator.setGcm(gcm);
         /*
          * Flag definition
          *   0 - DTW calculated, and it lies below dc
-         *   1 - calculate DTW
+         *   1 - calculated DTW, but it's above dc
          *   2 - within dc, prune
          *   3 - not within dc, prune
          *   4 - identical series
@@ -204,7 +199,7 @@ public:
             s2d(id, LBM_.nrow(), i, j);
             if (LBM_(i,j) <= dc_ && UBM_(i,j) > dc_) {
                 (*num_dist_op_)++;
-                double dtw_dist = dist_calculator.calculate(i, j);
+                double dtw_dist = dist_calculator->calculate(i,j);
                 (*distmat_)[id] = dtw_dist;
                 if (dtw_dist <= dc_)
                     (*flags_)[id] = 0;
@@ -221,16 +216,14 @@ public:
                 (*flags_)[id] = 4; // nocov
             }
         }
-        // release dynamic memory
         mutex_.lock();
-        delete[] gcm;
+        delete dist_calculator;
         mutex_.unlock();
     }
 
 private:
-    const int gcm_ncols_;
     const double dc_;
-    const DtwBasicParallelCalculator * const dist_calculator_;
+    const std::shared_ptr<DistanceCalculator> dist_calculator_;
     const RcppParallel::RMatrix<double> LBM_, UBM_;
     LowerTriMat<double>* const distmat_;
     LowerTriMat<int>* const flags_;
@@ -246,7 +239,7 @@ private:
 std::vector<double> local_density(const Rcpp::List& series,
                                   const int num_series,
                                   const double dc,
-                                  const DtwBasicParallelCalculator& dist_calculator,
+                                  const std::shared_ptr<DistanceCalculator>& dist_calculator,
                                   const Rcpp::NumericMatrix& LBM,
                                   const Rcpp::NumericMatrix& UBM,
                                   LowerTriMat<double>& distmat,
@@ -255,9 +248,6 @@ std::vector<double> local_density(const Rcpp::List& series,
                                   const int num_threads)
 {
     std::vector<double> rho(num_series, 0);
-
-    Rcpp::NumericVector temp((SEXP)series[0]);
-    int gcm_ncols = temp.length() + 1;
     int grain = distmat.length() / num_threads;
     grain = (grain < MIN_GRAIN) ? MIN_GRAIN : grain;
     LocalDensityHelper parallel_worker(
@@ -267,8 +257,7 @@ std::vector<double> local_density(const Rcpp::List& series,
             UBM,
             distmat,
             flags,
-            num_dist_op,
-            gcm_ncols
+            num_dist_op
     );
     RcppParallel::parallelFor(0, distmat.length(), parallel_worker, grain);
 
@@ -350,6 +339,7 @@ std::vector<double> nn_dist_2(const Rcpp::List& series,
 {
     std::vector<double> delta(num_series);
     nearest_neighbors[0] = -1;
+    DistanceCalculator* setup_calculator = dist_calculator->clone(); // trigger matrix allocation
 
     double min_delta = R_PosInf, max_delta = 0;
     for (int i = 1; i < num_series; i++) {
@@ -376,7 +366,7 @@ std::vector<double> nn_dist_2(const Rcpp::List& series,
             }
             else {
                 num_dist_op++;
-                double dtw_dist = dist_calculator->calculate(ii, jj);
+                double dtw_dist = setup_calculator->calculate(ii,jj);
                 if (dtw_dist < min_delta) {
                     min_delta = dtw_dist;
                     which_min_delta = jj;
@@ -406,6 +396,7 @@ std::vector<double> nn_dist_2(const Rcpp::List& series,
             this_delta = (this_delta - min_delta) / den;
     }
 
+    delete setup_calculator;
     return delta;
 }
 
@@ -474,9 +465,8 @@ SEXP tadpole_cpp(const Rcpp::List& series,
                  Rcpp::List& list,
                  const int num_threads)
 {
-    auto parallel_calculator = DtwBasicParallelCalculator(DTW_ARGS, series, series);
-    auto sequential_calculator = DistanceCalculatorFactory().create(
-        "DTW_BASIC", DTW_ARGS, series, series);
+    auto dist_calculator = DistanceCalculatorFactory().create(
+        "DTW_BASIC_PAR", DTW_ARGS, series, series);
 
     int num_series = series.length();
     LowerTriMat<double> distmat(num_series, NA_REAL);
@@ -486,9 +476,8 @@ SEXP tadpole_cpp(const Rcpp::List& series,
     if (trace) Rcpp::Rcout << "Pruning during local density calculation\n";
     Rflush();
     std::vector<double> rho = local_density(
-        series, num_series, dc, parallel_calculator,
-        LBM, UBM, distmat, flags, num_dist_op, num_threads
-    );
+        series, num_series, dc, dist_calculator,
+        LBM, UBM, distmat, flags, num_dist_op, num_threads);
 
     if (trace) Rcpp::Rcout << "Pruning during nearest-neighbor distance calculation (phase 1)\n";
     Rflush();
@@ -503,9 +492,8 @@ SEXP tadpole_cpp(const Rcpp::List& series,
     Rflush();
     std::vector<int> nearest_neighbors(num_series);
     std::vector<double> delta = nn_dist_2(
-        series, num_series, sequential_calculator, id_cl, delta_ub,
-        LBM, UBM, flags, distmat, nearest_neighbors, num_dist_op
-    );
+        series, num_series, dist_calculator, id_cl, delta_ub,
+        LBM, UBM, flags, distmat, nearest_neighbors, num_dist_op);
 
     auto id_orig = stable_sort_ind(id_cl, false);
     reorder(delta, id_orig);
