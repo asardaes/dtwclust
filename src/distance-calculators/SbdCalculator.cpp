@@ -58,12 +58,10 @@ double SbdCalculator::calculate(const arma::vec& x, const arma::vec& y,
     // reorder truncated sequence
     int id = 0;
     for (unsigned int i = fftlen_ - y.size() + 1; i < cc_seq.size(); i++) {
-        cc_seq_truncated_[id] = cc_seq[i];
-        id++;
+        cc_seq_truncated_[id++] = cc_seq[i];
     }
     for (unsigned int i = 0; i < x.size(); i++) {
-        cc_seq_truncated_[id] = cc_seq[i];
-        id++;
+        cc_seq_truncated_[id++] = cc_seq[i];
     }
     // get max
     double cc_max = R_NegInf;

@@ -167,10 +167,11 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     eval(prepare_expr) # UTILS-expressions-proxy.R
 
     # calculate distance matrix
-    distargs <- list()
-    distargs$fftlen <- fftlen
-    distargs$fftx <- fftx
-    distargs$ffty <- ffty
+    distargs <- list(
+        fftlen = fftlen,
+        fftx = fftx,
+        ffty = ffty
+    )
     num_threads <- get_nthreads()
     .Call(C_distmat_loop,
           D, x, y, "SBD", distargs, fill_type, mat_type, num_threads,
