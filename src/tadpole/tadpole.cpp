@@ -163,7 +163,7 @@ public:
          *   3 - not within dc, prune
          *   4 - identical series
          */
-        for (int id = begin; id < end; id++) {
+        for (int id = begin; id < static_cast<int>(end); id++) {
             s2d(id, LBM_.nrow(), i, j);
             if (LBM_(i,j) <= dc_ && UBM_(i,j) > dc_) {
                 (*num_dist_op_)++;
