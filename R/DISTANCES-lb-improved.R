@@ -92,8 +92,8 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
         envelopes <- compute_envelope(y, window.size = window.size, error.check = FALSE)
         lower.env <- envelopes$lower
         upper.env <- envelopes$upper
-
-    } else {
+    }
+    else {
         check_consistency(lower.env, "ts")
         check_consistency(upper.env, "ts")
         if (length(lower.env) != length(x))
@@ -104,12 +104,10 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
 
     p <- switch(norm, L1 = 1L, L2 = 2L)
     d <- .Call(C_lbi, x, y, window.size, p, lower.env, upper.env, PACKAGE = "dtwclust")
-
     if (force.symmetry) {
         d2 <- lb_improved(x = y, y = x, window.size = window.size, norm = norm, error.check = FALSE)
         if (d2 > d) d <- d2
     }
-
     # return
     d
 }
@@ -118,115 +116,60 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
 # Loop without using native 'proxy' looping (to avoid multiple calculations of the envelope)
 # ==================================================================================================
 
-#' @importFrom bigmemory describe
-#' @importFrom bigmemory is.big.matrix
-#'
 lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                               force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE)
 {
-    norm <- match.arg(norm, c("L1", "L2"))
-    window.size <- check_consistency(window.size, "window")
-    dots <- list(...)
     x <- tslist(x)
     if (error.check) check_consistency(x, "tslist")
-
-    if (is.null(y)) {
+    if (is.null(y))
         y <- x
-
-    } else {
+    else {
         y <- tslist(y)
         if (error.check) check_consistency(y, "tslist")
     }
 
     if (is_multivariate(c(x,y))) stop("lb_improved does not support multivariate series.")
-    pairwise <- isTRUE(pairwise)
-    dim_out <- c(length(x), length(y))
-    dim_names <- list(names(x), names(y))
+    symmetric <- FALSE
+    fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
+    eval(prepare_expr) # UTILS-expressions-proxy.R
 
-    # Get appropriate matrix/big.matrix
-    D <- allocate_distmat(length(x), length(y), pairwise, FALSE) # UTILS-utils.R
-
+    # adjust parameters for this distance
+    norm <- match.arg(norm, c("L1", "L2"))
+    window.size <- check_consistency(window.size, "window")
     envelopes <- lapply(y, function(s) { compute_envelope(s, window.size, error.check = FALSE) })
     lower.env <- lapply(envelopes, "[[", "lower")
     upper.env <- lapply(envelopes, "[[", "upper")
-    lower.env <- split_parallel(lower.env)
-    upper.env <- split_parallel(upper.env)
-    y <- split_parallel(y)
 
-    # Wrap as needed for foreach
+    # calculate distance matrix
+    distargs <- list(
+        p = switch(norm, "L1" = 1L, "L2" = 2L),
+        len = length(x[[1L]]),
+        window.size = window.size,
+        lower.env = lower.env,
+        upper.env = upper.env
+    )
+    num_threads <- get_nthreads()
+    .Call(C_distmat_loop,
+          D, x, y, "LBI", distargs, fill_type, mat_type, num_threads,
+          PACKAGE = "dtwclust")
+
+    # adjust D's attributes
     if (pairwise) {
-        x <- split_parallel(x)
-        validate_pairwise(x, y)
-        validate_pairwise(x, lower.env)
-        validate_pairwise(x, upper.env)
-        endpoints <- attr(x, "endpoints")
-
-    } else {
-        x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
-        endpoints <- attr(y, "endpoints")
-    }
-
-    if (bigmemory::is.big.matrix(D)) {
-        D_desc <- bigmemory::describe(D)
-        noexport <- "D"
-        packages <- c("dtwclust", "bigmemory")
-
-    } else {
-        D_desc <- NULL
-        noexport <- ""
-        packages <- c("dtwclust")
-    }
-
-    # Calculate distance matrix
-    foreach_extra_args <- list(lower.env = lower.env, upper.env = upper.env)
-    symmetric <- FALSE # needed to evaluate expression below
-    dots$window.size <- window.size
-    dots$norm <- norm
-    dots$lower.env <- quote(lower.env)
-    dots$upper.env <- quote(upper.env)
-    .distfun_ <- lbi_loop
-    eval(foreach_loop_expression) # UTILS-expressions-proxy.R
-
-    if (pairwise) {
+        dim(D) <- NULL
         class(D) <- "pairdist"
-
-    } else {
+    }
+    else {
         if (is.null(dim(D))) dim(D) <- dim_out
         dimnames(D) <- dim_names
         class(D) <- "crossdist"
     }
-
     if (force.symmetry && !pairwise) {
         if (nrow(D) != ncol(D))
             warning("Unable to force symmetry. Resulting distance matrix is not square.")
         else
             .Call(C_force_lb_symmetry, D, PACKAGE = "dtwclust")
     }
-
     attr(D, "method") <- "LB_Improved"
     # return
     D
-}
-
-# ==================================================================================================
-# Wrapper for C++
-# ==================================================================================================
-
-lbi_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ...,
-                     lower.env, upper.env, window.size, norm)
-{
-    # this is never symmetric
-    fill_type <- if (pairwise) "PAIRWISE" else "GENERAL"
-    mat_type <- if (bigmat) "BIG_MATRIX" else "R_MATRIX"
-    distargs <- list()
-    distargs$p <- switch(norm, "L1" = 1L, "L2" = 2L)
-    distargs$len <- length(x[[1L]])
-    distargs$window.size <- window.size
-    distargs$lower.env <- lower.env
-    distargs$upper.env <- upper.env
-    .Call(C_distmat_loop,
-          d, x, y,
-          "LBI", distargs,
-          fill_type, mat_type, endpoints,
-          PACKAGE = "dtwclust")
 }

@@ -1,69 +1,43 @@
-#include "distance-calculators.h"
+#include "concrete-calculators.h"
 
 #include <RcppArmadillo.h>
+#include <RcppParallel.h>
 
-#include "../distances/distances.h" // dtw_basic
+#include "../distances/distances.h" // dtw_basic_par
 
 namespace dtwclust {
-
-// =================================================================================================
-/* dtw_basic distance calculator */
-// =================================================================================================
 
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-DtwBasicCalculator::DtwBasicCalculator(
-    const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+DtwBasicCalculator::DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
     : DistanceCalculator(DIST_ARGS, X, Y)
+    , window_(Rcpp::as<int>(dist_args_["window.size"]))
+    , norm_(Rcpp::as<double>(dist_args_["norm"]))
+    , step_(Rcpp::as<double>(dist_args_["step.pattern"]))
+    , normalize_(Rcpp::as<bool>(dist_args_["normalize"]))
+    , is_multivariate_(Rcpp::as<bool>(dist_args_["is.multivariate"]))
 {
-    window_ = dist_args_["window.size"];
-    norm_ = dist_args_["norm"];
-    step_ = dist_args_["step.pattern"];
-    backtrack_ = dist_args_["backtrack"];
-    gcm_ = dist_args_["gcm"];
-    is_multivariate_ = Rcpp::as<bool>(dist_args_["is.multivariate"]);
-    normalize_ = Rcpp::as<bool>(dist_args_["normalize"]);
+    if (is_multivariate_) {
+        x_mv_ = TSTSList<Rcpp::NumericMatrix>(x_);
+        y_mv_ = TSTSList<Rcpp::NumericMatrix>(y_);
+    }
+    else {
+        x_uv_ = TSTSList<Rcpp::NumericVector>(x_);
+        y_uv_ = TSTSList<Rcpp::NumericVector>(y_);
+    }
+    // set value of max_len_y_
+    max_len_y_ = this->maxLength(y_, is_multivariate_);
+    // make sure pointer is null
+    gcm_ = nullptr;
 }
 
 // -------------------------------------------------------------------------------------------------
-/* compute distance for two series */
+/* destructor */
 // -------------------------------------------------------------------------------------------------
-double DtwBasicCalculator::calculate(const SEXP& X, const SEXP& Y)
+DtwBasicCalculator::~DtwBasicCalculator()
 {
-    bool backtrack = Rcpp::as<bool>(backtrack_);
-    int x_len, y_len, num_vars;
-    if (is_multivariate_) {
-        Rcpp::NumericMatrix x(X), y(Y);
-        x_len = x.nrow();
-        y_len = y.nrow();
-        num_vars = x.ncol();
-    }
-    else {
-        Rcpp::NumericVector x(X), y(Y);
-        x_len = x.length();
-        y_len = y.length();
-        num_vars = 1;
-    }
-
-    SEXP nx = PROTECT(Rcpp::wrap(x_len));
-    SEXP ny = PROTECT(Rcpp::wrap(y_len));
-    SEXP nv = PROTECT(Rcpp::wrap(num_vars));
-
-    SEXP res = dtw_basic(X, Y, window_, nx, ny, nv, norm_, step_, backtrack_, gcm_);
-    double distance;
-    if (backtrack) { // nocov start
-        Rcpp::List temp(res);
-        distance = Rcpp::as<double>(temp["distance"]);
-    } // nocov end
-    else {
-        distance = Rcpp::as<double>(res);
-    }
-    if (normalize_) {
-        distance /= x_len + y_len;
-    }
-    UNPROTECT(3);
-    return distance;
+    if (gcm_) delete[] gcm_;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -71,9 +45,52 @@ double DtwBasicCalculator::calculate(const SEXP& X, const SEXP& Y)
 // -------------------------------------------------------------------------------------------------
 double DtwBasicCalculator::calculate(const int i, const int j)
 {
-    SEXP x = x_[i];
-    SEXP y = y_[j];
-    return this->calculate(x, y);
+    if (is_multivariate_) {
+        return this->calculate(x_mv_[i], y_mv_[j]);
+    }
+    else {
+        return this->calculate(x_uv_[i], y_uv_[j]);
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+/* clone that sets helper matrix
+ *   This is needed because instances of this class are supposed to be called from different
+ *   threads, and each one needs its own independent matrix to perform the calculations. Each thread
+ *   has to lock a mutex and then call this method before calculating the distance.
+ */
+// ------------------------------------------------------------------------------------------------
+DtwBasicCalculator* DtwBasicCalculator::clone() const
+{
+    DtwBasicCalculator* ptr = new DtwBasicCalculator(*this);
+    ptr->gcm_ = new double[2 * (max_len_y_ + 1)];
+    return ptr;
+}
+
+// -------------------------------------------------------------------------------------------------
+/* compute distance for two series */
+// -------------------------------------------------------------------------------------------------
+
+// univariate
+double DtwBasicCalculator::calculate(
+        const RcppParallel::RVector<double>& x, const RcppParallel::RVector<double>& y)
+{
+    if (!gcm_) return -1;
+    int nx = x.length();
+    int ny = y.length();
+    int num_var = 1;
+    return dtw_basic_par(&x[0], &y[0], nx, ny, num_var, window_, norm_, step_, normalize_, gcm_);
+}
+
+// multivariate
+double DtwBasicCalculator::calculate(
+        const RcppParallel::RMatrix<double>& x, const RcppParallel::RMatrix<double>& y)
+{
+    if (!gcm_) return -1;
+    int nx = x.nrow();
+    int ny = y.nrow();
+    int num_var = x.ncol();
+    return dtw_basic_par(&x[0], &y[0], nx, ny, num_var, window_, norm_, step_, normalize_, gcm_);
 }
 
 } // namespace dtwclust

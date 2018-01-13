@@ -130,13 +130,10 @@ sbd <- SBD
 # Wrapper for proxy::dist
 # ==================================================================================================
 
-#' @importFrom bigmemory describe
-#' @importFrom bigmemory is.big.matrix
 #' @importFrom stats fft
 #' @importFrom stats nextn
 #'
-SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairwise = FALSE) {
-    dots <- list(...)
+sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairwise = FALSE) {
     x <- tslist(x)
 
     if (error.check) check_consistency(x, "vltslist")
@@ -151,8 +148,8 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         fftlen <- stats::nextn(L, 2L)
         fftx <- lapply(x, function(u) { stats::fft(c(u, rep(0, fftlen - length(u)))) })
         ffty <- lapply(fftx, Conj)
-
-    } else {
+    }
+    else {
         symmetric <- FALSE
         y <- tslist(y)
         if (error.check) check_consistency(y, "vltslist")
@@ -166,86 +163,30 @@ SBD_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     }
 
     if (is_multivariate(c(x,y))) stop("SBD does not support multivariate series.")
-    pairwise <- isTRUE(pairwise)
-    dim_out <- c(length(x), length(y))
-    dim_names <- list(names(x), names(y))
+    fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
+    eval(prepare_expr) # UTILS-expressions-proxy.R
 
-    # Get appropriate matrix/big.matrix
-    D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # UTILS-utils.R
-
-    # Wrap as needed for foreach
-    if (pairwise) {
-        x <- split_parallel(x)
-        y <- split_parallel(y)
-        fftx <- split_parallel(fftx)
-        ffty <- split_parallel(ffty)
-        validate_pairwise(x, y)
-        endpoints <- attr(x, "endpoints")
-
-    } else if (symmetric) {
-        endpoints <- symmetric_loop_endpoints(length(x)) # UTILS-utils.R
-        x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
-        y <- x
-        fftx <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { fftx })
-        ffty <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { ffty })
-
-    } else {
-        x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
-        y <- split_parallel(y)
-        fftx <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { fftx })
-        ffty <- split_parallel(ffty)
-        endpoints <- attr(y, "endpoints")
-    }
-
-    if (bigmemory::is.big.matrix(D)) {
-        D_desc <- bigmemory::describe(D)
-        noexport <- "D"
-        packages <- c("dtwclust", "bigmemory")
-
-    } else {
-        D_desc <- NULL
-        noexport <- ""
-        packages <- c("dtwclust")
-    }
-
-    # Calculate distance matrix
-    foreach_extra_args <- list(fftx = fftx, ffty = ffty)
-    dots$fftlen <- fftlen
-    dots$fftx <- quote(fftx)
-    dots$ffty <- quote(ffty)
-    .distfun_ <- sbd_loop
-    eval(foreach_loop_expression) # UTILS-expressions-proxy.R
-
-    if (pairwise) {
-        class(D) <- "pairdist"
-
-    } else {
-        if (is.null(dim(D))) dim(D) <- dim_out
-        dimnames(D) <- dim_names
-        class(D) <- "crossdist"
-    }
-
-    attr(D, "method") <- "SBD"
-    # return
-    D
-}
-
-# ==================================================================================================
-# Wrapper for C++
-# ==================================================================================================
-
-sbd_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ...,
-                     fftx, ffty, fftlen)
-{
-    fill_type <- if (pairwise) "PAIRWISE" else if (symmetric) "SYMMETRIC" else "GENERAL"
-    mat_type <- if (bigmat) "BIG_MATRIX" else "R_MATRIX"
+    # calculate distance matrix
     distargs <- list()
     distargs$fftlen <- fftlen
     distargs$fftx <- fftx
     distargs$ffty <- ffty
+    num_threads <- get_nthreads()
     .Call(C_distmat_loop,
-          d, x, y,
-          "SBD", distargs,
-          fill_type, mat_type, endpoints,
+          D, x, y, "SBD", distargs, fill_type, mat_type, num_threads,
           PACKAGE = "dtwclust")
+
+    # adjust D's attributes
+    if (pairwise) {
+        dim(D) <- NULL
+        class(D) <- "pairdist"
+    }
+    else {
+        if (is.null(dim(D))) dim(D) <- dim_out
+        dimnames(D) <- dim_names
+        class(D) <- "crossdist"
+    }
+    attr(D, "method") <- "SBD"
+    # return
+    D
 }

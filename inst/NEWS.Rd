@@ -9,7 +9,7 @@
 
 \section{Changes in version 5.1.0.9000}{
 \itemize{
-    \item The \code{dtw_lb} function now uses \code{RcppParallel} for parallelization.
+    \item All included distance functions and \code{TADPole} \code{RcppParallel} for parallelization.
     \item The ellipsis in \code{sdtw_cent} is now actually passed to \code{nloptr}.
     \item Updated distance and centroid timing experiments.
 }

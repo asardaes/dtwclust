@@ -16,8 +16,7 @@ spanning the columns.}
 
 \item{cm}{Optionally, a matrix to use for the calculations. It should have \code{NROW(x)+1} rows and
 \code{NROW(y)+1} columns. Used internally for memory optimization. If provided, it \strong{will} be
-modified \emph{in place} by \code{C} code, except in the parallel version in \code{\link[proxy:dist]{proxy::dist()}} which
-ignores it for thread-safe reasons.}
+modified \emph{in place} by \code{C} code, except in the \code{\link[proxy:dist]{proxy::dist()}} version which ignores it.}
 
 \item{error.check}{Logical indicating whether the function should try to detect inconsistencies
 and give more informative errors messages. Also used internally to avoid repeating checks.}
@@ -37,7 +36,7 @@ to zero. Like DTW, soft-DTW does not follow the triangle inequality, but it is a
 
   The version registered with \code{\link[proxy]{dist}} is custom (\code{loop = FALSE} in
   \code{\link[proxy]{pr_DB}}). The custom function handles parallelization directly (with
-  \code{\link[foreach]{foreach}}).
+  \code{\link[RcppParallel:RcppParallel-package]{RcppParallel}}).
 
 
 

@@ -20,8 +20,7 @@
 #' @param gcm Optionally, a matrix to use for the global cost matrix calculations. It should have
 #'   `NROW(y)+1` columns, and `NROW(x)+1` rows for `backtrack = TRUE` **or** `2` rows for `backtrack
 #'   = FALSE`. Used internally for memory optimization. If provided, it **will** be modified *in
-#'   place* by `C` code, except in the parallel version in [proxy::dist()] which ignores it for
-#'   thread-safe reasons.
+#'   place* by `C` code, except in the [proxy::dist()] version which ignores it.
 #' @template error-check
 #'
 #' @details
@@ -105,7 +104,6 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
         d$index2 <- d$index2[d$path:1L]
         d$path <- NULL
     }
-
     # return
     d
 }
@@ -114,76 +112,29 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 # Wrapper for proxy::dist
 # ==================================================================================================
 
-#' @importFrom bigmemory describe
-#' @importFrom bigmemory is.big.matrix
+#' @importFrom dtw symmetric1
+#' @importFrom dtw symmetric2
 #'
-dtw_basic_proxy <- function(x, y = NULL, ..., gcm = NULL, error.check = TRUE, pairwise = FALSE) {
-    dots <- list(...)
+dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
+                            step.pattern = dtw::symmetric2,
+                            normalize = FALSE, ..., error.check = TRUE, pairwise = FALSE)
+{
     x <- tslist(x)
-
     if (error.check) check_consistency(x, "vltslist")
-
     if (is.null(y)) {
         y <- x
-        symmetric <- is.null(dots$window.size) || !different_lengths(x)
-
-    } else {
+        symmetric <- is.null(window.size) || !different_lengths(x)
+    }
+    else {
         y <- tslist(y)
         if (error.check) check_consistency(y, "vltslist")
         symmetric <- FALSE
     }
 
-    if (is.null(gcm)) gcm <- matrix(0, 2L, max(sapply(y, NROW)) + 1L)
-    dots$gcm <- gcm
-    pairwise <- isTRUE(pairwise)
-    dim_out <- c(length(x), length(y))
-    dim_names <- list(names(x), names(y))
+    fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
+    eval(prepare_expr) # UTILS-expressions-proxy.R
 
-    # Get appropriate matrix/big.matrix
-    D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # UTILS-utils.R
-    # Wrap as needed for foreach
-    eval(foreach_wrap_expression) # UTILS-expressions-proxy.R
-
-    if (bigmemory::is.big.matrix(D)) {
-        D_desc <- bigmemory::describe(D)
-        noexport <- "D"
-        packages <- c("dtwclust", "bigmemory")
-
-    } else {
-        D_desc <- NULL
-        noexport <- ""
-        packages <- c("dtwclust")
-    }
-
-    # Calculate distance matrix
-    foreach_extra_args <- list()
-    .distfun_ <- dtwb_loop
-    eval(foreach_loop_expression) # UTILS-expressions-proxy.R
-
-    if (pairwise) {
-        class(D) <- "pairdist"
-
-    } else {
-        if (is.null(dim(D))) dim(D) <- dim_out
-        dimnames(D) <- dim_names
-        class(D) <- "crossdist"
-    }
-
-    attr(D, "method") <- "DTW_BASIC"
-    # return
-    D
-}
-
-# ==================================================================================================
-# Wrapper for C++
-# ==================================================================================================
-
-#' @importFrom dtw symmetric1
-#' @importFrom dtw symmetric2
-#'
-dtwb_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ..., normalize = FALSE,
-                      window.size = NULL, norm = "L1", step.pattern = dtw::symmetric2, gcm)
-{
+    # adjust parameters for this distance
     if (is.null(window.size))
         window.size <- -1L
     else
@@ -203,25 +154,31 @@ dtwb_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ..., norm
     mv <- is_multivariate(c(x, y))
     backtrack <- FALSE
 
-    nc <- max(sapply(y, NROW)) + 1L
-    if (!is.matrix(gcm) || nrow(gcm) < 2L || ncol(gcm) < nc)
-        stop("dtw_basic: Dimension inconsistency in 'gcm'")
-    if (storage.mode(gcm) != "double")
-        stop("dtw_basic: If provided, 'gcm' must have 'double' storage mode.")
-
-    fill_type <- if (pairwise) "PAIRWISE" else if (symmetric) "SYMMETRIC" else "GENERAL"
-    mat_type <- if (bigmat) "BIG_MATRIX" else "R_MATRIX"
-    distargs <- list(window.size = window.size,
-                     norm = norm,
-                     step.pattern = step.pattern,
-                     backtrack = backtrack,
-                     gcm = gcm,
-                     is.multivariate = mv,
-                     normalize = normalize)
-    # return
+    # calculate distance matrix
+    distargs <- list(
+        window.size = window.size,
+        norm = norm,
+        step.pattern = step.pattern,
+        backtrack = backtrack,
+        is.multivariate = mv,
+        normalize = normalize
+    )
+    num_threads <- get_nthreads()
     .Call(C_distmat_loop,
-          d, x, y,
-          "DTW_BASIC", distargs,
-          fill_type, mat_type, endpoints,
+          D, x, y, "DTW_BASIC", distargs, fill_type, mat_type, num_threads,
           PACKAGE = "dtwclust")
+
+    # adjust D's attributes
+    if (pairwise) {
+        dim(D) <- NULL
+        class(D) <- "pairdist"
+    }
+    else {
+        if (is.null(dim(D))) dim(D) <- dim_out
+        dimnames(D) <- dim_names
+        class(D) <- "crossdist"
+    }
+    attr(D, "method") <- "DTW_BASIC"
+    # return
+    D
 }

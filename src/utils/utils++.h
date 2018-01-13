@@ -24,11 +24,11 @@ RcppExport SEXP SparseDistmatIndices__getNewIndices(SEXP xptr, SEXP i, SEXP j, S
 // -------------------------------------------------------------------------------------------------
 
 // utils-cpp.cpp
-double kahan_sum(const Rcpp::NumericVector& x);
+double kahan_sum(const double * const x, const int length);
 
 // envelope.cpp
-void envelope_cpp(const Rcpp::NumericVector& array, const unsigned int width,
-                  Rcpp::NumericVector& minvalues, Rcpp::NumericVector& maxvalues);
+void envelope_cpp(const double * const array, const int length, const unsigned int width,
+                  double * const minvalues, double * const maxvalues);
 
 // utils-cpp.cpp
 void s2d(const int id, const int nrow, int& i, int& j);

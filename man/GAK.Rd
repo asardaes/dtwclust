@@ -6,10 +6,10 @@
 \title{Fast global alignment kernels}
 \usage{
 GAK(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
-  logs = NULL, error.check = TRUE)
+  error.check = TRUE)
 
 gak(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
-  logs = NULL, error.check = TRUE)
+  error.check = TRUE)
 }
 \arguments{
 \item{x, y}{Time series. A multivariate series should have time spanning the rows and variables
@@ -23,11 +23,6 @@ spanning the columns.}
 \item{window.size}{Parameterization of the constraining band (\emph{T} in Cuturi (2011)). See details.}
 
 \item{normalize}{Normalize the result by considering diagonal terms.}
-
-\item{logs}{Optionally, a matrix with \code{max(NROW(x), NROW(y)) + 1} rows and 3 columns to use for
-the logarithm calculations. Used internally for memory optimization. If provided, it \strong{will}
-be modified \emph{in place} by \code{C} code, except in the parallel version in \code{\link[proxy:dist]{proxy::dist()}} which
-ignores it for thread-safe reasons.}
 
 \item{error.check}{Logical indicating whether the function should try to detect inconsistencies
 and give more informative errors messages. Also used internally to avoid repeating checks.}
@@ -71,7 +66,7 @@ consider reinterpolating the time series (see \code{\link[=reinterpolate]{reinte
 
   The version registered with \code{\link[proxy]{dist}} is custom (\code{loop = FALSE} in
   \code{\link[proxy]{pr_DB}}). The custom function handles parallelization directly (with
-  \code{\link[foreach]{foreach}}).
+  \code{\link[RcppParallel:RcppParallel-package]{RcppParallel}}).
 
 
 

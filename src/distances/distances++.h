@@ -5,25 +5,32 @@
 
 namespace dtwclust {
 
+// -------------------------------------------------------------------------------------------------
+/* can be called from R */
+// -------------------------------------------------------------------------------------------------
+
 RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U);
 
 RcppExport SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U);
 
 RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT, SEXP MV);
 
-double lbk_core(const Rcpp::NumericVector& x, const int p,
-                const Rcpp::NumericVector& lower_envelope,
-                const Rcpp::NumericVector& upper_envelope,
-                Rcpp::NumericVector& H);
+// -------------------------------------------------------------------------------------------------
+/* called by other C++ functions */
+// -------------------------------------------------------------------------------------------------
 
-double lbi_core(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
-                const unsigned int window_size, const int p,
-                const Rcpp::NumericVector& lower_envelope,
-                const Rcpp::NumericVector& upper_envelope,
-                Rcpp::NumericVector& L2,
-                Rcpp::NumericVector& U2,
-                Rcpp::NumericVector& H,
-                Rcpp::NumericVector& LB);
+double lbk_core(const double * const x, const int length, const int p,
+                const double * const lower_envelope, const double * const upper_envelope,
+                double * const H);
+
+double lbi_core(const double * const x, const double * const y,
+                const int length, const unsigned int window_size, const int p,
+                const double * const lower_envelope, const double * const upper_envelope,
+                double * const L2, double * const U2, double * const H, double * const LB);
+
+double sdtw(const double * const x, const double * const y,
+            const int nx, const int ny, const int num_vars,
+            const double gamma, double * costmat);
 
 } // namespace dtwclust
 

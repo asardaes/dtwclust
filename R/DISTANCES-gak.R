@@ -32,10 +32,6 @@ estimate_sigma <- function(x, y, within_proxy) {
 #'   `NULL`.
 #' @param window.size Parameterization of the constraining band (*T* in Cuturi (2011)). See details.
 #' @param normalize Normalize the result by considering diagonal terms.
-#' @param logs Optionally, a matrix with `max(NROW(x), NROW(y)) + 1` rows and 3 columns to use for
-#'   the logarithm calculations. Used internally for memory optimization. If provided, it **will**
-#'   be modified *in place* by `C` code, except in the parallel version in [proxy::dist()] which
-#'   ignores it for thread-safe reasons.
 #' @template error-check
 #'
 #' @details
@@ -103,8 +99,7 @@ estimate_sigma <- function(x, y, within_proxy) {
 #' # Unnormalized similarities
 #' proxy::simil(CharTraj[1L:5L], method = "ugak")
 #'
-GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
-                logs = NULL, error.check = TRUE)
+GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE, error.check = TRUE)
 {
     if (error.check) {
         check_consistency(x, "ts")
@@ -113,13 +108,6 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
 
     # checks dimension consistency
     is_multivariate(list(x,y))
-
-    if (is.null(logs))
-        logs <- matrix(0, max(NROW(x), NROW(y)) + 1L, 3L)
-    else if (!is.matrix(logs) || nrow(logs) < (max(NROW(x), NROW(y)) + 1L) || ncol(logs) < 3L)
-        stop("GAK: Dimension inconsistency in 'logs'")
-    else if (storage.mode(logs) != "double")
-        stop("GAK: If provided, 'logs' must have 'double' storage mode.")
 
     if (is.null(window.size))
         window.size <- 0L
@@ -131,6 +119,7 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
     else if (sigma <= 0)
         stop("Parameter 'sigma' must be positive.")
 
+    logs <- matrix(0, max(NROW(x), NROW(y)) + 1L, 3L)
     logGAK <- .Call(C_logGAK, x, y,
                     NROW(x), NROW(y), NCOL(x),
                     sigma, window.size, logs,
@@ -149,7 +138,6 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
 
         logGAK <- 1 - exp(logGAK - 0.5 * (gak_x + gak_y))
     }
-
     attr(logGAK, "sigma") <- sigma
     # return
     logGAK
@@ -164,11 +152,8 @@ gak <- GAK
 # Wrapper for proxy::dist
 # ==================================================================================================
 
-#' @importFrom bigmemory describe
-#' @importFrom bigmemory is.big.matrix
-#'
-GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
-                      logs = NULL, error.check = TRUE, pairwise = FALSE, .internal_ = FALSE)
+gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
+                      error.check = TRUE, pairwise = FALSE, .internal_ = FALSE)
 {
     # normalization will be done manually to avoid multiple calculations of gak_x and gak_y
     if (!.internal_ && !normalize) { # nocov start
@@ -176,95 +161,74 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         normalize <- TRUE
     } # nocov end
 
-    dots <- list(...)
     x <- tslist(x)
-
     if (error.check) check_consistency(x, "vltslist")
-
     if (is.null(y)) {
         symmetric <- normalize
         y <- x
-
-    } else {
+    }
+    else {
         symmetric <- FALSE
         y <- tslist(y)
         if (error.check) check_consistency(y, "vltslist")
     }
-
     if (is.null(sigma))
         sigma <- estimate_sigma(x, y, TRUE)
     else if (sigma <= 0)
         stop("Parameter 'sigma' must be positive.")
 
-    # parallel chunks are made column-wise, so flip x and y if necessary
-    flip <- NULL
-    num_workers <- foreach::getDoParWorkers()
-    if (!pairwise && !symmetric && length(y) < num_workers && length(x) >= num_workers) {
-        flip <- y
-        y <- x
-        x <- flip
-    }
+    fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
+    eval(prepare_expr) # UTILS-expressions-proxy.R
 
-    if (is.null(logs)) logs <- matrix(0, max(sapply(x, NROW), sapply(y, NROW)) + 1L, 3L)
-    dots$logs <- logs
-    dots$sigma <- sigma
-    dots$window.size <- window.size
-    pairwise <- isTRUE(pairwise)
-    dim_out <- c(length(x), length(y))
-    dim_names <- list(names(x), names(y))
-
-    # Get appropriate matrix/big.matrix
-    D <- allocate_distmat(length(x), length(y), pairwise, symmetric) # UTILS-utils.R
-
+    # adjust parameters for this distance
     if (normalize) {
         # calculation of normalization factors
         # x
-        gak_x <- GAK_proxy(x, x,
-                           sigma = sigma, window.size = window.size, logs = logs,
+        gak_x <- gak_proxy(x, x,
+                           sigma = sigma, window.size = window.size,
                            error.check = FALSE, pairwise = TRUE, normalize = FALSE,
                            .internal_ = TRUE)
         # y
         if (symmetric)
             gak_y <- gak_x
         else
-            gak_y <- GAK_proxy(y, y,
-                               sigma = sigma, window.size = window.size, logs = logs,
+            gak_y <- gak_proxy(y, y,
+                               sigma = sigma, window.size = window.size,
                                error.check = FALSE, pairwise = TRUE, normalize = FALSE,
                                .internal_ = TRUE)
     }
 
-    # Wrap as needed for foreach
-    eval(foreach_wrap_expression) # UTILS-expressions-proxy.R
+    mv <- is_multivariate(c(x,y))
 
-    if (bigmemory::is.big.matrix(D)) {
-        D_desc <- bigmemory::describe(D)
-        noexport <- c("D", "gak_x", "gak_y")
-        packages <- c("dtwclust", "bigmemory")
+    if (is.null(window.size))
+        window.size <- 0L
+    else
+        window.size <- check_consistency(window.size, "window")
 
-    } else {
-        D_desc <- NULL
-        noexport <- c("gak_x", "gak_y")
-        packages <- c("dtwclust")
-    }
+    # calculate distance matrix
+    distargs <- list(
+        sigma = sigma,
+        window.size = window.size,
+        is.multivariate = mv
+    )
+    num_threads <- get_nthreads()
+    .Call(C_distmat_loop,
+          D, x, y, "GAK", distargs, fill_type, mat_type, num_threads,
+          PACKAGE = "dtwclust")
 
-    # Calculate distance matrix
-    foreach_extra_args <- list()
-    .distfun_ <- gak_loop
-    eval(foreach_loop_expression) # UTILS-expressions-proxy.R
-
+    # adjust D's attributes
     if (pairwise) {
+        dim(D) <- NULL
         if (normalize) D <- 1 - exp(D - 0.5 * (gak_x + gak_y))
         class(D) <- "pairdist"
-
-    } else {
+    }
+    else {
         if (is.null(dim(D))) dim(D) <- dim_out
         if (normalize) D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
         dimnames(D) <- dim_names
         class(D) <- "crossdist"
     }
-
     if (!pairwise && symmetric && normalize) diag(D) <- 0
-    if (!is.null(flip)) D <- t(D)
     attr(D, "method") <- "GAK"
     attr(D, "sigma") <- sigma
     # return
@@ -272,45 +236,10 @@ GAK_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
 }
 
 # ==================================================================================================
-# Wrapper for C++
-# ==================================================================================================
-
-gak_loop <- function(d, x, y, symmetric, pairwise, endpoints, bigmat, ...,
-                     window.size = NULL, sigma, logs)
-{
-    # checks dimension consistency
-    mv <- is_multivariate(c(x,y))
-
-    nr <- max(sapply(x, NROW), sapply(y, NROW)) + 1L
-    if (!is.matrix(logs) || nrow(logs) < nr || ncol(logs) < 3L)
-        stop("GAK: Dimension inconsistency in 'logs'")
-    else if (storage.mode(logs) != "double")
-        stop("GAK: If provided, 'logs' must have 'double' storage mode.")
-
-    if (is.null(window.size))
-        window.size <- 0L
-    else
-        window.size <- check_consistency(window.size, "window")
-
-    fill_type <- if (pairwise) "PAIRWISE" else if (symmetric) "SYMMETRIC" else "GENERAL"
-    mat_type <- if (bigmat) "BIG_MATRIX" else "R_MATRIX"
-    distargs <- list(sigma = sigma,
-                     window.size = window.size,
-                     logs = logs,
-                     is.multivariate = mv)
-
-    .Call(C_distmat_loop,
-          d, x, y,
-          "GAK", distargs,
-          fill_type, mat_type, endpoints,
-          PACKAGE = "dtwclust")
-}
-
-# ==================================================================================================
 # Wrapper for proxy::simil
 # ==================================================================================================
 
-GAK_simil <- function(x, y = NULL, ..., normalize = FALSE) {
+gak_simil <- function(x, y = NULL, ..., normalize = FALSE) {
     if (normalize) warning("The proxy::simil version of GAK cannot be normalized.")
-    GAK_proxy(x = x, y = y, ..., normalize = FALSE, .internal_ = TRUE)
+    gak_proxy(x = x, y = y, ..., normalize = FALSE, .internal_ = TRUE)
 }

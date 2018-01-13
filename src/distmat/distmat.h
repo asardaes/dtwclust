@@ -4,12 +4,12 @@
 #include <memory> // *_ptr
 
 #include <RcppArmadillo.h>
-#include <bigmemory/MatrixAccessor.hpp>
+#include <RcppParallel.h>
 
 namespace dtwclust {
 
 // =================================================================================================
-/* Distmat (base + factory + concretes) */
+/* Distmat (base + factory) */
 // =================================================================================================
 
 // -------------------------------------------------------------------------------------------------
@@ -30,32 +30,6 @@ class DistmatFactory
 public:
     std::shared_ptr<Distmat>
     create(const SEXP& MAT_TYPE, const SEXP& D);
-};
-
-// -------------------------------------------------------------------------------------------------
-/* R matrix distmat */
-// -------------------------------------------------------------------------------------------------
-class RDistmat : public Distmat
-{
-public:
-    RDistmat(const SEXP& D);
-    double& operator() (const int i, const int j) override;
-
-private:
-    Rcpp::NumericMatrix distmat_;
-};
-
-// -------------------------------------------------------------------------------------------------
-/* bigmemory big.matrix distmat */
-// -------------------------------------------------------------------------------------------------
-class BigmemoryDistmat : public Distmat
-{
-public:
-    BigmemoryDistmat(const SEXP& D);
-    double& operator() (const int i, const int j) override;
-
-private:
-    MatrixAccessor<double> distmat_;
 };
 
 } // namespace dtwclust

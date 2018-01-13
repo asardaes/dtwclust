@@ -365,27 +365,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
         } # nocov end
     }
 
-    # pre-allocate matrices for known distances
-    matrices_allocated <- FALSE
-    if (type != "tadpole") {
-        if (distance %in% c("dtw_basic", "dtw_lb") && is.null(args$dist$gcm)) {
-            N <- max(sapply(series, NROW))
-            args$dist$gcm <- matrix(0, 2L, N + 1L)
-            matrices_allocated <- TRUE
-
-        } else if (distance == "gak" && is.null(args$dist$logs)) {
-            N <- max(sapply(series, NROW))
-            args$dist$logs <- matrix(0, N + 1L, 3L)
-            matrices_allocated <- TRUE
-
-        } else if (distance == "sdtw" && is.null(args$dist$cm)) {
-            N <- max(sapply(series, NROW))
-            args$dist$cm <- matrix(0, N + 1L, N + 1L)
-            matrices_allocated <- TRUE
-
-        }
-    }
-
     # pre-allocate matrix for DBA
     if (grepl("^dba$", cent_char, ignore.case = TRUE) && is.null(args$cent$gcm)) {
         dba_allocated <- TRUE
@@ -533,7 +512,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             }
 
             if (inherits(distmat, "Distmat")) distmat <- distmat$distmat
-            if (matrices_allocated) { args$dist$cm <- args$dist$gcm <- args$dist$logs <- NULL }
             if (dba_allocated) args$cent$gcm <- NULL
             if (sdtwc_allocated) { args$cent$cm <- args$cent$dm <- args$cent$em <- NULL }
 
@@ -667,7 +645,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # Prepare results
             # --------------------------------------------------------------------------------------
 
-            if (matrices_allocated) { args$dist$cm <- args$dist$gcm <- args$dist$logs <- NULL }
             if (dba_allocated) args$cent$gcm <- NULL
             if (sdtwc_allocated) { args$cent$cm <- args$cent$dm <- args$cent$em <- NULL }
             if (trace) cat("Extracting centroids...\n\n")

@@ -13,7 +13,7 @@ namespace dtwclust {
 /* shared variables */
 // =================================================================================================
 
-static SEXP window, norm, step, backtrack, gcm;
+static SEXP window, norm, step, backtrack, normalize, gcm;
 static Rcpp::List series;
 static Rcpp::IntegerVector index1, index2;
 static int max_iter, nx, ny, nv, begin;
@@ -29,7 +29,7 @@ void uv_set_alignment(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y
     SEXP NX = PROTECT(Rcpp::wrap(nx));
     SEXP NY = PROTECT(Rcpp::wrap(ny));
     SEXP NV = PROTECT(Rcpp::wrap(nv));
-    Rcpp::List alignment(dtw_basic(x, y, window, NX, NY, NV, norm, step, backtrack, gcm));
+    Rcpp::List alignment(dtw_basic(x, y, window, NX, NY, NV, norm, step, backtrack, normalize, gcm));
     index1 = alignment["index1"];
     index2 = alignment["index2"];
     begin = alignment["path"];
@@ -41,7 +41,7 @@ void mv_set_alignment(const Rcpp::NumericMatrix& x, const Rcpp::NumericMatrix& y
     SEXP NX = PROTECT(Rcpp::wrap(nx));
     SEXP NY = PROTECT(Rcpp::wrap(ny));
     SEXP NV = PROTECT(Rcpp::wrap(nv));
-    Rcpp::List alignment(dtw_basic(x, y, window, NX, NY, NV, norm, step, backtrack, gcm));
+    Rcpp::List alignment(dtw_basic(x, y, window, NX, NY, NV, norm, step, backtrack, normalize, gcm));
     index1 = alignment["index1"];
     index2 = alignment["index2"];
     begin = alignment["path"];
@@ -326,24 +326,20 @@ RcppExport SEXP dba(SEXP X, SEXP CENT,
     norm = dots["norm"];
     step = dots["step.pattern"];
     backtrack = dots["backtrack"];
+    normalize = dots["normalize"];
     gcm = dots["gcm"];
-
-    SEXP new_cent;
 
     if (Rcpp::as<bool>(multivariate)) {
         Rcpp::NumericMatrix centroid(CENT);
-
         if (Rcpp::as<int>(mv_ver) == 1)
-            new_cent = dba_mv_by_variable(centroid);
+            return dba_mv_by_variable(centroid);
         else
-            new_cent = dba_mv_by_series(centroid);
-
-    } else {
-        Rcpp::NumericVector centroid(CENT);
-        new_cent = dba_uv(centroid);
+            return dba_mv_by_series(centroid);
     }
-
-    return new_cent;
+    else {
+        Rcpp::NumericVector centroid(CENT);
+        return dba_uv(centroid);
+    }
     END_RCPP
 }
 

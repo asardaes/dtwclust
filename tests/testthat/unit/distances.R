@@ -252,16 +252,6 @@ test_that("GAK can estimate sigma.", {
     expect_gt(attr(gak_distance, "sigma"), 0)
 })
 
-test_that("Inconsistencies in parameter 'logs' for GAK() are detected.", {
-    logs_wrong_dim <- matrix(0, 2L, 2L)
-    expect_error(GAK(x_uv, x_uv, logs = logs_wrong_dim),
-                 regexp = "inconsistency")
-
-    int_logs <- matrix(0L, length(x_uv) + 1L, 3L)
-    expect_error(GAK(x_uv, x_uv, logs = int_logs),
-                 regexp = "storage mode")
-})
-
 # ==================================================================================================
 # sdtw
 # ==================================================================================================

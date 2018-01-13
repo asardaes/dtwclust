@@ -195,7 +195,8 @@ SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var, SEXP sigma, SEXP win
     int nY = asInteger(ny);
     double d;
 
-    // If triangular is smaller than the difference in length of the time series, the kernel is equal to zero,
+    // If triangular is smaller than the difference in length of the time series,
+    // the kernel is equal to zero,
     // i.e. its log is set to -Inf
     if (triangular > 0 && abs(nX - nY) > triangular)
         d = R_NegInf;
@@ -203,4 +204,21 @@ SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var, SEXP sigma, SEXP win
         d = logGAK_c(REAL(x), REAL(y), nX, nY, asInteger(num_var), asReal(sigma), triangular, REAL(logs));
 
     return ScalarReal(d);
+}
+
+// a version compatible with RcppParallel
+double logGAK_par(double const * const x, double const * const y,
+                  int const nx, int const ny, int const num_var,
+                  double const sigma, int const triangular,
+                  double * const logs)
+{
+    double d;
+    // If triangular is smaller than the difference in length of the time series,
+    // the kernel is equal to zero,
+    // i.e. its log is set to -Inf
+    if (triangular > 0 && abs(nx - ny) > triangular)
+        d = R_NegInf;
+    else
+        d = logGAK_c(x, y, nx, ny, num_var, sigma, triangular, logs);
+    return d;
 }

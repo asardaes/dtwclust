@@ -52,7 +52,7 @@ dtw2 <- function(x, y, ...) {
 #' @importFrom dtw dtw
 #' @importFrom proxy dist
 #'
-dtw2.proxy <- function(x, y, ...) {
+dtw2_proxy <- function(x, y, ...) {
     lcm <- proxy::dist(x, y, method = "L1")
     sqrt(dtw::dtw(x = lcm^2, y = NULL, distance.only = TRUE, ...)$distance)
 }

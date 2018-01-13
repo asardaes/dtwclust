@@ -45,16 +45,16 @@ double inline soft_min(double a, double b, double c, const double gamma)
 /* dynamic programming recursion */
 // =================================================================================================
 
-template<typename SeriesType, typename MatrixType>
-double dp_recursion(const SeriesType& x, const SeriesType&y,
-                    MatrixType& costmat, const double gamma,
+// template used by the gateway function
+template<typename SeriesType>
+double dp_recursion(const SeriesType& x, const SeriesType& y,
+                    Rcpp::NumericMatrix& costmat, const double gamma,
                     const int nx, const int ny, const int num_vars,
-                    const bool save_norm, MatrixType& distmat)
+                    const bool save_norm, Rcpp::NumericMatrix& distmat)
 {
     for (int i = 1; i <= nx; i++) {
         for (int j = 1; j <= ny; j++) {
-            double point_norm = squared_euclidean(
-                &x[0], &y[0], i-1, j-1, nx, ny, num_vars);
+            double point_norm = squared_euclidean(&x[0], &y[0], i-1, j-1, nx, ny, num_vars);
             costmat(i,j) = point_norm + soft_min(costmat(i-1, j),
                                                  costmat(i-1, j-1),
                                                  costmat(i, j-1),
@@ -70,7 +70,8 @@ double dp_recursion(const SeriesType& x, const SeriesType&y,
 /* main gateway function */
 // =================================================================================================
 
-RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT, SEXP MV) {
+RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT, SEXP MV)
+{
     BEGIN_RCPP
     Rcpp::NumericMatrix costmat(COSTMAT), distmat;
     bool is_multivariate = Rcpp::as<bool>(MV);
@@ -85,16 +86,41 @@ RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT,
     if (is_multivariate) {
         Rcpp::NumericMatrix x(X), y(Y);
         return Rcpp::wrap(
-            dp_recursion<Rcpp::NumericMatrix, Rcpp::NumericMatrix>(
+            dp_recursion<Rcpp::NumericMatrix>(
                     x, y, costmat, gamma, x.nrow(), y.nrow(), x.ncol(), save_norm, distmat));
-
-    } else {
+    }
+    else {
         Rcpp::NumericVector x(X), y(Y);
         return Rcpp::wrap(
-            dp_recursion<Rcpp::NumericVector, Rcpp::NumericMatrix>(
+            dp_recursion<Rcpp::NumericVector>(
                     x, y, costmat, gamma, x.length(), y.length(), 1, save_norm, distmat));
     }
     END_RCPP
+}
+
+// =================================================================================================
+/* thread-safe version for the distance calculator (no save norm) */
+// =================================================================================================
+
+double sdtw(const double * const x, const double * const y,
+            const int nx, const int ny, const int num_vars,
+            const double gamma, double * costmat)
+{
+    // initialize costmat values
+    costmat[0] = 0;
+    for (int i = 1; i < nx+1; i++) costmat[d2s(i,0,nx+1)] = R_PosInf;
+    for (int j = 1; j < ny+1; j++) costmat[d2s(0,j,nx+1)] = R_PosInf;
+    // compute distance
+    for (int i = 1; i <= nx; i++) {
+        for (int j = 1; j <= ny; j++) {
+            double point_norm = squared_euclidean(x, y, i-1, j-1, nx, ny, num_vars);
+            costmat[d2s(i,j,nx+1)] = point_norm + soft_min(costmat[d2s(i-1, j, nx+1)],
+                        costmat[d2s(i-1, j-1, nx+1)],
+                               costmat[d2s(i, j-1, nx+1)],
+                                      gamma);
+        }
+    }
+    return costmat[d2s(nx,ny,nx+1)];
 }
 
 } // namespace dtwclust

@@ -5,6 +5,8 @@
 
 #include <RcppArmadillo.h>
 
+#include "concrete-distmat.h"
+
 namespace dtwclust {
 
 // =================================================================================================
@@ -14,12 +16,9 @@ namespace dtwclust {
 std::shared_ptr<Distmat>
 DistmatFactory::create(const SEXP& MAT_TYPE, const SEXP& D)
 {
-    string type = Rcpp::as<string>(MAT_TYPE);
+    std::string type = Rcpp::as<std::string>(MAT_TYPE);
     if (type == "R_MATRIX") {
         return std::make_shared<RDistmat>(D);
-    }
-    else if (type == "BIG_MATRIX") {
-        return std::make_shared<BigmemoryDistmat>(D);
     }
     else {
         Rcpp::stop("Unknown matrix type"); // nocov

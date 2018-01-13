@@ -1,43 +1,59 @@
-#include "distance-calculators.h"
+#include "concrete-calculators.h"
 
 #include <RcppArmadillo.h>
+#include <RcppParallel.h>
 
 #include "../distances/distances++.h" // lbi_core
 
 namespace dtwclust {
 
-// =================================================================================================
-/* lb_improved distance calculator */
-// =================================================================================================
-
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-LbiCalculator::LbiCalculator(
-    const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+LbiCalculator::LbiCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
     : DistanceCalculator(DIST_ARGS, X, Y)
+    , p_(Rcpp::as<int>((SEXP)dist_args_["p"]))
+    , len_(Rcpp::as<int>((SEXP)dist_args_["len"]))
+    , window_(Rcpp::as<unsigned int>((SEXP)dist_args_["window.size"]))
 {
-    int length = Rcpp::as<int>((SEXP)dist_args_["len"]);
-    p_ = Rcpp::as<int>((SEXP)dist_args_["p"]);
-    window_size_ = Rcpp::as<unsigned int>((SEXP)dist_args_["window.size"]);
-    lower_envelopes_ = dist_args_["lower.env"];
-    upper_envelopes_ = dist_args_["upper.env"];
-    H_ = Rcpp::NumericVector(length);
-    L2_ = Rcpp::NumericVector(length);
-    U2_ = Rcpp::NumericVector(length);
-    LB_ = Rcpp::NumericVector(length);
+    x_uv_ = TSTSList<Rcpp::NumericVector>(x_);
+    y_uv_ = TSTSList<Rcpp::NumericVector>(y_);
+    Rcpp::List LE((SEXP)dist_args_["lower.env"]);
+    Rcpp::List UE((SEXP)dist_args_["upper.env"]);
+    lower_envelopes_ = TSTSList<Rcpp::NumericVector>(LE);
+    upper_envelopes_ = TSTSList<Rcpp::NumericVector>(UE);
+    H_ = nullptr;
+    L2_ = nullptr;
+    U2_ = nullptr;
+    LB_ = nullptr;
 }
 
 // -------------------------------------------------------------------------------------------------
-/* compute distance for two series */
+/* destructor */
 // -------------------------------------------------------------------------------------------------
-double LbiCalculator::calculate(const Rcpp::NumericVector& x,
-                                const Rcpp::NumericVector& y,
-                                const Rcpp::NumericVector& lower_envelope,
-                                const Rcpp::NumericVector& upper_envelope)
+LbiCalculator::~LbiCalculator()
 {
-    return lbi_core(x, y, window_size_, p_, lower_envelope, upper_envelope,
-                    L2_, U2_, H_, LB_);
+    if (H_) delete[] H_;
+    if (L2_) delete[] L2_;
+    if (U2_) delete[] U2_;
+    if (LB_) delete[] LB_;
+}
+
+// -------------------------------------------------------------------------------------------------
+/* clone that sets helper matrix
+ *   This is needed because instances of this class are supposed to be called from different
+ *   threads, and each one needs its own independent matrix to perform the calculations. Each thread
+ *   has to lock a mutex and then call this method before calculating the distance.
+ */
+// ------------------------------------------------------------------------------------------------
+LbiCalculator* LbiCalculator::clone() const
+{
+    LbiCalculator* ptr = new LbiCalculator(*this);
+    ptr->H_ = new double[len_];
+    ptr->L2_ = new double[len_];
+    ptr->U2_ = new double[len_];
+    ptr->LB_ = new double[len_];
+    return ptr;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -45,11 +61,19 @@ double LbiCalculator::calculate(const Rcpp::NumericVector& x,
 // -------------------------------------------------------------------------------------------------
 double LbiCalculator::calculate(const int i, const int j)
 {
-    SEXP x = x_[i];
-    SEXP y = y_[j];
-    SEXP lower_envelope = lower_envelopes_[j];
-    SEXP upper_envelope = upper_envelopes_[j];
-    return this->calculate(x, y, lower_envelope, upper_envelope);
+    return this->calculate(x_uv_[i], y_uv_[j], lower_envelopes_[j], upper_envelopes_[j]);
+}
+
+// -------------------------------------------------------------------------------------------------
+/* compute distance for two series */
+// -------------------------------------------------------------------------------------------------
+double LbiCalculator::calculate(const RcppParallel::RVector<double>& x,
+                                const RcppParallel::RVector<double>& y,
+                                const RcppParallel::RVector<double>& lower_envelope,
+                                const RcppParallel::RVector<double>& upper_envelope)
+{
+    return lbi_core(&x[0], &y[0], len_, window_, p_, &lower_envelope[0], &upper_envelope[0],
+                    L2_, U2_, H_, LB_);
 }
 
 } // namespace dtwclust

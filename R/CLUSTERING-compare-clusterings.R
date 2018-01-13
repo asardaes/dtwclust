@@ -577,26 +577,11 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     # Matrix allocation
     # ==============================================================================================
 
-    allocate_sdtwc <- allocate_cm <- allocate_gcm <- allocate_logs <- allocate_dba <- FALSE
+    allocate_sdtwc <- allocate_dba <- FALSE
     if (any(types != "tadpole")) {
-        allocate_gcm <- any(sapply(setdiff(types, "tadpole"), function(type) {
-            any(grepl("^dtw_basic$|^dtw_lb$", configs[[type]]$distance, ignore.case = TRUE)) &&
-                !("gcm_distance" %in% colnames(configs[[type]]))
-        }))
-
-        allocate_logs <- any(sapply(setdiff(types, "tadpole"), function(type) {
-            any(grepl("^gak$", configs[[type]]$distance, ignore.case = TRUE)) &&
-                !("logs_distance" %in% colnames(configs[[type]]))
-        }))
-
         allocate_dba <- any(sapply(types, function(type) {
             any(grepl("^dba$", configs[[type]]$centroid, ignore.case = TRUE)) &&
                 !("gcm_centroid" %in% colnames(configs[[type]]))
-        }))
-
-        allocate_cm <- any(sapply(types, function(type) {
-            any(grepl("^sdtw$", configs[[type]]$distance, ignore.case = TRUE)) &&
-                !("cm_distance" %in% colnames(configs[[type]]))
         }))
 
         allocate_sdtwc <- any(sapply(types, function(type) {
@@ -604,37 +589,24 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                 !("cm_centroid" %in% colnames(configs[[type]]))
         }))
 
-        if (allocate_gcm || allocate_logs || allocate_dba || allocate_cm || allocate_sdtwc)
+        if (allocate_dba || allocate_sdtwc)
             N <- max(sapply(processed_series, function(series_by_type) {
                 max(sapply(series_by_type, function(series) {
                     max(sapply(series, NROW))
                 }))
             }))
 
-        if (is.null(dots$gcm)) {
-            if (allocate_dba)
-                dots$gcm <- matrix(0, N + 1L, N + 1L) # will also work if dtw_basic + DBA is used
-            else if (allocate_gcm)
-                dots$gcm <- matrix(0, 2L, N + 1L)
-
-        } else { allocate_dba <- allocate_gcm <- FALSE }
-
-        if (allocate_logs && is.null(dots$logs))
-            dots$logs <- matrix(0, N + 1L, 3L)
+        if (is.null(dots$gcm) && allocate_dba)
+            dots$gcm <- matrix(0, N + 1L, N + 1L) # will also work if dtw_basic + DBA is used
         else
-            allocate_logs <- FALSE
-
-        if (allocate_cm && is.null(dots$cm))
-            dots$cm <- matrix(0, N + 1L, N + 1L)
-        else
-            allocate_cm <- FALSE
+            allocate_dba <- FALSE
 
         if (allocate_sdtwc && (is.null(dots$cm) || is.null(dots$dm) || is.null(dots$em))) {
             dots$cm <- matrix(0, N + 2L, N + 2L)
             dots$dm <- matrix(0, N + 1L, N + 1L)
             dots$em <- matrix(0, 2L, N + 2L)
-
-        } else allocate_sdtwc <- FALSE
+        }
+        else allocate_sdtwc <- FALSE
     }
 
     # ==============================================================================================
@@ -674,7 +646,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
             assign(custom_centroid, get_from_callers(custom_centroid, "function"))
 
         export <- c("trace", "score.clus", "return.objects",
-                    "dots", "allocate_gcm", "allocate_logs", "allocate_dba", "allocate_cm", "allocate_sdtwc",
+                    "dots", "allocate_dba", "allocate_sdtwc",
                     "centroids_included",
                     "check_consistency", "enlist", "subset_dots", "get_from_callers", "setnames_inplace",
                     custom_preprocs, custom_centroids)
@@ -813,26 +785,10 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                 if (centroid_char != "default")
                     tsc@centroid <- centroid_char
 
-                if (allocate_gcm || allocate_dba) {
+                if (allocate_dba) {
                     tsc@dots$gcm <- NULL
                     tsc@args <- lapply(tsc@args, function(arg) {
                         arg$gcm <- NULL
-                        arg
-                    })
-                }
-
-                if (allocate_logs) {
-                    tsc@dots$logs <- NULL
-                    tsc@args <- lapply(tsc@args, function(arg) {
-                        arg$logs <- NULL
-                        arg
-                    })
-                }
-
-                if (allocate_cm) {
-                    tsc@dots$cm <- NULL
-                    tsc@args <- lapply(tsc@args, function(arg) {
-                        arg$cm <- NULL
                         arg
                     })
                 }

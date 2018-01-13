@@ -50,6 +50,7 @@ test_that("Parallel FORK computation gives the same results as sequential", {
     cat(" - Test FORKs:\n")
 
     cl <- makeCluster(num_workers - 1L, "FORK")
+    invisible(clusterEvalQ(cl, RcppParallel::setThreadOptions(2L)))
     registerDoParallel(cl)
 
     # Filter excludes files that have "parallel" in them, otherwise it would be recursive

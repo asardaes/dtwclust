@@ -1,34 +1,41 @@
-#include "distance-calculators.h"
+#include "concrete-calculators.h"
 
 #include <RcppArmadillo.h>
+#include <RcppParallel.h>
 
 #include "../distances/distances++.h" // soft_dtw
 
 namespace dtwclust {
 
-// =================================================================================================
-/* soft-DTW distance calculator */
-// =================================================================================================
-
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-SdtwCalculator::SdtwCalculator(
-    const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+SdtwCalculator::SdtwCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
     : DistanceCalculator(DIST_ARGS, X, Y)
+    , gamma_(Rcpp::as<double>(dist_args_["gamma"]))
+    , is_multivariate_(Rcpp::as<bool>(dist_args_["is.multivariate"]))
 {
-    gamma_ = dist_args_["gamma"];
-    costmat_ = dist_args_["cm"];
-    mv_ = dist_args_["mv"];
+    if (is_multivariate_) {
+        x_mv_ = TSTSList<Rcpp::NumericMatrix>(x_);
+        y_mv_ = TSTSList<Rcpp::NumericMatrix>(y_);
+    }
+    else {
+        x_uv_ = TSTSList<Rcpp::NumericVector>(x_);
+        y_uv_ = TSTSList<Rcpp::NumericVector>(y_);
+    }
+    // set values of max_len_*_
+    max_len_x_ = this->maxLength(x_, is_multivariate_);
+    max_len_y_ = this->maxLength(y_, is_multivariate_);
+    // make sure pointer is null
+    cm_ = nullptr;
 }
 
 // -------------------------------------------------------------------------------------------------
-/* compute distance for two series */
+/* destructor */
 // -------------------------------------------------------------------------------------------------
-double SdtwCalculator::calculate(const SEXP& X, const SEXP& Y)
+SdtwCalculator::~SdtwCalculator()
 {
-    // 'distmat' parameter is always NULL in here
-    return Rcpp::as<double>(soft_dtw(X, Y, gamma_, costmat_, R_NilValue, mv_));
+    if (cm_) delete[] cm_;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -36,9 +43,52 @@ double SdtwCalculator::calculate(const SEXP& X, const SEXP& Y)
 // -------------------------------------------------------------------------------------------------
 double SdtwCalculator::calculate(const int i, const int j)
 {
-    SEXP x = x_[i];
-    SEXP y = y_[j];
-    return this->calculate(x, y);
+    if (is_multivariate_) {
+        return this->calculate(x_mv_[i], y_mv_[j]);
+    }
+    else {
+        return this->calculate(x_uv_[i], y_uv_[j]);
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+/* clone that sets helper matrix
+ *   This is needed because instances of this class are supposed to be called from different
+ *   threads, and each one needs its own independent matrix to perform the calculations. Each thread
+ *   has to lock a mutex and then call this method before calculating the distance.
+ */
+// ------------------------------------------------------------------------------------------------
+SdtwCalculator* SdtwCalculator::clone() const
+{
+    SdtwCalculator* ptr = new SdtwCalculator(*this);
+    ptr->cm_ = new double[(max_len_x_ + 1) * (max_len_y_ + 1)];
+    return ptr;
+}
+
+// -------------------------------------------------------------------------------------------------
+/* compute distance for two series */
+// -------------------------------------------------------------------------------------------------
+
+// univariate
+double SdtwCalculator::calculate(
+        const RcppParallel::RVector<double>& x, const RcppParallel::RVector<double>& y)
+{
+    if (!cm_) return -1;
+    int nx = x.length();
+    int ny = y.length();
+    int num_var = 1;
+    return sdtw(&x[0], &y[0], nx, ny, num_var, gamma_, cm_);
+}
+
+// multivariate
+double SdtwCalculator::calculate(
+        const RcppParallel::RMatrix<double>& x, const RcppParallel::RMatrix<double>& y)
+{
+    if (!cm_) return -1;
+    int nx = x.nrow();
+    int ny = y.nrow();
+    int num_var = x.ncol();
+    return sdtw(&x[0], &y[0], nx, ny, num_var, gamma_, cm_);
 }
 
 } // namespace dtwclust

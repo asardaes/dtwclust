@@ -214,11 +214,10 @@ setnames_inplace <- function(vec, names) {
 #'
 split_parallel <- function(obj, margin = NULL) {
     num_workers <- foreach::getDoParWorkers()
-    if (num_workers == 1L) return(structure(list(obj), endpoints = 1L))
+    if (num_workers == 1L) return(list(obj))
 
     num_tasks <- if (is.null(margin)) length(obj) else dim(obj)[margin]
     if (!is.integer(num_tasks)) stop("Invalid attempt to split an object into parallel tasks")
-
     num_tasks <- parallel::splitIndices(num_tasks, num_workers)
     num_tasks <- num_tasks[lengths(num_tasks, use.names = FALSE) > 0L]
 
@@ -228,8 +227,7 @@ split_parallel <- function(obj, margin = NULL) {
         ret <- switch(EXPR = margin,
                       lapply(num_tasks, function(id) obj[id, , drop = FALSE]),
                       lapply(num_tasks, function(id) obj[ , id, drop = FALSE]))
-
-    attr(ret, "endpoints") <- lapply(num_tasks, function(ids) { ids[1L] })
+    # return
     ret
 }
 
@@ -256,67 +254,14 @@ get_nthreads <- function() {
 #' @importFrom bigmemory big.matrix
 #'
 allocate_distmat <- function(x_len, y_len, pairwise, symmetric) {
-    if (foreach::getDoParWorkers() > 1L) {
-        seed <- get0(".Random.seed", .GlobalEnv, mode = "integer") # undo big.matrix() seed change...
-        if (pairwise)
-            D <- bigmemory::big.matrix(x_len, 1L, "double", 0)
-        else if (symmetric)
-            D <- bigmemory::big.matrix(x_len, x_len, "double", 0)
-        else
-            D <- bigmemory::big.matrix(x_len, y_len, "double", 0)
-        assign(".Random.seed", seed, .GlobalEnv)
-
-    } else {
-        if (pairwise)
-            D <- matrix(0, x_len, 1L)
-        else if (symmetric)
-            D <- matrix(0, x_len, x_len)
-        else
-            D <- matrix(0, x_len, y_len)
-    }
+    if (pairwise)
+        D <- matrix(0, x_len, 1L)
+    else if (symmetric)
+        D <- matrix(0, x_len, x_len)
+    else
+        D <- matrix(0, x_len, y_len)
     # return
     D
-}
-
-# get endpoints for parallel symmetric distance matrix calculations based on number of workers
-symmetric_loop_endpoints <- function(n) {
-    if (n < 2L) stop("No symmetric calculations possible for a 1x1 distance matrix")
-    num_workers <- foreach::getDoParWorkers()
-    if (num_workers == 1L) return(list(list(
-        start = list(i = 2L, j = 1L), end = list(i = n, j = n - 1L))
-    ))
-
-    # single to double index for symmetric matrices
-    s2d <- function(id, n) {
-        if (id < n) return(list(i = id + 1L, j = 1L))
-        # start at second column
-        i <- 3L
-        j <- 2L
-        start_pair <- n
-        end_pair <- n * 2L - 3L
-        # j is ready after this while loop finishes
-        while (!(id >= start_pair && id <= end_pair)) {
-            start_pair <- end_pair + 1L
-            end_pair <- start_pair + n - j - 2L
-            i <- i + 1L
-            j <- j + 1L
-        }
-        # while loop for i
-        while (start_pair < id) {
-            i <- i + 1L
-            start_pair <- start_pair + 1L
-        }
-        # return
-        list(i = i, j = j)
-    }
-
-    num_pairs <- as.integer(n * (n + 1L) / 2L - n)
-    if (num_pairs < num_workers) num_workers <- num_pairs
-    start_pairs <- cumsum(c(1L, rep(as.integer(num_pairs / num_workers), num_workers - 1L)))
-    end_pairs <- c(start_pairs[-1L] - 1L, num_pairs)
-    Map(start_pairs, end_pairs, f = function(start_pair, end_pair) {
-        list(start = s2d(start_pair, n), end = s2d(end_pair, n))
-    })
 }
 
 # Euclidean norm

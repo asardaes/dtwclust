@@ -5,6 +5,8 @@
 
 #include <RcppArmadillo.h>
 
+#include "concrete-fillers.h"
+
 namespace dtwclust {
 
 // =================================================================================================
@@ -13,18 +15,19 @@ namespace dtwclust {
 
 std::shared_ptr<DistmatFiller>
 DistmatFillerFactory::create(const SEXP& FILL_TYPE,
-                             std::shared_ptr<Distmat>& distmat, const SEXP& ENDPOINTS,
+                             const SEXP& NUM_THREADS,
+                             std::shared_ptr<Distmat>& distmat,
                              const std::shared_ptr<DistanceCalculator>& dist_calculator)
 {
-    string type = Rcpp::as<string>(FILL_TYPE);
+    std::string type = Rcpp::as<std::string>(FILL_TYPE);
     if (type == "PAIRWISE") {
-        return std::make_shared<PairwiseDistmatFiller>(distmat, ENDPOINTS, dist_calculator);
+        return std::make_shared<PairwiseFiller>(distmat, dist_calculator, NUM_THREADS);
     }
     else if (type == "SYMMETRIC") {
-        return std::make_shared<SymmetricDistmatFiller>(distmat, ENDPOINTS, dist_calculator);
+        return std::make_shared<SymmetricFiller>(distmat, dist_calculator, NUM_THREADS);
     }
     else {
-        return std::make_shared<GeneralDistmatFiller>(distmat, ENDPOINTS, dist_calculator);
+        return std::make_shared<PrimaryFiller>(distmat, dist_calculator, NUM_THREADS);
     }
 }
 

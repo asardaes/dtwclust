@@ -55,18 +55,16 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
     norm <- match.arg(norm, c("L1", "L2"))
     if (error.check) check_consistency(x, "ts")
     if (is_multivariate(list(x))) stop("lb_keogh does not support multivariate series.")
-
     if (is.null(lower.env) || is.null(upper.env)) {
         if (is_multivariate(list(y))) stop("lb_keogh does not support multivariate series.")
         if (length(x) != length(y)) stop("The series must have the same length")
         if (error.check) check_consistency(y, "ts")
         window.size <- check_consistency(window.size, "window")
-
         envelopes <- compute_envelope(y, window.size = window.size, error.check = FALSE)
         lower.env <- envelopes$lower
         upper.env <- envelopes$upper
-
-    } else {
+    }
+    else {
         check_consistency(lower.env, "ts")
         check_consistency(upper.env, "ts")
         if (length(lower.env) != length(x))
@@ -77,7 +75,6 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
 
     p <- switch(norm, L1 = 1L, L2 = 2L)
     d <- .Call(C_lbk, x, p, lower.env, upper.env, PACKAGE = "dtwclust")
-
     if (force.symmetry) {
         d2 <- lb_keogh(x = y, y = x, window.size = window.size, norm = norm, error.check = FALSE)
         if (d2$d > d) {
@@ -86,7 +83,6 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
             upper.env = d2$upper.env
         }
     }
-
     # return
     list(d = d, upper.env = upper.env, lower.env = lower.env)
 }
@@ -95,10 +91,6 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
 # Loop without using native 'proxy' looping (to avoid multiple calculations of the envelope)
 # ==================================================================================================
 
-#' @importFrom bigmemory attach.big.matrix
-#' @importFrom bigmemory describe
-#' @importFrom bigmemory is.big.matrix
-#'
 lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                            force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE)
 {
@@ -106,113 +98,55 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     window.size <- check_consistency(window.size, "window")
     x <- tslist(x)
     if (error.check) check_consistency(x, "tslist")
-
     if (is.null(y)) {
         y <- x
-
-    } else {
+    }
+    else {
         y <- tslist(y)
         if (error.check) check_consistency(y, "tslist")
     }
 
-    if (is_multivariate(c(x,y)))
-        stop("lb_keogh does not support multivariate series.")
+    if (is_multivariate(c(x,y))) stop("lb_keogh does not support multivariate series.")
+    symmetric <- FALSE
+    fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
+    eval(prepare_expr) # UTILS-expressions-proxy.R
 
-    pairwise <- isTRUE(pairwise)
-    dim_out <- c(length(x), length(y))
-    dim_names <- list(names(x), names(y))
-    D <- allocate_distmat(length(x), length(y), pairwise, FALSE) # UTILS-utils.R
-
+    # adjust parameters for this distance
+    norm <- match.arg(norm, c("L1", "L2"))
+    window.size <- check_consistency(window.size, "window")
     envelopes <- lapply(y, function(s) { compute_envelope(s, window.size, error.check = FALSE) })
     lower.env <- lapply(envelopes, "[[", "lower")
     upper.env <- lapply(envelopes, "[[", "upper")
-    lower.env <- split_parallel(lower.env)
-    upper.env <- split_parallel(upper.env)
 
-    # Wrap as needed for foreach
+    # calculate distance matrix
+    distargs <- list(
+        p = switch(norm, "L1" = 1L, "L2" = 2L),
+        len = length(x[[1L]]),
+        lower.env = lower.env,
+        upper.env = upper.env
+    )
+    num_threads <- get_nthreads()
+    .Call(C_distmat_loop,
+          D, x, y, "LBK", distargs, fill_type, mat_type, num_threads,
+          PACKAGE = "dtwclust")
+
+    # adjust D's attributes
     if (pairwise) {
-        x <- split_parallel(x)
-        validate_pairwise(x, lower.env)
-        validate_pairwise(x, upper.env)
-        endpoints <- attr(x, "endpoints")
-
-    } else {
-        x <- lapply(1L:(foreach::getDoParWorkers()), function(dummy) { x })
-        endpoints <- attr(lower.env, "endpoints")
-    }
-
-    if (bigmemory::is.big.matrix(D)) {
-        D_desc <- bigmemory::describe(D)
-        noexport <- "D"
-        packages <- c("dtwclust", "bigmemory")
-
-    } else {
-        D_desc <- NULL
-        noexport <- ""
-        packages <- c("dtwclust")
-    }
-
-    # Calculate distance matrix
-    foreach(x = x, lower.env = lower.env, upper.env = upper.env, endpoints = endpoints,
-            .combine = c,
-            .multicombine = TRUE,
-            .packages = packages,
-            .export = c("lbk_loop", "enlist"),
-            .noexport = noexport) %op% {
-                bigmat <- !is.null(D_desc)
-                d <- if (bigmat) bigmemory::attach.big.matrix(D_desc)@address else D
-                do.call(lbk_loop,
-                        enlist(d = d,
-                               x = x,
-                               lower.env = lower.env,
-                               upper.env = upper.env,
-                               pairwise = pairwise,
-                               endpoints = endpoints,
-                               bigmat = bigmat,
-                               norm = norm),
-                        TRUE)
-            }
-
-    D <- D[,]
-    if (pairwise) {
+        dim(D) <- NULL
         class(D) <- "pairdist"
-
-    } else {
+    }
+    else {
         if (is.null(dim(D))) dim(D) <- dim_out
         dimnames(D) <- dim_names
         class(D) <- "crossdist"
     }
-
     if (force.symmetry && !pairwise) {
         if (nrow(D) != ncol(D))
             warning("Unable to force symmetry. Resulting distance matrix is not square.")
         else
             .Call(C_force_lb_symmetry, D, PACKAGE = "dtwclust")
     }
-
     attr(D, "method") <- "LB_Keogh"
     # return
     D
-}
-
-# ==================================================================================================
-# Wrapper for C++
-# ==================================================================================================
-
-lbk_loop <- function(d, x, lower.env, upper.env, pairwise, endpoints, bigmat, ..., norm = "L1")
-{
-    # this is never symmetric
-    fill_type <- if (pairwise) "PAIRWISE" else "GENERAL"
-    mat_type <- if (bigmat) "BIG_MATRIX" else "R_MATRIX"
-    distargs <- list()
-    distargs$p <- switch(norm, "L1" = 1L, "L2" = 2L)
-    distargs$len <- length(x[[1L]])
-    distargs$lower.env <- lower.env
-    distargs$upper.env <- upper.env
-    # lower.env is passed as it if were 'y', its length will be used for the loop
-    .Call(C_distmat_loop,
-          d, x, lower.env,
-          "LBK", distargs,
-          fill_type, mat_type, endpoints,
-          PACKAGE = "dtwclust")
 }

@@ -75,7 +75,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
 .onAttach <- function(lib, pkg) {
     # Register DTW2
     if (!check_consistency("DTW2", "dist", silent = TRUE))
-        proxy::pr_DB$set_entry(FUN = dtw2.proxy, names=c("DTW2", "dtw2"),
+        proxy::pr_DB$set_entry(FUN = dtw2_proxy, names=c("DTW2", "dtw2"),
                                loop = TRUE, type = "metric", distance = TRUE,
                                description = "DTW with L2 norm",
                                PACKAGE = "dtwclust")
@@ -104,7 +104,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
 
     # Register SBD
     if (!check_consistency("SBD", "dist", silent = TRUE))
-        proxy::pr_DB$set_entry(FUN = SBD_proxy, names=c("SBD", "sbd"),
+        proxy::pr_DB$set_entry(FUN = sbd_proxy, names=c("SBD", "sbd"),
                                loop = FALSE, type = "metric", distance = TRUE,
                                description = "Paparrizos and Gravanos' shape-based distance for time series",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun,
@@ -119,7 +119,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
 
     # Register GAK
     if (!check_consistency("GAK", "dist", silent = TRUE))
-        proxy::pr_DB$set_entry(FUN = GAK_proxy, names=c("GAK", "gak"),
+        proxy::pr_DB$set_entry(FUN = gak_proxy, names=c("GAK", "gak"),
                                loop = FALSE, type = "metric", distance = TRUE,
                                description = "Fast (triangular) global alignment kernel distance",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun,
@@ -127,7 +127,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
 
     # Register uGAK
     if (!check_consistency("uGAK", "dist", silent = TRUE))
-        proxy::pr_DB$set_entry(FUN = GAK_simil, names=c("uGAK", "ugak"),
+        proxy::pr_DB$set_entry(FUN = gak_simil, names=c("uGAK", "ugak"),
                                loop = FALSE, type = "metric", distance = FALSE,
                                description = "Fast (triangular) global alignment kernel similarity",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun)

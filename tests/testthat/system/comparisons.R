@@ -260,7 +260,6 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                             lbls = labels_subset)
 
     N <- max(lengths(data_subset)) + 1L
-    logs <- matrix(0, N, 3L)
     gcm <- matrix(0, N, N)
     cm <- matrix(0, N + 1L, N + 1L)
     dm <- matrix(0, N, N)
@@ -268,12 +267,11 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
 
     mats_comparison <- compare_clusterings(data_subset, "h",
                                            configs = cfgs_mats, seed = 9430L,
-                                           logs = logs,
                                            gcm = gcm,
                                            return.objects = TRUE)
 
     expect_true(all(
-        c("gcm", "logs") %in%
+        c("gcm") %in%
             names(mats_comparison$objects.hierarchical$config1@dots)
     ))
 
@@ -288,7 +286,6 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
     ))
 
     if (foreach::getDoParWorkers() == 1L) {
-        expect_false(all(logs == 0))
         expect_false(all(gcm == 0))
         expect_false(all(cm == 0))
         expect_false(all(dm == 0))

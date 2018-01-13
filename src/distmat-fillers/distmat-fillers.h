@@ -11,7 +11,7 @@
 namespace dtwclust {
 
 // =================================================================================================
-/* DistmatFillers (base + factory + concretes) */
+/* DistmatFillers (base + factory) */
 // =================================================================================================
 
 // -------------------------------------------------------------------------------------------------
@@ -24,16 +24,17 @@ public:
     virtual void fill() const = 0;
 
 protected:
-    DistmatFiller(std::shared_ptr<Distmat>& distmat, const SEXP& ENDPOINTS,
-                  const std::shared_ptr<DistanceCalculator>& dist_calculator)
+    DistmatFiller(std::shared_ptr<Distmat>& distmat,
+                  const std::shared_ptr<DistanceCalculator>& dist_calculator,
+                  const SEXP& NUM_THREADS)
         : dist_calculator_(dist_calculator)
         , distmat_(distmat)
-        , endpoints_(ENDPOINTS)
+        , num_threads_(Rcpp::as<int>(NUM_THREADS))
     { }
 
     std::shared_ptr<DistanceCalculator> dist_calculator_;
     std::shared_ptr<Distmat> distmat_;
-    SEXP endpoints_;
+    int num_threads_;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -42,51 +43,11 @@ protected:
 class DistmatFillerFactory
 {
 public:
-    std::shared_ptr<DistmatFiller>
-    create(const SEXP& FILL_TYPE, std::shared_ptr<Distmat>& distmat, const SEXP& ENDPOINTS,
-           const std::shared_ptr<DistanceCalculator>& dist_calculator);
-};
-
-// -------------------------------------------------------------------------------------------------
-/* pairwise distmat filler */
-// -------------------------------------------------------------------------------------------------
-class PairwiseDistmatFiller : public DistmatFiller
-{
-public:
-    PairwiseDistmatFiller(std::shared_ptr<Distmat>& distmat, const SEXP& ENDPOINTS,
-                          const std::shared_ptr<DistanceCalculator>& dist_calculator)
-        : DistmatFiller(distmat, ENDPOINTS, dist_calculator)
-    { }
-
-    void fill() const override;
-};
-
-// -------------------------------------------------------------------------------------------------
-/* symmetric distmat filler */
-// -------------------------------------------------------------------------------------------------
-class SymmetricDistmatFiller : public DistmatFiller
-{
-public:
-    SymmetricDistmatFiller(std::shared_ptr<Distmat>& distmat, const SEXP& ENDPOINTS,
-                           const std::shared_ptr<DistanceCalculator>& dist_calculator)
-        : DistmatFiller(distmat, ENDPOINTS, dist_calculator)
-    { }
-
-    void fill() const override;
-};
-
-// -------------------------------------------------------------------------------------------------
-/* general distmat filler */
-// -------------------------------------------------------------------------------------------------
-class GeneralDistmatFiller : public DistmatFiller
-{
-public:
-    GeneralDistmatFiller(std::shared_ptr<Distmat>& distmat, const SEXP& ENDPOINTS,
-                         const std::shared_ptr<DistanceCalculator>& dist_calculator)
-        : DistmatFiller(distmat, ENDPOINTS, dist_calculator)
-    { }
-
-    void fill() const override;
+    std::shared_ptr<DistmatFiller> create(
+            const SEXP& FILL_TYPE,
+            const SEXP& NUM_THREADS,
+            std::shared_ptr<Distmat>& distmat,
+            const std::shared_ptr<DistanceCalculator>& dist_calculator);
 };
 
 } // namespace dtwclust

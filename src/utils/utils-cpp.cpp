@@ -8,7 +8,8 @@ namespace dtwclust {
 /* Force symmetry helper */
 // =================================================================================================
 
-RcppExport SEXP force_lb_symmetry(SEXP X) {
+RcppExport SEXP force_lb_symmetry(SEXP X)
+{
     BEGIN_RCPP
     Rcpp::NumericMatrix matrix(X);
     for (int i = 1; i < matrix.nrow(); i++) {
@@ -30,10 +31,11 @@ RcppExport SEXP force_lb_symmetry(SEXP X) {
 /* helper kahan_sum */
 // =================================================================================================
 
-double kahan_sum(const Rcpp::NumericVector& x) {
+double kahan_sum(const double * const x, const int length)
+{
     double sum = 0, c = 0;
-    for (const double& i : x) {
-        double y = i - c;
+    for (int i = 0; i < length; i++) {
+        double y = x[i] - c;
         double t = sum + y;
         c = (t - sum) - y;
         sum = t;
