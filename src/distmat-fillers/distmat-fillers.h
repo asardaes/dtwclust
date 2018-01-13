@@ -32,7 +32,7 @@ protected:
         , num_threads_(Rcpp::as<int>(NUM_THREADS))
     { }
 
-    std::shared_ptr<DistanceCalculator> dist_calculator_;
+    const std::shared_ptr<DistanceCalculator> dist_calculator_;
     std::shared_ptr<Distmat> distmat_;
     int num_threads_;
 };

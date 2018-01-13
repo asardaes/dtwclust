@@ -58,8 +58,8 @@ public:
     }
 
 private:
-    const std::shared_ptr<DistanceCalculator>& dist_calculator_;
-    const std::shared_ptr<Distmat>& distmat_;
+    const std::shared_ptr<DistanceCalculator> dist_calculator_;
+    std::shared_ptr<Distmat> distmat_;
     int nrows_;
     // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
     tthread::mutex mutex_;
