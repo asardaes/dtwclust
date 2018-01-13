@@ -67,8 +67,6 @@ private:
     const std::shared_ptr<DistanceCalculator> dist_calculator_;
     // margin for update
     int margin_;
-    // dimension of dynamically allocated array
-    int gcm_ncols_;
     // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
     tthread::mutex mutex_;
 };
