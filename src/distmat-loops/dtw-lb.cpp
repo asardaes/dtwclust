@@ -2,13 +2,13 @@
 
 #include <memory> // shared_ptr
 
+#include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
 #include "../distance-calculators/distance-calculators.h"
+#include "../utils/utils++.h" // get_grain
 
 namespace dtwclust {
-
-#define MIN_GRAIN 10
 
 // =================================================================================================
 /* worker to update DTW distance in parallel */
@@ -139,15 +139,14 @@ void dtw_lb_cpp(const Rcpp::List& X,
                 const int margin,
                 const int num_threads)
 {
-    auto dist_calculator = DistanceCalculatorFactory().create("DTW_BASIC_PAR", DOTS, X, Y);
+    auto dist_calculator = DistanceCalculatorFactory().create("DTW_BASIC", DOTS, X, Y);
     int len = margin == 1 ? distmat.nrow() : distmat.ncol();
     Rcpp::IntegerVector id_nn(len), id_nn_prev(len);
     Rcpp::LogicalVector id_changed(len);
     DtwDistanceUpdater dist_updater(id_changed, id_nn, distmat, dist_calculator, margin);
     set_nn(distmat, id_nn, margin);
     for (int i = 0; i < id_nn.length(); i++) id_nn_prev[i] = id_nn[i] + 1; // initialize different
-    int grain = len / num_threads;
-    grain = (grain < MIN_GRAIN) ? MIN_GRAIN : grain;
+    int grain = get_grain(len, num_threads);
     while (!check_finished(id_nn, id_nn_prev, id_changed)) {
         Rcpp::checkUserInterrupt();
         // update nn_prev

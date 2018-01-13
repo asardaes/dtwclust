@@ -41,4 +41,35 @@ double kahan_sum(const Rcpp::NumericVector& x) {
     return sum;
 }
 
+// =================================================================================================
+/* single to double indices for symmetric matrices without diagonal */
+// =================================================================================================
+
+void s2d(const int id, const int nrow, int& i, int& j)
+{
+    // check if it's the first column
+    if (id < (nrow - 1)) {
+        i = id + 1;
+        j = 0;
+        return;
+    }
+    // otherwise start at second column
+    i = 2;
+    j = 1;
+    int start_id = nrow - 1;
+    int end_id = nrow * 2 - 4;
+    // j is ready after this while loop finishes
+    while (!(id >= start_id && id <= end_id)) {
+        start_id = end_id + 1;
+        end_id = start_id + nrow - j - 3;
+        i++;
+        j++;
+    }
+    // while loop for i
+    while (start_id < id) {
+        i++;
+        start_id++;
+    }
+}
+
 } // namespace dtwclust

@@ -30,6 +30,17 @@ double kahan_sum(const Rcpp::NumericVector& x);
 void envelope_cpp(const Rcpp::NumericVector& array, const unsigned int width,
                   Rcpp::NumericVector& minvalues, Rcpp::NumericVector& maxvalues);
 
+// utils-cpp.cpp
+void s2d(const int id, const int nrow, int& i, int& j);
+
+int inline get_grain(const int n, const int num_threads)
+    __attribute__((always_inline));
+int inline get_grain(const int n, const int num_threads) {
+    int grain = n / num_threads;
+    // min_grain defined here
+    return (grain < 10) ? 10 : grain;
+}
+
 } // namespace dtwclust
 
 #endif // DTWCLUST_UTILS_HPP_

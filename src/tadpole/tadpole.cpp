@@ -3,50 +3,18 @@
 #include <algorithm> // std::sort
 #include <atomic> // atomic_int
 #include <iomanip> // std::setprecision
-#include <memory> // *_ptr, static_pointer_cast
+#include <memory> // *_ptr
 #include <string>
 #include <vector>
 
+#include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
 #include "../distance-calculators/distance-calculators.h"
+#include "../utils/utils++.h" // get_grain, s2d
 #include "../utils/utils.h" // Rflush
 
 namespace dtwclust {
-
-#define MIN_GRAIN 10
-
-// =================================================================================================
-/* helper functions */
-// =================================================================================================
-
-// single to double indices for symmetric matrices without diagonal
-void s2d(const int id, const int nrow, int& i, int& j)
-{
-    // check if it's the first column
-    if (id < (nrow - 1)) {
-        i = id + 1;
-        j = 0;
-        return;
-    }
-    // otherwise start at second column
-    i = 2;
-    j = 1;
-    int start_id = nrow - 1;
-    int end_id = nrow * 2 - 4;
-    // j is ready after this while loop finishes
-    while (!(id >= start_id && id <= end_id)) {
-        start_id = end_id + 1;
-        end_id = start_id + nrow - j - 3;
-        i++;
-        j++;
-    }
-    // while loop for i
-    while (start_id < id) {
-        i++;
-        start_id++;
-    }
-}
 
 // =================================================================================================
 /* class that stores lower triangular of a matrix and knows how to access it */
@@ -248,8 +216,7 @@ std::vector<double> local_density(const Rcpp::List& series,
                                   const int num_threads)
 {
     std::vector<double> rho(num_series, 0);
-    int grain = distmat.length() / num_threads;
-    grain = (grain < MIN_GRAIN) ? MIN_GRAIN : grain;
+    int grain = get_grain(distmat.length(), num_threads);
     LocalDensityHelper parallel_worker(
             dc,
             dist_calculator,
@@ -466,7 +433,7 @@ SEXP tadpole_cpp(const Rcpp::List& series,
                  const int num_threads)
 {
     auto dist_calculator = DistanceCalculatorFactory().create(
-        "DTW_BASIC_PAR", DTW_ARGS, series, series);
+        "DTW_BASIC", DTW_ARGS, series, series);
 
     int num_series = series.length();
     LowerTriMat<double> distmat(num_series, NA_REAL);
