@@ -120,14 +120,11 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                               force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE)
 {
     x <- tslist(x)
-    if (error.check) check_consistency(x, "tslist")
     if (is.null(y))
         y <- x
-    else {
+    else
         y <- tslist(y)
-        if (error.check) check_consistency(y, "tslist")
-    }
-
+    if (error.check) check_consistency(c(x,y), "tslist")
     if (is_multivariate(c(x,y))) stop("lb_improved does not support multivariate series.")
     symmetric <- FALSE
     fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals

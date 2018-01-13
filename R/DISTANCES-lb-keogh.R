@@ -94,18 +94,12 @@ lb_keogh <- function(x, y, window.size = NULL, norm = "L1",
 lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
                            force.symmetry = FALSE, pairwise = FALSE, error.check = TRUE)
 {
-    norm <- match.arg(norm, c("L1", "L2"))
-    window.size <- check_consistency(window.size, "window")
     x <- tslist(x)
-    if (error.check) check_consistency(x, "tslist")
-    if (is.null(y)) {
+    if (is.null(y))
         y <- x
-    }
-    else {
+    else
         y <- tslist(y)
-        if (error.check) check_consistency(y, "tslist")
-    }
-
+    if (error.check) check_consistency(c(x,y), "tslist")
     if (is_multivariate(c(x,y))) stop("lb_keogh does not support multivariate series.")
     symmetric <- FALSE
     fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
