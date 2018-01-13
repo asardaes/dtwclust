@@ -1,6 +1,7 @@
 #ifndef DTWCLUST_DISTANCE_CALCULATORS_HPP_
 #define DTWCLUST_DISTANCE_CALCULATORS_HPP_
 
+#include <complex>
 #include <memory> // *_ptr
 #include <string>
 #include <type_traits> // conditional, is_same
@@ -12,9 +13,12 @@
 namespace dtwclust {
 
 // =================================================================================================
-/* Thread-Safe Time-Series List */
+/* Thread-Safe Time-Series List
+ *   It should be constructed outside the thread though.
+ */
 // =================================================================================================
 
+// primary one
 template<typename SeriesType>
 class TSTSList
 {
@@ -31,6 +35,32 @@ public:
         for (const SEXP& x : series) {
             SeriesType x_rcpp(x);
             series_.push_back(TSTSType(x_rcpp));
+        }
+    }
+    // operator[]
+    TSTSType& operator[](const int i) { return series_[i]; }
+    const TSTSType& operator[](const int i) const { return series_[i]; }
+
+private:
+    std::vector<TSTSType> series_;
+};
+
+// specialization for complex vectors
+template<>
+class TSTSList<Rcpp::ComplexVector>
+{
+public:
+    typedef arma::cx_vec TSTSType;
+    // constructors
+    TSTSList() {} // dummy
+    TSTSList(const Rcpp::List& series)
+    {
+        for (const SEXP& x : series) {
+            Rcpp::ComplexVector x_rcpp(x);
+            // see http://rcpp-devel.r-forge.r-project.narkive.com/o5ubHVos/multiplication-of-complexvector
+            arma::cx_vec x_arma(reinterpret_cast<std::complex<double>*>(x_rcpp.begin()),
+                                x_rcpp.length(), false, true);
+            series_.push_back(x_arma);
         }
     }
     // operator[]
