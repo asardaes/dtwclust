@@ -9,12 +9,12 @@ extern "C" {
 
 SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
                SEXP m, SEXP n, SEXP num_var,
-               SEXP norm, SEXP step, SEXP backtrack,
+               SEXP norm, SEXP step, SEXP backtrack, SEXP normalize,
                SEXP distmat);
 
 double dtw_basic_par(double const * const x, double const * const y,
                      int const nx, int const ny, int const num_var,
-                     int const window, double const norm, double const step,
+                     int const window, double const norm, double const step, int const normalize,
                      double * const distmat);
 
 SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var, SEXP sigma, SEXP window, SEXP logs);

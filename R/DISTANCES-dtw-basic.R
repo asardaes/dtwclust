@@ -73,19 +73,19 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
     else
         stop("step.pattern must be either symmetric1 or symmetric2 (without quotes)")
 
-    if (normalize && step.pattern == 1) stop("Unable to normalize with chosen step pattern.")
-
     norm <- match.arg(norm, c("L1", "L2"))
     norm <- switch(norm, "L1" = 1, "L2" = 2)
     backtrack <- isTRUE(backtrack)
+    normalize <- isTRUE(normalize)
+    if (normalize && step.pattern == 1) stop("Unable to normalize with chosen step pattern.")
 
     if (backtrack) {
         if (is.null(gcm))
             gcm <- matrix(0, NROW(x) + 1L, NROW(y) + 1L)
         else if (!is.matrix(gcm) || nrow(gcm) < (NROW(x) + 1L) || ncol(gcm) < (NROW(y) + 1L))
             stop("dtw_basic: Dimension inconsistency in 'gcm'")
-
-    } else {
+    }
+    else {
         if (is.null(gcm))
             gcm <- matrix(0, 2L, NROW(y) + 1L)
         else if (!is.matrix(gcm) || nrow(gcm) < 2L || ncol(gcm) < (NROW(y) + 1L))
@@ -97,15 +97,8 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 
     d <- .Call(C_dtw_basic, x, y, window.size,
                NROW(x), NROW(y), NCOL(x),
-               norm, step.pattern, backtrack,
+               norm, step.pattern, backtrack, normalize,
                gcm, PACKAGE = "dtwclust")
-
-    if (normalize) {
-        if (backtrack)
-            d$distance <- d$distance / (NROW(x) + NROW(y))
-        else
-            d <- d / (NROW(x) + NROW(y))
-    }
 
     if (backtrack) {
         d$index1 <- d$index1[d$path:1L]

@@ -159,7 +159,7 @@ double dtw_basic_c(double * const D, double volatile * const tuple,
 // the gateway function
 SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
                SEXP m, SEXP n, SEXP num_var,
-               SEXP norm, SEXP step, SEXP backtrack,
+               SEXP norm, SEXP step, SEXP backtrack, SEXP normalize,
                SEXP distmat)
 {
     double d;
@@ -179,6 +179,7 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
                         REAL(x), REAL(y), asInteger(window),
                         nx, ny, asInteger(num_var),
                         asReal(norm), asReal(step), 1);
+        if (asLogical(normalize)) d /= nx + ny;
 
         // actual length of path
         int path = backtrack_steps(D, nx, ny, INTEGER(index1), INTEGER(index2));
@@ -207,6 +208,7 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
                         REAL(x), REAL(y), asInteger(window),
                         nx, ny, asInteger(num_var),
                         asReal(norm), asReal(step), 0);
+        if (asLogical(normalize)) d /= nx + ny;
 
         SEXP ret = PROTECT(ScalarReal(d));
 
@@ -219,10 +221,12 @@ SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
 // a version compatible with RcppParallel (no backtrack here)
 double dtw_basic_par(double const * const x, double const * const y,
                      int const nx, int const ny, int const num_var,
-                     int const window, double const norm, double const step,
+                     int const window, double const norm, double const step, int const normalize,
                      double * const distmat)
 {
     // volatile to avoid some comparison problems in which_min
     volatile double tuple[3];
-    return dtw_basic_c(distmat, tuple, x, y, window, nx, ny, num_var, norm, step, 0);
+    double d = dtw_basic_c(distmat, tuple, x, y, window, nx, ny, num_var, norm, step, 0);
+    if (normalize) d /= nx + ny;
+    return d;
 }

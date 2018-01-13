@@ -125,7 +125,8 @@ DBA <- function(X, centroid = NULL, ...,
                  norm = norm,
                  gcm = gcm,
                  step.pattern = step.pattern,
-                 backtrack = TRUE)
+                 backtrack = TRUE,
+                 normalize = FALSE)
 
     # C++ code
     new_cent <- .Call(C_dba, X, centroid, max.iter, delta, trace, mv, mv.ver, dots, PACKAGE = "dtwclust")

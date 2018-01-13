@@ -20,7 +20,7 @@ static R_CallMethodDef callMethods[] = {
     CALLDEFpp(sdtw_cent, 8),
     CALLDEFpp(soft_dtw, 6),
     CALLDEFpp(tadpole, 9),
-    CALLDEF(dtw_basic, 10),
+    CALLDEF(dtw_basic, 11),
     CALLDEF(logGAK, 8),
     CALLDEF(pairs, 1),
     CALLDEF(setnames_inplace, 2),
