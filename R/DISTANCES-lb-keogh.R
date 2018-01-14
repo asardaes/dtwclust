@@ -10,6 +10,7 @@
 #' @inherit lb_improved details
 #' @inheritSection lb_improved Note
 #'
+#' @template rcpp-parallel
 #' @template proxy
 #'
 #' @return A list with:

@@ -73,9 +73,8 @@ aforementioned format, although \code{shape} is \emph{not} recommended. Note tha
 simply append all dimensions (columns) one after the other.
 }
 \note{
-The lower bounds are defined only for time series of equal length.
-
-The lower bounds are \strong{not} symmetric, and \code{DTW} is not symmetric in general.
+The lower bounds are defined only for time series of equal length. They are \strong{not} symmetric,
+and \code{DTW} is not symmetric in general.
 }
 \section{Centroid Calculation}{
 
@@ -205,8 +204,7 @@ Multiple values of \code{k} can also be provided to get different partitions usi
 clustering.
 
 Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is
-precomputed, since said matrix is reused for every repetition, and can be computed in parallel
-(see Parallel section).
+precomputed, since said matrix is reused for every repetition.
 }
 
 \section{Parallel Computing}{
@@ -216,20 +214,20 @@ precomputed, since said matrix is reused for every repetition, and can be comput
   overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 
   The user can register a parallel backend, e.g. with the \pkg{doParallel} package, in order to
-  attempt to speed up the calculations (see the examples).
+  attempt to speed up the calculations (see the examples). This relies on
+  \code{\link[foreach:foreach]{foreach}}, i.e. it uses multi-processing.
 
 
 
-If you register a parallel backend, the function will also try to do the calculation of the
-distance matrices in parallel. See the caveats in \linkS4class{tsclustFamily}. If the function
-requires special packages to be loaded, provide their names in the \code{packages} element of
-\code{control}. Note that "dtwclust" is always loaded in each parallel worker, so that doesn't need
-to be included. Alternatively, you may want to pre-load \pkg{dtwclust} in each worker with
-\code{\link[parallel:clusterEvalQ]{parallel::clusterEvalQ()}}.
+Multi-processing is used in partitional and fuzzy clustering for multiple values of \code{k} and/or
+\code{nrep} (in \code{\link[=partitional_control]{partitional_control()}}). See \code{\link[=TADPole]{TADPole()}} to know how it uses parallelization. For
+cross-distance matrix calculations, the parallelization strategy depends on whether the
+distance is included with \pkg{dtwclust} or not, see the caveats in \linkS4class{tsclustFamily}.
 
-In case of multiple repetitions, each worker gets a repetition task. Otherwise, the tasks
-(which can be a distance matrix or a centroid calculation) are usually divided into chunks
-according to the number of workers available.
+If you register a parallel backend and special packages must be loaded, provide their names in
+the \code{packages} element of \code{control}. Note that "dtwclust" is always loaded in each parallel
+worker, so that doesn't need to be included. Alternatively, you may want to pre-load
+\pkg{dtwclust} in each worker with \code{\link[parallel:clusterEvalQ]{parallel::clusterEvalQ()}}.
 }
 
 \examples{

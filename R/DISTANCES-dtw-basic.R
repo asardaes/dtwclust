@@ -35,6 +35,7 @@
 #'   - `index1`: `x` indices for the matched elements in the warping path.
 #'   - `index2`: `y` indices for the matched elements in the warping path.
 #'
+#' @template rcpp-parallel
 #' @template proxy
 #' @template symmetric
 #' @section Proxy version:

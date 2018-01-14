@@ -20,6 +20,7 @@
 #'
 #' @return The Soft DTW distance.
 #'
+#' @template rcpp-parallel
 #' @template proxy
 #' @template symmetric
 #'

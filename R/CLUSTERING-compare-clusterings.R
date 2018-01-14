@@ -378,8 +378,9 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'
 #' @section Parallel computation:
 #'
-#'   The configurations for each clustering type can be evaluated in parallel with the \pkg{foreach}
-#'   package. A parallel backend can be registered, e.g., with \pkg{doParallel}.
+#'   The configurations for each clustering type can be evaluated in parallel (multi-processing)
+#'   with the \pkg{foreach} package. A parallel backend can be registered, e.g., with
+#'   \pkg{doParallel}.
 #'
 #'   If the `.errorhandling` parameter is changed to "pass" and a custom `score.clus` function is
 #'   used, said function should be able to deal with possible error objects.

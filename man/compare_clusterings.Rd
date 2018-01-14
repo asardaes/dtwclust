@@ -72,8 +72,9 @@ and \code{pick} elements of the result will be \code{NULL}.
 \section{Parallel computation}{
 
 
-The configurations for each clustering type can be evaluated in parallel with the \pkg{foreach}
-package. A parallel backend can be registered, e.g., with \pkg{doParallel}.
+The configurations for each clustering type can be evaluated in parallel (multi-processing)
+with the \pkg{foreach} package. A parallel backend can be registered, e.g., with
+\pkg{doParallel}.
 
 If the \code{.errorhandling} parameter is changed to "pass" and a custom \code{score.clus} function is
 used, said function should be able to deal with possible error objects.

@@ -9,7 +9,7 @@
 #'
 #' The custom implementations also handle parallelization.
 #'
-#' Since the distance function makes use of `proxy`, it also supports any extra [proxy::dist()]
+#' Since the distance function makes use of \pkg{proxy}, it also supports any extra [proxy::dist()]
 #' parameters in `...`.
 #'
 #' The prototype includes the `cluster` function for partitional methods, as well as a pass-through
@@ -22,22 +22,23 @@
 #'
 #' @section Distance function:
 #'
-#'   The dist() function in here works like [proxy::dist()] but supports parallelization and
+#'   The family's dist() function works like [proxy::dist()] but supports parallelization and
 #'   optimized symmetric calculations. If you like, you can use the function more or less directly,
-#'   but provide a control argument when creating the family. However, bear in mind the following
-#'   considerations.
+#'   but provide a control argument when creating the family (see examples). However, bear in mind
+#'   the following considerations.
 #'
 #'   - The second argument is called `centroids` (inconsistent with [proxy::dist()]).
 #'   - If `control$distmat` is *not* `NULL`, the function will try to subset it.
 #'   - If `control$symmetric` is `TRUE`, `centroids` is `NULL`, *and* there is no argument
 #'     `pairwise` that is `TRUE`, only half the distance matrix will be computed.
 #'     + If the distance was registered in [proxy::pr_DB] with `loop = TRUE` and more than one
-#'       parallel worker is detected, the computation will be in parallel, otherwise it will be
-#'       sequential with [proxy::dist()].
+#'       parallel worker is detected, the computation will be in parallel (using multi-processing
+#'       with [foreach::foreach()]), otherwise it will be sequential with [proxy::dist()].
 #'   - The function always returns a `crossdist` matrix.
 #'
-#'   Note that all distances implemented as part of \pkg{dtwclust} have custom proxy loops, so see
-#'   their respective documentation to see what optimizations apply to each one.
+#'   Note that all distances implemented as part of \pkg{dtwclust} have custom proxy loops that use
+#'   multi-processing independently of \pkg{foreach}, so see their respective documentation to see
+#'   what optimizations apply to each one.
 #'
 #'   For distances *not* included in \pkg{dtwclust}, the symmetric, parallel case mentioned above
 #'   makes chunks for parallel workers, but they are not perfectly balanced, so some workers might
@@ -46,14 +47,19 @@
 #' @section Centroid function:
 #'
 #'   The default partitional allcent() function is a closure with the implementations of the
-#'   included centroids. The ones for [DBA()] and [shape_extraction()] can use parallelization. Its
-#'   formal arguments are described in the Centroid Calculation section from [tsclust()].
+#'   included centroids. The ones for [DBA()], [shape_extraction()] and [sdtw_cent()] can use
+#'   multi-process parallelization with [foreach::foreach()]. Its formal arguments are described in
+#'   the Centroid Calculation section from [tsclust()].
 #'
 #' @note
 #'
 #' This class is meant to group together the relevant functions, but they are **not** linked with
 #' each other automatically. In other words, neither `dist` nor `allcent` apply `preproc`. They
 #' essentially don't know of each other's existence.
+#'
+#' @seealso
+#'
+#' [dtw_basic()], [dtw_lb()], [gak()], [lb_improved()], [lb_keogh()], [sbd()], [sdtw()].
 #'
 #' @examples
 #'
@@ -73,11 +79,10 @@
 #' fam <- new("tsclustFamily", dist = "dtw",
 #'            control = partitional_control(symmetric = TRUE))
 #' fam@dist(CharTraj[1L:5L])
-#' }
 #'
 #' # If you want the fuzzy family, use fuzzy = TRUE
 #' ffam <- new("tsclustFamily", control = fuzzy_control(), fuzzy = TRUE)
-#'
+#' }
 #'
 tsclustFamily <- methods::setClass(
     "tsclustFamily",

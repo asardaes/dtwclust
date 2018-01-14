@@ -246,29 +246,26 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'   clustering.
 #'
 #'   Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is
-#'   precomputed, since said matrix is reused for every repetition, and can be computed in parallel
-#'   (see Parallel section).
+#'   precomputed, since said matrix is reused for every repetition.
 #'
 #' @template parallel
 #'
 #' @section Parallel Computing:
 #'
-#'   If you register a parallel backend, the function will also try to do the calculation of the
-#'   distance matrices in parallel. See the caveats in [tsclustFamily-class]. If the function
-#'   requires special packages to be loaded, provide their names in the `packages` element of
-#'   `control`. Note that "dtwclust" is always loaded in each parallel worker, so that doesn't need
-#'   to be included. Alternatively, you may want to pre-load \pkg{dtwclust} in each worker with
-#'   [parallel::clusterEvalQ()].
+#'   Multi-processing is used in partitional and fuzzy clustering for multiple values of `k` and/or
+#'   `nrep` (in [partitional_control()]). See [TADPole()] to know how it uses parallelization. For
+#'   cross-distance matrix calculations, the parallelization strategy depends on whether the
+#'   distance is included with \pkg{dtwclust} or not, see the caveats in [tsclustFamily-class].
 #'
-#'   In case of multiple repetitions, each worker gets a repetition task. Otherwise, the tasks
-#'   (which can be a distance matrix or a centroid calculation) are usually divided into chunks
-#'   according to the number of workers available.
+#'   If you register a parallel backend and special packages must be loaded, provide their names in
+#'   the `packages` element of `control`. Note that "dtwclust" is always loaded in each parallel
+#'   worker, so that doesn't need to be included. Alternatively, you may want to pre-load
+#'   \pkg{dtwclust} in each worker with [parallel::clusterEvalQ()].
 #'
 #' @note
 #'
-#' The lower bounds are defined only for time series of equal length.
-#'
-#' The lower bounds are **not** symmetric, and `DTW` is not symmetric in general.
+#' The lower bounds are defined only for time series of equal length. They are **not** symmetric,
+#' and `DTW` is not symmetric in general.
 #'
 #' @author Alexis Sarda-Espinosa
 #'
