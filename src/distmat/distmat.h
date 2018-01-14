@@ -28,8 +28,7 @@ public:
 class DistmatFactory
 {
 public:
-    std::shared_ptr<Distmat>
-    create(const SEXP& MAT_TYPE, const SEXP& D);
+    std::shared_ptr<Distmat> create(const SEXP& MAT_TYPE, const SEXP& D);
 };
 
 } // namespace dtwclust
