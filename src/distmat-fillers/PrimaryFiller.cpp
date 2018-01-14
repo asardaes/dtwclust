@@ -1,5 +1,6 @@
 #include "concrete-fillers.h"
 
+#include <cstddef>
 #include <memory>
 
 #include <RcppArmadillo.h>
@@ -10,7 +11,7 @@
 namespace dtwclust {
 
 // =================================================================================================
-/* multi-threaded pairwise filler
+/* multi-threaded primary filler
  *   This filler makes no assumptions about the dimensions of *distmat_, but makes the parallel
  *   chunks based on the number of rows.
  */

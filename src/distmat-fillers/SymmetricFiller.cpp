@@ -1,5 +1,6 @@
 #include "concrete-fillers.h"
 
+#include <cstddef>
 #include <memory>
 
 #include <RcppArmadillo.h>
@@ -10,7 +11,7 @@
 namespace dtwclust {
 
 // =================================================================================================
-/* multi-threaded pairwise filler
+/* multi-threaded symmetric filler
  *   This filler assumes a square matrix has been received in *distmat_
  */
 // =================================================================================================

@@ -1,5 +1,6 @@
 #include "concrete-fillers.h"
 
+#include <cstddef>
 #include <memory>
 
 #include <RcppArmadillo.h>
@@ -11,7 +12,8 @@ namespace dtwclust {
 
 // =================================================================================================
 /* multi-threaded pairwise filler
- *   This filler assumes a column vector has been received in *distmat_
+ *   This filler assumes a column vector has been received in *distmat_, and that the distance
+ *   calculator has the same amount of series in X and Y.
  */
 // =================================================================================================
 
