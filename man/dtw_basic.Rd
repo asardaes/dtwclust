@@ -6,7 +6,7 @@
 \usage{
 dtw_basic(x, y, window.size = NULL, norm = "L1",
   step.pattern = dtw::symmetric2, backtrack = FALSE, normalize = FALSE,
-  ..., gcm = NULL, error.check = TRUE)
+  ..., error.check = TRUE)
 }
 \arguments{
 \item{x, y}{Time series. Multivariate series must have time spanning the rows and variables
@@ -24,10 +24,6 @@ that these are \emph{not} characters. See \link[dtw:stepPattern]{dtw::stepPatter
 \item{normalize}{Should the distance be normalized? Only supported for \code{symmetric2}.}
 
 \item{...}{Currently ignored.}
-
-\item{gcm}{Optionally, a matrix to use for the global cost matrix calculations. It should have
-\code{NROW(y)+1} columns, and \code{NROW(x)+1} rows for \code{backtrack = TRUE} \strong{or} \code{2} rows for \code{backtrack = FALSE}. Used internally for memory optimization. If provided, it \strong{will} be modified \emph{in
-place} by \code{C} code, except in the \code{\link[proxy:dist]{proxy::dist()}} version which ignores it.}
 
 \item{error.check}{Logical indicating whether the function should try to detect inconsistencies
 and give more informative errors messages. Also used internally to avoid repeating checks.}

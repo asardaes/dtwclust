@@ -8,9 +8,6 @@
 #'   spanning the columns.
 #' @param gamma Positive regularization parameter, with lower values resulting in less smoothing.
 #' @param ... Currently ignored.
-#' @param cm Optionally, a matrix to use for the calculations. It should have `NROW(x)+1` rows and
-#'   `NROW(y)+1` columns. Used internally for memory optimization. If provided, it **will** be
-#'   modified *in place* by `C` code, except in the [proxy::dist()] version which ignores it.
 #' @template error-check
 #'
 #' @details
@@ -29,7 +26,7 @@
 #' Cuturi, M., & Blondel, M. (2017). Soft-DTW: a Differentiable Loss Function for Time-Series. arXiv
 #' preprint arXiv:1703.01541.
 #'
-sdtw <- function(x, y, gamma = 0.01, ..., cm = NULL, error.check = TRUE)
+sdtw <- function(x, y, gamma = 0.01, ..., error.check = TRUE)
 {
     if (error.check) {
         check_consistency(x, "ts")
@@ -37,12 +34,7 @@ sdtw <- function(x, y, gamma = 0.01, ..., cm = NULL, error.check = TRUE)
     }
     if (gamma <= 0) stop("The gamma paramter must be positive")
     mv <- is_multivariate(list(x,y)) # dimension consistency checked here
-    if (is.null(cm))
-        cm <- matrix(0, NROW(x) + 1L, NROW(y) + 1L)
-    else if (!is.matrix(cm) || nrow(cm) < (NROW(x) + 1L) || ncol(cm) < (NROW(y) + 1L))
-        stop("sdtw: Dimension inconsistency in 'cm'")
-    else if (storage.mode(cm) != "double")
-        stop("sdtw: If provided, 'cm' must have 'double' storage mode.")
+    cm <- matrix(0, NROW(x) + 1L, NROW(y) + 1L)
     # return
     .Call(C_soft_dtw, x, y, gamma, cm, NULL, mv, PACKAGE = "dtwclust")
 }

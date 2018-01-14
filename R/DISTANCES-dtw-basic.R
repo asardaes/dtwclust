@@ -17,10 +17,6 @@
 #' @param backtrack Also compute the warping path between series? See details.
 #' @param normalize Should the distance be normalized? Only supported for `symmetric2`.
 #' @param ... Currently ignored.
-#' @param gcm Optionally, a matrix to use for the global cost matrix calculations. It should have
-#'   `NROW(y)+1` columns, and `NROW(x)+1` rows for `backtrack = TRUE` **or** `2` rows for `backtrack
-#'   = FALSE`. Used internally for memory optimization. If provided, it **will** be modified *in
-#'   place* by `C` code, except in the [proxy::dist()] version which ignores it.
 #' @template error-check
 #'
 #' @details
@@ -52,7 +48,7 @@
 #'
 dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
                       step.pattern = dtw::symmetric2, backtrack = FALSE,
-                      normalize = FALSE, ..., gcm = NULL, error.check = TRUE)
+                      normalize = FALSE, ..., error.check = TRUE)
 {
     if (error.check) {
         check_consistency(x, "ts")
@@ -79,21 +75,10 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
     normalize <- isTRUE(normalize)
     if (normalize && step.pattern == 1) stop("Unable to normalize with chosen step pattern.")
 
-    if (backtrack) {
-        if (is.null(gcm))
-            gcm <- matrix(0, NROW(x) + 1L, NROW(y) + 1L)
-        else if (!is.matrix(gcm) || nrow(gcm) < (NROW(x) + 1L) || ncol(gcm) < (NROW(y) + 1L))
-            stop("dtw_basic: Dimension inconsistency in 'gcm'")
-    }
-    else {
-        if (is.null(gcm))
-            gcm <- matrix(0, 2L, NROW(y) + 1L)
-        else if (!is.matrix(gcm) || nrow(gcm) < 2L || ncol(gcm) < (NROW(y) + 1L))
-            stop("dtw_basic: Dimension inconsistency in 'gcm'")
-    }
-
-    if (storage.mode(gcm) != "double")
-        stop("dtw_basic: If provided, 'gcm' must have 'double' storage mode.")
+    if (backtrack)
+        gcm <- matrix(0, NROW(x) + 1L, NROW(y) + 1L)
+    else
+        gcm <- matrix(0, 2L, NROW(y) + 1L)
 
     d <- .Call(C_dtw_basic, x, y, window.size,
                NROW(x), NROW(y), NCOL(x),

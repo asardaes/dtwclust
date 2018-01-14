@@ -4,7 +4,7 @@
 \alias{sdtw}
 \title{Soft-DTW distance}
 \usage{
-sdtw(x, y, gamma = 0.01, ..., cm = NULL, error.check = TRUE)
+sdtw(x, y, gamma = 0.01, ..., error.check = TRUE)
 }
 \arguments{
 \item{x, y}{Time series. Multivariate series must have time spanning the rows and variables
@@ -13,10 +13,6 @@ spanning the columns.}
 \item{gamma}{Positive regularization parameter, with lower values resulting in less smoothing.}
 
 \item{...}{Currently ignored.}
-
-\item{cm}{Optionally, a matrix to use for the calculations. It should have \code{NROW(x)+1} rows and
-\code{NROW(y)+1} columns. Used internally for memory optimization. If provided, it \strong{will} be
-modified \emph{in place} by \code{C} code, except in the \code{\link[proxy:dist]{proxy::dist()}} version which ignores it.}
 
 \item{error.check}{Logical indicating whether the function should try to detect inconsistencies
 and give more informative errors messages. Also used internally to avoid repeating checks.}

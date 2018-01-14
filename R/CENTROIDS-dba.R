@@ -23,9 +23,7 @@
 #'   convergence is assumed.
 #' @template error-check
 #' @param trace If `TRUE`, the current iteration is printed to output.
-#' @param gcm Optional matrix to pass to [dtw_basic()] (for the case when `backtrack = TRUE`). To
-#'   define the matrix size, it should be assumed that `x` is the *longest* series in `X`, and `y`
-#'   is the `centroid` if provided or `x` otherwise.
+#' @param gcm Optional matrix to use for the calculations. See details.
 #' @param mv.ver Multivariate version to use. See below.
 #'
 #' @details
@@ -36,6 +34,11 @@
 #' If a given series reference is provided in `centroid`, the algorithm should always converge to
 #' the same result provided the elements of `X` keep the same values, although their order may
 #' change.
+#'
+#' To define the gcm matrix's size, it should be assumed that `x` is the *longest* series in `X`,
+#' and `y` is the `centroid` if provided or `x` otherwise. It should have `NROW(x)+1` rows and
+#' `NROW(y)+1` columns. Used internally for memory optimization. If provided, it **will** be
+#' modified *in place* by `C` code.
 #'
 #' @template window
 #'
@@ -129,7 +132,9 @@ DBA <- function(X, centroid = NULL, ...,
                  normalize = FALSE)
 
     # C++ code
-    new_cent <- .Call(C_dba, X, centroid, max.iter, delta, trace, mv, mv.ver, dots, PACKAGE = "dtwclust")
+    new_cent <- .Call(C_dba,
+                      X, centroid, max.iter, delta, trace, mv, mv.ver, dots,
+                      PACKAGE = "dtwclust")
     if (mv) dimnames(new_cent) <- dimnames(centroid)
     new_cent
 }

@@ -41,9 +41,7 @@ and give more informative errors messages. Also used internally to avoid repeati
 
 \item{trace}{If \code{TRUE}, the current iteration is printed to output.}
 
-\item{gcm}{Optional matrix to pass to \code{\link[=dtw_basic]{dtw_basic()}} (for the case when \code{backtrack = TRUE}). To
-define the matrix size, it should be assumed that \code{x} is the \emph{longest} series in \code{X}, and \code{y}
-is the \code{centroid} if provided or \code{x} otherwise.}
+\item{gcm}{Optional matrix to use for the calculations. See details.}
 
 \item{mv.ver}{Multivariate version to use. See below.}
 }
@@ -60,6 +58,11 @@ space. Refer to the cited article for specific details on the algorithm.
 If a given series reference is provided in \code{centroid}, the algorithm should always converge to
 the same result provided the elements of \code{X} keep the same values, although their order may
 change.
+
+To define the gcm matrix's size, it should be assumed that \code{x} is the \emph{longest} series in \code{X},
+and \code{y} is the \code{centroid} if provided or \code{x} otherwise. It should have \code{NROW(x)+1} rows and
+\code{NROW(y)+1} columns. Used internally for memory optimization. If provided, it \strong{will} be
+modified \emph{in place} by \code{C} code.
 
 The windowing constraint uses a centered window. The calculations expect a value in
 \code{window.size} that represents the distance between the point considered and one of the edges
