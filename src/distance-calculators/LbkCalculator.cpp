@@ -50,7 +50,7 @@ LbkCalculator* LbkCalculator::clone() const
 // -------------------------------------------------------------------------------------------------
 double LbkCalculator::calculate(const int i, const int j)
 {
-    //  is ignored here, only the envelopes matter
+    // y is ignored here, only the envelopes matter
     return this->calculate(x_uv_[i], lower_envelopes_[j], upper_envelopes_[j]);
 }
 
@@ -61,6 +61,7 @@ double LbkCalculator::calculate(const RcppParallel::RVector<double>& x,
                                 const RcppParallel::RVector<double>& lower_envelope,
                                 const RcppParallel::RVector<double>& upper_envelope)
 {
+    if (!H_) return -1;
     return lbk_core(&x[0], len_, p_, &lower_envelope[0], &upper_envelope[0], H_);
 }
 
