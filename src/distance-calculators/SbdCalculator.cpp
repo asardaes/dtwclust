@@ -1,7 +1,5 @@
 #include "concrete-calculators.h"
 
-#include <utility> // std::move
-
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
@@ -19,8 +17,8 @@ SbdCalculator::SbdCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y
     y_uv_ = TSTSList<Rcpp::NumericVector>(y);
     Rcpp::List fftx((SEXP)dist_args["fftx"]);
     Rcpp::List ffty((SEXP)dist_args["ffty"]);
-    fftx_ = std::move(TSTSList<Rcpp::ComplexVector>(fftx));
-    ffty_ = std::move(TSTSList<Rcpp::ComplexVector>(ffty));
+    fftx_ = TSTSList<Rcpp::ComplexVector>(fftx);
+    ffty_ = TSTSList<Rcpp::ComplexVector>(ffty);
 }
 
 // -------------------------------------------------------------------------------------------------

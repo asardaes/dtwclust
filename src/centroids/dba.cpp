@@ -32,12 +32,12 @@ public:
         step_ = Rcpp::as<double>(dist_args["step.pattern"]);
         normalize_ = Rcpp::as<bool>(dist_args["normalize"]);
         if (is_multivariate_) {
-            x_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(x));
-            y_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(y));
+            x_mv_ = TSTSList<Rcpp::NumericMatrix>(x);
+            y_mv_ = TSTSList<Rcpp::NumericMatrix>(y);
         }
         else {
-            x_uv_ = std::move(TSTSList<Rcpp::NumericVector>(x));
-            y_uv_ = std::move(TSTSList<Rcpp::NumericVector>(y));
+            x_uv_ = TSTSList<Rcpp::NumericVector>(x);
+            y_uv_ = TSTSList<Rcpp::NumericVector>(y);
         }
         // set value of max_len_*_
         max_len_x_ = this->maxLength(x, is_multivariate_);

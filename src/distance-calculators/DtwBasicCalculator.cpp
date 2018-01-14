@@ -1,7 +1,5 @@
 #include "concrete-calculators.h"
 
-#include <utility> // std::move
-
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
@@ -21,12 +19,12 @@ DtwBasicCalculator::DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, con
     normalize_ = Rcpp::as<bool>(dist_args["normalize"]);
     is_multivariate_ = Rcpp::as<bool>(dist_args["is.multivariate"]);
     if (is_multivariate_) {
-        x_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(x));
-        y_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(y));
+        x_mv_ = TSTSList<Rcpp::NumericMatrix>(x);
+        y_mv_ = TSTSList<Rcpp::NumericMatrix>(y);
     }
     else {
-        x_uv_ = std::move(TSTSList<Rcpp::NumericVector>(x));
-        y_uv_ = std::move(TSTSList<Rcpp::NumericVector>(y));
+        x_uv_ = TSTSList<Rcpp::NumericVector>(x);
+        y_uv_ = TSTSList<Rcpp::NumericVector>(y);
     }
     // set value of max_len_y_
     max_len_y_ = this->maxLength(y, is_multivariate_);
