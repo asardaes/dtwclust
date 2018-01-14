@@ -1,6 +1,7 @@
 #include "concrete-calculators.h"
 
 #include <algorithm> // std::max
+#include <utility> // std::move
 
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
@@ -19,12 +20,12 @@ GakCalculator::GakCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y
     , is_multivariate_(Rcpp::as<bool>(dist_args_["is.multivariate"]))
 {
     if (is_multivariate_) {
-        x_mv_ = TSTSList<Rcpp::NumericMatrix>(x_);
-        y_mv_ = TSTSList<Rcpp::NumericMatrix>(y_);
+        x_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(x_));
+        y_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(y_));
     }
     else {
-        x_uv_ = TSTSList<Rcpp::NumericVector>(x_);
-        y_uv_ = TSTSList<Rcpp::NumericVector>(y_);
+        x_uv_ = std::move(TSTSList<Rcpp::NumericVector>(x_));
+        y_uv_ = std::move(TSTSList<Rcpp::NumericVector>(y_));
     }
     // set values of max_len_*_
     max_len_x_ = this->maxLength(x_, is_multivariate_);

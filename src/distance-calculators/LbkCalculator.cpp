@@ -1,5 +1,7 @@
 #include "concrete-calculators.h"
 
+#include <utility> // std::move
+
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
@@ -15,11 +17,11 @@ LbkCalculator::LbkCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y
     , p_(Rcpp::as<int>((SEXP)dist_args_["p"]))
     , len_(Rcpp::as<int>((SEXP)dist_args_["len"]))
 {
-    x_uv_ = TSTSList<Rcpp::NumericVector>(x_);
+    x_uv_ = std::move(TSTSList<Rcpp::NumericVector>(x_));
     Rcpp::List LE((SEXP)dist_args_["lower.env"]);
     Rcpp::List UE((SEXP)dist_args_["upper.env"]);
-    lower_envelopes_ = TSTSList<Rcpp::NumericVector>(LE);
-    upper_envelopes_ = TSTSList<Rcpp::NumericVector>(UE);
+    lower_envelopes_ = std::move(TSTSList<Rcpp::NumericVector>(LE));
+    upper_envelopes_ = std::move(TSTSList<Rcpp::NumericVector>(UE));
     H_ = nullptr;
 }
 
