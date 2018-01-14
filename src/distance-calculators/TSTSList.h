@@ -54,11 +54,7 @@ public:
     TSTSList(const Rcpp::List& series)
     {
         for (const SEXP& x : series) {
-            Rcpp::ComplexVector x_rcpp(x);
-            // see http://rcpp-devel.r-forge.r-project.narkive.com/o5ubHVos/multiplication-of-complexvector
-            arma::cx_vec x_arma(reinterpret_cast<std::complex<double>*>(x_rcpp.begin()),
-                                x_rcpp.length(), false, true);
-            series_.push_back(x_arma);
+            series_.push_back(arma::cx_vec(Rcpp::ComplexVector(x)));
         }
     }
     // operator[]
