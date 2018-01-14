@@ -81,7 +81,10 @@ double DtwBasicCalculator::calculate(
     int nx = x.length();
     int ny = y.length();
     int num_var = 1;
-    return dtw_basic_par(&x[0], &y[0], nx, ny, num_var, window_, norm_, step_, normalize_, gcm_);
+    return dtw_basic_par(&x[0], &y[0],
+                         nx, ny, num_var,
+                         window_, norm_, step_, normalize_,
+                         gcm_, false, nullptr, nullptr, nullptr);
 }
 
 // multivariate
@@ -92,7 +95,10 @@ double DtwBasicCalculator::calculate(
     int nx = x.nrow();
     int ny = y.nrow();
     int num_var = x.ncol();
-    return dtw_basic_par(&x[0], &y[0], nx, ny, num_var, window_, norm_, step_, normalize_, gcm_);
+    return dtw_basic_par(&x[0], &y[0],
+                         nx, ny, num_var,
+                         window_, norm_, step_, normalize_,
+                         gcm_, false, nullptr, nullptr, nullptr);
 }
 
 } // namespace dtwclust

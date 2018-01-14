@@ -25,7 +25,8 @@ SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var, SEXP sigma, SEXP win
 double dtw_basic_par(double const * const x, double const * const y,
                      int const nx, int const ny, int const num_var,
                      int const window, double const norm, double const step, int const normalize,
-                     double * const distmat);
+                     double * const distmat, int const backtrack,
+                     int * const index1, int * const index2, int * const path);
 
 double logGAK_par(double const * const x, double const * const y,
                   int const nx, int const ny, int const num_var,
