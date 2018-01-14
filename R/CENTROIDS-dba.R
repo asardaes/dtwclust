@@ -23,7 +23,6 @@
 #'   convergence is assumed.
 #' @template error-check
 #' @param trace If `TRUE`, the current iteration is printed to output.
-#' @param gcm Optional matrix to use for the calculations. See details.
 #' @param mv.ver Multivariate version to use. See below.
 #'
 #' @details
@@ -35,11 +34,7 @@
 #' the same result provided the elements of `X` keep the same values, although their order may
 #' change.
 #'
-#' To define the gcm matrix's size, it should be assumed that `x` is the *longest* series in `X`,
-#' and `y` is the `centroid` if provided or `x` otherwise. It should have `NROW(x)+1` rows and
-#' `NROW(y)+1` columns. Used internally for memory optimization. If provided, it **will** be
-#' modified *in place* by `C` code.
-#'
+#' @template rcpp-parallel
 #' @template window
 #'
 #' @return The average time series.
@@ -74,14 +69,12 @@ DBA <- function(X, centroid = NULL, ...,
                 window.size = NULL, norm = "L1",
                 max.iter = 20L, delta = 1e-3,
                 error.check = TRUE, trace = FALSE,
-                gcm = NULL, mv.ver = "by-variable")
+                mv.ver = "by-variable")
 {
     X <- tslist(X)
     mv.ver <- match.arg(mv.ver, c("by-variable", "by-series"))
     mv.ver <- switch(mv.ver, "by-variable" = 1L, "by-series" = 2L)
-
     if (is.null(centroid)) centroid <- X[[sample(length(X), 1L)]] # Random choice
-
     if (error.check) {
         check_consistency(X, "vltslist")
         check_consistency(centroid, "ts")
@@ -99,7 +92,6 @@ DBA <- function(X, centroid = NULL, ...,
 
     dots <- list(...)
     step.pattern <- dots$step.pattern
-
     if (is.null(step.pattern) || identical(step.pattern, dtw::symmetric2))
         step.pattern <- 2
     else if (identical(step.pattern, dtw::symmetric1))
@@ -114,26 +106,20 @@ DBA <- function(X, centroid = NULL, ...,
     L <- max(sapply(X, NROW)) + 1L # maximum length of considered series + 1L
     mv <- is_multivariate(c(X, list(centroid)))
     nr <- NROW(centroid) + 1L
+    gcm <- matrix(0, L, nr)
 
-    # pre-allocate cost matrices
-    if (is.null(gcm))
-        gcm <- matrix(0, L, nr)
-    else if (!is.matrix(gcm) || nrow(gcm) < L || ncol(gcm) < nr)
-        stop("DBA: Dimension inconsistency in 'gcm'")
-    else if (storage.mode(gcm) != "double")
-        stop("DBA: If provided, 'gcm' must have 'double' storage mode.")
-
-    # All parameters for dtw_basic()
-    dots <- list(window.size = window.size,
-                 norm = norm,
-                 gcm = gcm,
-                 step.pattern = step.pattern,
-                 backtrack = TRUE,
-                 normalize = FALSE)
-
-    # C++ code
+    # all parameters for dtw_basic()
+    dots <- list(
+        window.size = window.size,
+        norm = norm,
+        gcm = gcm,
+        step.pattern = step.pattern,
+        backtrack = TRUE,
+        normalize = FALSE
+    )
+    num_threads <- get_nthreads()
     new_cent <- .Call(C_dba,
-                      X, centroid, max.iter, delta, trace, mv, mv.ver, dots,
+                      X, centroid, max.iter, delta, trace, mv, mv.ver, dots, num_threads,
                       PACKAGE = "dtwclust")
     if (mv) dimnames(new_cent) <- dimnames(centroid)
     new_cent

@@ -7,14 +7,14 @@
 
 namespace dtwclust {
 
-SEXP dba(SEXP X, SEXP centroid,
-         SEXP max_iter, SEXP delta, SEXP trace,
-         SEXP multivariate, SEXP mv_ver, SEXP DOTS)
+SEXP dba(SEXP X, SEXP CENT,
+         SEXP MAX_ITER, SEXP DELTA, SEXP TRACE,
+         SEXP MV, SEXP MV_VER, SEXP DOTS, SEXP NUM_THREADS)
 {
-    static SEXP(*fun)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP) = NULL;
+    static SEXP(*fun)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP) = NULL;
     if(fun == NULL)
-        fun = (SEXP(*)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP)) R_GetCCallable("dtwclust", "dba");
-    return fun(X, centroid, max_iter, delta, trace, multivariate, mv_ver, DOTS);
+        fun = (SEXP(*)(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP)) R_GetCCallable("dtwclust", "dba");
+    return fun(X, CENT, MAX_ITER, DELTA, TRACE, MV, MV_VER, DOTS, NUM_THREADS);
 }
 
 SEXP dtw_lb(SEXP X, SEXP Y, SEXP D, SEXP MARGIN, SEXP DOTS, SEXP NUM_THREADS)

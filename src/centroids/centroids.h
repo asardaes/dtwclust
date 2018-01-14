@@ -5,9 +5,9 @@
 
 namespace dtwclust {
 
-RcppExport SEXP dba(SEXP X, SEXP centroid,
-                    SEXP max_iter, SEXP delta, SEXP trace,
-                    SEXP multivariate, SEXP mv_ver, SEXP DOTS);
+RcppExport SEXP dba(SEXP X, SEXP CENT,
+                    SEXP MAX_ITER, SEXP DELTA, SEXP TRACE,
+                    SEXP MV, SEXP MV_VER, SEXP DOTS, SEXP NUM_THREADS);
 
 RcppExport SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID, SEXP GAMMA, SEXP WEIGHTS, SEXP MV,
                           SEXP COSTMAT, SEXP DISTMAT, SEXP EM);
