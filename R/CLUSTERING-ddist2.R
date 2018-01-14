@@ -23,8 +23,8 @@ split_parallel_symmetric <- function(n, num_workers, adjust = 0L) {
         mat <- list(ul_trimat)
 
         ids <- c(trimat, mat)
-
-    } else {
+    }
+    else {
         mid_point <- as.integer(n / 2)
 
         # recursion
@@ -82,8 +82,8 @@ ddist2 <- function(distance, control) {
             i <- 1L:length(x)
             j <- if (is.null(centroids)) i else control$distmat$id_cent
             d <- control$distmat[i, j, drop = FALSE]
-
-        } else {
+        }
+        else {
             # distmat not available, calculate it
             # Extra distance parameters in case of parallel computation
             # They can be for the function or for proxy::dist
@@ -107,14 +107,14 @@ ddist2 <- function(distance, control) {
             if (is.function(dist_entry$FUN)) {
                 if (!has_dots(dist_entry$FUN))
                     valid_args <- union(names(formals(proxy::dist)), names(formals(dist_entry$FUN)))
-
-            } else {
+            }
+            else {
                 valid_args <- names(formals(proxy::dist))
             }
             dots <- dots[intersect(names(dots), valid_args)]
 
             # variables/functions from the parent environments that should be exported
-            export <- c("distance", "dist_entry", "check_consistency", "enlist", "subset_dots")
+            export <- c("distance", "dist_entry", "check_consistency", "enlist")
 
             if (tolower(distance) %in% distances_included) {
                 # DTWCLUST DISTANCES, LET THEM HANDLE OPTIMIZATIONS
@@ -124,8 +124,8 @@ ddist2 <- function(distance, control) {
                                     method = distance,
                                     dots = dots),
                              TRUE)
-
-            } else if (is.null(centroids) && symmetric && !isTRUE(dots$pairwise)) {
+            }
+            else if (is.null(centroids) && symmetric && !isTRUE(dots$pairwise)) {
                 if (dist_entry$loop && foreach::getDoParWorkers() > 1L) {
                     # WHOLE SYMMETRIC DISTMAT IN PARALLEL
                     # Only half of it is computed
@@ -173,7 +173,8 @@ ddist2 <- function(distance, control) {
                                            dots = dots),
                                     TRUE
                                 ))
-                        } else {
+                        }
+                        else {
                             rows <- attr(ids, "rows")
                             mat_chunk <- base::as.matrix(do.call(
                                 proxy::dist,
@@ -195,8 +196,8 @@ ddist2 <- function(distance, control) {
                     d <- d[,]
                     attr(d, "class") <- "crossdist"
                     attr(d, "dimnames") <- list(names(x), names(x))
-
-                } else {
+                }
+                else {
                     # WHOLE SYMMETRIC DISTMAT WITH CUSTOM LOOP OR SEQUENTIAL proxy LOOP
                     d <- base::as.matrix(do.call(proxy::dist,
                                                  enlist(x = x,
@@ -206,8 +207,8 @@ ddist2 <- function(distance, control) {
                                                  TRUE))
                     class(d) <- "crossdist"
                 }
-
-            } else {
+            }
+            else {
                 # WHOLE DISTMAT OR SUBDISTMAT OR NOT SYMMETRIC
                 if (is.null(centroids)) centroids <- x
                 dim_names <- list(names(x), names(centroids))
@@ -217,8 +218,8 @@ ddist2 <- function(distance, control) {
                     centroids <- split_parallel(centroids)
                     validate_pairwise(x, centroids)
                     combine <- c
-
-                } else {
+                }
+                else {
                     centroids <- lapply(1L:foreach::getDoParWorkers(), function(dummy) { centroids })
                     if (length(centroids) > length(x)) centroids <- centroids[1L:length(x)]
                     combine <- rbind
@@ -245,8 +246,8 @@ ddist2 <- function(distance, control) {
 
                 if (isTRUE(dots$pairwise)) {
                     attr(d, "class") <- "pairdist"
-
-                } else {
+                }
+                else {
                     attr(d, "class") <- "crossdist"
                     attr(d, "dimnames") <- dim_names
                 }
@@ -255,10 +256,9 @@ ddist2 <- function(distance, control) {
 
         attr(d, "method") <- toupper(distance)
         attr(d, "call") <- NULL
-
         # return
         d
     }
-
+    # return enclosed function
     distfun
 }
