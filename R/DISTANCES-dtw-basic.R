@@ -141,6 +141,7 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
     backtrack <- FALSE
 
     # calculate distance matrix
+    distance <- "DTW_BASIC" # read in C++, can't be temporary!
     distargs <- list(
         window.size = window.size,
         norm = norm,
@@ -151,7 +152,7 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
     )
     num_threads <- get_nthreads()
     .Call(C_distmat_loop,
-          D, x, y, "DTW_BASIC", distargs, fill_type, mat_type, num_threads,
+          D, x, y, distance, distargs, fill_type, mat_type, num_threads,
           PACKAGE = "dtwclust")
 
     # adjust D's attributes

@@ -66,13 +66,14 @@ sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ..., error.check = TRUE, pairw
     mv <- is_multivariate(c(x, y))
 
     # calculate distance matrix
+    distance <- "SDTW" # read in C++, can't be temporary!
     distargs <- list(
         gamma = gamma,
         is.multivariate = mv
     )
     num_threads <- get_nthreads()
     .Call(C_distmat_loop,
-          D, x, y, "SDTW", distargs, fill_type, mat_type, num_threads,
+          D, x, y, distance, distargs, fill_type, mat_type, num_threads,
           PACKAGE = "dtwclust")
 
     if (pairwise) {

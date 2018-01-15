@@ -114,6 +114,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     upper.env <- lapply(envelopes, "[[", "upper")
 
     # calculate distance matrix
+    distance <- "LBK" # read in C++, can't be temporary!
     distargs <- list(
         p = switch(norm, "L1" = 1L, "L2" = 2L),
         len = length(x[[1L]]),
@@ -122,7 +123,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     )
     num_threads <- get_nthreads()
     .Call(C_distmat_loop,
-          D, x, y, "LBK", distargs, fill_type, mat_type, num_threads,
+          D, x, y, distance, distargs, fill_type, mat_type, num_threads,
           PACKAGE = "dtwclust")
 
     # adjust D's attributes

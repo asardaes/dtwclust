@@ -168,6 +168,7 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     eval(prepare_expr) # UTILS-expressions-proxy.R
 
     # calculate distance matrix
+    distance <- "SBD" # read in C++, can't be temporary!
     distargs <- list(
         fftlen = fftlen,
         fftx = fftx,
@@ -175,7 +176,7 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     )
     num_threads <- get_nthreads()
     .Call(C_distmat_loop,
-          D, x, y, "SBD", distargs, fill_type, mat_type, num_threads,
+          D, x, y, distance, distargs, fill_type, mat_type, num_threads,
           PACKAGE = "dtwclust")
 
     # adjust D's attributes

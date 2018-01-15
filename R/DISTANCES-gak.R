@@ -207,6 +207,7 @@ gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         window.size <- check_consistency(window.size, "window")
 
     # calculate distance matrix
+    distance <- "GAK" # read in C++, can't be temporary!
     distargs <- list(
         sigma = sigma,
         window.size = window.size,
@@ -214,7 +215,7 @@ gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     )
     num_threads <- get_nthreads()
     .Call(C_distmat_loop,
-          D, x, y, "GAK", distargs, fill_type, mat_type, num_threads,
+          D, x, y, distance, distargs, fill_type, mat_type, num_threads,
           PACKAGE = "dtwclust")
 
     # adjust D's attributes
