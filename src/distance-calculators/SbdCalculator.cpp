@@ -11,14 +11,14 @@ namespace dtwclust {
 /* constructor */
 // -------------------------------------------------------------------------------------------------
 SbdCalculator::SbdCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
-    : DistanceCalculator(DIST_ARGS, X, Y)
-    , fftlen_(Rcpp::as<int>((SEXP)dist_args_["fftlen"]))
 {
     // note cc_seq_truncated_ is not set here, it is allocated for each clone
-    x_uv_ = TSTSList<Rcpp::NumericVector>(x_);
-    y_uv_ = TSTSList<Rcpp::NumericVector>(y_);
-    Rcpp::List fftx((SEXP)dist_args_["fftx"]);
-    Rcpp::List ffty((SEXP)dist_args_["ffty"]);
+    Rcpp::List dist_args(DIST_ARGS), x(X), y(Y);
+    fftlen_ = Rcpp::as<int>(dist_args["fftlen"]);
+    x_uv_ = TSTSList<Rcpp::NumericVector>(x);
+    y_uv_ = TSTSList<Rcpp::NumericVector>(y);
+    Rcpp::List fftx((SEXP)dist_args["fftx"]);
+    Rcpp::List ffty((SEXP)dist_args["ffty"]);
     fftx_ = std::move(TSTSList<Rcpp::ComplexVector>(fftx));
     ffty_ = std::move(TSTSList<Rcpp::ComplexVector>(ffty));
 }
@@ -31,6 +31,20 @@ SbdCalculator* SbdCalculator::clone() const
     SbdCalculator* ptr = new SbdCalculator(*this);
     ptr->cc_seq_truncated_ = arma::vec(fftlen_);
     return ptr;
+}
+
+// -------------------------------------------------------------------------------------------------
+/* limits */
+// -------------------------------------------------------------------------------------------------
+
+int SbdCalculator::xLimit() const
+{
+    return x_uv_.length();
+}
+
+int SbdCalculator::yLimit() const
+{
+    return y_uv_.length();
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -23,16 +23,10 @@ public:
     // a clone method to make life easier when copying objects in each thread
     virtual DistanceCalculator* clone() const = 0;
     // helpers for distmat filler
-    int xLimit() { return x_.length(); }
-    int yLimit() { return y_.length(); }
+    virtual int xLimit() const = 0;
+    virtual int yLimit() const = 0;
 
 protected:
-    DistanceCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
-        : dist_args_(DIST_ARGS)
-        , x_(X)
-        , y_(Y)
-    { }
-
     int maxLength(const Rcpp::List& list, const bool is_multivariate) const {
         int max_len = 0;
         for (const SEXP& series : list) {
@@ -49,8 +43,6 @@ protected:
         }
         return max_len;
     }
-
-    Rcpp::List dist_args_, x_, y_;
 };
 
 // -------------------------------------------------------------------------------------------------

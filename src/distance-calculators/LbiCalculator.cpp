@@ -13,15 +13,15 @@ namespace dtwclust {
 /* constructor */
 // -------------------------------------------------------------------------------------------------
 LbiCalculator::LbiCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
-    : DistanceCalculator(DIST_ARGS, X, Y)
-    , p_(Rcpp::as<int>((SEXP)dist_args_["p"]))
-    , len_(Rcpp::as<int>((SEXP)dist_args_["len"]))
-    , window_(Rcpp::as<unsigned int>((SEXP)dist_args_["window.size"]))
 {
-    x_uv_ = std::move(TSTSList<Rcpp::NumericVector>(x_));
-    y_uv_ = std::move(TSTSList<Rcpp::NumericVector>(y_));
-    Rcpp::List LE((SEXP)dist_args_["lower.env"]);
-    Rcpp::List UE((SEXP)dist_args_["upper.env"]);
+    Rcpp::List dist_args(DIST_ARGS), x(X), y(Y);
+    p_ = Rcpp::as<int>(dist_args["p"]);
+    len_ = Rcpp::as<int>(dist_args["len"]);
+    window_ = Rcpp::as<unsigned int>(dist_args["window.size"]);
+    x_uv_ = std::move(TSTSList<Rcpp::NumericVector>(x));
+    y_uv_ = std::move(TSTSList<Rcpp::NumericVector>(y));
+    Rcpp::List LE((SEXP)dist_args["lower.env"]);
+    Rcpp::List UE((SEXP)dist_args["upper.env"]);
     lower_envelopes_ = std::move(TSTSList<Rcpp::NumericVector>(LE));
     upper_envelopes_ = std::move(TSTSList<Rcpp::NumericVector>(UE));
     H_ = nullptr;
@@ -56,6 +56,20 @@ LbiCalculator* LbiCalculator::clone() const
     ptr->U2_ = new double[len_];
     ptr->LB_ = new double[len_];
     return ptr;
+}
+
+// -------------------------------------------------------------------------------------------------
+/* limits */
+// -------------------------------------------------------------------------------------------------
+
+int LbiCalculator::xLimit() const
+{
+    return x_uv_.length();
+}
+
+int LbiCalculator::yLimit() const
+{
+    return y_uv_.length();
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -14,22 +14,22 @@ namespace dtwclust {
 /* constructor */
 // -------------------------------------------------------------------------------------------------
 GakCalculator::GakCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
-    : DistanceCalculator(DIST_ARGS, X, Y)
-    , sigma_(Rcpp::as<double>(dist_args_["sigma"]))
-    , window_(Rcpp::as<int>(dist_args_["window.size"]))
-    , is_multivariate_(Rcpp::as<bool>(dist_args_["is.multivariate"]))
 {
+    Rcpp::List dist_args(DIST_ARGS), x(X), y(Y);
+    sigma_ = Rcpp::as<double>(dist_args["sigma"]);
+    window_ = Rcpp::as<int>(dist_args["window.size"]);
+    is_multivariate_ = Rcpp::as<bool>(dist_args["is.multivariate"]);
     if (is_multivariate_) {
-        x_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(x_));
-        y_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(y_));
+        x_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(x));
+        y_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(y));
     }
     else {
-        x_uv_ = std::move(TSTSList<Rcpp::NumericVector>(x_));
-        y_uv_ = std::move(TSTSList<Rcpp::NumericVector>(y_));
+        x_uv_ = std::move(TSTSList<Rcpp::NumericVector>(x));
+        y_uv_ = std::move(TSTSList<Rcpp::NumericVector>(y));
     }
     // set values of max_len_*_
-    max_len_x_ = this->maxLength(x_, is_multivariate_);
-    max_len_y_ = this->maxLength(y_, is_multivariate_);
+    max_len_x_ = this->maxLength(x, is_multivariate_);
+    max_len_y_ = this->maxLength(y, is_multivariate_);
     // make sure pointer is null
     logs_ = nullptr;
 }
@@ -67,6 +67,20 @@ GakCalculator* GakCalculator::clone() const
     GakCalculator* ptr = new GakCalculator(*this);
     ptr->logs_ = new double[(std::max(max_len_x_, max_len_y_) + 1) * 3];
     return ptr;
+}
+
+// -------------------------------------------------------------------------------------------------
+/* limits */
+// -------------------------------------------------------------------------------------------------
+
+int GakCalculator::xLimit() const
+{
+    return is_multivariate_ ? x_mv_.length() : x_uv_.length();
+}
+
+int GakCalculator::yLimit() const
+{
+    return is_multivariate_ ? y_mv_.length() : y_uv_.length();
 }
 
 // -------------------------------------------------------------------------------------------------

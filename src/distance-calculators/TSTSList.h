@@ -38,6 +38,8 @@ public:
     // operator[]
     TSTSType& operator[](const int i) { return series_[i]; }
     const TSTSType& operator[](const int i) const { return series_[i]; }
+    // length
+    int length() const { return series_.size(); }
 
 private:
     std::vector<TSTSType> series_;
@@ -64,6 +66,8 @@ public:
     // operator[]
     TSTSType& operator[](const int i) { return series_[i]; }
     const TSTSType& operator[](const int i) const { return series_[i]; }
+    // length
+    int length() const { return series_.size(); }
 
 private:
     std::vector<TSTSType> series_;

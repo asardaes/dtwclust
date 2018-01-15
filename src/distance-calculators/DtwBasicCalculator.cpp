@@ -13,23 +13,23 @@ namespace dtwclust {
 /* constructor */
 // -------------------------------------------------------------------------------------------------
 DtwBasicCalculator::DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
-    : DistanceCalculator(DIST_ARGS, X, Y)
-    , window_(Rcpp::as<int>(dist_args_["window.size"]))
-    , norm_(Rcpp::as<double>(dist_args_["norm"]))
-    , step_(Rcpp::as<double>(dist_args_["step.pattern"]))
-    , normalize_(Rcpp::as<bool>(dist_args_["normalize"]))
-    , is_multivariate_(Rcpp::as<bool>(dist_args_["is.multivariate"]))
 {
+    Rcpp::List dist_args(DIST_ARGS), x(X), y(Y);
+    window_ = Rcpp::as<int>(dist_args["window.size"]);
+    norm_ = Rcpp::as<double>(dist_args["norm"]);
+    step_ = Rcpp::as<double>(dist_args["step.pattern"]);
+    normalize_ = Rcpp::as<bool>(dist_args["normalize"]);
+    is_multivariate_ = Rcpp::as<bool>(dist_args["is.multivariate"]);
     if (is_multivariate_) {
-        x_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(x_));
-        y_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(y_));
+        x_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(x));
+        y_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(y));
     }
     else {
-        x_uv_ = std::move(TSTSList<Rcpp::NumericVector>(x_));
-        y_uv_ = std::move(TSTSList<Rcpp::NumericVector>(y_));
+        x_uv_ = std::move(TSTSList<Rcpp::NumericVector>(x));
+        y_uv_ = std::move(TSTSList<Rcpp::NumericVector>(y));
     }
     // set value of max_len_y_
-    max_len_y_ = this->maxLength(y_, is_multivariate_);
+    max_len_y_ = this->maxLength(y, is_multivariate_);
     // make sure pointer is null
     gcm_ = nullptr;
 }
@@ -67,6 +67,20 @@ DtwBasicCalculator* DtwBasicCalculator::clone() const
     DtwBasicCalculator* ptr = new DtwBasicCalculator(*this);
     ptr->gcm_ = new double[2 * (max_len_y_ + 1)];
     return ptr;
+}
+
+// -------------------------------------------------------------------------------------------------
+/* limits */
+// -------------------------------------------------------------------------------------------------
+
+int DtwBasicCalculator::xLimit() const
+{
+    return is_multivariate_ ? x_mv_.length() : x_uv_.length();
+}
+
+int DtwBasicCalculator::yLimit() const
+{
+    return is_multivariate_ ? y_mv_.length() : y_uv_.length();
 }
 
 // -------------------------------------------------------------------------------------------------

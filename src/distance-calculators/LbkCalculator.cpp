@@ -13,13 +13,13 @@ namespace dtwclust {
 /* constructor */
 // -------------------------------------------------------------------------------------------------
 LbkCalculator::LbkCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
-    : DistanceCalculator(DIST_ARGS, X, Y)
-    , p_(Rcpp::as<int>((SEXP)dist_args_["p"]))
-    , len_(Rcpp::as<int>((SEXP)dist_args_["len"]))
 {
-    x_uv_ = std::move(TSTSList<Rcpp::NumericVector>(x_));
-    Rcpp::List LE((SEXP)dist_args_["lower.env"]);
-    Rcpp::List UE((SEXP)dist_args_["upper.env"]);
+    Rcpp::List dist_args(DIST_ARGS), x(X);
+    p_ = Rcpp::as<int>(dist_args["p"]);
+    len_ = Rcpp::as<int>(dist_args["len"]);
+    x_uv_ = std::move(TSTSList<Rcpp::NumericVector>(x));
+    Rcpp::List LE((SEXP)dist_args["lower.env"]);
+    Rcpp::List UE((SEXP)dist_args["upper.env"]);
     lower_envelopes_ = std::move(TSTSList<Rcpp::NumericVector>(LE));
     upper_envelopes_ = std::move(TSTSList<Rcpp::NumericVector>(UE));
     H_ = nullptr;
@@ -45,6 +45,20 @@ LbkCalculator* LbkCalculator::clone() const
     LbkCalculator* ptr = new LbkCalculator(*this);
     ptr->H_ = new double[len_];
     return ptr;
+}
+
+// -------------------------------------------------------------------------------------------------
+/* limits */
+// -------------------------------------------------------------------------------------------------
+
+int LbkCalculator::xLimit() const
+{
+    return x_uv_.length();
+}
+
+int LbkCalculator::yLimit() const
+{
+    return lower_envelopes_.length();
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -11,7 +11,7 @@
 #include "../distance-calculators/TSTSList.h"
 #include "../distances/distances.h" // dtw_basic_par
 #include "../utils/utils++.h" // get_grain
-#include "../utils/utils.h" // Rflush
+#include "../utils/utils.h" // Rflush, d2s
 
 namespace dtwclust {
 
@@ -24,24 +24,24 @@ class DtwBacktrackCalculator : public DistanceCalculator
 public:
     // constructor
     DtwBacktrackCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y, const bool mv)
-        : DistanceCalculator(DIST_ARGS, X, Y)
-        , window_(Rcpp::as<int>(dist_args_["window.size"]))
-        , norm_(Rcpp::as<double>(dist_args_["norm"]))
-        , step_(Rcpp::as<double>(dist_args_["step.pattern"]))
-        , normalize_(Rcpp::as<bool>(dist_args_["normalize"]))
-        , is_multivariate_(mv)
+        : is_multivariate_(mv)
     {
+        Rcpp::List dist_args(DIST_ARGS), x(X), y(Y);
+        window_ = Rcpp::as<int>(dist_args["window.size"]);
+        norm_ = Rcpp::as<double>(dist_args["norm"]);
+        step_ = Rcpp::as<double>(dist_args["step.pattern"]);
+        normalize_ = Rcpp::as<bool>(dist_args["normalize"]);
         if (is_multivariate_) {
-            x_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(x_));
-            y_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(y_));
+            x_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(x));
+            y_mv_ = std::move(TSTSList<Rcpp::NumericMatrix>(y));
         }
         else {
-            x_uv_ = std::move(TSTSList<Rcpp::NumericVector>(x_));
-            y_uv_ = std::move(TSTSList<Rcpp::NumericVector>(y_));
+            x_uv_ = std::move(TSTSList<Rcpp::NumericVector>(x));
+            y_uv_ = std::move(TSTSList<Rcpp::NumericVector>(y));
         }
         // set value of max_len_*_
-        max_len_x_ = this->maxLength(x_, is_multivariate_);
-        max_len_y_ = this->maxLength(y_, is_multivariate_);
+        max_len_x_ = this->maxLength(x, is_multivariate_);
+        max_len_y_ = this->maxLength(y, is_multivariate_);
         // make sure pointers are null
         gcm_ = nullptr;
         index1_ = nullptr;
@@ -70,6 +70,14 @@ public:
         ptr->index1_ = new int[max_len_x_ + max_len_y_];
         ptr->index2_ = new int[max_len_x_ + max_len_y_];
         return ptr;
+    }
+
+    // limits
+    int xLimit() const override {
+        return is_multivariate_ ? x_mv_.length() : x_uv_.length();
+    }
+    int yLimit() const override {
+        return is_multivariate_ ? y_mv_.length() : y_uv_.length();
     }
 
     // input series (univariate)
