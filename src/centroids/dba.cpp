@@ -2,6 +2,7 @@
 
 #include <algorithm> // std::fill
 #include <cmath> // std::abs
+#include <cstddef> // std::size_t
 #include <utility> // std::move
 
 #include <RcppArmadillo.h>
@@ -159,7 +160,7 @@ public:
         mutex_.unlock();
         // kahan sum step
         std::fill(kahan_c_, kahan_c_ + new_cent_.length(), 0);
-        for (int i = begin; i < end; i++) {
+        for (std::size_t i = begin; i < end; i++) {
             local_calculator->calculate(i,0);
             RcppParallel::RVector<double>& x = local_calculator->x_uv_[i];
             mutex_.lock();

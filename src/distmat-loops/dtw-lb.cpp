@@ -1,5 +1,6 @@
 #include "distmat-loops.h"
 
+#include <cstddef> // std::size_t
 #include <memory> // shared_ptr
 
 #include <RcppArmadillo.h>
