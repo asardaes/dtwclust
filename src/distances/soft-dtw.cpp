@@ -2,7 +2,6 @@
 
 #include <algorithm> // std::max
 #include <math.h> // exp, log, pow
-#include <utility> // std::move
 
 #include <RcppArmadillo.h>
 
@@ -77,7 +76,7 @@ RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT,
     bool is_multivariate = Rcpp::as<bool>(MV);
     double gamma = Rcpp::as<double>(GAMMA);
     bool save_norm = !Rf_isNull(DISTMAT);
-    if (save_norm) distmat = std::move(Rcpp::NumericMatrix(DISTMAT));
+    if (save_norm) distmat = Rcpp::NumericMatrix(DISTMAT);
     // initialize costmat values
     costmat(0,0) = 0;
     for (int i = 1; i < costmat.nrow(); i++) costmat(i,0) = R_PosInf;
