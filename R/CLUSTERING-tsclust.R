@@ -362,14 +362,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
         } # nocov end
     }
 
-    # pre-allocate matrix for DBA
-    if (grepl("^dba$", cent_char, ignore.case = TRUE) && is.null(args$cent$gcm)) {
-        dba_allocated <- TRUE
-        if (!exists("N", mode = "integer", inherits = FALSE)) N <- max(sapply(series, NROW))
-        args$cent$gcm <- matrix(0, N + 1L, N + 1L)
-
-    } else dba_allocated <- FALSE
-
     # pre-allocate matrix for sdtw_cent
     if (grepl("^sdtw_cent$", cent_char, ignore.case = TRUE) &&
         (is.null(args$cent$cm) || is.null(args$cent$dm) || is.null(args$cent$em)))
@@ -509,7 +501,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             }
 
             if (inherits(distmat, "Distmat")) distmat <- distmat$distmat
-            if (dba_allocated) args$cent$gcm <- NULL
             if (sdtwc_allocated) { args$cent$cm <- args$cent$dm <- args$cent$em <- NULL }
 
             # Create objects
@@ -642,7 +633,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # Prepare results
             # --------------------------------------------------------------------------------------
 
-            if (dba_allocated) args$cent$gcm <- NULL
             if (sdtwc_allocated) { args$cent$cm <- args$cent$dm <- args$cent$em <- NULL }
             if (trace) cat("Extracting centroids...\n\n")
 
@@ -774,7 +764,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                     centroids <- series[R$centroids]
                 }
 
-                if (dba_allocated) args$cent$gcm <- NULL
                 if (sdtwc_allocated) { args$cent$cm <- args$cent$dm <- args$cent$em <- NULL }
 
                 obj <- methods::new("PartitionalTSClusters",
