@@ -27,7 +27,7 @@ Warping envelopes
 -----------------
 
 The code in:
-- src/distances/envelope.cpp
+- src/utils/envelope.cpp
 
 was adapted from third-party code to which the following applies:
 
