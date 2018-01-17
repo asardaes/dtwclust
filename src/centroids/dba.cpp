@@ -109,9 +109,8 @@ private:
         if (!gcm_ || !index1_ || !index2_) return -1;
         int nx = x.length();
         int ny = y.length();
-        int num_var = 1;
         return dtw_basic_par(&x[0], &y[0],
-                             nx, ny, num_var,
+                             nx, ny, 1,
                              window_, norm_, step_, normalize_,
                              gcm_, true, index1_, index2_, &path_);
     }
@@ -397,8 +396,8 @@ void print_trace(const bool converged, const int iter)
     if (trace) {
         if (converged) {
             Rcpp::Rcout << " " << iter << " - Converged!" << std::endl;
-
-        } else {
+        }
+        else {
             Rcpp::Rcout << " " << iter << ",";
             if (iter % 10 == 0) {
                 Rcpp::Rcout << "\n\t\t";
