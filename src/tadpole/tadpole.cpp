@@ -234,7 +234,7 @@ public:
         mutex_.lock();
         DistanceCalculator* dist_calculator = dist_calculator_->clone();
         mutex_.unlock();
-        for (int i = begin; i < end; i++) {
+        for (std::size_t i = begin; i < end; i++) {
             int which_min_delta = -1;
             double min_delta = R_PosInf;
             for (int j = 0; j < i; j++) {

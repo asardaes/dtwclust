@@ -255,7 +255,7 @@ public:
             local_calculator->calculate(i,0);
             RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[i];
             mutex_.lock();
-            for (int j = 0; j < new_cent_.ncol(); j++) {
+            for (int j = 0; j < static_cast<int>(new_cent_.ncol()); j++) {
                 for (int ii = local_calculator->path_ - 1; ii >= 0; ii--) {
                     int i1 = local_calculator->index1_[ii] - 1;
                     int i2 = local_calculator->index2_[ii] - 1;
@@ -321,7 +321,7 @@ public:
         int nrows = new_cent_.nrow();
         for (std::size_t i = begin; i < end; i++) {
             RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[i];
-            for (int j = 0; j < new_cent_.ncol(); j++) {
+            for (int j = 0; j < static_cast<int>(new_cent_.ncol()); j++) {
                 local_calculator->calculate(i,0,j);
                 mutex_.lock();
                 for (int ii = local_calculator->path_ - 1; ii >= 0; ii--) {
