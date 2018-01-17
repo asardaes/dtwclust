@@ -7,8 +7,8 @@
 #include <RcppParallel.h>
 
 #include "../distance-calculators/distance-calculators.h"
-#include "../distance-calculators/TSTSList.h"
 #include "../distances/distances++.h" // sdtw
+#include "../utils/TSTSList.h"
 #include "../utils/utils++.h" // get_grain
 #include "../utils/utils.h" // d2s
 
