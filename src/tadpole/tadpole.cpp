@@ -237,8 +237,8 @@ public:
         for (std::size_t i = begin; i < end; i++) {
             int which_min_delta = -1;
             double min_delta = R_PosInf;
-            for (int j = 0; j < i; j++) {
-                int ii = id_cl_[i], jj = id_cl_[j];
+            for (std::size_t j = 0; j < i; j++) {
+                std::size_t ii = id_cl_[i], jj = id_cl_[j];
                 bool prune = LBM_(ii,jj) > delta_ub_[ii];
                 bool precomputed = flags_(ii,jj) == 0 || flags_(ii,jj) == 1;
                 if (precomputed) {
@@ -449,7 +449,7 @@ void cluster_assignment(const Rcpp::IntegerVector& k_vec,
         // id_cent only contains distinct elements, so stable sorting is not needed
         std::sort(id_cent.begin(), id_cent.begin() + k);
         for (int i = 0; i < k; i++) {
-            int ii = (int)(id_cent[i]);
+            int ii = static_cast<int>(id_cent[i]);
             cent[i] = ii + 1;
             cl[ii] = i + 1;
         }
