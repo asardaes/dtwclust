@@ -1,10 +1,16 @@
 #include "centroids.h"
 
+#include <algorithm> // std::fill
 #include <math.h> // exp
 
 #include <RcppArmadillo.h>
+#include <RcppParallel.h>
 
-#include "../distances/distances++.h" // soft_dtw
+#include "../distance-calculators/distance-calculators.h"
+#include "../distance-calculators/TSTSList.h"
+#include "../distances/distances++.h" // sdtw
+#include "../utils/utils++.h" // get_grain
+#include "../utils/utils.h" // d2s
 
 namespace dtwclust {
 
@@ -13,149 +19,305 @@ namespace dtwclust {
 // =================================================================================================
 
 void init_matrices(const int m, const int n,
-                   Rcpp::NumericMatrix& cm, Rcpp::NumericMatrix& dm, Rcpp::NumericMatrix& em)
+                   const int cm_nrows, const int dm_nrows, const int max_len_y,
+                   double * const cm, double * const dm, double * const em)
 {
     for (int i = 1; i <= m; i++) {
-        dm(i-1, n) = 0;
-        cm(i, n+1) = R_NegInf;
+        dm[d2s(i-1, n, dm_nrows)] = 0;
+        cm[d2s(i, n+1, cm_nrows)] = R_NegInf;
     }
     for (int j = 1; j <= n; j++) {
-        dm(m, j-1) = 0;
-        cm(m+1, j) = R_NegInf;
+        dm[d2s(m, j-1, dm_nrows)] = 0;
+        cm[d2s(m+1, j, cm_nrows)] = R_NegInf;
     }
-    cm(m+1, n+1) = cm(m,n);
-    dm(m,n) = 0;
-    em.fill(0);
-    em((m+1)%2, n+1) = 1;
+    cm[d2s(m+1, n+1, cm_nrows)] = cm[d2s(m,n,cm_nrows)];
+    dm[d2s(m,n,dm_nrows)] = 0;
+    std::fill(em, em + 2 * (max_len_y + 2), 0);
+    em[d2s((m+1)%2, n+1, 2)] = 1;
 }
 
 void update_em(const int i, const int n, const double gamma,
-               Rcpp::NumericMatrix& cm, Rcpp::NumericMatrix& dm, Rcpp::NumericMatrix& em)
+               const int cm_nrows, const int dm_nrows,
+               const double * const cm, const double * const dm, double * const em)
 {
     double a, b, c;
     for (int j = n; j > 0; j--) {
-        a = exp((cm(i+1, j) - cm(i,j) - dm(i, j-1)) / gamma);
-        b = exp((cm(i, j+1) - cm(i,j) - dm(i-1, j)) / gamma);
-        c = exp((cm(i+1, j+1) - cm(i,j) - dm(i,j)) / gamma);
-        em(i%2, j) = a * em((i+1)%2, j) + b * em(i%2, j+1) + c * em((i+1)%2, j+1);
+        a = exp((cm[d2s(i+1,j,cm_nrows)] - cm[d2s(i,j,cm_nrows)] - dm[d2s(i,j-1,dm_nrows)]) / gamma);
+        b = exp((cm[d2s(i,j+1,cm_nrows)] - cm[d2s(i,j,cm_nrows)] - dm[d2s(i-1,j,dm_nrows)]) / gamma);
+        c = exp((cm[d2s(i+1,j+1,cm_nrows)] - cm[d2s(i,j,cm_nrows)] - dm[d2s(i,j,dm_nrows)]) / gamma);
+        em[d2s(i%2,j,2)] = a * em[d2s((i+1)%2,j,2)] + b * em[d2s(i%2,j+1,2)] + c * em[d2s((i+1)%2,j+1,2)];
     }
 }
 
 // =================================================================================================
-/* backward recursions
- *   Includes the calculation of soft-DTW gradient + jacobian product.
- */
+/* thread-safe soft-DTW calculator */
 // =================================================================================================
 
-// univariate
-void update_gradient(Rcpp::NumericVector& gradient, const double weight, const double gamma,
-                     Rcpp::NumericMatrix& cm, Rcpp::NumericMatrix& dm, Rcpp::NumericMatrix& em,
-                     const Rcpp::NumericVector& x, const Rcpp::NumericVector& y)
+class SdtwCalculator : public DistanceCalculator
 {
-    int m = x.length(), n = y.length();
-    double grad;
-
-    init_matrices(m, n, cm, dm, em);
-    for (int i = m; i > 0; i--) {
-        update_em(i, n, gamma, cm, dm, em);
-        grad = 0;
-        for (int j = 0; j < n; j++) grad += em(i%2, j+1) * 2 * (x[i-1] - y[j]);
-        gradient[i-1] += weight * grad;
-        if (i == m) em((m+1)%2, n+1) = 0;
+public:
+    // constructor
+    SdtwCalculator(const Rcpp::List& x, const Rcpp::List& y, const double gamma, const bool mv)
+        : gamma_(gamma)
+        , is_multivariate_(mv)
+    {
+        if (is_multivariate_) {
+            x_mv_ = TSTSList<Rcpp::NumericMatrix>(x);
+            y_mv_ = TSTSList<Rcpp::NumericMatrix>(y);
+        }
+        else {
+            x_uv_ = TSTSList<Rcpp::NumericVector>(x);
+            y_uv_ = TSTSList<Rcpp::NumericVector>(y);
+        }
+        // set values of max_len_*_
+        max_len_x_ = this->maxLength(x, is_multivariate_);
+        max_len_y_ = this->maxLength(y, is_multivariate_);
+        // make sure pointers are null
+        cm_ = nullptr;
+        dm_ = nullptr;
     }
-}
 
-// multivariate
-void update_gradient(Rcpp::NumericMatrix& gradient, const double weight, const double gamma,
-                     Rcpp::NumericMatrix& cm, Rcpp::NumericMatrix& dm, Rcpp::NumericMatrix& em,
-                     const Rcpp::NumericMatrix& x, const Rcpp::NumericMatrix& y)
-{
-    int m = x.nrow(), n = y.nrow(), dim = x.ncol();
-    Rcpp::NumericVector grad(dim);
+    // destructor
+    ~SdtwCalculator() {
+        if (cm_) delete[] cm_;
+        if (dm_) delete[] dm_;
+    }
 
-    init_matrices(m, n, cm, dm, em);
-    for (int i = m; i > 0; i--) {
-        update_em(i, n, gamma, cm, dm, em);
-        grad.fill(0);
-        for (int j = 0; j < n; j++) {
-            for (int k = 0; k < dim; k++) {
-                grad[k] += em(i%2, j+1) * 2 * (x(i-1, k) - y(j,k));
+    // calculate for given indices
+    double calculate(const int i, const int j) override {
+        if (is_multivariate_)
+            return this->calculate(x_mv_[i], y_mv_[j]);
+        else
+            return this->calculate(x_uv_[i], y_uv_[j]);
+    }
+
+    // clone that sets helper matrices
+    SdtwCalculator* clone() const override {
+        SdtwCalculator* ptr = new SdtwCalculator(*this);
+        ptr->cm_ = new double[(max_len_x_ + 2) * (max_len_y_ + 2)];
+        ptr->dm_ = new double[(max_len_x_ + 1) * (max_len_y_ + 1)];
+        return ptr;
+    }
+
+    // limits
+    int xLimit() const override { return is_multivariate_ ? x_mv_.length() : x_uv_.length(); }
+    int yLimit() const override { return is_multivariate_ ? y_mv_.length() : y_uv_.length(); }
+
+    // univariate calculate
+    double calculate(const RcppParallel::RVector<double>& x, const RcppParallel::RVector<double>& y) {
+        if (!cm_ || !dm_) return -1;
+        int nx = x.length();
+        int ny = y.length();
+        return sdtw(&x[0], &y[0], nx, ny, 1, gamma_, cm_, true, dm_);
+    }
+
+    // multivariate calculate
+    double calculate(const RcppParallel::RMatrix<double>& x, const RcppParallel::RMatrix<double>& y) {
+        if (!cm_ || !dm_) return -1;
+        int nx = x.nrow();
+        int ny = y.nrow();
+        int num_var = x.ncol();
+        return sdtw(&x[0], &y[0], nx, ny, num_var, gamma_, cm_, true, dm_);
+    }
+
+    // input parameters
+    double gamma_;
+    bool is_multivariate_;
+    // input series (univariate)
+    TSTSList<Rcpp::NumericVector> x_uv_, y_uv_;
+    // input series (multivariate)
+    TSTSList<Rcpp::NumericMatrix> x_mv_, y_mv_;
+    // helper "matrices"
+    double *cm_, *dm_;
+    // to dimension cm_ and dm_
+    int max_len_x_, max_len_y_;
+};
+
+// =================================================================================================
+/* the parallel worker for the univariate version */
+// =================================================================================================
+
+class SdtwUv : public RcppParallel::Worker {
+public:
+    // constructor
+    SdtwUv(const SdtwCalculator&& dist_calculator,
+           const Rcpp::NumericVector& weights,
+           Rcpp::NumericVector& gradient,
+           double& objective,
+           const double gamma)
+        : dist_calculator_(dist_calculator)
+        , weights_(weights)
+        , gradient_(gradient)
+        , objective_(objective)
+        , gamma_(gamma)
+    { }
+
+    // parallel loop across specified range
+    void operator()(std::size_t begin, std::size_t end) {
+        // local copy of calculator so it is setup separately for each thread
+        mutex_.lock();
+        SdtwCalculator* local_calculator = dist_calculator_.clone();
+        double* em = new double[2 * (local_calculator->max_len_y_ + 2)];
+        mutex_.unlock();
+        // calculations for these series
+        //   Includes the calculation of soft-DTW gradient + jacobian product.
+        double* cm = local_calculator->cm_;
+        double* dm = local_calculator->dm_;
+        int cm_nrows = local_calculator->max_len_x_ + 2;
+        int dm_nrows = local_calculator->max_len_x_ + 1;
+        for (std::size_t id = begin; id < end; id++) {
+            RcppParallel::RVector<double>& x = local_calculator->x_uv_[0];
+            RcppParallel::RVector<double>& y = local_calculator->y_uv_[id];
+            double dist = local_calculator->calculate(0,id);
+            mutex_.lock();
+            objective_ += weights_[id] * dist;
+            mutex_.unlock();
+            int m = x.length(), n = y.length();
+            init_matrices(m, n, cm_nrows, dm_nrows, local_calculator->max_len_y_, cm, dm, em);
+            for (int i = m; i > 0; i--) {
+                update_em(i, n, gamma_, cm_nrows, dm_nrows, cm, dm, em);
+                double grad = 0;
+                for (int j = 0; j < n; j++) grad += em[d2s(i%2, j+1, 2)] * 2 * (x[i-1] - y[j]);
+                mutex_.lock();
+                gradient_[i-1] += weights_[id] * grad;
+                mutex_.unlock();
+                if (i == m) em[d2s((m+1)%2, n+1, 2)] = 0;
             }
         }
-        for (int k = 0; k < dim; k++) gradient(i-1, k) += weight * grad[k];
-        if (i == m) em((m+1)%2, n+1) = 0;
+        // finish
+        mutex_.lock();
+        delete local_calculator;
+        delete[] em;
+        mutex_.unlock();
     }
-}
+
+private:
+    const SdtwCalculator& dist_calculator_;
+    const RcppParallel::RVector<double> weights_;
+    RcppParallel::RVector<double> gradient_;
+    double& objective_;
+    double gamma_;
+    tthread::mutex mutex_;
+};
 
 // =================================================================================================
-/* main C++ loops */
+/* the parallel worker for the multivariate version */
 // =================================================================================================
 
-// univariate
-SEXP sdtw_cent_uv(const Rcpp::List& series, const SEXP& CENT,
-                  const Rcpp::NumericVector& weights, const SEXP& GAMMA, const SEXP& MULTIVARIATE,
-                  SEXP& COSTMAT, SEXP& DISTMAT, SEXP& EM)
-{
-    Rcpp::NumericMatrix cm(COSTMAT), dm(DISTMAT), em(EM);
-    Rcpp::NumericVector cent(CENT);
-    Rcpp::NumericVector gradient(cent.length());
-    double objective = 0;
-    for (int i = 0; i < series.length(); i++) {
-        SEXP X = series[i];
-        double d = Rcpp::as<double>(soft_dtw(CENT, X, GAMMA, COSTMAT, DISTMAT, MULTIVARIATE));
-        objective += weights[i] * d;
-        Rcpp::NumericVector x(X);
-        // notice in the call below 'cent' is taken as 'x' and what here is 'x' is 'y' there
-        update_gradient(gradient, weights[i], Rcpp::as<double>(GAMMA),
-                        cm, dm, em,
-                        cent, x);
-    }
-    Rcpp::List ret = Rcpp::List::create(
-        Rcpp::_["objective"] = objective,
-        Rcpp::_["gradient"] = gradient
-    );
-    return ret;
-}
+class SdtwMv : public RcppParallel::Worker {
+public:
+    // constructor
+    SdtwMv(const SdtwCalculator&& dist_calculator,
+           const Rcpp::NumericVector& weights,
+           Rcpp::NumericMatrix& gradient,
+           double& objective,
+           const double gamma)
+        : dist_calculator_(dist_calculator)
+        , weights_(weights)
+        , gradient_(gradient)
+        , objective_(objective)
+        , gamma_(gamma)
+    { }
 
-// multivariate
-SEXP sdtw_cent_mv(const Rcpp::List& series, const SEXP& CENT,
-                  const Rcpp::NumericVector& weights, const SEXP& GAMMA, const SEXP& MULTIVARIATE,
-                  SEXP& COSTMAT, SEXP& DISTMAT, SEXP& EM)
-{
-    Rcpp::NumericMatrix cm(COSTMAT), dm(DISTMAT), em(EM);
-    Rcpp::NumericMatrix cent(CENT);
-    Rcpp::NumericMatrix gradient(cent.nrow(), cent.ncol());
-    double objective = 0;
-    for (int i = 0; i < series.length(); i++) {
-        SEXP X = series[i];
-        double d = Rcpp::as<double>(soft_dtw(CENT, X, GAMMA, COSTMAT, DISTMAT, MULTIVARIATE));
-        objective += weights[i] * d;
-        Rcpp::NumericMatrix x(X);
-        // notice in the call below 'cent' is taken as 'x' and what here is 'x' is 'y' there
-        update_gradient(gradient, weights[i], Rcpp::as<double>(GAMMA),
-                        cm, dm, em,
-                        cent, x);
+    // parallel loop across specified range
+    void operator()(std::size_t begin, std::size_t end) {
+        // local copy of calculator so it is setup separately for each thread
+        mutex_.lock();
+        SdtwCalculator* local_calculator = dist_calculator_.clone();
+        double* em = new double[2 * (local_calculator->max_len_y_ + 2)];
+        mutex_.unlock();
+        // calculations for these series
+        //   Includes the calculation of soft-DTW gradient + jacobian product.
+        double* grad = nullptr;
+        double* cm = local_calculator->cm_;
+        double* dm = local_calculator->dm_;
+        int cm_nrows = local_calculator->max_len_x_ + 2;
+        int dm_nrows = local_calculator->max_len_x_ + 1;
+        for (std::size_t id = begin; id < end; id++) {
+            RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[0];
+            RcppParallel::RMatrix<double>& y = local_calculator->y_mv_[id];
+            double dist = local_calculator->calculate(0,id);
+            mutex_.lock();
+            objective_ += weights_[id] * dist;
+            mutex_.unlock();
+            int m = x.nrow(), n = y.nrow(), dim = x.ncol();
+            if (!grad) {
+                mutex_.lock();
+                grad = new double[dim];
+                mutex_.unlock();
+            }
+            init_matrices(m, n, cm_nrows, dm_nrows, local_calculator->max_len_y_, cm, dm, em);
+            for (int i = m; i > 0; i--) {
+                update_em(i, n, gamma_, cm_nrows, dm_nrows, cm, dm, em);
+                std::fill(grad, grad + dim, 0);
+                for (int j = 0; j < n; j++) {
+                    for (int k = 0; k < dim; k++) {
+                        grad[k] += em[d2s(i%2, j+1, 2)] * 2 * (x[d2s(i-1,k,m)] - y[d2s(j,k,n)]);
+                    }
+                }
+                mutex_.lock();
+                for (int k = 0; k < dim; k++) gradient_(i-1,k) += weights_[id] * grad[k];
+                mutex_.unlock();
+                if (i == m) em[d2s((m+1)%2, n+1, 2)] = 0;
+            }
+        }
+        // finish
+        mutex_.lock();
+        delete local_calculator;
+        delete[] em;
+        if (grad) delete[] grad;
+        mutex_.unlock();
     }
-    Rcpp::List ret = Rcpp::List::create(
-        Rcpp::_["objective"] = objective,
-        Rcpp::_["gradient"] = gradient
-    );
-    return ret;
-}
+
+private:
+    const SdtwCalculator& dist_calculator_;
+    const RcppParallel::RVector<double> weights_;
+    RcppParallel::RMatrix<double> gradient_;
+    double& objective_;
+    double gamma_;
+    tthread::mutex mutex_;
+};
 
 // =================================================================================================
 /* main gateway function */
 // =================================================================================================
 
-RcppExport SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID, SEXP GAMMA, SEXP WEIGHTS, SEXP MV,
-                          SEXP COSTMAT, SEXP DISTMAT, SEXP EM)
+RcppExport SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
+                          SEXP GAMMA, SEXP WEIGHTS,
+                          SEXP MV, SEXP NUM_THREADS)
 {
     BEGIN_RCPP
+    Rcpp::List series(SERIES);
+    double gamma = Rcpp::as<double>(GAMMA);
+    int num_threads = Rcpp::as<int>(NUM_THREADS);
+    int grain = get_grain(series.length(), num_threads);
     // compute objective and gradient
-    if (Rcpp::as<bool>(MV))
-        return sdtw_cent_mv(SERIES, CENTROID, WEIGHTS, GAMMA, MV, COSTMAT, DISTMAT, EM);
-    else
-        return sdtw_cent_uv(SERIES, CENTROID, WEIGHTS, GAMMA, MV, COSTMAT, DISTMAT, EM);
+    if (Rcpp::as<bool>(MV)) {
+        Rcpp::NumericMatrix cent(CENTROID);
+        Rcpp::NumericMatrix gradient(cent.nrow(), cent.ncol());
+        double objective = 0;
+        Rcpp::List x = Rcpp::List::create(Rcpp::_["cent"] = CENTROID);
+        SdtwCalculator dist_calculator(x, series, gamma, true);
+        SdtwMv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma);
+        RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
+        return Rcpp::List::create(
+            Rcpp::_["objective"] = objective,
+            Rcpp::_["gradient"] = gradient
+        );
+    }
+    else {
+        Rcpp::NumericVector cent(CENTROID);
+        Rcpp::NumericVector gradient(cent.length());
+        double objective = 0;
+        Rcpp::List x = Rcpp::List::create(Rcpp::_["cent"] = CENTROID);
+        SdtwCalculator dist_calculator(x, series, gamma, false);
+        SdtwUv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma);
+        RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
+        return Rcpp::List::create(
+            Rcpp::_["objective"] = objective,
+            Rcpp::_["gradient"] = gradient
+        );
+    }
     END_RCPP
 }
 

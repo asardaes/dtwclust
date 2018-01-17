@@ -259,27 +259,6 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                             score.clus = score_fun,
                                             lbls = labels_subset)
 
-    N <- max(lengths(data_subset)) + 1L
-    cm <- matrix(0, N + 1L, N + 1L)
-    dm <- matrix(0, N, N)
-    em <- matrix(0, 2L, N + 1L)
-
-    mats_comparison <- compare_clusterings(data_subset, "h",
-                                           configs = cfgs_sdtwc, seed = 9430L,
-                                           cm = cm, dm = dm, em = em,
-                                           return.objects = TRUE)
-
-    expect_true(all(
-        c("cm", "dm", "em") %in%
-            names(mats_comparison$objects.hierarchical$config1@dots)
-    ))
-
-    if (foreach::getDoParWorkers() == 1L) {
-        expect_false(all(cm == 0))
-        expect_false(all(dm == 0))
-        expect_false(all(em == 0))
-    }
-
     ## rds
     all_comparisons$pick <- reset_nondeterministic(all_comparisons$pick)
     all_comparisons$pick@call <- call("zas", foo = "bar")

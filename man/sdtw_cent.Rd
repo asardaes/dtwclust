@@ -6,7 +6,7 @@
 \usage{
 sdtw_cent(series, centroid = NULL, gamma = 0.01, weights = rep(1,
   length(series)), ..., opts = list(algorithm = "NLOPT_LD_LBFGS", maxeval =
-  20L), error.check = TRUE, cm = NULL, dm = NULL, em = NULL)
+  20L), error.check = TRUE)
 }
 \arguments{
 \item{series}{A matrix or data frame where each row is a time series, or a list where each
@@ -27,10 +27,6 @@ characteristics as the matrices in \code{series}.}
 
 \item{error.check}{Logical indicating whether the function should try to detect inconsistencies
 and give more informative errors messages. Also used internally to avoid repeating checks.}
-
-\item{cm, dm, em}{Optional helper matrices for the calculations. Used internally for memory
-optimization. If provided, they \strong{will} be modified \emph{in place} by \code{C} code. See details for
-dimensioning information.}
 }
 \value{
 The resulting centroid, with attribute \code{nloptr_results} specifying the optimization
@@ -40,13 +36,6 @@ results (except for \code{solution}, which is the returned centroid).
 Soft-DTW centroid function as proposed in Cuturi and Blondel (2017).
 }
 \details{
-The helper matrices are allocated in the following way by default:\preformatted{num_rows <- NROW(centroid)
-num_cols <- max(sapply(series, NROW))
-cm <- matrix(0, num_rows + 2L, num_cols + 2L)
-dm <- matrix(0, num_rows + 1L, num_cols + 1L)
-em <- matrix(0, 2L, num_cols + 2L)
-}
-
 Note that you can trace the optimization by specifing \code{print_level > 0} in \code{opts}.
 }
 \references{

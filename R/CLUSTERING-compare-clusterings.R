@@ -575,32 +575,6 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     setnames_inplace(processed_series, names(configs))
 
     # ==============================================================================================
-    # Matrix allocation
-    # ==============================================================================================
-
-    allocate_sdtwc <- FALSE
-    if (any(types != "tadpole")) {
-        allocate_sdtwc <- any(sapply(types, function(type) {
-            any(grepl("^sdtw_cent$", configs[[type]]$centroid, ignore.case = TRUE)) &&
-                !("cm_centroid" %in% colnames(configs[[type]]))
-        }))
-
-        if (allocate_sdtwc)
-            N <- max(sapply(processed_series, function(series_by_type) {
-                max(sapply(series_by_type, function(series) {
-                    max(sapply(series, NROW))
-                }))
-            }))
-
-        if (allocate_sdtwc && (is.null(dots$cm) || is.null(dots$dm) || is.null(dots$em))) {
-            dots$cm <- matrix(0, N + 2L, N + 2L)
-            dots$dm <- matrix(0, N + 1L, N + 1L)
-            dots$em <- matrix(0, 2L, N + 2L)
-        }
-        else allocate_sdtwc <- FALSE
-    }
-
-    # ==============================================================================================
     # Clusterings
     # ==============================================================================================
 
@@ -637,7 +611,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
             assign(custom_centroid, get_from_callers(custom_centroid, "function"))
 
         export <- c("trace", "score.clus", "return.objects",
-                    "dots", "allocate_sdtwc",
+                    "dots",
                     "centroids_included",
                     "check_consistency", "enlist", "subset_dots", "get_from_callers", "setnames_inplace",
                     custom_preprocs, custom_centroids)
@@ -775,18 +749,6 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
                     tsc@family@preproc <- get_from_callers(preproc_char, "function")
                 if (centroid_char != "default")
                     tsc@centroid <- centroid_char
-
-                if (allocate_sdtwc) {
-                    tsc@dots$cm <- NULL
-                    tsc@dots$dm <- NULL
-                    tsc@dots$em <- NULL
-                    tsc@args <- lapply(tsc@args, function(arg) {
-                        arg$cm <- NULL
-                        arg$dm <- NULL
-                        arg$em <- NULL
-                        arg
-                    })
-                }
 
                 tsc
             })

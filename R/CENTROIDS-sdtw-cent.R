@@ -1,7 +1,8 @@
-sdtw_cent_nloptr <- function(centroid, series, gamma, weights, mv, dim0, cm, dm, em)
+sdtw_cent_nloptr <- function(centroid, series, gamma, weights, mv, dim0)
 {
     if (mv && is.null(dim(centroid))) dim(centroid) <- dim0
-    .Call(C_sdtw_cent, series, centroid, gamma, weights, mv, cm, dm, em, PACKAGE = "dtwclust")
+    num_threads <- get_nthreads()
+    .Call(C_sdtw_cent, series, centroid, gamma, weights, mv, num_threads, PACKAGE = "dtwclust")
 }
 
 #' Centroid calculation based on soft-DTW
@@ -22,21 +23,8 @@ sdtw_cent_nloptr <- function(centroid, series, gamma, weights, mv, dim0, cm, dm,
 #' @param ... Further arguments for [nloptr::nloptr()] (except `opts` and `...`).
 #' @param opts List of options to pass to [nloptr::nloptr()].
 #' @template error-check
-#' @param cm,dm,em Optional helper matrices for the calculations. Used internally for memory
-#'   optimization. If provided, they **will** be modified *in place* by `C` code. See details for
-#'   dimensioning information.
 #'
 #' @details
-#'
-#' The helper matrices are allocated in the following way by default:
-#'
-#' ```
-#' num_rows <- NROW(centroid)
-#' num_cols <- max(sapply(series, NROW))
-#' cm <- matrix(0, num_rows + 2L, num_cols + 2L)
-#' dm <- matrix(0, num_rows + 1L, num_cols + 1L)
-#' em <- matrix(0, 2L, num_cols + 2L)
-#' ```
 #'
 #' Note that you can trace the optimization by specifing `print_level > 0` in `opts`.
 #'
@@ -50,7 +38,7 @@ sdtw_cent_nloptr <- function(centroid, series, gamma, weights, mv, dim0, cm, dm,
 #'
 sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, length(series)), ...,
                       opts = list(algorithm = "NLOPT_LD_LBFGS", maxeval = 20L),
-                      error.check = TRUE, cm = NULL, dm = NULL, em = NULL)
+                      error.check = TRUE)
 {
     series <- tslist(series)
     if (is.null(centroid)) centroid <- series[[sample(length(series), 1L)]] # Random choice
@@ -62,31 +50,8 @@ sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, le
         check_consistency(series, "vltslist")
         check_consistency(centroid, "ts")
     }
-
-    # for helper matrices
-    num_rows <- NROW(centroid)
-    num_cols <- max(sapply(series, NROW))
-
-    if (is.null(cm))
-        cm <- matrix(0, num_rows + 2L, num_cols + 2L)
-    else if (!is.matrix(cm) || nrow(cm) < (num_rows + 2L) || ncol(cm) < (num_cols + 2L))
-        stop("sdtw_cent: Dimension inconsistency in 'cm'")
-    else if (storage.mode(cm) != "double")
-        stop("sdtw_cent: If provided, 'cm' must have 'double' storage mode.")
-
-    if (is.null(dm))
-        dm <- matrix(0, num_rows + 1L, num_cols + 1L)
-    else if (!is.matrix(dm) || nrow(dm) < (num_rows + 1L) || ncol(dm) < (num_cols + 1L))
-        stop("sdtw_cent: Dimension inconsistency in 'dm'")
-    else if (storage.mode(dm) != "double")
-        stop("sdtw_cent: If provided, 'dm' must have 'double' storage mode.")
-
-    if (is.null(em))
-        em <- matrix(0, 2L, num_cols + 2L)
-    else if (!is.matrix(em) || nrow(em) < 2L || ncol(em) < (num_cols + 2L))
-        stop("sdtw_cent: Dimension inconsistency in 'em'")
-    else if (storage.mode(em) != "double")
-        stop("sdtw_cent: If provided, 'em' must have 'double' storage mode.")
+    gamma <- as.numeric(gamma)[1L]
+    weights <- as.numeric(weights)
 
     dots <- list(...)
     dots <- dots[intersect(names(dots), setdiff(names(formals(nloptr::nloptr)), "..."))]
@@ -101,10 +66,7 @@ sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, le
         gamma = gamma,
         weights = weights,
         mv = mv,
-        dim0 = dim0,
-        cm = cm,
-        dm = dm,
-        em = em
+        dim0 = dim0
     ))
 
     cent_out <- opt$solution

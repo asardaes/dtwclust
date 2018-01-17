@@ -362,18 +362,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
         } # nocov end
     }
 
-    # pre-allocate matrix for sdtw_cent
-    if (grepl("^sdtw_cent$", cent_char, ignore.case = TRUE) &&
-        (is.null(args$cent$cm) || is.null(args$cent$dm) || is.null(args$cent$em)))
-    {
-        sdtwc_allocated <- TRUE
-        if (!exists("N", mode = "integer", inherits = FALSE)) N <- max(sapply(series, NROW))
-        args$cent$cm <- matrix(0, N + 2L, N + 2L)
-        args$cent$dm <- matrix(0, N + 1L, N + 1L)
-        args$cent$em <- matrix(0, 2L, N + 2L)
-
-    } else sdtwc_allocated <- FALSE
-
     RET <- switch(
         type,
         partitional =, fuzzy = {
@@ -501,7 +489,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             }
 
             if (inherits(distmat, "Distmat")) distmat <- distmat$distmat
-            if (sdtwc_allocated) { args$cent$cm <- args$cent$dm <- args$cent$em <- NULL }
 
             # Create objects
             RET <- lapply(pc_list, function(pc) {
@@ -633,7 +620,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # Prepare results
             # --------------------------------------------------------------------------------------
 
-            if (sdtwc_allocated) { args$cent$cm <- args$cent$dm <- args$cent$em <- NULL }
             if (trace) cat("Extracting centroids...\n\n")
 
             RET <- lapply(k, function(k) {
@@ -763,8 +749,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                     allcent <- function(...) {}
                     centroids <- series[R$centroids]
                 }
-
-                if (sdtwc_allocated) { args$cent$cm <- args$cent$dm <- args$cent$em <- NULL }
 
                 obj <- methods::new("PartitionalTSClusters",
                                     call = MYCALL,
