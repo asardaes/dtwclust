@@ -1,34 +1,41 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
-
 language: r
 cache: packages
-r_build_args: "--compact-vignettes"
-
+sudo: required
+r_build_args: "--no-build-vignettes"
+r_packages:
+  - devtools
 r_github_packages:
   - r-lib/covr
-
-sudo:
-  - false
 os:
   - linux
 r:
   - release
   - devel
-
 matrix:
   include:
     - os: osx
       r: release
       sudo: required
-
+# see http://thecoatlessprofessor.com/programming/r/selecting-an-alternative-compiler-for-r-package-testing-on-travis-ci/
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-5
+      - g++-5
+      - gfortran-5
+env:
+  - COMPILER_VER=5
 before_install:
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5
+  - sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-5 50
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then sudo tlmgr install placeins cleveref; fi
-
 after_success:
   - if [[ ("$TRAVIS_R_VERSION" != "devel") && ("$TRAVIS_OS_NAME" == "linux") ]]; then
       travis_wait 20 Rscript codecov.R;
     fi
-
 notifications:
   email:
     on_success: change
