@@ -2,7 +2,7 @@
 language: r
 cache: packages
 sudo: required
-r_build_args: "--no-build-vignettes"
+r_build_args: "--compact-vignettes"
 r_packages:
   - devtools
 r_github_packages:
