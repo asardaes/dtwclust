@@ -53,11 +53,11 @@ void update_em(const int i, const int n, const double gamma,
 /* thread-safe soft-DTW calculator */
 // =================================================================================================
 
-class SdtwCalculator : public DistanceCalculator
+class SdtwCentCalculator : public DistanceCalculator
 {
 public:
     // constructor
-    SdtwCalculator(const Rcpp::List& x, const Rcpp::List& y, const double gamma, const bool mv)
+    SdtwCentCalculator(const Rcpp::List& x, const Rcpp::List& y, const double gamma, const bool mv)
         : gamma_(gamma)
         , is_multivariate_(mv)
     {
@@ -78,7 +78,7 @@ public:
     }
 
     // destructor
-    ~SdtwCalculator() {
+    ~SdtwCentCalculator() {
         if (cm_) delete[] cm_;
         if (dm_) delete[] dm_;
     }
@@ -92,8 +92,8 @@ public:
     }
 
     // clone that sets helper matrices
-    SdtwCalculator* clone() const override {
-        SdtwCalculator* ptr = new SdtwCalculator(*this);
+    SdtwCentCalculator* clone() const override {
+        SdtwCentCalculator* ptr = new SdtwCentCalculator(*this);
         ptr->cm_ = new double[(max_len_x_ + 2) * (max_len_y_ + 2)];
         ptr->dm_ = new double[(max_len_x_ + 1) * (max_len_y_ + 1)];
         return ptr;
@@ -140,7 +140,7 @@ public:
 class SdtwUv : public RcppParallel::Worker {
 public:
     // constructor
-    SdtwUv(const SdtwCalculator&& dist_calculator,
+    SdtwUv(const SdtwCentCalculator&& dist_calculator,
            const Rcpp::NumericVector& weights,
            Rcpp::NumericVector& gradient,
            double& objective,
@@ -156,7 +156,7 @@ public:
     void operator()(std::size_t begin, std::size_t end) {
         // local copy of calculator so it is setup separately for each thread
         mutex_.lock();
-        SdtwCalculator* local_calculator = dist_calculator_.clone();
+        SdtwCentCalculator* local_calculator = dist_calculator_.clone();
         double* em = new double[2 * (local_calculator->max_len_y_ + 2)];
         mutex_.unlock();
         // calculations for these series
@@ -192,7 +192,7 @@ public:
     }
 
 private:
-    const SdtwCalculator& dist_calculator_;
+    const SdtwCentCalculator& dist_calculator_;
     const RcppParallel::RVector<double> weights_;
     RcppParallel::RVector<double> gradient_;
     double& objective_;
@@ -207,7 +207,7 @@ private:
 class SdtwMv : public RcppParallel::Worker {
 public:
     // constructor
-    SdtwMv(const SdtwCalculator&& dist_calculator,
+    SdtwMv(const SdtwCentCalculator&& dist_calculator,
            const Rcpp::NumericVector& weights,
            Rcpp::NumericMatrix& gradient,
            double& objective,
@@ -223,7 +223,7 @@ public:
     void operator()(std::size_t begin, std::size_t end) {
         // local copy of calculator so it is setup separately for each thread
         mutex_.lock();
-        SdtwCalculator* local_calculator = dist_calculator_.clone();
+        SdtwCentCalculator* local_calculator = dist_calculator_.clone();
         double* em = new double[2 * (local_calculator->max_len_y_ + 2)];
         mutex_.unlock();
         // calculations for these series
@@ -270,7 +270,7 @@ public:
     }
 
 private:
-    const SdtwCalculator& dist_calculator_;
+    const SdtwCentCalculator& dist_calculator_;
     const RcppParallel::RVector<double> weights_;
     RcppParallel::RMatrix<double> gradient_;
     double& objective_;
@@ -297,7 +297,7 @@ RcppExport SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
         Rcpp::NumericMatrix gradient(cent.nrow(), cent.ncol());
         double objective = 0;
         Rcpp::List x = Rcpp::List::create(Rcpp::_["cent"] = CENTROID);
-        SdtwCalculator dist_calculator(x, series, gamma, true);
+        SdtwCentCalculator dist_calculator(x, series, gamma, true);
         SdtwMv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma);
         RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
         return Rcpp::List::create(
@@ -310,7 +310,7 @@ RcppExport SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
         Rcpp::NumericVector gradient(cent.length());
         double objective = 0;
         Rcpp::List x = Rcpp::List::create(Rcpp::_["cent"] = CENTROID);
-        SdtwCalculator dist_calculator(x, series, gamma, false);
+        SdtwCentCalculator dist_calculator(x, series, gamma, false);
         SdtwUv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma);
         RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
         return Rcpp::List::create(
