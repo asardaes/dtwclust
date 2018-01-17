@@ -136,25 +136,3 @@ mvc <- tsclust(CharTrajMV[1L:20L], k = 4L, distance = "gak", seed = 390L)
 # Note how the variables of each series are appended one after the other in the plot
 plot(mvc)
 ```
-
-### Parallel support
-
-```{r parallel}
-require("doParallel")
-# Create and register parallel workers, each with dtwclust loaded
-cl <- makeCluster(detectCores())
-invisible(clusterEvalQ(cl, library("dtwclust")))
-registerDoParallel(cl)
-# Registered parallel backend detected automatically
-plc <- tsclust(CharTraj, k = 20L,
-               distance = "dtw_basic", centroid = "dba",
-               seed = 9421L, trace = TRUE,
-               args = tsclust_args(dist = list(window.size = 20L),
-                                   cent = list(window.size = 20L,
-                                               max.iter = 15L)))
-# Return to sequential calculations
-stopCluster(cl)
-registerDoSEQ()
-# Modify some plot parameters
-plot(plc, labs.arg = list(title = "DTW distance + DBA Centroids", x = "time", y = "series"))
-```

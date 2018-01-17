@@ -109,7 +109,7 @@ pc <- tsclust(CharTraj, type = "partitional", k = 20L,
 #> Iteration 6: Changes / Distsum = 1 / 1347.486
 #> Iteration 7: Changes / Distsum = 0 / 1346.886
 #> 
-#>  Elapsed time is 1.365 seconds.
+#>  Elapsed time is 0.523 seconds.
 plot(pc)
 ```
 
@@ -126,7 +126,7 @@ hc <- tsclust(CharTraj, type = "hierarchical", k = 20L,
 #> Performing hierarchical clustering...
 #> Extracting centroids...
 #> 
-#>  Elapsed time is 0.535 seconds.
+#>  Elapsed time is 0.291 seconds.
 plot(hc)
 ```
 
@@ -151,7 +151,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.220   0.000   0.221 
+#>   0.350   0.000   0.358 
 #> 
 #> Head of fuzzy memberships:
 #> 
@@ -174,36 +174,3 @@ plot(mvc)
 ```
 
 ![](README-multivariate-1.png)
-
-### Parallel support
-
-``` r
-require("doParallel")
-#> Loading required package: doParallel
-#> Loading required package: foreach
-#> Loading required package: iterators
-# Create and register parallel workers, each with dtwclust loaded
-cl <- makeCluster(detectCores())
-invisible(clusterEvalQ(cl, library("dtwclust")))
-registerDoParallel(cl)
-# Registered parallel backend detected automatically
-plc <- tsclust(CharTraj, k = 20L,
-               distance = "dtw_basic", centroid = "dba",
-               seed = 9421L, trace = TRUE,
-               args = tsclust_args(dist = list(window.size = 20L),
-                                   cent = list(window.size = 20L,
-                                               max.iter = 15L)))
-#> Iteration 1: Changes / Distsum = 100 / 1531.018
-#> Iteration 2: Changes / Distsum = 3 / 886.4687
-#> Iteration 3: Changes / Distsum = 2 / 873.7354
-#> Iteration 4: Changes / Distsum = 0 / 864.1794
-#> 
-#>  Elapsed time is 1.619 seconds.
-# Return to sequential calculations
-stopCluster(cl)
-registerDoSEQ()
-# Modify some plot parameters
-plot(plc, labs.arg = list(title = "DTW distance + DBA Centroids", x = "time", y = "series"))
-```
-
-![](README-parallel-1.png)
