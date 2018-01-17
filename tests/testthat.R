@@ -2,6 +2,9 @@ library(dtwclust)
 library(foreach)
 library(testthat)
 
+# coverage for multi-threading might not be possible (?)
+if (nzchar(Sys.getenv("R_COVR"))) RcppParallel::setThreadOptions(1L)
+
 #' To test in a local machine:
 #' Sys.setenv(NOT_CRAN = "true"); test_dir("tests/testthat/")
 #' OR
