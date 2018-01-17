@@ -12,11 +12,16 @@ os:
 r:
   - release
   - devel
+env:
+  - COMPILER_VER=5
 matrix:
+  fast_finish: true
   include:
     - os: osx
       r: release
       sudo: required
+  allow_failures:
+    - os: osx
 # see http://thecoatlessprofessor.com/programming/r/selecting-an-alternative-compiler-for-r-package-testing-on-travis-ci/
 addons:
   apt:
@@ -26,15 +31,15 @@ addons:
       - gcc-5
       - g++-5
       - gfortran-5
-env:
-  - COMPILER_VER=5
 before_install:
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5
-  - sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-5 50
-  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then sudo tlmgr install placeins cleveref; fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
+      sudo tlmgr install placeins cleveref; fi
+    else
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5
+      sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-5 50
 after_success:
   - if [[ ("$TRAVIS_R_VERSION" != "devel") && ("$TRAVIS_OS_NAME" == "linux") ]]; then
-      travis_wait 40 Rscript codecov.R;
+      travis_wait 30 Rscript codecov.R;
     fi
 notifications:
   email:
