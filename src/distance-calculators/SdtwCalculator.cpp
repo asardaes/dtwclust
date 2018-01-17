@@ -61,7 +61,7 @@ double SdtwCalculator::calculate(const int i, const int j)
 SdtwCalculator* SdtwCalculator::clone() const
 {
     SdtwCalculator* ptr = new SdtwCalculator(*this);
-    ptr->cm_ = new double[(max_len_x_ + 1) * (max_len_y_ + 1)];
+    ptr->cm_ = new double[(max_len_x_ + 2) * (max_len_y_ + 2)];
     return ptr;
 }
 
@@ -90,8 +90,7 @@ double SdtwCalculator::calculate(
     if (!cm_) return -1;
     int nx = x.length();
     int ny = y.length();
-    int num_var = 1;
-    return sdtw(&x[0], &y[0], nx, ny, num_var, gamma_, cm_);
+    return sdtw(&x[0], &y[0], nx, ny, 1, gamma_, cm_, false, nullptr);
 }
 
 // multivariate
@@ -102,7 +101,7 @@ double SdtwCalculator::calculate(
     int nx = x.nrow();
     int ny = y.nrow();
     int num_var = x.ncol();
-    return sdtw(&x[0], &y[0], nx, ny, num_var, gamma_, cm_);
+    return sdtw(&x[0], &y[0], nx, ny, num_var, gamma_, cm_, false, nullptr);
 }
 
 } // namespace dtwclust

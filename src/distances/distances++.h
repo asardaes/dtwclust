@@ -30,7 +30,8 @@ double lbi_core(const double * const x, const double * const y,
 
 double sdtw(const double * const x, const double * const y,
             const int nx, const int ny, const int num_vars,
-            const double gamma, double * costmat);
+            const double gamma, double * const costmat,
+            const bool save_norm, double * const distmat);
 
 } // namespace dtwclust
 

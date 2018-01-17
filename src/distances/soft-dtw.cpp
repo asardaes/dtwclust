@@ -98,28 +98,31 @@ RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT,
 }
 
 // =================================================================================================
-/* thread-safe version for the distance calculator (no save norm) */
+/* thread-safe version for the distance calculator */
 // =================================================================================================
 
 double sdtw(const double * const x, const double * const y,
             const int nx, const int ny, const int num_vars,
-            const double gamma, double * costmat)
+            const double gamma, double * const costmat,
+            const bool save_norm, double * const distmat)
 {
     // initialize costmat values
     costmat[0] = 0;
-    for (int i = 1; i < nx+1; i++) costmat[d2s(i,0,nx+1)] = R_PosInf;
-    for (int j = 1; j < ny+1; j++) costmat[d2s(0,j,nx+1)] = R_PosInf;
+    for (int i = 1; i < nx+2; i++) costmat[d2s(i,0,nx+2)] = R_PosInf;
+    for (int j = 1; j < ny+2; j++) costmat[d2s(0,j,nx+2)] = R_PosInf;
     // compute distance
     for (int i = 1; i <= nx; i++) {
         for (int j = 1; j <= ny; j++) {
             double point_norm = squared_euclidean(x, y, i-1, j-1, nx, ny, num_vars);
-            costmat[d2s(i,j,nx+1)] = point_norm + soft_min(costmat[d2s(i-1, j, nx+1)],
-                        costmat[d2s(i-1, j-1, nx+1)],
-                               costmat[d2s(i, j-1, nx+1)],
-                                      gamma);
+            costmat[d2s(i,j,nx+2)] = point_norm + soft_min(costmat[d2s(i-1, j, nx+2)],
+                                                           costmat[d2s(i-1, j-1, nx+2)],
+                                                           costmat[d2s(i, j-1, nx+2)],
+                                                           gamma);
+            if (save_norm)
+                distmat[d2s(i-1,j-1,nx+1)] = point_norm;
         }
     }
-    return costmat[d2s(nx,ny,nx+1)];
+    return costmat[d2s(nx,ny,nx+2)];
 }
 
 } // namespace dtwclust
