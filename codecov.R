@@ -1,7 +1,9 @@
 library("covr")
+# see https://github.com/r-lib/covr/issues/176
 options(covr.exclude_pattern = rex::rex("#" %or% "//", any_spaces, "nocov"),
         covr.exclude_start = rex::rex("#" %or% "//", any_spaces, "nocov", any_spaces, "start"),
-        covr.exclude_end = rex::rex("#" %or% "//", any_spaces, "nocov", any_spaces, "end"))
+        covr.exclude_end = rex::rex("#" %or% "//", any_spaces, "nocov", any_spaces, "end"),
+        covr.gcov = "gcov-5")
 covr::codecov(type = "tests", quiet = FALSE, clean = FALSE, line_exclusions = list(
     "R/pkg.R"
 ))
