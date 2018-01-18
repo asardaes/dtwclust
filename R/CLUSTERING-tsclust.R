@@ -599,14 +599,18 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # --------------------------------------------------------------------------------------
 
             if (trace) cat("Performing hierarchical clustering...\n")
+            if (!base::isSymmetric(base::as.matrix(distmat)))
+                warning("Distance matrix is not symmetric, ",
+                        "and hierarchical clustering assumes it is ",
+                        "(it ignores the upper triangular).")
 
             if (is.character(method)) {
                 # Using hclust
                 hc <- lapply(method, function(method) {
                     stats::hclust(stats::as.dist(distmat), method, members = dots$members)
                 })
-
-            } else {
+            }
+            else {
                 # Using provided function
                 hc <- list(do.call(method,
                                    args = enlist(stats::as.dist(distmat),

@@ -63,10 +63,12 @@ test_that("Hierarchical clustering works as expected.", {
     )
 
     ## ---------------------------------------------------------- non-symmetric
-    hc_lbi <- tsclust(data_reinterpolated, type = "hierarchical", k = 20L,
-                      distance = "lbi",
-                      control = hierarchical_control(method = "all"),
-                      args = tsclust_args(dist = list(window.size = 17L)))
+    expect_warning({
+        hc_lbi <- tsclust(data_reinterpolated, type = "hierarchical", k = 20L,
+                          distance = "lbi",
+                          control = hierarchical_control(method = "all"),
+                          args = tsclust_args(dist = list(window.size = 17L)))
+    })
     hc_lbi <- lapply(hc_lbi, reset_nondeterministic)
     assign("hc_lbi", hc_lbi, persistent)
 
