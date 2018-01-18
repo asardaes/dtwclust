@@ -48,8 +48,7 @@ double inline soft_min(double a, double b, double c, const double gamma)
 template<typename SeriesType>
 double dp_recursion(const SeriesType& x, const SeriesType& y,
                     Rcpp::NumericMatrix& costmat, const double gamma,
-                    const int nx, const int ny, const int num_vars,
-                    const bool save_norm, Rcpp::NumericMatrix& distmat)
+                    const int nx, const int ny, const int num_vars)
 {
     for (int i = 1; i <= nx; i++) {
         for (int j = 1; j <= ny; j++) {
@@ -58,8 +57,6 @@ double dp_recursion(const SeriesType& x, const SeriesType& y,
                                                  costmat(i-1, j-1),
                                                  costmat(i, j-1),
                                                  gamma);
-            if (save_norm)
-                distmat(i-1, j-1) = point_norm;
         }
     }
     return costmat(nx, ny);
@@ -69,14 +66,12 @@ double dp_recursion(const SeriesType& x, const SeriesType& y,
 /* main gateway function */
 // =================================================================================================
 
-RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT, SEXP MV)
+RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP MV)
 {
     BEGIN_RCPP
-    Rcpp::NumericMatrix costmat(COSTMAT), distmat;
+    Rcpp::NumericMatrix costmat(COSTMAT);
     bool is_multivariate = Rcpp::as<bool>(MV);
     double gamma = Rcpp::as<double>(GAMMA);
-    bool save_norm = !Rf_isNull(DISTMAT);
-    if (save_norm) distmat = Rcpp::NumericMatrix(DISTMAT);
     // initialize costmat values
     costmat(0,0) = 0;
     for (int i = 1; i < costmat.nrow(); i++) costmat(i,0) = R_PosInf;
@@ -86,13 +81,13 @@ RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT,
         Rcpp::NumericMatrix x(X), y(Y);
         return Rcpp::wrap(
             dp_recursion<Rcpp::NumericMatrix>(
-                    x, y, costmat, gamma, x.nrow(), y.nrow(), x.ncol(), save_norm, distmat));
+                    x, y, costmat, gamma, x.nrow(), y.nrow(), x.ncol()));
     }
     else {
         Rcpp::NumericVector x(X), y(Y);
         return Rcpp::wrap(
             dp_recursion<Rcpp::NumericVector>(
-                    x, y, costmat, gamma, x.length(), y.length(), 1, save_norm, distmat));
+                    x, y, costmat, gamma, x.length(), y.length(), 1));
     }
     END_RCPP
 }

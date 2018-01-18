@@ -13,7 +13,7 @@ RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U);
 
 RcppExport SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U);
 
-RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP DISTMAT, SEXP MV);
+RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP MV);
 
 // -------------------------------------------------------------------------------------------------
 /* called by other C++ functions */

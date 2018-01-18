@@ -36,7 +36,7 @@ sdtw <- function(x, y, gamma = 0.01, ..., error.check = TRUE)
     mv <- is_multivariate(list(x,y)) # dimension consistency checked here
     cm <- matrix(0, NROW(x) + 1L, NROW(y) + 1L)
     # return
-    .Call(C_soft_dtw, x, y, gamma, cm, NULL, mv, PACKAGE = "dtwclust")
+    .Call(C_soft_dtw, x, y, gamma, cm, mv, PACKAGE = "dtwclust")
 }
 
 # ==================================================================================================
