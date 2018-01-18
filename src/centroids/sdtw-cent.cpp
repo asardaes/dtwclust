@@ -100,8 +100,8 @@ public:
     }
 
     // limits
-    int xLimit() const override { return is_multivariate_ ? x_mv_.length() : x_uv_.length(); }
-    int yLimit() const override { return is_multivariate_ ? y_mv_.length() : y_uv_.length(); }
+    int xLimit() const override { return is_multivariate_ ? x_mv_.length() : x_uv_.length(); } // nocov start
+    int yLimit() const override { return is_multivariate_ ? y_mv_.length() : y_uv_.length(); } // nocov end
 
     // univariate calculate
     double calculate(const RcppParallel::RVector<double>& x, const RcppParallel::RVector<double>& y) {

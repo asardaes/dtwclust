@@ -87,12 +87,12 @@ public:
     }
 
     // limits
-    int xLimit() const override {
+    int xLimit() const override { // nocov start
         return is_multivariate_ ? x_mv_.length() : x_uv_.length();
     }
     int yLimit() const override {
         return is_multivariate_ ? y_mv_.length() : y_uv_.length();
-    }
+    } // nocov end
 
     // input series (univariate)
     TSTSList<Rcpp::NumericVector> x_uv_, y_uv_;

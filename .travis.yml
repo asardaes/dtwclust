@@ -40,7 +40,7 @@ before_install:
     fi
 after_success:
   - if [[ ("$TRAVIS_R_VERSION" != "devel") && ("$TRAVIS_OS_NAME" == "linux") ]]; then
-      travis_wait 30 Rscript codecov.R;
+      Rscript codecov.R;
     fi
 notifications:
   email:

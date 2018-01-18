@@ -42,6 +42,7 @@ test_that("Parallel FORK computation gives the same results as sequential", {
     skip_on_cran()
     skip_on_travis()
     skip_on_os("windows")
+    skip_if(nzchar(Sys.getenv("R_COVR")), "calculating coverage")
 
     if (getOption("dtwclust_skip_par_tests", FALSE))
         skip("Parallel tests disabled explicitly.")

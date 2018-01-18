@@ -183,8 +183,8 @@ setnames_inplace <- function(vec, names) {
         ) %dopar% {
             num_threads <- Sys.getenv("RCPP_PARALLEL_NUM_THREADS")
             if (nzchar(num_threads)) return(FALSE)
-            Sys.setenv("RCPP_PARALLEL_NUM_THREADS" = 1L)
-            return(TRUE)
+            Sys.setenv("RCPP_PARALLEL_NUM_THREADS" = 1L) # nocov start
+            return(TRUE) # nocov end
         }
     }
     # evaluate expression
@@ -196,7 +196,7 @@ setnames_inplace <- function(vec, names) {
             invokeRestart("muffleWarning")
     })
     # reset parallel workers if needed
-    if (num_workers > 1L && any(reset_workers)) {
+    if (num_workers > 1L && any(reset_workers)) { # nocov start
         foreach::foreach(
             i = 1L:num_workers,
             .inorder = FALSE,
@@ -204,7 +204,7 @@ setnames_inplace <- function(vec, names) {
         ) %dopar% {
             Sys.unsetenv("RCPP_PARALLEL_NUM_THREADS")
         }
-    }
+    } # nocov end
     # return
     ret
 }
