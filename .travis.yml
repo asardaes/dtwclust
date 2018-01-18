@@ -33,13 +33,14 @@ addons:
       - gfortran-5
 before_install:
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
-      sudo tlmgr install placeins cleveref; fi
+      sudo tlmgr install placeins cleveref
     else
       sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5
       sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-5 50
+    fi
 after_success:
   - if [[ ("$TRAVIS_R_VERSION" != "devel") && ("$TRAVIS_OS_NAME" == "linux") ]]; then
-      travis_wait 30 Rscript codecov.R;
+      travis_wait 30 Rscript codecov.R
     fi
 notifications:
   email:
