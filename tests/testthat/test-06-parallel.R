@@ -25,7 +25,12 @@ test_that("Parallel computation gives the same results as sequential", {
     require(doParallel)
 
     cl <- makeCluster(num_workers)
-    invisible(clusterEvalQ(cl, library(dtwclust)))
+    invisible(clusterEvalQ(cl, {
+        library(dtwclust)
+        # environment variables get inherited by the workers when they are created, so reset this
+        RcppParallel::setThreadOptions()
+        Sys.unsetenv("RCPP_PARALLEL_NUM_THREADS")
+    }))
     registerDoParallel(cl)
 
     # Filter excludes files that have "parallel" in them, otherwise it would be recursive
