@@ -6,6 +6,8 @@
 #include <R.h>
 #include <Rinternals.h>
 
+namespace dtwclust {
+
 // for cost matrix, in case of window constraint
 #define NOT_VISITED -1.0
 
@@ -77,7 +79,7 @@ int backtrack_steps(double const * const D,
             i--;
         }
         else {
-            error("dtw_basic: Invalid direction matrix computed. Indices %d and %d.", ++i, ++j); // nocov
+            Rcpp::stop("dtw_basic: Invalid direction matrix computed. Indices %d and %d.", ++i, ++j); // nocov
         }
         index1[path] = i + 1;
         index2[path] = j + 1;
@@ -142,61 +144,59 @@ double dtw_basic_c(double * const D, double volatile * const tuple,
 }
 
 // the gateway function
-SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
-               SEXP m, SEXP n, SEXP num_var,
-               SEXP norm, SEXP step, SEXP backtrack, SEXP normalize,
-               SEXP distmat)
+RcppExport SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
+                          SEXP m, SEXP n, SEXP num_var,
+                          SEXP norm, SEXP step, SEXP backtrack, SEXP normalize,
+                          SEXP distmat)
 {
     double d;
-    int nx = asInteger(m);
-    int ny = asInteger(n);
+    int nx = Rf_asInteger(m);
+    int ny = Rf_asInteger(n);
     double* D = REAL(distmat);
     // volatile to avoid some comparison problems in which_min
-    volatile double* tuple = malloc(3 * sizeof(double));
+    volatile double tuple[3];
 
-    if (asLogical(backtrack)) {
+    if (Rf_asLogical(backtrack)) {
         // longest possible path, length will be adjusted in R
-        SEXP index1 = PROTECT(allocVector(INTSXP, nx + ny));
-        SEXP index2 = PROTECT(allocVector(INTSXP, nx + ny));
+        SEXP index1 = PROTECT(Rf_allocVector(INTSXP, nx + ny));
+        SEXP index2 = PROTECT(Rf_allocVector(INTSXP, nx + ny));
 
         // calculate distance
         d = dtw_basic_c(D, tuple,
-                        REAL(x), REAL(y), asInteger(window),
-                        nx, ny, asInteger(num_var),
-                        asReal(norm), asReal(step), 1);
-        if (asLogical(normalize)) d /= nx + ny;
+                        REAL(x), REAL(y), Rf_asInteger(window),
+                        nx, ny, Rf_asInteger(num_var),
+                        Rf_asReal(norm), Rf_asReal(step), 1);
+        if (Rf_asLogical(normalize)) d /= nx + ny;
 
         // actual length of path
         int path = backtrack_steps(D, nx, ny, INTEGER(index1), INTEGER(index2));
 
         // put results in a list
-        SEXP list_names = PROTECT(allocVector(STRSXP, 4));
-        SET_STRING_ELT(list_names, 0, mkChar("distance"));
-        SET_STRING_ELT(list_names, 1, mkChar("index1"));
-        SET_STRING_ELT(list_names, 2, mkChar("index2"));
-        SET_STRING_ELT(list_names, 3, mkChar("path"));
+        SEXP list_names = PROTECT(Rf_allocVector(STRSXP, 4));
+        SET_STRING_ELT(list_names, 0, Rf_mkChar("distance"));
+        SET_STRING_ELT(list_names, 1, Rf_mkChar("index1"));
+        SET_STRING_ELT(list_names, 2, Rf_mkChar("index2"));
+        SET_STRING_ELT(list_names, 3, Rf_mkChar("path"));
 
-        SEXP ret = PROTECT(allocVector(VECSXP, 4));
-        SET_VECTOR_ELT(ret, 0, PROTECT(ScalarReal(d)));
+        SEXP ret = PROTECT(Rf_allocVector(VECSXP, 4));
+        SET_VECTOR_ELT(ret, 0, PROTECT(Rf_ScalarReal(d)));
         SET_VECTOR_ELT(ret, 1, index1);
         SET_VECTOR_ELT(ret, 2, index2);
-        SET_VECTOR_ELT(ret, 3, PROTECT(ScalarInteger(path)));
-        setAttrib(ret, R_NamesSymbol, list_names);
+        SET_VECTOR_ELT(ret, 3, PROTECT(Rf_ScalarInteger(path)));
+        Rf_setAttrib(ret, R_NamesSymbol, list_names);
 
-        free((double *)tuple);
         UNPROTECT(6);
         return ret;
     }
     else {
         // calculate distance
         d = dtw_basic_c(D, tuple,
-                        REAL(x), REAL(y), asInteger(window),
-                        nx, ny, asInteger(num_var),
-                        asReal(norm), asReal(step), 0);
-        if (asLogical(normalize)) d /= nx + ny;
+                        REAL(x), REAL(y), Rf_asInteger(window),
+                        nx, ny, Rf_asInteger(num_var),
+                        Rf_asReal(norm), Rf_asReal(step), 0);
+        if (Rf_asLogical(normalize)) d /= nx + ny;
 
-        SEXP ret = PROTECT(ScalarReal(d));
-        free((double *)tuple);
+        SEXP ret = PROTECT(Rf_ScalarReal(d));
         UNPROTECT(1);
         return ret;
     }
@@ -216,3 +216,5 @@ double dtw_basic_par(double const * const x, double const * const y,
     if (backtrack) *path = backtrack_steps(distmat, nx, ny, index1, index2);
     return d;
 }
+
+} // namespace dtwclust

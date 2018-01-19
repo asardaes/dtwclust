@@ -3,7 +3,7 @@
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
-#include "../distances/distances++.h" // lbk_core
+#include "../distances/distances.h" // lbk_core
 
 namespace dtwclust {
 

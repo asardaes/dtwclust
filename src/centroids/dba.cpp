@@ -11,8 +11,7 @@
 #include "../distance-calculators/distance-calculators.h"
 #include "../distances/distances.h" // dtw_basic_par
 #include "../utils/TSTSList.h"
-#include "../utils/utils++.h" // get_grain
-#include "../utils/utils.h" // Rflush, d2s
+#include "../utils/utils.h" // Rflush, d2s, get_grain
 
 namespace dtwclust {
 

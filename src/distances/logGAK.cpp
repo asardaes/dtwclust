@@ -58,6 +58,8 @@
 #include <R.h>
 #include <Rinternals.h>
 
+namespace dtwclust {
+
 // Useful constants
 #define LOG0 -10000          // log(0)
 
@@ -175,7 +177,9 @@ double logGAK_c(double const *seq1 , double const *seq2,
 }
 
 // The gateway function
-SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var, SEXP sigma, SEXP window, SEXP logs) {
+RcppExport SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var,
+                       SEXP sigma, SEXP window, SEXP logs)
+{
     /*
      * Inputs are, in this order
      * A N1 x d matrix (d-variate time series with N1 observations)
@@ -190,9 +194,9 @@ SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var, SEXP sigma, SEXP win
      * A (max(N1,N2) + 1) x 3 matrix of doubles
      */
 
-    int triangular = asInteger(window);
-    int nX = asInteger(nx);
-    int nY = asInteger(ny);
+    int triangular = Rf_asInteger(window);
+    int nX = Rf_asInteger(nx);
+    int nY = Rf_asInteger(ny);
     double d;
 
     // If triangular is smaller than the difference in length of the time series,
@@ -201,9 +205,9 @@ SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var, SEXP sigma, SEXP win
     if (triangular > 0 && abs(nX - nY) > triangular)
         d = R_NegInf;
     else
-        d = logGAK_c(REAL(x), REAL(y), nX, nY, asInteger(num_var), asReal(sigma), triangular, REAL(logs));
+        d = logGAK_c(REAL(x), REAL(y), nX, nY, Rf_asInteger(num_var), Rf_asReal(sigma), triangular, REAL(logs));
 
-    return ScalarReal(d);
+    return Rf_ScalarReal(d);
 }
 
 // a version compatible with RcppParallel
@@ -222,3 +226,5 @@ double logGAK_par(double const * const x, double const * const y,
         d = logGAK_c(x, y, nx, ny, num_var, sigma, triangular, logs);
     return d;
 }
+
+} // namespace dtwclust

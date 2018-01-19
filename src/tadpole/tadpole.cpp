@@ -12,8 +12,7 @@
 #include <RcppParallel.h>
 
 #include "../distance-calculators/distance-calculators.h"
-#include "../utils/utils++.h" // get_grain, s2d
-#include "../utils/utils.h" // Rflush
+#include "../utils/utils.h" // Rflush, get_grain, s2d
 
 namespace dtwclust {
 

@@ -49,7 +49,7 @@ Global alignment kernel
 -----------------------
 
 The code in:
-- src/distances/logGAK.c
+- src/distances/logGAK.cpp
 
 was adapted from third-party code to which the following applies:
 

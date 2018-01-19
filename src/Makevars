@@ -6,8 +6,7 @@ PKG_LIBS += $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 PKG_LIBS += $(shell ${R_HOME}/bin/Rscript -e "RcppParallel::RcppParallelLibs()")
 
 # Get source files (see https://stackoverflow.com/a/27794283/5793905 but note the quotes)
-C_SOURCES = $(shell find . -type f -name '*.c')
 CPP_SOURCES = $(shell find . -type f -name '*.cpp')
 
 # Change extension (see https://www.gnu.org/software/make/manual/make.html#Text-Functions)
-OBJECTS = $(C_SOURCES:.c=.o) $(CPP_SOURCES:.cpp=.o)
+OBJECTS = $(CPP_SOURCES:.cpp=.o)

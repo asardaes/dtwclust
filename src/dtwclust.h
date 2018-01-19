@@ -1,15 +1,10 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef DTWCLUST_HPP_
+#define DTWCLUST_HPP_
 
-#ifndef DTWCLUST_H_
-#define DTWCLUST_H_
-
+#include "centroids/centroids.h"
 #include "distances/distances.h"
+#include "distmat-loops/distmat-loops.h"
+#include "tadpole/tadpole.h"
 #include "utils/utils.h"
 
-#endif // DTWCLUST_H_
-
-#ifdef __cplusplus
-}
-#endif
+#endif // DTWCLUST_HPP_

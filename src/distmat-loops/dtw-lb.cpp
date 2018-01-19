@@ -7,7 +7,7 @@
 #include <RcppParallel.h>
 
 #include "../distance-calculators/distance-calculators.h"
-#include "../utils/utils++.h" // get_grain
+#include "../utils/utils.h" // get_grain
 
 namespace dtwclust {
 

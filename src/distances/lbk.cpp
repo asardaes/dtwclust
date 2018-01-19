@@ -1,10 +1,10 @@
-#include "distances++.h"
+#include "distances.h"
 
 #include <cmath> // std::sqrt
 
 #include <RcppArmadillo.h>
 
-#include "../utils/utils++.h" // kahan_sum
+#include "../utils/utils.h" // kahan_sum
 
 namespace dtwclust {
 
