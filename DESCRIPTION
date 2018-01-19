@@ -4,7 +4,7 @@ Title: Time Series Clustering Along with Optimizations for the Dynamic Time
     Warping Distance
 Version: 5.1.0.9000
 Depends:
-    R (>= 3.2.0),
+    R (>= 3.3.0),
     methods,
     proxy (>= 0.4-16),
     dtw
