@@ -19,7 +19,7 @@ matrix:
   include:
     - os: osx
       r: release
-      sudo: required
+      env: COMPILER_VER=UNKNOWN
   allow_failures:
     - os: osx
 # see http://thecoatlessprofessor.com/programming/r/selecting-an-alternative-compiler-for-r-package-testing-on-travis-ci/
@@ -33,7 +33,8 @@ addons:
       - gfortran-5
 before_install:
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
-      sudo tlmgr install placeins cleveref;
+      sudo tlmgr install placeins cleveref framed;
+      clang --version;
     else
       sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5;
       sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-5 50;
