@@ -18,7 +18,7 @@ matrix:
   fast_finish: true
   include:
     - os: osx
-      osx_image: xcode9
+      osx_image: xcode9.2
       r: release
       env: COMPILER=clang-4
   allow_failures:
