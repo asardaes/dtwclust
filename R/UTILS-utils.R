@@ -181,10 +181,13 @@ setnames_inplace <- function(vec, names) {
             .inorder = FALSE,
             .packages = "dtwclust"
         ) %dopar% {
+            reset <- TRUE
             num_threads <- Sys.getenv("RCPP_PARALLEL_NUM_THREADS")
-            if (nzchar(num_threads)) return(FALSE)
-            Sys.setenv("RCPP_PARALLEL_NUM_THREADS" = 1L) # nocov start
-            return(TRUE) # nocov end
+            if (nzchar(num_threads))
+                reset <- FALSE # nocov
+            else
+                RcppParallel::setThreadOptions(1L)
+            reset
         }
     }
     # evaluate expression
@@ -196,15 +199,21 @@ setnames_inplace <- function(vec, names) {
             invokeRestart("muffleWarning")
     })
     # reset parallel workers if needed
-    if (num_workers > 1L && any(reset_workers)) { # nocov start
-        foreach::foreach(
+    if (num_workers > 1L && any(reset_workers)) {
+        reset_failed <- foreach::foreach(
             i = 1L:num_workers,
+            .combine = c,
+            .multicombine = TRUE,
             .inorder = FALSE,
             .packages = "dtwclust"
         ) %dopar% {
+            RcppParallel::setThreadOptions("auto")
             Sys.unsetenv("RCPP_PARALLEL_NUM_THREADS")
+            nzchar(Sys.getenv("RCPP_PARALLEL_NUM_THREADS"))
         }
-    } # nocov end
+        if (any(reset_failed))
+            warning("Could not reset thread options in the parallel workers") # nocov
+    }
     # return
     ret
 }
