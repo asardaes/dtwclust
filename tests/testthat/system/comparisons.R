@@ -249,13 +249,13 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                           score.clus = score_fun,
                                           lbls = labels_subset)
 
-    expect_warning({
+    do_this <- if (foreach::getDoParWorkers() > 1L) base::eval else testthat::expect_warning
+    do_this({
         dba_comparison <- compare_clusterings(data_multivariate, "h",
                                               configs = cfgs_dba, seed = 294L,
                                               score.clus = score_fun,
                                               lbls = labels_subset)
-    },
-    "symmetric.*hierarchical")
+    })
 
     sdtwc_comparison <- compare_clusterings(data_subset, "h",
                                             configs = cfgs_sdtwc, seed = 3290L,
