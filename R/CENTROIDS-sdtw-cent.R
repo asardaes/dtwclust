@@ -1,7 +1,6 @@
-sdtw_cent_nloptr <- function(centroid, series, gamma, weights, mv, dim0)
+sdtw_cent_nloptr <- function(centroid, series, gamma, weights, mv, dim0, num_threads)
 {
     if (mv && is.null(dim(centroid))) dim(centroid) <- dim0
-    num_threads <- get_nthreads()
     .Call(C_sdtw_cent, series, centroid, gamma, weights, mv, num_threads, PACKAGE = "dtwclust")
 }
 
@@ -23,10 +22,22 @@ sdtw_cent_nloptr <- function(centroid, series, gamma, weights, mv, dim0)
 #' @param ... Further arguments for [nloptr::nloptr()] (except `opts` and `...`).
 #' @param opts List of options to pass to [nloptr::nloptr()].
 #' @template error-check
+#' @param num_threads How many threads to use for multi-threading. See Parallel Computing section
+#'   below.
 #'
 #' @details
 #'
 #' Note that you can trace the optimization by specifing `print_level > 0` in `opts`.
+#'
+#' @template rcpp-parallel
+#'
+#' @section Parallel Computing:
+#'
+#'   In contrast to other \pkg{dtwclust} functions, this function has a parameter to specify how
+#'   many threads it should try to use. This is because the procedure is more sensitive to floating
+#'   point inaccuracies, and dividing the work onto different threads could change the results (at
+#'   least in the order of 1e-8 according to my limited experiments). This could be an issue during
+#'   clusterings where a lot of calls to the centroid function are made.
 #'
 #' @return The resulting centroid, with attribute `nloptr_results` specifying the optimization
 #' results (except for `solution`, which is the returned centroid).
@@ -38,7 +49,7 @@ sdtw_cent_nloptr <- function(centroid, series, gamma, weights, mv, dim0)
 #'
 sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, length(series)), ...,
                       opts = list(algorithm = "NLOPT_LD_LBFGS", maxeval = 20L),
-                      error.check = TRUE)
+                      error.check = TRUE, num_threads = 1L)
 {
     series <- tslist(series)
     if (is.null(centroid)) centroid <- series[[sample(length(series), 1L)]] # Random choice
@@ -52,6 +63,7 @@ sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, le
     }
     gamma <- as.numeric(gamma)[1L]
     weights <- as.numeric(weights)
+    num_threads <- as.integer(num_threads)[1L]
 
     dots <- list(...)
     dots <- dots[intersect(names(dots), setdiff(names(formals(nloptr::nloptr)), "..."))]
@@ -66,7 +78,8 @@ sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, le
         gamma = gamma,
         weights = weights,
         mv = mv,
-        dim0 = dim0
+        dim0 = dim0,
+        num_threads = num_threads
     ))
 
     cent_out <- opt$solution
