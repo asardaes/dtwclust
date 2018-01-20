@@ -53,8 +53,8 @@ int inline get_grain(const int n, const int num_threads)
     __attribute__((always_inline));
 int inline get_grain(const int n, const int num_threads) {
     int grain = n / num_threads;
-    // min_grain defined here
-    return (grain < 10) ? 10 : grain;
+    // min grain defined here
+    return (grain < 8) ? 8 : grain;
 }
 
 } // namespace dtwclust
