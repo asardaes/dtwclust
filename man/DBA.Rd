@@ -81,7 +81,8 @@ The indices of the DTW alignment are obtained by calling \code{\link[=dtw_basic]
   An exception to the above is when this function is called within a
   \code{\link[foreach:foreach]{foreach}} parallel loop \strong{made by dtwclust}. If the parallel
   workers do not have the number of threads explicitly specified, this function will default to 1
-  thread per worker.
+  thread per worker. See the parallelization vignette for more information
+  (\code{browseVignettes("dtwclust")}).
 }
 
 \section{Multivariate series}{

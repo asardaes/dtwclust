@@ -75,7 +75,8 @@ in \code{y}, so be careful with the provided order and \code{nn.margin} (see exa
   An exception to the above is when this function is called within a
   \code{\link[foreach:foreach]{foreach}} parallel loop \strong{made by dtwclust}. If the parallel
   workers do not have the number of threads explicitly specified, this function will default to 1
-  thread per worker.
+  thread per worker. See the parallelization vignette for more information
+  (\code{browseVignettes("dtwclust")}).
 }
 
 \examples{
