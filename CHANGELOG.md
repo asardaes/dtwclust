@@ -1,7 +1,7 @@
 # Changelog
 
 ## Version 5.1.0.9000
-* All included distance functions and `TADPole` now use `RcppParallel` for parallelization.
+* Several functions now use `RcppParallel` for parallelization, refer to the new parallelization vignette for more information.
 * None of the distance/centroid functions expose a parameter for helper matrices anymore.
 * The ellipsis in `sdtw_cent` is now actually passed to `nloptr`.
 * Updated distance and centroid timing experiments.
