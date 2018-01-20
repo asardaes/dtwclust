@@ -165,8 +165,8 @@ public:
         int cm_nrows = local_calculator->max_len_x_ + 2;
         int dm_nrows = local_calculator->max_len_x_ + 1;
         for (std::size_t id = begin; id < end; id++) {
-            RcppParallel::RVector<double>& x = local_calculator->x_uv_[0];
-            RcppParallel::RVector<double>& y = local_calculator->y_uv_[id];
+            const RcppParallel::RVector<double>& x = local_calculator->x_uv_[0];
+            const RcppParallel::RVector<double>& y = local_calculator->y_uv_[id];
             double dist = local_calculator->calculate(0,id);
             mutex_.lock();
             objective_ += weights_[id] * dist;
@@ -233,8 +233,8 @@ public:
         int cm_nrows = local_calculator->max_len_x_ + 2;
         int dm_nrows = local_calculator->max_len_x_ + 1;
         for (std::size_t id = begin; id < end; id++) {
-            RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[0];
-            RcppParallel::RMatrix<double>& y = local_calculator->y_mv_[id];
+            const RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[0];
+            const RcppParallel::RMatrix<double>& y = local_calculator->y_mv_[id];
             double dist = local_calculator->calculate(0,id);
             mutex_.lock();
             objective_ += weights_[id] * dist;

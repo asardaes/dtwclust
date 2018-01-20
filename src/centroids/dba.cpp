@@ -187,7 +187,7 @@ public:
         std::fill(kahan_c_, kahan_c_ + new_cent_.length(), 0);
         for (std::size_t i = begin; i < end; i++) {
             local_calculator->calculate(i,0);
-            RcppParallel::RVector<double>& x = local_calculator->x_uv_[i];
+            const RcppParallel::RVector<double>& x = local_calculator->x_uv_[i];
             mutex_.lock();
             for (int ii = local_calculator->path_ - 1; ii >= 0; ii--) {
                 int i1 = local_calculator->index1_[ii] - 1;
@@ -252,7 +252,7 @@ public:
         int nrows = new_cent_.nrow();
         for (std::size_t i = begin; i < end; i++) {
             local_calculator->calculate(i,0);
-            RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[i];
+            const RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[i];
             mutex_.lock();
             for (int j = 0; j < static_cast<int>(new_cent_.ncol()); j++) {
                 for (int ii = local_calculator->path_ - 1; ii >= 0; ii--) {
@@ -319,7 +319,7 @@ public:
         std::fill(kahan_c_, kahan_c_ + (new_cent_.nrow() * new_cent_.ncol()), 0);
         int nrows = new_cent_.nrow();
         for (std::size_t i = begin; i < end; i++) {
-            RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[i];
+            const RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[i];
             for (int j = 0; j < static_cast<int>(new_cent_.ncol()); j++) {
                 local_calculator->calculate(i,0,j);
                 mutex_.lock();
