@@ -22,7 +22,6 @@ matrix:
       r: release
       env: COMPILER=clang-4
   allow_failures:
-    - os: osx
     - r: devel
 # see http://thecoatlessprofessor.com/programming/r/selecting-an-alternative-compiler-for-r-package-testing-on-travis-ci/
 addons:
