@@ -28,11 +28,11 @@ SymmetricFiller::SymmetricFiller(std::shared_ptr<Distmat>& distmat,
 // -------------------------------------------------------------------------------------------------
 /* parallel worker */
 // -------------------------------------------------------------------------------------------------
-class ParallelFillWorker : public RcppParallel::Worker {
+class SymmetricFillWorker : public RcppParallel::Worker {
 public:
     // constructor
-    ParallelFillWorker(const std::shared_ptr<DistanceCalculator>& dist_calculator,
-                       const std::shared_ptr<Distmat>& distmat)
+    SymmetricFillWorker(const std::shared_ptr<DistanceCalculator>& dist_calculator,
+                        const std::shared_ptr<Distmat>& distmat)
         : dist_calculator_(dist_calculator)
         , distmat_(distmat)
         , nrows_(dist_calculator_->xLimit())
@@ -71,7 +71,7 @@ private:
 // -------------------------------------------------------------------------------------------------
 void SymmetricFiller::fill() const
 {
-    ParallelFillWorker fill_worker(dist_calculator_, distmat_);
+    SymmetricFillWorker fill_worker(dist_calculator_, distmat_);
     // number of elements in square matrix without including diagonal
     int nrows = dist_calculator_->xLimit();
     int size = nrows * (nrows + 1) / 2 - nrows;

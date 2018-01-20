@@ -29,10 +29,10 @@ PairwiseFiller::PairwiseFiller(std::shared_ptr<Distmat>& distmat,
 // -------------------------------------------------------------------------------------------------
 /* parallel worker */
 // -------------------------------------------------------------------------------------------------
-class ParallelFillWorker : public RcppParallel::Worker {
+class PairwiseFillWorker : public RcppParallel::Worker {
 public:
     // constructor
-    ParallelFillWorker(const std::shared_ptr<DistanceCalculator>& dist_calculator,
+    PairwiseFillWorker(const std::shared_ptr<DistanceCalculator>& dist_calculator,
                        const std::shared_ptr<Distmat>& distmat)
         : dist_calculator_(dist_calculator)
         , distmat_(distmat)
@@ -66,7 +66,7 @@ private:
 // -------------------------------------------------------------------------------------------------
 void PairwiseFiller::fill() const
 {
-    ParallelFillWorker fill_worker(dist_calculator_, distmat_);
+    PairwiseFillWorker fill_worker(dist_calculator_, distmat_);
     int size = dist_calculator_->xLimit();
     int grain = get_grain(size, num_threads_);
     RcppParallel::parallelFor(0, size, fill_worker, grain);
