@@ -83,6 +83,12 @@ The indices of the DTW alignment are obtained by calling \code{\link[=dtw_basic]
   workers do not have the number of threads explicitly specified, this function will default to 1
   thread per worker. See the parallelization vignette for more information
   (\code{browseVignettes("dtwclust")}).
+
+
+
+This function appears to be very sensitive to numerical inaccuracies if multi-threading is used
+in a \strong{32 bit} installation. In such systems, consider limiting calculations to 1 thread with
+\code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
 }
 
 \section{Multivariate series}{
