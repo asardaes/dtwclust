@@ -4,6 +4,7 @@
 * Several functions now use `RcppParallel` for parallelization, refer to the new parallelization vignette for more information.
 * None of the distance/centroid functions expose a parameter for helper matrices anymore.
 * The ellipsis in `sdtw_cent` is now actually passed to `nloptr`.
+* Fixed `tsclust` for `dtw_lb` distance and `pam.precompute = FALSE` (it was always using `dtw_basic`, so the results should not change).
 * Updated distance and centroid timing experiments.
 
 ## Version 5.1.0
