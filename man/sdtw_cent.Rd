@@ -65,7 +65,7 @@ In contrast to other \pkg{dtwclust} functions, this function has a parameter to 
 many threads it should try to use. This is because the procedure is more sensitive to floating
 point inaccuracies, and dividing the work onto different threads could change the results (at
 least in the order of 1e-8 according to my limited experiments). This could be an issue during
-clusterings where a lot of calls to the centroid function are made.
+clusterings where a lot of calls to the centroid function are made and the errors propagate.
 }
 
 \references{

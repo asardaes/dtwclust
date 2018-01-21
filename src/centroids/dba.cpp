@@ -11,7 +11,7 @@
 #include "../distance-calculators/distance-calculators.h"
 #include "../distances/distances.h" // dtw_basic_par
 #include "../utils/TSTSList.h"
-#include "../utils/utils.h" // Rflush, d2s, get_grain
+#include "../utils/utils.h" // Rflush, d2s
 
 namespace dtwclust {
 
@@ -420,7 +420,8 @@ SEXP dba_uv(const SEXP& X, const Rcpp::NumericVector& centroid, const SEXP& DOTS
     SEXP Y = Rcpp::List::create(Rcpp::_["cent"] = ref_cent);
     DtwBacktrackCalculator backtrack_calculator(DOTS, X, Y, false);
     DbaUv parallel_worker(std::move(backtrack_calculator), new_cent, num_vals);
-    int grain = get_grain(series.length(), num_threads);
+    int grain = series.length() / num_threads;
+    if (grain == 0) grain = 1;
 
     if (trace) Rcpp::Rcout << "\tDBA Iteration:";
     int iter = 1;
@@ -457,7 +458,8 @@ SEXP dba_mv_by_variable(const SEXP& X, const Rcpp::NumericMatrix& centroid, cons
     SEXP Y = Rcpp::List::create(Rcpp::_["cent"] = ref_cent);
     DtwBacktrackCalculator backtrack_calculator(DOTS, X, Y, true);
     DbaMvByVariable parallel_worker(std::move(backtrack_calculator), new_cent, num_vals);
-    int grain = get_grain(series.length(), num_threads);
+    int grain = series.length() / num_threads;
+    if (grain == 0) grain = 1;
 
     if (trace) Rcpp::Rcout << "\tDBA Iteration:";
     int iter = 1;
@@ -494,7 +496,8 @@ SEXP dba_mv_by_series(const SEXP& X, const Rcpp::NumericMatrix& centroid, const 
     SEXP Y = Rcpp::List::create(Rcpp::_["cent"] = ref_cent);
     DtwBacktrackCalculator backtrack_calculator(DOTS, X, Y, true);
     DbaMvBySeries parallel_worker(std::move(backtrack_calculator), new_cent, num_vals);
-    int grain = get_grain(series.length(), num_threads);
+    int grain = series.length() / num_threads;
+    if (grain == 0) grain = 1;
 
     if (trace) Rcpp::Rcout << "\tDBA Iteration:";
     int iter = 1;
@@ -529,7 +532,7 @@ RcppExport SEXP dba(SEXP X, SEXP CENT,
     max_iter = Rcpp::as<int>(MAX_ITER);
     delta = Rcpp::as<double>(DELTA);
     trace = Rcpp::as<bool>(TRACE);
-    num_threads = Rcpp::as<bool>(NUM_THREADS);
+    num_threads = Rcpp::as<int>(NUM_THREADS);
     if (Rcpp::as<bool>(MV)) {
         if (Rcpp::as<int>(MV_VER) == 1)
             return dba_mv_by_variable(X, CENT, DOTS);

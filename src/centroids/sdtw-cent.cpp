@@ -9,7 +9,7 @@
 #include "../distance-calculators/distance-calculators.h"
 #include "../distances/distances.h" // sdtw
 #include "../utils/TSTSList.h"
-#include "../utils/utils.h" // d2s, get_grain
+#include "../utils/utils.h" // d2s
 
 namespace dtwclust {
 
@@ -289,7 +289,8 @@ RcppExport SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
     Rcpp::List series(SERIES);
     double gamma = Rcpp::as<double>(GAMMA);
     int num_threads = Rcpp::as<int>(NUM_THREADS);
-    int grain = get_grain(series.length(), num_threads);
+    int grain = series.length() / num_threads;
+    if (grain == 0) grain = 1;
     // compute objective and gradient
     if (Rcpp::as<bool>(MV)) {
         Rcpp::NumericMatrix cent(CENTROID);
