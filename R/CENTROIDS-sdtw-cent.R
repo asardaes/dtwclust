@@ -39,8 +39,8 @@ sdtw_cent_nloptr <- function(centroid, series, gamma, weights, mv, dim0, num_thr
 #'   point inaccuracies, and dividing the work onto different threads could change the results (at
 #'   least in the order of 1e-8 according to my limited experiments). This could be an issue during
 #'   clusterings where a lot of calls to the centroid function are made and the errors propagate.
-#'
-#'   Note that this **resets** the `stackSize` of [RcppParallel::setThreadOptions()].
+#'   Note that you should still set the maximum amount of available threads with
+#'   [RcppParallel::setThreadOptions()].
 #'
 #' @return The resulting centroid, with attribute `nloptr_results` specifying the optimization
 #' results (except for `solution`, which is the returned centroid).
@@ -67,12 +67,6 @@ sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, le
     gamma <- as.numeric(gamma)[1L]
     weights <- as.numeric(weights)
     num_threads <- as.integer(num_threads)[1L]
-    num_threads0 <- get_nthreads()
-    RcppParallel::setThreadOptions(num_threads)
-    on.exit({
-        RcppParallel::setThreadOptions(num_threads0)
-        Sys.setenv("RCPP_PARALLEL_NUM_THREADS" = num_threads0)
-    })
 
     dots <- list(...)
     dots <- dots[intersect(names(dots), setdiff(names(formals(nloptr::nloptr)), "..."))]

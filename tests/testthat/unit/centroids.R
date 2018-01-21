@@ -297,6 +297,15 @@ test_that("Operations with sdtw_cent centroid complete successfully.", {
 
     expect_identical(length(cent_sdtwc), k)
 
+    cent_sdtwc_par <- family@allcent(x,
+                                     cl_id = cl_id,
+                                     k = k,
+                                     cent = x[c(1L,20L)],
+                                     cl_old = 0L,
+                                     num_threads = RcppParallel::defaultNumThreads())
+
+    expect_equal(cent_sdtwc, cent_sdtwc_par, tolerance = 1e-6)
+
     ## ---------------------------------------------------------- multivariate
     cent_mv_sdtwc <- family@allcent(x_mv,
                                     cl_id = cl_id,
@@ -306,6 +315,15 @@ test_that("Operations with sdtw_cent centroid complete successfully.", {
 
     expect_identical(length(cent_mv_sdtwc), k)
     expect_identical(dim(cent_mv_sdtwc[[1L]]), dim(x_mv[[1L]]))
+
+    cent_mv_sdtwc_par <- family@allcent(x_mv,
+                                        cl_id = cl_id,
+                                        k = k,
+                                        cent = x_mv[c(1L,20L)],
+                                        cl_old = 0L,
+                                        num_threads = RcppParallel::defaultNumThreads())
+
+    expect_equal(cent_mv_sdtwc, cent_mv_sdtwc_par, tolerance = 1e-6)
 
     ## ---------------------------------------------------------- refs
     assign("cent_sdtwc", cent_sdtwc, persistent)

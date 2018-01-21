@@ -299,7 +299,10 @@ RcppExport SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
         Rcpp::List x = Rcpp::List::create(Rcpp::_["cent"] = CENTROID);
         SdtwCentCalculator dist_calculator(x, series, gamma, true);
         SdtwMv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma);
-        RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
+        if (num_threads == 1)
+            parallel_worker(0, series.length());
+        else
+            RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
         return Rcpp::List::create(
             Rcpp::_["objective"] = objective,
             Rcpp::_["gradient"] = gradient
@@ -312,7 +315,10 @@ RcppExport SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
         Rcpp::List x = Rcpp::List::create(Rcpp::_["cent"] = CENTROID);
         SdtwCentCalculator dist_calculator(x, series, gamma, false);
         SdtwUv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma);
-        RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
+        if (num_threads == 1)
+            parallel_worker(0, series.length());
+        else
+            RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
         return Rcpp::List::create(
             Rcpp::_["objective"] = objective,
             Rcpp::_["gradient"] = gradient
