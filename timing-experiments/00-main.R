@@ -2,7 +2,6 @@ suppressPackageStartupMessages({
     library("dtwclust")
     library("microbenchmark")
     library("dplyr")
-    library("doParallel")
 })
 
 #' Set this to TRUE to run a subset of the experiments with less evaluations. "Short" is relative

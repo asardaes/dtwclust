@@ -40,7 +40,7 @@ series_mv <- series_mv[id_ascending]
 # Window sizes for the experiments (where applicable)
 window_sizes <- seq(from = 10L, to = 100L, by = 10L)
 # Number of times each experiment will be repeated (by microbenchmark)
-times <- if (short_experiments) 10L else 100L
+times <- if (short_experiments) 100L else 500L
 
 #' NOTE: all single experiments are pretty much equivalent, only the first one is commented. They
 #' are run within a new environment so that they don't change variables in the global environment
@@ -455,7 +455,7 @@ while (any(dlen)) {
 series <- series[id_ascending]
 series_mv <- multivariate_series[id_ascending]
 # Window sizes for experiments that test more than one value
-window_sizes <- seq(from = 20L, to = 80L, by = 20L)
+window_sizes <- seq(from = 30L, to = 90L, by = 30L)
 # Window size for experiments that set a fixed value
 window_size <- 50L
 
@@ -466,20 +466,20 @@ if (short_experiments) {
     series_mv <- series_mv[1L:2L]
     # Number of evaluations for each expression
     times <- 5L
-    # Number of parallel workers to test
-    num_workers_to_test <- c(4L)
+    # Number of parallel threads to test
+    num_threads_to_test <- c(4L)
     id_series <- cbind(seq(from = 10L, to = 100L, by = 10L),
                        seq(from = 10L, to = 100L, by = 10L))
 } else {
     # Number of evaluations for each expression
     times <- 30L
-    # Number of parallel workers to test
-    num_workers_to_test <- c(1L, 2L, 4L)
+    # Number of parallel threads to test
+    num_threads_to_test <- c(1L, 2L, 4L)
     id_series <- rbind(
-        expand.grid(seq(from = 10L, to = 100L, by = 10L), 10L),
-        expand.grid(100L, seq(from = 20L, to = 100L, by = 10L)),
-        cbind(Var1 = seq(from = 20L, to = 90L, by = 10L),
-              Var2 = seq(from = 20L, to = 90L, by = 10L))
+        expand.grid(seq(from = 20L, to = 100L, by = 20L), 20L),
+        expand.grid(100L, seq(from = 40L, to = 100L, by = 20L)),
+        cbind(Var1 = seq(from = 40L, to = 80L, by = 20L),
+              Var2 = seq(from = 40L, to = 80L, by = 20L))
     )
     id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
 }
@@ -496,12 +496,11 @@ cat("\n")
 
 cat("\tRunning lb_keogh experiments for multiple series\n")
 # Loop along number of parallel workers
-dist_lbk_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
+dist_lbk_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
     cat("\t\t")
 
-    # Create parallel workers and load dtwclust in each one
-    registerDoParallel(workers <- makeCluster(num_workers))
-    invisible(clusterEvalQ(workers, library("dtwclust")))
+    # Set number of threads to use
+    RcppParallel::setThreadOptions(num_threads)
 
     # Loop along series
     benchmarks <- lapply(series, function(this_series) {
@@ -522,7 +521,7 @@ dist_lbk_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_w
         cat(".")
         # Return data frame with results
         data.frame(distance = "lb_keogh",
-                   num_workers = num_workers,
+                   num_threads = num_threads,
                    num_x = id_series[,1L],
                    num_y = id_series[,2L],
                    num_total = id_series[,1L] * id_series[,2L],
@@ -530,11 +529,6 @@ dist_lbk_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_w
                    window_size = window_size,
                    median_time_ms = benchmark$median)
     })
-
-    # Stop parallel workers
-    stopCluster(workers)
-    registerDoSEQ()
-    rm(workers)
 
     cat("\n")
     # Bind results for all series and return
@@ -546,10 +540,9 @@ dist_lbk_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_w
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning lb_improved experiments for multiple series\n")
-dist_lbi_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
+dist_lbi_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
     cat("\t\t")
-    registerDoParallel(workers <- makeCluster(num_workers))
-    invisible(clusterEvalQ(workers, library("dtwclust")))
+    RcppParallel::setThreadOptions(num_threads)
 
     benchmarks <- lapply(series, function(this_series) {
         expressions <- lapply(1L:nrow(id_series), function(i) {
@@ -566,7 +559,7 @@ dist_lbi_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_w
 
         cat(".")
         data.frame(distance = "lb_improved",
-                   num_workers = num_workers,
+                   num_threads = num_threads,
                    num_x = id_series[,1L],
                    num_y = id_series[,2L],
                    num_total = id_series[,1L] * id_series[,2L],
@@ -574,10 +567,6 @@ dist_lbi_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_w
                    window_size = window_size,
                    median_time_ms = benchmark$median)
     })
-
-    stopCluster(workers)
-    registerDoSEQ()
-    rm(workers)
 
     cat("\n")
     dplyr::bind_rows(benchmarks)
@@ -591,10 +580,9 @@ dist_lbi_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_w
 #' id_series is different here.
 
 cat("\tRunning dtw_lb experiments for multiple series\n")
-dist_dtwlb_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
+dist_dtwlb_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
     cat("\t\t")
-    registerDoParallel(workers <- makeCluster(num_workers))
-    invisible(clusterEvalQ(workers, library("dtwclust")))
+    RcppParallel::setThreadOptions(num_threads)
 
     id_series <- rbind(
         expand.grid(seq(from = 10L, to = 50L, by = 10L), 10L),
@@ -619,7 +607,7 @@ dist_dtwlb_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num
 
         cat(".")
         data.frame(distance = "dtw_lb",
-                   num_workers = num_workers,
+                   num_threads = num_threads,
                    num_x = id_series[,1L],
                    num_y = id_series[,2L],
                    num_total = id_series[,1L] * id_series[,2L],
@@ -627,10 +615,6 @@ dist_dtwlb_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num
                    window_size = window_size,
                    median_time_ms = benchmark$median)
     })
-
-    stopCluster(workers)
-    registerDoSEQ()
-    rm(workers)
 
     cat("\n")
     dplyr::bind_rows(benchmarks)
@@ -641,10 +625,9 @@ dist_dtwlb_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning sbd experiments for multiple series\n")
-dist_sbd_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
+dist_sbd_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
     cat("\t\t")
-    registerDoParallel(workers <- makeCluster(num_workers))
-    invisible(clusterEvalQ(workers, library("dtwclust")))
+    RcppParallel::setThreadOptions(num_threads)
 
     benchmarks <- lapply(series, function(this_series) {
         expressions <- lapply(1L:nrow(id_series), function(i) {
@@ -660,17 +643,13 @@ dist_sbd_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_w
 
         cat(".")
         data.frame(distance = "sbd",
-                   num_workers = num_workers,
+                   num_threads = num_threads,
                    num_x = id_series[,1L],
                    num_y = id_series[,2L],
                    num_total = id_series[,1L] * id_series[,2L],
                    series_length = NROW(this_series[[1L]]),
                    median_time_ms = benchmark$median)
     })
-
-    stopCluster(workers)
-    registerDoSEQ()
-    rm(workers)
 
     cat("\n")
     dplyr::bind_rows(benchmarks)
@@ -681,10 +660,9 @@ dist_sbd_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_w
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning dtw experiments for multiple univariate series\n")
-dist_dtw_univariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
+dist_dtw_univariate_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
     cat("\t\t")
-    registerDoParallel(workers <- makeCluster(num_workers))
-    invisible(clusterEvalQ(workers, library("dtwclust")))
+    RcppParallel::setThreadOptions(num_threads)
 
     benchmarks <- lapply(series, function(this_series) {
         expressions <- lapply(window_sizes, function(window_size) {
@@ -704,7 +682,7 @@ dist_dtw_univariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, fun
 
         cat(".")
         data.frame(distance = "dtw_univariate",
-                   num_workers = num_workers,
+                   num_threads = num_threads,
                    num_x = id_series[,1L],
                    num_y = id_series[,2L],
                    num_total = id_series[,1L] * id_series[,2L],
@@ -712,10 +690,6 @@ dist_dtw_univariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, fun
                    window_size = rep(window_sizes, each = nrow(id_series)),
                    median_time_ms = benchmark$median)
     })
-
-    stopCluster(workers)
-    registerDoSEQ()
-    rm(workers)
 
     cat("\n")
     dplyr::bind_rows(benchmarks)
@@ -726,10 +700,9 @@ dist_dtw_univariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, fun
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning dtw experiments for multiple multivariate series\n")
-dist_dtw_multivariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
+dist_dtw_multivariate_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
     cat("\t\t")
-    registerDoParallel(workers <- makeCluster(num_workers))
-    invisible(clusterEvalQ(workers, library("dtwclust")))
+    RcppParallel::setThreadOptions(num_threads)
 
     benchmarks <- lapply(series_mv, function(this_series) {
         expressions <- lapply(window_sizes, function(window_size) {
@@ -749,7 +722,7 @@ dist_dtw_multivariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, f
 
         cat(".")
         data.frame(distance = "dtw_multivariate",
-                   num_workers = num_workers,
+                   num_threads = num_threads,
                    num_x = id_series[,1L],
                    num_y = id_series[,2L],
                    num_total = id_series[,1L] * id_series[,2L],
@@ -757,10 +730,6 @@ dist_dtw_multivariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, f
                    window_size = rep(window_sizes, each = nrow(id_series)),
                    median_time_ms = benchmark$median)
     })
-
-    stopCluster(workers)
-    registerDoSEQ()
-    rm(workers)
 
     cat("\n")
     dplyr::bind_rows(benchmarks)
@@ -771,24 +740,22 @@ dist_dtw_multivariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, f
 # --------------------------------------------------------------------------------------------------
 
 #' NOTE: GAK and soft-DTW are much more time consuming, so I only test univariate, less window
-#' sizes, less series, and less repetitions. Based on the single experiments, this should be enough
+#' sizes, and less series. Based on the single experiments, this should be enough
 #' to give an idea.
 
 window_sizes <- c(20L, 40L)
 id_series <- rbind(
-    expand.grid(seq(from = 10L, to = 50L, by = 10L), 10L),
-    expand.grid(50L, seq(from = 20L, to = 50L, by = 10L)),
-    cbind(Var1 = seq(from = 20L, to = 40L, by = 10L),
-          Var2 = seq(from = 20L, to = 40L, by = 10L))
+    expand.grid(seq(from = 20L, to = 60L, by = 20L), 20L),
+    expand.grid(60L, seq(from = 40L, to = 60L, by = 20L)),
+    cbind(Var1 = 40L,
+          Var2 = 40L)
 )
 id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
-times <- 10L
 
 cat("\tRunning sdtw experiments for multiple univariate series\n")
-dist_sdtw_univariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
+dist_sdtw_univariate_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
     cat("\t\t")
-    registerDoParallel(workers <- makeCluster(num_workers))
-    invisible(clusterEvalQ(workers, library("dtwclust")))
+    RcppParallel::setThreadOptions(num_threads)
 
     benchmarks <- lapply(series, function(this_series) {
         expressions <- lapply(1L:nrow(id_series), function(i) {
@@ -804,17 +771,13 @@ dist_sdtw_univariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, fu
 
         cat(".")
         data.frame(distance = "sdtw_univariate",
-                   num_workers = num_workers,
+                   num_threads = num_threads,
                    num_x = id_series[,1L],
                    num_y = id_series[,2L],
                    num_total = id_series[,1L] * id_series[,2L],
                    series_length = NROW(this_series[[1L]]),
                    median_time_ms = benchmark$median)
     })
-
-    stopCluster(workers)
-    registerDoSEQ()
-    rm(workers)
 
     cat("\n")
     dplyr::bind_rows(benchmarks)
@@ -825,10 +788,9 @@ dist_sdtw_univariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, fu
 # --------------------------------------------------------------------------------------------------
 
 cat("\tRunning normalized_gak experiments for multiple univariate series\n")
-dist_ngak_univariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, function(num_workers) {
+dist_ngak_univariate_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
     cat("\t\t")
-    registerDoParallel(workers <- makeCluster(num_workers))
-    invisible(clusterEvalQ(workers, library("dtwclust")))
+    RcppParallel::setThreadOptions(num_threads)
 
     benchmarks <- lapply(series, function(this_series) {
         expressions <- lapply(window_sizes, function(window_size) {
@@ -849,7 +811,7 @@ dist_ngak_univariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, fu
 
         cat(".")
         data.frame(distance = "gak_univariate",
-                   num_workers = num_workers,
+                   num_threads = num_threads,
                    num_x = id_series[,1L],
                    num_y = id_series[,2L],
                    num_total = id_series[,1L] * id_series[,2L],
@@ -857,10 +819,6 @@ dist_ngak_univariate_multiple <- dplyr::bind_rows(lapply(num_workers_to_test, fu
                    window_size = rep(window_sizes, each = nrow(id_series)),
                    median_time_ms = benchmark$median)
     })
-
-    stopCluster(workers)
-    registerDoSEQ()
-    rm(workers)
 
     cat("\n")
     dplyr::bind_rows(benchmarks)

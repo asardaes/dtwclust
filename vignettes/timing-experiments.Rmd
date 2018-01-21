@@ -8,11 +8,13 @@ output:
         fig_width: 6.5
         fig_height: 7
 vignette: >
-    %\VignetteEngine{knitr::rmarkdown}
     %\VignettePackage{dtwclust}
     %\VignetteIndexEntry{Timing experiments for dtwclust}
     %\VignetteEncoding{UTF-8}
+    %\VignetteEngine{knitr::rmarkdown}
 bibliography: REFERENCES.bib
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
@@ -81,9 +83,12 @@ a series of timing experiments were made.
 Said experiments were not concerned with correctness or accuracy,
 only with timing characteristics.
 
-The distance and prototyping experiments were re-run with `R` v3.4.3 and `dtwclust` v5.1.0.9000.
-The rest were run using `R` v3.4.1 and `dtwclust` v4.0.3.
-The `microbenchmark` package (v1.4-2.1) was also used for most of them.
+The experiments were re-run with `R` v3.4.3 and `dtwclust` v5.1.0.9000.
+Because of the changes introduced
+(see [the parallelization vignette](parallelization-considerations.html)),
+the results have changed slightly in comparison to the original ones
+(which used `dtwclust` v4.0.3).
+The `microbenchmark` package (v1.4-3) was also used for most of the experiments.
 The computer used was running GNU/Linux (LTS kernel v4.9) with an `i5-6500` Intel processor (4 cores) and 16GB of RAM.
 The whole set of experiments took approximately `r exec_time` hours to complete.
 The data used comes from the Character Trajectories set [@lichman2013],
@@ -102,7 +107,7 @@ First we look at the results of the timing experiments for single time-series,
 i.e., for distances calculated between two individual time-series.
 The distances tested are those included in the package.
 Here we look at the effect of window sizes and series' lengths.
-Each calculation was repeated `r attr(dist_single_results, "times")` times and the *median* value was extracted.
+Each calculation was repeated `r attr(dist_single_results, "times")` times and the **median** value was extracted.
 Note that the vertical scales differ for the following figures.
 
 ### DTW lower bounds
@@ -124,11 +129,12 @@ gg +
 
 The first interesting result relates to the DTW lower bounds: `lb_keogh` and `lb_improved`.
 The window size does not seem to have a very significant effect,
-and the running time appears to grow linearly with the series' length for `lb_improved`.
+and the running time appears to (mostly?) grow slowly with the series' length.
 However, `lb_improved` was faster that `lb_keogh`.
 Considering that `lb_improved` first needs to calculate `lb_keogh` and then perform additional calculations,
 this is somewhat puzzling,
 and the reason is not immediately evident.
+Perhaps there are compiler optimizations at play.
 
 ### Shape-based distance
 
@@ -174,7 +180,7 @@ gg +
 
 In the case of DTW,
 we can see that a window constraint can indeed have a very significant effect on running time,
-considering that a window size of 10 resulted in a calculation that was 4 times faster than when using no constraint.
+considering that a window size of 10 resulted in a calculation that was about 4 times faster than when using no constraint.
 In this case, using multivariate series (with 3 variables) did not have a very significant effect.
 
 ### Soft-DTW
@@ -196,7 +202,7 @@ gg +
 In principle, the soft-DTW algorithm is very similar to that of unconstrained DTW.
 However, its run-time characteristics are clearly different,
 resulting in considerably slower calculations.
-The increase caused by considering multivariate time-series is not negligible.
+Interestingly, the multivariate case was marginally faster.
 
 ### Triangular global alignment kernel
 
@@ -231,8 +237,7 @@ In the following sections,
 we look at the way the included distances are optimized,
 and evaluate the way it affects their running times when doing distance calculations between several time-series.
 
-These experiments were repeated 30 times and the median value was computed,
-except for the GAK distance which was only repeated 10 times.
+These experiments were repeated `r attr(dist_multiple_results, "times")` times and the median value was computed.
 We look at the effect of several factors:
 the length of the series,
 a window size where applicable,
@@ -268,25 +273,25 @@ ggplot(dist_multiple_results[id_gg,],
            colour = num_y,
            shape = series_length)) +
     geom_point(size = 3) +
-    facet_grid(distance ~ num_workers, scales = "free_y") +
+    facet_grid(distance ~ num_threads, scales = "free_y") +
     labs(x = "Total number of distance calculations",
          y = "Median time (ms)")
 ```
 
 For `lb_keogh` and `lb_improved`,
-we see that the effect of the series' length is diminished when calculating cross-distance matrices.
-Parallelization actually seems to be detrimental for these distances,
-and in the case of sequential calculations (i.e. with one worker),
-`lb_improved` was once again slightly faster than `lb_keogh`.
+we see that the effect of the series' length is more consistent when calculating cross-distance matrices.
+Parallelization with multi-threading yields better performance in a proportional way,
+and this time `lb_improved` was about twice as slow as `lb_keogh`.
 As expected, increasing the number of series in `y` increases the running times.
 
-The behavior of `dtw_lb` is more consistent.
-The length of the series increased the running times of sequential calculations more or less by a constant factor,
-although this effect disappeared for parallel calculations.
-Using 2 parallel workers helped quite a bit,
-but increasing that number to 4 was actually marginally worse.
-As in the previous case,
-the number of series in `y` is directly proportional to the running times.
+The behavior of `dtw_lb` is also consistent,
+but the length of the series affected running times in a strange way,
+since the calculations with series of length 152 were the slowest ones.
+Using multi-threading can also be advantageous in this case,
+and this is applied on two occasions:
+when estimating the initial distance matrix with `lb_improved`,
+and when updating the nearest neighbors' with DTW.
+Nevertheless, the procedure is much slower than the lower bounds alone.
 
 ### Shape-based distance
 
@@ -304,7 +309,7 @@ ggplot(dist_multiple_results[id_gg,],
            y = median_time_ms,
            colour = series_length)) +
     geom_point(size = 3) +
-    facet_wrap(~num_workers) +
+    facet_wrap(~num_threads) +
     labs(x = "Total number of distance calculations",
          y = "Median time (ms)")
 ```
@@ -312,19 +317,15 @@ ggplot(dist_multiple_results[id_gg,],
 For sequential calculations,
 we see here the expected effect of the series' lengths.
 Adjusting them to powers of 2 for the FFT meant that the calculations were faster for series of length 109,
-and for series of length 152 and 196,
-the times were more or less equal.
-Parallelization removed this effect somewhat,
-and helped reduce times slightly,
-although once again only with 2 parallel workers.
-This might be different for cross-distance matrices that are much larger.
+and for series of length 152 and 196 the times were more or less equal.
+Parallelization helped reduce times proportionally.
 
 ### DTW
 
 The DTW distance doesn't allow for many optimizations.
 The version implemented in `dtw_basic` for cross-distance matrices uses less RAM by saving only 2 columns of the local cost matrix (LCM) at all times
 (since no back-tracking is performed in this case).
-Moreover, this LCM is only allocated once.
+Moreover, this LCM is only allocated once in each thread.
 The results are shown in the next figure.
 
 ```{r dist-multiple-dtw-plot, fig.height=8, fig.cap="*The facets' columns indicate the number of parallel workers, whereas the rows indicate the length of the series being considered (all series had the same length for each case). All times are in milliseconds.*"}
@@ -336,7 +337,7 @@ ggplot(dist_multiple_results[id_gg,],
            shape = distance)) +
     geom_point(size = 3) +
     scale_shape_manual(values = c(0, 3)) +
-    facet_grid(series_length ~ num_workers) +
+    facet_grid(series_length ~ num_threads) +
     labs(x = "Total number of distance calculations",
          y = "Median time (ms)")
 ```
@@ -345,9 +346,9 @@ The DTW distance presents a much more constant behavior across the board.
 The difference between univariate and multivariate series is very small,
 but window sizes and series lengths can have a very significant effect,
 especially for sequential calculations.
-Additionally, DTW benefits a lot from parallelization, almost linearly,
-since using 2 workers reduced times in half,
-and using 4 workers reduced them practically by a factor of 4.
+Additionally, DTW benefits linearly from parallelization,
+since using 2 threads reduced times in half,
+and using 4 reduced them practically by a factor of 4.
 Also note that the growth is very linear,
 which indicates that DTW cannot be easily optimized much more,
 something which was already pointed out before [@keogh2004].
@@ -356,7 +357,7 @@ something which was already pointed out before [@keogh2004].
 
 As with DTW,
 soft-DTW has few optimizations:
-its helper matrix is allocated only once during the calculation.
+its helper matrix is allocated only once in each thread during the calculation.
 In this case,
 we look only at the univariate version.
 
@@ -366,7 +367,7 @@ ggplot(dist_multiple_results[id_gg,],
        aes(x = num_total,
            y = median_time_ms)) +
     geom_point(size = 3) +
-    facet_grid(series_length ~ num_workers) +
+    facet_grid(series_length ~ num_threads) +
     labs(x = "Total number of distance calculations",
          y = "Median time (ms)")
 ```
@@ -379,8 +380,7 @@ Unfortunately, running times also grow very fast with the series' length.
 
 Finally we look at the computations with the GAK distance.
 As shown in the previous section,
-this distance is considerably slower,
-which is why less experiments were made in this section.
+this distance is considerably slower.
 Moreover, only the normalized version can be used as a *distance* measure
 (as opposed to a similarity),
 so only the normalized version was tested.
@@ -391,7 +391,7 @@ normalization effectively requires calculating a GAK for `x` and `y` by themselv
 so in order to avoid repeated calculations,
 these normalization factors are only computed once for cross-distance matrices.
 GAK also uses a helper matrix to save logarithms during the intermediate calculations,
-and this matrix is allocated only once.
+and this matrix is allocated only once in each thread.
 
 It is worth pointing out that, in principle, the GAK code is very similar to that of DTW.
 However, GAK relies on logarithms, whereas DTW only uses arithmetic operations.
@@ -404,12 +404,12 @@ ggplot(dist_multiple_results[id_gg,],
            y = median_time_ms,
            colour = window_size)) +
     geom_point(size = 3) +
-    facet_grid(series_length ~ num_workers) +
+    facet_grid(series_length ~ num_threads) +
     labs(x = "Total number of distance calculations",
          y = "Median time (ms)")
 ```
 
-Here we see a much clearer effect of window sizes and series' lengths and,
+Here we see a clear effect of window sizes and series' lengths and,
 as was the case for DTW,
 parallelization can be very beneficial for GAK.
 
