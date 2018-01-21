@@ -10,7 +10,6 @@ sdtw_cent_nloptr <- function(centroid, series, gamma, weights, mv, dim0, num_thr
 #'
 #' @export
 #' @importFrom nloptr nloptr
-#' @importFrom RcppParallel setThreadOptions
 #'
 #' @param series A matrix or data frame where each row is a time series, or a list where each
 #'   element is a time series. Multivariate series should be provided as a list of matrices where
