@@ -177,6 +177,11 @@ public:
         if (kahan_t_) delete[] kahan_t_;
     }
 
+    // for reusability
+    void reset() {
+        std::fill(kahan_c_, kahan_c_ + new_cent_.length(), 0);
+    }
+
     // parallel loop across specified range
     void operator()(std::size_t begin, std::size_t end) {
         // local copy of calculator so it is setup separately for each thread
@@ -184,7 +189,6 @@ public:
         DtwBacktrackCalculator* local_calculator = backtrack_calculator_.clone();
         mutex_.unlock();
         // kahan sum step
-        std::fill(kahan_c_, kahan_c_ + new_cent_.length(), 0);
         for (std::size_t i = begin; i < end; i++) {
             local_calculator->calculate(i,0);
             const RcppParallel::RVector<double>& x = local_calculator->x_uv_[i];
@@ -241,6 +245,11 @@ public:
         if (kahan_t_) delete[] kahan_t_;
     }
 
+    // for reusability
+    void reset() {
+        std::fill(kahan_c_, kahan_c_ + (new_cent_.nrow() * new_cent_.ncol()), 0);
+    }
+
     // parallel loop across specified range
     void operator()(std::size_t begin, std::size_t end) {
         // local copy of calculator so it is setup separately for each thread
@@ -248,7 +257,6 @@ public:
         DtwBacktrackCalculator* local_calculator = backtrack_calculator_.clone();
         mutex_.unlock();
         // kahan sum step
-        std::fill(kahan_c_, kahan_c_ + (new_cent_.nrow() * new_cent_.ncol()), 0);
         int nrows = new_cent_.nrow();
         for (std::size_t i = begin; i < end; i++) {
             local_calculator->calculate(i,0);
@@ -309,6 +317,11 @@ public:
         if (kahan_t_) delete[] kahan_t_;
     }
 
+    // for reusability
+    void reset() {
+        std::fill(kahan_c_, kahan_c_ + (new_cent_.nrow() * new_cent_.ncol()), 0);
+    }
+
     // parallel loop across specified range
     void operator()(std::size_t begin, std::size_t end) {
         // local copy of calculator so it is setup separately for each thread
@@ -316,7 +329,6 @@ public:
         DtwBacktrackCalculator* local_calculator = backtrack_calculator_.clone();
         mutex_.unlock();
         // kahan sum step
-        std::fill(kahan_c_, kahan_c_ + (new_cent_.nrow() * new_cent_.ncol()), 0);
         int nrows = new_cent_.nrow();
         for (std::size_t i = begin; i < end; i++) {
             const RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[i];
@@ -428,6 +440,7 @@ SEXP dba_uv(const SEXP& X, const Rcpp::NumericVector& centroid, const SEXP& DOTS
     while (iter <= max_iter) {
         new_cent.fill(0);
         num_vals.fill(0);
+        parallel_worker.reset();
         // sum step
         RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
         // average step with check for 'convergence' and update ref_cent
@@ -466,6 +479,7 @@ SEXP dba_mv_by_variable(const SEXP& X, const Rcpp::NumericMatrix& centroid, cons
     while (iter <= max_iter) {
         new_cent.fill(0);
         num_vals.fill(0);
+        parallel_worker.reset();
         // sum step
         RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
         // average step with check for 'convergence' and update ref_cent
@@ -504,6 +518,7 @@ SEXP dba_mv_by_series(const SEXP& X, const Rcpp::NumericMatrix& centroid, const 
     while (iter <= max_iter) {
         new_cent.fill(0);
         num_vals.fill(0);
+        parallel_worker.reset();
         // sum step
         RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
         // average step with check for 'convergence' and update ref_cent
