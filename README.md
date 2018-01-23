@@ -1,11 +1,11 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/dtwclust)](https://cran.r-project.org/package=dtwclust)
-[![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](http://cranlogs.r-pkg.org/badges/dtwclust)
 [![Travis-CI Build
 Status](https://travis-ci.org/asardaes/dtwclust.svg?branch=master)](https://travis-ci.org/asardaes/dtwclust)
 [![AppVeyor Build
 Status](https://ci.appveyor.com/api/projects/status/github/asardaes/dtwclust?branch=master&svg=true)](https://ci.appveyor.com/project/asardaes/dtwclust)
 [![codecov](https://codecov.io/gh/asardaes/dtwclust/branch/master/graph/badge.svg)](https://codecov.io/gh/asardaes/dtwclust)
+[![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](http://cranlogs.r-pkg.org/badges/dtwclust)
 
 Time Series Clustering Along with Optimizations for the Dynamic Time Warping (DTW) Distance
 ===========================================================================================
@@ -109,7 +109,7 @@ pc <- tsclust(CharTraj, type = "partitional", k = 20L,
 #> Iteration 6: Changes / Distsum = 1 / 1347.486
 #> Iteration 7: Changes / Distsum = 0 / 1346.886
 #> 
-#>  Elapsed time is 0.523 seconds.
+#>  Elapsed time is 0.493 seconds.
 plot(pc)
 ```
 
@@ -126,7 +126,7 @@ hc <- tsclust(CharTraj, type = "hierarchical", k = 20L,
 #> Performing hierarchical clustering...
 #> Extracting centroids...
 #> 
-#>  Elapsed time is 0.291 seconds.
+#>  Elapsed time is 0.244 seconds.
 plot(hc)
 ```
 
@@ -151,7 +151,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.350   0.000   0.358 
+#>   0.370   0.000   0.366 
 #> 
 #> Head of fuzzy memberships:
 #> 
@@ -170,7 +170,7 @@ fc
 # Multivariate series provided as a list of matrices, using GAK distance
 mvc <- tsclust(CharTrajMV[1L:20L], k = 4L, distance = "gak", seed = 390L)
 # Note how the variables of each series are appended one after the other in the plot
-plot(mvc)
+plot(mvc, labels = list(nudge_x = -10, nudge_y = 1))
 ```
 
 ![](README-multivariate-1.png)

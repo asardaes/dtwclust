@@ -6,10 +6,9 @@ output:
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r setOptions, cache = FALSE, include = FALSE}
+```{r setup, cache = FALSE, include = FALSE}
 library(knitr)
 library(dtwclust)
-
 knitr::opts_chunk$set(
     collapse = TRUE,
     comment = "#>",
@@ -19,10 +18,10 @@ knitr::opts_chunk$set(
 ```
 
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/dtwclust)](https://cran.r-project.org/package=dtwclust)
-[![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](http://cranlogs.r-pkg.org/badges/dtwclust)
 [![Travis-CI Build Status](https://travis-ci.org/asardaes/dtwclust.svg?branch=master)](https://travis-ci.org/asardaes/dtwclust)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/asardaes/dtwclust?branch=master&svg=true)](https://ci.appveyor.com/project/asardaes/dtwclust)
 [![codecov](https://codecov.io/gh/asardaes/dtwclust/branch/master/graph/badge.svg)](https://codecov.io/gh/asardaes/dtwclust)
+[![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](http://cranlogs.r-pkg.org/badges/dtwclust)
 
 # Time Series Clustering Along with Optimizations for the Dynamic Time Warping (DTW) Distance
 
@@ -90,7 +89,7 @@ This software package was developed independently of any organization or institu
 
 ## Examples
 
-```{r set-up}
+```{r data}
 # Load series
 data("uciCT")
 ```
@@ -134,5 +133,5 @@ fc
 # Multivariate series provided as a list of matrices, using GAK distance
 mvc <- tsclust(CharTrajMV[1L:20L], k = 4L, distance = "gak", seed = 390L)
 # Note how the variables of each series are appended one after the other in the plot
-plot(mvc)
+plot(mvc, labels = list(nudge_x = -10, nudge_y = 1))
 ```

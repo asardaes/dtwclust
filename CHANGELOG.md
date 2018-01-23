@@ -2,7 +2,8 @@
 
 ## Version 5.1.0.9000
 * Several functions now use `RcppParallel` for parallelization, refer to the new parallelization vignette for more information.
-* None of the distance/centroid functions expose a parameter for helper matrices anymore.
+* None of the distance/centroid functions expose parameters for helper matrices anymore.
+* Added the option to add labels to non-dendrogram plots.
 * The ellipsis in `sdtw_cent` is now actually passed to `nloptr`.
 * Fixed `tsclust` for `dtw_lb` distance and `pam.precompute = FALSE` (it was always using `dtw_basic`, so the results should not change).
 * Updated timing experiments.

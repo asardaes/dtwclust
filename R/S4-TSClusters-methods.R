@@ -63,9 +63,6 @@ NULL
 #'               control = partitional_control(),
 #'               args = tsclust_args(cent = list(window.size = 8L, norm = "L2")))
 #'
-#' plot(pc_obj, type = "c", linetype = "solid",
-#'      labs.arg = list(title = "Clusters' centroids"))
-#'
 #' fc_obj <- new("FuzzyTSClusters",
 #'               type = "fuzzy", datalist = CharTraj,
 #'               centroids = centroids, cluster = cluster,
@@ -422,6 +419,8 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #' @rdname tsclusters-methods
 #' @method plot TSClusters
 #' @export
+#' @importFrom dplyr bind_rows
+#' @importFrom dplyr sample_n
 #' @importFrom methods S3Part
 #' @importFrom ggplot2 aes_string
 #' @importFrom ggplot2 facet_wrap
@@ -431,6 +430,7 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #' @importFrom ggplot2 guides
 #' @importFrom ggplot2 labs
 #' @importFrom ggplot2 theme_bw
+#' @importFrom ggrepel geom_label_repel
 #' @importFrom graphics plot
 #' @importFrom reshape2 melt
 #'
@@ -444,6 +444,8 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #' @param plot Logical flag. You can set this to `FALSE` in case you want to save the ggplot object
 #'   without printing anything to screen
 #' @param type What to plot. `NULL` means default. See details.
+#' @param labels Whether to include labels in the plot (not for dendrogram plots). See details and
+#'   note that this is subject to **randomness**.
 #'
 #' @section Plotting:
 #'
@@ -464,6 +466,23 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #'   - `"centroids"`: Plot the obtained centroids only.
 #'   - `"sc"`: Plot both series and centroids
 #'
+#'   In order to enable labels on the (non-dendrogram) plot, you have to select an option that plots
+#'   the series and at least provide an empty list in the `labels` argument. This list can contain
+#'   arguments for [ggrepel::geom_label_repel()] and will be passed along. The following are
+#'   set by the plot method if they are not provided:
+#'
+#'   - `"mapping"`: set to [aes_string][ggplot2::aes_string](x = "t", y = "value", label = "label")
+#'   - `"data"`: a data frame with as many rows as series in the `datalist` and 4 columns:
+#'     + `t`: x coordinate of the label for each series.
+#'     + `value`: y coordinate of the label for each series.
+#'     + `cl`: index of the cluster to which the series belongs (i.e. `x@cluster`).
+#'     + `label`: the label for the given series (i.e. `names(x@datalist)`).
+#'
+#'   You can provide your own data frame if you want, but it must have those columns and, even if
+#'   you override `mapping`, the `cl` column must have that name. The method will attempt to spread
+#'   the labels across the plot, but note that this is **subject to randomness**, so be careful if
+#'   you need reproducibility of any commands used after plotting (see examples).
+#'
 #'   If created, the function returns the `gg` object invisibly, in case you want to modify it to
 #'   your liking. You might want to look at [ggplot2::ggplot_build()] if that's the case.
 #'
@@ -479,10 +498,20 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #'
 #' The plot method returns a `gg` object (or `NULL` for dendrogram plot) invisibly.
 #'
+#' @examples
+#'
+#' plot(pc_obj, type = "c", linetype = "solid",
+#'      labs.arg = list(title = "Clusters' centroids"))
+#'
+#' set.seed(10L)
+#' plot(pc_obj, labels = list(nudge_x = -5, nudge_y = -0.2),
+#'      clus = c(1L,4L))
+#'
 plot.TSClusters <- function(x, y, ...,
                             clus = seq_len(x@k), labs.arg = NULL,
                             series = NULL, time = NULL,
-                            plot = TRUE, type = NULL)
+                            plot = TRUE, type = NULL,
+                            labels = NULL)
 {
     # set default type if none was provided
     if (!is.null(type))
@@ -497,19 +526,18 @@ plot.TSClusters <- function(x, y, ...,
         x <- methods::S3Part(x, strictS3 = TRUE)
         if (plot) graphics::plot(x, ...)
         return(invisible(NULL))
-
-    } else if (x@type != "hierarchical" && type == "dendrogram") {
+    }
+    else if (x@type != "hierarchical" && type == "dendrogram") {
         stop("Dendrogram plot only applies to hierarchical clustering.")
     }
 
     # Obtain data, the priority is: provided data > included data list
     if (!is.null(series)) {
         data <- tslist(series)
-
-    } else {
+    }
+    else {
         if (length(x@datalist) < 1L)
             stop("Provided object has no data. Please provide the data manually.")
-
         data <- x@datalist
     }
 
@@ -520,24 +548,19 @@ plot.TSClusters <- function(x, y, ...,
     # adding NAs
     if (mv <- is_multivariate(data)) {
         clusters <- split(data, factor(x@cluster, levels = 1L:x@k), drop = FALSE)
-
         for (id_clus in 1L:x@k) {
             cluster <- clusters[[id_clus]]
             if (length(cluster) < 1L) next # empty cluster
-
             nc <- NCOL(cluster[[1L]])
             len <- sapply(cluster, NROW)
             L <- max(len, NROW(centroids[[id_clus]]))
             trail <- L - len
-
             clusters[[id_clus]] <- Map(cluster, trail, f = function(mvs, trail) {
                 rbind(mvs, matrix(NA, trail, nc))
             })
-
             trail <- L - NROW(centroids[[id_clus]])
             centroids[[id_clus]] <- rbind(centroids[[id_clus]], matrix(NA, trail, nc))
         }
-
         # split returns the result in order of the factor levels,
         # but I want to keep the original order as returned from clustering
         ido <- sort(sort(x@cluster, index.return = TRUE)$ix, index.return = TRUE)$ix
@@ -547,11 +570,9 @@ plot.TSClusters <- function(x, y, ...,
     # helper values (lengths() here, see issue #18 in GitHub)
     L1 <- lengths(data)
     L2 <- lengths(centroids)
-
     # timestamp consistency
     if (!is.null(time) && length(time) < max(L1, L2))
         stop("Length mismatch between values and timestamps")
-
     # Check if data was z-normalized
     if (x@preproc == "zscore")
         title_str <- "Clusters' members (z-normalized)"
@@ -572,7 +593,6 @@ plot.TSClusters <- function(x, y, ...,
                           color_ids[clus] <<- color_ids[clus] + 1L
                           data.frame(t = t, cl = cl, color = color)
                       })
-
     dfcm_tc <- mapply(1L:x@k, L2, USE.NAMES = FALSE, SIMPLIFY = FALSE,
                       FUN = function(clus, len) {
                           t <- if (is.null(time)) seq_len(len) else time[1L:len]
@@ -583,9 +603,8 @@ plot.TSClusters <- function(x, y, ...,
     # bind
     dfm <- data.frame(dfm, do.call(rbind, dfm_tcc, TRUE))
     dfcm <- data.frame(dfcm, do.call(rbind, dfcm_tc, TRUE))
-
     # make factor
-    dfm$cl <- factor(dfm$cl)
+    dfm$cl <- factor(dfm$cl, levels = unique(dfm$cl)) # keep order for labeling
     dfcm$cl <- factor(dfcm$cl)
     dfm$color <- factor(dfm$color)
 
@@ -619,10 +638,34 @@ plot.TSClusters <- function(x, y, ...,
     if (mv) {
         ggdata <- data.frame(cl = rep(1L:x@k, each = (nc - 1L)),
                              vbreaks = as.numeric(1L:(nc - 1L) %o% sapply(centroids, NROW)))
-
         gg <- gg + ggplot2::geom_vline(data = ggdata[ggdata$cl %in% clus, , drop = FALSE],
                                        colour = "black", linetype = "longdash",
                                        ggplot2::aes_string(xintercept = "vbreaks"))
+    }
+
+    # add labels
+    if (type %in% c("sc", "series") && is.list(labels)) {
+        if (is.null(labels$mapping))
+            labels$mapping <- ggplot2::aes_string(x = "t", y = "value", label = "label")
+        if (is.null(labels$data) && !is.null(names(x@datalist))) {
+            coords <- split(dfm[c("t", "value", "L1")], dfm$cl)
+            coords <- dplyr::bind_rows(lapply(coords, function(df_cluster) {
+                # keep given order for split
+                df_cluster$L1 <- factor(df_cluster$L1, levels = unique(df_cluster$L1))
+                df_series <- split(df_cluster[c("t", "value")], df_cluster$L1)
+                ret <- dplyr::bind_rows(lapply(df_series, dplyr::sample_n, size = 1L))
+                while(length(unique(ret$value)) != nrow(ret)) {
+                    ret <- dplyr::bind_rows(lapply(df_series, dplyr::sample_n, size = 1L))
+                }
+                ret
+            }))
+            coords$cl <- x@cluster
+            coords$label <- names(x@datalist)
+            labels$data <- coords
+        }
+        labels$data <- labels$data[labels$data$cl %in% clus,]
+        labels$inherit.aes <- FALSE
+        gg <- gg + do.call(ggrepel::geom_label_repel, labels, TRUE)
     }
 
     # add facets, remove legend, apply kinda black-white theme
@@ -631,7 +674,7 @@ plot.TSClusters <- function(x, y, ...,
         ggplot2::guides(colour = FALSE) +
         ggplot2::theme_bw()
 
-    # labels
+    # labs
     if (!is.null(labs.arg))
         gg <- gg + ggplot2::labs(labs.arg)
     else

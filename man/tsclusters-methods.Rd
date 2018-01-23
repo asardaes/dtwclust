@@ -32,11 +32,11 @@
 \S4method{predict}{TSClusters}(object, newdata = NULL, ...)
 
 \method{plot}{TSClusters}(x, y, ..., clus = seq_len(x@k), labs.arg = NULL,
-  series = NULL, time = NULL, plot = TRUE, type = NULL)
+  series = NULL, time = NULL, plot = TRUE, type = NULL, labels = NULL)
 
 \S4method{plot}{TSClusters,missing}(x, y, ..., clus = seq_len(x@k),
   labs.arg = NULL, series = NULL, time = NULL, plot = TRUE,
-  type = NULL)
+  type = NULL, labels = NULL)
 }
 \arguments{
 \item{.Object}{A \code{TSClusters} prototype. You \emph{shouldn't} use this, see Initialize section and the
@@ -74,6 +74,9 @@ values of the longest series.}
 without printing anything to screen}
 
 \item{type}{What to plot. \code{NULL} means default. See details.}
+
+\item{labels}{Whether to include labels in the plot (not for dendrogram plots). See details and
+note that this is subject to \strong{randomness}.}
 }
 \value{
 The plot method returns a \code{gg} object (or \code{NULL} for dendrogram plot) invisibly.
@@ -147,6 +150,26 @@ You can choose what to plot with the \code{type} parameter. Possible options are
 \item \code{"sc"}: Plot both series and centroids
 }
 
+In order to enable labels on the (non-dendrogram) plot, you have to select an option that plots
+the series and at least provide an empty list in the \code{labels} argument. This list can contain
+arguments for \code{\link[ggrepel:geom_label_repel]{ggrepel::geom_label_repel()}} and will be passed along. The following are
+set by the plot method if they are not provided:
+\itemize{
+\item \code{"mapping"}: set to \link[ggplot2:aes_string]{aes_string}(x = "t", y = "value", label = "label")
+\item \code{"data"}: a data frame with as many rows as series in the \code{datalist} and 4 columns:
+\itemize{
+\item \code{t}: x coordinate of the label for each series.
+\item \code{value}: y coordinate of the label for each series.
+\item \code{cl}: index of the cluster to which the series belongs (i.e. \code{x@cluster}).
+\item \code{label}: the label for the given series (i.e. \code{names(x@datalist)}).
+}
+}
+
+You can provide your own data frame if you want, but it must have those columns and, even if
+you override \code{mapping}, the \code{cl} column must have that name. The method will attempt to spread
+the labels across the plot, but note that this is \strong{subject to randomness}, so be careful if
+you need reproducibility of any commands used after plotting (see examples).
+
 If created, the function returns the \code{gg} object invisibly, in case you want to modify it to
 your liking. You might want to look at \code{\link[ggplot2:ggplot_build]{ggplot2::ggplot_build()}} if that's the case.
 
@@ -174,9 +197,6 @@ pc_obj <- new("PartitionalTSClusters",
               control = partitional_control(),
               args = tsclust_args(cent = list(window.size = 8L, norm = "L2")))
 
-plot(pc_obj, type = "c", linetype = "solid",
-     labs.arg = list(title = "Clusters' centroids"))
-
 fc_obj <- new("FuzzyTSClusters",
               type = "fuzzy", datalist = CharTraj,
               centroids = centroids, cluster = cluster,
@@ -184,5 +204,13 @@ fc_obj <- new("FuzzyTSClusters",
               control = fuzzy_control())
 
 show(fc_obj)
+
+
+plot(pc_obj, type = "c", linetype = "solid",
+     labs.arg = list(title = "Clusters' centroids"))
+
+set.seed(10L)
+plot(pc_obj, labels = list(nudge_x = -5, nudge_y = -0.2),
+     clus = c(1L,4L))
 
 }

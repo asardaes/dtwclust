@@ -19,6 +19,7 @@ Imports:
     flexclust,
     foreach,
     ggplot2,
+    ggrepel,
     Matrix,
     nloptr,
     RSpectra,
