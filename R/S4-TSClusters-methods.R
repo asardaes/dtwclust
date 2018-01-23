@@ -419,6 +419,7 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #' @rdname tsclusters-methods
 #' @method plot TSClusters
 #' @export
+#' @importFrom dplyr anti_join
 #' @importFrom dplyr bind_rows
 #' @importFrom dplyr sample_n
 #' @importFrom methods S3Part
@@ -503,8 +504,8 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #' plot(pc_obj, type = "c", linetype = "solid",
 #'      labs.arg = list(title = "Clusters' centroids"))
 #'
-#' set.seed(10L)
-#' plot(pc_obj, labels = list(nudge_x = -5, nudge_y = -0.2),
+#' set.seed(15L)
+#' plot(pc_obj, labels = list(nudge_x = -5, nudge_y = 0.2),
 #'      clus = c(1L,4L))
 #'
 plot.TSClusters <- function(x, y, ...,
@@ -604,7 +605,7 @@ plot.TSClusters <- function(x, y, ...,
     dfm <- data.frame(dfm, do.call(rbind, dfm_tcc, TRUE))
     dfcm <- data.frame(dfcm, do.call(rbind, dfcm_tc, TRUE))
     # make factor
-    dfm$cl <- factor(dfm$cl, levels = unique(dfm$cl)) # keep order for labeling
+    dfm$cl <- factor(dfm$cl)
     dfcm$cl <- factor(dfcm$cl)
     dfm$color <- factor(dfm$color)
 
@@ -648,20 +649,25 @@ plot.TSClusters <- function(x, y, ...,
         if (is.null(labels$mapping))
             labels$mapping <- ggplot2::aes_string(x = "t", y = "value", label = "label")
         if (is.null(labels$data) && !is.null(names(x@datalist))) {
-            coords <- split(dfm[c("t", "value", "L1")], dfm$cl)
-            coords <- dplyr::bind_rows(lapply(coords, function(df_cluster) {
+            label <- names(x@datalist)[x@cluster %in% clus]
+            label <- split(label, x@cluster[x@cluster %in% clus])
+            dfm <- dfm[dfm$cl %in% clus,]
+            labels$data <- dplyr::bind_rows(lapply(split(dfm, dfm$cl), function(df_cluster) {
                 # keep given order for split
                 df_cluster$L1 <- factor(df_cluster$L1, levels = unique(df_cluster$L1))
-                df_series <- split(df_cluster[c("t", "value")], df_cluster$L1)
-                ret <- dplyr::bind_rows(lapply(df_series, dplyr::sample_n, size = 1L))
-                while(length(unique(ret$value)) != nrow(ret)) {
-                    ret <- dplyr::bind_rows(lapply(df_series, dplyr::sample_n, size = 1L))
+                df_series <- split(df_cluster[c("t", "value", "cl")], df_cluster$L1)
+                ret <- vector("list", length(df_series))
+                for (i in seq_along(df_series)) {
+                    this_df <- df_series[[i]]
+                    for (not_this in df_series[-i]) {
+                        this_df <- dplyr::anti_join(this_df, not_this, by = c("t", "value"))
+                    }
+                    ret[[i]] <- dplyr::sample_n(this_df, 1L)
                 }
-                ret
+                # return
+                dplyr::bind_rows(ret)
             }))
-            coords$cl <- x@cluster
-            coords$label <- names(x@datalist)
-            labels$data <- coords
+            labels$data$label <- unlist(label)
         }
         labels$data <- labels$data[labels$data$cl %in% clus,]
         labels$inherit.aes <- FALSE
