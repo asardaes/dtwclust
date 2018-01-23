@@ -5,7 +5,7 @@
 * None of the distance/centroid functions expose a parameter for helper matrices anymore.
 * The ellipsis in `sdtw_cent` is now actually passed to `nloptr`.
 * Fixed `tsclust` for `dtw_lb` distance and `pam.precompute = FALSE` (it was always using `dtw_basic`, so the results should not change).
-* Updated distance and centroid timing experiments.
+* Updated timing experiments.
 
 ## Version 5.1.0
 * Added implementations of soft-DTW distance and centroid.

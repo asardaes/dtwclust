@@ -35,7 +35,7 @@ if (short_experiments) {
     # Number of clusters to test for sparse PAM case
     sparse_k <- seq(from = 2L, to = 18L, by = 4L)
     # Number of evaluations
-    times <- 15L
+    times <- 30L
 }
 
 # NOTE: all clustering experiments will use tsclust() to include overhead of corresponding checks
