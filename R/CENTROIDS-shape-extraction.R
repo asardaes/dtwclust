@@ -77,7 +77,6 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check
     }
 
     Xz <- if (znorm) zscore(X, ..., error.check = FALSE) else X
-
     # make sure at least one series is not just a flat line at zero
     if (all(sapply(Xz, sum) == 0)) {
         if (is.null(centroid))
@@ -89,14 +88,14 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check
     if (is.null(centroid)) {
         if (!different_lengths(Xz)) {
             A <- do.call(rbind, Xz, TRUE) # use all
-
-        } else {
+        }
+        else {
             centroid <- Xz[[sample(length(Xz), 1L)]] # random choice as reference
             A <- lapply(Xz, function(a) { SBD(centroid, a)$yshift })
             A <- do.call(rbind, A, TRUE)
         }
-
-    } else {
+    }
+    else {
         centroid <- zscore(centroid, ..., error.check = FALSE) # use given reference
         A <- lapply(Xz, function(a) { SBD(centroid, a)$yshift })
         A <- do.call(rbind, A, TRUE)

@@ -30,7 +30,6 @@ Distmat <- methods::setRefClass("Distmat",
 
                                if (missing(distmat)) {
                                    if (tolower(distance) == "dtw_lb") distance <- "dtw_basic"
-
                                    if (error.check) {
                                        check_consistency(series, "vltslist")
                                        check_consistency(distance,
@@ -38,20 +37,18 @@ Distmat <- methods::setRefClass("Distmat",
                                                          trace = FALSE,
                                                          diff_lengths = different_lengths(series),
                                                          silent = FALSE)
-
                                        if (class(control) != "PtCtrl")
                                            stop("Invalid control provided.")
                                    }
-
                                    # need another dist closure, otherwise it would be recursive
                                    control$distmat <- NULL
                                    initFields(...,
                                               series = series,
                                               distfun = ddist2(distance, control))
-
-                               } else
+                               }
+                               else
                                    initFields(..., distmat = distmat)
-
+                               # return
                                invisible(NULL)
                            }
                        )
@@ -90,11 +87,12 @@ setMethod(`[`, "Distmat", function(x, i, j, ..., drop = TRUE) {
                              centroids = centroids,
                              dots = x$dist_args),
                       TRUE)
-    } else {
+    }
+    else {
         dm <- x$distmat[i, j, drop = drop]
         if (identical(dim(dm), dim(x$distmat))) attributes(dm) <- attributes(x$distmat)
     }
-
+    # return
     dm
 })
 

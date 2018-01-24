@@ -36,12 +36,11 @@ tslist <- function(series) {
             series[[i]] <- mat[i,]
             i <- i + 1L
         }
-
-    } else if (is.numeric(series))
+    }
+    else if (is.numeric(series))
         series <- list(series)
     else if (!is.list(series))
         stop("Unsupported data type.")
-
     # return
     series
 }

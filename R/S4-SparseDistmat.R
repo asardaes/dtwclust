@@ -54,7 +54,7 @@ SparseDistmat <- methods::setRefClass(
                       distmat_indices, id, id, symmetric,
                       PACKAGE = "dtwclust")
             })
-
+            # return
             invisible(NULL)
         }
     )
@@ -106,10 +106,9 @@ setMethod(`[`, "SparseDistmat", function(x, i, j, ..., drop = TRUE) {
                                                        pairwise = TRUE,
                                                        dots = x$dist_args),
                                                 TRUE))
-
         if (x$symmetric) x$distmat <- Matrix::forceSymmetric(x$distmat, "L")
     }
-
+    # return
     x$distmat[i, j, drop = drop]
 })
 

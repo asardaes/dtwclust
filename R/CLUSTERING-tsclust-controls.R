@@ -61,7 +61,7 @@ partitional_control <- function(pam.precompute = TRUE,
 {
     if (any(iter.max <= 0L)) stop("Maximum iterations must be positive")
     if (any(nrep < 1L)) stop("Number of repetitions must be at least one")
-
+    # return
     structure(
         list(pam.precompute = as.logical(pam.precompute),
              pam.sparse = as.logical(pam.sparse),
@@ -103,16 +103,15 @@ hierarchical_control <- function(method = "average",
                               "average", "mcquitty", "median", "centroid",
                               "all"),
                             several.ok = TRUE)
-
         if ("all" %in% method)
             method <- c("ward.D", "ward.D2", "single", "complete",
                         "average", "mcquitty", "median", "centroid")
-
-    } else if (!is.function(method))
+    }
+    else if (!is.function(method))
         stop("Argument 'method' must be either a supported character or a function.")
     else
         attr(method, "name") <- as.character(substitute(method))[1L]
-
+    # return
     structure(
         list(method = method,
              symmetric = as.logical(symmetric),
@@ -140,7 +139,7 @@ fuzzy_control <- function(fuzziness = 2,
     if (any(fuzziness <= 1)) stop("Fuzziness exponent should be greater than one")
     if (any(iter.max <= 0L)) stop("Maximum iterations must be positive")
     if (any(delta < 0)) stop("Delta should be positive")
-
+    # return
     structure(
         list(fuzziness = fuzziness,
              iter.max = as.integer(iter.max),
@@ -172,7 +171,7 @@ tadpole_control <- function(dc,
     if (any(dc <= 0)) stop("Cutoff distance 'dc' must be positive")
     window.size <- check_consistency(window.size, "window")
     lb <- match.arg(lb, c("lbk", "lbi"), several.ok = TRUE)
-
+    # return
     structure(
         list(dc = dc,
              window.size = window.size,

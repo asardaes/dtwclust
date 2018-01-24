@@ -26,8 +26,8 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
                                     cl_old = cluster,
                                     dots = subset_dots(args$cent, family@allcent)),
                              TRUE)
-
-    } else {
+    }
+    else {
         id_cent <- sample(N, k)
         centroids <- x[id_cent]
         if (inherits(control$distmat, "Distmat")) control$distmat$id_cent <- id_cent
@@ -38,7 +38,6 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
     clustold <- cluster
     objective_old <- Inf
     dmi <- cbind(1L:N, integer(N))
-
     while (iter <= control$iter.max) {
         distmat <- do.call(family@dist, enlist(x = x, centroids = centroids, dots = args$dist), TRUE)
         cluster <- family@cluster(distmat = distmat, m = control$fuzziness)
@@ -68,8 +67,8 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
                 break
             }
             objective_old <- objective
-
-        } else {
+        }
+        else {
             dmi[, 2L] <- if (cent != "fcmdd") cluster else apply(cluster, 1L, which.max)
             changes <- sum(dmi[, 2L] != clustold)
             if (trace) {
@@ -85,7 +84,6 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
                 break
             }
         }
-
         iter <- iter + 1L
         if (control$version > 1L)
             centroids <- do.call(family@allcent,
@@ -103,8 +101,8 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         if (trace) cat("\n")
         converged <- FALSE
         iter <- control$iter.max
-
-    } else {
+    }
+    else {
         converged <- TRUE
     }
 
@@ -118,15 +116,14 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         cluster <- max.col(-distmat, "first")
         rownames(fcluster) <- names(x)
         colnames(fcluster) <- paste0("cluster_", 1L:k)
-
-    } else {
+    }
+    else {
         fcluster <- matrix(NA_real_)
     }
 
     cldist <- base::as.matrix(distmat[cbind(1L:N, cluster)])
     clusinfo <- compute_clusinfo(k, cluster, cldist) # UTILS-utils.R
     names(centroids) <- NULL
-
     # return
     list(k = k,
          cluster = cluster,

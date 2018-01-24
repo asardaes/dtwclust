@@ -7,26 +7,23 @@ check_consistency <- function(obj, case, ..., clus_type,
                               trace = FALSE, silent = TRUE)
 {
     case <- match.arg(case, c("ts", "tslist", "vltslist", "window", "dist", "cent"))
-
     if (case == "ts") {
         if (!is.numeric(obj)) stop("The series must be numeric")
         if (length(obj) < 1L) stop("The series must have at least one point")
         if (anyNA(obj)) stop("There are missing values in the series")
-
-    } else if (case %in% c("tslist", "vltslist")) {
+    }
+    else if (case %in% c("tslist", "vltslist")) {
         if (!is.list(obj)) stop("Oops, data should already be a list by this point...")
         if (length(obj) < 1L) stop("Data is empty")
         if (case == "tslist" && different_lengths(obj)) stop("All series must have the same length")
-
         sapply(obj, check_consistency, case = "ts", ...)
-
-    } else if (case == "window") {
+    }
+    else if (case == "window") {
         if (is.null(obj)) stop("Please provide the 'window.size' parameter")
         if (any(obj <= 0L)) stop("Window width must be larger than 0")
-
         return(as.integer(obj))
-
-    } else if (case == "dist") {
+    }
+    else if (case == "dist") {
         if (!is.character(obj) || !pr_DB$entry_exists(obj)) {
             if (silent)
                 return(FALSE)
@@ -34,7 +31,6 @@ check_consistency <- function(obj, case, ..., clus_type,
                 stop("Please provide the name of a valid distance function registered with the ",
                      "'proxy' package.")
         }
-
         if (diff_lengths) {
             obj <- tolower(obj)
             if ((obj %in% distances_known) && !(obj %in% distances_difflength))
@@ -44,42 +40,37 @@ check_consistency <- function(obj, case, ..., clus_type,
                 message("Series have different lengths. ",
                         "Please confirm that the provided distance function supports this.")
         }
-
         # valid registered distance
         return(TRUE)
-
-    } else if (case == "cent") {
+    }
+    else if (case == "cent") {
         cent_char <- switch(
             clus_type,
             partitional = {
                 if (is.character(obj)) {
                     cent_char <- match.arg(obj, centroids_nonfuzzy)
-
                     if (diff_lengths &&
                         cent_char %in% centroids_included &&
                         !(cent_char %in% centroids_difflength))
                         stop("Only the following centroids are supported for ",
                              "series with different lengths:\n\t",
                              paste(centroids_difflength, collapse = "\t"))
-
-                } else {
+                }
+                else {
                     force(cent_char)
                 }
-
                 # return partitional switch
                 cent_char
             },
             fuzzy = {
                 if (is.character(obj)) {
                     cent_char <- match.arg(obj, centroids_fuzzy)
-
                     if (diff_lengths && cent_char == "fcm")
                         stop("Fuzzy c-means does not support series with different length.")
-
-                } else {
+                }
+                else {
                     force(cent_char)
                 }
-
                 # return fuzzy switch
                 cent_char
             },
@@ -95,16 +86,13 @@ check_consistency <- function(obj, case, ..., clus_type,
                                        switch(clus_type,
                                               hierarchical = "(Hierarchical)",
                                               tadpole = "(TADPole)"))
-
                 # return hierarchical/tadpole switch
                 cent_char
             }
         )
-
         # cent case
         return(cent_char)
     }
-
     invisible(NULL)
 }
 
@@ -299,17 +287,14 @@ is_multivariate <- function(x) {
 
 reshape_multivariate <- function(series, cent) {
     ncols <- ncol(series[[1L]])
-
     series <- lapply(1L:ncols, function(idc) {
         lapply(series, function(s) { s[ , idc, drop = TRUE] })
     })
-
     cent <- lapply(1L:ncols, function(idc) {
         if (is.null(cent))
             NULL
         else
             cent[ , idc, drop = TRUE]
     })
-
     list(series = series, cent = cent)
 }

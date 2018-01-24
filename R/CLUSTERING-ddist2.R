@@ -14,23 +14,18 @@ split_parallel_symmetric <- function(n, num_workers, adjust = 0L) {
         ll_trimat <- (mid_point + 1L):n + adjust
         # put triangular parts together for load balance
         trimat <- list(ul = ul_trimat, ll = ll_trimat)
-
         attr(trimat, "trimat") <- TRUE
         trimat <- list(trimat)
-
         mid_point <- mid_point + adjust
         attr(ul_trimat, "rows") <- ll_trimat
         mat <- list(ul_trimat)
-
         ids <- c(trimat, mat)
     }
     else {
         mid_point <- as.integer(n / 2)
-
         # recursion
         rec1 <- split_parallel_symmetric(mid_point, as.integer(num_workers / 4), adjust)
         rec2 <- split_parallel_symmetric(n - mid_point, as.integer(num_workers / 4), mid_point + adjust)
-
         endpoints <- parallel::splitIndices(mid_point, max(length(rec1) + length(rec2), num_workers))
         endpoints <- endpoints[lengths(endpoints) > 0L]
         mat <- lapply(endpoints, function(ids) {
@@ -38,14 +33,11 @@ split_parallel_symmetric <- function(n, num_workers, adjust = 0L) {
             attr(ids, "rows") <- (mid_point + 1L):n + adjust
             ids
         })
-
         ids <- c(rec1, rec2, mat)
     }
-
     chunk_sizes <- unlist(lapply(ids, function(x) {
         if (is.null(attr(x, "trimat"))) length(x) else median(lengths(x))
     }))
-
     # return
     ids[sort(chunk_sizes, index.return = TRUE)$ix]
 }
@@ -94,7 +86,6 @@ ddist2 <- function(distance, control) {
                 dots$window.type <- "none"
             else if (is.null(dots$window.type))
                 dots$window.type <- "slantedband"
-
             dots$error.check <- FALSE
 
             # dtw uses L2 by default, but in dtwclust I want dtw to use L1 by default
@@ -147,9 +138,7 @@ ddist2 <- function(distance, control) {
                     ) %op% {
                         if (!check_consistency(dist_entry$names[1L], "dist"))
                             do.call(proxy::pr_DB$set_entry, dist_entry, TRUE)
-
                         dd <- bigmemory::attach.big.matrix(d_desc)
-
                         if (isTRUE(attr(ids, "trimat"))) {
                             # assign upper part of lower triangular
                             ul <- ids$ul
@@ -188,12 +177,10 @@ ddist2 <- function(distance, control) {
                             dd[rows,ids] <- mat_chunk
                             dd[ids,rows] <- t(mat_chunk)
                         }
-
                         # return from parallel foreach
                         NULL
                     }
-
-                    d <- d[,]
+                    d <- d[,] # coerce to normal matrix
                     attr(d, "class") <- "crossdist"
                     attr(d, "dimnames") <- list(names(x), names(x))
                 }
@@ -253,7 +240,6 @@ ddist2 <- function(distance, control) {
                 }
             }
         }
-
         attr(d, "method") <- toupper(distance)
         attr(d, "call") <- NULL
         # return

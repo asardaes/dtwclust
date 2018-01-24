@@ -11,20 +11,16 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
         if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
             stop("Dimensions of provided cross-distance matrix don't correspond ",
                  "to length of provided data")
-
         # see S4-Distmat.R
         if (!inherits(distmat, "Distmat")) distmat <- Distmat$new(distmat = distmat)
         distmat_provided <- TRUE
-
         if (trace) cat("\n\tDistance matrix provided...\n\n")
-
-    } else if (isTRUE(control$pam.precompute) || cent_char == "fcmdd") {
+    }
+    else if (isTRUE(control$pam.precompute) || cent_char == "fcmdd") {
         if (distance == "dtw_lb")
             warning("Using dtw_lb with control$pam.precompute = TRUE is not ",
                     "advised.")
-
         if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
-
         # see S4-Distmat.R
         distmat <- Distmat$new(distmat = do.call(
             family@dist,
@@ -33,8 +29,8 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
                    dots = args$dist),
             TRUE
         ))
-
-    } else {
+    }
+    else {
         if (isTRUE(control$pam.sparse) && distance != "dtw_lb") {
             # see S4-SparseDistmat.R
             distmat <- SparseDistmat$new(series = series,
@@ -42,8 +38,8 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
                                          control = control,
                                          dist_args = args$dist,
                                          error.check = FALSE)
-
-        } else {
+        }
+        else {
             # see S4-Distmat.R
             distmat <- Distmat$new(series = series,
                                    distance = distance,
@@ -52,7 +48,6 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
                                    error.check = FALSE)
         }
     }
-
     # return
     list(distmat = distmat, distmat_provided = distmat_provided)
 }
@@ -296,11 +291,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     set.seed(seed)
     type <- match.arg(type, c("partitional", "hierarchical", "tadpole", "fuzzy"))
     series <- tslist(series) # coerce to list if necessary
-
     if (any(k < 2L)) stop("At least two clusters must be defined")
     if (any(k > length(series))) stop("Cannot have more clusters than series in the dataset")
     if (!is.list(control)) stop("Invalid control argument")
-
     MYCALL <- match.call(expand.dots = TRUE)
     dots <- list(...)
     args <- adjust_args(args, dots) # UTILS-utils.R
@@ -312,18 +305,18 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     if (!is.null(preproc) && is.function(preproc)) {
         series <- do.call(preproc, enlist(series, dots = subset_dots(args$preproc, preproc)), TRUE)
         preproc_char <- as.character(substitute(preproc))[1L]
-
-    } else if (type == "partitional" && is.character(centroid) && centroid == "shape") {
+    }
+    else if (type == "partitional" && is.character(centroid) && centroid == "shape") {
         preproc <- zscore
         preproc_char <- "zscore"
         series <- do.call(zscore, enlist(series, dots = args$preproc), TRUE)
-
-    } else if (is.null(preproc)) {
+    }
+    else if (is.null(preproc)) {
         preproc <- function(x, ...) { x } # nocov
         environment(preproc) <- .GlobalEnv
         preproc_char <- "none"
-
-    } else stop("Invalid preprocessing")
+    }
+    else stop("Invalid preprocessing")
 
     if (error.check) check_consistency(series, "vltslist")
 
@@ -371,9 +364,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             if (!inherits(control, "PtCtrl") && !inherits(control, "FzCtrl"))
                 stop("Invalid control provided")
-
             nrep <- if (is.null(control$nrep)) 1L else control$nrep
-
             if (!is.character(centroid) || !(cent_char %in% c("pam", "fcmdd")))
                 control$distmat <- NULL
 
@@ -402,14 +393,13 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 dm <- pam_distmat(series, control, distance, cent_char, family, args, trace)
                 distmat <- dm$distmat
                 distmat_provided <- dm$distmat_provided
-
                 # Redefine new distmat if appropriate
                 control$distmat <- distmat
                 environment(family@allcent)$control$distmat <- distmat
                 if (!(distance == "dtw_lb" && !isTRUE(control$pam.precompute)))
                     environment(family@dist)$control$distmat <- distmat
-
-            } else {
+            }
+            else {
                 distmat <- NULL
                 distmat_provided <- FALSE
             }
@@ -432,7 +422,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                                trace = trace,
                                                args = args),
                                         TRUE))
-            } else {
+            }
+            else {
                 # I need to re-register any custom distances in each parallel worker
                 dist_entry <- proxy::pr_DB$get_entry(distance)
                 export <- c("pfclust", "check_consistency", "enlist")
@@ -443,7 +434,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 # sequential allows the matrix to be updated iteratively
                 `%this_op%` <- if(inherits(control$distmat, "SparseDistmat")) `%do%` else `%op%`
                 i <- integer() # CHECK complains about non-initialization
-
+                # cluster
                 pc_list <- foreach(k = k0, rng = rng0,
                                    .combine = c, .multicombine = TRUE,
                                    .packages = control$packages,
@@ -482,15 +473,12 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # Replace distmat with NULL so that, if the distance function is called again,
             # it won't subset it
             environment(family@dist)$control$distmat <- NULL
-
             # If distmat was provided, let it be shown in the results
             if (distmat_provided) {
                 dist_method <- attr(distmat, "method")
                 distance <- if (is.null(dist_method)) "unknown" else dist_method
             }
-
             if (inherits(distmat, "Distmat")) distmat <- distmat$distmat
-
             # Create objects
             RET <- lapply(pc_list, function(pc) {
                 if (type == "partitional") {
@@ -519,8 +507,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                  cldist = pc$cldist,
 
                                  override.family = FALSE)
-
-                } else {
+                }
+                else {
                     methods::new("FuzzyTSClusters",
                                  call = MYCALL,
                                  family = family,
@@ -547,23 +535,19 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                  override.family = FALSE)
                 }
             })
-
             if (any(!sapply(RET, methods::slot, name = "converged")))
                 warning("At least one clustering did not converge within the allowed iterations.")
             # return partitional/fuzzy
             RET
         },
-
         hierarchical = {
             # ======================================================================================
             # Hierarchical
             # ======================================================================================
 
             if (!inherits(control, "HcCtrl")) stop("Invalid control provided")
-
             method <- control$method
             distmat <- control$distmat
-
             if (!is.function(centroid)) centroid <- NA
             if (distance == "dtw_lb")
                 warning("Using dtw_lb with hierarchical clustering is not advised.")
@@ -580,15 +564,14 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
                     stop("Dimensions of provided cross-distance matrix don't correspond to ",
                          "length of provided data")
-
                 if (trace) cat("\nDistance matrix provided...\n")
 
                 if (is.null(attr(distmat, "method")))
                     stop("Provided distance matrix does not include the 'method' attribute")
                 else
                     distance <- attr(distmat, "method")
-
-            } else {
+            }
+            else {
                 if (trace) cat("\nCalculating distance matrix...\n")
                 distmat <- do.call(distfun,
                                    enlist(x = series, centroids = NULL, dots = args$dist),
@@ -604,7 +587,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 warning("Distance matrix is not symmetric, ",
                         "and hierarchical clustering assumes it is ",
                         "(it ignores the upper triangular).")
-
             if (is.character(method)) {
                 # Using hclust
                 hc <- lapply(method, function(method) {
@@ -617,7 +599,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                    args = enlist(stats::as.dist(distmat),
                                                  dots = subset_dots(dots, method)),
                                    TRUE))
-
                 method <- attr(method, "name")
             }
 
@@ -626,34 +607,29 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # --------------------------------------------------------------------------------------
 
             if (trace) cat("Extracting centroids...\n\n")
-
             RET <- lapply(k, function(k) {
                 lapply(hc, function(hc) {
                     # cutree and corresponding centroids
                     cluster <- stats::cutree(stats::as.hclust(hc), k)
-
                     if (is.function(centroid)) {
                         allcent <- function(...) { list(centroid(...)) }
                         environment(allcent) <- new.env(parent = .GlobalEnv)
                         assign("centroid", centroid, environment(allcent))
-
                         centroids <- lapply(1L:k, function(kcent) {
                             do.call(centroid,
                                     enlist(series[cluster == kcent],
                                            dots = subset_dots(args$cent, centroid)),
                                     TRUE)
                         })
-
-                    } else {
+                    }
+                    else {
                         allcent <- function(...) {} # dummy
-
                         centroids <- sapply(1L:k, function(kcent) {
                             id_k <- cluster == kcent
                             d_sub <- distmat[id_k, id_k, drop = FALSE]
                             id_centroid <- which.min(apply(d_sub, 1L, sum))
                             which(id_k)[id_centroid]
                         })
-
                         centroids <- series[centroids]
                     }
 
@@ -685,12 +661,10 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                  override.family = !is.function(centroid))
                 })
             })
-
             RET <- unlist(RET, recursive = FALSE)
             # return hierarchical
             RET
         },
-
         tadpole = {
             # ======================================================================================
             # TADPole
@@ -715,14 +689,12 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # --------------------------------------------------------------------------------------
 
             if (trace) cat("\n\tEntering TADPole...\n\n")
-
             R <- TADPole(series,
                          k = k,
                          dc = control$dc,
                          window.size = control$window.size,
                          lb = control$lb,
                          trace = trace)
-
             if (length(k) == 1L && length(control$dc) == 1L) R <- list(R)
 
             # --------------------------------------------------------------------------------------
@@ -737,20 +709,18 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             RET <- Map(R, rng, f = function(R, rng) {
                 rngtools::setRNG(rng)
                 k <- length(R$centroids)
-
                 if (is.function(centroid)) {
                     allcent <- function(...) { list(centroid(...)) }
                     environment(allcent) <- new.env(parent = .GlobalEnv)
                     assign("centroid", centroid, environment(allcent))
-
                     centroids <- lapply(1L:k, function(kcent) {
                         do.call(centroid,
                                 enlist(series[R$cl == kcent],
                                        dots = subset_dots(args$cent, centroid)),
                                 TRUE)
                     })
-
-                } else {
+                }
+                else {
                     allcent <- function(...) {}
                     centroids <- series[R$centroids]
                 }
@@ -778,11 +748,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                     args = args,
 
                                     override.family = !is.function(centroid))
-
                 obj@distance <- "LB+DTW2"
                 obj
             })
-
             # return tadpole
             RET
         }
@@ -793,18 +761,15 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     # ==============================================================================================
 
     toc <- proc.time() - tic
-
     RET <- lapply(RET, function(ret) {
         ret@proctime <- toc
         ret@seed <- as.integer(seed)
         ret
     })
-
     if (length(RET) == 1L)
         RET <- RET[[1L]]
     else if (type %in% c("partitional", "fuzzy"))
         attr(RET, "rng") <- unlist(rng0, recursive = FALSE, use.names = FALSE)
-
     if (trace) cat("\tElapsed time is", toc["elapsed"], "seconds.\n\n")
     RET
 }

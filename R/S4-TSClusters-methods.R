@@ -74,23 +74,19 @@ NULL
 setMethod("initialize", "TSClusters", function(.Object, ..., override.family = TRUE) {
     tic <- proc.time()
     dots <- list(...)
-
     # some minor checks
     if (!is.null(dots$datalist)) dots$datalist <- tslist(dots$datalist)
     if (!is.null(dots$centroids)) dots$centroids <- tslist(dots$centroids)
-
     # avoid infinite recursion (see https://bugs.r-project.org/bugzilla/show_bug.cgi?id=16629)
     if (is.null(dots$call)) {
         call <- match.call()
-
-    } else {
+    }
+    else {
         call <- dots$call
         dots$call <- NULL
     }
-
     .Object <- do.call(methods::callNextMethod, enlist(.Object = .Object, dots = dots), TRUE)
     .Object@call <- call
-
     # some "defaults"
     if (is.null(dots$preproc)) .Object@preproc <- "none"
     if (is.null(dots$k)) .Object@k <- length(.Object@centroids)
@@ -100,7 +96,6 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
                                      cent = .Object@dots)
     else
         .Object@args <- adjust_args(.Object@args, .Object@dots) # UTILS-utils.R
-
     # more helpful for hierarchical/tadpole
     if (override.family) {
         if (length(.Object@type) == 0L)
@@ -110,9 +105,7 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
         else {
             centroids <- .Object@centroids
             datalist <- .Object@datalist
-
             preproc <- if (.Object@preproc == "none") .Object@family@preproc else match.fun(.Object@preproc)
-
             if (.Object@type == "partitional" && length(.Object@centroid))
                 allcent <- all_cent2(.Object@centroid, .Object@control)
             else if (.Object@type == "hierarchical" && length(formals(.Object@family@allcent)))
@@ -134,17 +127,14 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
                                            preproc = preproc,
                                            control = .Object@control,
                                            fuzzy = isTRUE(.Object@type == "fuzzy"))
-
             if (.Object@type == "partitional" && .Object@centroid == "shape") {
                 .Object@family@preproc <- zscore
                 .Object@preproc <- "zscore"
             }
         }
     }
-
     # just a filler
     if (!length(.Object@proctime)) .Object@proctime <- proc.time() - tic
-
     # return
     .Object
 })
@@ -155,11 +145,9 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
 #'
 setMethod("initialize", "PartitionalTSClusters", function(.Object, ...) {
     .Object <- methods::callNextMethod()
-
     # some "defaults"
     if (!length(.Object@iter)) .Object@iter <- 1L
     if (!length(.Object@converged)) .Object@converged <- TRUE
-
     if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
         # no cldist available, but dist and cluster can be used to calculate it
         dm <- do.call(.Object@family@dist,
@@ -167,18 +155,13 @@ setMethod("initialize", "PartitionalTSClusters", function(.Object, ...) {
                              .Object@centroids,
                              dots = .Object@args$dist),
                       TRUE)
-
-        .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist),
-                                                   .Object@cluster)])
-
+        .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist), .Object@cluster)])
         dimnames(.Object@cldist) <- NULL
     }
-
     if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
         # no clusinfo available, but cluster and cldist can be used to calculate it (see UTILS-utils.R)
         .Object@clusinfo <- compute_clusinfo(.Object@k, .Object@cluster, .Object@cldist)
     }
-
     # return
     .Object
 })
@@ -188,12 +171,10 @@ setMethod("initialize", "PartitionalTSClusters", function(.Object, ...) {
 #'
 setMethod("initialize", "HierarchicalTSClusters", function(.Object, ...) {
     .Object <- methods::callNextMethod()
-
     # Replace distmat with NULL so that, if the distance function is called again,
     # it won't subset it
     if (length(formals(.Object@family@dist)))
         eval(quote(control$distmat <- NULL), environment(.Object@family@dist))
-
     if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
         # no cldist available, but dist and cluster can be used to calculate it
         dm <- do.call(.Object@family@dist,
@@ -201,18 +182,14 @@ setMethod("initialize", "HierarchicalTSClusters", function(.Object, ...) {
                              .Object@centroids,
                              dots = .Object@args$dist),
                       TRUE)
-
         .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist),
                                                    .Object@cluster)])
-
         dimnames(.Object@cldist) <- NULL
     }
-
     if (!nrow(.Object@clusinfo) && length(.Object@cluster) && nrow(.Object@cldist)) {
         # no clusinfo available, but cluster and cldist can be used to calculate it (see UTILS-utils.R)
         .Object@clusinfo <- compute_clusinfo(.Object@k, .Object@cluster, .Object@cldist)
     }
-
     # return
     .Object
 })
@@ -222,11 +199,9 @@ setMethod("initialize", "HierarchicalTSClusters", function(.Object, ...) {
 #'
 setMethod("initialize", "FuzzyTSClusters", function(.Object, ...) {
     .Object <- methods::callNextMethod()
-
     # some "defaults"
     if (!length(.Object@iter)) .Object@iter <- 1L
     if (!length(.Object@converged)) .Object@converged <- TRUE
-
     if (!nrow(.Object@fcluster)) {
         if (length(formals(.Object@family@dist))) {
             # no fcluster available, but dist and cluster function can be used to calculate it
@@ -235,16 +210,13 @@ setMethod("initialize", "FuzzyTSClusters", function(.Object, ...) {
                                  .Object@centroids,
                                  dots = .Object@args$dist),
                           TRUE)
-
             .Object@fcluster <- .Object@family@cluster(dm, m = .Object@control$fuzziness)
             colnames(.Object@fcluster) <- paste0("cluster_", 1:.Object@k)
             .Object@cluster <- max.col(.Object@fcluster, "first")
-
-        } else {
+        }else {
             .Object@fcluster <- matrix(NA_real_) # nocov
         }
     }
-
     # return
     .Object
 })
@@ -264,24 +236,20 @@ setMethod("show", "TSClusters", function(object) {
     cat(object@type, "clustering with", object@k, "clusters\n")
     cat("Using", object@distance, "distance\n")
     cat("Using", object@centroid, "centroids\n")
-
     if (inherits(object, "HierarchicalTSClusters"))
         cat("Using method", object@method, "\n")
     if (object@preproc != "none")
         cat("Using", object@preproc, "preprocessing\n")
-
     cat("\nTime required for analysis:\n")
     print(object@proctime)
-
     if (inherits(object, "FuzzyTSClusters")) {
         cat("\nHead of fuzzy memberships:\n\n")
         print(utils::head(object@fcluster))
-
-    } else if (!is.null(attr(object, "clusinfo"))) {
+    }
+    else if (!is.null(attr(object, "clusinfo"))) {
         cat("\nCluster sizes with average intra-cluster distance:\n\n")
         print(object@clusinfo)
     }
-
     invisible(NULL)
 })
 
@@ -306,30 +274,25 @@ setMethod("show", "TSClusters", function(object) {
 #'
 update.TSClusters <- function(object, ..., evaluate = TRUE) {
     args <- as.pairlist(list(...))
-
     if (length(args) == 0L) {
         if (evaluate) {
             if (object@type != "tadpole") {
                 # update dist closure
                 object@family@dist <- ddist2(object@distance, object@control)
-
                 # update allcent closure
                 if (object@centroid %in% centroids_included)
                     object@family@allcent <- all_cent2(object@centroid, object@control)
-
                 # update distmat in allcent environment with internal class?
                 if (object@centroid %in% c("pam", "fcmdd"))
                     environment(object@family@allcent)$control$distmat <- object@control$distmat
             }
-
             return(object)
-
-        } else return(object@call)
+        }
+        else
+            return(object@call)
     }
-
     new_call <- object@call
     new_call[names(args)] <- args
-
     if (evaluate)
         eval.parent(new_call, n = 2L)
     else
@@ -376,32 +339,27 @@ predict.TSClusters <- function(object, newdata = NULL, ...) {
             ret <- object@fcluster
         else
             ret <- object@cluster
-
-    } else {
+    }
+    else {
         newdata <- tslist(newdata)
         check_consistency(newdata, "vltslist")
         nm <- names(newdata)
-
         newdata <- do.call(object@family@preproc,
                            args = enlist(newdata,
                                          dots = subset_dots(object@args$preproc,
                                                             object@family@preproc)),
                            TRUE)
-
         distmat <- do.call(object@family@dist,
                            args = enlist(x = newdata,
                                          centroids = object@centroids,
                                          dots = object@args$dist),
                            TRUE)
-
         ret <- object@family@cluster(distmat = distmat, m = object@control$fuzziness)
-
         if (inherits(object, "FuzzyTSClusters"))
             dimnames(ret) <- list(nm, paste0("cluster_", 1L:ncol(ret)))
         else
             names(ret) <- nm
     }
-
     ret
 }
 
@@ -709,35 +667,32 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                       c("RI", "ARI", "J", "FM", "VI",
                         "Sil", "SF", "CH", "DB", "DBstar", "D", "COP",
                         "valid", "internal", "external"))
-
     dots <- list(...)
     internal <- c("Sil", "SF", "CH", "DB", "DBstar", "D", "COP")
     external <- c("RI", "ARI", "J", "FM", "VI")
-
     if (any(type == "valid")) {
         type <- if (is.null(b)) internal else c(internal, external)
-    } else if (any(type == "internal")) {
+    }
+    else if (any(type == "internal")) {
         type <- internal
-    } else if (any(type == "external")) {
+    }
+    else if (any(type == "external")) {
         type <- external
     }
 
     which_internal <- type %in% internal
     which_external <- type %in% external
-
     if (any(which_external))
         CVIs <- cvi(a@cluster, b = b, type = type[which_external], ...)
     else
         CVIs <- numeric()
 
     type <- type[which_internal]
-
     if (any(which_internal)) {
         if (length(a@datalist) == 0L && any(type %in% c("SF", "CH"))) {
             warning("Internal CVIs: the original data must be in object to calculate ",
                     "the following indices:",
                     "\n\tSF\tCH")
-
             type <- setdiff(type, c("SF", "CH"))
         }
 
@@ -748,17 +703,17 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                 if (length(a@datalist) == 0L) {
                     warning("Internal CVIs: distmat OR original data needed for indices:",
                             "\n\tSil\tD\tCOP")
-
                     type <- setdiff(type, c("Sil", "D", "COP"))
-
-                } else {
+                }
+                else {
                     distmat <- do.call(a@family@dist,
                                        args = enlist(x = a@datalist,
                                                      centroids = NULL,
                                                      dots = a@args$dist),
                                        TRUE)
                 }
-            } else {
+            }
+            else {
                 distmat <- a@distmat
             }
         }
@@ -769,10 +724,8 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                         "which can be problematic for:",
                         "\n\tSil\tD\tCOP")
         }
-
         # are no valid indices left?
         if (length(type) == 0L) return(CVIs)
-
         # calculate some values that both Davies-Bouldin indices use
         if (any(type %in% c("DB", "DBstar"))) {
             S <- a@clusinfo$av_dist
@@ -792,7 +745,6 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
         # calculate global centroids if needed
         if (any(type %in% c("SF", "CH"))) {
             N <- length(a@datalist)
-
             if (a@type == "partitional") {
                 global_cent <- do.call(a@family@allcent,
                                        args = enlist(x = a@datalist,
@@ -802,20 +754,19 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                                                      cl_old = rep(0L, N),
                                                      dots = a@args$cent),
                                        TRUE)
-            } else {
+            }
+            else {
                 global_cent <- do.call(a@family@allcent,
                                        args = enlist(a@datalist,
                                                      dots = subset_dots(a@args$cent,
                                                                         a@family@allcent)),
                                        TRUE)
             }
-
             dist_global_cent <- do.call(a@family@dist,
                                         args = enlist(x = a@centroids,
                                                       centroids = global_cent,
                                                       dots = a@args$dist),
                                         TRUE)
-
             dim(dist_global_cent) <- NULL
         }
 
@@ -825,11 +776,9 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                    Sil = {
                        mean(cluster::silhouette(a@cluster, dmatrix = distmat)[,3L])
                    },
-
                    # Dunn
                    D = {
                        pairs <- call_pairs(a@k)
-
                        deltas <- mapply(pairs[ , 1L], pairs[ , 2L],
                                         USE.NAMES = FALSE, SIMPLIFY = TRUE,
                                         FUN = function(i, j) {
@@ -837,28 +786,23 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                                                         a@cluster == j,
                                                         drop = TRUE])
                                         })
-
                        Deltas <- sapply(1L:a@k, function(k) {
                            max(distmat[a@cluster == k, a@cluster == k, drop = TRUE])
                        })
-
                        min(deltas) / max(Deltas)
                    },
-
                    # Davies-Bouldin
                    DB = {
                        mean(sapply(1L:a@k, function(k) {
                            max((S[k] + S[-k]) / distcent[k, -k])
                        }))
                    },
-
                    # Modified DB -> DB*
                    DBstar = {
                        mean(sapply(1L:a@k, function(k) {
                            max(S[k] + S[-k]) / min(distcent[k, -k, drop = TRUE])
                        }))
                    },
-
                    # Calinski-Harabasz
                    CH = {
                        (N - a@k) /
@@ -866,14 +810,12 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                            sum(a@clusinfo$size * dist_global_cent) /
                            sum(a@cldist[, 1L])
                    },
-
                    # Score function
                    SF = {
                        bcd <- sum(a@clusinfo$size * dist_global_cent) / (N * a@k)
                        wcd <- sum(a@clusinfo$av_dist)
                        1 - 1 / exp(exp(bcd - wcd))
                    },
-
                    # COP
                    COP = {
                        1 / nrow(distmat) * sum(sapply(1L:a@k, function(k) {
@@ -886,7 +828,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                    })
         }))
     }
-
+    # return
     CVIs
 }
 
@@ -917,11 +859,9 @@ setMethod(
                           c("MPC", "K", "T", "SC", "PBMF",
                             "RI", "ARI", "VI", "NMIM",
                             "valid", "internal", "external"))
-
         dots <- list(...)
         internal <- c("MPC", "K", "T", "SC", "PBMF")
         external <- c("RI", "ARI", "VI", "NMIM")
-
         if (any(type == "valid")) {
             type <- if (is.null(b)) internal else c(internal, external)
         } else if (any(type == "internal")) {
@@ -932,30 +872,24 @@ setMethod(
 
         which_internal <- type %in% internal
         which_external <- type %in% external
-
         if (any(which_external))
             CVIs <- cvi(a@fcluster, b = b, type = type[which_external], ...)
         else
             CVIs <- numeric()
 
         type <- type[which_internal]
-
         if (any(which_internal)) {
             if (length(a@datalist) == 0L && any(type %in% c("K", "T" ,"SC", "PBMF"))) {
                 warning("Fuzzy CVIs: the original series must be in the object to calculate ",
                         "the following indices:\n",
                         "\tK\tT\tSC\tPBMF")
-
                 type <- setdiff(type, c("K", "T" ,"SC", "PBMF"))
             }
-
             # are no valid indices left?
             if (length(type) == 0L) return(numeric(0L))
-
             # calculate global centroids if needed
             if (any(type %in% c("K", "SC", "PBMF"))) {
                 N <- length(a@datalist)
-
                 global_cent <- do.call(a@family@allcent,
                                        args = enlist(x = a@datalist,
                                                      cl_id = cbind(rep(1L, N)),
@@ -969,7 +903,6 @@ setMethod(
                                             TRUE)
                 dim(dist_global_cent) <- NULL
             }
-
             # distance between centroids
             if (any(type %in% c("K", "T", "PBMF"))) {
                 distcent <- do.call(a@family@dist,
@@ -978,7 +911,6 @@ setMethod(
                                                   dots = a@args$dist),
                                     TRUE)
             }
-
             # distance between series and centroids
             if (any(type %in% c("K", "T", "SC", "PBMF"))) {
                 dsc <- do.call(a@family@dist,
@@ -987,7 +919,6 @@ setMethod(
                                              dots = a@args$dist),
                                TRUE)
             }
-
             CVIs <- c(CVIs, sapply(type, function(CVI) {
                 switch(EXPR = CVI,
                        # ---------------------------------------------------------------------------
@@ -995,7 +926,6 @@ setMethod(
                            PC <- sum(a@fcluster ^ 2) / nrow(a@fcluster)
                            1 - (a@k / (a@k - 1L)) * (1 - PC)
                        },
-
                        # ---------------------------------------------------------------------------
                        "K" = {
                            numerator <- sum((a@fcluster ^ 2) * (dsc ^ 2)) +
@@ -1003,7 +933,6 @@ setMethod(
                            denominator <- min(distcent[!diag(a@k)] ^ 2)
                            numerator / denominator
                        },
-
                        # ---------------------------------------------------------------------------
                        "T" = {
                            numerator <- sum((a@fcluster ^ 2) * (dsc ^ 2)) +
@@ -1011,17 +940,14 @@ setMethod(
                            denominator <- min(distcent[!diag(a@k)] ^ 2) + 1 / a@k
                            numerator / denominator
                        },
-
                        # ---------------------------------------------------------------------------
                        "SC" = {
                            u <- a@fcluster
                            m <- a@control$fuzziness
-
                            SC1_numerator <- sum((dist_global_cent ^ 2) / a@k)
                            SC1_denominator <- sum(apply((u ^ m) * (dsc ^ 2), 2L, sum) /
                                                       apply(u, 2L, sum))
                            SC1 <- SC1_numerator / SC1_denominator
-
                            SC2_numerator <- sum(sapply(1L:(a@k - 1L), function(i) {
                                sum(sapply(1L:(a@k - i), function(r) {
                                    j <- r + i
@@ -1032,10 +958,8 @@ setMethod(
                            SC2_denominator <- apply(u, 1L, max)
                            SC2_denominator <- sum(SC2_denominator ^ 2) / sum(SC2_denominator)
                            SC2 <- SC2_numerator / SC2_denominator
-
                            SC1 - SC2
                        },
-
                        # ---------------------------------------------------------------------------
                        "PBMF" = {
                            u <- a@fcluster

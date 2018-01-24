@@ -25,8 +25,8 @@ zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE, error.
         x <- lapply(x, zscore, ...,
                     multivariate = is_multivariate(x),
                     keep.attributes = keep.attributes)
-
-    } else if (!multivariate && (is.matrix(x) || is.data.frame(x))) {
+    }
+    else if (!multivariate && (is.matrix(x) || is.data.frame(x))) {
         if (is.data.frame(x)) x <- base::as.matrix(x)
         if (error.check) check_consistency(x, "ts")
         dots <- list(...)
@@ -35,8 +35,8 @@ zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE, error.
         x <- t(base::scale(t(x), center = center, scale = scale))
         x[is.nan(x)] <- 0
         if (!keep.attributes) { attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL }
-
-    } else {
+    }
+    else {
         if (is.data.frame(x)) x <- base::as.matrix(x)
         if (error.check) check_consistency(x, "ts")
         dots <- list(...)
@@ -47,7 +47,6 @@ zscore <- function(x, ..., multivariate = FALSE, keep.attributes = FALSE, error.
         if (!multivariate) dim(x) <- NULL
         if (!keep.attributes) { attr(x, "scaled:center") <- attr(x, "scaled:scale") <- NULL }
     }
-
     # return
     x
 }

@@ -79,29 +79,24 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
                                loop = TRUE, type = "metric", distance = TRUE,
                                description = "DTW with L2 norm",
                                PACKAGE = "dtwclust")
-
     # Register DTW_BASIC
     if (!check_consistency("DTW_BASIC", "dist", silent = TRUE))
         proxy::pr_DB$set_entry(FUN = dtw_basic_proxy, names=c("DTW_BASIC", "dtw_basic"),
                                loop = FALSE, type = "metric", distance = TRUE,
                                description = "Basic and maybe faster DTW distance",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun)
-
     # Register LB_Keogh
     if (!check_consistency("LB_Keogh", "dist", silent = TRUE))
         proxy::pr_DB$set_entry(FUN = lb_keogh_proxy, names=c("LBK", "LB_Keogh", "lbk"),
                                loop = FALSE, type = "metric", distance = TRUE,
                                description = "Keogh's DTW lower bound for the Sakoe-Chiba band",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun)
-
-
     # Register LB_Improved
     if (!check_consistency("LB_Improved", "dist", silent = TRUE))
         proxy::pr_DB$set_entry(FUN = lb_improved_proxy, names=c("LBI", "LB_Improved", "lbi"),
                                loop = FALSE, type = "metric", distance = TRUE,
                                description = "Lemire's improved DTW lower bound for the Sakoe-Chiba band",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun)
-
     # Register SBD
     if (!check_consistency("SBD", "dist", silent = TRUE))
         proxy::pr_DB$set_entry(FUN = sbd_proxy, names=c("SBD", "sbd"),
@@ -109,14 +104,12 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
                                description = "Paparrizos and Gravanos' shape-based distance for time series",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun,
                                convert = function(d) { 2 - d })
-
     # Register DTW_LB
     if (!check_consistency("DTW_LB", "dist", silent = TRUE))
         proxy::pr_DB$set_entry(FUN = dtw_lb, names=c("DTW_LB", "dtw_lb"),
                                loop = FALSE, type = "metric", distance = TRUE,
                                description = "DTW distance aided with Lemire's lower bound",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun)
-
     # Register GAK
     if (!check_consistency("GAK", "dist", silent = TRUE))
         proxy::pr_DB$set_entry(FUN = gak_proxy, names=c("GAK", "gak"),
@@ -124,14 +117,12 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
                                description = "Fast (triangular) global alignment kernel distance",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun,
                                convert = function(d) { 1 - d })
-
     # Register uGAK
     if (!check_consistency("uGAK", "dist", silent = TRUE))
         proxy::pr_DB$set_entry(FUN = gak_simil, names=c("uGAK", "ugak"),
                                loop = FALSE, type = "metric", distance = FALSE,
                                description = "Fast (triangular) global alignment kernel similarity",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun)
-
     # Register soft-DTW
     if (!check_consistency("sdtw", "dist", silent = TRUE))
         proxy::pr_DB$set_entry(FUN = sdtw_proxy, names=c("sdtw", "SDTW", "soft-DTW"),

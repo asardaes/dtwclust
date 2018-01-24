@@ -166,20 +166,17 @@ setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10
     if (any(type == "VI")) {
         # Variation of information
         # taken from https://github.com/cran/mcclust/blob/master/R/vi.dist.R
-
         # entropy
         ent <- function(cl) {
             p <- table(cl) / length(cl)
             -sum(p * log(p, base = log.base))
         }
-
         # mutual information
         mi <- function(cl1, cl2) {
             p12 <- table(cl1, cl2) / length(cl1)
             p1p2 <- outer(table(cl1) / length(cl1), table(cl2) / length(cl2))
             sum(p12[p12 > 0] * log(p12[p12 > 0] / p1p2[p12 > 0], base = log.base))
         }
-
         VI <- ent(a) + ent(b) - 2 * mi(a, b)
         CVIs <- c(CVIs, VI = VI)
     }
@@ -201,7 +198,6 @@ setMethod(
         dim_b <- dim(b)
         b <- as.integer(b)
         dim(b) <- dim_b
-
         if (is.null(dim_b)) {
             if (nrow(a) != length(b)) stop("External CVIs: 'a'-rows and 'b'-length must match.")
             temp <- matrix(0L, nrow(a), max(b))
@@ -212,7 +208,6 @@ setMethod(
         type <- match.arg(type, several.ok = TRUE,
                           choices = c("ARI", "RI", "VI", "NMIM", "valid", "external"))
         if (any(type %in% c("valid", "external"))) type <- c("ARI", "RI", "VI", "NMIM")
-
         num_objects <- nrow(a)
         contingency_table <- t(a) %*% b
 
@@ -249,18 +244,15 @@ setMethod(
                        temp_mul <- both_and_a * both_and_b
                        (pairs_in_both - temp_mul / sum_all) / (0.5 * temp_sum - temp_mul / sum_all)
                    },
-
                    # -------------------------------------------------------------------------------
                    "RI" = {
                        (pairs_in_both + pairs_in_neither) /
                            (pairs_in_both + pairs_in_neither + just_in_a + just_in_b)
                    },
-
                    # -------------------------------------------------------------------------------
                    "VI" = {
                        entropy_x + entropy_y - 2 * mutual_information
                    },
-
                    # -------------------------------------------------------------------------------
                    "NMIM" = {
                        mutual_information / max(entropy_x, entropy_y)
