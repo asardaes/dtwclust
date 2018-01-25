@@ -79,12 +79,12 @@ SBD <- function(x, y, znorm = FALSE, error.check = TRUE, return.shifted = TRUE) 
 
     if (nx > ny) {
         # The order in which I provide the arguments to NCCc affects 'shift'
-        flip <- x
+        swap <- x
         x <- y
-        y <- flip
-
-    } else {
-        flip <- NULL
+        y <- swap
+    }
+    else {
+        swap <- NULL
     }
 
     if (znorm)
@@ -98,14 +98,14 @@ SBD <- function(x, y, znorm = FALSE, error.check = TRUE, return.shifted = TRUE) 
     if (!return.shifted) return(1 - m)
     shift <- which.max(CCseq) - max(nx, ny)
 
-    if (is.null(flip)) {
+    if (is.null(swap)) {
         if (shift < 0L)
             yshift <- y[(-shift + 1L):ny]
         else
             yshift <- c( rep(0, shift), y )
-
-    } else {
-        # Remember, if I flipped them, then I have to shift what is now saved in 'x'
+    }
+    else {
+        # Remember, if I swapped them, then I have to shift what is now saved in 'x'
         if (shift < 0L)
             yshift <- c( rep(0, -shift), x )
         else
@@ -113,12 +113,11 @@ SBD <- function(x, y, znorm = FALSE, error.check = TRUE, return.shifted = TRUE) 
     }
 
     nys <- length(yshift)
-
     if (nys < nx)
         yshift <- c( yshift, rep(0, nx-nys) )
     else
         yshift <- yshift[1L:nx]
-
+    # return
     list(dist = 1 - m, yshift = yshift)
 }
 
