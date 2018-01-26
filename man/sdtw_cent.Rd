@@ -6,7 +6,7 @@
 \usage{
 sdtw_cent(series, centroid = NULL, gamma = 0.01, weights = rep(1,
   length(series)), ..., opts = list(algorithm = "NLOPT_LD_LBFGS", maxeval =
-  20L), error.check = TRUE, num_threads = 1L)
+  20L), error.check = TRUE)
 }
 \arguments{
 \item{series}{A matrix or data frame where each row is a time series, or a list where each
@@ -27,9 +27,6 @@ characteristics as the matrices in \code{series}.}
 
 \item{error.check}{Logical indicating whether the function should try to detect inconsistencies
 and give more informative errors messages. Also used internally to avoid repeating checks.}
-
-\item{num_threads}{How many threads to use for multi-threading. See Parallel Computing section
-below.}
 }
 \value{
 The resulting centroid, with attribute \code{nloptr_results} specifying the optimization
@@ -58,16 +55,6 @@ Note that you can trace the optimization by specifing \code{print_level > 0} in 
   workers do not have the number of threads explicitly specified, this function will default to 1
   thread per worker. See the parallelization vignette for more information
   (\code{browseVignettes("dtwclust")}).
-
-
-
-In contrast to other \pkg{dtwclust} functions, this function has a parameter to specify how
-many threads it should try to use. This is because the procedure is more sensitive to floating
-point inaccuracies, and dividing the work onto different threads could change the results (at
-least in the order of 1e-8 according to my limited experiments). This could be an issue during
-clusterings where a lot of calls to the centroid function are made and the errors propagate.
-Note that you should still set the maximum amount of available threads with
-\code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
 }
 
 \references{

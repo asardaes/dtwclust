@@ -546,10 +546,7 @@ This centroid calculation is based on soft-DTW,
 so it also supports multivariate series.
 Additionally, it depends on numerical optimization,
 and uses the `nloptr::nloptr` function.
-The implementation in `dtwclust` supports multi-threading in the same manner as DBA,
-but it is not automatically used by default
-(see its documentation);
-for this experiments parallelization was explicitly tested.
+The implementation in `dtwclust` supports multi-threading in the same manner as DBA.
 Only the "NLOPT_LD_LBFGS" algorithm with a maximum of 20 evaluations was tested.
 Both `gamma` and the `weights` vector were left at their default values in all tests.
 
