@@ -9,7 +9,7 @@
 #include "../distance-calculators/distance-calculators.h"
 #include "../distances/distances.h" // sdtw
 #include "../utils/TSTSList.h"
-#include "../utils/utils.h" // d2s
+#include "../utils/utils.h" // KahanSummer, d2s
 
 namespace dtwclust {
 
@@ -146,9 +146,9 @@ public:
            const double gamma)
         : dist_calculator_(dist_calculator)
         , weights_(weights)
-        , gradient_(gradient)
-        , objective_(objective)
         , gamma_(gamma)
+        , gradient_summer_(&gradient[0], gradient.length())
+        , objective_summer_(&objective, 1)
     { }
 
     // parallel loop across specified range
@@ -169,7 +169,7 @@ public:
             const RcppParallel::RVector<double>& y = local_calculator->y_uv_[id];
             double dist = local_calculator->calculate(0,id);
             mutex_.lock();
-            objective_ += weights_[id] * dist;
+            objective_summer_.add(weights_[id] * dist, 0);
             mutex_.unlock();
             int m = x.length(), n = y.length();
             init_matrices(m, n, cm_nrows, dm_nrows, local_calculator->max_len_y_, cm, dm, em);
@@ -178,7 +178,7 @@ public:
                 double grad = 0;
                 for (int j = 0; j < n; j++) grad += em[d2s(i%2, j+1, 2)] * 2 * (x[i-1] - y[j]);
                 mutex_.lock();
-                gradient_[i-1] += weights_[id] * grad;
+                gradient_summer_.add(weights_[id] * grad, i-1);
                 mutex_.unlock();
                 if (i == m) em[d2s((m+1)%2, n+1, 2)] = 0;
             }
@@ -193,9 +193,8 @@ public:
 private:
     const SdtwCentCalculator& dist_calculator_;
     const RcppParallel::RVector<double> weights_;
-    RcppParallel::RVector<double> gradient_;
-    double& objective_;
     double gamma_;
+    KahanSummer gradient_summer_, objective_summer_;
     tthread::mutex mutex_;
 };
 
@@ -213,9 +212,9 @@ public:
            const double gamma)
         : dist_calculator_(dist_calculator)
         , weights_(weights)
-        , gradient_(gradient)
-        , objective_(objective)
         , gamma_(gamma)
+        , gradient_summer_(&gradient[0], gradient.nrow(), gradient.ncol())
+        , objective_summer_(&objective, 1)
     { }
 
     // parallel loop across specified range
@@ -237,7 +236,7 @@ public:
             const RcppParallel::RMatrix<double>& y = local_calculator->y_mv_[id];
             double dist = local_calculator->calculate(0,id);
             mutex_.lock();
-            objective_ += weights_[id] * dist;
+            objective_summer_.add(weights_[id] * dist, 0);
             mutex_.unlock();
             int m = x.nrow(), n = y.nrow(), dim = x.ncol();
             if (!grad) {
@@ -255,7 +254,7 @@ public:
                     }
                 }
                 mutex_.lock();
-                for (int k = 0; k < dim; k++) gradient_(i-1,k) += weights_[id] * grad[k];
+                for (int k = 0; k < dim; k++) gradient_summer_.add(weights_[id] * grad[k], i-1, k);
                 mutex_.unlock();
                 if (i == m) em[d2s((m+1)%2, n+1, 2)] = 0;
             }
@@ -271,9 +270,8 @@ public:
 private:
     const SdtwCentCalculator& dist_calculator_;
     const RcppParallel::RVector<double> weights_;
-    RcppParallel::RMatrix<double> gradient_;
-    double& objective_;
     double gamma_;
+    KahanSummer gradient_summer_, objective_summer_;
     tthread::mutex mutex_;
 };
 
@@ -299,10 +297,7 @@ RcppExport SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
         Rcpp::List x = Rcpp::List::create(Rcpp::_["cent"] = CENTROID);
         SdtwCentCalculator dist_calculator(x, series, gamma, true);
         SdtwMv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma);
-        if (num_threads == 1)
-            parallel_worker(0, series.length());
-        else
-            RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
+        RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
         return Rcpp::List::create(
             Rcpp::_["objective"] = objective,
             Rcpp::_["gradient"] = gradient
@@ -315,10 +310,7 @@ RcppExport SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
         Rcpp::List x = Rcpp::List::create(Rcpp::_["cent"] = CENTROID);
         SdtwCentCalculator dist_calculator(x, series, gamma, false);
         SdtwUv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma);
-        if (num_threads == 1)
-            parallel_worker(0, series.length());
-        else
-            RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
+        RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
         return Rcpp::List::create(
             Rcpp::_["objective"] = objective,
             Rcpp::_["gradient"] = gradient
