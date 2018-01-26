@@ -11,7 +11,7 @@
 #include "../distance-calculators/distance-calculators.h"
 #include "../distances/distances.h" // dtw_basic_par
 #include "../utils/TSTSList.h"
-#include "../utils/utils.h" // Rflush, d2s
+#include "../utils/utils.h" // KahanSummer, Rflush, d2s
 
 namespace dtwclust {
 
@@ -165,21 +165,12 @@ public:
         : backtrack_calculator_(backtrack_calculator)
         , new_cent_(new_cent)
         , num_vals_(num_vals)
-        , kahan_c_(new double[new_cent.length()])
-        , kahan_y_(new double[new_cent.length()])
-        , kahan_t_(new double[new_cent.length()])
+        , summer_(&new_cent_[0], new_cent_.length())
     { }
-
-    // destructor
-    ~DbaUv() {
-        if (kahan_c_) delete[] kahan_c_;
-        if (kahan_y_) delete[] kahan_y_;
-        if (kahan_t_) delete[] kahan_t_;
-    }
 
     // for reusability
     void reset() {
-        std::fill(kahan_c_, kahan_c_ + new_cent_.length(), 0);
+        summer_.reset();
     }
 
     // parallel loop across specified range
@@ -196,10 +187,7 @@ public:
             for (int ii = local_calculator->path_ - 1; ii >= 0; ii--) {
                 int i1 = local_calculator->index1_[ii] - 1;
                 int i2 = local_calculator->index2_[ii] - 1;
-                kahan_y_[i2] = x[i1] - kahan_c_[i2];
-                kahan_t_[i2] = new_cent_[i2] + kahan_y_[i2];
-                kahan_c_[i2] = (kahan_t_[i2] - new_cent_[i2]) - kahan_y_[i2];
-                new_cent_[i2] = kahan_t_[i2];
+                summer_.add(x[i1], i2);
                 num_vals_[i2] += 1;
             }
             mutex_.unlock();
@@ -214,8 +202,8 @@ private:
     const DtwBacktrackCalculator& backtrack_calculator_;
     RcppParallel::RVector<double> new_cent_;
     RcppParallel::RVector<int> num_vals_;
-    // sum helpers
-    double *kahan_c_, *kahan_y_, *kahan_t_;
+    // sum helper
+    KahanSummer summer_;
     // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
     tthread::mutex mutex_;
 };
@@ -233,21 +221,12 @@ public:
         : backtrack_calculator_(backtrack_calculator)
         , new_cent_(new_cent)
         , num_vals_(num_vals)
-        , kahan_c_(new double[new_cent.nrow() * new_cent.ncol()])
-        , kahan_y_(new double[new_cent.nrow() * new_cent.ncol()])
-        , kahan_t_(new double[new_cent.nrow() * new_cent.ncol()])
+        , summer_(&new_cent_[0], new_cent_.nrow(), new_cent_.ncol())
     { }
-
-    // destructor
-    ~DbaMvBySeries() {
-        if (kahan_c_) delete[] kahan_c_;
-        if (kahan_y_) delete[] kahan_y_;
-        if (kahan_t_) delete[] kahan_t_;
-    }
 
     // for reusability
     void reset() {
-        std::fill(kahan_c_, kahan_c_ + (new_cent_.nrow() * new_cent_.ncol()), 0);
+        summer_.reset();
     }
 
     // parallel loop across specified range
@@ -266,11 +245,7 @@ public:
                 for (int ii = local_calculator->path_ - 1; ii >= 0; ii--) {
                     int i1 = local_calculator->index1_[ii] - 1;
                     int i2 = local_calculator->index2_[ii] - 1;
-                    kahan_y_[d2s(i2,j,nrows)] = x(i1,j) - kahan_c_[d2s(i2,j,nrows)];
-                    kahan_t_[d2s(i2,j,nrows)] = new_cent_(i2,j) + kahan_y_[d2s(i2,j,nrows)];
-                    kahan_c_[d2s(i2,j,nrows)] = (kahan_t_[d2s(i2,j,nrows)] - new_cent_(i2,j)) -
-                        kahan_y_[d2s(i2,j,nrows)];
-                    new_cent_(i2,j) = kahan_t_[d2s(i2,j,nrows)];
+                    summer_.add(x(i1,j), i2, j);
                     num_vals_(i2,j) += 1;
                 }
             }
@@ -286,8 +261,8 @@ private:
     const DtwBacktrackCalculator& backtrack_calculator_;
     RcppParallel::RMatrix<double> new_cent_;
     RcppParallel::RMatrix<int> num_vals_;
-    // sum helpers
-    double *kahan_c_, *kahan_y_, *kahan_t_;
+    // sum helper
+    KahanSummer summer_;
     // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
     tthread::mutex mutex_;
 };
@@ -305,21 +280,12 @@ public:
         : backtrack_calculator_(backtrack_calculator)
         , new_cent_(new_cent)
         , num_vals_(num_vals)
-        , kahan_c_(new double[new_cent.nrow() * new_cent.ncol()])
-        , kahan_y_(new double[new_cent.nrow() * new_cent.ncol()])
-        , kahan_t_(new double[new_cent.nrow() * new_cent.ncol()])
+        , summer_(&new_cent_[0], new_cent_.nrow(), new_cent_.ncol())
     { }
-
-    // destructor
-    ~DbaMvByVariable() {
-        if (kahan_c_) delete[] kahan_c_;
-        if (kahan_y_) delete[] kahan_y_;
-        if (kahan_t_) delete[] kahan_t_;
-    }
 
     // for reusability
     void reset() {
-        std::fill(kahan_c_, kahan_c_ + (new_cent_.nrow() * new_cent_.ncol()), 0);
+        summer_.reset();
     }
 
     // parallel loop across specified range
@@ -338,11 +304,7 @@ public:
                 for (int ii = local_calculator->path_ - 1; ii >= 0; ii--) {
                     int i1 = local_calculator->index1_[ii] - 1;
                     int i2 = local_calculator->index2_[ii] - 1;
-                    kahan_y_[d2s(i2,j,nrows)] = x(i1,j) - kahan_c_[d2s(i2,j,nrows)];
-                    kahan_t_[d2s(i2,j,nrows)] = new_cent_(i2,j) + kahan_y_[d2s(i2,j,nrows)];
-                    kahan_c_[d2s(i2,j,nrows)] = (kahan_t_[d2s(i2,j,nrows)] - new_cent_(i2,j)) -
-                        kahan_y_[d2s(i2,j,nrows)];
-                    new_cent_(i2,j) = kahan_t_[d2s(i2,j,nrows)];
+                    summer_.add(x(i1,j), i2, j);
                     num_vals_(i2,j) += 1;
                 }
                 mutex_.unlock();
@@ -358,8 +320,8 @@ private:
     const DtwBacktrackCalculator& backtrack_calculator_;
     RcppParallel::RMatrix<double> new_cent_;
     RcppParallel::RMatrix<int> num_vals_;
-    // sum helpers
-    double *kahan_c_, *kahan_y_, *kahan_t_;
+    // sum helper
+    KahanSummer summer_;
     // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
     tthread::mutex mutex_;
 };
