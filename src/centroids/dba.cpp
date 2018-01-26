@@ -235,7 +235,6 @@ public:
         DtwBacktrackCalculator* local_calculator = backtrack_calculator_.clone();
         mutex_.unlock();
         // kahan sum step
-        int nrows = new_cent_.nrow();
         for (std::size_t i = begin; i < end; i++) {
             local_calculator->calculate(i,0);
             const RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[i];
@@ -294,7 +293,6 @@ public:
         DtwBacktrackCalculator* local_calculator = backtrack_calculator_.clone();
         mutex_.unlock();
         // kahan sum step
-        int nrows = new_cent_.nrow();
         for (std::size_t i = begin; i < end; i++) {
             const RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[i];
             for (int j = 0; j < static_cast<int>(new_cent_.ncol()); j++) {
