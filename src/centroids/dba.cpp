@@ -1,6 +1,5 @@
 #include "centroids.h"
 
-#include <algorithm> // std::fill
 #include <cmath> // std::abs
 #include <cstddef> // std::size_t
 #include <utility> // std::move
