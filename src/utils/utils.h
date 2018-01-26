@@ -1,6 +1,8 @@
 #ifndef DTWCLUST_UTILS_HPP_
 #define DTWCLUST_UTILS_HPP_
 
+#include <vector>
+
 #include <RcppArmadillo.h>
 
 namespace dtwclust {
@@ -56,6 +58,20 @@ int inline get_grain(const int n, const int num_threads) {
     // min grain defined here
     return (grain < 8) ? 8 : grain;
 }
+
+// for kahan sum (compensated sum)
+class KahanSummer
+{
+public:
+    KahanSummer(double * const x, const int nrows, const int ncols = 1);
+    void reset();
+    void add(const double value, const int i, const int j = 0);
+
+private:
+    double* const x_;
+    int nrows_, ncols_;
+    std::vector<double> c_, y_, t_;
+};
 
 } // namespace dtwclust
 
