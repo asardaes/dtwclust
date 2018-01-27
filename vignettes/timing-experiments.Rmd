@@ -65,7 +65,7 @@ levels(dist_single_results$distance) <- c(
 levels(dist_multiple_results$distance) <- c(
     lb_keogh = "LB Keogh",
     lb_improved = "LB Improved",
-    dtw_lb = "DTW + LBI",
+    dtw_lb = "LBI + DTW",
     sbd = "Shape-Based Distance",
     dtw_univariate = "DTW (Univariate)",
     dtw_multivariate = "DTW (Multivariate)",
@@ -587,7 +587,7 @@ For all experiments in this section the number of available threads was left at 
 Since multi-threading is active by default,
 it is expected that most users will benefit from it,
 and what we care about is relative performance,
-so the fact that they all have access to all threads makes it a fair comparison.
+so the fact that all tests have access to all threads makes it a fair comparison.
 
 ## TADPole
 
@@ -636,7 +636,6 @@ We test 3 different strategies to apply PAM centroids:
 pre-computing the whole distance matrix once,
 performing no pre-computation and using a sparse matrix that is updated iteratively,
 and performing no pre-computation but using `dtw_lb` at each iteration.
-In this section, we briefly look at the differences between the first 2.
 Even though **the remarks for sparse matrices apply to any distance**,
 we only use DTW here (the `dtw_basic` version).
 The value of `k` was fixed at 20.
@@ -645,7 +644,7 @@ For the next figure, only 1 repetition was made in each experiment.
 ```{r clust-part-dtw-pam-plot, fig.height=5}
 ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$pam, 
                        id.vars=c("num_series", "k", "window_size"))
-levels(ggdf$variable) <- c("DTW (Full Pre-Computation)", "DTW (Sparse Matrix)", "DTW + LBI")
+levels(ggdf$variable) <- c("DTW (Full Pre-Computation)", "DTW (Sparse Matrix)", "LBI + DTW")
 ggplot(ggdf,
        aes(x = num_series,
            y = value,
@@ -669,7 +668,7 @@ cols <- setdiff(colnames(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps),
                 "sparse_distmat_filled_percent")
 ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$pam_vs_reps[,cols], 
                        id.vars=c("num_series", "k", "num_repetitions"))
-levels(ggdf$variable) <- c("DTW (Full Pre-Computation)", "DTW (Sparse Matrix)", "DTW + LBI")
+levels(ggdf$variable) <- c("DTW (Full Pre-Computation)", "DTW (Sparse Matrix)", "LBI + DTW")
 ggplot(ggdf,
        aes(x = num_series,
            y = value,
@@ -717,7 +716,7 @@ using `dtw_lb` may be an appropriate alternative.
 ### DBA centroids
 
 The previous section looked solely at PAM centroids because there are several specific nuances for them.
-However, for other centroids, the story changes.
+However, for other centroids the story changes.
 For all non-PAM centroids, the centroid time-series change at every iteration and for every repetition,
 so there can be no pre-computation of the cross-distance matrix.
 With that in mind, we look here at the difference between `dtw_basic` and `dtw_lb` for DBA centroids.
@@ -726,7 +725,7 @@ This comparison of DTW-based distances probably **applies to other centroids too
 ```{r clust-part-dtw-dba-plot, fig.height=5}
 ggdf <- reshape2::melt(partitional_results$dtwlb_vs_dtwbasic$dba, 
                        id.vars=c("num_series", "k", "window_size"))
-levels(ggdf$variable) <- c("DTW", "DTW + LBI")
+levels(ggdf$variable) <- c("DTW", "LBI + DTW")
 ggplot(ggdf,
        aes(x = num_series,
            y = value,

@@ -658,6 +658,29 @@ A \proglang{C} implementation of the TGAK algorithm is available at its author's
 An \R{} wrapper has been implemented in \dtwclust{} in the \code{GAK} function,
 performing the aforementioned normalization and subtraction in order to obtain a distance measure that can be used in clustering procedures.
 
+\subsection{Soft-DTW}
+\label{sec:sdtw}
+
+Following with the idea of the TGAK,
+i.e., of regularizing DTW by smoothing it,
+\citet{cuturi2017} called the resulting DTW score a soft-DTW,
+and discussed its differentiability.
+Thanks to this property,
+a gradient function can be obtained,
+and \citet{cuturi2017} developed a more efficient way to compute it.
+This can be then used to calculate centroids with numerical optimization as discussed in \cref{sec:sdtw-cent}.
+
+However, as a stand-alone distance measure,
+the soft-DTW distance has some disadvantages:
+the distance can be negative,
+the distance between $x$ and itself is \textit{not} necessarily zero,
+it does not fulfill the triangle inequality,
+and also has quadratic complexity with respect to the series' lengths.
+On the other hand,
+it is a symmetric distance,
+it supports multivariate series as well as different lengths,
+and it can provide differently smoothed results by means of a user-defined parameter $\gamma > 0$.
+
 \subsection{Shape-based distance}
 \label{sec:sbd}
 
@@ -845,6 +868,20 @@ namely that the length of the resulting prototype will depend on the length of t
 Technically, for multivariate series,
 the shape extraction algorithm could be applied for each variable $v$ of all involved series,
 but this was not explored by the authors of \kshape{}.
+
+\subsection{Soft-DTW centroid}
+\label{sec:sdtw-cent}
+
+Thanks to the gradient that can be computed as a by-product of the soft-DTW distance calculation
+(see \cref{sec:sdtw}),
+it is possible to define an objective function
+(see Equation (4) in \citet{cuturi2017})
+and subsequently minimize it with numerical optimization.
+In addition to the smoothing parameter of soft-DTW ($\gamma$),
+the optimization procedure considers the option of using normalizing weights for the input series,
+which noticeably alters the resulting centroids
+(see Figure 4 in \citet{cuturi2017}).
+The clustering and classification experiments performed by \citet{cuturi2017} showed that using soft-DTW (distance and centroid) provided quantitatively better results in many scenarios.
 
 \subsection{Fuzzy-based prototypes}
 \label{sec:fuzzy-cent}
@@ -1117,31 +1154,36 @@ and assigning the respective series to the corresponding cluster only.
 \label{sec:parallel}
 
 Using parallelization is not something that is commonly explored explicitly in the literature,
-but it is something that can be extremely useful in practical applications.
+but it can be extremely useful in practical applications.
 In the case of time-series clustering,
-and particularly when using the DTW distance,
 parallel computation can result in a very significant reduction in execution times.
 
 There are some important considerations when using parallelization.
-The amount of parallel workers, i.e., subprocesses that can each handle a given task,
+First of all,
+there is a basic distinction between multi-process and multi-threaded parallelization.
+The optimal amount of parallel workers, i.e., subprocesses that can each handle a given task,
 is dependent on the computer processor that is being used and the number of physical processing cores and logical threads it can handle.
 Each worker may require additional RAM, and \R{} usually only works with data that is loaded on RAM.
-Finally, the overhead introduced for the orchestration of the parallel workers may be too large when compared to the amount of time each worker needs to finish their assigned tasks,
+Finally, the overhead introduced for the orchestration of parallelization may be too large when compared to the amount of time needed to complete each task,
 which is especially true for relatively simple workloads.
 Therefore, using parallelization does not guarantee faster execution times,
 and should be tested in the context of a specific application.
 
 Handling parallelization has been greatly simplified in \R{} by different software packages.
-The implementations done in \dtwclust{} use the \pkg{foreach} package \citep{foreach},
-since it provides a flexible way of specifying the parallel backend that should be used,
-and can be extended by other packages.
-See \cref{app:doParallel} for a specific example.
+The implementations done in \dtwclust{} use the \pkg{foreach} package \citep{foreach} for multi-processing,
+and \pkg{RcppParallel} for multi-threading \citep{rcppparallel}.
+See \cref{app:doParallel} for a specific example of multi-processing,
+and refer to the parallelization vignette for additional information.
 
-Before describing the different cases where \dtwclust{} can take advantage of parallel computation,
+The documentation for each function specifies if they use parallelization and how,
+but in general,
+all distances included with \dtwclust{} use multi-threading,
+and multi-processing is leveraged during clustering.
+Before describing the different cases where \dtwclust{} can take advantage of multi-processing,
 it should also be noted that,
 by default,
-there is only one level of parallelization.
-This means that all tasks performed by a given parallel worker are done sequentially,
+there is only one level of parallelization in that case.
+This means that all tasks performed by a given parallel worker's process are done sequentially,
 and they cannot take advantage of further parallelization even if there are workers available.
 
 When performing partitional clustering,
@@ -1150,24 +1192,14 @@ When many repetitions are specified directly to \code{tsclust},
 the package assigns each repetition to a different worker.
 This is also the case when the function is called with several values of \code{k},
 i.e., when different number of clusters are to be tested;
-they are detected in partitional, fuzzy and TADPole clustering.
+this is detected in partitional, fuzzy and TADPole clustering.
+The included implementation of the TADPole algorithm also supports multi-processing for different values of the cutoff distance.
 
-Calculating distance matrices involves performing several independent pairwise comparisons.
-The default distance function included with \dtwclust{} parallelizes said calculations by grouping the amount of comparisons in chunks and assigning a chunk to each parallel worker.
-For instance, if 100 distance calculations are needed, and there are 4 workers available,
-each of them would get a chunk with 25 calculations.
-This should provide a good load balance,
-since each distance calculation is usually very fast.
-This chunking is also performed by the distance functions provided by \dtwclust{} which are registered with \pkg{proxy},
-specifically: \code{LB_Keogh}, \code{LB_Improved}, \code{SBD}, \code{dtw_basic}, \code{dtw_lb} and \code{GAK}.
-
-The included implementation of the TADPole algorithm supports parallelization for different values of the cutoff distance.
-
-Finally, in the context of partitional clustering,
+In the context of partitional clustering,
 calculating time-series prototypes is something that is done many times each iteration.
 Since clusters are mutually exclusive, the prototype calculations can be executed in parallel,
 but this is only worth it if the calculations are time consuming.
-Therefore, in \dtwclust{}, only DBA and shape extraction attempt to do parallelization when used in partitional clustering.
+Therefore, in \dtwclust{}, only DBA, shape extraction, and the soft-DTW centroid attempt to do multi-processing when used in partitional clustering.
 
 \section{Cluster evaluation}
 \label{sec:evaluation}
@@ -1332,8 +1364,8 @@ in an attempt to preserve reproducibility.
 The user is free to change this afterwards by using the \code{RNGkind} function.
 
 This manuscript summarizes some of the theory behind the algorithms.
-However, the documentation of the different functions and the other vignette%
-\footnote{\url{https://cran.r-project.org/web/packages/dtwclust/vignettes/timing-experiments.html}}
+However, the documentation of the different functions and the other vignettes%
+\footnote{\url{https://cran.r-project.org/web/packages/dtwclust/vignettes/}}
 include additional information regarding usability,
 and should also be considered when using the package.
 
@@ -1524,7 +1556,7 @@ and it should return a classed object that supports coercion to \code{hclust} ob
 The functions in the \pkg{cluster} package \citep{cluster} follow this convention,
 so, as an example, using them in conjunction with \dtwclust{} is straightforward.
 
-<<example-hc-3, echo = TRUE, message = FALSE>>=
+<<example-hc-3, echo = TRUE, message = FALSE, warning = FALSE>>=
 require("cluster")
 
 tsclust(CharTraj[1L:20L], type = "h", k = 4L,
@@ -1585,6 +1617,7 @@ sapply(list(DTW = pc_dtw, DTW_LB = pc_dtwlb, kShape = pc_ks, TADPole = pc_tp),
        cvi, b = CharTrajLabels[60L:100L], type = "VI")
 @
 
+\newpage
 \section{Fuzzy clustering example}
 \label{app:fuzzy}
 
@@ -1625,6 +1658,7 @@ The example below does the backend registration and calls \dtwclust{},
 returning to sequential computation after it finishes.
 It only uses 2 parallel workers,
 but more can be configured depending on each processor (see function \code{detectCores} in \R{}).
+Refer to \dtwclust{}'s parallelization vignette for more information.
 
 <<example-doParallel, echo = TRUE, message = FALSE>>=
 require("doParallel")
@@ -1639,8 +1673,8 @@ registerDoParallel(workers)
 # Backend detected automatically
 pc_par <- tsclust(CharTraj[1L:20L], k = 4L,
                   distance = "dtw_basic", centroid = "dba",
-                  window.size = 15L,
-                  seed = 938)
+                  window.size = 15L, seed = 938,
+                  control = partitional_control(nrep = 2L))
 
 # Stop parallel workers
 stopCluster(workers)

@@ -15,5 +15,6 @@
     \item The ellipsis in \code{sdtw_cent} is now actually passed to \code{nloptr}.
     \item Fixed \code{tsclust} for \code{dtw_lb} distance and \code{pam.precompute = FALSE} (it was always using \code{dtw_basic}, so the results should not change).
     \item Updated timing experiments.
+    \item Added soft-DTW information to the PDF vignette.
 }
 }

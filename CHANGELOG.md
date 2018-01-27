@@ -7,6 +7,7 @@
 * The ellipsis in `sdtw_cent` is now actually passed to `nloptr`.
 * Fixed `tsclust` for `dtw_lb` distance and `pam.precompute = FALSE` (it was always using `dtw_basic`, so the results should not change).
 * Updated timing experiments.
+* Added soft-DTW information to the PDF vignette.
 
 ## Version 5.1.0
 * Added implementations of soft-DTW distance and centroid.
