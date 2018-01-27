@@ -29,7 +29,7 @@ with(persistent, {
         expect_known_value(cent_mv_dba, file_name(cent_mv_dba, x32 = TRUE), tolerance = tol, info = "Multivariate")
 
         expect_known_value(cent_mv_dba_bys, file_name(cent_mv_dba_bys), info = "DBA by series")
-        expect_known_value(cent_sdtwc, file_name(cent_sdtwc), info = "SDTWC Univariate")
+        expect_known_value(cent_sdtwc, file_name(cent_sdtwc), tolerance = 1e-6, info = "SDTWC Univariate")
         expect_known_value(cent_mv_sdtwc, file_name(cent_mv_sdtwc), info = "SDTWC Multivariate")
     })
 })

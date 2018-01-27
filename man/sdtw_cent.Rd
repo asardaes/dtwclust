@@ -55,6 +55,13 @@ Note that you can trace the optimization by specifing \code{print_level > 0} in 
   workers do not have the number of threads explicitly specified, this function will default to 1
   thread per worker. See the parallelization vignette for more information
   (\code{browseVignettes("dtwclust")}).
+
+
+
+For unknown reasons, this function has returned different results (in the order of 1e-6) when
+using multi-threading in x64 Windows installations in comparison to other environments (using
+nloptr v1.0.4). Consider limiting the number of threads if you run into reproducibility
+problems.
 }
 
 \references{

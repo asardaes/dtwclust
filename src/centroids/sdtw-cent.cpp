@@ -164,14 +164,15 @@ public:
         double* dm = local_calculator->dm_;
         int cm_nrows = local_calculator->max_len_x_ + 2;
         int dm_nrows = local_calculator->max_len_x_ + 1;
+        const RcppParallel::RVector<double>& x = local_calculator->x_uv_[0];
+        int m = x.length();
         for (std::size_t id = begin; id < end; id++) {
-            const RcppParallel::RVector<double>& x = local_calculator->x_uv_[0];
             const RcppParallel::RVector<double>& y = local_calculator->y_uv_[id];
             double dist = local_calculator->calculate(0,id);
             mutex_.lock();
             objective_summer_.add(weights_[id] * dist, 0);
             mutex_.unlock();
-            int m = x.length(), n = y.length();
+            int n = y.length();
             init_matrices(m, n, cm_nrows, dm_nrows, local_calculator->max_len_y_, cm, dm, em);
             for (int i = m; i > 0; i--) {
                 update_em(i, n, gamma_, cm_nrows, dm_nrows, cm, dm, em);
@@ -231,19 +232,20 @@ public:
         double* dm = local_calculator->dm_;
         int cm_nrows = local_calculator->max_len_x_ + 2;
         int dm_nrows = local_calculator->max_len_x_ + 1;
+        const RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[0];
+        int m = x.nrow(), dim = x.ncol();
         for (std::size_t id = begin; id < end; id++) {
-            const RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[0];
             const RcppParallel::RMatrix<double>& y = local_calculator->y_mv_[id];
             double dist = local_calculator->calculate(0,id);
             mutex_.lock();
             objective_summer_.add(weights_[id] * dist, 0);
             mutex_.unlock();
-            int m = x.nrow(), n = y.nrow(), dim = x.ncol();
             if (!grad) {
                 mutex_.lock();
                 grad = new double[dim];
                 mutex_.unlock();
             }
+            int n = y.nrow();
             init_matrices(m, n, cm_nrows, dm_nrows, local_calculator->max_len_y_, cm, dm, em);
             for (int i = m; i > 0; i--) {
                 update_em(i, n, gamma_, cm_nrows, dm_nrows, cm, dm, em);

@@ -30,6 +30,13 @@ sdtw_cent_nloptr <- function(centroid, series, gamma, weights, mv, dim0)
 #'
 #' @template rcpp-parallel
 #'
+#' @section Parallel Computing:
+#'
+#'   For unknown reasons, this function has returned different results (in the order of 1e-6) when
+#'   using multi-threading in x64 Windows installations in comparison to other environments (using
+#'   nloptr v1.0.4). Consider limiting the number of threads if you run into reproducibility
+#'   problems.
+#'
 #' @return The resulting centroid, with attribute `nloptr_results` specifying the optimization
 #' results (except for `solution`, which is the returned centroid).
 #'
