@@ -506,6 +506,8 @@ plot.TSClusters <- function(x, y, ...,
     # force same length for all multivariate series/centroids in the same cluster by
     # adding NAs
     if (mv <- is_multivariate(data)) {
+        data <- lapply(data, base::as.matrix)
+        centroids <- lapply(centroids, base::as.matrix)
         clusters <- split(data, factor(x@cluster, levels = 1L:x@k), drop = FALSE)
         for (id_clus in 1L:x@k) {
             cluster <- clusters[[id_clus]]
