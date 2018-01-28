@@ -39,7 +39,7 @@ with(persistent, {
         expect_known_value(hc_all, file_name(hc_all))
         expect_known_value(hc_lbi, file_name(hc_lbi))
         expect_known_value(hc_cent, file_name(hc_cent))
-        expect_known_value(hc_cent2, file_name(hc_cent2, x32 = TRUE))
+        expect_known_value(hc_cent2, file_name(hc_cent2), tolerance = 1e-6)
         expect_known_value(hc_diana, file_name(hc_diana))
     })
 })
