@@ -27,7 +27,7 @@
 #'
 #' No consistency checks are performed by this function.
 #'
-tslist <- function(series, simplify = TRUE) {
+tslist <- function(series, simplify = FALSE) {
     if (is.matrix(series) || is.data.frame(series)) {
         rnms <- rownames(series)
         mat <- unname(base::as.matrix(series))

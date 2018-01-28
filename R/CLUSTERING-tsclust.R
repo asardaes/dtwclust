@@ -290,7 +290,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     tic <- proc.time()
     set.seed(seed)
     type <- match.arg(type, c("partitional", "hierarchical", "tadpole", "fuzzy"))
-    series <- tslist(series) # coerce to list if necessary
+    series <- tslist(series, error.check) # coerce to list if necessary
     if (any(k < 2L)) stop("At least two clusters must be defined")
     if (any(k > length(series))) stop("Cannot have more clusters than series in the dataset")
     if (!is.list(control)) stop("Invalid control argument")

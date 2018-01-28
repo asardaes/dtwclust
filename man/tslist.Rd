@@ -4,7 +4,7 @@
 \alias{tslist}
 \title{Coerce matrices or data frames to a list of time series}
 \usage{
-tslist(series, simplify = TRUE)
+tslist(series, simplify = FALSE)
 }
 \arguments{
 \item{series}{A matrix or data frame where each row is a time series.}
