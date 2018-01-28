@@ -68,12 +68,12 @@
 #'
 SBD <- function(x, y, znorm = FALSE, error.check = TRUE, return.shifted = TRUE) {
     if (is_multivariate(list(x, y))) stop("SBD does not support multivariate series.")
-
     if (error.check) {
         check_consistency(x, "ts")
         check_consistency(y, "ts")
+        x <- as.numeric(x)
+        y <- as.numeric(y)
     }
-
     nx <- length(x)
     ny <- length(y)
 

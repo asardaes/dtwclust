@@ -108,7 +108,14 @@ GAK <- function(x, y, ..., sigma = NULL, window.size = NULL, normalize = TRUE, e
     }
 
     # checks dimension consistency
-    is_multivariate(list(x,y))
+    if (is_multivariate(list(x,y))) {
+        x <- base::as.matrix(x)
+        y <- base::as.matrix(y)
+    }
+    else {
+        x <- as.numeric(x)
+        y <- as.numeric(y)
+    }
 
     if (is.null(window.size))
         window.size <- 0L

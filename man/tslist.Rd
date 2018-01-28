@@ -4,10 +4,13 @@
 \alias{tslist}
 \title{Coerce matrices or data frames to a list of time series}
 \usage{
-tslist(series)
+tslist(series, simplify = TRUE)
 }
 \arguments{
 \item{series}{A matrix or data frame where each row is a time series.}
+
+\item{simplify}{Coerce all series in the resulting list to either matrix (multivariate) or
+numeric (univariate).}
 }
 \value{
 A list of time series.

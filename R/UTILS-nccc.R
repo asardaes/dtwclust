@@ -26,6 +26,8 @@ NCCc <- function(x, y, error.check = TRUE) {
         check_consistency(x, "ts")
         check_consistency(y, "ts")
         if (is_multivariate(list(x,y))) stop("NCCc does not support multivariate series.")
+        x <- as.numeric(x)
+        y <- as.numeric(y)
     }
     den <- l2norm(x) * l2norm(y) # UTILS-utils.R
     # Notice that the native 'convolve' function already uses FFT for the calculation

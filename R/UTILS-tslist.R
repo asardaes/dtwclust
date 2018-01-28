@@ -5,6 +5,8 @@
 #' @export
 #'
 #' @param series A matrix or data frame where each row is a time series.
+#' @param simplify Coerce all series in the resulting list to either matrix (multivariate) or
+#'   numeric (univariate).
 #'
 #' @details
 #'
@@ -25,7 +27,7 @@
 #'
 #' No consistency checks are performed by this function.
 #'
-tslist <- function(series) {
+tslist <- function(series, simplify = TRUE) {
     if (is.matrix(series) || is.data.frame(series)) {
         rnms <- rownames(series)
         mat <- unname(base::as.matrix(series))
@@ -41,6 +43,13 @@ tslist <- function(series) {
         series <- list(series)
     else if (!is.list(series))
         stop("Unsupported data type.")
+    # coerce to simple types that are known to work
+    if (simplify) {
+        if (is_multivariate(series))
+            series <- lapply(series, base::as.matrix)
+        else
+            series <- lapply(series, base::as.numeric)
+    }
     # return
     series
 }
