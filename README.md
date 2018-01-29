@@ -32,6 +32,8 @@ For more information:
     (with examples in the appendices)
 -   [Timing
     experiments](https://cran.r-project.org/web/packages/dtwclust/vignettes/timing-experiments.html)
+-   [Parallelization
+    considerations](https://cran.r-project.org/web/packages/dtwclust/vignettes/parallelization-considerations.html)
 -   [Functions’
     documentation](https://cran.r-project.org/web/packages/dtwclust/dtwclust.pdf)
 -   [CRAN’s time series
