@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 5.1.0.9000
+## Version 5.2.0
 * Several functions now use `RcppParallel` for parallelization, refer to the new parallelization vignette for more information.
 * None of the distance/centroid functions expose parameters for helper matrices anymore.
 * Added the option to add labels to non-dendrogram plots.

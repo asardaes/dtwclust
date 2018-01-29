@@ -127,7 +127,7 @@ a series of timing experiments were made.
 Said experiments were not concerned with correctness or accuracy,
 only with timing characteristics.
 
-The experiments were re-run with `R` v3.4.3 and `dtwclust` v5.1.0.9000.
+The experiments were re-run with `R` v3.4.3 and `dtwclust` v5.2.0.
 Because of the changes introduced
 (see [the parallelization vignette](parallelization-considerations.html)),
 the results have changed in comparison to the original ones

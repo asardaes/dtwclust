@@ -1,5 +1,5 @@
 
-## Update to version 5.1.0.9000
+## Update to version 5.2.0
 * Vignette updates, addition of multi-threading, and minor fixes.
 
 ## Test environments
@@ -13,8 +13,15 @@
 
 ## R CMD check results
 * There were no ERRORs or WARNINGs
-* There were 2 NOTEs:
+* There were 3 NOTEs:
   + Regarding spelling, TADPole is the name of an algorithm,
     and it is written as such. Centroid/Partitional are maybe domain specific, 
     but are written like that too.
+  + The installed size is due to the 3 included vignettes (already compacted)
+    and the compiled code (approx. 20% of the code).
   + GNU make is a system requirement due to RcppParallel
+
+## Additional issues
+* UBSAN: the warnings come from the bigmemory package.
+  Apparently the sanitizers don't play nicely with its classes' inheritance.
+* MKL: the equality tests have been adjusted.

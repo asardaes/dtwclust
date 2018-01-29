@@ -7,7 +7,7 @@
     Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/master/CHANGELOG.md}
 }
 
-\section{Changes in version 5.1.0.9000}{
+\section{Changes in version 5.2.0}{
 \itemize{
     \item Several functions now use \code{RcppParallel} for parallelization, refer to the new parallelization vignette for more information.
     \item None of the distance/centroid functions expose parameters for helper matrices anymore.
