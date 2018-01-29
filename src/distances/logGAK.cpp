@@ -64,8 +64,8 @@ namespace dtwclust {
 #define LOG0 -10000          // log(0)
 
 // LOGP
-double inline LOGP(double const x, double const y) __attribute__((always_inline));
-
+double inline LOGP(double const x, double const y)
+    __attribute__((always_inline));
 double inline LOGP(double const x, double const y) {
     return (x > y) ? x + log1p(exp(y - x)) : y + log1p(exp(x - y));
 }
@@ -104,14 +104,12 @@ double logGAK_c(double const *seq1 , double const *seq2,
     // initialize
     ii = (trimax < triangular) ? trimax + 1 : triangular;
     aux = triangular ? LOG0 : 0;
-
     for (i = 0; i <= trimax; i++) {
         if (triangular > 0 && i < ii)
-            logs[i + 2*cl] = log(1 - i / triangular);
+            logs[i + 2*cl] = log(static_cast<double>(1 - i / triangular));
         else
             logs[i + 2*cl] = aux;
     }
-
     Sig = -1 / (2 * sigma * sigma);
 
     /****************************************************/
@@ -121,10 +119,8 @@ double logGAK_c(double const *seq1 , double const *seq2,
     for (j = 1; j < cl; j++) {
         logs[j] = LOG0;
     }
-
     // ... except for the lower-left cell which is initialized with a value of 1, i.e. a log value of 0.
     logs[0] = 0;
-
     // Cur and Old keep track of which column is the current one and which one is the already computed one.
     cur = 1;      // Indexes [0..cl-1] are used to process the next column
     old = 0;      // Indexes [cl..2*cl-1] were used for column 0
@@ -137,41 +133,33 @@ double logGAK_c(double const *seq1 , double const *seq2,
         // Special update for positions (i=1..nX,j=0)
         curpos = cur * cl;                  // index of the state (i,0)
         logs[curpos] = LOG0;
-
         // Secondary loop to vary the position for j=1..nY
         for (j = 1; j <= nY; j++) {
             curpos = cur * cl + j;          // index of the state (i,j)
-
             if (logs[abs(i-j) + 2*cl] > LOG0) {
                 frompos1 = old*cl + j;      // index of the state (i-1,j)
                 frompos2 = cur*cl + j-1;    // index of the state (i,j-1)
                 frompos3 = old*cl + j-1;    // index of the state (i-1,j-1)
-
                 // We first compute the kernel value
                 sum = 0;
                 for (ii = 0; ii < num_var; ii++) {
                     sum += pow(seq1[i-1 + ii*nX] - seq2[j-1 + ii*nY], 2);
                 }
-
                 gram = logs[abs(i-j) + 2*cl] + sum*Sig;
                 gram -= log(2 - exp(gram));
-
                 // Doing the updates now, in two steps
                 aux = LOGP(logs[frompos1], logs[frompos2]);
                 logs[curpos] = LOGP(aux, logs[frompos3]) + gram;
-
-            } else {
+            }
+            else {
                 logs[curpos] = LOG0;
             }
         }
-
         // Update the culumn order
         cur = 1 - cur;
         old = 1 - old;
     }
-
     aux = logs[curpos];
-
     // Return the logarithm of the Global Alignment Kernel
     return aux;
 }
@@ -206,7 +194,6 @@ RcppExport SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var,
         d = R_NegInf;
     else
         d = logGAK_c(REAL(x), REAL(y), nX, nY, Rf_asInteger(num_var), Rf_asReal(sigma), triangular, REAL(logs));
-
     return Rf_ScalarReal(d);
 }
 
