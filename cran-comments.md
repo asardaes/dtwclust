@@ -1,6 +1,5 @@
 
-## Update to version 5.2.0
-* Vignette updates, addition of multi-threading, and minor fixes.
+## Update to version 5.2.0.9000
 
 ## Test environments
 * Local GNU/Linux, R release
@@ -20,8 +19,3 @@
   + The installed size is due to the 3 included vignettes (already compacted)
     and the compiled code (approx. 20% of the code).
   + GNU make is a system requirement due to RcppParallel
-
-## Additional issues
-* UBSAN: the warnings come from the bigmemory package.
-  Apparently the sanitizers don't play nicely with its classes' inheritance.
-* MKL: the equality tests have been adjusted.
