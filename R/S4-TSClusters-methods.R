@@ -331,7 +331,7 @@ setMethod("update", methods::signature(object = "TSClusters"), update.TSClusters
 #'      `object@family@dist` using the parameters in `object@args$dist`.
 #'   3. For non-fuzzy clustering, the series are assigned to their nearest centroid's cluster. For
 #'      fuzzy clustering, the fuzzy membership matrix for the series is calculated. In both cases,
-#'      `object@family@cluster` is used.
+#'      the function in `object@family@cluster` is used.
 #'
 predict.TSClusters <- function(object, newdata = NULL, ...) {
     if (is.null(newdata)) {

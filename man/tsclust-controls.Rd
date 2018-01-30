@@ -87,7 +87,7 @@ this, but bear in mind that the results may vary slightly due to the missing ite
 \section{Partitional}{
 
 
-When \code{pam.precompute = FALSE}, using \code{pam.sparse = TRUE} defines a sparse matrix (see
+When \code{pam.precompute = FALSE}, using \code{pam.sparse = TRUE} defines a sparse matrix (refer to
 \code{\link[Matrix:sparseMatrix]{Matrix::sparseMatrix()}}) and updates it every iteration (except for \code{"dtw_lb"} distance). For
 most cases, precomputing the whole distance matrix is still probably faster. See the timing
 experiments in \code{browseVignettes("dtwclust")}.

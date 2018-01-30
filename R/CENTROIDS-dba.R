@@ -39,8 +39,7 @@
 #' @section Parallel Computing:
 #'
 #'   This function appears to be very sensitive to numerical inaccuracies if multi-threading is used
-#'   in a **32 bit** installation. In such systems, consider limiting calculations to 1 thread with
-#'   [RcppParallel::setThreadOptions()].
+#'   in a **32 bit** installation. In such systems, consider limiting calculations to 1 thread.
 #'
 #' @template window
 #'

@@ -126,7 +126,7 @@ centroids obtained from clustering is performed:
 \code{object@family@dist} using the parameters in \code{object@args$dist}.
 \item For non-fuzzy clustering, the series are assigned to their nearest centroid's cluster. For
 fuzzy clustering, the fuzzy membership matrix for the series is calculated. In both cases,
-\code{object@family@cluster} is used.
+the function in \code{object@family@cluster} is used.
 }
 }
 

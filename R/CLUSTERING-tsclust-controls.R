@@ -34,7 +34,7 @@
 #'
 #' @section Partitional:
 #'
-#'   When `pam.precompute = FALSE`, using `pam.sparse = TRUE` defines a sparse matrix (see
+#'   When `pam.precompute = FALSE`, using `pam.sparse = TRUE` defines a sparse matrix (refer to
 #'   [Matrix::sparseMatrix()]) and updates it every iteration (except for `"dtw_lb"` distance). For
 #'   most cases, precomputing the whole distance matrix is still probably faster. See the timing
 #'   experiments in `browseVignettes("dtwclust")`.

@@ -87,8 +87,7 @@ The indices of the DTW alignment are obtained by calling \code{\link[=dtw_basic]
 
 
 This function appears to be very sensitive to numerical inaccuracies if multi-threading is used
-in a \strong{32 bit} installation. In such systems, consider limiting calculations to 1 thread with
-\code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
+in a \strong{32 bit} installation. In such systems, consider limiting calculations to 1 thread.
 }
 
 \section{Multivariate series}{
