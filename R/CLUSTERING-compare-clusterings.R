@@ -460,7 +460,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     if (!return.objects && score_missing)
         stop("Returning no objects and specifying no scoring function would return no useful results.")
     # coerce to list if necessary
-    if (!is.list(series)) series <- tslist(series, TRUE)
+    if (is.data.frame(series) || !is.list(series)) series <- tslist(series, TRUE)
     check_consistency(series, "vltslist")
     if (!is.function(score.clus) && !(is.list(score.clus) && all(sapply(score.clus, is.function))))
         stop("Invalid evaluation function(s)")
