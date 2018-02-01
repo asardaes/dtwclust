@@ -32,20 +32,6 @@ SbdCalculator* SbdCalculator::clone() const
 }
 
 // -------------------------------------------------------------------------------------------------
-/* limits */
-// -------------------------------------------------------------------------------------------------
-
-int SbdCalculator::xLimit() const
-{
-    return x_uv_.length();
-}
-
-int SbdCalculator::yLimit() const
-{
-    return y_uv_.length();
-}
-
-// -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
 double SbdCalculator::calculate(const int i, const int j)

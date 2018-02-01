@@ -20,6 +20,8 @@ class RDistmat : public Distmat
 public:
     RDistmat(const SEXP& D);
     double& operator() (const int i, const int j) override;
+    int nrow() const override;
+    int ncol() const override;
 
 private:
     RcppParallel::RMatrix<double> distmat_;

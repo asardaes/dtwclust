@@ -67,7 +67,7 @@ private:
 void PairwiseFiller::fill() const
 {
     PairwiseFillWorker fill_worker(dist_calculator_, distmat_);
-    int size = dist_calculator_->xLimit();
+    int size = distmat_->nrow();
     int grain = get_grain(size, num_threads_);
     RcppParallel::parallelFor(0, size, fill_worker, grain);
 }

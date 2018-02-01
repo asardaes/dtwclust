@@ -22,9 +22,6 @@ public:
     virtual double calculate(const int i, const int j) = 0;
     // a clone method to make life easier when copying objects in each thread
     virtual DistanceCalculator* clone() const = 0;
-    // helpers for distmat filler
-    virtual int xLimit() const = 0;
-    virtual int yLimit() const = 0;
 
 protected:
     int maxLength(const Rcpp::List& list, const bool is_multivariate) const {

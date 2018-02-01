@@ -68,20 +68,6 @@ DtwBasicCalculator* DtwBasicCalculator::clone() const
 }
 
 // -------------------------------------------------------------------------------------------------
-/* limits */
-// -------------------------------------------------------------------------------------------------
-
-int DtwBasicCalculator::xLimit() const
-{
-    return is_multivariate_ ? x_mv_.length() : x_uv_.length();
-}
-
-int DtwBasicCalculator::yLimit() const
-{
-    return is_multivariate_ ? y_mv_.length() : y_uv_.length();
-}
-
-// -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
 

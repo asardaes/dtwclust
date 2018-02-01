@@ -57,20 +57,6 @@ LbiCalculator* LbiCalculator::clone() const
 }
 
 // -------------------------------------------------------------------------------------------------
-/* limits */
-// -------------------------------------------------------------------------------------------------
-
-int LbiCalculator::xLimit() const
-{
-    return x_uv_.length();
-}
-
-int LbiCalculator::yLimit() const
-{
-    return y_uv_.length();
-}
-
-// -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
 double LbiCalculator::calculate(const int i, const int j)

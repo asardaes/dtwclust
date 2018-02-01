@@ -46,20 +46,6 @@ LbkCalculator* LbkCalculator::clone() const
 }
 
 // -------------------------------------------------------------------------------------------------
-/* limits */
-// -------------------------------------------------------------------------------------------------
-
-int LbkCalculator::xLimit() const
-{
-    return x_uv_.length();
-}
-
-int LbkCalculator::yLimit() const
-{
-    return lower_envelopes_.length();
-}
-
-// -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
 double LbkCalculator::calculate(const int i, const int j)

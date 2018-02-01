@@ -20,6 +20,8 @@ class Distmat
 public:
     virtual ~Distmat() {};
     virtual double& operator() (const int i, const int j) = 0;
+    virtual int nrow() const = 0;
+    virtual int ncol() const = 0;
 };
 
 // -------------------------------------------------------------------------------------------------

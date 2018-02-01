@@ -36,7 +36,7 @@ public:
                       const std::shared_ptr<Distmat>& distmat)
         : dist_calculator_(dist_calculator)
         , distmat_(distmat)
-        , ncols_(dist_calculator_->yLimit())
+        , ncols_(distmat->ncol())
     { }
 
     // parallel loop across specified range
@@ -71,7 +71,7 @@ private:
 void PrimaryFiller::fill() const
 {
     PrimaryFillWorker fill_worker(dist_calculator_, distmat_);
-    int size = dist_calculator_->xLimit();
+    int size = distmat_->nrow();
     int grain = get_grain(size, num_threads_);
     RcppParallel::parallelFor(0, size, fill_worker, grain);
 }

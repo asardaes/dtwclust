@@ -23,8 +23,6 @@ public:
     ~DtwBasicCalculator();
     double calculate(const int i, const int j) override;
     DtwBasicCalculator* clone() const override;
-    int xLimit() const override;
-    int yLimit() const override;
 
 private:
     // method calculate
@@ -56,8 +54,6 @@ public:
     ~GakCalculator();
     double calculate(const int i, const int j) override;
     GakCalculator* clone() const override;
-    int xLimit() const override;
-    int yLimit() const override;
 
 private:
     // method calculate
@@ -89,8 +85,6 @@ public:
     ~LbiCalculator();
     double calculate(const int i, const int j) override;
     LbiCalculator* clone() const override;
-    int xLimit() const override;
-    int yLimit() const override;
 
 private:
     double calculate(const RcppParallel::RVector<double>& x,
@@ -113,8 +107,6 @@ public:
     ~LbkCalculator();
     double calculate(const int i, const int j) override;
     LbkCalculator* clone() const override;
-    int xLimit() const override;
-    int yLimit() const override;
 
 private:
     double calculate(const RcppParallel::RVector<double>& x,
@@ -134,8 +126,6 @@ public:
     SbdCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
     double calculate(const int i, const int j) override;
     SbdCalculator* clone() const override;
-    int xLimit() const override;
-    int yLimit() const override;
 
 private:
     double calculate(const arma::vec& x, const arma::vec& y,
@@ -156,8 +146,6 @@ public:
     ~SdtwCalculator();
     double calculate(const int i, const int j) override;
     SdtwCalculator* clone() const override;
-    int xLimit() const override;
-    int yLimit() const override;
 
 private:
     // method calculate
