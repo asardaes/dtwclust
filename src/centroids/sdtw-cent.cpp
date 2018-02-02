@@ -2,6 +2,7 @@
 
 #include <algorithm> // std::fill
 #include <math.h> // exp
+#include <utility> // std::move
 
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
@@ -81,6 +82,10 @@ public:
         if (cm_) delete[] cm_;
         if (dm_) delete[] dm_;
     }
+
+    // default copy/move constructor (must be explicitly defined due to custom destructor)
+    SdtwCentCalculator(const SdtwCentCalculator&) = default;
+    SdtwCentCalculator(SdtwCentCalculator&&) = default;
 
     // calculate for given indices
     double calculate(const int i, const int j) override {

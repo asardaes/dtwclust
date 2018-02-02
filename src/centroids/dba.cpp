@@ -62,6 +62,10 @@ public:
         if (index2_) delete[] index2_;
     }
 
+    // default copy/move constructor (must be explicitly defined due to custom destructor)
+    DtwBacktrackCalculator(const DtwBacktrackCalculator&) = default;
+    DtwBacktrackCalculator(DtwBacktrackCalculator&&) = default;
+
     // calculate for given indices (inherited)
     double calculate(const int i, const int j) override {
         if (is_multivariate_)
