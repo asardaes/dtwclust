@@ -68,6 +68,8 @@ Parameters specified in \code{configs} whose values are \code{NA} will be ignore
 
 The scoring and picking functions are for convenience, if they are not specified, the \code{scores}
 and \code{pick} elements of the result will be \code{NULL}.
+
+See \code{\link[=repeat_clustering]{repeat_clustering()}} for when \code{return.objects = FALSE}.
 }
 \section{Parallel computation}{
 

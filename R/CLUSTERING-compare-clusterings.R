@@ -347,6 +347,8 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #' The scoring and picking functions are for convenience, if they are not specified, the `scores`
 #' and `pick` elements of the result will be `NULL`.
 #'
+#' See [repeat_clustering()] for when `return.objects = FALSE`.
+#'
 #' @return
 #'
 #' A list with:

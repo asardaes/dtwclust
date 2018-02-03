@@ -9,6 +9,6 @@
 
 \section{Changes in version 5.2.0.9000}{
 \itemize{
-    \item TBD
+    \item Added another helper for \code{compare_clusterings}: \code{repeat_clustering}.
 }
 }

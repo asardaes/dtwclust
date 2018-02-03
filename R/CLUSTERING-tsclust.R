@@ -408,8 +408,10 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # Cluster
             # --------------------------------------------------------------------------------------
 
+            .rng_ <- dots$.rng_
             if (length(k) == 1L && nrep == 1L) {
-                rngtools::setRNG(rngtools::RNGseq(1L, seed = seed, simplify = TRUE))
+                if (is.null(.rng_)) .rng_ <- rngtools::RNGseq(1L, seed = seed, simplify = TRUE)
+                rngtools::setRNG(.rng_)
                 # just one repetition,
                 # done like this so dist/cent functions can take advantage of parallelization
                 pc_list <- list(do.call(pfclust,
@@ -427,9 +429,11 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 # I need to re-register any custom distances in each parallel worker
                 dist_entry <- proxy::pr_DB$get_entry(distance)
                 export <- c("pfclust", "check_consistency", "enlist")
-                rng <- rngtools::RNGseq(length(k) * nrep, seed = seed, simplify = FALSE)
+                if (is.null(.rng_))
+                    .rng_ <- rngtools::RNGseq(length(k) * nrep, seed = seed, simplify = FALSE)
                 # if %do% is used, the outer loop replaces values in this envir
-                rng0 <- lapply(parallel::splitIndices(length(rng), length(k)), function(i) { rng[i] })
+                rng0 <- lapply(parallel::splitIndices(length(.rng_), length(k)),
+                               function(i) { .rng_[i] })
                 k0 <- k
                 # sequential allows the matrix to be updated iteratively
                 `%this_op%` <- if(inherits(control$distmat, "SparseDistmat")) `%do%` else `%op%`
@@ -702,11 +706,13 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # --------------------------------------------------------------------------------------
 
             # seeds
-            rng <- rngtools::RNGseq(length(k) * length(control$dc),
-                                    seed = seed,
-                                    simplify = FALSE)
+            .rng_ <- dots$.rng_
+            if (is.null(.rng_))
+                .rng_ <- rngtools::RNGseq(length(k) * length(control$dc),
+                                          seed = seed,
+                                          simplify = FALSE)
 
-            RET <- Map(R, rng, f = function(R, rng) {
+            RET <- Map(R, .rng_, f = function(R, rng) {
                 rngtools::setRNG(rng)
                 k <- length(R$centroids)
                 if (is.function(centroid)) {

@@ -65,6 +65,7 @@ Collate:
     'CLUSTERING-compare-clusterings.R'
     'CLUSTERING-ddist2.R'
     'CLUSTERING-partitional-fuzzy.R'
+    'CLUSTERING-repeat-clustering.R'
     'CLUSTERING-tadole.R'
     'CLUSTERING-tsclust-controls.R'
     'CLUSTERING-tsclust.R'

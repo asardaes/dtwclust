@@ -159,23 +159,6 @@ cfgs_sdtwc <- compare_clusterings_configs(types = "h", k = 2L,
                                           )
 )
 
-cfgs_mats <- compare_clusterings_configs(types = "h", k = 2L,
-                                         preprocs = pdc_configs(
-                                             "preproc",
-                                             none = list()
-                                         ),
-                                         distances = pdc_configs(
-                                             "distance",
-                                             gak = list(window.size = 20L,
-                                                        sigma = 100)
-                                         ),
-                                         centroids = pdc_configs(
-                                             "centroid",
-                                             DBA = list(window.size = 20L,
-                                                        max.iter = 5L)
-                                         )
-)
-
 # ==================================================================================================
 # Compare clusterings
 # ==================================================================================================
@@ -242,6 +225,21 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                                return.objects = TRUE,
                                                shuffle.configs = TRUE,
                                                lbls = labels_subset)
+    )
+
+    expect_equal_slots(
+        repeat_clustering(data_reinterpolated_subset, all_comparisons, "config3_1"),
+        all_comparisons$objects.partitional$config3_1
+    )
+
+    expect_equal_slots(
+        repeat_clustering(data_reinterpolated_subset, all_comparisons, "config10_1"),
+        all_comparisons$objects.hierarchical$config10_1
+    )
+
+    expect_equal_slots(
+        repeat_clustering(data_reinterpolated_subset, all_comparisons, "config18_2"),
+        all_comparisons$objects.tadpole$config18_2
     )
 
     gak_comparison <- compare_clusterings(data_subset, "p",

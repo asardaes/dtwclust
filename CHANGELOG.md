@@ -1,6 +1,7 @@
 # Changelog
 
 ## Version 5.2.0.9000
+* Added another helper for `compare_clusterings`: `repeat_clustering`.
 
 ## Version 5.2.0
 * Several functions now use `RcppParallel` for parallelization, refer to the new parallelization vignette for more information.
