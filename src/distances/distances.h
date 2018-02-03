@@ -3,6 +3,8 @@
 
 #include <RcppArmadillo.h>
 
+#include "../utils/SurrogateMatrix.h"
+
 namespace dtwclust {
 
 // -------------------------------------------------------------------------------------------------
@@ -49,8 +51,11 @@ double logGAK_par(double const * const x, double const * const y,
 
 double sdtw(const double * const x, const double * const y,
             const int nx, const int ny, const int num_vars,
-            const double gamma, double * const costmat,
-            const bool save_norm, double * const distmat);
+            const double gamma, SurrogateMatrix<double>& costmat);
+double sdtw(const double * const x, const double * const y,
+            const int nx, const int ny, const int num_vars,
+            const double gamma, SurrogateMatrix<double>& costmat,
+            SurrogateMatrix<double>& distmat);
 
 } // namespace dtwclust
 

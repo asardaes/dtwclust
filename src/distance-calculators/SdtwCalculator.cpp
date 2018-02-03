@@ -4,6 +4,7 @@
 #include <RcppParallel.h>
 
 #include "../distances/distances.h" // soft_dtw
+#include "../utils/SurrogateMatrix.h"
 
 namespace dtwclust {
 
@@ -26,16 +27,6 @@ SdtwCalculator::SdtwCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP&
     // set values of max_len_*_
     max_len_x_ = this->maxLength(x, is_multivariate_);
     max_len_y_ = this->maxLength(y, is_multivariate_);
-    // make sure pointer is null
-    cm_ = nullptr;
-}
-
-// -------------------------------------------------------------------------------------------------
-/* destructor */
-// -------------------------------------------------------------------------------------------------
-SdtwCalculator::~SdtwCalculator()
-{
-    if (cm_) delete[] cm_;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -61,7 +52,7 @@ double SdtwCalculator::calculate(const int i, const int j)
 SdtwCalculator* SdtwCalculator::clone() const
 {
     SdtwCalculator* ptr = new SdtwCalculator(*this);
-    ptr->cm_ = new double[(max_len_x_ + 2) * (max_len_y_ + 2)];
+    ptr->cm_ = SurrogateMatrix<double>(max_len_x_ + 2, max_len_y_ + 2);
     return ptr;
 }
 
@@ -76,7 +67,7 @@ double SdtwCalculator::calculate(
     if (!cm_) return -1;
     int nx = x.length();
     int ny = y.length();
-    return sdtw(&x[0], &y[0], nx, ny, 1, gamma_, cm_, false, nullptr);
+    return sdtw(&x[0], &y[0], nx, ny, 1, gamma_, cm_);
 }
 
 // multivariate
@@ -87,7 +78,7 @@ double SdtwCalculator::calculate(
     int nx = x.nrow();
     int ny = y.nrow();
     int num_var = x.ncol();
-    return sdtw(&x[0], &y[0], nx, ny, num_var, gamma_, cm_, false, nullptr);
+    return sdtw(&x[0], &y[0], nx, ny, num_var, gamma_, cm_);
 }
 
 } // namespace dtwclust

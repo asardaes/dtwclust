@@ -5,7 +5,8 @@
 
 #include <RcppArmadillo.h>
 
-#include "../utils/utils.h" // d2s
+#include "../utils/SurrogateMatrix.h"
+#include "../utils/utils.h"
 
 namespace dtwclust {
 
@@ -19,7 +20,7 @@ double inline squared_euclidean(const double * const x, const double * const y,
 {
     double d = 0;
     for (int k = 0; k < ncols; k++)
-        d += pow(x[d2s(i, k, x_nrows)] - y[d2s(j, k, y_nrows)], 2);
+        d += pow(x[i + k * x_nrows] - y[j + k * y_nrows], 2);
     return d;
 }
 
@@ -98,26 +99,46 @@ RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP MV)
 
 double sdtw(const double * const x, const double * const y,
             const int nx, const int ny, const int num_vars,
-            const double gamma, double * const costmat,
-            const bool save_norm, double * const distmat)
+            const double gamma, SurrogateMatrix<double>& costmat)
 {
     // initialize costmat values
     costmat[0] = 0;
-    for (int i = 1; i < nx+2; i++) costmat[d2s(i,0,nx+2)] = R_PosInf;
-    for (int j = 1; j < ny+2; j++) costmat[d2s(0,j,nx+2)] = R_PosInf;
+    for (int i = 1; i < nx+2; i++) costmat(i,0) = R_PosInf;
+    for (int j = 1; j < ny+2; j++) costmat(0,j) = R_PosInf;
     // compute distance
     for (int i = 1; i <= nx; i++) {
         for (int j = 1; j <= ny; j++) {
             double point_norm = squared_euclidean(x, y, i-1, j-1, nx, ny, num_vars);
-            costmat[d2s(i,j,nx+2)] = point_norm + soft_min(costmat[d2s(i-1, j, nx+2)],
-                                                           costmat[d2s(i-1, j-1, nx+2)],
-                                                           costmat[d2s(i, j-1, nx+2)],
-                                                           gamma);
-            if (save_norm)
-                distmat[d2s(i-1,j-1,nx+1)] = point_norm;
+            costmat(i,j) = point_norm + soft_min(costmat(i-1,j),
+                                                 costmat(i-1,j-1),
+                                                 costmat(i,j-1),
+                                                 gamma);
         }
     }
-    return costmat[d2s(nx,ny,nx+2)];
+    return costmat(nx,ny);
+}
+
+double sdtw(const double * const x, const double * const y,
+            const int nx, const int ny, const int num_vars,
+            const double gamma, SurrogateMatrix<double>& costmat,
+            SurrogateMatrix<double>& distmat)
+{
+    // initialize costmat values
+    costmat[0] = 0;
+    for (int i = 1; i < nx+2; i++) costmat(i,0) = R_PosInf;
+    for (int j = 1; j < ny+2; j++) costmat(0,j) = R_PosInf;
+    // compute distance
+    for (int i = 1; i <= nx; i++) {
+        for (int j = 1; j <= ny; j++) {
+            double point_norm = squared_euclidean(x, y, i-1, j-1, nx, ny, num_vars);
+            costmat(i,j) = point_norm + soft_min(costmat(i-1,j),
+                    costmat(i-1,j-1),
+                    costmat(i,j-1),
+                    gamma);
+            distmat(i-1,j-1) = point_norm;
+        }
+    }
+    return costmat(nx,ny);
 }
 
 } // namespace dtwclust

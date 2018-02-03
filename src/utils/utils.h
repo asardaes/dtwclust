@@ -44,12 +44,6 @@ double kahan_sum(const double * const x, const int length);
 // utils.cpp
 void s2d(const int id, const int nrow, int& i, int& j);
 
-// double to single index for matrices
-int inline d2s(int const i, int const j, int const num_rows)
-    __attribute__((always_inline));
-int inline d2s(int const i, int const j, int const num_rows)
-{ return i + j * num_rows; }
-
 // grain parameter for multi-threading
 int inline get_grain(const int n, const int num_threads)
     __attribute__((always_inline));

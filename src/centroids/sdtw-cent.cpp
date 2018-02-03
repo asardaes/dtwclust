@@ -9,8 +9,9 @@
 
 #include "../distance-calculators/distance-calculators.h"
 #include "../distances/distances.h" // sdtw
+#include "../utils/SurrogateMatrix.h"
 #include "../utils/TSTSList.h"
-#include "../utils/utils.h" // KahanSummer, d2s
+#include "../utils/utils.h" // KahanSummer
 
 namespace dtwclust {
 
@@ -19,33 +20,35 @@ namespace dtwclust {
 // =================================================================================================
 
 void init_matrices(const int m, const int n,
-                   const int cm_nrows, const int dm_nrows, const int max_len_y,
-                   double * const cm, double * const dm, double * const em)
+                   SurrogateMatrix<double>& cm,
+                   SurrogateMatrix<double>& dm,
+                   SurrogateMatrix<double>& em)
 {
     for (int i = 1; i <= m; i++) {
-        dm[d2s(i-1, n, dm_nrows)] = 0;
-        cm[d2s(i, n+1, cm_nrows)] = R_NegInf;
+        dm(i-1,n) = 0;
+        cm(i,n+1) = R_NegInf;
     }
     for (int j = 1; j <= n; j++) {
-        dm[d2s(m, j-1, dm_nrows)] = 0;
-        cm[d2s(m+1, j, cm_nrows)] = R_NegInf;
+        dm(m,j-1) = 0;
+        cm(m+1,j) = R_NegInf;
     }
-    cm[d2s(m+1, n+1, cm_nrows)] = cm[d2s(m,n,cm_nrows)];
-    dm[d2s(m,n,dm_nrows)] = 0;
-    std::fill(em, em + 2 * (max_len_y + 2), 0);
-    em[d2s((m+1)%2, n+1, 2)] = 1;
+    cm(m+1,n+1) = cm(m,n);
+    dm(m,n) = 0;
+    em.fill(0);
+    em((m+1)%2,n+1) = 1;
 }
 
 void update_em(const int i, const int n, const double gamma,
-               const int cm_nrows, const int dm_nrows,
-               const double * const cm, const double * const dm, double * const em)
+               SurrogateMatrix<double>& cm,
+               SurrogateMatrix<double>& dm,
+               SurrogateMatrix<double>& em)
 {
     double a, b, c;
     for (int j = n; j > 0; j--) {
-        a = exp((cm[d2s(i+1,j,cm_nrows)] - cm[d2s(i,j,cm_nrows)] - dm[d2s(i,j-1,dm_nrows)]) / gamma);
-        b = exp((cm[d2s(i,j+1,cm_nrows)] - cm[d2s(i,j,cm_nrows)] - dm[d2s(i-1,j,dm_nrows)]) / gamma);
-        c = exp((cm[d2s(i+1,j+1,cm_nrows)] - cm[d2s(i,j,cm_nrows)] - dm[d2s(i,j,dm_nrows)]) / gamma);
-        em[d2s(i%2,j,2)] = a * em[d2s((i+1)%2,j,2)] + b * em[d2s(i%2,j+1,2)] + c * em[d2s((i+1)%2,j+1,2)];
+        a = exp((cm(i+1,j) - cm(i,j) - dm(i,j-1)) / gamma);
+        b = exp((cm(i,j+1) - cm(i,j) - dm(i-1,j)) / gamma);
+        c = exp((cm(i+1,j+1) - cm(i,j) - dm(i,j)) / gamma);
+        em(i%2,j) = a * em((i+1)%2,j) + b * em(i%2,j+1) + c * em((i+1)%2,j+1);
     }
 }
 
@@ -72,20 +75,7 @@ public:
         // set values of max_len_*_
         max_len_x_ = this->maxLength(x, is_multivariate_);
         max_len_y_ = this->maxLength(y, is_multivariate_);
-        // make sure pointers are null
-        cm_ = nullptr;
-        dm_ = nullptr;
     }
-
-    // destructor
-    ~SdtwCentCalculator() {
-        if (cm_) delete[] cm_;
-        if (dm_) delete[] dm_;
-    }
-
-    // default copy/move constructor (must be explicitly defined due to custom destructor)
-    SdtwCentCalculator(const SdtwCentCalculator&) = default;
-    SdtwCentCalculator(SdtwCentCalculator&&) = default;
 
     // calculate for given indices
     double calculate(const int i, const int j) override {
@@ -98,8 +88,8 @@ public:
     // clone that sets helper matrices
     SdtwCentCalculator* clone() const override {
         SdtwCentCalculator* ptr = new SdtwCentCalculator(*this);
-        ptr->cm_ = new double[(max_len_x_ + 2) * (max_len_y_ + 2)];
-        ptr->dm_ = new double[(max_len_x_ + 1) * (max_len_y_ + 1)];
+        ptr->cm_ = SurrogateMatrix<double>(max_len_x_ + 2, max_len_y_ + 2);
+        ptr->dm_ = SurrogateMatrix<double>(max_len_x_ + 1, max_len_y_ + 1);
         return ptr;
     }
 
@@ -108,7 +98,7 @@ public:
         if (!cm_ || !dm_) return -1;
         int nx = x.length();
         int ny = y.length();
-        return sdtw(&x[0], &y[0], nx, ny, 1, gamma_, cm_, true, dm_);
+        return sdtw(&x[0], &y[0], nx, ny, 1, gamma_, cm_, dm_);
     }
 
     // multivariate calculate
@@ -117,7 +107,7 @@ public:
         int nx = x.nrow();
         int ny = y.nrow();
         int num_var = x.ncol();
-        return sdtw(&x[0], &y[0], nx, ny, num_var, gamma_, cm_, true, dm_);
+        return sdtw(&x[0], &y[0], nx, ny, num_var, gamma_, cm_, dm_);
     }
 
     // input parameters
@@ -128,7 +118,7 @@ public:
     // input series (multivariate)
     TSTSList<Rcpp::NumericMatrix> x_mv_, y_mv_;
     // helper "matrices"
-    double *cm_, *dm_;
+    SurrogateMatrix<double> cm_, dm_;
     // to dimension cm_ and dm_
     int max_len_x_, max_len_y_;
 };
@@ -157,38 +147,39 @@ public:
         // local copy of calculator so it is setup separately for each thread
         mutex_.lock();
         SdtwCentCalculator* local_calculator = dist_calculator_.clone();
-        double* em = new double[2 * (local_calculator->max_len_y_ + 2)];
+        SurrogateMatrix<double> em(2, local_calculator->max_len_y_ + 2);
         mutex_.unlock();
         // calculations for these series
         //   Includes the calculation of soft-DTW gradient + jacobian product.
-        double* cm = local_calculator->cm_;
-        double* dm = local_calculator->dm_;
-        int cm_nrows = local_calculator->max_len_x_ + 2;
-        int dm_nrows = local_calculator->max_len_x_ + 1;
+        SurrogateMatrix<double>& cm = local_calculator->cm_;
+        SurrogateMatrix<double>& dm = local_calculator->dm_;
         const RcppParallel::RVector<double>& x = local_calculator->x_uv_[0];
         int m = x.length();
         for (std::size_t id = begin; id < end; id++) {
             const RcppParallel::RVector<double>& y = local_calculator->y_uv_[id];
             double dist = local_calculator->calculate(0,id);
+
             mutex_.lock();
             objective_summer_.add(weights_[id] * dist, 0);
             mutex_.unlock();
+
             int n = y.length();
-            init_matrices(m, n, cm_nrows, dm_nrows, local_calculator->max_len_y_, cm, dm, em);
+            init_matrices(m, n, cm, dm, em);
             for (int i = m; i > 0; i--) {
-                update_em(i, n, gamma_, cm_nrows, dm_nrows, cm, dm, em);
+                update_em(i, n, gamma_, cm, dm, em);
                 double grad = 0;
-                for (int j = 0; j < n; j++) grad += em[d2s(i%2, j+1, 2)] * 2 * (x[i-1] - y[j]);
+                for (int j = 0; j < n; j++) grad += em(i%2,j+1) * 2 * (x[i-1] - y[j]);
+
                 mutex_.lock();
                 gradient_summer_.add(weights_[id] * grad, i-1);
                 mutex_.unlock();
-                if (i == m) em[d2s((m+1)%2, n+1, 2)] = 0;
+
+                if (i == m) em((m+1)%2,n+1) = 0;
             }
         }
         // finish
         mutex_.lock();
         delete local_calculator;
-        delete[] em;
         mutex_.unlock();
     }
 
@@ -224,48 +215,45 @@ public:
         // local copy of calculator so it is setup separately for each thread
         mutex_.lock();
         SdtwCentCalculator* local_calculator = dist_calculator_.clone();
-        double* em = new double[2 * (local_calculator->max_len_y_ + 2)];
+        SurrogateMatrix<double> em(2, local_calculator->max_len_y_ + 2);
         mutex_.unlock();
         // calculations for these series
         //   Includes the calculation of soft-DTW gradient + jacobian product.
         double* grad = nullptr;
-        double* cm = local_calculator->cm_;
-        double* dm = local_calculator->dm_;
-        int cm_nrows = local_calculator->max_len_x_ + 2;
-        int dm_nrows = local_calculator->max_len_x_ + 1;
+        SurrogateMatrix<double>& cm = local_calculator->cm_;
+        SurrogateMatrix<double>& dm = local_calculator->dm_;
         const RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[0];
         int m = x.nrow(), dim = x.ncol();
         for (std::size_t id = begin; id < end; id++) {
             const RcppParallel::RMatrix<double>& y = local_calculator->y_mv_[id];
             double dist = local_calculator->calculate(0,id);
+
             mutex_.lock();
             objective_summer_.add(weights_[id] * dist, 0);
+            if (!grad) grad = new double[dim];
             mutex_.unlock();
-            if (!grad) {
-                mutex_.lock();
-                grad = new double[dim];
-                mutex_.unlock();
-            }
+
             int n = y.nrow();
-            init_matrices(m, n, cm_nrows, dm_nrows, local_calculator->max_len_y_, cm, dm, em);
+            init_matrices(m, n, cm, dm, em);
             for (int i = m; i > 0; i--) {
-                update_em(i, n, gamma_, cm_nrows, dm_nrows, cm, dm, em);
+                update_em(i, n, gamma_, cm, dm, em);
                 std::fill(grad, grad + dim, 0);
                 for (int j = 0; j < n; j++) {
                     for (int k = 0; k < dim; k++) {
-                        grad[k] += em[d2s(i%2, j+1, 2)] * 2 * (x[d2s(i-1,k,m)] - y[d2s(j,k,n)]);
+                        grad[k] += em(i%2,j+1) * 2 * (x(i-1,k) - y(j,k));
                     }
                 }
+
                 mutex_.lock();
                 for (int k = 0; k < dim; k++) gradient_summer_.add(weights_[id] * grad[k], i-1, k);
                 mutex_.unlock();
-                if (i == m) em[d2s((m+1)%2, n+1, 2)] = 0;
+
+                if (i == m) em((m+1)%2,n+1) = 0;
             }
         }
         // finish
         mutex_.lock();
         delete local_calculator;
-        delete[] em;
         if (grad) delete[] grad;
         mutex_.unlock();
     }

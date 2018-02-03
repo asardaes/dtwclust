@@ -5,6 +5,7 @@
 #include <RcppParallel.h>
 
 #include "../utils/TSTSList.h"
+#include "../utils/SurrogateMatrix.h"
 #include "distance-calculators.h"
 
 namespace dtwclust {
@@ -143,7 +144,6 @@ class SdtwCalculator : public DistanceCalculator
 {
 public:
     SdtwCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
-    ~SdtwCalculator();
     double calculate(const int i, const int j) override;
     SdtwCalculator* clone() const override;
 
@@ -161,7 +161,7 @@ private:
     // input series (multivariate)
     TSTSList<Rcpp::NumericMatrix> x_mv_, y_mv_;
     // helper "matrix"
-    double* cm_;
+    SurrogateMatrix<double> cm_;
     // to dimension cm_
     int max_len_x_, max_len_y_;
 };

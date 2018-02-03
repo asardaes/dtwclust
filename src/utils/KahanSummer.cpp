@@ -19,10 +19,11 @@ void KahanSummer::reset() {
 }
 
 void KahanSummer::add(const double value, const int i, const int j) {
-    y_[d2s(i,j,nrows_)] = value - c_[d2s(i,j,nrows_)];
-    t_[d2s(i,j,nrows_)] = x_[d2s(i,j,nrows_)] + y_[d2s(i,j,nrows_)];
-    c_[d2s(i,j,nrows_)] = (t_[d2s(i,j,nrows_)] - x_[d2s(i,j,nrows_)]) - y_[d2s(i,j,nrows_)];
-    x_[d2s(i,j,nrows_)] = t_[d2s(i,j,nrows_)];
+    int id = i + j * nrows_;
+    y_[id] = value - c_[id];
+    t_[id] = x_[id] + y_[id];
+    c_[id] = (t_[id] - x_[id]) - y_[id];
+    x_[id] = t_[id];
 }
 
 } // namespace dtwclust
