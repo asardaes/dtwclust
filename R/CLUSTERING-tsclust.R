@@ -437,7 +437,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 k0 <- k
                 # sequential allows the matrix to be updated iteratively
                 `%this_op%` <- if(inherits(control$distmat, "SparseDistmat")) `%do%` else `%op%`
-                i <- integer() # CHECK complains about non-initialization
+                # CHECK complains about non-initialization and globals
+                rng <- list()
+                i <- integer()
                 # cluster
                 pc_list <- foreach(k = k0, rng = rng0,
                                    .combine = c, .multicombine = TRUE,
