@@ -2,11 +2,19 @@
 
 #include <stdlib.h>
 #include <math.h>
+#include <type_traits> // conditional
 
 #include <R.h>
 #include <Rinternals.h>
 
 namespace dtwclust {
+
+// do not use volatile in x64, in x32 it's to avoid some comparison problems in which_min
+typedef std::conditional<
+    sizeof(void*) == 4,
+    volatile double,
+    double
+>::type dtwclust_tuple_t;
 
 // for cost matrix, in case of window constraint
 #define NOT_VISITED -1.0
@@ -43,7 +51,7 @@ double lnorm(double const * const x, double const * const y, double const norm,
 
 // which direction to take in the cost matrix
 int which_min(double const diag, double const left, double const up,
-              double const step, double volatile const local_cost, double volatile * const tuple)
+              double const step, dtwclust_tuple_t const local_cost, dtwclust_tuple_t * const tuple)
 {
     // DIAG, LEFT, UP
     tuple[0] = (diag == NOT_VISITED) ? R_PosInf : diag + step * local_cost;
@@ -89,14 +97,14 @@ int backtrack_steps(double const * const D,
 }
 
 // the C code
-double dtw_basic_c(double * const D, double volatile * const tuple,
+double dtw_basic_c(double * const D, dtwclust_tuple_t * const tuple,
                    double const * const x, double const * const y, int const w,
                    int const nx, int const ny, int const num_var,
                    double const norm, double const step,
                    int const backtrack)
 {
     int i, j, direction;
-    double volatile local_cost;
+    dtwclust_tuple_t local_cost;
     // initialization (first row and first column)
     for (j = 0; j <= ny; j++) D[d2s(0, j, nx, backtrack)] = NOT_VISITED;
     for (i = 0; i <= (backtrack ? nx : 1); i++) D[d2s(i, 0, nx, backtrack)] = NOT_VISITED;
@@ -153,8 +161,7 @@ RcppExport SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
     int nx = Rf_asInteger(m);
     int ny = Rf_asInteger(n);
     double* D = REAL(distmat);
-    // volatile to avoid some comparison problems in which_min
-    volatile double tuple[3];
+    dtwclust_tuple_t tuple[3];
 
     if (Rf_asLogical(backtrack)) {
         // longest possible path, length will be adjusted in R
@@ -209,8 +216,7 @@ double dtw_basic_par(double const * const x, double const * const y,
                      double * const distmat, int const backtrack,
                      int * const index1, int * const index2, int * const path)
 {
-    // volatile to avoid some comparison problems in which_min
-    volatile double tuple[3];
+    dtwclust_tuple_t tuple[3];
     double d = dtw_basic_c(distmat, tuple, x, y, window, nx, ny, num_var, norm, step, backtrack);
     if (normalize) d /= nx + ny;
     if (backtrack) *path = backtrack_steps(distmat, nx, ny, index1, index2);
