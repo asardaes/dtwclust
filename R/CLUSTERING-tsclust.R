@@ -410,7 +410,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             .rng_ <- dots$.rng_
             if (length(k) == 1L && nrep == 1L) {
-                if (is.null(.rng_)) .rng_ <- RNGseq(1L, seed = seed, simplify = TRUE)
+                # UTILS-rng.R
+                if (is.null(.rng_)) .rng_ <- rng_seq(1L, seed = seed, simplify = TRUE)
                 assign(".Random.seed", .rng_, globalenv())
                 # just one repetition,
                 # done like this so dist/cent functions can take advantage of parallelization
@@ -430,7 +431,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 dist_entry <- proxy::pr_DB$get_entry(distance)
                 export <- c("pfclust", "check_consistency", "enlist")
                 if (is.null(.rng_))
-                    .rng_ <- RNGseq(length(k) * nrep, seed = seed, simplify = FALSE)
+                    .rng_ <- rng_seq(length(k) * nrep, seed = seed, simplify = FALSE) # UTILS-rng.R
                 # if %do% is used, the outer loop replaces values in this envir
                 rng0 <- lapply(parallel::splitIndices(length(.rng_), length(k)),
                                function(i) { .rng_[i] })
@@ -707,10 +708,10 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # Prepare results
             # --------------------------------------------------------------------------------------
 
-            # seeds
+            # seeds (UTILS-rng.R)
             .rng_ <- dots$.rng_
             if (is.null(.rng_))
-                .rng_ <- RNGseq(length(k) * length(control$dc), seed = seed, simplify = FALSE)
+                .rng_ <- rng_seq(length(k) * length(control$dc), seed = seed, simplify = FALSE)
 
             RET <- Map(R, .rng_, f = function(R, rng) {
                 assign(".Random.seed", rng, globalenv())

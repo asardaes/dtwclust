@@ -494,10 +494,10 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     # ----------------------------------------------------------------------------------------------
 
     num_seeds <- cumsum(sapply(configs, nrow))
-    seeds <- RNGseq(num_seeds[length(num_seeds)], seed = seed, simplify = FALSE)
+    seeds <- rng_seq(num_seeds[length(num_seeds)], seed = seed, simplify = FALSE) # UTILS-rng.R
     seeds <- Map(c(1L, num_seeds[-length(num_seeds)] + 1L), num_seeds,
                  f = function(first, last) { seeds[first:last] })
-    setnames_inplace(seeds, names(configs))
+    setnames_inplace(seeds, names(configs)) # UTILS-utils.R
 
     # ==============================================================================================
     # Preprocessings

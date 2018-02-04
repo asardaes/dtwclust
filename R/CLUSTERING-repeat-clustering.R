@@ -55,7 +55,7 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
         matching_configs <- grepl(paste0(top_id, "_"), results$config_id)
         matching_configs <- which(matching_configs)
         sub_id <- which(matching_configs == id)
-        .rng_ <- RNGseq(length(matching_configs), seed, simplify = FALSE)[sub_id]
+        .rng_ <- rng_seq(length(matching_configs), seed, simplify = FALSE)[sub_id] # UTILS-rng.R
         if (clus_type != "tadpole") .rng_ <- .rng_[[1L]]
         args$.rng_ <- .rng_
     }

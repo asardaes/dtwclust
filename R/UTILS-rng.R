@@ -1,16 +1,20 @@
 #' @importFrom parallel nextRNGStream
 #'
-RNGseq <- function(n, seed = NULL, simplify = FALSE) {
+rng_seq <- function(n, seed = NULL, simplify = FALSE) {
     stopifnot(RNGkind()[1L] == rng_kind, n > 0L)
 
     if (!is.null(seed)) {
-        seed <- as.integer(seed)
-    }
-    if (length(seed) == 1L) {
-        set.seed(seed)
-    }
-    else if (length(seed) == 7L) {
-        assign(".Random.seed", seed, globalenv())
+        prev_seed <- get(".Random.seed", globalenv())
+        if (length(seed) == 1L) {
+            set.seed(as.integer(seed))
+        }
+        else if (length(seed) == 7L) {
+            assign(".Random.seed", seed, globalenv())
+        }
+        else {
+            stop("Invalid seed provided") # nocov
+        }
+        on.exit(assign(".Random.seed", prev_seed, globalenv()))
     }
 
     first_seed <- get(".Random.seed", globalenv())
