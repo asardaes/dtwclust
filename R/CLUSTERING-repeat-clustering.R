@@ -38,10 +38,11 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
     seed <- clusterings$seeds[[clus_type]][[top_id]]
 
     # get control_args and remove them from args
+    results <- results[[clus_type]]
     scores <- clusterings$scores[[clus_type]]
     score_names <- if (is.null(dim(scores))) "score" else colnames(scores)
     id <- unlist(id)
-    args <- results[[clus_type]][id, , drop = FALSE]
+    args <- results[id, , drop = FALSE]
     keep_args <- setdiff(names(args), c("config_id", "rep", score_names))
     args <- as.list(args[keep_args])
     control_args <- names(formals(paste0(clus_type, "_control")))
@@ -50,7 +51,7 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
 
     # get sub_seed for non-hierarchical cases
     if (clus_type != "hierarchical") {
-        matching_configs <- grepl(paste0(top_id, "_"), clusterings$results[[clus_type]]$config_id)
+        matching_configs <- grepl(paste0(top_id, "_"), results$config_id)
         matching_configs <- which(matching_configs)
         sub_id <- which(matching_configs == id)
         .rng_ <- rngtools::RNGseq(length(matching_configs), seed, simplify = FALSE)[sub_id]
@@ -102,7 +103,7 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
             "median",
             "centroid"
         )
-        if (!(method_char %in% hclust_methods)) control_args$method <- match.fun(control_args$method)
+        if (!(method_char %in% hclust_methods)) control_args$method <- match.fun(method_char)
     }
     args$control <- do.call(paste0(clus_type, "_control"), control_args, TRUE)
 
