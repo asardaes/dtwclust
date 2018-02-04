@@ -314,7 +314,6 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #' @export
 #' @importFrom dplyr bind_rows
 #' @importFrom proxy pr_DB
-#' @importFrom rngtools RNGseq
 #'
 #' @param series A list of series, a numeric matrix or a data frame. Matrices and data frames are
 #'   coerced to a list row-wise (see [tslist()]).
@@ -453,6 +452,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     # ==============================================================================================
 
     tic <- proc.time()
+    previous_rngkind <- RNGkind(rng_kind)[1L]
+    if (previous_rngkind != rng_kind) on.exit(RNGkind(previous_rngkind))
     set.seed(seed)
     score_missing <- missing(score.clus)
     pick_missing <- missing(pick.clus)
@@ -493,7 +494,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     # ----------------------------------------------------------------------------------------------
 
     num_seeds <- cumsum(sapply(configs, nrow))
-    seeds <- rngtools::RNGseq(num_seeds[length(num_seeds)], seed = seed, simplify = FALSE)
+    seeds <- RNGseq(num_seeds[length(num_seeds)], seed = seed, simplify = FALSE)
     seeds <- Map(c(1L, num_seeds[-length(num_seeds)] + 1L), num_seeds,
                  f = function(first, last) { seeds[first:last] })
     setnames_inplace(seeds, names(configs))

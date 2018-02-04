@@ -30,12 +30,17 @@ test_that("Parallel computation gives the same results as sequential", {
         # environment variables get inherited by the workers when they are created, so reset this
         RcppParallel::setThreadOptions()
         Sys.unsetenv("RCPP_PARALLEL_NUM_THREADS")
+        # to test that other RNGkinds won't affect
+        RNGkind("default")
     }))
     registerDoParallel(cl)
 
     # Filter excludes files that have "parallel" in them, otherwise it would be recursive
     res <- test_dir("./", filter = "parallel", invert = TRUE)
-    expect_s3_class(res, "testthat_results")
+
+    sapply(clusterEvalQ(cl, RNGkind()[1L]), function(current_rngkind) {
+        expect_identical(current_rngkind, default_rngkind)
+    })
 
     stopCluster(cl)
     stopImplicitCluster()

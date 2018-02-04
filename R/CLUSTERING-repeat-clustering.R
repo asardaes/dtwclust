@@ -4,7 +4,6 @@
 #' object.
 #'
 #' @export
-#' @importFrom rngtools RNGseq
 #'
 #' @param series The same time series that were given to [compare_clusterings()].
 #' @param clusterings The list returned by [compare_clusterings()].
@@ -51,10 +50,12 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
 
     # get sub_seed for non-hierarchical cases
     if (clus_type != "hierarchical") {
+        previous_rngkind <- RNGkind(rng_kind)[1L]
+        if (previous_rngkind != rng_kind) on.exit(RNGkind(previous_rngkind))
         matching_configs <- grepl(paste0(top_id, "_"), results$config_id)
         matching_configs <- which(matching_configs)
         sub_id <- which(matching_configs == id)
-        .rng_ <- rngtools::RNGseq(length(matching_configs), seed, simplify = FALSE)[sub_id]
+        .rng_ <- RNGseq(length(matching_configs), seed, simplify = FALSE)[sub_id]
         if (clus_type != "tadpole") .rng_ <- .rng_[[1L]]
         args$.rng_ <- .rng_
     }

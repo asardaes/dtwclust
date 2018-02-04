@@ -3,6 +3,7 @@
 # ==================================================================================================
 
 supported_clusterings <- c("partitional", "hierarchical", "fuzzy", "tadpole")
+rng_kind <- "L'Ecuyer-CMRG"
 
 distances_known <- c("dtw", "dtw2", "dtw_lb", "lbk", "lbi", "sbd", "dtw_basic", "gak", "sdtw")
 distances_included <- c("dtw_lb", "lb_keogh", "lb_improved", "sbd", "dtw_basic", "gak", "sdtw")

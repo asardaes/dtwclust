@@ -178,6 +178,18 @@ setnames_inplace <- function(vec, names) {
             reset
         }
     }
+    # check the RNGkind of the workers
+    if (foreach::getDoParName() != "doSEQ") {
+        reset_rng <- foreach::foreach(
+            i = 1L:num_workers,
+            .combine = c,
+            .multicombine = TRUE,
+            .inorder = FALSE,
+            .packages = "dtwclust"
+        ) %dopar% {
+            RNGkind("L'Ecuyer-CMRG")[1L]
+        }
+    }
     # evaluate expression
     withCallingHandlers({
         ret <- eval.parent(substitute(obj %dopar% ex))
@@ -188,7 +200,7 @@ setnames_inplace <- function(vec, names) {
     })
     # reset parallel workers if needed
     if (num_workers > 1L && any(reset_workers)) {
-        reset_failed <- foreach::foreach(
+        foreach::foreach(
             i = 1L:num_workers,
             .combine = c,
             .multicombine = TRUE,
@@ -199,8 +211,19 @@ setnames_inplace <- function(vec, names) {
             Sys.unsetenv("RCPP_PARALLEL_NUM_THREADS")
             nzchar(Sys.getenv("RCPP_PARALLEL_NUM_THREADS"))
         }
-        if (any(reset_failed))
-            warning("Could not reset thread options in the parallel workers") # nocov
+    }
+    # rest RNGkind if needed
+    if (foreach::getDoParName() != "doSEQ" && any(reset_rng != rng_kind)) {
+        kind <- "" # stupid CHECK
+        foreach::foreach(
+            kind = reset_rng,
+            .combine = c,
+            .multicombine = TRUE,
+            .inorder = FALSE,
+            .packages = "dtwclust"
+        ) %dopar% {
+            RNGkind(kind)
+        }
     }
     # return
     ret

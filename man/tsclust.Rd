@@ -196,9 +196,9 @@ generic (see also \link{tsclusters-methods}).
 
 Due to their stochastic nature, partitional clustering is usually repeated several times with
 different random seeds to allow for different starting points. This function uses
-\code{\link[rngtools:RNGseq]{rngtools::RNGseq()}} to obtain different seed streams for each repetition, utilizing the \code{seed}
-parameter (if provided) to initialize it. If more than one repetition is made, the streams are
-returned in an attribute called \code{rng}.
+\code{\link[parallel:nextRNGStream]{parallel::nextRNGStream()}} to obtain different seed streams for each repetition, utilizing the
+\code{seed} parameter (if provided) to initialize it. If more than one repetition is made, the
+streams are returned in an attribute called \code{rng}.
 
 Multiple values of \code{k} can also be provided to get different partitions using any \code{type} of
 clustering.

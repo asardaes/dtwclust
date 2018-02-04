@@ -69,8 +69,6 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #' @importFrom methods slot
 #' @importFrom parallel splitIndices
 #' @importFrom proxy pr_DB
-#' @importFrom rngtools RNGseq
-#' @importFrom rngtools setRNG
 #' @importFrom stats as.dist
 #' @importFrom stats as.hclust
 #' @importFrom stats cutree
@@ -233,9 +231,9 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'
 #'   Due to their stochastic nature, partitional clustering is usually repeated several times with
 #'   different random seeds to allow for different starting points. This function uses
-#'   [rngtools::RNGseq()] to obtain different seed streams for each repetition, utilizing the `seed`
-#'   parameter (if provided) to initialize it. If more than one repetition is made, the streams are
-#'   returned in an attribute called `rng`.
+#'   [parallel::nextRNGStream()] to obtain different seed streams for each repetition, utilizing the
+#'   `seed` parameter (if provided) to initialize it. If more than one repetition is made, the
+#'   streams are returned in an attribute called `rng`.
 #'
 #'   Multiple values of `k` can also be provided to get different partitions using any `type` of
 #'   clustering.
@@ -288,6 +286,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     # ==============================================================================================
 
     tic <- proc.time()
+    previous_rngkind <- RNGkind(rng_kind)[1L]
+    if (previous_rngkind != rng_kind) on.exit(RNGkind(previous_rngkind))
     set.seed(seed)
     type <- match.arg(type, c("partitional", "hierarchical", "tadpole", "fuzzy"))
     series <- tslist(series, error.check) # coerce to list if necessary
@@ -410,8 +410,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             .rng_ <- dots$.rng_
             if (length(k) == 1L && nrep == 1L) {
-                if (is.null(.rng_)) .rng_ <- rngtools::RNGseq(1L, seed = seed, simplify = TRUE)
-                rngtools::setRNG(.rng_)
+                if (is.null(.rng_)) .rng_ <- RNGseq(1L, seed = seed, simplify = TRUE)
+                assign(".Random.seed", .rng_, globalenv())
                 # just one repetition,
                 # done like this so dist/cent functions can take advantage of parallelization
                 pc_list <- list(do.call(pfclust,
@@ -430,7 +430,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 dist_entry <- proxy::pr_DB$get_entry(distance)
                 export <- c("pfclust", "check_consistency", "enlist")
                 if (is.null(.rng_))
-                    .rng_ <- rngtools::RNGseq(length(k) * nrep, seed = seed, simplify = FALSE)
+                    .rng_ <- RNGseq(length(k) * nrep, seed = seed, simplify = FALSE)
                 # if %do% is used, the outer loop replaces values in this envir
                 rng0 <- lapply(parallel::splitIndices(length(.rng_), length(k)),
                                function(i) { .rng_[i] })
@@ -451,7 +451,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                             .export = export) %this_op%
                             {
                                 if (trace) message("Repetition ", i, " for k = ", k)
-                                rngtools::setRNG(rng[[i]])
+                                assign(".Random.seed", rng[[i]], globalenv())
 
                                 if (!check_consistency(dist_entry$names[1L], "dist"))
                                     do.call(proxy::pr_DB$set_entry, dist_entry, TRUE)
@@ -710,12 +710,10 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # seeds
             .rng_ <- dots$.rng_
             if (is.null(.rng_))
-                .rng_ <- rngtools::RNGseq(length(k) * length(control$dc),
-                                          seed = seed,
-                                          simplify = FALSE)
+                .rng_ <- RNGseq(length(k) * length(control$dc), seed = seed, simplify = FALSE)
 
             RET <- Map(R, .rng_, f = function(R, rng) {
-                rngtools::setRNG(rng)
+                assign(".Random.seed", rng, globalenv())
                 k <- length(R$centroids)
                 if (is.function(centroid)) {
                     allcent <- function(...) { list(centroid(...)) }

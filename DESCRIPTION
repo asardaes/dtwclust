@@ -25,8 +25,7 @@ Imports:
     RSpectra,
     Rcpp,
     RcppParallel,
-    reshape2,
-    rngtools
+    reshape2
 Suggests:
     doParallel,
     knitr,
@@ -90,6 +89,7 @@ Collate:
     'UTILS-globals-internal.R'
     'UTILS-nccc.R'
     'UTILS-reinterpolate.R'
+    'UTILS-rng.R'
     'UTILS-tslist.R'
     'UTILS-utils.R'
     'UTILS-zscore.R'
