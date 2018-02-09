@@ -86,8 +86,9 @@ frame, or it may be inconsistent. Additionally, if \code{return.objects} is \cod
 to the objects might also be inconsistent.
 
 Parallelization can incur a lot of deep copies of data when returning the cluster objects,
-since each one will likely contain a copy of \code{datalist}. If you want to avoid this, consider
-specifying \code{score.clus} and setting \code{return.objects} to \code{FALSE}.
+since each one will contain a copy of \code{datalist}. If you want to avoid this, consider
+specifying \code{score.clus} and setting \code{return.objects} to \code{FALSE}, and then using
+\code{\link[=repeat_clustering]{repeat_clustering()}}.
 }
 
 \section{Scoring}{

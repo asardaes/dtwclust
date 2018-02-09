@@ -67,10 +67,9 @@ missing values are allowed.
 
 In the case of multivariate time series, they should be provided as a list of matrices, where
 time spans the rows of each matrix and the variables span the columns (see \link{CharTrajMV} for an
-example). At the moment, only \code{dtw_basic}, \code{DTW}, \code{DTW2} and \code{GAK} support such series. You can
-of course create your own custom distances. All included centroid functions should work with the
-aforementioned format, although \code{shape} is \emph{not} recommended. Note that the \code{plot} method will
-simply append all dimensions (columns) one after the other.
+example). All included centroid functions should work with the aforementioned format, although
+\code{shape} is \emph{not} recommended. Note that the \code{plot} method will simply append all dimensions
+(columns) one after the other.
 }
 \note{
 The lower bounds are defined only for time series of equal length. They are \strong{not} symmetric,

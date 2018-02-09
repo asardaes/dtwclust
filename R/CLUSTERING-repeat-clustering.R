@@ -25,6 +25,9 @@
 #'   re-created by this function, since [compare_clusterings()] applies all preprocessing before
 #'   calling [tsclust()].
 #'
+#'   If any parameters were given to [compare_clusterings()] through its ellipsis, they whould
+#'   probably be given to this function too.
+#'
 repeat_clustering <- function(series, clusterings, config_id, ...) {
     if (is.null(clusterings$scores)) stop("No scores found, are you sure you need this function?")
     results <- clusterings$results

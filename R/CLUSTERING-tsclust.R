@@ -109,10 +109,9 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'
 #' In the case of multivariate time series, they should be provided as a list of matrices, where
 #' time spans the rows of each matrix and the variables span the columns (see [CharTrajMV] for an
-#' example). At the moment, only `dtw_basic`, `DTW`, `DTW2` and `GAK` support such series. You can
-#' of course create your own custom distances. All included centroid functions should work with the
-#' aforementioned format, although `shape` is *not* recommended. Note that the `plot` method will
-#' simply append all dimensions (columns) one after the other.
+#' example). All included centroid functions should work with the aforementioned format, although
+#' `shape` is *not* recommended. Note that the `plot` method will simply append all dimensions
+#' (columns) one after the other.
 #'
 #' @return
 #'

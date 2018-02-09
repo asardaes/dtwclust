@@ -375,8 +375,9 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'   to the objects might also be inconsistent.
 #'
 #'   Parallelization can incur a lot of deep copies of data when returning the cluster objects,
-#'   since each one will likely contain a copy of `datalist`. If you want to avoid this, consider
-#'   specifying `score.clus` and setting `return.objects` to `FALSE`.
+#'   since each one will contain a copy of `datalist`. If you want to avoid this, consider
+#'   specifying `score.clus` and setting `return.objects` to `FALSE`, and then using
+#'   [repeat_clustering()].
 #'
 #' @section Scoring:
 #'
