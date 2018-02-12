@@ -819,51 +819,39 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
         dfs <- switch(
             type,
             partitional = {
-                if (length(k) > 1L || any(config$nrep > 1L))
-                    lapply(seq_len(nrow(config)), function(i) {
-                        this_config <- config[i, , drop = FALSE]
-                        rep <- 1L:this_config$nrep
-                        this_config <- this_config[setdiff(names(this_config), c("k", "nrep"))]
-                        df <- expand.grid(rep = rep, k = k)
-                        make_unique_ids(df, this_config) # see EOF
-                    })
-                else
-                    config
+                lapply(seq_len(nrow(config)), function(i) {
+                    this_config <- config[i, , drop = FALSE]
+                    rep <- 1L:this_config$nrep
+                    this_config <- this_config[setdiff(names(this_config), c("k", "nrep"))]
+                    df <- expand.grid(rep = rep, k = k)
+                    make_unique_ids(df, this_config) # see EOF
+                })
             },
             hierarchical = {
-                if (length(k) > 1L || any(lengths(config$method) > 1L))
-                    lapply(seq_len(nrow(config)), function(i) {
-                        this_config <- config[i, , drop = FALSE]
-                        method <- unlist(this_config$method)
-                        this_config <- this_config[setdiff(names(this_config), c("k", "method"))]
-                        df <- expand.grid(k = k, method = method)
-                        make_unique_ids(df, this_config) # see EOF
-                    })
-                else
-                    config
+                lapply(seq_len(nrow(config)), function(i) {
+                    this_config <- config[i, , drop = FALSE]
+                    method <- unlist(this_config$method)
+                    this_config <- this_config[setdiff(names(this_config), c("k", "method"))]
+                    df <- expand.grid(k = k, method = method, stringsAsFactors = FALSE)
+                    make_unique_ids(df, this_config) # see EOF
+                })
             },
             fuzzy = {
-                if (length(k) > 1L)
-                    lapply(seq_len(nrow(config)), function(i) {
-                        this_config <- config[i, , drop = FALSE]
-                        this_config <- this_config[setdiff(names(this_config), c("k"))]
-                        df <- expand.grid(k = k)
-                        make_unique_ids(df, this_config) # see EOF
-                    })
-                else
-                    config
+                lapply(seq_len(nrow(config)), function(i) {
+                    this_config <- config[i, , drop = FALSE]
+                    this_config <- this_config[setdiff(names(this_config), c("k"))]
+                    df <- expand.grid(k = k)
+                    make_unique_ids(df, this_config) # see EOF
+                })
             },
             tadpole = {
-                if (length(k) > 1L || any(lengths(config$dc) > 1L))
-                    lapply(seq_len(nrow(config)), function(i) {
-                        this_config <- config[i, , drop = FALSE]
-                        dc <- unlist(this_config$dc)
-                        this_config <- this_config[setdiff(names(this_config), c("k", "dc"))]
-                        df <- expand.grid(k = k, dc = dc)
-                        make_unique_ids(df, this_config) # see EOF
-                    })
-                else
-                    config
+                lapply(seq_len(nrow(config)), function(i) {
+                    this_config <- config[i, , drop = FALSE]
+                    dc <- unlist(this_config$dc)
+                    this_config <- this_config[setdiff(names(this_config), c("k", "dc"))]
+                    df <- expand.grid(k = k, dc = dc)
+                    make_unique_ids(df, this_config) # see EOF
+                })
             }
         )
         # return Map
