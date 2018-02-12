@@ -56,6 +56,7 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
         previous_rngkind <- RNGkind(rng_kind)[1L]
         if (previous_rngkind != rng_kind) on.exit(RNGkind(previous_rngkind))
         matching_configs <- grepl(paste0(top_id, "_"), results$config_id)
+        if (!any(matching_configs)) matching_configs <- grepl(top_id, results$config_id)
         matching_configs <- which(matching_configs)
         sub_id <- which(matching_configs == id)
         .rng_ <- rng_seq(length(matching_configs), seed, simplify = FALSE)[sub_id] # UTILS-rng.R
