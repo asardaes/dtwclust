@@ -44,6 +44,9 @@
 #' The DTW algorithm (and the functions that depend on it) might return different values in 32 bit
 #' installations compared to 64 bit ones.
 #'
+#' An infinite distance value indicates that the constraints could not be fulfilled, probably due to
+#' a too small `window.size`.
+#'
 #' @example man-examples/multivariate-dtw.R
 #'
 dtw_basic <- function(x, y, window.size = NULL, norm = "L1",

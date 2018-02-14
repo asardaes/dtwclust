@@ -53,6 +53,9 @@ in \code{10(2) + 1 = 21} observations falling within the window.
 \note{
 The DTW algorithm (and the functions that depend on it) might return different values in 32 bit
 installations compared to 64 bit ones.
+
+An infinite distance value indicates that the constraints could not be fulfilled, probably due to
+a too small \code{window.size}.
 }
 \section{Parallel Computing}{
 
