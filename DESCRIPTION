@@ -25,7 +25,9 @@ Imports:
     RSpectra,
     Rcpp,
     RcppParallel,
-    reshape2
+    reshape2,
+    shiny,
+    shinyjs
 Suggests:
     doParallel,
     knitr,
@@ -82,6 +84,7 @@ Collate:
     'S4-tsclustFamily.R'
     'S4-TSClusters-classes.R'
     'S4-TSClusters-methods.R'
+    'SHINY-interactive-clustering.R'
     'UTILS-as-methods.R'
     'UTILS-compute-envelope.R'
     'UTILS-data.R'

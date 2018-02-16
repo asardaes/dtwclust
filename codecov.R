@@ -6,11 +6,13 @@ options(covr.exclude_pattern = rex::rex("#" %or% "//", any_spaces, "nocov"),
         covr.gcov = "gcov-5", # see https://github.com/r-lib/covr/issues/176
         covr.flags = sapply(covr_flags, function(dummy) { "--coverage" }))
 covr::codecov(type = "tests", quiet = FALSE, clean = FALSE, line_exclusions = list(
-    "R/pkg.R"
+    "R/pkg.R",
+    "R/SHINY-interactive-clustering.R"
 ))
 
 #' to run locally, comment the line with covr.gcov above, run all code above until codecov(), and:
 #'
 #' Sys.setenv(NOT_CRAN = "true"); covr::report(package_coverage(type = "tests", quiet = FALSE, line_exclusions = list(
-#'     "R/pkg.R"
+#'     "R/pkg.R",
+#'     "R/SHINY-interactive-clustering.R"
 #' )))
