@@ -134,7 +134,8 @@ fuzzy_control <- function(fuzziness = 2,
                           delta = 1e-3,
                           packages = character(0L),
                           symmetric = FALSE,
-                          version = 2L)
+                          version = 2L,
+                          distmat = NULL)
 {
     if (any(fuzziness <= 1)) stop("Fuzziness exponent should be greater than one")
     if (any(iter.max <= 0L)) stop("Maximum iterations must be positive")
@@ -146,7 +147,8 @@ fuzzy_control <- function(fuzziness = 2,
              delta = delta,
              symmetric = as.logical(symmetric)[1L],
              packages = unique(c("dtwclust", as.character(packages))),
-             version = as.integer(version)),
+             version = as.integer(version),
+             distmat = distmat),
         "class" = c(control_classes[["fuzzy"]])
     )
 }

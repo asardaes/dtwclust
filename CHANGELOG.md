@@ -2,6 +2,7 @@
 
 ## Version 5.2.0.9000
 * Added another helper for `compare_clusterings`: `repeat_clustering`.
+* Added `distmat` to `fuzzy_control` for when `centroid = "fcmdd"`.
 
 ## Version 5.2.0
 * Several functions now use `RcppParallel` for parallelization, refer to the new parallelization vignette for more information.

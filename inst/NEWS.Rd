@@ -10,5 +10,6 @@
 \section{Changes in version 5.2.0.9000}{
 \itemize{
     \item Added another helper for \code{compare_clusterings}: \code{repeat_clustering}.
+    \item Added \code{distmat} to \code{fuzzy_control} for when \code{centroid = "fcmdd"}.
 }
 }
