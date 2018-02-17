@@ -131,3 +131,16 @@ explore__plot <- function(ids, df, series) {
     # return
     gg
 }
+
+# ==================================================================================================
+#' This helper will parse comma-separated key-value pairs
+#'
+#' @keywords internal
+#'
+#' @param input_text A character.
+#' @param into The name of the function that will contain the resulting values.
+#'
+parse_input <- function(input_text, into = "list") {
+    input_text <- paste0(into, "(", input_text, ")")
+    eval(parse(n = 1L, text = input_text))
+}

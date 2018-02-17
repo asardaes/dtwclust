@@ -536,31 +536,13 @@ server <- function(input, output, session) {
             )
             # dist args
             dist_args <- input$cluster__dist_args
-            if (nzchar(dist_args)) {
-                dist_args <- paste0("list(", dist_args, ")")
-                dist_args <- eval(parse(n = 1L, text = dist_args))
-            }
-            else {
-                dist_args <- list()
-            }
+            dist_args <- if (nzchar(dist_args)) parse_input(dist_args) else list()
             # cent args
             cent_args <- input$cluster__cent_args
-            if (nzchar(cent_args)) {
-                cent_args <- paste0("list(", cent_args, ")")
-                cent_args <- eval(parse(n = 1L, text = cent_args))
-            }
-            else {
-                cent_args <- list()
-            }
+            cent_args <- if (nzchar(cent_args)) parse_input(cent_args) else list()
             # dots
             dots <- input$cluster__dots
-            if (nzchar(dots)) {
-                dots <- paste0("list(", dots, ")")
-                dots <- eval(parse(n = 1L, text = dots))
-            }
-            else {
-                dots <- list()
-            }
+            dots <- if (nzchar(dots)) parse_input(dots) else list()
             # return
             args <- enlist(
                 series = .series_,
@@ -603,15 +585,9 @@ server <- function(input, output, session) {
             tried <- tryCatch({
                 height <- as.integer(input$cluster__plot_height)
                 type <- input$cluster__plot_type
-                clus <- as.integer(eval(parse(n = 1L, text = input$cluster__plot_clus)))
+                clus <- as.integer(parse_input(input$cluster__plot_clus, "c"))
                 labels <- input$cluster__plot_labels
-                if (nzchar(labels)) {
-                    labels <- paste0("list(", labels, ")")
-                    labels <- eval(parse(n = 1L, text = labels))
-                }
-                else {
-                    labels <- NULL
-                }
+                labels <- if (nzchar(labels)) parse_input(labels) else NULL
                 output$cluster__plot <- renderPlot({
                     plot_bool <- if (type == "dendrogram") TRUE else FALSE
                     out <- plot(
