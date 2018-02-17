@@ -47,7 +47,9 @@
 #'
 #' @examples
 #'
+#' \dontrun{
 #' interactive_clustering(CharTrajMV)
+#' }
 #'
 interactive_clustering <- function(series, ...) {
     series <- tslist(series)

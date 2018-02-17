@@ -56,7 +56,9 @@ Some of the control parameters are disabled when \pkg{dtwclust} detects them aut
 
 \examples{
 
+\dontrun{
 interactive_clustering(CharTrajMV)
+}
 
 }
 \author{
