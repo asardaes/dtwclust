@@ -14,3 +14,50 @@ interactive_clustering(series, ...)
 \description{
 Display a shiny user interface to do clustering based on the provided series.
 }
+\section{Explore}{
+
+
+This part of the app is simply to see some basic characteristics of the provided series and
+plot some of them. The field for integer IDs expects a valid R expression that specifies which
+of the \code{series} should be plotted. Multivariate series are plotted with each variable in a
+different facet.
+}
+
+\section{Cluster}{
+
+
+This part of the app wraps \code{\link[=tsclust]{tsclust()}}, so you should be familiar with it. Some remarks:
+\itemize{
+\item Specifying a custom centroid or hierarchical method expects the name of a function available
+in the R session (without quotes). Naturally, any required package should be loaded before
+calling \code{interactive_clustering}. For example, if you want to use \code{\link[cluster:agnes]{cluster::agnes()}}, you
+should load \pkg{cluster} beforehand.
+\item A random seed of 0 means that it will be left as \code{NULL} when calling \code{\link[=tsclust]{tsclust()}}.
+\item The input fields for Extra parameters (distance, centroid and ellipsis) expect a comma-
+separated sequence of key-value pairs. For example: \code{window.size = 10L}, \code{trace = TRUE}. You
+should be able to pass any variables available in the R session's global environment.
+\item Regarding plot parameters:
+\itemize{
+\item The \code{Clusters} field is like the integer IDs from the Explore section.
+\item The \code{Labels} field is passed to the plot method (see \link{TSClusters-methods}). You can specify
+several values like with the Extra parameters, e.g.: \code{nudge_x = 10}, \code{nudge_y = 1}. You can
+type an empty space to activate them with the defaults, and delete everything to hide them.
+Note that the location of the labels is random each time.
+}
+}
+
+The plot area reacts to the plot parameters, but the actual clustering with \code{\link[=tsclust]{tsclust()}} won't
+be executed until you click the \code{Cluster!} button. The plot can take a couple of seconds to
+load!
+
+Some of the control parameters are disabled when \pkg{dtwclust} detects them automatically.
+}
+
+\examples{
+
+interactive_clustering(CharTrajMV)
+
+}
+\author{
+Alexis Sarda-Espinosa
+}
