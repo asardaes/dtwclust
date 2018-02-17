@@ -582,12 +582,11 @@ server <- function(input, output, session) {
             do.call(tsclust, args, TRUE)
         },
         error = function(e) {
-            shinyjs::enable("cluster__cluster")
-            message(e$message)
             e
         })
+        shinyjs::enable("cluster__cluster")
         if (inherits(this_result, "error")) {
-            shinyjs::alert("There was an error, see the R console.")
+            shinyjs::alert(this_result$message)
         }
         else {
             result(this_result)
@@ -597,34 +596,49 @@ server <- function(input, output, session) {
     # main plot
     observe({
         if (inherits(result(), "TSClusters")) {
-            height <- as.integer(input$cluster__plot_height)
-            type <- input$cluster__plot_type
-            clus <- as.integer(eval(parse(n = 1L, text = input$cluster__plot_clus)))
-            labels <- input$cluster__plot_labels
-            if (nzchar(labels)) {
-                labels <- paste0("list(", labels, ")")
-                labels <- eval(parse(n = 1L, text = labels))
-            }
-            else {
-                labels <- NULL
-            }
-            output$cluster__plot <- renderPlot({
-                plot_bool <- if (type == "dendrogram") TRUE else FALSE
-                out <- plot(
-                    result(),
-                    clus = clus,
-                    plot = plot_bool,
-                    type = type,
-                    labels = labels
-                )
-                if (inherits(out, "ggplot")) out <- ggplot2::ggplot_build(out)$plot
-                out
+            # shinyjs::disable("cluster__plot_type")
+            # shinyjs::disable("cluster__plot_clus")
+            # shinyjs::disable("cluster__plot_labels")
+            # shinyjs::disable("cluster__plot_height")
+            tried <- tryCatch({
+                height <- as.integer(input$cluster__plot_height)
+                type <- input$cluster__plot_type
+                clus <- as.integer(eval(parse(n = 1L, text = input$cluster__plot_clus)))
+                labels <- input$cluster__plot_labels
+                if (nzchar(labels)) {
+                    labels <- paste0("list(", labels, ")")
+                    labels <- eval(parse(n = 1L, text = labels))
+                }
+                else {
+                    labels <- NULL
+                }
+                output$cluster__plot <- renderPlot({
+                    plot_bool <- if (type == "dendrogram") TRUE else FALSE
+                    out <- plot(
+                        result(),
+                        clus = clus,
+                        plot = plot_bool,
+                        type = type,
+                        labels = labels
+                    )
+                    if (inherits(out, "ggplot")) {
+                        out <- out + facet_wrap(~cl, scales = "free_y", ncol = 2L)
+                        out <- ggplot2::ggplot_build(out)$plot
+                    }
+                    out
+                },
+                height = height)
             },
-            height = height)
+            error = function(e) {
+                e
+            })
+            # shinyjs::enable("cluster__plot_type")
+            # shinyjs::enable("cluster__plot_clus")
+            # shinyjs::enable("cluster__plot_labels")
+            # shinyjs::enable("cluster__plot_height")
+            if (inherits(tried, "error")) {
+                shinyjs::alert(tried$message)
+            }
         }
-        else {
-            NULL
-        }
-        shinyjs::enable("cluster__cluster")
     })
 }

@@ -37,8 +37,9 @@
 #'       Note that the location of the labels is random each time.
 #'
 #'   The plot area reacts to the plot parameters, but the actual clustering with [tsclust()] won't
-#'   be executed until you click the `Cluster!` button. The plot can take a couple of seconds to
-#'   load!
+#'   be executed until you click the `Cluster!` button. **The plot can take a couple of seconds to
+#'   load!** Plotting multivariate series might generate warnings about missing values, they can be
+#'   safely ignored.
 #'
 #'   Some of the control parameters are disabled when \pkg{dtwclust} detects them automatically.
 #'
