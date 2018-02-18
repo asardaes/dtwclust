@@ -43,6 +43,9 @@
 #'
 #'   Some of the control parameters are disabled when \pkg{dtwclust} detects them automatically.
 #'
+#'   The cross-distance matrix is cached so that it can be re-used when appropriate. The cached
+#'   version is invalidated automatically when necessary.
+#'
 #' @author Alexis Sarda-Espinosa
 #'
 #' @examples
@@ -56,7 +59,7 @@ interactive_clustering <- function(series, ...) {
     check_consistency(series, "vltslist")
     is_multivariate(series) # dimension consistency check
 
-    file_path <- system.file("interactive-clustering/app.R", package = "dtwclust")
+    file_path <- system.file("interactive-clustering", "app.R", package = "dtwclust")
     if (!nzchar(file_path)) stop("Shiny application not found")
     ui <- server <- NULL # avoid NOTE about undefined globals
     source(file_path, local = TRUE, chdir = TRUE)

@@ -344,7 +344,10 @@ ui <- tagList(
 )
 
 server <- function(input, output, session) {
+    # ==============================================================================================
+    # reactive values
     result <- reactiveVal(NA)
+    distmat <- reactiveVal()
     # ==============================================================================================
     # Explore tab
     # ----------------------------------------------------------------------------------------------
@@ -387,6 +390,27 @@ server <- function(input, output, session) {
     })
     # ==============================================================================================
     # Cluster tab
+    # ----------------------------------------------------------------------------------------------
+    # invalidate cached distmat
+    observeEvent(c(
+        input$cluster__dist,
+        input$cluster__dist_args,
+        input$cluster__part_pam,
+        input$cluster__part_symmetric,
+        input$cluster__hier_symmetric,
+        input$cluster__fuzz_symmetric
+    ),
+    {
+        distmat(NULL)
+    })
+    observe({
+        if (input$cluster__cent_custom) {
+            distmat(NULL)
+        }
+        else if (!(input$cluster__cent %in% c("pam", "fcmdd", "default"))) {
+            distmat(NULL)
+        }
+    })
     # ----------------------------------------------------------------------------------------------
     # plot type selection options
     observe({
@@ -444,11 +468,19 @@ server <- function(input, output, session) {
             "f" = as.list(centroids_fuzzy),
             "t" = list("default")
         )
+        selected <- switch(
+            input$cluster__clus_type,
+            "p" = "pam",
+            "h" = "default",
+            "f" = "fcmdd",
+            "t" = "default"
+        )
         updateSelectInput(
             session,
             "cluster__cent",
             label = "Centroid",
-            choices = choices
+            choices = choices,
+            selected = selected
         )
     })
     # ----------------------------------------------------------------------------------------------
@@ -505,7 +537,8 @@ server <- function(input, output, session) {
                     partitional_control(
                         iter.max = as.integer(input$cluster__part_iter),
                         pam.precompute = input$cluster__part_pam,
-                        symmetric = input$cluster__part_symmetric
+                        symmetric = input$cluster__part_symmetric,
+                        distmat = distmat()
                     )
                 },
                 "h" = {
@@ -513,9 +546,11 @@ server <- function(input, output, session) {
                         method <- match.fun(input$cluster__hier_method_func)
                     else
                         method <- input$cluster__hier_method
+
                     hierarchical_control(
                         method = method,
-                        symmetric = input$cluster__hier_symmetric
+                        symmetric = input$cluster__hier_symmetric,
+                        distmat = distmat()
                     )
                 },
                 "f" = {
@@ -523,7 +558,8 @@ server <- function(input, output, session) {
                         iter.max = as.integer(input$cluster__fuzz_iter),
                         fuzziness = input$cluster__fuzz_m,
                         delta = input$cluster__fuzz_delta,
-                        symmetric = input$cluster__fuzz_symmetric
+                        symmetric = input$cluster__fuzz_symmetric,
+                        distmat = distmat()
                     )
                 },
                 "t" = {
@@ -572,6 +608,7 @@ server <- function(input, output, session) {
         }
         else {
             result(this_result)
+            distmat(this_result@distmat)
         }
     })
     # ----------------------------------------------------------------------------------------------

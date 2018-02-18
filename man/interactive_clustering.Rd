@@ -52,6 +52,9 @@ load!} Plotting multivariate series might generate warnings about missing values
 safely ignored.
 
 Some of the control parameters are disabled when \pkg{dtwclust} detects them automatically.
+
+The cross-distance matrix is cached so that it can be re-used when appropriate. The cached
+version is invalidated automatically when necessary.
 }
 
 \examples{
