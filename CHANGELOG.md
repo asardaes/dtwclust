@@ -1,8 +1,10 @@
 # Changelog
 
 ## Version 5.2.0.9000
+* Added a shiny app, see `interactive_clustering`.
 * Added another helper for `compare_clusterings`: `repeat_clustering`.
 * Added `distmat` to `fuzzy_control` for when `centroid = "fcmdd"`.
+* Dropped dependency on `rngtools`. Changing the random number generator after loading `dtwclust` should not be a problem now.
 
 ## Version 5.2.0
 * Several functions now use `RcppParallel` for parallelization, refer to the new parallelization vignette for more information.

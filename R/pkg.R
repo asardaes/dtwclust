@@ -25,11 +25,12 @@
 #' (Ratanamahatana and Keogh 2004).
 #'
 #' The main clustering function and entry point for this package is [tsclust()], with a convenience
-#' wrapper for multiple tests in [compare_clusterings()].
+#' wrapper for multiple tests in [compare_clusterings()], and a shiny app in
+#' [interactive_clustering()].
 #'
 #' Please note the random number generator is set to L'Ecuyer-CMRG when \pkg{dtwclust} is attached
-#' in an attempt to preserve reproducibility. You are free to change this afterwards if you wish.
-#' See [base::RNGkind()].
+#' in an attempt to preserve reproducibility. You are free to change this afterwards if you wish
+#' (see [base::RNGkind()]), but \pkg{dtwclust} will always use L'Ecuyer-CMRG internally.
 #'
 #' For more information, please read the included package vignettes, which can be accessed by typing
 #' `browseVignettes("dtwclust")`.

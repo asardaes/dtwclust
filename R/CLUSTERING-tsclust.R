@@ -60,7 +60,8 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'
 #' This is the main function to perform time series clustering. See the details and the examples for
 #' more information, as well as the included package vignettes (which can be found by typing
-#' `browseVignettes("dtwclust")`). A convenience wrapper is available in [compare_clusterings()].
+#' `browseVignettes("dtwclust")`). A convenience wrapper is available in [compare_clusterings()],
+#' and a shiny app in [interactive_clustering()].
 #'
 #' @export
 #' @importFrom dtw symmetric1

@@ -1,6 +1,6 @@
 
 ## Update to version 5.2.0.9000
-Optimizations and bug fixes.
+Optimizations, bug fixes and addition of shiny app.
 
 ## Test environments
 * Local GNU/Linux, R release
@@ -20,3 +20,7 @@ Optimizations and bug fixes.
   + The installed size is due to the 3 included vignettes (already compacted)
     and the compiled code (approx. 20% of the code).
   + GNU make is a system requirement due to RcppParallel
+
+## Additional issues
+* UBSAN: the errors stem from the RcppParallel package and can be safely ignored.
+* The ambiguity for Solaris has been fixed.

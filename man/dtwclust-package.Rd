@@ -26,11 +26,12 @@ distance definitions may be used, or series could be reinterpolated to a matchin
 (Ratanamahatana and Keogh 2004).
 
 The main clustering function and entry point for this package is \code{\link[=tsclust]{tsclust()}}, with a convenience
-wrapper for multiple tests in \code{\link[=compare_clusterings]{compare_clusterings()}}.
+wrapper for multiple tests in \code{\link[=compare_clusterings]{compare_clusterings()}}, and a shiny app in
+\code{\link[=interactive_clustering]{interactive_clustering()}}.
 
 Please note the random number generator is set to L'Ecuyer-CMRG when \pkg{dtwclust} is attached
-in an attempt to preserve reproducibility. You are free to change this afterwards if you wish.
-See \code{\link[base:RNGkind]{base::RNGkind()}}.
+in an attempt to preserve reproducibility. You are free to change this afterwards if you wish
+(see \code{\link[base:RNGkind]{base::RNGkind()}}), but \pkg{dtwclust} will always use L'Ecuyer-CMRG internally.
 
 For more information, please read the included package vignettes, which can be accessed by typing
 \code{browseVignettes("dtwclust")}.
