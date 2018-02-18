@@ -65,15 +65,14 @@ interactive_clustering <- function(series, ...) {
     is_multivariate(series) # dimension consistency check
 
     file_path <- system.file("interactive-clustering", "app.R", package = "dtwclust")
-    if (!nzchar(file_path)) stop("Shiny application not found")
+    if (!nzchar(file_path)) stop("Shiny app not found")
     ui <- server <- NULL # avoid NOTE about undefined globals
     source(file_path, local = TRUE, chdir = TRUE)
 
-    server_env <- new.env() # will see all dtwclust functions
+    server_env <- environment(server) # will see all dtwclust functions
     server_env$.series_ <- series
     server_env$.explore_df_ <- explore__tidy_series(series)
 
-    environment(server) <- server_env
     app <- shiny::shinyApp(ui, server)
     shiny::runApp(app, ...)
 }
