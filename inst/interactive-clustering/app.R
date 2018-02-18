@@ -131,7 +131,8 @@ ui <- tagList(
                             unname(lapply(dist$names[dist$distance], function(d) {
                                 tolower(d[1L])
                             }))
-                        })
+                        }),
+                        selected = "dtw_basic"
                     ),
                     fluidRow(
                         column(
@@ -337,6 +338,70 @@ ui <- tagList(
                 column(
                     9L,
                     plotOutput(outputId = "cluster__plot")
+                )
+            )
+        ),
+        # ==========================================================================================
+        # Evaluate tab
+        tabPanel(
+            "Evaluate",
+            sidebarLayout(
+                sidebarPanel(
+                    h3("Summary"),
+                    htmlOutput("evaluate__summary"),
+                    helpText("The latest TSClusters object can be saved in the current R session's",
+                             "global environment by specifying the desired variable name",
+                             "and clicking the save button."),
+                    textInput(
+                        "evaluate__save_name",
+                        label = NULL
+                    ),
+                    actionButton(
+                        "evaluate__save",
+                        label = "Save"
+                    )
+                ),
+                mainPanel(
+                    tabsetPanel(
+                        tabPanel(
+                            "Clusters",
+                            tableOutput("evaluate__clusinfo"),
+                            tableOutput("evaluate__cl"),
+                            tableOutput("evaluate__fcluster")
+                        ),
+                        tabPanel(
+                            "CVIs",
+                            fluidRow(
+                                column(
+                                    4L,
+                                    textInput(
+                                        "evaluate__ground_truth",
+                                        label = "Ground truth variable"
+                                    ),
+                                    shinyjs::hidden(checkboxGroupInput(
+                                        "evaluate__ext_cvis",
+                                        label = "External Cluster Validity Indices",
+                                        choices = list("external"),
+                                        width = "100%"
+                                    )),
+                                    checkboxGroupInput(
+                                        "evaluate__int_cvis",
+                                        label = "Internal Cluster Validity Indices",
+                                        choices = list("internal"),
+                                        width = "100%"
+                                    )
+                                ),
+                                column(
+                                    8L,
+                                    tableOutput("evaluate__cvis")
+                                )
+                            )
+                        ),
+                        tabPanel(
+                            "Cross-distance matrix",
+                            tableOutput("evaluate__distmat")
+                        )
+                    )
                 )
             )
         )
@@ -653,5 +718,241 @@ server <- function(input, output, session) {
                 shinyjs::alert(tried$message)
             }
         }
+    })
+    # ==============================================================================================
+    # Evaluate tab
+    # ----------------------------------------------------------------------------------------------
+    # summary
+    output$evaluate__summary <- renderText({
+        out <- ""
+        tsc <- result()
+        if (inherits(tsc, "TSClusters")) {
+            dist <- tsc@distance
+            isolate({ if (dist == "unknown") dist <- input$cluster__dist })
+            out <- paste0(
+                tools::toTitleCase(tsc@type),
+                " clustering with ",
+                tolower(dist),
+                " distance and ",
+                tolower(tsc@centroid),
+                " centroids.<br>\n"
+            )
+            out <- paste0(
+                out,
+                switch(
+                    tsc@type,
+                    "partitional" =, "fuzzy" = {
+                        converged <- if (tsc@converged) "(converged)" else "(did not converge)"
+                        paste0(
+                            tsc@k,
+                            " clusters were created. It took ",
+                            tsc@iter,
+                            " iterations ",
+                            converged,
+                            ".<br>\n"
+                        )
+                    },
+                    "hierarchical" = {
+                        paste0(
+                            "The ",
+                            tsc@method,
+                            " linkage was used, and ",
+                            tsc@k,
+                            " clusters were created with the cutree() function.<br>\n"
+                        )
+                    },
+                    "tadpole" = {
+                        lb <- switch(tsc@control$lb,
+                                     "lbk" = "Keogh's",
+                                     "lbi" = "Lemire's improved")
+                        paste0(
+                            tsc@k,
+                            " clusters were created, using a cutoff distance of ",
+                            tsc@control$dc,
+                            " and a window size of size ",
+                            tsc@control$window.size,
+                            ". ",
+                            lb,
+                            " lower bound was used.<br>\n"
+                        )
+                    }
+                )
+            )
+            out <- paste0(out,
+                          "The measured execution time was ",
+                          tsc@proctime[["elapsed"]],
+                          " seconds.<br>\n")
+        }
+        out
+    })
+    # ----------------------------------------------------------------------------------------------
+    # save
+    observeEvent(input$evaluate__save, {
+        if (inherits(result(), "TSClusters")) {
+            out_name <- input$evaluate__save_name
+            if (nzchar(out_name)) {
+                tryCatch({
+                    assign(out_name, result(), globalenv())
+                    shinyjs::alert("Saved! Exit shiny app to update the global environment.")
+                },
+                error = function(e) {
+                    shinyjs::alert(paste("Could not save:", e$message))
+                })
+            }
+        }
+    })
+    # ----------------------------------------------------------------------------------------------
+    # cvi
+    # selection options
+    observe({
+        res <- result()
+        if (inherits(res, "TSClusters")){
+            if (inherits(res, "FuzzyTSClusters")) {
+                if (nzchar(input$evaluate__ground_truth))
+                    shinyjs::show("evaluate__ext_cvis")
+                else
+                    shinyjs::hide("evaluate__ext_cvis")
+                # external
+                choices <- list(
+                    "Soft rand (max)" = "RI",
+                    "Soft adjusted rand (max)" = "ARI",
+                    "Soft variation of information (min)" = "VI",
+                    "Soft normalized mutual information (max)" = "NMIM"
+                )
+                updateCheckboxGroupInput(
+                    session,
+                    "evaluate__ext_cvis",
+                    label = "External Cluster Validity Indices",
+                    choices = choices,
+                    selected = isolate(input$evaluate__ext_cvis)
+                )
+                # internal
+                choices <- list(
+                    "MPC (max)" = "MPC",
+                    "K (min)" = "K",
+                    "T (min)" = "T",
+                    "SC (max)" = "SC",
+                    "PBMF (max)" = "PBMF"
+                )
+                updateCheckboxGroupInput(
+                    session,
+                    "evaluate__int_cvis",
+                    label = "Internal Cluster Validity Indices",
+                    choices = choices,
+                    selected = isolate(input$evaluate__int_cvis)
+                )
+            }
+            else {
+                if (nzchar(input$evaluate__ground_truth))
+                    shinyjs::show("evaluate__ext_cvis")
+                else
+                    shinyjs::hide("evaluate__ext_cvis")
+                # external
+                choices <- list(
+                    "Rand (max)" = "RI",
+                    "Adjusted rand (max)" = "ARI",
+                    "Jaccard (max)" = "J",
+                    "Fowlkes-Mallows (max)" = "FM",
+                    "Variation of information (min)" = "VI"
+                )
+                updateCheckboxGroupInput(
+                    session,
+                    "evaluate__ext_cvis",
+                    label = "External Cluster Validity Indices",
+                    choices = choices,
+                    selected = isolate(input$evaluate__ext_cvis)
+                )
+                # internal
+                choices <- list(
+                    "Silhouette (max)" = "Sil",
+                    "Dunn (max)" = "D",
+                    "COP (min)" = "COP",
+                    "Davies-Bouldin (min)" = "DB",
+                    "Modified Davies-Bouldin DB* (min)" = "DBstar",
+                    "Calinski-Harabasz (max)" = "CH",
+                    "Score function (max)" = "SF"
+                )
+                updateCheckboxGroupInput(
+                    session,
+                    "evaluate__int_cvis",
+                    label = "Internal Cluster Validity Indices",
+                    choices = choices,
+                    selected = isolate(input$evaluate__int_cvis)
+                )
+            }
+        }
+    })
+    # calcluation of cvi
+    observe({
+        if (inherits(result(), "TSClusters")) {
+            internal <- input$evaluate__int_cvis
+            truth <- input$evaluate__ground_truth
+            tryCatch({
+                if (nzchar(truth)) {
+                    external <- input$evaluate__ext_cvis
+                    b <- eval(parse(n = 1L, text = truth))
+                }
+                else {
+                    external <- ""
+                    b <- NULL
+                }
+                output$evaluate__cvis <- renderTable({
+                    as.data.frame(rbind(cvi(result(), b = b, type = c(internal, external))))
+                })
+            },
+            error = function(e) {
+                shinyjs::alert(e$message)
+            })
+        }
+    })
+    # ----------------------------------------------------------------------------------------------
+    # clusters and distmat
+    observe({
+        out <- result()
+        dm <- NULL
+        if (inherits(out, "TSClusters")) {
+            dm <- out@distmat
+
+            if (inherits(out, "FuzzyTSClusters")) {
+                output$evaluate__clusinfo <- renderTable(data.frame())
+                output$evaluate__cl <- renderTable(data.frame())
+
+                output$evaluate__fcluster <- renderTable(
+                    out@fcluster,
+                    rownames = TRUE,
+                    caption = "Fuzzy memberships",
+                    caption.placement = "top"
+                )
+            }
+            else {
+                output$evaluate__fcluster <- renderTable(data.frame())
+
+                output$evaluate__clusinfo <- renderTable({
+                    df <- t(out@clusinfo)
+                    rownames(df) <- c("Cluster size", "Average distance")
+                    colnames(df) <- paste("Cluster", 1L:out@k)
+                    df
+                },
+                rownames = TRUE,
+                caption = "Cluster sizes with average intra-cluster distance.",
+                caption.placement = "top"
+                )
+                output$evaluate__cl <- renderTable({
+                    df <- cbind(out@cluster, out@cldist)
+                    colnames(df) <- c("Cluster ID", "Distance to centroid")
+                    rownames(df) <- names(.series_)
+                    df
+                },
+                rownames = TRUE,
+                caption = "Cluster indices.",
+                caption.placement = "top")
+            }
+        }
+        if (is.null(dm))
+            output$evaluate__distmat <- renderTable(data.frame())
+        else
+            output$evaluate__distmat <- renderTable(as.data.frame(dm),
+                                                    spacing = "xs",
+                                                    rownames = TRUE)
     })
 }

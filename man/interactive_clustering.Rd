@@ -57,6 +57,13 @@ The cross-distance matrix is cached so that it can be re-used when appropriate. 
 version is invalidated automatically when necessary.
 }
 
+\section{Evaluate}{
+
+
+This part of the app provides results of the current clustering. External CVIs can be
+calculated if the name of a variable with the ground truth is provided (see \code{\link[=cvi]{cvi()}}).
+}
+
 \examples{
 
 \dontrun{
