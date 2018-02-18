@@ -485,6 +485,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 distance <- if (is.null(dist_method)) "unknown" else dist_method
             }
             if (inherits(distmat, "Distmat")) distmat <- distmat$distmat
+            if (inherits(distmat, "uninitializedField")) distmat <- NULL
             # Create objects
             RET <- lapply(pc_list, function(pc) {
                 if (type == "partitional") {
