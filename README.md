@@ -36,6 +36,8 @@ For more information:
     considerations](https://cran.r-project.org/web/packages/dtwclust/vignettes/parallelization-considerations.html)
 -   [Functions’
     documentation](https://cran.r-project.org/web/packages/dtwclust/dtwclust.pdf)
+-   [Sample shiny
+    app](https://asardaes.shinyapps.io/dtwclust-tsclust-interactive/)
 -   [CRAN’s time series
     view](https://cran.r-project.org/web/views/TimeSeries.html)
 
