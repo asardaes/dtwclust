@@ -27,6 +27,8 @@ cluster_plot <- quote({
             labels <- if (nzchar(labels)) parse_input(labels) else NULL
             output$cluster__plot <- renderPlot({
                 plot_bool <- if (type == "dendrogram") TRUE else FALSE
+                seed <- result()@seed
+                if (length(seed) == 1L) set.seed(seed)
                 out <- plot(
                     result(),
                     clus = clus,
