@@ -8,6 +8,9 @@
 static R_CallMethodDef callMethods[] = {
     CALLDEF(SparseDistmatIndices__new, 1),
     CALLDEF(SparseDistmatIndices__getNewIndices, 4),
+    CALLDEF(SemiSupervisedDtw__new, 1),
+    CALLDEF(SemiSupervisedDtw__link, 4),
+    CALLDEF(SemiSupervisedDtw__getUnseenPair, 1),
     CALLDEF(dba, 9),
     CALLDEF(distmat_loop, 8),
     CALLDEF(dtw_basic, 11),

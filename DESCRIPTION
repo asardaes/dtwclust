@@ -80,6 +80,7 @@ Collate:
     'DISTANCES-sdtw.R'
     'GENERICS-cvi.R'
     'S4-Distmat.R'
+    'S4-SemiSupervisedDtw.R'
     'S4-SparseDistmat.R'
     'S4-tsclustFamily.R'
     'S4-TSClusters-classes.R'
