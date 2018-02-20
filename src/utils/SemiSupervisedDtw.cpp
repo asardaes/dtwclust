@@ -51,9 +51,9 @@ public:
             pair[0] = std::round(R::runif(1, max_size_));
             pair[1] = std::round(R::runif(1, max_size_));
             while (pair[0] == pair[1]) pair[1] = std::round(R::runif(1, max_size_));
-            if (must_link_.areNeighbors(pair[0], pair[1])) seen = true;
-            if (cannot_link_.areNeighbors(pair[0], pair[1])) seen = true;
-            if (dont_know_.areNeighbors(pair[0], pair[1])) seen = true;
+            if (must_link_.areNeighbors(pair[0], pair[1], true))   seen = true;
+            if (cannot_link_.areNeighbors(pair[0], pair[1], true)) seen = true;
+            if (dont_know_.areNeighbors(pair[0], pair[1], false))  seen = true;
         }
         return pair;
     }
@@ -63,10 +63,9 @@ private:
     int max_size_;
 
     bool optionsAvailable() {
-        return !(aggregate_.isConnected()   ||
-                 must_link_.isConnected()   ||
-                 cannot_link_.isConnected() ||
-                 dont_know_.isConnected()
+        return !(aggregate_.isConnected() ||
+                 must_link_.isConnected() ||
+                 cannot_link_.isConnected()
         );
     }
 };
