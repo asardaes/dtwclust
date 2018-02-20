@@ -23,8 +23,8 @@ SemiSupervisedDtw <- methods::setRefClass(
         },
         link = function(i, j, link_type) {
             "Link indices i and j.
-            dont_know = -1, cannot_link = 0, must_link = 1.
-            Returns TRUE if graph is connected after insertion."
+            Link types: dont_know = -1, cannot_link = 0, must_link = 1.
+            Returns TRUE if underlying graph is connected after insertion."
             i <- as.integer(i)[1L]
             j <- as.integer(j)[1L]
             link_type <- as.integer(link_type)[1L]
@@ -32,8 +32,8 @@ SemiSupervisedDtw <- methods::setRefClass(
             .Call(C_SemiSupervisedDtw__link, xptr, i, j, link_type, PACKAGE = "dtwclust")
         },
         get_unseen_pair = function() {
-            "Get a pair that is not contained in the graph,
-            NULL means the graph is connected."
+            "Get a pair that is not contained in any graph,
+            NULL means no unseen pairs left."
             .Call(C_SemiSupervisedDtw__getUnseenPair, xptr, PACKAGE = "dtwclust")
         }
     )

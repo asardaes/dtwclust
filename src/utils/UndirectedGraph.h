@@ -12,16 +12,18 @@ class UndirectedGraph {
 public:
     UndirectedGraph(const int max_size);
     bool areNeighbors(const int i, const int j);
-    void linkVertices(const int i, const int j, const int link_type);
+    void linkVertices(const int i, const int j);
     bool isConnected();
+    int numEdges();
 
 private:
     struct Vertex {
-        Vertex(const int i, const int lnk = -1) : id(i), link_type(lnk) {}
-        int id, link_type;
+        Vertex(const int i) : id(i) {}
+        int id;
         std::unordered_set<std::shared_ptr<Vertex>> neighbors;
     };
 
+    int countEdges(const std::shared_ptr<Vertex>& vertex, const std::shared_ptr<Vertex>& caller);
     void dfs(const std::shared_ptr<Vertex>& vertex);
 
     std::unordered_map<int, std::shared_ptr<Vertex>> vertices_;

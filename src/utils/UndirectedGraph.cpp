@@ -32,12 +32,13 @@ bool UndirectedGraph::areNeighbors(const int i, const int j) {
 }
 
 // connect two indices, creating them if they didn't exist
-void UndirectedGraph::linkVertices(const int i, const int j, const int link_type) {
+void UndirectedGraph::linkVertices(const int i, const int j) {
+    if (i == j) return;
     std::shared_ptr<Vertex> i_vertex, j_vertex;
 
     auto ii = vertices_.find(i);
     if (ii == vertices_.end()) {
-        i_vertex = std::make_shared<Vertex>(i, link_type);
+        i_vertex = std::make_shared<Vertex>(i);
         vertices_.insert({i, i_vertex});
     }
     else
@@ -45,7 +46,7 @@ void UndirectedGraph::linkVertices(const int i, const int j, const int link_type
 
     auto jj = vertices_.find(j);
     if (jj == vertices_.end()) {
-        j_vertex = std::make_shared<Vertex>(j, link_type);
+        j_vertex = std::make_shared<Vertex>(j);
         vertices_.insert({j, j_vertex});
     }
     else
@@ -74,6 +75,36 @@ bool UndirectedGraph::isConnected() {
     return true;
 }
 
+// total number of edges so far
+int UndirectedGraph::numEdges() {
+    if (vertices_.size() == 0) return 0;
+    std::fill(visited_.begin(), visited_.end(), false);
+    int count = 0;
+    for (auto iter : vertices_) {
+        count += this->countEdges(iter.second, nullptr);
+        if (connected_) break;
+    }
+    return count;
+}
+
+// count edges based on dfs
+int UndirectedGraph::countEdges(
+        const std::shared_ptr<Vertex>& vertex,
+        const std::shared_ptr<Vertex>& caller)
+{
+    // ids start with 1 due to R
+    if (visited_[vertex->id - 1])
+        return 0;
+    visited_[vertex->id- 1] = true;
+    int count = 0;
+    for (auto neighbor : vertex->neighbors) {
+        // +1 due to this neighbor, as long as it's not the caller
+        if (neighbor != caller) count++;
+        count += countEdges(neighbor, vertex);
+    }
+    return count;
+}
+
 // depth-first search
 void UndirectedGraph::dfs(const std::shared_ptr<Vertex>& vertex) {
     // ids start with 1 due to R
@@ -81,8 +112,7 @@ void UndirectedGraph::dfs(const std::shared_ptr<Vertex>& vertex) {
         return;
     visited_[vertex->id- 1] = true;
     for (auto neighbor : vertex->neighbors) {
-        if (!(visited_[neighbor->id - 1]))
-            dfs(neighbor);
+        dfs(neighbor);
     }
 }
 
