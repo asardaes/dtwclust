@@ -12,7 +12,7 @@ UndirectedGraph::UndirectedGraph(const int max_size)
 { }
 
 // check if two indices are connected by an edge
-bool UndirectedGraph::areNeighbors(const int i, const int j) const {
+bool UndirectedGraph::areNeighbors(const int i, const int j) {
     auto ii = vertices_.find(i);
     if (ii == vertices_.end())
         return false;
@@ -21,9 +21,14 @@ bool UndirectedGraph::areNeighbors(const int i, const int j) const {
     if (jj == vertices_.end())
         return false;
 
-    if (ii->second->neighbors.find(jj->second) == ii->second->neighbors.end())
-        return false;
-    return true;
+    // is it a direct neighbor?
+    if (ii->second->neighbors.find(jj->second) != ii->second->neighbors.end())
+        return true;
+
+    // is it an indirect neighbor?
+    std::fill(visited_.begin(), visited_.end(), false);
+    this->dfs(ii->second);
+    return visited_[j-1];
 }
 
 // connect two indices, creating them if they didn't exist
