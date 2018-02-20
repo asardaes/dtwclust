@@ -14,7 +14,6 @@ public:
     bool areNeighbors(const int i, const int j);
     void linkVertices(const int i, const int j);
     bool isConnected();
-    int numEdges();
 
 private:
     struct Vertex {
@@ -23,7 +22,6 @@ private:
         std::unordered_set<std::shared_ptr<Vertex>> neighbors;
     };
 
-    int countEdges(const std::shared_ptr<Vertex>& vertex, const std::shared_ptr<Vertex>& caller);
     void dfs(const std::shared_ptr<Vertex>& vertex);
 
     std::unordered_map<int, std::shared_ptr<Vertex>> vertices_;

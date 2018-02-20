@@ -19,11 +19,13 @@ public:
         : must_link_(max_size)
         , cannot_link_(max_size)
         , dont_know_(max_size)
+        , aggregate_(max_size)
         , max_size_(max_size)
     { }
 
     SEXP link(const int i, const int j, const int link_type) {
         if (i < 1 || i > max_size_ || j < 1 || j > max_size_) Rcpp::stop("Invalid indices provided");
+        aggregate_.linkVertices(i,j);
         switch(link_type)
         {
         case DONT_KNOW:
@@ -57,18 +59,15 @@ public:
     }
 
 private:
-    UndirectedGraph must_link_, cannot_link_, dont_know_;
+    UndirectedGraph must_link_, cannot_link_, dont_know_, aggregate_;
     int max_size_;
 
     bool optionsAvailable() {
-        if (must_link_.isConnected() || cannot_link_.isConnected() || dont_know_.isConnected())
-            return false;
-
-        int total_edges = must_link_.numEdges() + cannot_link_.numEdges() + dont_know_.numEdges();
-        if (total_edges >= max_size_ * (max_size_ - 1) / 2)
-            return false;
-
-        return true;
+        return !(aggregate_.isConnected()   ||
+                 must_link_.isConnected()   ||
+                 cannot_link_.isConnected() ||
+                 dont_know_.isConnected()
+        );
     }
 };
 

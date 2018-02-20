@@ -75,36 +75,6 @@ bool UndirectedGraph::isConnected() {
     return true;
 }
 
-// total number of edges so far
-int UndirectedGraph::numEdges() {
-    if (vertices_.size() == 0) return 0;
-    std::fill(visited_.begin(), visited_.end(), false);
-    int count = 0;
-    for (auto iter : vertices_) {
-        count += this->countEdges(iter.second, nullptr);
-        if (connected_) break;
-    }
-    return count;
-}
-
-// count edges based on dfs
-int UndirectedGraph::countEdges(
-        const std::shared_ptr<Vertex>& vertex,
-        const std::shared_ptr<Vertex>& caller)
-{
-    // ids start with 1 due to R
-    if (visited_[vertex->id - 1])
-        return 0;
-    visited_[vertex->id- 1] = true;
-    int count = 0;
-    for (auto neighbor : vertex->neighbors) {
-        // +1 due to this neighbor, as long as it's not the caller
-        if (neighbor != caller) count++;
-        count += countEdges(neighbor, vertex);
-    }
-    return count;
-}
-
 // depth-first search
 void UndirectedGraph::dfs(const std::shared_ptr<Vertex>& vertex) {
     // ids start with 1 due to R
