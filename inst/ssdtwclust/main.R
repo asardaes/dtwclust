@@ -1,0 +1,114 @@
+# main clustering routine
+main <- quote({
+    shinyjs::disable("cluster__cluster")
+    reset_and_disable()
+    this_result <- tryCatch({
+        type <- input$cluster__clus_type
+        k <- as.integer(input$cluster__k)
+        distance <- "dtw_basic"
+        seed <- as.integer(input$cluster__seed)
+        if (seed == 0L) seed <- NULL
+        trace <- input$cluster__trace
+        if (input$cluster__cent_custom)
+            centroid <- input$cluster__cent_func
+        else
+            centroid <- input$cluster__cent
+        # windows
+        window_sizes <- input$cluster__windows
+        window_sizes <- seq(from = window_sizes[1L],
+                            to = window_sizes[2L],
+                            by = as.integer(input$cluster__windows_step))
+        window_sizes <- unique(round(min(lengths(.series_)) * window_sizes / 100))
+        # controls
+        control <- switch(
+            type,
+            "p" = {
+                list(partitional = partitional_control(
+                    iter.max = as.integer(input$cluster__part_iter),
+                    pam.precompute = input$cluster__part_pam,
+                    nrep = as.integer(input$cluster__part_nrep)
+                ))
+            },
+            "h" = {
+                if (input$cluster__hier_method_custom)
+                    method <- input$cluster__hier_method_func
+                else
+                    method <- input$cluster__hier_method
+
+                list(hierarchical = hierarchical_control(
+                    method = method
+                ))
+            },
+            "t" = {
+                list(tadpole = tadpole_control(
+                    dc = input$cluster__tadp_dc,
+                    window.size = as.integer(window_sizes),
+                    lb = input$cluster__tadp_lb
+                ))
+            }
+        )
+        # dist
+        dist_args <- input$cluster__dist_args
+        dist_args <- if (nzchar(dist_args)) parse_input(dist_args) else list()
+        dist_args$window.size <- as.integer(window_sizes)
+        # cent
+        cent_args <- input$cluster__cent_args
+        cent_args <- if (nzchar(cent_args)) parse_input(cent_args) else list()
+        cent_args$window.size <- NULL # to be sure, see hack further below
+        cent_cfg <- as.data.frame(c(list(centroid = centroid), cent_args), stringsAsFactors = FALSE)
+        cent_cfg <- list(cent_cfg)
+        names(cent_cfg) <- match.arg(type, c("partitional", "hierarchical", "tadpole"))
+        # dots
+        dots <- input$cluster__dots
+        dots <- if (nzchar(dots)) parse_input(dots) else list()
+        # configs
+        cfgs <- compare_clusterings_configs(
+            types = type,
+            k = k,
+            controls = control,
+            preprocs = pdc_configs(
+                "preproc",
+                none = list(),
+                share.config = type
+            ),
+            distances = suppressWarnings(pdc_configs(
+                "distance",
+                dtw_basic = dist_args,
+                share.config = type
+            )),
+            centroids = cent_cfg
+        )
+        # a bit of a hack, but oh well
+        if (tolower(centroid) == "dba")
+            cfgs$partitional$window.size_centroid <- cfgs$partitional$window.size_distance
+        # return
+        args <- enlist(
+            series = .series_,
+            type = type,
+            configs = cfgs,
+            seed = seed,
+            trace = trace,
+            score.clus = score_fun,
+            dots = dots
+        )
+        do.call(compare_clusterings, args, TRUE)
+    },
+    error = function(e) {
+        e
+    })
+    shinyjs::enable("cluster__cluster")
+    if (inherits(this_result, "error")) {
+        shinyjs::alert(this_result$message)
+    }
+    else {
+        result(this_result)
+        output$evaluate__raw <- renderTable(raw_table, quoted = TRUE)
+        # TODO: make ensembles
+        pair_tracker <<- SemiSupervisedDtw$new(length(.series_)) # S4-SemiSupervisedDtw.R
+        shinyjs::enable("cluster__continue")
+        shinyjs::enable("cluster__must_link")
+        shinyjs::enable("cluster__cannot_link")
+        shinyjs::enable("cluster__dont_know")
+        pair_ids(pair_tracker$get_unseen_pair())
+    }
+})

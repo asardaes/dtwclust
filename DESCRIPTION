@@ -86,6 +86,8 @@ Collate:
     'S4-TSClusters-classes.R'
     'S4-TSClusters-methods.R'
     'SHINY-interactive-clustering.R'
+    'SHINY-ssdtwclust.R'
+    'SHINY-utils.R'
     'UTILS-as-methods.R'
     'UTILS-compute-envelope.R'
     'UTILS-data.R'

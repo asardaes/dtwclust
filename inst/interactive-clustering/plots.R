@@ -4,7 +4,7 @@ explore_plot <- quote({
     height <- as.integer(input$explore__height) * NCOL(.series_[[1L]])
     output$explore__plot <- renderPlot(
         isolate({
-            # SHINY-interactive-clustering.R
+            # SHINY-utils.R
             explore__plot(input$explore__ids, .explore_df_, .series_)
         }),
         height = height
