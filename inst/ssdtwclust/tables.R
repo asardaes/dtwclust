@@ -26,3 +26,8 @@ characteristics_table <- quote({
 raw_table <- quote({
     this_result$results[[1L]]
 })
+
+# Evaluate tab, aggregated
+agg_table <- quote({
+    agg_ids
+})

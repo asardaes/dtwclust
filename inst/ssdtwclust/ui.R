@@ -175,6 +175,36 @@ ui <- tagList(
                                 )
                             )
                         ),
+                        fluidRow(
+                            column(
+                                9L,
+                                shinyjs::disabled(selectInput(
+                                    "cluster__part_agg",
+                                    label = "Aggregation method",
+                                    choices = list(
+                                        "euclidean",
+                                        "manhattan",
+                                        "comemberships",
+                                        "symdiff",
+                                        "Rand",
+                                        "GV1",
+                                        "BA/A",
+                                        "BA/D",
+                                        "BA/E",
+                                        "VI"
+                                    )
+                                ))
+                            ),
+                            column(
+                                3L,
+                                h5("", style = "padding:5px"),
+                                shinyjs::disabled(checkboxInput(
+                                    "cluster__part_agg_flag",
+                                    label = "Aggregate",
+                                    value = TRUE
+                                ))
+                            )
+                        ),
                         checkboxInput(
                             "cluster__part_pam",
                             label = "pam.precompute",
@@ -215,6 +245,36 @@ ui <- tagList(
                                     "cluster__hier_method_custom",
                                     label = "Custom",
                                     value = FALSE
+                                )
+                            )
+                        ),
+                        fluidRow(
+                            column(
+                                9L,
+                                selectInput(
+                                    "cluster__hier_agg",
+                                    label = "Aggregation method",
+                                    choices = list(
+                                        "euclidean",
+                                        "manhattan",
+                                        "comemberships",
+                                        "symdiff",
+                                        "Rand",
+                                        "GV1",
+                                        "BA/A",
+                                        "BA/D",
+                                        "BA/E",
+                                        "VI"
+                                    )
+                                )
+                            ),
+                            column(
+                                3L,
+                                h5("", style = "padding:5px"),
+                                checkboxInput(
+                                    "cluster__hier_agg_flag",
+                                    label = "Aggregate",
+                                    value = TRUE
                                 )
                             )
                         )
@@ -321,6 +381,10 @@ ui <- tagList(
                         tabPanel(
                             "Raw",
                             tableOutput("evaluate__raw")
+                        ),
+                        tabPanel(
+                            "Aggregated",
+                            tableOutput("evaluate__agg")
                         )
                     )
                 )

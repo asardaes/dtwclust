@@ -103,7 +103,47 @@ main <- quote({
     else {
         result(this_result)
         output$evaluate__raw <- renderTable(raw_table, quoted = TRUE)
-        # TODO: make ensembles
+
+        agg_ids <- this_result$scores[[1L]]
+        if (
+            # partitional
+            (input$cluster__clus_type == "p" &&
+             input$cluster__part_nrep > 1L &&
+             input$cluster__part_agg_flag) ||
+            # hierarchical
+            (input$cluster__clus_type == "h" &&
+             input$cluster__hier_method == "all" &&
+             input$cluster__hier_agg_flag))
+        {
+            cfgs <- this_result$results[[1L]]$config_id
+            agg_cfgs <- sapply(strsplit(cfgs, "_"), "[", 1L)
+            split_ids <- split(agg_ids, agg_cfgs)
+            agg_ids <- dplyr::bind_rows(lapply(split_ids, function(cfgs_ids) {
+                partitions <- apply(cfgs_ids, 1L, function(ids) {
+                    clue::as.cl_hard_partition(as.integer(ids))
+                })
+                ensemble <- clue::cl_ensemble(list = partitions)
+                method <- switch(input$cluster__clus_type,
+                                 "p" = input$cluster__part_agg,
+                                 "h" = input$cluster__hier_agg)
+                as.data.frame(rbind(unclass(clue::cl_medoid(ensemble, method)$.Data)))
+            }))
+            agg_ids <- data.frame(config_id = unique(agg_cfgs),
+                                  window_size = window_sizes,
+                                  agg_ids)
+        }
+        else {
+            agg_ids <- data.frame(this_result$results[[1L]]["config_id"],
+                                  window_size = window_sizes,
+                                  agg_ids)
+        }
+        if (is.null(names(.series_)))
+            colnames(agg_ids)[-c(1L, 2L)] <- as.character(1L:length(.series_))
+        else
+            colnames(agg_ids)[-c(1L, 2L)] <- names(.series_)
+        cluster_ids <<- agg_ids
+        output$evaluate__agg <- renderTable(agg_table, quoted = TRUE)
+
         pair_tracker <<- PairTracker$new(length(.series_)) # S4-PairTracker.R
         shinyjs::enable("cluster__must_link")
         shinyjs::enable("cluster__cannot_link")

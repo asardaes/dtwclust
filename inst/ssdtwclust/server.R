@@ -8,6 +8,7 @@ server <- function(input, output, session) {
     pair_ids <- reactiveVal(NA)
     # non-reactive values
     pair_tracker <- NA
+    cluster_ids <- NA
     score_fun <- function(obj_list, ...) {
         df_list <- lapply(obj_list, function(obj) {
             df <- as.data.frame(rbind(obj@cluster))
@@ -101,6 +102,26 @@ server <- function(input, output, session) {
         else {
             shinyjs::hide("cluster__hier_method_func")
             shinyjs::show("cluster__hier_method")
+        }
+    })
+    observe({
+        if (input$cluster__part_nrep > 1L) {
+            shinyjs::enable("cluster__part_agg")
+            shinyjs::enable("cluster__part_agg_flag")
+        }
+        else {
+            shinyjs::disable("cluster__part_agg")
+            shinyjs::disable("cluster__part_agg_flag")
+        }
+    })
+    observe({
+        if (!input$cluster__hier_method_custom && input$cluster__hier_method == "all") {
+            shinyjs::enable("cluster__hier_agg")
+            shinyjs::enable("cluster__hier_agg_flag")
+        }
+        else {
+            shinyjs::disable("cluster__hier_agg")
+            shinyjs::disable("cluster__hier_agg_flag")
         }
     })
     # ----------------------------------------------------------------------------------------------
