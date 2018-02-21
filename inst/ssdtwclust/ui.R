@@ -51,62 +51,11 @@ ui <- tagList(
                     )
                 )
             ),
-            fluidRow(
-                column(
-                    3L,
-                    h2("Clustering parameters")
-                ),
-                column(
-                    3L, offset = 2L,
-                    fluidRow(
-                        column(
-                            6L, offset = 3L,
-                            shinyjs::disabled(checkboxInput(
-                                "cluster__continue",
-                                "Continue annotating?",
-                                value = TRUE
-                            ))
-                        )
-                    ),
-                    hr(),
-                    fluidRow(
-                        column(
-                            4L,
-                            shinyjs::disabled(actionButton(
-                                "cluster__must_link",
-                                label = "Must link"
-                            ))
-                        ),
-                        column(
-                            4L,
-                            shinyjs::disabled(actionButton(
-                                "cluster__cannot_link",
-                                label = "Cannot link"
-                            ))
-                        ),
-                        column(
-                            4L,
-                            shinyjs::disabled(actionButton(
-                                "cluster__dont_know",
-                                label = "Skip"
-                            ))
-                        )
-                    )
-                ),
-                column(
-                    2L, offset = 2L,
-                    numericInput(
-                        "cluster__plot_height",
-                        label = "Height (px)",
-                        value = 600,
-                        step = 10
-                    )
-                )
-            ),
             # clustering parameters ----------------------------------------------------------------
             fluidRow(
                 column(
                     3L,
+                    h2("Clustering parameters"),
                     # shared -----------------------------------------------------------------------
                     selectInput(
                         "cluster__clus_type",
@@ -184,13 +133,13 @@ ui <- tagList(
                     h3("Extra parameters"),
                     textInput(
                         "cluster__dist_args",
-                        label = "Distance parameters",
+                        label = "Distance parameters (except window.size)",
                         value = "",
                         width = "100%"
                     ),
                     textInput(
                         "cluster__cent_args",
-                        label = "Centroid parameters",
+                        label = "Centroid parameters (except window.size)",
                         value = "",
                         width = "100%"
                     ),
@@ -301,7 +250,48 @@ ui <- tagList(
                 # output plot
                 column(
                     9L,
-                    plotOutput(outputId = "cluster__plot")
+                    fluidRow(
+                        column(
+                            3L, offset = 4L,
+                            fluidRow(
+                                column(
+                                    4L,
+                                    shinyjs::disabled(actionButton(
+                                        "cluster__must_link",
+                                        label = "Must link"
+                                    ))
+                                ),
+                                column(
+                                    4L,
+                                    shinyjs::disabled(actionButton(
+                                        "cluster__cannot_link",
+                                        label = "Cannot link"
+                                    ))
+                                ),
+                                column(
+                                    3L, offset = 1L,
+                                    shinyjs::disabled(actionButton(
+                                        "cluster__dont_know",
+                                        label = "Skip"
+                                    ))
+                                )
+                            )
+                        ),
+                        column(
+                            2L, offset = 3L,
+                            numericInput(
+                                "cluster__plot_height",
+                                label = "Plot height (px)",
+                                value = 600,
+                                step = 10
+                            )
+                        )
+                    ),
+                    fluidRow(
+                        column(12L,
+                               plotOutput(outputId = "cluster__plot")
+                        )
+                    )
                 )
             )
         ),

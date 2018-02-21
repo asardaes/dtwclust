@@ -16,9 +16,7 @@ server <- function(input, output, session) {
         })
         dplyr::bind_rows(df_list)
     }
-    reset_and_disable <- function() {
-        shinyjs::reset("cluster__continue")
-        shinyjs::disable("cluster__continue")
+    disable_buttons <- function() {
         shinyjs::disable("cluster__must_link")
         shinyjs::disable("cluster__cannot_link")
         shinyjs::disable("cluster__dont_know")
@@ -27,7 +25,7 @@ server <- function(input, output, session) {
         new_pair <- pair_tracker$get_unseen_pair()
         if (is.null(new_pair)) {
             pair_ids(NULL)
-            reset_and_disable()
+            disable_buttons()
             shinyjs::alert("No unlinked pairs left.")
         }
         else {
@@ -115,9 +113,9 @@ server <- function(input, output, session) {
     observeEvent(input$cluster__must_link, {
         ids <- pair_ids()
         connected <- pair_tracker$link(ids[1L], ids[2L], 1L)
-        if (!input$cluster__continue || connected) {
+        if (connected) {
             pair_ids(NULL)
-            reset_and_disable()
+            disable_buttons()
             if (connected)
                 shinyjs::alert(paste(
                     "No unlinked pairs left.",
@@ -132,9 +130,9 @@ server <- function(input, output, session) {
     observeEvent(input$cluster__cannot_link, {
         ids <- pair_ids()
         connected <- pair_tracker$link(ids[1L], ids[2L], 0L)
-        if (!input$cluster__continue || connected) {
+        if (connected) {
             pair_ids(NULL)
-            reset_and_disable()
+            disable_buttons()
             if (connected)
                 shinyjs::alert(paste(
                     "No unlinked pairs left.",
@@ -149,13 +147,7 @@ server <- function(input, output, session) {
     observeEvent(input$cluster__dont_know, {
         ids <- pair_ids()
         pair_tracker$link(ids[1L], ids[2L], -1L)
-        if (!input$cluster__continue) {
-            pair_ids(NULL)
-            reset_and_disable()
-        }
-        else {
-            get_new_pair()
-        }
+        get_new_pair()
     })
     # ==============================================================================================
     # Evaluate tab

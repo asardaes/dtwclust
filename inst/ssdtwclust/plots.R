@@ -14,7 +14,7 @@ explore_plot <- quote({
 
 # Cluster tab, main plot
 cluster_plot <- quote({
-    if (inherits(result(), "list") && input$cluster__continue) {
+    if (inherits(result(), "list")) {
         tried <- tryCatch({
             ids <- pair_ids()
             if (is.null(ids)) {

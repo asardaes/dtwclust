@@ -1,7 +1,7 @@
 # main clustering routine
 main <- quote({
     shinyjs::disable("cluster__cluster")
-    reset_and_disable()
+    disable_buttons()
     this_result <- tryCatch({
         type <- input$cluster__clus_type
         k <- as.integer(input$cluster__k)
@@ -105,7 +105,6 @@ main <- quote({
         output$evaluate__raw <- renderTable(raw_table, quoted = TRUE)
         # TODO: make ensembles
         pair_tracker <<- PairTracker$new(length(.series_)) # S4-PairTracker.R
-        shinyjs::enable("cluster__continue")
         shinyjs::enable("cluster__must_link")
         shinyjs::enable("cluster__cannot_link")
         shinyjs::enable("cluster__dont_know")
