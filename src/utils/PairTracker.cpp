@@ -12,10 +12,10 @@ namespace dtwclust {
 #define CANNOT_LINK 0
 #define MUST_LINK 1
 
-class SemiSupervisedDtw
+class PairTracker
 {
 public:
-    SemiSupervisedDtw(int max_size)
+    PairTracker(int max_size)
         : must_link_(max_size)
         , cannot_link_(max_size)
         , dont_know_(max_size)
@@ -70,26 +70,26 @@ private:
     }
 };
 
-RcppExport SEXP SemiSupervisedDtw__new(SEXP max_size)
+RcppExport SEXP PairTracker__new(SEXP max_size)
 {
     BEGIN_RCPP
-    Rcpp::XPtr<SemiSupervisedDtw> ptr(new SemiSupervisedDtw(Rcpp::as<int>(max_size)), true);
+    Rcpp::XPtr<PairTracker> ptr(new PairTracker(Rcpp::as<int>(max_size)), true);
     return ptr;
     END_RCPP
 }
 
-RcppExport SEXP SemiSupervisedDtw__link(SEXP xptr, SEXP i, SEXP j, SEXP link)
+RcppExport SEXP PairTracker__link(SEXP xptr, SEXP i, SEXP j, SEXP link)
 {
     BEGIN_RCPP
-    Rcpp::XPtr<SemiSupervisedDtw> ptr(xptr);
+    Rcpp::XPtr<PairTracker> ptr(xptr);
     return ptr->link(Rcpp::as<int>(i), Rcpp::as<int>(j), Rcpp::as<int>(link));
     END_RCPP
 }
 
-RcppExport SEXP SemiSupervisedDtw__getUnseenPair(SEXP xptr)
+RcppExport SEXP PairTracker__getUnseenPair(SEXP xptr)
 {
     BEGIN_RCPP
-    Rcpp::XPtr<SemiSupervisedDtw> ptr(xptr);
+    Rcpp::XPtr<PairTracker> ptr(xptr);
     return ptr->getUnseenPair();
     END_RCPP
 }

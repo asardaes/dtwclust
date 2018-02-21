@@ -104,7 +104,7 @@ main <- quote({
         result(this_result)
         output$evaluate__raw <- renderTable(raw_table, quoted = TRUE)
         # TODO: make ensembles
-        pair_tracker <<- SemiSupervisedDtw$new(length(.series_)) # S4-SemiSupervisedDtw.R
+        pair_tracker <<- PairTracker$new(length(.series_)) # S4-PairTracker.R
         shinyjs::enable("cluster__continue")
         shinyjs::enable("cluster__must_link")
         shinyjs::enable("cluster__cannot_link")

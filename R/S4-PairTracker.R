@@ -6,8 +6,8 @@
 #'
 #' @keywords internal
 #'
-SemiSupervisedDtw <- methods::setRefClass(
-    "SemiSupervisedDtw",
+PairTracker <- methods::setRefClass(
+    "PairTracker",
     fields = list(
         xptr = "externalptr"
     ),
@@ -17,7 +17,7 @@ SemiSupervisedDtw <- methods::setRefClass(
             max_size <- as.integer(max_size)
             if (max_size < 1L) stop("Invalid size")
             # initialize C++ class
-            xptr <<- .Call(C_SemiSupervisedDtw__new, max_size, PACKAGE = "dtwclust")
+            xptr <<- .Call(C_PairTracker__new, max_size, PACKAGE = "dtwclust")
             # return
             invisible(NULL)
         },
@@ -29,12 +29,12 @@ SemiSupervisedDtw <- methods::setRefClass(
             j <- as.integer(j)[1L]
             link_type <- as.integer(link_type)[1L]
             if (abs(link_type) > 1L) stop("Invalid link type")
-            .Call(C_SemiSupervisedDtw__link, xptr, i, j, link_type, PACKAGE = "dtwclust")
+            .Call(C_PairTracker__link, xptr, i, j, link_type, PACKAGE = "dtwclust")
         },
         get_unseen_pair = function() {
             "Get a pair that is not contained in any graph,
             NULL means no unseen pairs left."
-            .Call(C_SemiSupervisedDtw__getUnseenPair, xptr, PACKAGE = "dtwclust")
+            .Call(C_PairTracker__getUnseenPair, xptr, PACKAGE = "dtwclust")
         }
     )
 )

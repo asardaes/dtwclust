@@ -28,9 +28,9 @@ RcppExport SEXP pairs(SEXP L);
 RcppExport SEXP setnames_inplace(SEXP vec, SEXP names);
 
 // helper for semi-supervised dtwclust
-RcppExport SEXP SemiSupervisedDtw__new(SEXP max_size);
-RcppExport SEXP SemiSupervisedDtw__link(SEXP xptr, SEXP i, SEXP j, SEXP link_type);
-RcppExport SEXP SemiSupervisedDtw__getUnseenPair(SEXP xptr);
+RcppExport SEXP PairTracker__new(SEXP max_size);
+RcppExport SEXP PairTracker__link(SEXP xptr, SEXP i, SEXP j, SEXP link_type);
+RcppExport SEXP PairTracker__getUnseenPair(SEXP xptr);
 
 // -------------------------------------------------------------------------------------------------
 /* called by other C++ functions */
