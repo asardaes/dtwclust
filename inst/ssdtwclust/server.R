@@ -23,6 +23,17 @@ server <- function(input, output, session) {
         shinyjs::disable("cluster__cannot_link")
         shinyjs::disable("cluster__dont_know")
     }
+    get_new_pair <- function() {
+        new_pair <- pair_tracker$get_unseen_pair()
+        if (is.null(new_pair)) {
+            pair_ids(NULL)
+            reset_and_disable()
+            shinyjs::alert("No unlinked pairs left.")
+        }
+        else {
+            pair_ids(new_pair)
+        }
+    }
     # ==============================================================================================
     # Explore tab
     # characteristics table
@@ -115,15 +126,7 @@ server <- function(input, output, session) {
                 ))
         }
         else {
-            new_pair <- pair_tracker$get_unseen_pair()
-            if (is.null(new_pair)) {
-                pair_ids(NULL)
-                reset_and_disable()
-                shinyjs::alert("No unlinked pairs left.")
-            }
-            else {
-                pair_ids(new_pair)
-            }
+            get_new_pair()
         }
     })
     observeEvent(input$cluster__cannot_link, {
@@ -140,15 +143,7 @@ server <- function(input, output, session) {
                 ))
         }
         else {
-            new_pair <- pair_tracker$get_unseen_pair()
-            if (is.null(new_pair)) {
-                pair_ids(NULL)
-                reset_and_disable()
-                shinyjs::alert("No unlinked pairs left.")
-            }
-            else {
-                pair_ids(new_pair)
-            }
+            get_new_pair()
         }
     })
     observeEvent(input$cluster__dont_know, {
@@ -159,15 +154,7 @@ server <- function(input, output, session) {
             reset_and_disable()
         }
         else {
-            new_pair <- pair_tracker$get_unseen_pair()
-            if (is.null(new_pair)) {
-                pair_ids(NULL)
-                reset_and_disable()
-                shinyjs::alert("No unlinked pairs left.")
-            }
-            else {
-                pair_ids(new_pair)
-            }
+            get_new_pair()
         }
     })
     # ==============================================================================================
