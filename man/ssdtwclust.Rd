@@ -12,7 +12,25 @@ ssdtwclust(series, ...)
 \item{...}{More arguments for \code{\link[shiny:runApp]{shiny::runApp()}}.}
 }
 \description{
-Display a shiny user interface that implements the approach in .
+Display a shiny user interface that implements the approach in Dau et al. (2016).
+}
+\details{
+The approach suggested in Dau et al. (2016) argues that finding a good value of \code{window.size} for
+the DTW distance is very important, and presents how to find one by using user-provided feedback.
+After clustering is done, a pair of series is presented at a time, and the user must annotate the
+pair as:
+\itemize{
+\item Must link: the series should be in the same cluster.
+\item Cannot link: the series should \emph{not} be in the same cluster.
+\item Skip: the choice is unclear.
+}
+
+After each step, a good value of the window size is suggested by evaluating which clusterings
+fulfill the constraint(s) so far, and how (see Dau et al. (2016) for more information). The
+(main) procedure is thus interactive and can be abandoned at any point.
+}
+\note{
+The optimization mentioned in section 3.4 of Dau et al. (2016) is also implemented here.
 }
 \section{Explore}{
 
@@ -26,18 +44,28 @@ different facet.
 \section{Cluster}{
 
 
-The \code{window.size} parameter should \emph{not} be specified in the extra parameters, it will be
-replaced with the computed values based on the slider. Using \code{\link[=dba]{dba()}} centroid is detected, and
-will use the same window sizes.
-
-Since \code{\link[=compare_clusterings]{compare_clusterings()}} supports parallelization with \code{\link[foreach:foreach]{foreach::foreach()}}, you can
+This part of the app implements the main procedure by leveraging \code{\link[=compare_clusterings]{compare_clusterings()}}. The
+interface is similar to \code{\link[=interactive_clustering]{interactive_clustering()}}, so it is worth checking its documentation
+too. Since \code{\link[=compare_clusterings]{compare_clusterings()}} supports parallelization with \code{\link[foreach:foreach]{foreach::foreach()}}, you can
 register a parallel backend before opening the shiny app, but you should pre-load the workers
 with the necessary packages and/or functions. See \code{\link[parallel:clusterEvalQ]{parallel::clusterEvalQ()}} and
 \code{\link[parallel:clusterExport]{parallel::clusterExport()}}, as well as the examples below.
+
+The range of window sizes is specified with the slider, and represents the size as a percentage
+of the shortest series' length. The \code{step} parameter indicates how spaced should the sizes be
+(parameter \code{'by'} in \code{\link[base:seq]{base::seq()}}). The \code{window.size} should \emph{not} be specified in the extra
+parameters, it will be replaced with the computed values based on the slider. Using \code{\link[=dba]{dba()}}
+centroid is detected, and will use the same window sizes.
+
+For partitional clusterings with many repetitions and hierarchical clusterings with many
+linkage methods, the resulting partitions can be aggregated by calling \code{\link[clue:cl_medoid]{clue::cl_medoid()}} with
+the specified \code{method}.
 }
 
 \section{Evaluate}{
 
+
+This section provides numerical results for reference.
 }
 
 \examples{
@@ -53,6 +81,12 @@ registerDoParallel(workers)
 ssdtwclust(CharTrajMV)
 }
 
+}
+\references{
+Dau, H. A., Begum, N., & Keogh, E. (2016). Semi-supervision dramatically improves time series
+clustering under dynamic time warping. In Proceedings of the 25th ACM International on Conference
+on Information and Knowledge Management (pp. 999-1008). ACM.
+\url{https://sites.google.com/site/dtwclustering/}
 }
 \author{
 Alexis Sarda-Espinosa
