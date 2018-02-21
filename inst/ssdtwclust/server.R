@@ -136,7 +136,7 @@ server <- function(input, output, session) {
                 shinyjs::alert(paste(
                     "No unlinked pairs left.",
                     "Based on your feedback,",
-                    "all series should go in their own cluster."
+                    "each series should go in its own cluster."
                 ))
         }
         else {
@@ -153,16 +153,10 @@ server <- function(input, output, session) {
     })
     observeEvent(input$cluster__dont_know, {
         ids <- pair_ids()
-        connected <- pair_tracker$link(ids[1L], ids[2L], -1L)
-        if (!input$cluster__continue || connected) {
+        pair_tracker$link(ids[1L], ids[2L], -1L)
+        if (!input$cluster__continue) {
             pair_ids(NULL)
             reset_and_disable()
-            if (connected)
-                shinyjs::alert(paste(
-                    "No unlinked pairs left.",
-                    "Based on your feedback,",
-                    "nothing can be inferred."
-                ))
         }
         else {
             new_pair <- pair_tracker$get_unseen_pair()
