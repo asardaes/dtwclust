@@ -1,3 +1,5 @@
+R/pkg.R
+R/SHINY-*
 src/*.h
 src/*/*.h
 src/utils/UndirectedGraph.cpp
