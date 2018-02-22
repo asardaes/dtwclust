@@ -1,5 +1,7 @@
-R/pkg.R
 R/SHINY-*
+R/S4-PairTracker.R
+R/pkg.R
 src/*.h
 src/*/*.h
+src/utils/PairTracker.cpp
 src/utils/UndirectedGraph.cpp
