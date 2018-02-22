@@ -1,7 +1,7 @@
 # Changelog
 
 ## Version 5.2.0.9000
-* Added a shiny app, see `interactive_clustering`.
+* Added 2 shiny apps, see `interactive_clustering` and `ssdtwclust`.
 * Added another helper for `compare_clusterings`: `repeat_clustering`.
 * Added `distmat` to `fuzzy_control` for when `centroid = "fcmdd"`.
 * Dropped dependency on `rngtools`. Changing the random number generator after loading `dtwclust` should not be a problem now.

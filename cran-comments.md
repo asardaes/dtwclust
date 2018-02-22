@@ -1,6 +1,6 @@
 
 ## Update to version 5.2.0.9000
-Optimizations, bug fixes and addition of shiny app.
+Optimizations, bug fixes and addition of shiny apps.
 
 ## Test environments
 * Local GNU/Linux, R release
