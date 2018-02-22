@@ -38,3 +38,32 @@ cluster_plot <- quote({
         output$cluster__plot <- renderPlot({})
     }
 })
+
+# Evaluate tab, constraints plot
+constraints_plot <- quote({
+    df <- window_flags()
+    cnst <- constraints()
+    output$evaluate__plot <- renderPlot({
+        if (nrow(df) == 0L) {
+            NULL
+        }
+        else {
+            df_labels <- data.frame(
+                constraint = unique(df$constraint),
+                complexity = paste("complexity =", round(cnst$complexity, 2L)),
+                x = cnst$best_window,
+                y = 0.5,
+                stringsAsFactors = FALSE
+            )
+            ggplot2::ggplot(df, aes(x = window_size, y = flag)) +
+                ggplot2::geom_step(size = 2) +
+                ggrepel::geom_label_repel(aes(x = x, y = y, label = complexity),
+                                          data = df_labels,
+                                          inherit.aes = FALSE,
+                                          size = 10L) +
+                ggplot2::facet_wrap(~constraint, ncol = 1L) +
+                ggplot2::theme_bw(base_size = 20L)
+        }
+    },
+    height = input$evaluate__plot_height)
+})

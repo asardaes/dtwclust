@@ -2,6 +2,9 @@
 main <- quote({
     shinyjs::disable("cluster__cluster")
     disable_buttons()
+    best_window(NA_integer_)
+    constraints(data.frame())
+    window_flags(data.frame())
     this_result <- tryCatch({
         type <- input$cluster__clus_type
         k <- as.integer(input$cluster__k)
@@ -18,7 +21,7 @@ main <- quote({
         window_sizes <- seq(from = window_sizes[1L],
                             to = window_sizes[2L],
                             by = as.integer(input$cluster__windows_step))
-        window_sizes <- unique(round(min(lengths(.series_)) * window_sizes / 100))
+        window_sizes <- as.integer(unique(round(min(lengths(.series_)) * window_sizes / 100)))
         # controls
         control <- switch(
             type,
@@ -101,6 +104,7 @@ main <- quote({
         shinyjs::alert(this_result$message)
     }
     else {
+        # post-processing --------------------------------------------------------------------------
         result(this_result)
         output$evaluate__raw <- renderTable(raw_table, quoted = TRUE)
 
@@ -137,17 +141,10 @@ main <- quote({
                                   window_size = window_sizes,
                                   agg_ids)
         }
-        if (is.null(names(.series_)))
-            colnames(agg_ids)[-c(1L, 2L)] <- as.character(1L:length(.series_))
-        else
-            colnames(agg_ids)[-c(1L, 2L)] <- names(.series_)
         cluster_ids <<- agg_ids
-        output$evaluate__agg <- renderTable(agg_table, quoted = TRUE)
 
         pair_tracker <<- PairTracker$new(length(.series_)) # S4-PairTracker.R
-        shinyjs::enable("cluster__must_link")
-        shinyjs::enable("cluster__cannot_link")
-        shinyjs::enable("cluster__dont_know")
+        enable_buttons()
         pair_ids(pair_tracker$get_unseen_pair())
     }
 })

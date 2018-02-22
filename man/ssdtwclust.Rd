@@ -31,6 +31,14 @@ fulfill the constraint(s) so far, and how (see Dau et al. (2016) for more inform
 }
 \note{
 The optimization mentioned in section 3.4 of Dau et al. (2016) is also implemented here.
+
+If the ratio of "must link" to "cannot link" annotations is very different from 1, a majority
+vote might not be the best way to suggest a window size. You might want to save the results and
+process the constraints data frame separately.
+
+This procedure might not be very useful for clusterings with a large number of clusters, mostly
+due to the aforementioned, because many pair combinations could be possible and most of them
+could end up being annotated as "cannot link".
 }
 \section{Explore}{
 
@@ -60,12 +68,32 @@ centroid is detected, and will use the same window sizes.
 For partitional clusterings with many repetitions and hierarchical clusterings with many
 linkage methods, the resulting partitions can be aggregated by calling \code{\link[clue:cl_medoid]{clue::cl_medoid()}} with
 the specified \code{method}.
+
+Complexity of a constraint is calculated differently from what is suggested in Dau et al.
+(2016):
+\itemize{
+\item Allocate a logical flag vector with length equal to the number of tested window sizes.
+\item For each window size, set the corresponding flag to \code{TRUE} if the constraint given by the
+user is fulfilled.
+\item Calculate complexity as: (number of sign changes in the vector) / (number of window sizes -
+\enumerate{
+\item / (number of \emph{consecutive} \code{TRUE} flags).
+}
+}
+
+The complexity threshold can be specified in the app. Any constraint whose complexity is higher
+than the threshold will not be considered for the majority vote. Constraints with a complexity
+of 0 are also ignored. An infinite complexity means that the constraint is never fulfilled by
+any clustering.
 }
 
 \section{Evaluate}{
 
 
-This section provides numerical results for reference.
+This section provides numerical results for reference. The latests results can be saved in the
+global environment, which includes clustering results, constraints so far, and the suggested
+window size. Since this includes everything returned by \code{\link[=compare_clusterings]{compare_clusterings()}}, you could also
+use \code{\link[=repeat_clustering]{repeat_clustering()}} afterwards.
 }
 
 \examples{
@@ -78,7 +106,7 @@ clusterEvalQ(workers, {
     RcppParallel::setThreadOptions(1L)
 })
 registerDoParallel(workers)
-ssdtwclust(CharTrajMV)
+ssdtwclust(reinterpolate(CharTraj[1L:20L], 150L))
 }
 
 }

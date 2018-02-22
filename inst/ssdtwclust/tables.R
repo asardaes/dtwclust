@@ -24,10 +24,8 @@ characteristics_table <- quote({
 
 # Evaluate tab, raw
 raw_table <- quote({
-    this_result$results[[1L]]
+    df <- this_result$results[[1L]]
+    df <- df[setdiff(colnames(df), colnames(this_result$scores[[1L]]))]
+    df
 })
 
-# Evaluate tab, aggregated
-agg_table <- quote({
-    agg_ids
-})

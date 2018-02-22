@@ -6,9 +6,13 @@ server <- function(input, output, session) {
     # reactive values
     result <- reactiveVal(NA)
     pair_ids <- reactiveVal(NA)
+    best_window <- reactiveVal(NA_integer_)
+    constraints <- reactiveVal(data.frame())
+    window_flags <- reactiveVal(data.frame())
     # non-reactive values
     pair_tracker <- NA
     cluster_ids <- NA
+    # functions
     score_fun <- function(obj_list, ...) {
         df_list <- lapply(obj_list, function(obj) {
             df <- as.data.frame(rbind(obj@cluster))
@@ -16,6 +20,11 @@ server <- function(input, output, session) {
             df
         })
         dplyr::bind_rows(df_list)
+    }
+    enable_buttons <- function() {
+        shinyjs::enable("cluster__must_link")
+        shinyjs::enable("cluster__cannot_link")
+        shinyjs::enable("cluster__dont_know")
     }
     disable_buttons <- function() {
         shinyjs::disable("cluster__must_link")
@@ -30,9 +39,71 @@ server <- function(input, output, session) {
             shinyjs::alert("No unlinked pairs left.")
         }
         else {
+            enable_buttons()
             pair_ids(new_pair)
         }
     }
+    majority <- function(x) {
+        ux <- unique(x)
+        ux[which.max(tabulate(match(x, ux)))]
+    }
+    complexity <- function(flags) {
+        if (length(flags) <= 1L) return(0)
+        sign_changes <- sum(abs(diff(flags)))
+        max_consecutive_true <- rle(flags)
+        if (any(max_consecutive_true$values))
+            max_consecutive_true <- max(max_consecutive_true$lengths[max_consecutive_true$values])
+        else
+            max_consecutive_true <- 0
+        # return
+        cmp <- sum(sign_changes) / (length(flags) - 1L) / max_consecutive_true
+        if (is.na(cmp)) cmp <- Inf
+        cmp
+    }
+    feedback_handler <- function(pair, type) {
+        cp <- switch(
+            type,
+            "must_link" = `==`,
+            "cannot_link" = `!=`
+        )
+        df <- data.frame(
+            series1 = pair[1L],
+            series2 = pair[2L],
+            link_type = type,
+            stringsAsFactors = FALSE
+        )
+        flags <- logical(nrow(cluster_ids))
+        i <- 1L
+        while (i <= nrow(cluster_ids)) {
+            # + 2L due to cluster_ids having config_id and window_size as first two columns
+            flags[i] <- cp(cluster_ids[i, pair[1L] + 2L],
+                           cluster_ids[i, pair[2L] + 2L])
+            i <- i + 1L
+        }
+        df$complexity <- complexity(flags)
+        df$best_window <- cluster_ids[which.max(flags), 2L]
+        # update reactive values
+        constraints(rbind(constraints(), df))
+        window_flags({
+            rbind(window_flags(), data.frame(
+                constraint = paste0(type, "=", paste0(pair, collapse = ",")),
+                window_size = cluster_ids$window_size,
+                flag = as.integer(flags),
+                stringsAsFactors = FALSE
+            ))
+        })
+    }
+    observe({
+        cnst <- constraints()
+        if (nrow(cnst) > 0L) {
+            threshold <- input$cluster__complexity
+            df <- dplyr::filter(cnst, complexity > 0 & complexity < threshold)
+            if (nrow(df) > 0L)
+                best_window(majority(df$best_window))
+            else
+                best_window(NA)
+        }
+    })
     # ==============================================================================================
     # Explore tab
     # characteristics table
@@ -134,6 +205,7 @@ server <- function(input, output, session) {
     observeEvent(input$cluster__must_link, {
         ids <- pair_ids()
         connected <- pair_tracker$link(ids[1L], ids[2L], 1L)
+        feedback_handler(ids, "must_link")
         if (connected) {
             pair_ids(NULL)
             disable_buttons()
@@ -151,6 +223,7 @@ server <- function(input, output, session) {
     observeEvent(input$cluster__cannot_link, {
         ids <- pair_ids()
         connected <- pair_tracker$link(ids[1L], ids[2L], 0L)
+        feedback_handler(ids, "cannot_link")
         if (connected) {
             pair_ids(NULL)
             disable_buttons()
@@ -170,25 +243,42 @@ server <- function(input, output, session) {
         pair_tracker$link(ids[1L], ids[2L], -1L)
         get_new_pair()
     })
+    output$cluster__best_window <- renderText({
+        paste("Best window size so far:", best_window())
+    })
     # ==============================================================================================
     # Evaluate tab
     # ----------------------------------------------------------------------------------------------
     # summary
     output$evaluate__summary <- renderText({
         out <- ""
-        res <- result()
-        if (inherits(res, "list")) {
+        cnst <- constraints()
+        if (nrow(cnst) > 0L) {
+            out <- paste0(
+                "Annotations so far: ",
+                nrow(cnst),
+                ".<br>\n",
+                "Number of 'must link': ",
+                sum(cnst$link_type == "must_link"),
+                ".<br>\n",
+                "Number of 'cannot link': ",
+                sum(cnst$link_type == "cannot_link"),
+                ".<br>\n"
+            )
         }
         out
     })
     # ----------------------------------------------------------------------------------------------
     # save
     observeEvent(input$evaluate__save, {
-        if (inherits(result(), "list")) {
+        res <- result()
+        if (inherits(res, "list")) {
+            res$constraints <- constraints()
+            res$best_window <- best_window()
             out_name <- input$evaluate__save_name
             if (nzchar(out_name)) {
                 tryCatch({
-                    assign(out_name, result(), globalenv())
+                    assign(out_name, res, globalenv())
                     shinyjs::alert("Saved! Exit shiny app to update the global environment.")
                 },
                 error = function(e) {
@@ -197,4 +287,10 @@ server <- function(input, output, session) {
             }
         }
     })
+    # ----------------------------------------------------------------------------------------------
+    # constraints table
+    output$evaluate__constraints <- renderTable(constraints())
+    # ----------------------------------------------------------------------------------------------
+    # constraints plots
+    observe(constraints_plot, quoted = TRUE)
 }

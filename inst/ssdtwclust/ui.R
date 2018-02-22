@@ -348,6 +348,23 @@ ui <- tagList(
                         )
                     ),
                     fluidRow(
+                        fluidRow(
+                            column(
+                                2L,
+                                textOutput("cluster__best_window")
+                            ),
+                            column(
+                                3L, offset = 2L,
+                                sliderInput(
+                                    "cluster__complexity",
+                                    label = "Complexity threshold",
+                                    min = 0,
+                                    max = 1,
+                                    value = 0.3,
+                                    step = 0.01
+                                )
+                            )
+                        ),
                         column(12L,
                                plotOutput(outputId = "cluster__plot")
                         )
@@ -363,7 +380,7 @@ ui <- tagList(
                 sidebarPanel(
                     h3("Summary"),
                     htmlOutput("evaluate__summary"),
-                    helpText("The latest compare_clusterings result",
+                    helpText("The latest results",
                              "can be saved in the current R session's",
                              "global environment by specifying the desired variable name",
                              "and clicking the save button."),
@@ -379,12 +396,22 @@ ui <- tagList(
                 mainPanel(
                     tabsetPanel(
                         tabPanel(
-                            "Raw",
+                            "Clustering results",
                             tableOutput("evaluate__raw")
                         ),
                         tabPanel(
-                            "Aggregated",
-                            tableOutput("evaluate__agg")
+                            "Constraints",
+                            tableOutput("evaluate__constraints")
+                        ),
+                        tabPanel(
+                            "Constraint plots",
+                            numericInput(
+                                "evaluate__plot_height",
+                                label = "Plot height (px)",
+                                value = 600,
+                                step = 10
+                            ),
+                            plotOutput("evaluate__plot")
                         )
                     )
                 )

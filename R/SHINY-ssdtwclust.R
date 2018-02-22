@@ -51,13 +51,38 @@
 #'   linkage methods, the resulting partitions can be aggregated by calling [clue::cl_medoid()] with
 #'   the specified `method`.
 #'
+#'   Complexity of a constraint is calculated differently from what is suggested in Dau et al.
+#'   (2016):
+#'
+#'   - Allocate a logical flag vector with length equal to the number of tested window sizes.
+#'   - For each window size, set the corresponding flag to `TRUE` if the constraint given by the
+#'     user is fulfilled.
+#'   - Calculate complexity as: (number of sign changes in the vector) / (number of window sizes -
+#'     1) / (number of *consecutive* `TRUE` flags).
+#'
+#'   The complexity threshold can be specified in the app. Any constraint whose complexity is higher
+#'   than the threshold will not be considered for the majority vote. Constraints with a complexity
+#'   of 0 are also ignored. An infinite complexity means that the constraint is never fulfilled by
+#'   any clustering.
+#'
 #' @section Evaluate:
 #'
-#'   This section provides numerical results for reference.
+#'   This section provides numerical results for reference. The latests results can be saved in the
+#'   global environment, which includes clustering results, constraints so far, and the suggested
+#'   window size. Since this includes everything returned by [compare_clusterings()], you could also
+#'   use [repeat_clustering()] afterwards.
 #'
 #' @note
 #'
 #' The optimization mentioned in section 3.4 of Dau et al. (2016) is also implemented here.
+#'
+#' If the ratio of "must link" to "cannot link" annotations is very different from 1, a majority
+#' vote might not be the best way to suggest a window size. You might want to save the results and
+#' process the constraints data frame separately.
+#'
+#' This procedure might not be very useful for clusterings with a large number of clusters, mostly
+#' due to the aforementioned, because many pair combinations could be possible and most of them
+#' could end up being annotated as "cannot link".
 #'
 #' @author Alexis Sarda-Espinosa
 #'
@@ -78,7 +103,7 @@
 #'     RcppParallel::setThreadOptions(1L)
 #' })
 #' registerDoParallel(workers)
-#' ssdtwclust(CharTrajMV)
+#' ssdtwclust(reinterpolate(CharTraj[1L:20L], 150L))
 #' }
 #'
 ssdtwclust <- function(series, ...) {
