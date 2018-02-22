@@ -180,8 +180,8 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 
     if (missing(preprocs))
         force(preprocs)
-    else if (!is.list(preprocs) || is.null(names(preprocs)))
-        stop("The 'preprocs' argument must be a named list")
+    else if (!is.list(preprocs) || (length(preprocs) > 0L && is.null(names(preprocs))))
+        stop("The 'preprocs' argument must be a list with named elements")
     else if (!all(types %in% names(preprocs)))
         stop("The names of the 'preprocs' argument do not correspond to the provided 'types'")
 
@@ -193,8 +193,8 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 
     if (missing(distances))
         force(distances)
-    else if (!is.list(distances) || is.null(names(distances)))
-        stop("The 'distances' argument must be a named list")
+    else if (!is.list(distances) || (length(distances) > 0L && is.null(names(distances))))
+        stop("The 'distances' argument must be a list with named elements")
     else if (!all(setdiff(types, "tadpole") %in% names(distances)))
         stop("The names of the 'distances' argument do not correspond to the provided 'types'")
 
@@ -206,8 +206,8 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 
     if (missing(centroids))
         force(centroids)
-    else if (!is.list(centroids) || is.null(names(centroids)))
-        stop("The 'centroids' argument must be a named list")
+    else if (!is.list(centroids) || (length(centroids) > 0L && is.null(names(centroids))))
+        stop("The 'centroids' argument must be a list with named elements")
     else if (!all(types %in% names(centroids)))
         stop("The names of the 'centroids' argument do not correspond to the provided 'types'")
 
