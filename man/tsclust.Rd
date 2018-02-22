@@ -419,7 +419,7 @@ Please refer to the package vignette references (which can be loaded by typing
 }
 \seealso{
 \linkS4class{TSClusters}, \link{tsclusters-methods}, \linkS4class{tsclustFamily}, \link{tsclust-controls},
-\code{\link[=compare_clusterings]{compare_clusterings()}}.
+\code{\link[=compare_clusterings]{compare_clusterings()}}, \code{\link[=interactive_clustering]{interactive_clustering()}}, \code{\link[=ssdtwclust]{ssdtwclust()}}.
 }
 \author{
 Alexis Sarda-Espinosa

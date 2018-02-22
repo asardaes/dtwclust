@@ -270,7 +270,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #' @seealso
 #'
 #' [TSClusters-class], [tsclusters-methods], [tsclustFamily-class], [tsclust-controls],
-#' [compare_clusterings()].
+#' [compare_clusterings()], [interactive_clustering()], [ssdtwclust()].
 #'
 #' @example man-examples/tsclust-examples.R
 #'

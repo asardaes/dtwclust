@@ -13,7 +13,7 @@
 #' @details
 #'
 #' The approach suggested in Dau et al. (2016) argues that finding a good value of `window.size` for
-#' the DTW distance is very important, and presents how to find one by using user-provided feedback.
+#' the DTW distance is very important, and provides how to find one by using user-provided feedback.
 #' After clustering is done, a pair of series is presented at a time, and the user must annotate the
 #' pair as:
 #'
@@ -35,19 +35,19 @@
 #' @section Cluster:
 #'
 #'   This part of the app implements the main procedure by leveraging [compare_clusterings()]. The
-#'   interface is similar to [interactive_clustering()], so it is worth checking its documentation
+#'   interface is similar to [interactive_clustering()], so it's worth checking its documentation
 #'   too. Since [compare_clusterings()] supports parallelization with [foreach::foreach()], you can
 #'   register a parallel backend before opening the shiny app, but you should pre-load the workers
 #'   with the necessary packages and/or functions. See [parallel::clusterEvalQ()] and
 #'   [parallel::clusterExport()], as well as the examples below.
 #'
-#'   The range of window sizes is specified with the slider, and represents the size as a percentage
-#'   of the shortest series' length. The `step` parameter indicates how spaced should the sizes be
-#'   (parameter `'by'` in [base::seq()]). The `window.size` should *not* be specified in the extra
-#'   parameters, it will be replaced with the computed values based on the slider. Using [dba()]
-#'   centroid is detected, and will use the same window sizes.
+#'   The range of window sizes is specified with a slider, and represents the size as a percentage
+#'   of the shortest series' length. The `step` parameter indicates how spaced appart should the
+#'   sizes be (parameter `'by'` in [base::seq()]). The `window.size` should *not* be specified in
+#'   the extra parameters, it will be replaced with the computed values based on the slider. Using
+#'   [dba()] centroid is detected, and will use the same window sizes.
 #'
-#'   For partitional clusterings with many repetitions and hierarchical clusterings with many
+#'   For partitional clusterings with many repetitions, and hierarchical clusterings with many
 #'   linkage methods, the resulting partitions can be aggregated by calling [clue::cl_medoid()] with
 #'   the specified `method`.
 #'
@@ -58,7 +58,7 @@
 #'   - For each window size, set the corresponding flag to `TRUE` if the constraint given by the
 #'     user is fulfilled.
 #'   - Calculate complexity as: (number of sign changes in the vector) / (number of window sizes -
-#'     1) / (number of *consecutive* `TRUE` flags).
+#'     1) / (maximum number of *contiguous* `TRUE` flags).
 #'
 #'   The complexity threshold can be specified in the app. Any constraint whose complexity is higher
 #'   than the threshold will not be considered for the majority vote. Constraints with a complexity
@@ -92,6 +92,10 @@
 #' clustering under dynamic time warping. In Proceedings of the 25th ACM International on Conference
 #' on Information and Knowledge Management (pp. 999-1008). ACM.
 #' \url{https://sites.google.com/site/dtwclustering/}
+#'
+#' @seealso
+#'
+#' [interactive_clustering()], [compare_clusterings()]
 #'
 #' @examples
 #'

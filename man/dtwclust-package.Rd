@@ -27,7 +27,7 @@ distance definitions may be used, or series could be reinterpolated to a matchin
 
 The main clustering function and entry point for this package is \code{\link[=tsclust]{tsclust()}}, with a convenience
 wrapper for multiple tests in \code{\link[=compare_clusterings]{compare_clusterings()}}, and a shiny app in
-\code{\link[=interactive_clustering]{interactive_clustering()}}.
+\code{\link[=interactive_clustering]{interactive_clustering()}}. There is another less-general-purpose shiny app in \code{\link[=ssdtwclust]{ssdtwclust()}}.
 
 Please note the random number generator is set to L'Ecuyer-CMRG when \pkg{dtwclust} is attached
 in an attempt to preserve reproducibility. You are free to change this afterwards if you wish

@@ -26,7 +26,7 @@
 #'
 #' The main clustering function and entry point for this package is [tsclust()], with a convenience
 #' wrapper for multiple tests in [compare_clusterings()], and a shiny app in
-#' [interactive_clustering()].
+#' [interactive_clustering()]. There is another less-general-purpose shiny app in [ssdtwclust()].
 #'
 #' Please note the random number generator is set to L'Ecuyer-CMRG when \pkg{dtwclust} is attached
 #' in an attempt to preserve reproducibility. You are free to change this afterwards if you wish

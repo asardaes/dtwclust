@@ -16,7 +16,7 @@ Display a shiny user interface that implements the approach in Dau et al. (2016)
 }
 \details{
 The approach suggested in Dau et al. (2016) argues that finding a good value of \code{window.size} for
-the DTW distance is very important, and presents how to find one by using user-provided feedback.
+the DTW distance is very important, and provides how to find one by using user-provided feedback.
 After clustering is done, a pair of series is presented at a time, and the user must annotate the
 pair as:
 \itemize{
@@ -53,19 +53,19 @@ different facet.
 
 
 This part of the app implements the main procedure by leveraging \code{\link[=compare_clusterings]{compare_clusterings()}}. The
-interface is similar to \code{\link[=interactive_clustering]{interactive_clustering()}}, so it is worth checking its documentation
+interface is similar to \code{\link[=interactive_clustering]{interactive_clustering()}}, so it's worth checking its documentation
 too. Since \code{\link[=compare_clusterings]{compare_clusterings()}} supports parallelization with \code{\link[foreach:foreach]{foreach::foreach()}}, you can
 register a parallel backend before opening the shiny app, but you should pre-load the workers
 with the necessary packages and/or functions. See \code{\link[parallel:clusterEvalQ]{parallel::clusterEvalQ()}} and
 \code{\link[parallel:clusterExport]{parallel::clusterExport()}}, as well as the examples below.
 
-The range of window sizes is specified with the slider, and represents the size as a percentage
-of the shortest series' length. The \code{step} parameter indicates how spaced should the sizes be
-(parameter \code{'by'} in \code{\link[base:seq]{base::seq()}}). The \code{window.size} should \emph{not} be specified in the extra
-parameters, it will be replaced with the computed values based on the slider. Using \code{\link[=dba]{dba()}}
-centroid is detected, and will use the same window sizes.
+The range of window sizes is specified with a slider, and represents the size as a percentage
+of the shortest series' length. The \code{step} parameter indicates how spaced appart should the
+sizes be (parameter \code{'by'} in \code{\link[base:seq]{base::seq()}}). The \code{window.size} should \emph{not} be specified in
+the extra parameters, it will be replaced with the computed values based on the slider. Using
+\code{\link[=dba]{dba()}} centroid is detected, and will use the same window sizes.
 
-For partitional clusterings with many repetitions and hierarchical clusterings with many
+For partitional clusterings with many repetitions, and hierarchical clusterings with many
 linkage methods, the resulting partitions can be aggregated by calling \code{\link[clue:cl_medoid]{clue::cl_medoid()}} with
 the specified \code{method}.
 
@@ -77,7 +77,7 @@ Complexity of a constraint is calculated differently from what is suggested in D
 user is fulfilled.
 \item Calculate complexity as: (number of sign changes in the vector) / (number of window sizes -
 \enumerate{
-\item / (number of \emph{consecutive} \code{TRUE} flags).
+\item / (maximum number of \emph{contiguous} \code{TRUE} flags).
 }
 }
 
@@ -115,6 +115,9 @@ Dau, H. A., Begum, N., & Keogh, E. (2016). Semi-supervision dramatically improve
 clustering under dynamic time warping. In Proceedings of the 25th ACM International on Conference
 on Information and Knowledge Management (pp. 999-1008). ACM.
 \url{https://sites.google.com/site/dtwclustering/}
+}
+\seealso{
+\code{\link[=interactive_clustering]{interactive_clustering()}}, \code{\link[=compare_clusterings]{compare_clusterings()}}
 }
 \author{
 Alexis Sarda-Espinosa
