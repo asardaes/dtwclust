@@ -1,7 +1,7 @@
 # Explore tab, main plot
 explore_plot <- quote({
     shinyjs::disable("explore__trigger_plot")
-    height <- as.integer(input$explore__height) * NCOL(.series_[[1L]])
+    height <- as.integer(input$explore__height)
     output$explore__plot <- renderPlot(
         isolate({
             # SHINY-utils.R

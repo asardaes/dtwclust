@@ -16,7 +16,7 @@ ui <- tagList(
                     ),
                     numericInput(
                         "explore__height",
-                        label = h3("Plot height (per facet, in pixels)"),
+                        label = h3("Plot height (px)"),
                         value = 600,
                         step = 10
                     ),
