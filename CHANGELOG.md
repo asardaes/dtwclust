@@ -5,6 +5,7 @@
 * Added another helper for `compare_clusterings`: `repeat_clustering`.
 * Added `distmat` to `fuzzy_control` for when `centroid = "fcmdd"`.
 * Dropped dependency on `rngtools`. Changing the random number generator after loading `dtwclust` should not be a problem now.
+* Fixed a bug regarding the way `tsclust` handled the `seed` when called from `compare_clusterings`. This will affect `compare_clusterings` results of hierarchical or TADPole clusterings made therein if a centroid subject to randomness was used (e.g. `dba`).
 
 ## Version 5.2.0
 * Several functions now use `RcppParallel` for parallelization, refer to the new parallelization vignette for more information.

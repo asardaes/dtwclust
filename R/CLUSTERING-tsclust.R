@@ -288,7 +288,14 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     tic <- proc.time()
     previous_rngkind <- RNGkind(rng_kind)[1L]
     if (previous_rngkind != rng_kind) on.exit(RNGkind(previous_rngkind))
-    set.seed(seed)
+    if (!is.null(seed)) {
+        if (length(seed) == 1L)
+            set.seed(seed)
+        else if (length(seed) == 7L)
+            assign(".Random.seed", seed, globalenv())
+        else
+            stop("Invalid seed provided") # nocov
+    }
     type <- match.arg(type, c("partitional", "hierarchical", "tadpole", "fuzzy"))
     series <- tslist(series, error.check) # coerce to list if necessary
     if (any(k < 2L)) stop("At least two clusters must be defined")
