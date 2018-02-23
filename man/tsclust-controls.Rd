@@ -46,7 +46,7 @@ functions. Relevant for parallel computation, although since the distance entrie
 re-registered in each parallel worker if needed, this is probably useless, but just in case.}
 
 \item{distmat}{If available, the cross-distance matrix can be provided here. Only relevant for
-partitional with PAM centroids or hierarchical procedures.}
+partitional with PAM centroids, fuzzy with FCMdd centroids, or hierarchical clustering.}
 
 \item{pam.sparse}{Attempt to use a sparse matrix for PAM centroids. See details.}
 
