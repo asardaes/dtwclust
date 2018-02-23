@@ -67,8 +67,8 @@ the extra parameters, it will be replaced with the computed values based on the 
 \code{\link[=dba]{dba()}} centroid is detected, and will use the same window sizes.
 
 For partitional clusterings with many repetitions, and hierarchical clusterings with many
-linkage methods, the resulting partitions can be aggregated by calling \code{\link[clue:cl_medoid]{clue::cl_medoid()}} with
-the specified \code{method}.
+linkage methods, the resulting partitions are aggregated by calling \code{\link[clue:cl_medoid]{clue::cl_medoid()}} with
+the specified aggregation \code{method}.
 
 Complexity of a constraint is calculated differently from what is suggested in Dau et al.
 (2016):

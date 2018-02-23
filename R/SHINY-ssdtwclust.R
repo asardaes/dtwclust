@@ -49,8 +49,8 @@
 #'   [dba()] centroid is detected, and will use the same window sizes.
 #'
 #'   For partitional clusterings with many repetitions, and hierarchical clusterings with many
-#'   linkage methods, the resulting partitions can be aggregated by calling [clue::cl_medoid()] with
-#'   the specified `method`.
+#'   linkage methods, the resulting partitions are aggregated by calling [clue::cl_medoid()] with
+#'   the specified aggregation `method`.
 #'
 #'   Complexity of a constraint is calculated differently from what is suggested in Dau et al.
 #'   (2016):

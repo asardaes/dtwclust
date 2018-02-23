@@ -56,7 +56,7 @@ server <- function(input, output, session) {
         else
             max_consecutive_true <- 0
         # return
-        cmp <- sum(sign_changes) / (length(flags) - 1L) / max_consecutive_true
+        cmp <- sign_changes / (length(flags) - 1L) / max_consecutive_true
         if (is.na(cmp)) cmp <- Inf
         cmp
     }
@@ -178,21 +178,17 @@ server <- function(input, output, session) {
     observe({
         if (input$cluster__part_nrep > 1L) {
             shinyjs::enable("cluster__part_agg")
-            shinyjs::enable("cluster__part_agg_flag")
         }
         else {
             shinyjs::disable("cluster__part_agg")
-            shinyjs::disable("cluster__part_agg_flag")
         }
     })
     observe({
         if (!input$cluster__hier_method_custom && input$cluster__hier_method == "all") {
             shinyjs::enable("cluster__hier_agg")
-            shinyjs::enable("cluster__hier_agg_flag")
         }
         else {
             shinyjs::disable("cluster__hier_agg")
-            shinyjs::disable("cluster__hier_agg_flag")
         }
     })
     # ----------------------------------------------------------------------------------------------

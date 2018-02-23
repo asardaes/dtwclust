@@ -111,25 +111,21 @@ main <- quote({
         agg_ids <- this_result$scores[[1L]]
         if (
             # partitional
-            (input$cluster__clus_type == "p" &&
-             input$cluster__part_nrep > 1L &&
-             input$cluster__part_agg_flag) ||
+            (input$cluster__clus_type == "p" && input$cluster__part_nrep > 1L) ||
             # hierarchical
-            (input$cluster__clus_type == "h" &&
-             input$cluster__hier_method == "all" &&
-             input$cluster__hier_agg_flag))
+            (input$cluster__clus_type == "h" && input$cluster__hier_method == "all"))
         {
             cfgs <- this_result$results[[1L]]$config_id
             agg_cfgs <- sapply(strsplit(cfgs, "_"), "[", 1L)
             split_ids <- split(agg_ids, agg_cfgs)
+            method <- switch(input$cluster__clus_type,
+                             "p" = input$cluster__part_agg,
+                             "h" = input$cluster__hier_agg)
             agg_ids <- dplyr::bind_rows(lapply(split_ids, function(cfgs_ids) {
                 partitions <- apply(cfgs_ids, 1L, function(ids) {
                     clue::as.cl_hard_partition(as.integer(ids))
                 })
                 ensemble <- clue::cl_ensemble(list = partitions)
-                method <- switch(input$cluster__clus_type,
-                                 "p" = input$cluster__part_agg,
-                                 "h" = input$cluster__hier_agg)
                 as.data.frame(rbind(unclass(clue::cl_medoid(ensemble, method)$.Data)))
             }))
             agg_ids <- data.frame(config_id = unique(agg_cfgs),
