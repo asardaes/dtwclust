@@ -5,6 +5,6 @@
 #include "distances/distances.h"
 #include "distmat-loops/distmat-loops.h"
 #include "tadpole/tadpole.h"
-#include "utils/utils.h"
+#include "utils/R-utils.h"
 
 #endif // DTWCLUST_HPP_

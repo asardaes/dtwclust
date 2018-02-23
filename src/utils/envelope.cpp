@@ -2,8 +2,6 @@
 
 #include <deque>
 
-#include <RcppArmadillo.h>
-
 namespace dtwclust {
 
 /*
@@ -12,7 +10,7 @@ namespace dtwclust {
  * Adapted from the code available at https://github.com/lemire/lbimproved/blob/master/dtw.h
  */
 
-// thread-safe overload
+// thread-safe
 void envelope_cpp(const double * const array, const int length, const unsigned int width,
                   double * const minvalues, double * const maxvalues)
 {
@@ -53,27 +51,6 @@ void envelope_cpp(const double * const array, const int length, const unsigned i
         if(i - maxfifo.front() >= width) maxfifo.pop_front();
         if(i - minfifo.front() >= width) minfifo.pop_front();
     }
-}
-
-// non-thread-safe
-void envelope_cpp(const Rcpp::NumericVector& array, const unsigned int width,
-                  Rcpp::NumericVector& minvalues, Rcpp::NumericVector& maxvalues)
-{
-    int length = array.length();
-    envelope_cpp(&array[0], length, width, &minvalues[0], &maxvalues[0]);
-}
-
-// gateway
-RcppExport SEXP envelope(SEXP series, SEXP window) {
-    BEGIN_RCPP
-    Rcpp::NumericVector x(series);
-    Rcpp::NumericVector L(x.size()), U(x.size());
-    envelope_cpp(x, Rcpp::as<unsigned int>(window), L, U);
-    Rcpp::List ret;
-    ret["lower"] = L;
-    ret["upper"] = U;
-    return(ret);
-    END_RCPP
 }
 
 } // namespace dtwclust

@@ -6,7 +6,6 @@
 #include <RcppArmadillo.h>
 
 #include "../utils/SurrogateMatrix.h"
-#include "../utils/utils.h"
 
 namespace dtwclust {
 
