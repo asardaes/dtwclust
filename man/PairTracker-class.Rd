@@ -24,7 +24,7 @@ NULL means no unseen pairs left.}
 
 \item{\code{link(i, j, link_type)}}{Link indices i and j.
 Link types: dont_know = -1, cannot_link = 0, must_link = 1.
-Returns TRUE if underlying graph is connected after insertion.}
+Returns TRUE if underlying graph is complete/complete/connected after insertion.}
 }}
 
 \keyword{internal}

@@ -5,9 +5,10 @@
 namespace dtwclust {
 
 // constructor
-UndirectedGraph::UndirectedGraph(const int max_size)
+UndirectedGraph::UndirectedGraph(const unsigned int max_size)
     : visited_(max_size, false)
     , max_size_(max_size)
+    , complete_(false)
     , connected_(false)
 { }
 
@@ -57,14 +58,22 @@ void UndirectedGraph::linkVertices(const int i, const int j) {
     j_vertex->neighbors.insert(i_vertex);
 }
 
+// is graph complete? https://en.wikipedia.org/wiki/Complete_graph
+bool UndirectedGraph::isComplete() {
+    if (complete_) return true;
+    if (vertices_.size() < max_size_) return false;
+    for (auto vertex : vertices_) {
+        if (vertex.second->neighbors.size() != (max_size_ - 1))
+            return false;
+    }
+    complete_ = true;
+    return true;
+}
+
 // is graph conected? https://en.wikipedia.org/wiki/Connectivity_(graph_theory)
 bool UndirectedGraph::isConnected() {
     if (connected_) return true;
-
-    int current_size = vertices_.size();
-    if (current_size == 0 || current_size < max_size_)
-        return false;
-
+    if (vertices_.size() < max_size_) return false;
     std::fill(visited_.begin(), visited_.end(), false);
     this->dfs(vertices_.begin()->second);
     // if all vertices were visited, the graph is connected

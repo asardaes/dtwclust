@@ -81,14 +81,6 @@
 #'
 #' The optimization mentioned in section 3.4 of Dau et al. (2016) is also implemented here.
 #'
-#' If the ratio of "must link" to "cannot link" annotations is very different from 1, a majority
-#' vote might not be the best way to suggest a window size. You might want to save the results and
-#' process the constraints data frame separately.
-#'
-#' This procedure might not be very useful for clusterings with a large number of clusters, mostly
-#' due to the aforementioned, because many pair combinations could be possible and most of them
-#' could end up being annotated as "cannot link".
-#'
 #' @author Alexis Sarda-Espinosa
 #'
 #' @references

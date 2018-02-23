@@ -172,12 +172,12 @@ RcppExport SEXP setnames_inplace(SEXP vec, SEXP names) {
 class PairTracker
 {
 public:
-    PairTracker(int max_size)
-        : must_link_(max_size)
-    , cannot_link_(max_size)
-    , dont_know_(max_size)
-    , aggregate_(max_size)
-    , max_size_(max_size)
+    PairTracker(const int max_size)
+        : must_link_(static_cast<unsigned int>(max_size))
+        , cannot_link_(static_cast<unsigned int>(max_size))
+        , dont_know_(static_cast<unsigned int>(max_size))
+        , aggregate_(static_cast<unsigned int>(max_size))
+        , max_size_(max_size)
     { }
 
     SEXP link(const int i, const int j, const int link_type) {
@@ -187,10 +187,10 @@ public:
         {
         case DONT_KNOW:
             dont_know_.linkVertices(i,j);
-            return Rcpp::wrap(dont_know_.isConnected());
+            return Rcpp::wrap(dont_know_.isComplete());
         case CANNOT_LINK:
             cannot_link_.linkVertices(i,j);
-            return Rcpp::wrap(cannot_link_.isConnected());
+            return Rcpp::wrap(cannot_link_.isComplete());
         case MUST_LINK:
             must_link_.linkVertices(i,j);
             return Rcpp::wrap(must_link_.isConnected());
@@ -210,7 +210,7 @@ public:
             pair[1] = std::round(R::runif(1, max_size_));
             while (pair[0] == pair[1]) pair[1] = std::round(R::runif(1, max_size_));
             if (must_link_.areNeighbors(pair[0], pair[1], true))   seen = true;
-            if (cannot_link_.areNeighbors(pair[0], pair[1], true)) seen = true;
+            if (cannot_link_.areNeighbors(pair[0], pair[1], false)) seen = true;
             if (dont_know_.areNeighbors(pair[0], pair[1], false))  seen = true;
         }
         PutRNGstate();
@@ -222,9 +222,10 @@ private:
     int max_size_;
 
     bool optionsAvailable() {
-        return !(aggregate_.isConnected() ||
+        return !(aggregate_.isComplete() ||
                  must_link_.isConnected() ||
-                 cannot_link_.isConnected()
+                 cannot_link_.isComplete() ||
+                 dont_know_.isComplete()
         );
     }
 };

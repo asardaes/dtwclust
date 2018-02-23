@@ -10,9 +10,10 @@ namespace dtwclust {
 
 class UndirectedGraph {
 public:
-    UndirectedGraph(const int max_size);
+    UndirectedGraph(const unsigned int max_size);
     bool areNeighbors(const int i, const int j, const bool indirect);
     void linkVertices(const int i, const int j);
+    bool isComplete();
     bool isConnected();
 
 private:
@@ -26,8 +27,8 @@ private:
 
     std::unordered_map<int, std::shared_ptr<Vertex>> vertices_;
     std::vector<bool> visited_;
-    int max_size_;
-    bool connected_;
+    unsigned int max_size_;
+    bool complete_, connected_;
 };
 
 } // namespace dtwclust

@@ -24,7 +24,7 @@ PairTracker <- methods::setRefClass(
         link = function(i, j, link_type) {
             "Link indices i and j.
             Link types: dont_know = -1, cannot_link = 0, must_link = 1.
-            Returns TRUE if underlying graph is connected after insertion."
+            Returns TRUE if underlying graph is complete/complete/connected after insertion."
             i <- as.integer(i)[1L]
             j <- as.integer(j)[1L]
             link_type <- as.integer(link_type)[1L]

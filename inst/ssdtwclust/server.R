@@ -93,22 +93,6 @@ server <- function(input, output, session) {
             ))
         })
     }
-    observe({
-        cnst <- constraints()
-        if (nrow(cnst) > 0L) {
-            threshold <- input$cluster__complexity
-            df <- dplyr::filter(cnst, complexity > 0 & complexity < threshold)
-            trivial <- all(sapply(cnst$complexity, function(cx) {
-                isTRUE(all.equal(cx, 0)) | is.infinite(cx)
-            }))
-            if (nrow(df) > 0L)
-                best_window(majority(df$best_window))
-            else if (trivial)
-                best_window(min(cnst$best_window))
-            else
-                best_window(NA)
-        }
-    })
     # ==============================================================================================
     # Explore tab
     # characteristics table
@@ -203,6 +187,22 @@ server <- function(input, output, session) {
     observeEvent(c(pair_ids(), input$cluster__plot_height), cluster_plot, handler.quoted = TRUE)
     # ----------------------------------------------------------------------------------------------
     # annotation feedback
+    observe({
+        cnst <- constraints()
+        if (nrow(cnst) > 0L) {
+            threshold <- input$cluster__complexity
+            df <- dplyr::filter(cnst, complexity > 0 & complexity < threshold)
+            trivial <- all(sapply(cnst$complexity, function(cx) {
+                isTRUE(all.equal(cx, 0)) | is.infinite(cx)
+            }))
+            if (nrow(df) > 0L)
+                best_window(majority(df$best_window))
+            else if (trivial)
+                best_window(min(cnst$best_window))
+            else
+                best_window(NA)
+        }
+    })
     observeEvent(input$cluster__must_link, {
         ids <- pair_ids()
         connected <- pair_tracker$link(ids[1L], ids[2L], 1L)
@@ -223,12 +223,12 @@ server <- function(input, output, session) {
     })
     observeEvent(input$cluster__cannot_link, {
         ids <- pair_ids()
-        connected <- pair_tracker$link(ids[1L], ids[2L], 0L)
+        complete <- pair_tracker$link(ids[1L], ids[2L], 0L)
         feedback_handler(ids, "cannot_link")
-        if (connected) {
+        if (complete) {
             pair_ids(NULL)
             disable_buttons()
-            if (connected)
+            if (complete)
                 shinyjs::alert(paste(
                     "No unlinked pairs left.",
                     "Based on your feedback,",
@@ -241,8 +241,20 @@ server <- function(input, output, session) {
     })
     observeEvent(input$cluster__dont_know, {
         ids <- pair_ids()
-        pair_tracker$link(ids[1L], ids[2L], -1L)
-        get_new_pair()
+        complete <- pair_tracker$link(ids[1L], ids[2L], -1L)
+        if (complete) {
+            pair_ids(NULL)
+            disable_buttons()
+            if (complete)
+                shinyjs::alert(paste(
+                    "No unlinked pairs left.",
+                    "Based on your feedback,",
+                    "nothing can be inferred."
+                ))
+        }
+        else {
+            get_new_pair()
+        }
     })
     output$cluster__best_window <- renderText({
         paste("Best window size so far:", best_window())
