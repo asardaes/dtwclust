@@ -47,19 +47,20 @@ server <- function(input, output, session) {
         ux <- sort(unique(x))
         ux[which.max(tabulate(match(x, ux)))]
     }
-    complexity <- function(flags) {
-        if (length(flags) <= 1L) return(0)
-        sign_changes <- sum(abs(diff(flags)))
-        max_consecutive_true <- rle(flags)
-        if (any(max_consecutive_true$values))
-            max_consecutive_true <- max(max_consecutive_true$lengths[max_consecutive_true$values])
-        else
-            max_consecutive_true <- 0
-        # return
-        cmp <- sign_changes / (length(flags) - 1L) / max_consecutive_true
-        if (is.na(cmp)) cmp <- Inf
-        cmp
-    }
+    if (is.null(complexity))
+        complexity <- function(flags) {
+            if (length(flags) <= 1L) return(0)
+            sign_changes <- sum(abs(diff(flags)))
+            max_consecutive_true <- rle(flags)
+            if (any(max_consecutive_true$values))
+                max_consecutive_true <- max(max_consecutive_true$lengths[max_consecutive_true$values])
+            else
+                max_consecutive_true <- 0
+            # return
+            cmp <- sign_changes / (length(flags) - 1L) / max_consecutive_true
+            if (is.na(cmp)) cmp <- Inf
+            cmp
+        }
     feedback_handler <- function(pair, type) {
         cp <- switch(
             type,

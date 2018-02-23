@@ -9,6 +9,8 @@
 #'
 #' @param series Time series in the formats accepted by [compare_clusterings()].
 #' @param ... More arguments for [shiny::runApp()].
+#' @param complexity A function to calculate a constraint's complexity. See details in the Cluster
+#'   section.
 #'
 #' @details
 #'
@@ -52,14 +54,17 @@
 #'   linkage methods, the resulting partitions are aggregated by calling [clue::cl_medoid()] with
 #'   the specified aggregation `method`.
 #'
-#'   Complexity of a constraint is calculated differently from what is suggested in Dau et al.
-#'   (2016):
+#'   By default, complexity of a constraint is calculated differently from what is suggested in Dau
+#'   et al. (2016):
 #'
 #'   - Allocate a logical flag vector with length equal to the number of tested window sizes.
 #'   - For each window size, set the corresponding flag to `TRUE` if the constraint given by the
 #'     user is fulfilled.
 #'   - Calculate complexity as: (number of sign changes in the vector) / (number of window sizes -
 #'     1L) / (maximum number of *contiguous* `TRUE` flags).
+#'
+#'   You can provide your own function in the `complexity` parameter. It will receive the flag
+#'   vector as only input, and a single number is expected as a result.
 #'
 #'   The complexity threshold can be specified in the app. Any constraint whose complexity is higher
 #'   than the threshold will not be considered for the majority vote. Constraints with a complexity
@@ -107,7 +112,7 @@
 #' ssdtwclust(reinterpolate(CharTraj[1L:20L], 150L))
 #' }
 #'
-ssdtwclust <- function(series, ...) {
+ssdtwclust <- function(series, ..., complexity = NULL) {
     series <- tslist(series)
     check_consistency(series, "vltslist")
     is_multivariate(series) # dimension consistency check
@@ -120,6 +125,7 @@ ssdtwclust <- function(series, ...) {
     server_env <- environment(server) # will see all dtwclust functions
     server_env$.series_ <- series
     server_env$.explore_df_ <- explore__tidy_series(series)
+    server_env$complexity <- complexity
 
     app <- shiny::shinyApp(ui, server)
     shiny::runApp(app, ...)

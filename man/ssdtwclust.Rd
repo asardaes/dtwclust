@@ -4,12 +4,15 @@
 \alias{ssdtwclust}
 \title{A shiny app for semi-supervised DTW-based clustering}
 \usage{
-ssdtwclust(series, ...)
+ssdtwclust(series, ..., complexity = NULL)
 }
 \arguments{
 \item{series}{Time series in the formats accepted by \code{\link[=compare_clusterings]{compare_clusterings()}}.}
 
 \item{...}{More arguments for \code{\link[shiny:runApp]{shiny::runApp()}}.}
+
+\item{complexity}{A function to calculate a constraint's complexity. See details in the Cluster
+section.}
 }
 \description{
 Display a shiny user interface that implements the approach in Dau et al. (2016).
@@ -62,8 +65,8 @@ For partitional clusterings with many repetitions, and hierarchical clusterings 
 linkage methods, the resulting partitions are aggregated by calling \code{\link[clue:cl_medoid]{clue::cl_medoid()}} with
 the specified aggregation \code{method}.
 
-Complexity of a constraint is calculated differently from what is suggested in Dau et al.
-(2016):
+By default, complexity of a constraint is calculated differently from what is suggested in Dau
+et al. (2016):
 \itemize{
 \item Allocate a logical flag vector with length equal to the number of tested window sizes.
 \item For each window size, set the corresponding flag to \code{TRUE} if the constraint given by the
@@ -71,6 +74,9 @@ user is fulfilled.
 \item Calculate complexity as: (number of sign changes in the vector) / (number of window sizes -
 1L) / (maximum number of \emph{contiguous} \code{TRUE} flags).
 }
+
+You can provide your own function in the \code{complexity} parameter. It will receive the flag
+vector as only input, and a single number is expected as a result.
 
 The complexity threshold can be specified in the app. Any constraint whose complexity is higher
 than the threshold will not be considered for the majority vote. Constraints with a complexity
