@@ -44,7 +44,7 @@ server <- function(input, output, session) {
         }
     }
     majority <- function(x) {
-        ux <- unique(x)
+        ux <- sort(unique(x))
         ux[which.max(tabulate(match(x, ux)))]
     }
     complexity <- function(flags) {
