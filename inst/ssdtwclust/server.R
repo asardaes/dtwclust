@@ -98,8 +98,13 @@ server <- function(input, output, session) {
         if (nrow(cnst) > 0L) {
             threshold <- input$cluster__complexity
             df <- dplyr::filter(cnst, complexity > 0 & complexity < threshold)
+            trivial <- all(sapply(cnst$complexity, function(cx) {
+                isTRUE(all.equal(cx, 0)) | is.infinite(cx)
+            }))
             if (nrow(df) > 0L)
                 best_window(majority(df$best_window))
+            else if (trivial)
+                best_window(min(cnst$best_window))
             else
                 best_window(NA)
         }

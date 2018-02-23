@@ -73,6 +73,10 @@
 #'   window size. Since this includes everything returned by [compare_clusterings()], you could also
 #'   use [repeat_clustering()] afterwards.
 #'
+#'   The constraint plots depict if the constraints are fulfilled or not for the given window sizes,
+#'   where 0 means it was fulfilled and 1 means it wasn't. An error about a zero-dimension viewport
+#'   indicates the plot height is too small to fit the plots, so please increase the height.
+#'
 #' @note
 #'
 #' The optimization mentioned in section 3.4 of Dau et al. (2016) is also implemented here.

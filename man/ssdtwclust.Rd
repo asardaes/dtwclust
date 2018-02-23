@@ -93,6 +93,10 @@ This section provides numerical results for reference. The latests results can b
 global environment, which includes clustering results, constraints so far, and the suggested
 window size. Since this includes everything returned by \code{\link[=compare_clusterings]{compare_clusterings()}}, you could also
 use \code{\link[=repeat_clustering]{repeat_clustering()}} afterwards.
+
+The constraint plots depict if the constraints are fulfilled or not for the given window sizes,
+where 0 means it was fulfilled and 1 means it wasn't. An error about a zero-dimension viewport
+indicates the plot height is too small to fit the plots, so please increase the height.
 }
 
 \examples{
