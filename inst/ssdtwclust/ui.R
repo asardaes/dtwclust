@@ -379,9 +379,9 @@ ui <- tagList(
                             "Constraint plots",
                             numericInput(
                                 "evaluate__plot_height",
-                                label = "Plot height (px)",
-                                value = 1500,
-                                step = 50
+                                label = "Plot height (per constraint, px)",
+                                value = 200,
+                                step = 10
                             ),
                             plotOutput("evaluate__plot")
                         )

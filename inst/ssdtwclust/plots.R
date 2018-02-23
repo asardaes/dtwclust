@@ -65,5 +65,5 @@ constraints_plot <- quote({
                 ggplot2::theme_bw(base_size = 20L)
         }
     },
-    height = input$evaluate__plot_height)
+    height = as.integer(input$evaluate__plot_height) * nrow(cnst))
 })
