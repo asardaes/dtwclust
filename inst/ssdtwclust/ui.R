@@ -380,8 +380,8 @@ ui <- tagList(
                             numericInput(
                                 "evaluate__plot_height",
                                 label = "Plot height (px)",
-                                value = 600,
-                                step = 10
+                                value = 1500,
+                                step = 50
                             ),
                             plotOutput("evaluate__plot")
                         )

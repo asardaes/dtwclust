@@ -51,7 +51,7 @@ constraints_plot <- quote({
             df_labels <- data.frame(
                 constraint = unique(df$constraint),
                 complexity = paste("complexity =", round(cnst$complexity, 2L)),
-                x = cnst$best_window,
+                x = min(cluster_ids$window_size),
                 y = 0.5,
                 stringsAsFactors = FALSE
             )
