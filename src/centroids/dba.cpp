@@ -8,7 +8,7 @@
 #include <RcppParallel.h>
 
 #include "../distance-calculators/distance-calculators.h"
-#include "../distances/distances.h" // dtw_basic_par
+#include "../distances/distances-details.h" // dtw_basic_par
 #include "../utils/TSTSList.h"
 #include "../utils/utils.h" // KahanSummer, Rflush
 

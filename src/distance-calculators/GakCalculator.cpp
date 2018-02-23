@@ -5,7 +5,7 @@
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
-#include "../distances/distances.h" // logGAK_par
+#include "../distances/distances-details.h" // logGAK_par
 
 namespace dtwclust {
 

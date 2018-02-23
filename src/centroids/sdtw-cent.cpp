@@ -8,7 +8,7 @@
 #include <RcppParallel.h>
 
 #include "../distance-calculators/distance-calculators.h"
-#include "../distances/distances.h" // sdtw
+#include "../distances/distances-details.h" // sdtw
 #include "../utils/SurrogateMatrix.h"
 #include "../utils/TSTSList.h"
 #include "../utils/utils.h" // KahanSummer

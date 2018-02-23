@@ -3,7 +3,7 @@
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
-#include "../distances/distances.h" // soft_dtw
+#include "../distances/distances-details.h" // soft_dtw
 #include "../utils/SurrogateMatrix.h"
 
 namespace dtwclust {

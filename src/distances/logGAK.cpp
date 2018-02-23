@@ -50,13 +50,12 @@
  * v1.0 of Global Alignment Kernel, March 25th 2011.
  */
 
-#include "distances.h"
+#include "distances-details.h"
 
 #include <stdlib.h>
 #include <math.h>
 
-#include <R.h>
-#include <Rinternals.h>
+#include <R.h> // R_NegInf
 
 namespace dtwclust {
 
@@ -162,39 +161,6 @@ double logGAK_c(double const *seq1 , double const *seq2,
     aux = logs[curpos];
     // Return the logarithm of the Global Alignment Kernel
     return aux;
-}
-
-// The gateway function
-RcppExport SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var,
-                       SEXP sigma, SEXP window, SEXP logs)
-{
-    /*
-     * Inputs are, in this order
-     * A N1 x d matrix (d-variate time series with N1 observations)
-     * A N2 x d matrix (d-variate time series with N2 observations)
-     * The length of series N1 and N2, and the number of variables d
-     * A sigma > 0 parameter for the Gaussian kernel's width
-     * A triangular integer which parameterizes the band.
-     *   - when triangular = 0, the triangular kernel is not used, the evaluation is on the sum of all
-     *   paths, and the complexity if of the order of N1 x N2
-     *   - when triangular > 0, the triangular kernel is used and downweights some of the paths that
-     *   lay far from the diagonal.
-     * A (max(N1,N2) + 1) x 3 matrix of doubles
-     */
-
-    int triangular = Rf_asInteger(window);
-    int nX = Rf_asInteger(nx);
-    int nY = Rf_asInteger(ny);
-    double d;
-
-    // If triangular is smaller than the difference in length of the time series,
-    // the kernel is equal to zero,
-    // i.e. its log is set to -Inf
-    if (triangular > 0 && abs(nX - nY) > triangular)
-        d = R_NegInf;
-    else
-        d = logGAK_c(REAL(x), REAL(y), nX, nY, Rf_asInteger(num_var), Rf_asReal(sigma), triangular, REAL(logs));
-    return Rf_ScalarReal(d);
 }
 
 // a version compatible with RcppParallel

@@ -3,7 +3,7 @@
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
-#include "../distances/distances.h" // lbi_core
+#include "../distances/distances-details.h" // lbi_core
 
 namespace dtwclust {
 

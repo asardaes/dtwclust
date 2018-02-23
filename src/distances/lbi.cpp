@@ -1,14 +1,12 @@
-#include "distances.h"
+#include "distances-details.h"
 
 #include <cmath> // std::sqrt
-
-#include <RcppArmadillo.h>
 
 #include "../utils/utils.h" // envelope_cpp, kahan_sum
 
 namespace dtwclust {
 
-// thread-safe overload
+// thread-safe
 double lbi_core(const double * const x, const double * const y,
                 const int length, const unsigned int window_size, const int p,
                 const double * const lower_envelope, const double * const upper_envelope,
@@ -45,33 +43,6 @@ double lbi_core(const double * const x, const double * const y,
     lb = kahan_sum(LB, length);
     if (p > 1) lb = std::sqrt(lb);
     return lb;
-}
-
-// non-thread-safe
-double lbi_core(const Rcpp::NumericVector& x, const Rcpp::NumericVector& y,
-                const unsigned int window_size, const int p,
-                const Rcpp::NumericVector& lower_envelope,
-                const Rcpp::NumericVector& upper_envelope,
-                Rcpp::NumericVector& L2,
-                Rcpp::NumericVector& U2,
-                Rcpp::NumericVector& H,
-                Rcpp::NumericVector& LB)
-{
-    return lbi_core(&x[0], &y[0], x.length(), window_size, p,
-                    &lower_envelope[0], &upper_envelope[0],
-                    &L2[0], &U2[0], &H[0], &LB[0]);
-}
-
-// gateway
-RcppExport SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U)
-{
-    BEGIN_RCPP
-    Rcpp::NumericVector x(X);
-    Rcpp::NumericVector L2(x.length()), U2(x.length()), H(x.length());
-    Rcpp::NumericVector LB(x.length());
-    return Rcpp::wrap(lbi_core(x, Y, Rcpp::as<unsigned int>(WINDOW), Rcpp::as<int>(P),
-                               L, U, L2, U2, H, LB));
-    END_RCPP
 }
 
 } // namespace dtwclust

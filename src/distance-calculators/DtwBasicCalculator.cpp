@@ -3,7 +3,7 @@
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
-#include "../distances/distances.h" // dtw_basic_par
+#include "../distances/distances-details.h" // dtw_basic_par
 
 namespace dtwclust {
 
