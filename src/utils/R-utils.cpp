@@ -201,7 +201,7 @@ public:
     SEXP getUnseenPair() {
         if (!(this->optionsAvailable())) return R_NilValue;
         Rcpp::IntegerVector pair(2);
-        Rcpp::RNGScope rng_scope;
+        GetRNGstate(); // see https://github.com/rstudio/shiny/issues/1953
         bool seen = true;
         while (seen) {
             Rcpp::checkUserInterrupt();
@@ -213,6 +213,7 @@ public:
             if (cannot_link_.areNeighbors(pair[0], pair[1], true)) seen = true;
             if (dont_know_.areNeighbors(pair[0], pair[1], false))  seen = true;
         }
+        PutRNGstate();
         return pair;
     }
 
