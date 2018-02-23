@@ -55,9 +55,9 @@ constraints_plot <- quote({
                 y = 0.5,
                 stringsAsFactors = FALSE
             )
-            ggplot2::ggplot(df, aes(x = window_size, y = flag)) +
+            ggplot2::ggplot(df, ggplot2::aes(x = window_size, y = flag)) +
                 ggplot2::geom_step(size = 2) +
-                ggrepel::geom_label_repel(aes(x = x, y = y, label = complexity),
+                ggrepel::geom_label_repel(ggplot2::aes(x = x, y = y, label = complexity),
                                           data = df_labels,
                                           inherit.aes = FALSE,
                                           size = 10L) +
