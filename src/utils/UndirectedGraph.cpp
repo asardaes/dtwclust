@@ -34,7 +34,7 @@ bool UndirectedGraph::areNeighbors(const int i, const int j, const bool indirect
 }
 
 // connect two indices, creating them if they didn't exist
-void UndirectedGraph::linkVertices(const int i, const int j) {
+void UndirectedGraph::linkVertices(const int i, const int j, const bool deeply) {
     if (i == j) return;
     std::shared_ptr<Vertex> i_vertex, j_vertex;
 
@@ -56,6 +56,18 @@ void UndirectedGraph::linkVertices(const int i, const int j) {
 
     i_vertex->neighbors.insert(j_vertex);
     j_vertex->neighbors.insert(i_vertex);
+
+    if (deeply) {
+        std::fill(visited_.begin(), visited_.end(), false);
+        this->dfs(i_vertex);
+        int size = visited_.size();
+        for (int i_visited = 0; i_visited < size; i_visited++) {
+            for (int j_visited = 0; j_visited < size; j_visited++) {
+                if (visited_[i_visited] && visited_[j_visited])
+                    this->linkVertices(i_visited + 1, j_visited + 1, false);
+            }
+        }
+    }
 }
 
 // is graph complete? https://en.wikipedia.org/wiki/Complete_graph

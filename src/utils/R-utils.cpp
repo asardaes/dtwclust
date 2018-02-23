@@ -169,6 +169,11 @@ RcppExport SEXP setnames_inplace(SEXP vec, SEXP names) {
 #define CANNOT_LINK 0
 #define MUST_LINK 1
 
+/** Pair tracker
+ *
+ *  I could depend only on the aggregate_ graph without caring about the link_type, but then I
+ *  wouldn't be able to give fine-grained feedback on the R side.
+ */
 class PairTracker
 {
 public:
@@ -182,16 +187,18 @@ public:
 
     SEXP link(const int i, const int j, const int link_type) {
         if (i < 1 || i > max_size_ || j < 1 || j > max_size_) Rcpp::stop("Invalid indices provided");
-        aggregate_.linkVertices(i,j);
         switch(link_type)
         {
         case DONT_KNOW:
+            aggregate_.linkVertices(i,j);
             dont_know_.linkVertices(i,j);
             return Rcpp::wrap(dont_know_.isComplete());
         case CANNOT_LINK:
+            aggregate_.linkVertices(i,j);
             cannot_link_.linkVertices(i,j);
             return Rcpp::wrap(cannot_link_.isComplete());
         case MUST_LINK:
+            aggregate_.linkVertices(i,j, true);
             must_link_.linkVertices(i,j);
             return Rcpp::wrap(must_link_.isConnected());
         }
@@ -199,19 +206,17 @@ public:
     }
 
     SEXP getUnseenPair() {
-        if (!(this->optionsAvailable())) return R_NilValue;
+        if (aggregate_.isComplete()) return R_NilValue;
         Rcpp::IntegerVector pair(2);
         GetRNGstate(); // see https://github.com/rstudio/shiny/issues/1953
         bool seen = true;
         while (seen) {
             Rcpp::checkUserInterrupt();
-            seen = false;
             pair[0] = std::round(R::runif(1, max_size_));
             pair[1] = std::round(R::runif(1, max_size_));
             while (pair[0] == pair[1]) pair[1] = std::round(R::runif(1, max_size_));
-            if (must_link_.areNeighbors(pair[0], pair[1], true))   seen = true;
-            if (cannot_link_.areNeighbors(pair[0], pair[1], false)) seen = true;
-            if (dont_know_.areNeighbors(pair[0], pair[1], false))  seen = true;
+            if (!aggregate_.areNeighbors(pair[0], pair[1], false))
+                seen = false;
         }
         PutRNGstate();
         return pair;
@@ -220,14 +225,6 @@ public:
 private:
     UndirectedGraph must_link_, cannot_link_, dont_know_, aggregate_;
     int max_size_;
-
-    bool optionsAvailable() {
-        return !(aggregate_.isComplete() ||
-                 must_link_.isConnected() ||
-                 cannot_link_.isComplete() ||
-                 dont_know_.isComplete()
-        );
-    }
 };
 
 RcppExport SEXP PairTracker__new(SEXP max_size)
