@@ -195,6 +195,7 @@ public:
             must_link_.linkVertices(i,j);
             return Rcpp::wrap(must_link_.isConnected());
         }
+        return R_NilValue; // nocov
     }
 
     SEXP getUnseenPair() {
