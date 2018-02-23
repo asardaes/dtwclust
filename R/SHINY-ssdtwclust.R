@@ -12,8 +12,8 @@
 #'
 #' @details
 #'
-#' The approach suggested in Dau et al. (2016) argues that finding a good value of `window.size` for
-#' the DTW distance is very important, and provides how to find one by using user-provided feedback.
+#' The approach developed in Dau et al. (2016) argues that finding a good value of `window.size` for
+#' the DTW distance is very important, and suggests how to find one by using user-provided feedback.
 #' After clustering is done, a pair of series is presented at a time, and the user must annotate the
 #' pair as:
 #'
@@ -22,8 +22,9 @@
 #' - Skip: the choice is unclear.
 #'
 #' After each step, a good value of the window size is suggested by evaluating which clusterings
-#' fulfill the constraint(s) so far, and how (see Dau et al. (2016) for more information). The
-#' (main) procedure is thus interactive and can be abandoned at any point.
+#' fulfill the constraint(s) so far, and how (see Dau et al. (2016) for more information), and
+#' performing a majority vote using the window sizes inferred from each constraint. The (main)
+#' procedure is thus interactive and can be abandoned at any point.
 #'
 #' @section Explore:
 #'
@@ -58,7 +59,7 @@
 #'   - For each window size, set the corresponding flag to `TRUE` if the constraint given by the
 #'     user is fulfilled.
 #'   - Calculate complexity as: (number of sign changes in the vector) / (number of window sizes -
-#'     1) / (maximum number of *contiguous* `TRUE` flags).
+#'     1L) / (maximum number of *contiguous* `TRUE` flags).
 #'
 #'   The complexity threshold can be specified in the app. Any constraint whose complexity is higher
 #'   than the threshold will not be considered for the majority vote. Constraints with a complexity

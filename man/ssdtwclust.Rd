@@ -15,8 +15,8 @@ ssdtwclust(series, ...)
 Display a shiny user interface that implements the approach in Dau et al. (2016).
 }
 \details{
-The approach suggested in Dau et al. (2016) argues that finding a good value of \code{window.size} for
-the DTW distance is very important, and provides how to find one by using user-provided feedback.
+The approach developed in Dau et al. (2016) argues that finding a good value of \code{window.size} for
+the DTW distance is very important, and suggests how to find one by using user-provided feedback.
 After clustering is done, a pair of series is presented at a time, and the user must annotate the
 pair as:
 \itemize{
@@ -26,8 +26,9 @@ pair as:
 }
 
 After each step, a good value of the window size is suggested by evaluating which clusterings
-fulfill the constraint(s) so far, and how (see Dau et al. (2016) for more information). The
-(main) procedure is thus interactive and can be abandoned at any point.
+fulfill the constraint(s) so far, and how (see Dau et al. (2016) for more information), and
+performing a majority vote using the window sizes inferred from each constraint. The (main)
+procedure is thus interactive and can be abandoned at any point.
 }
 \note{
 The optimization mentioned in section 3.4 of Dau et al. (2016) is also implemented here.
@@ -76,9 +77,7 @@ Complexity of a constraint is calculated differently from what is suggested in D
 \item For each window size, set the corresponding flag to \code{TRUE} if the constraint given by the
 user is fulfilled.
 \item Calculate complexity as: (number of sign changes in the vector) / (number of window sizes -
-\enumerate{
-\item / (maximum number of \emph{contiguous} \code{TRUE} flags).
-}
+1L) / (maximum number of \emph{contiguous} \code{TRUE} flags).
 }
 
 The complexity threshold can be specified in the app. Any constraint whose complexity is higher
