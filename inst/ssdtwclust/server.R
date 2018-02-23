@@ -274,6 +274,7 @@ server <- function(input, output, session) {
     observeEvent(input$evaluate__save, {
         res <- result()
         if (inherits(res, "list")) {
+            res$ensembles <- cluster_ids
             res$constraints <- constraints()
             res$best_window <- best_window()
             out_name <- input$evaluate__save_name
