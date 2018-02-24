@@ -22,7 +22,7 @@ The base class is \code{TSClusters}. The 3 classes that inherit from it are: \co
 \code{HierarchicalTSClusters} also contain \code{\link[stats:hclust]{stats::hclust()}} as parent class.
 
 Package \pkg{clue} is supported, but generics from \pkg{flexclust} are not. See also
-\link{tsclusters-methods}.
+\link{TSClusters-methods}.
 }
 \section{Slots}{
 
@@ -138,5 +138,5 @@ This class adds the following slots to the base class:
 }
 
 \seealso{
-\link{tsclusters-methods}
+\link{TSClusters-methods}
 }

@@ -188,7 +188,7 @@ will receive the data as first argument, followed by the contents of \code{args$
 its formal arguments.
 
 It is convenient to provide this function if you're planning on using the \code{\link[stats:predict]{stats::predict()}}
-generic (see also \link{tsclusters-methods}).
+generic (see also \link{TSClusters-methods}).
 }
 
 \section{Repetitions}{
@@ -418,7 +418,7 @@ Please refer to the package vignette references (which can be loaded by typing
 \code{vignette("dtwclust")}).
 }
 \seealso{
-\linkS4class{TSClusters}, \link{tsclusters-methods}, \linkS4class{tsclustFamily}, \link{tsclust-controls},
+\linkS4class{TSClusters}, \link{TSClusters-methods}, \linkS4class{tsclustFamily}, \link{tsclust-controls},
 \code{\link[=compare_clusterings]{compare_clusterings()}}, \code{\link[=interactive_clustering]{interactive_clustering()}}, \code{\link[=ssdtwclust]{ssdtwclust()}}.
 }
 \author{

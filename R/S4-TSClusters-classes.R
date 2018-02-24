@@ -29,7 +29,7 @@ methods::removeClass("hclust4")
 #' `HierarchicalTSClusters` also contain [stats::hclust()] as parent class.
 #'
 #' Package \pkg{clue} is supported, but generics from \pkg{flexclust} are not. See also
-#' [tsclusters-methods].
+#' [TSClusters-methods].
 #'
 #' @slot call The function call.
 #' @slot family An object of class [tsclustFamily-class].
@@ -73,7 +73,7 @@ methods::removeClass("hclust4")
 #'
 #' @seealso
 #'
-#' [tsclusters-methods]
+#' [TSClusters-methods]
 #'
 TSClusters <- methods::setClass(
     "TSClusters",

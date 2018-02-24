@@ -225,7 +225,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'   its formal arguments.
 #'
 #'   It is convenient to provide this function if you're planning on using the [stats::predict()]
-#'   generic (see also [tsclusters-methods]).
+#'   generic (see also [TSClusters-methods]).
 #'
 #' @section Repetitions:
 #'
@@ -269,7 +269,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'
 #' @seealso
 #'
-#' [TSClusters-class], [tsclusters-methods], [tsclustFamily-class], [tsclust-controls],
+#' [TSClusters-class], [TSClusters-methods], [tsclustFamily-class], [tsclust-controls],
 #' [compare_clusterings()], [interactive_clustering()], [ssdtwclust()].
 #'
 #' @example man-examples/tsclust-examples.R

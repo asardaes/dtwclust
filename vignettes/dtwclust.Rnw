@@ -1352,7 +1352,7 @@ which are one way in which \R{} implements classes.
 The formal elements of the class are called \code{slots},
 and can be accessed with the \code{@} operator (instead of the usual \code{$}).
 The documentation of the slots can be found with \code{?"TSClusters-class"},
-and the methods with \code{?"tsclusters-methods"}.
+and the methods with \code{?"TSClusters-methods"}.
 Controls are set via intermediary functions whose documentation can be found by typing \code{?"tsclust-controls"}.
 The function \code{compare_clusterings} and its helper functions can be used to execute many different clustering configurations in a convenient way.
 The \code{tsclust} function is used for the calculations.
