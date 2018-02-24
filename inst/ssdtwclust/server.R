@@ -284,6 +284,7 @@ server <- function(input, output, session) {
         if (inherits(res, "list")) {
             res$ensembles <- cluster_ids
             res$constraints <- constraints()
+            res$constraints_plot_df <- window_flags()
             res$best_window <- best_window()
             out_name <- input$evaluate__save_name
             if (nzchar(out_name)) {
