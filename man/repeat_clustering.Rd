@@ -35,7 +35,7 @@ If the preprocessing function is subject to randomness, the clustering will not 
 re-created by this function, since \code{\link[=compare_clusterings]{compare_clusterings()}} applies all preprocessing before
 calling \code{\link[=tsclust]{tsclust()}}.
 
-If any parameters were given to \code{\link[=compare_clusterings]{compare_clusterings()}} through its ellipsis, they whould
+If any parameters were given to \code{\link[=compare_clusterings]{compare_clusterings()}} through its ellipsis, they should
 probably be given to this function too.
 }
 
