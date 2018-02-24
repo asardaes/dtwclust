@@ -265,19 +265,14 @@ server <- function(input, output, session) {
     # ----------------------------------------------------------------------------------------------
     # summary
     output$evaluate__summary <- renderText({
-        out <- ""
         cnst <- constraints()
+        out <- paste0("Suggested window: ", best_window(), "<br>\n",
+                      "Annotations so far: ", nrow(cnst), "<br>\n")
         if (nrow(cnst) > 0L) {
             out <- paste0(
-                "Annotations so far: ",
-                nrow(cnst),
-                ".<br>\n",
-                "Number of 'must link': ",
-                sum(cnst$link_type == "must_link"),
-                ".<br>\n",
-                "Number of 'cannot link': ",
-                sum(cnst$link_type == "cannot_link"),
-                ".<br>\n"
+                out,
+                "Number of 'must link': ", sum(cnst$link_type == "must_link"), "<br>\n",
+                "Number of 'cannot link': ", sum(cnst$link_type == "cannot_link"), "<br>\n"
             )
         }
         out
