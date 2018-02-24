@@ -61,8 +61,8 @@ void UndirectedGraph::linkVertices(const int i, const int j, const bool deeply) 
         std::fill(visited_.begin(), visited_.end(), false);
         this->dfs(i_vertex);
         int size = visited_.size();
-        for (int i_visited = 0; i_visited < size; i_visited++) {
-            for (int j_visited = 0; j_visited < size; j_visited++) {
+        for (int i_visited = 1; i_visited < size; i_visited++) {
+            for (int j_visited = 0; j_visited < i_visited; j_visited++) {
                 if (visited_[i_visited] && visited_[j_visited])
                     this->linkVertices(i_visited + 1, j_visited + 1, false);
             }
