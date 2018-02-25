@@ -35,6 +35,8 @@ procedure is thus interactive and can be abandoned at any point.
 }
 \note{
 The optimization mentioned in section 3.4 of Dau et al. (2016) is also implemented here.
+
+Tracing is printed to the console.
 }
 \section{Explore}{
 

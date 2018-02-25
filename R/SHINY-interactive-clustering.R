@@ -51,6 +51,10 @@
 #'   This part of the app provides results of the current clustering. External CVIs can be
 #'   calculated if the name of a variable with the ground truth is provided (see [cvi()]).
 #'
+#' @note
+#'
+#' Tracing is printed to the console.
+#'
 #' @author Alexis Sarda-Espinosa
 #'
 #' @examples

@@ -14,6 +14,9 @@ interactive_clustering(series, ...)
 \description{
 Display a shiny user interface to do clustering based on the provided series.
 }
+\note{
+Tracing is printed to the console.
+}
 \section{Explore}{
 
 
