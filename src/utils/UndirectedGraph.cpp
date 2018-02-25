@@ -1,6 +1,7 @@
 #include "UndirectedGraph.h"
 
 #include <algorithm> // std::fill
+#include <memory>
 
 namespace dtwclust {
 

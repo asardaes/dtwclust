@@ -4,8 +4,8 @@
 #include <RcppArmadillo.h> // arma:: referenced here
 #include <RcppParallel.h>
 
-#include "../utils/TSTSList.h"
 #include "../utils/SurrogateMatrix.h"
+#include "../utils/TSTSList.h"
 #include "distance-calculators.h"
 
 namespace dtwclust {
