@@ -20,7 +20,7 @@ check_consistency <- function(obj, case, ..., clus_type,
     }
     else if (case == "window") {
         if (is.null(obj)) stop("Please provide the 'window.size' parameter")
-        if (any(obj <= 0L)) stop("Window width must be larger than 0")
+        if (any(obj < 0L)) stop("Window size must be non-negative")
         return(as.integer(obj))
     }
     else if (case == "dist") {

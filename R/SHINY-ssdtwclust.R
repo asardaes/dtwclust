@@ -46,9 +46,13 @@
 #'
 #'   The range of window sizes is specified with a slider, and represents the size as a percentage
 #'   of the shortest series' length. The `step` parameter indicates how spaced appart should the
-#'   sizes be (parameter `'by'` in [base::seq()]). The `window.size` should *not* be specified in
-#'   the extra parameters, it will be replaced with the computed values based on the slider. Using
-#'   [dba()] centroid is detected, and will use the same window sizes.
+#'   sizes be (parameter `'by'` in [base::seq()]). A 0% window should only be used if all series
+#'   have the same length. If the series have different lengths, using small window sizes can be
+#'   problematic if the length differences are very big, see the notes in [dtw_basic()].
+#'
+#'   A `window.size` should *not* be specified in the extra parameters, it will be replaced with the
+#'   computed values based on the slider. Using [dba()] centroid is detected, and will use the same
+#'   window sizes.
 #'
 #'   For partitional clusterings with many repetitions, and hierarchical clusterings with many
 #'   linkage methods, the resulting partitions are aggregated by calling [clue::cl_medoid()] with

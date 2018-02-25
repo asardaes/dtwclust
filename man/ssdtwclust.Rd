@@ -57,9 +57,13 @@ with the necessary packages and/or functions. See \code{\link[parallel:clusterEv
 
 The range of window sizes is specified with a slider, and represents the size as a percentage
 of the shortest series' length. The \code{step} parameter indicates how spaced appart should the
-sizes be (parameter \code{'by'} in \code{\link[base:seq]{base::seq()}}). The \code{window.size} should \emph{not} be specified in
-the extra parameters, it will be replaced with the computed values based on the slider. Using
-\code{\link[=dba]{dba()}} centroid is detected, and will use the same window sizes.
+sizes be (parameter \code{'by'} in \code{\link[base:seq]{base::seq()}}). A 0% window should only be used if all series
+have the same length. If the series have different lengths, using small window sizes can be
+problematic if the length differences are very big, see the notes in \code{\link[=dtw_basic]{dtw_basic()}}.
+
+A \code{window.size} should \emph{not} be specified in the extra parameters, it will be replaced with the
+computed values based on the slider. Using \code{\link[=dba]{dba()}} centroid is detected, and will use the same
+window sizes.
 
 For partitional clusterings with many repetitions, and hierarchical clusterings with many
 linkage methods, the resulting partitions are aggregated by calling \code{\link[clue:cl_medoid]{clue::cl_medoid()}} with

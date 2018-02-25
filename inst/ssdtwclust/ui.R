@@ -78,8 +78,9 @@ ui <- tagList(
                             sliderInput(
                                 "cluster__windows",
                                 label = "Range of window sizes (%)",
-                                min = 1,
+                                min = 0,
                                 max = 100,
+                                step = 1,
                                 value = c(1, 20)
                             )
                         ),
