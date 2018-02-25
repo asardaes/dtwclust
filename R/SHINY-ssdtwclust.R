@@ -122,6 +122,8 @@ ssdtwclust <- function(series, ..., complexity = NULL) {
     series <- tslist(series)
     check_consistency(series, "vltslist")
     is_multivariate(series) # dimension consistency check
+    if (!is.null(complexity) && !is.function(complexity))
+        stop("A custom complexity should be a function.")
 
     file_path <- system.file("ssdtwclust", "app.R", package = "dtwclust")
     if (!nzchar(file_path)) stop("Shiny app not found")

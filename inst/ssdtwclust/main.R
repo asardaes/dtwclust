@@ -22,6 +22,8 @@ main <- quote({
                             to = window_sizes[2L],
                             by = as.integer(input$cluster__windows_step))
         window_sizes <- as.integer(unique(round(min(lengths(.series_)) * window_sizes / 100)))
+        if (window_sizes[1L] == 0L && !all(diff(lengths(.series_)) == 0L))
+            stop("A window of size 0 should not be used with series of different length.")
         # controls
         control <- switch(
             type,
