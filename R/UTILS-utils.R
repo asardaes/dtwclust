@@ -170,8 +170,7 @@ setnames_inplace <- function(vec, names) {
             .packages = "dtwclust"
         ) %dopar% {
             reset <- TRUE
-            num_threads <- Sys.getenv("RCPP_PARALLEL_NUM_THREADS")
-            if (nzchar(num_threads))
+            if (nzchar(Sys.getenv("RCPP_PARALLEL_NUM_THREADS")))
                 reset <- FALSE # nocov
             else
                 RcppParallel::setThreadOptions(1L)
