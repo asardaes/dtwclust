@@ -3,7 +3,8 @@
 #include <memory> // make_shared
 #include <string>
 
-#include <RcppArmadillo.h>
+#include <Rcpp.h>
+#include <RcppParallel.h>
 
 namespace dtwclust {
 

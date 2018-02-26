@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include <RcppArmadillo.h>
+#include <Rcpp.h>
 
 #include "UndirectedGraph.h"
 #include "utils.h"
@@ -59,7 +59,7 @@ private:
     std::unordered_set<int> existing_indices_;
 };
 
-RcppExport SEXP SparseDistmatIndices__new(SEXP num_rows)
+extern "C" SEXP SparseDistmatIndices__new(SEXP num_rows)
 {
     BEGIN_RCPP
     Rcpp::XPtr<SparseDistmatIndices> ptr(new SparseDistmatIndices(Rcpp::as<int>(num_rows)), true);
@@ -67,7 +67,7 @@ RcppExport SEXP SparseDistmatIndices__new(SEXP num_rows)
     END_RCPP
 }
 
-RcppExport SEXP SparseDistmatIndices__getNewIndices(SEXP xptr, SEXP i, SEXP j, SEXP symmetric)
+extern "C" SEXP SparseDistmatIndices__getNewIndices(SEXP xptr, SEXP i, SEXP j, SEXP symmetric)
 {
     BEGIN_RCPP
     Rcpp::XPtr<SparseDistmatIndices> ptr(xptr);
@@ -79,7 +79,7 @@ RcppExport SEXP SparseDistmatIndices__getNewIndices(SEXP xptr, SEXP i, SEXP j, S
 /* Gateway for warping envelopes */
 // ================================================================================================
 
-RcppExport SEXP envelope(SEXP series, SEXP window) {
+extern "C" SEXP envelope(SEXP series, SEXP window) {
     BEGIN_RCPP
     Rcpp::NumericVector x(series);
     Rcpp::NumericVector L(x.size()), U(x.size());
@@ -95,7 +95,7 @@ RcppExport SEXP envelope(SEXP series, SEXP window) {
 /* Force symmetry helper */
 // =================================================================================================
 
-RcppExport SEXP force_lb_symmetry(SEXP X)
+extern "C" SEXP force_lb_symmetry(SEXP X)
 {
     BEGIN_RCPP
     Rcpp::NumericMatrix matrix(X);
@@ -134,7 +134,7 @@ void pairs_c(const int n, const int nrow, int *out)
 }
 
 // the gateway function
-RcppExport SEXP pairs(SEXP L)
+extern "C" SEXP pairs(SEXP L)
 {
     int n = Rf_asInteger(L);
     int nrow = n * (n+1) / 2 - n;
@@ -156,7 +156,7 @@ RcppExport SEXP pairs(SEXP L)
 /* assign existing names to existing vector */
 // =================================================================================================
 
-RcppExport SEXP setnames_inplace(SEXP vec, SEXP names) {
+extern "C" SEXP setnames_inplace(SEXP vec, SEXP names) {
     Rf_setAttrib(vec, R_NamesSymbol, names);
     return R_NilValue;
 }
@@ -227,7 +227,7 @@ private:
     int max_size_;
 };
 
-RcppExport SEXP PairTracker__new(SEXP max_size)
+extern "C" SEXP PairTracker__new(SEXP max_size)
 {
     BEGIN_RCPP
     Rcpp::XPtr<PairTracker> ptr(new PairTracker(Rcpp::as<int>(max_size)), true);
@@ -235,7 +235,7 @@ RcppExport SEXP PairTracker__new(SEXP max_size)
     END_RCPP
 }
 
-RcppExport SEXP PairTracker__link(SEXP xptr, SEXP i, SEXP j, SEXP link)
+extern "C" SEXP PairTracker__link(SEXP xptr, SEXP i, SEXP j, SEXP link)
 {
     BEGIN_RCPP
     Rcpp::XPtr<PairTracker> ptr(xptr);
@@ -243,7 +243,7 @@ RcppExport SEXP PairTracker__link(SEXP xptr, SEXP i, SEXP j, SEXP link)
     END_RCPP
 }
 
-RcppExport SEXP PairTracker__getUnseenPair(SEXP xptr)
+extern "C" SEXP PairTracker__getUnseenPair(SEXP xptr)
 {
     BEGIN_RCPP
     Rcpp::XPtr<PairTracker> ptr(xptr);

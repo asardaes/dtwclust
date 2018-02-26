@@ -3,8 +3,9 @@
 
 #include <memory> // *_ptr
 
-#include <RcppArmadillo.h>
 #include <RcppParallel.h>
+#define R_NO_REMAP
+#include <Rinternals.h>
 
 namespace dtwclust {
 

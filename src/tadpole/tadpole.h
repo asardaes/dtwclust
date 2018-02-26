@@ -6,11 +6,12 @@
 #include <utility> // swap
 #include <vector>
 
-#include <RcppArmadillo.h>
+#define R_NO_REMAP
+#include <Rinternals.h>
 
 namespace dtwclust {
 
-RcppExport SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
+extern "C" SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
                         SEXP LB, SEXP UB, SEXP TRACE,
                         SEXP LIST, SEXP NUM_THREADS);
 
@@ -41,8 +42,6 @@ std::vector<size_t> stable_sort_ind(const std::vector<T>& v, const bool decreasi
 template <typename T>
 void reorder(std::vector<T>& v, std::vector<size_t>& order)
 {
-    if (v.size() != order.size()) Rcpp::stop("Cannot reorder with vectors of different sizes");
-
     // for all elements to put in place
     for (size_t i = 0; i < v.size(); ++i) {
         // while order[i] is not yet in place

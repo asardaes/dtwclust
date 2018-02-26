@@ -270,7 +270,7 @@ private:
 /* main gateway function */
 // =================================================================================================
 
-RcppExport SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
+extern "C" SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
                           SEXP GAMMA, SEXP WEIGHTS,
                           SEXP MV, SEXP NUM_THREADS)
 {

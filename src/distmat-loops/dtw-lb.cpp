@@ -161,7 +161,7 @@ void dtw_lb_cpp(const Rcpp::List& X,
 /* main gateway function */
 // =================================================================================================
 
-RcppExport SEXP dtw_lb(SEXP X, SEXP Y, SEXP D, SEXP MARGIN, SEXP DOTS, SEXP NUM_THREADS)
+extern "C" SEXP dtw_lb(SEXP X, SEXP Y, SEXP D, SEXP MARGIN, SEXP DOTS, SEXP NUM_THREADS)
 {
     BEGIN_RCPP
     Rcpp::NumericMatrix distmat(D);

@@ -494,7 +494,7 @@ SEXP dba_mv_by_series(const SEXP& X, const Rcpp::NumericMatrix& centroid, const 
 /* main gateway function */
 // =================================================================================================
 
-RcppExport SEXP dba(SEXP X, SEXP CENT,
+extern "C" SEXP dba(SEXP X, SEXP CENT,
                     SEXP MAX_ITER, SEXP DELTA, SEXP TRACE,
                     SEXP MV, SEXP MV_VER, SEXP DOTS, SEXP NUM_THREADS)
 {

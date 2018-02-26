@@ -10,7 +10,7 @@ namespace dtwclust {
 /* dtw_basic */
 // =================================================================================================
 
-RcppExport SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
+extern "C" SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
                           SEXP m, SEXP n, SEXP num_var,
                           SEXP norm, SEXP step, SEXP backtrack, SEXP normalize,
                           SEXP distmat)
@@ -71,7 +71,7 @@ RcppExport SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
 /* lbi */
 // =================================================================================================
 
-RcppExport SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U)
+extern "C" SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U)
 {
     BEGIN_RCPP
     Rcpp::NumericVector x(X), y(Y), lower(L), upper(U);
@@ -86,7 +86,7 @@ RcppExport SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U)
 /* lbk */
 // =================================================================================================
 
-RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U)
+extern "C" SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U)
 {
     BEGIN_RCPP
     Rcpp::NumericVector x(X), lower(L), upper(U);
@@ -99,7 +99,7 @@ RcppExport SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U)
 /* logGAK */
 // =================================================================================================
 
-RcppExport SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var,
+extern "C" SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var,
                        SEXP sigma, SEXP window, SEXP logs)
 {
     /*
@@ -157,7 +157,7 @@ double dp_recursion(const SeriesType& x, const SeriesType& y,
 }
 
 // gateway
-RcppExport SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP MV)
+extern "C" SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP MV)
 {
     BEGIN_RCPP
     Rcpp::NumericMatrix costmat(COSTMAT);

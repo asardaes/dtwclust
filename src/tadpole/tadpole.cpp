@@ -539,7 +539,7 @@ SEXP tadpole_cpp(const Rcpp::List& series,
 /* gateway function */
 // =================================================================================================
 
-RcppExport SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
+extern "C" SEXP tadpole(SEXP X, SEXP K, SEXP DC, SEXP DTW_ARGS,
                         SEXP LB, SEXP UB, SEXP TRACE,
                         SEXP LIST, SEXP NUM_THREADS)
 {

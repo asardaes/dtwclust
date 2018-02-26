@@ -8,7 +8,7 @@
 
 namespace dtwclust {
 
-RcppExport SEXP distmat_loop(SEXP D, SEXP X, SEXP Y,
+extern "C" SEXP distmat_loop(SEXP D, SEXP X, SEXP Y,
                              SEXP DIST, SEXP DIST_ARGS,
                              SEXP FILL_TYPE, SEXP MAT_TYPE, SEXP NUM_THREADS)
 {
