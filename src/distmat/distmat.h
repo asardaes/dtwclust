@@ -9,7 +9,7 @@
 namespace dtwclust {
 
 // =================================================================================================
-/* Distmat (base + factory) */
+/* Distmat (abstract + factory + concretes) */
 // =================================================================================================
 
 // -------------------------------------------------------------------------------------------------
@@ -31,6 +31,21 @@ class DistmatFactory
 {
 public:
     std::shared_ptr<Distmat> create(const SEXP& MAT_TYPE, const SEXP& D);
+};
+
+// -------------------------------------------------------------------------------------------------
+/* R matrix distmat (thread-safe) */
+// -------------------------------------------------------------------------------------------------
+class RDistmat : public Distmat
+{
+public:
+    RDistmat(const SEXP& D);
+    double& operator() (const int i, const int j) override;
+    int nrow() const override;
+    int ncol() const override;
+
+private:
+    RcppParallel::RMatrix<double> distmat_;
 };
 
 } // namespace dtwclust
