@@ -136,7 +136,7 @@ but it is best to be explicit (as shown in the introduction) because `RcppParall
 and the following could happen:
 
 ```{r reset-rcpp-parallel, eval = TRUE, include = FALSE}
-Sys.unsetenv("RCPP_PARALLEL_NUM_THREADS")
+RcppParallel::setThreadOptions()
 ```
 
 ```{r rcpp-parallel-env, eval = TRUE}

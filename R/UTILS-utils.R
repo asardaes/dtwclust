@@ -208,8 +208,6 @@ setnames_inplace <- function(vec, names) {
             .packages = "dtwclust"
         ) %dopar% {
             RcppParallel::setThreadOptions("auto")
-            Sys.unsetenv("RCPP_PARALLEL_NUM_THREADS")
-            nzchar(Sys.getenv("RCPP_PARALLEL_NUM_THREADS"))
         }
     }
     # rest RNGkind if needed
