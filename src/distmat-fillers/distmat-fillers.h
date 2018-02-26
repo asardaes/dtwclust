@@ -11,7 +11,7 @@
 namespace dtwclust {
 
 // =================================================================================================
-/* DistmatFillers (base + factory) */
+/* DistmatFillers (abstract + factory + concretes) */
 // =================================================================================================
 
 // -------------------------------------------------------------------------------------------------
@@ -48,6 +48,42 @@ public:
             const SEXP& NUM_THREADS,
             std::shared_ptr<Distmat>& distmat,
             const std::shared_ptr<DistanceCalculator>& dist_calculator);
+};
+
+// -------------------------------------------------------------------------------------------------
+/* pairwise filler */
+// -------------------------------------------------------------------------------------------------
+class PairwiseFiller : public DistmatFiller
+{
+public:
+    PairwiseFiller(std::shared_ptr<Distmat>& distmat,
+                   const std::shared_ptr<DistanceCalculator>& dist_calculator,
+                   const SEXP& NUM_THREADS);
+    void fill() const override;
+};
+
+// -------------------------------------------------------------------------------------------------
+/* symmetric filler */
+// -------------------------------------------------------------------------------------------------
+class SymmetricFiller : public DistmatFiller
+{
+public:
+    SymmetricFiller(std::shared_ptr<Distmat>& distmat,
+                    const std::shared_ptr<DistanceCalculator>& dist_calculator,
+                    const SEXP& NUM_THREADS);
+    void fill() const override;
+};
+
+// -------------------------------------------------------------------------------------------------
+/* primary filler */
+// -------------------------------------------------------------------------------------------------
+class PrimaryFiller : public DistmatFiller
+{
+public:
+    PrimaryFiller(std::shared_ptr<Distmat>& distmat,
+                  const std::shared_ptr<DistanceCalculator>& dist_calculator,
+                  const SEXP& NUM_THREADS);
+    void fill() const override;
 };
 
 } // namespace dtwclust
