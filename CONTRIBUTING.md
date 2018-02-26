@@ -15,13 +15,13 @@ By stand-alone we mean that it can be used directly without going through `proxy
 On the R side there are pretty much no restrictions,
 the function can have any number of parameters,
 but it's probably better if consistency checks are done in R.
-See for example [`dtw_basic`](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L49).
+See for example [`dtw_basic`](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L52).
 
 On the C++ side the distance should be declared in the corresponding [header](https://github.com/asardaes/dtwclust/blob/master/src/distances/distances.h#L14),
 registered in the [initialization](https://github.com/asardaes/dtwclust/blob/master/src/init.cpp#L8),
 and [defined](https://github.com/asardaes/dtwclust/blob/master/src/distances/dtw-basic.cpp).
 Importantly, if the stand-alone version will serve as a basis for the `proxy` version,
-the [core calculations](https://github.com/asardaes/dtwclust/blob/master/src/distances/dtw-basic.cpp#L100) should be done independently of any R/Rcpp API,
+the [core calculations](https://github.com/asardaes/dtwclust/blob/master/src/distances/dtw-basic.cpp#L89) should be done independently of any R/Rcpp API,
 depending either on raw pointers,
 [custom wrapper classes](https://github.com/asardaes/dtwclust/blob/master/src/utils/SurrogateMatrix.h),
 or `RcppParallel`'s wrappers.
@@ -71,15 +71,15 @@ but [others](https://github.com/asardaes/dtwclust/blob/master/src/distance-calcu
 
 All functions have a similar structure:
 
-- [Check consistency of inputs](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L108)
-- [Prepare common parameters by evaluationg a pre-defined expression](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L120)
-- [Check consistency of distance parameters and put them in a list](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L123)
-- [Get the available number of threads](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L153)
-- [`.Call` `C_distmat_loop`](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L154)
-- [Final output adjustments](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L158)
+- [Check consistency of inputs](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L111)
+- [Prepare common parameters by evaluationg a pre-defined expression](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L123)
+- [Check consistency of distance parameters and put them in a list](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L126)
+- [Get the available number of threads](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L156)
+- [`.Call` `C_distmat_loop`](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L157)
+- [Final output adjustments](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L161)
 
-They are registered with `proxy` during [attachment](https://github.com/asardaes/dtwclust/blob/master/R/pkg.R#L75),
-and unregistered during [unload](https://github.com/asardaes/dtwclust/blob/master/R/pkg.R#L148).
+They are registered with `proxy` during [attachment](https://github.com/asardaes/dtwclust/blob/master/R/pkg.R#L76),
+and unregistered during [unload](https://github.com/asardaes/dtwclust/blob/master/R/pkg.R#L149).
 
 ## Final details
 
