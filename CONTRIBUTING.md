@@ -30,8 +30,8 @@ or `RcppParallel`'s wrappers.
 
 For this case, we will start with the C++ side.
 A [`DistanceCalculator`](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.h) has to be implemented.
-The concrete class should be declared in the [corresponding header](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/concrete-calculators.h),
-and added to the [factory](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/DistanceCalculatorFactory.cpp).
+The concrete class should be declared there,
+and added to the [factory](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L27).
 Since all time series are passed from R as a list of vectors, matrices, or complex vectors,
 there is a [templated class](https://github.com/asardaes/dtwclust/blob/master/src/utils/TSTSList.h) that works with `Rcpp`'s `NumericVector`, `NumericMatrix` and `ComplexVector`,
 saving them respectively as `RcppParallel`'s `RVector<double>`, `RMatrix<double>`, or Armadillo's `cx_vec` so that they are thread-safe.
@@ -42,7 +42,7 @@ It is expected that the `DistanceCalculator`'s constructor will take 3 `SEXP` pa
 any arguments for the distance,
 the time series in `x` (from `proxy`),
 and the time series in `y` (from `proxy`).
-See for example the [DtwBasicCalculator](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/DtwBasicCalculator.cpp#L13),
+See for example the [DtwBasicCalculator](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L47),
 and note that it handles univariate and multivariate series by expecting the R side to specify what was passed.
 
 **Important**: if the concrete class has any private members that should be unique to each thread,
@@ -57,15 +57,15 @@ and each thread will `delete` the clone when it's done.
 If there are private members that should be unique to each thread
 (e.g. dynamically allocated memory),
 they should be set-up during cloning.
-See what [DtwBasicCalculator](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/DtwBasicCalculator.cpp#L63) does,
-and note its [destructor](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/DtwBasicCalculator.cpp#L38).
+See what [DtwBasicCalculator](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L101) does,
+and note its [destructor](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L78).
 
 ### Calculate
 
 The factory method `calculate` takes 2 integers `i` and `j`,
 and it is expected that it returns the distance between `x[i]` and `y[j]`.
-Some calculators [dispatch](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/DtwBasicCalculator.cpp#L46) to the appropriate (univariate/multivariate) method,
-but [others](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/SbdCalculator.cpp#L37) can do some more adjustments before dispatching.
+Some calculators [dispatch](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L85) to the appropriate (univariate/multivariate) method,
+but [others](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L382) can do some more adjustments before dispatching.
 
 ### R side
 

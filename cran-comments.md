@@ -1,6 +1,7 @@
 
 ## Update to version 5.2.0.9000
 Optimizations, bug fixes and addition of shiny apps.
+Compilation times should be faster now.
 
 ## Test environments
 * Local GNU/Linux, R release
