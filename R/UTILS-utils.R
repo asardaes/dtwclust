@@ -191,7 +191,7 @@ setnames_inplace <- function(vec, names) {
     }
     # evaluate expression
     withCallingHandlers({
-        ret <- eval.parent(substitute(obj %dopar% ex))
+        ret <- tryCatch(eval.parent(substitute(obj %dopar% ex)), error = function(e) { e })
     },
     warning = function(w) {
         if (grepl("package:dtwclust", w$message, ignore.case = TRUE))
@@ -222,6 +222,7 @@ setnames_inplace <- function(vec, names) {
             RNGkind(kind)
         }
     }
+    if (inherits(ret, "error") && obj$errorHandling != "pass") stop(ret)
     # return
     ret
 }
