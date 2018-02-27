@@ -1,4 +1,5 @@
-// for whatever reason, OSX doesn't like if I include Rinternals.h (in distmat.h) before Rcpp.h
+// for whatever reason, OSX doesn't like if I include distmat.h first
+// probably due to RcppParallel appearing before Rcpp?
 
 #include <memory> // make_shared
 #include <string>

@@ -1,6 +1,6 @@
 #include "distances.h"
 
-#include <RcppArmadillo.h>
+#include <Rcpp.h>
 
 #include "distances-details.h"
 
