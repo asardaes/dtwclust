@@ -179,7 +179,7 @@ setnames_inplace <- function(vec, names) {
     }
     # check the RNGkind of the workers
     if (foreach::getDoParName() != "doSEQ") {
-        reset_rng <- foreach::foreach(
+        rng_kind <- foreach::foreach(
             i = 1L:num_workers,
             .combine = c,
             .multicombine = TRUE,
@@ -209,17 +209,16 @@ setnames_inplace <- function(vec, names) {
             RcppParallel::setThreadOptions("auto")
         }
     }
-    # rest RNGkind if needed
-    if (foreach::getDoParName() != "doSEQ" && any(reset_rng != rng_kind)) {
-        kind <- "" # stupid CHECK
+    # reset RNGkind if needed
+    if (foreach::getDoParName() != "doSEQ" && any(rng_kind != dtwclust_rngkind)) {
         foreach::foreach(
-            kind = reset_rng,
+            rng_kind = rng_kind,
             .combine = c,
             .multicombine = TRUE,
             .inorder = FALSE,
             .packages = "dtwclust"
         ) %dopar% {
-            RNGkind(kind)
+            RNGkind(rng_kind)
         }
     }
     if (inherits(ret, "error") && obj$errorHandling != "pass") stop(ret)

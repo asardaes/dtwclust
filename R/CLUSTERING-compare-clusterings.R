@@ -453,8 +453,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     # ==============================================================================================
 
     tic <- proc.time()
-    previous_rngkind <- RNGkind(rng_kind)[1L]
-    if (previous_rngkind != rng_kind) on.exit(RNGkind(previous_rngkind))
+    handle_rngkind() # UTILS-rng.R
     set.seed(seed)
     score_missing <- missing(score.clus)
     pick_missing <- missing(pick.clus)

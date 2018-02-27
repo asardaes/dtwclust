@@ -131,7 +131,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
                                description = "Soft-DTW",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
-    RNGkind(rng_kind)
+    RNGkind(dtwclust_rngkind)
 
     # avoids default message if no backend exists
     if (is.null(foreach::getDoParName())) foreach::registerDoSEQ()

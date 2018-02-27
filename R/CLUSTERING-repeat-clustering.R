@@ -53,8 +53,7 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
 
     # get sub_seed for non-hierarchical cases
     if (clus_type != "hierarchical") {
-        previous_rngkind <- RNGkind(rng_kind)[1L]
-        if (previous_rngkind != rng_kind) on.exit(RNGkind(previous_rngkind))
+        handle_rngkind() # UTILS-rng.R
         matching_configs <- which(grepl(paste0(top_id, "_"), results$config_id))
         if (length(matching_configs) == 0L) matching_configs <- id
         sub_id <- which(matching_configs == id)

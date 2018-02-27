@@ -286,8 +286,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     # ==============================================================================================
 
     tic <- proc.time()
-    previous_rngkind <- RNGkind(rng_kind)[1L]
-    if (previous_rngkind != rng_kind) on.exit(RNGkind(previous_rngkind))
+    handle_rngkind() # UTILS-rng.R
     if (!is.null(seed)) {
         if (length(seed) == 1L)
             set.seed(seed)
