@@ -8,7 +8,6 @@ namespace dtwclust {
 KahanSummer::KahanSummer(double * const x, const int nrows, const int ncols)
     : x_(x)
     , nrows_(nrows)
-    , ncols_(ncols)
     , c_(std::vector<double>(nrows * ncols))
     , y_(std::vector<double>(nrows * ncols))
     , t_(std::vector<double>(nrows * ncols))

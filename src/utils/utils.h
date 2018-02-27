@@ -41,7 +41,7 @@ public:
 
 private:
     double* const x_;
-    int nrows_, ncols_;
+    int nrows_;
     std::vector<double> c_, y_, t_;
 };
 
