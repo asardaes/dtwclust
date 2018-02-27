@@ -80,6 +80,54 @@ test_that("zscore function works correctly for supported inputs.", {
 })
 
 # ==================================================================================================
+# %op%
+# ==================================================================================================
+
+test_that("%op% catches errors as expected.", {
+    skip_if(foreach::getDoParWorkers() == 1L, "sequential case")
+    expect_error(
+        dtwclust:::`%op%`(foreach(i = 1L:2L, .packages = "dtwclust"), {
+            if (i == 1L) stop("test") else NULL
+        })
+    )
+    workers_threads <- foreach(dummy = 1L:foreach::getDoParWorkers()) %dopar% {
+        Sys.getenv("RCPP_PARALLEL_NUM_THREADS")
+    }
+    sapply(workers_threads, function(nthreads_env_var) {
+        expect_false(nzchar(nthreads_env_var))
+    })
+})
+
+# ==================================================================================================
+# PairTracker
+# ==================================================================================================
+
+test_that("PairTracker works as expected.", {
+    set.seed(103289L)
+    tracker <- dtwclust:::PairTracker$new(3L)
+    expect_error(tracker$link(0L, 1L, 0L), "Invalid indices")
+    expect_error(tracker$link(1L, 2L, 2L), "link type")
+
+    expect_false(tracker$link(1L, 2L, -1L), "link 1 and 2 as dont-know")
+    invisible(sapply(1L:100L, function(dummy) {
+        expect_false(all(c(1L,2L) %in% tracker$get_unseen_pair()),
+                     "1 and 2 are linked, so they should not appear again")
+        NULL
+    }))
+
+    expect_false(tracker$link(2L, 3L, 0L), "link 2 and 3 as cannot-link")
+    invisible(sapply(1L:100L, function(dummy) {
+        expect_true(all(c(1L,3L) %in% tracker$get_unseen_pair()),
+                    "1 and 3 are the only unlinked indices")
+        NULL
+    }))
+
+    expect_false(tracker$link(1L, 3L, 1L), "link 1 and 3 as must-link")
+    expect_null(tracker$get_unseen_pair(), "aggregate graph should be complete now")
+    expect_true(tracker$link(2L, 3L, 1L), "must-link graph should be connected now")
+})
+
+# ==================================================================================================
 # clean
 # ==================================================================================================
 

@@ -171,7 +171,7 @@ setnames_inplace <- function(vec, names) {
         ) %dopar% {
             reset <- TRUE
             if (nzchar(Sys.getenv("RCPP_PARALLEL_NUM_THREADS")))
-                reset <- FALSE # nocov
+                reset <- FALSE
             else
                 RcppParallel::setThreadOptions(1L)
             reset

@@ -72,10 +72,13 @@ test_that("Partitional clustering works as expected.", {
                                args = tsclust_args(dist = list(window.size = 20L)),
                                control = partitional_control(distmat = pc_dtwb@distmat))
 
-    pc_dtwlb <- tsclust(data_reinterpolated_subset, type = "p", k = 4L,
-                        distance = "dtw_lb", centroid = "pam", seed = 938,
-                        args = tsclust_args(dist = list(window.size = 20L)),
-                        control = partitional_control(pam.precompute = FALSE))
+    expect_warning(
+        pc_dtwlb <- tsclust(data_reinterpolated_subset, type = "p", k = 4L,
+                            distance = "dtw_lb", centroid = "pam", seed = 938,
+                            args = tsclust_args(dist = list(window.size = 20L, nn.margin = 2L)),
+                            control = partitional_control(pam.precompute = FALSE)),
+        "row-wise nearest neighbors"
+    )
 
     expect_identical(pc_dtwb@cluster, pc_dtwb_npampre@cluster, info = "pam.pre vs no pam.pre")
     expect_identical(pc_dtwb@cluster, pc_dtwb_distmat@cluster, info = "distmat supplied")

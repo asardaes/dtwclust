@@ -13,8 +13,8 @@ UndirectedGraph::UndirectedGraph(const unsigned int max_size)
     , connected_(false)
 { }
 
-// check if two indices are connected by an edge
-bool UndirectedGraph::areNeighbors(const int i, const int j, const bool indirect) {
+// check if two indices are connected directly by an edge
+bool UndirectedGraph::areNeighbors(const int i, const int j) {
     auto ii = vertices_.find(i);
     if (ii == vertices_.end())
         return false;
@@ -26,12 +26,7 @@ bool UndirectedGraph::areNeighbors(const int i, const int j, const bool indirect
     // is it a direct neighbor?
     if (ii->second->neighbors.find(jj->second) != ii->second->neighbors.end())
         return true;
-
-    // is it an indirect neighbor?
-    if (!indirect) return false;
-    std::fill(visited_.begin(), visited_.end(), false);
-    this->dfs(ii->second);
-    return visited_[j-1];
+    return false;
 }
 
 // connect two indices, creating them if they didn't exist
@@ -76,8 +71,7 @@ bool UndirectedGraph::isComplete() {
     if (complete_) return true;
     if (vertices_.size() < max_size_) return false;
     for (auto vertex : vertices_) {
-        if (vertex.second->neighbors.size() != (max_size_ - 1))
-            return false;
+        if (vertex.second->neighbors.size() != (max_size_ - 1)) return false;
     }
     complete_ = true;
     return true;
@@ -91,9 +85,7 @@ bool UndirectedGraph::isConnected() {
     this->dfs(vertices_.begin()->second);
     // if all vertices were visited, the graph is connected
     // see https://www.quora.com/How-do-I-find-if-undirected-graph-is-connected-or-not-using-DFS
-    for (const bool flag : visited_) {
-        if (!flag) return false;
-    }
+    for (const bool flag : visited_) if (!flag) return false;
     connected_ = true;
     return true;
 }
@@ -104,9 +96,8 @@ void UndirectedGraph::dfs(const std::shared_ptr<Vertex>& vertex) {
     if (visited_[vertex->id - 1])
         return;
     visited_[vertex->id- 1] = true;
-    for (auto neighbor : vertex->neighbors) {
+    for (auto neighbor : vertex->neighbors)
         dfs(neighbor);
-    }
 }
 
 } // namespace dtwclust

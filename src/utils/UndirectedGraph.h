@@ -11,7 +11,7 @@ namespace dtwclust {
 class UndirectedGraph {
 public:
     UndirectedGraph(const unsigned int max_size);
-    bool areNeighbors(const int i, const int j, const bool indirect);
+    bool areNeighbors(const int i, const int j);
     void linkVertices(const int i, const int j, const bool deeply = false);
     bool isComplete();
     bool isConnected();

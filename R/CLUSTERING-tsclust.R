@@ -356,10 +356,10 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
         else if (distance %in% c("sbd", "gak", "sdtw"))
             control$symmetric <- TRUE
 
-        if (distance == "dtw_lb" && isTRUE(args$dist$nn.margin != 1L)) { # nocov start
+        if (distance == "dtw_lb" && isTRUE(args$dist$nn.margin != 1L)) {
             warning("Using dtw_lb in tsclust() always uses row-wise nearest neighbors.")
             args$dist$nn.margin <- 1L
-        } # nocov end
+        }
     }
 
     RET <- switch(

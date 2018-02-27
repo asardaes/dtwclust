@@ -165,7 +165,7 @@ extern "C" SEXP setnames_inplace(SEXP vec, SEXP names) {
 /* Helper for PairTracker in R */
 // =================================================================================================
 
-#define DONT_KNOW -1 // nocov start
+#define DONT_KNOW -1
 #define CANNOT_LINK 0
 #define MUST_LINK 1
 
@@ -215,7 +215,7 @@ public:
             pair[0] = std::round(R::runif(1, max_size_));
             pair[1] = std::round(R::runif(1, max_size_));
             while (pair[0] == pair[1]) pair[1] = std::round(R::runif(1, max_size_));
-            if (!aggregate_.areNeighbors(pair[0], pair[1], false))
+            if (!aggregate_.areNeighbors(pair[0], pair[1]))
                 seen = false;
         }
         PutRNGstate();
@@ -249,6 +249,6 @@ extern "C" SEXP PairTracker__getUnseenPair(SEXP xptr)
     Rcpp::XPtr<PairTracker> ptr(xptr);
     return ptr->getUnseenPair();
     END_RCPP
-} // nocov end
+}
 
 } // namespace dtwclust
