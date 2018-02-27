@@ -1,10 +1,12 @@
-#include "distmat.h"
+// for whatever reason, OSX doesn't like if I include Rinternals.h (in distmat.h) before Rcpp.h
 
 #include <memory> // make_shared
 #include <string>
 
 #include <Rcpp.h>
 #include <RcppParallel.h>
+
+#include "distmat.h"
 
 namespace dtwclust {
 

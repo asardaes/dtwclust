@@ -4,9 +4,8 @@
 #include <memory> // *_ptr
 
 #define R_NO_REMAP
-#include <R.h> // otherwise there's a warning because RcppParallel re-defines an error macro
-#include <Rinternals.h>
 #include <RcppParallel.h>
+#include <Rinternals.h>
 
 namespace dtwclust {
 
