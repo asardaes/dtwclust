@@ -1,8 +1,4 @@
-# ==================================================================================================
-# Expressions that are evaluated in the proxy version of some included distances
-# ==================================================================================================
-
-prepare_expr <- expression({
+prepare_expr <- quote({
     pairwise <- isTRUE(pairwise)
     dim_out <- c(length(x), length(y))
     dim_names <- list(names(x), names(y))

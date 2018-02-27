@@ -164,7 +164,7 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
 
     if (is_multivariate(c(x,y))) stop("SBD does not support multivariate series.")
     fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
-    eval(prepare_expr) # UTILS-expressions-proxy.R
+    eval(prepare_expr) # UTILS-expressions.R
 
     # calculate distance matrix
     distance <- "SBD" # read in C++, can't be temporary!

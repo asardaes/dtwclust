@@ -57,7 +57,7 @@ sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ..., error.check = TRUE, pairw
     }
 
     fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
-    eval(prepare_expr) # UTILS-expressions-proxy.R
+    eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
     if (!pairwise && symmetric)

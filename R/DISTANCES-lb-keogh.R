@@ -104,7 +104,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     if (is_multivariate(c(x,y))) stop("lb_keogh does not support multivariate series.")
     symmetric <- FALSE
     fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
-    eval(prepare_expr) # UTILS-expressions-proxy.R
+    eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
     norm <- match.arg(norm, c("L1", "L2"))

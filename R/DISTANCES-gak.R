@@ -186,7 +186,7 @@ gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         stop("Parameter 'sigma' must be positive.")
 
     fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
-    eval(prepare_expr) # UTILS-expressions-proxy.R
+    eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
     if (normalize) {

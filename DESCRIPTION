@@ -91,7 +91,7 @@ Collate:
     'UTILS-as-methods.R'
     'UTILS-compute-envelope.R'
     'UTILS-data.R'
-    'UTILS-expressions-proxy.R'
+    'UTILS-expressions.R'
     'UTILS-globals-internal.R'
     'UTILS-nccc.R'
     'UTILS-reinterpolate.R'
