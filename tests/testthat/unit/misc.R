@@ -84,7 +84,7 @@ test_that("zscore function works correctly for supported inputs.", {
 # ==================================================================================================
 
 test_that("%op% catches errors as expected.", {
-    skip_if(foreach::getDoParWorkers() == 1L, "sequential case")
+    skip_if(foreach::getDoParWorkers() %% 2L == 1L, "sequential or FORK case")
     expect_error(
         dtwclust:::`%op%`(foreach(i = 1L:2L, .packages = "dtwclust"), {
             if (i == 1L) stop("test") else NULL
