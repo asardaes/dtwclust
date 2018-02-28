@@ -10,7 +10,7 @@ template<typename T>
 class SurrogateMatrix
 {
 public:
-    SurrogateMatrix() : x_(nullptr) {}
+    SurrogateMatrix() : x_(nullptr), own_x_(false) {}
     SurrogateMatrix(const int nrows, const int ncols, T * const x = nullptr)
         : x_(x ? x : new T[nrows * ncols])
         , nrows_(nrows)
