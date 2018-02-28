@@ -1,9 +1,44 @@
 #include "UndirectedGraph.h"
 
 #include <algorithm> // std::fill
+#include <cstddef> // std::size_t
+#include <functional> // std::hash
 #include <memory>
+#include <unordered_set>
 
 namespace dtwclust {
+
+// =================================================================================================
+/* Vertex
+ *
+ * See https://stackoverflow.com/q/27085782/5793905 and
+ * https://stackoverflow.com/questions/13695640/how-to-make-a-c11-stdunordered-set-of-stdweak-ptr
+ *
+ * This should be fine in my case because vertices_ always has all existing shared_ptr<Vertex>,
+ * and it will never go out of scope before neighbors.
+ */
+
+// struct definition
+struct UndirectedGraph::Vertex {
+    Vertex(const int i) : id(i) {}
+    int id;
+    std::unordered_set<std::weak_ptr<Vertex>, VertexHash, VertexEqual> neighbors;
+};
+
+// hash
+std::size_t UndirectedGraph::VertexHash::operator()(const std::weak_ptr<Vertex>& vertex_wp) const {
+    return std::hash<int>{}(vertex_wp.lock()->id);
+}
+
+// equal_to
+bool UndirectedGraph::VertexEqual::operator()(const std::weak_ptr<Vertex>& left,
+                                              const std::weak_ptr<Vertex>& right) const
+{
+    return left.lock()->id == right.lock()->id;
+}
+
+// =================================================================================================
+/* UndirectedGraph */
 
 // constructor
 UndirectedGraph::UndirectedGraph(const unsigned int max_size)
@@ -97,7 +132,7 @@ void UndirectedGraph::dfs(const std::shared_ptr<Vertex>& vertex) {
         return;
     visited_[vertex->id- 1] = true;
     for (auto neighbor : vertex->neighbors)
-        dfs(neighbor);
+        dfs(neighbor.lock());
 }
 
 } // namespace dtwclust

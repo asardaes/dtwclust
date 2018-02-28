@@ -1,9 +1,10 @@
 #ifndef DTWCLUST_UNDIRECTEDGRAPH_HPP_
 #define DTWCLUST_UNDIRECTEDGRAPH_HPP_
 
+#include <cstddef> // std::size_t
+#include <functional> // std::unary_function
 #include <memory>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 namespace dtwclust {
@@ -17,10 +18,12 @@ public:
     bool isConnected();
 
 private:
-    struct Vertex {
-        Vertex(const int i) : id(i) {}
-        int id;
-        std::unordered_set<std::shared_ptr<Vertex>> neighbors;
+    struct Vertex;
+    struct VertexHash : public std::unary_function<std::weak_ptr<Vertex>, std::size_t> {
+        std::size_t operator()(const std::weak_ptr<Vertex>& vertex_wp) const;
+    };
+    struct VertexEqual : public std::unary_function<std::weak_ptr<Vertex>, bool> {
+        bool operator()(const std::weak_ptr<Vertex>& left, const std::weak_ptr<Vertex>& right) const;
     };
 
     void dfs(const std::shared_ptr<Vertex>& vertex);
