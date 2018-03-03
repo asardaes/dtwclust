@@ -29,7 +29,6 @@ test_that("Parallel computation gives the same results as sequential", {
         library(dtwclust)
         # environment variables get inherited by the workers when they are created, so reset this
         RcppParallel::setThreadOptions()
-        Sys.unsetenv("RCPP_PARALLEL_NUM_THREADS")
         # to test that other RNGkinds won't affect
         RNGkind("default")
     }))
