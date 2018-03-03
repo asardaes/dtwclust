@@ -7,7 +7,7 @@
     Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/master/CHANGELOG.md}
 }
 
-\section{Changes in version 5.2.0.9000}{
+\section{Changes in version 5.3.0}{
 \itemize{
     \item Added 2 shiny apps, see \code{interactive_clustering} and \code{ssdtwclust}.
     \item Added another helper for \code{compare_clusterings}: \code{repeat_clustering}.

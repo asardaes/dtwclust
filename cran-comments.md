@@ -1,5 +1,5 @@
 
-## Update to version 5.2.0.9000
+## Update to version 5.3.0
 Optimizations, bug fixes and addition of shiny apps.
 Compilation times should be faster now.
 
