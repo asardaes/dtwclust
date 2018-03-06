@@ -106,7 +106,7 @@ private:
         return dtw_basic_par(&x[0], &y[0],
                              nx, ny, 1,
                              window_, norm_, step_, normalize_,
-                             gcm_, true, index1_, index2_, &path_);
+                             gcm_, index1_, index2_, &path_);
     }
 
     // by-series multivariate calculate
@@ -120,7 +120,7 @@ private:
         return dtw_basic_par(&x[0], &y[0],
                              nx, ny, num_var,
                              window_, norm_, step_, normalize_,
-                             gcm_, true, index1_, index2_, &path_);
+                             gcm_, index1_, index2_, &path_);
     }
 
     // by-variable multivariate calculate
@@ -134,7 +134,7 @@ private:
         return dtw_basic_par(&x[0] + (nx * k), &y[0] + (ny * k),
                              nx, ny, 1,
                              window_, norm_, step_, normalize_,
-                             gcm_, true, index1_, index2_, &path_);
+                             gcm_, index1_, index2_, &path_);
     }
 
     // input parameters

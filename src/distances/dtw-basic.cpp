@@ -2,7 +2,6 @@
 
 #include <stdlib.h>
 #include <math.h>
-#include <type_traits> // conditional
 
 #include <R.h> // R_PosInf
 
@@ -140,17 +139,29 @@ double dtw_basic_c(double * const D, dtwclust_tuple_t * const tuple,
     return (norm == 1) ? D[d2s(nx, ny, nx, backtrack)] : sqrt(D[d2s(nx, ny, nx, backtrack)]);
 }
 
-// a version compatible with RcppParallel
+// versions compatible with RcppParallel
+
 double dtw_basic_par(double const * const x, double const * const y,
                      int const nx, int const ny, int const num_var,
                      int const window, double const norm, double const step, int const normalize,
-                     double * const distmat, int const backtrack,
+                     double * const distmat)
+{
+    dtwclust_tuple_t tuple[3];
+    double d = dtw_basic_c(distmat, tuple, x, y, window, nx, ny, num_var, norm, step, 0);
+    if (normalize) d /= nx + ny;
+    return d;
+}
+
+double dtw_basic_par(double const * const x, double const * const y,
+                     int const nx, int const ny, int const num_var,
+                     int const window, double const norm, double const step, int const normalize,
+                     double * const distmat,
                      int * const index1, int * const index2, int * const path)
 {
     dtwclust_tuple_t tuple[3];
-    double d = dtw_basic_c(distmat, tuple, x, y, window, nx, ny, num_var, norm, step, backtrack);
+    double d = dtw_basic_c(distmat, tuple, x, y, window, nx, ny, num_var, norm, step, 1);
     if (normalize) d /= nx + ny;
-    if (backtrack) *path = backtrack_steps(distmat, nx, ny, index1, index2);
+    *path = backtrack_steps(distmat, nx, ny, index1, index2);
     return d;
 }
 

@@ -1,6 +1,8 @@
 #ifndef DTWCLUST_DISTANCES_DETAILS_HPP_
 #define DTWCLUST_DISTANCES_DETAILS_HPP_
 
+#include <type_traits> // conditional
+
 #include "../utils/SurrogateMatrix.h"
 
 namespace dtwclust {
@@ -22,7 +24,11 @@ double dtw_basic_c(double * const D, dtwclust_tuple_t * const tuple,
 double dtw_basic_par(double const * const x, double const * const y,
                      int const nx, int const ny, int const num_var,
                      int const window, double const norm, double const step, int const normalize,
-                     double * const distmat, int const backtrack,
+                     double * const distmat);
+double dtw_basic_par(double const * const x, double const * const y,
+                     int const nx, int const ny, int const num_var,
+                     int const window, double const norm, double const step, int const normalize,
+                     double * const distmat,
                      int * const index1, int * const index2, int * const path);
 
 // lbi.cpp
