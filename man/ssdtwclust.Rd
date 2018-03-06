@@ -59,7 +59,7 @@ with the necessary packages and/or functions. See \code{\link[parallel:clusterEv
 
 The range of window sizes is specified with a slider, and represents the size as a percentage
 of the shortest series' length. The \code{step} parameter indicates how spaced appart should the
-sizes be (parameter \code{'by'} in \code{\link[base:seq]{base::seq()}}). A 0% window should only be used if all series
+sizes be (parameter \code{'by'} in \code{\link[base:seq]{base::seq()}}). A 0-size window should only be used if all series
 have the same length. If the series have different lengths, using small window sizes can be
 problematic if the length differences are very big, see the notes in \code{\link[=dtw_basic]{dtw_basic()}}.
 
@@ -99,7 +99,7 @@ window size. Since this includes everything returned by \code{\link[=compare_clu
 use \code{\link[=repeat_clustering]{repeat_clustering()}} afterwards.
 
 The constraint plots depict if the constraints are fulfilled or not for the given window sizes,
-where 0 means it was fulfilled and 1 means it wasn't. An error about a zero-dimension viewport
+where 1 means it was fulfilled and 0 means it wasn't. An error about a zero-dimension viewport
 indicates the plot height is too small to fit the plots, so please increase the height.
 }
 
