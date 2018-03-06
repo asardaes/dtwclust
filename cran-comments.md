@@ -1,7 +1,5 @@
 
-## Update to version 5.3.0
-Optimizations, bug fixes and addition of shiny apps.
-Compilation times should be faster now.
+## Update to version 5.3.0.9000
 
 ## Test environments
 * Local GNU/Linux, R release
@@ -24,4 +22,3 @@ Compilation times should be faster now.
 
 ## Additional issues
 * UBSAN: the errors stem from the RcppParallel package and can be safely ignored.
-* The ambiguity for Solaris has been fixed.
