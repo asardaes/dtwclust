@@ -12,15 +12,13 @@ install:
 
 # Adapt as necessary starting from here
 
+platform: x64
+
 environment:
   global:
-    NOT_CRAN: 'true'
-
-  matrix:
-  - R_VERSION: release
-
-  - R_VERSION: release
+    R_VERSION: release
     R_ARCH: x64
+    NOT_CRAN: 'true'
 
 build_script:
   - travis-tool.sh install_deps
