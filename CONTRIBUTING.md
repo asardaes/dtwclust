@@ -17,11 +17,11 @@ the function can have any number of parameters,
 but it's probably better if consistency checks are done in R.
 See for example [`dtw_basic`](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L52).
 
-On the C++ side the distance should be declared in the corresponding [header](https://github.com/asardaes/dtwclust/blob/master/src/distances/distances.h#L14),
+On the C++ side the distance should be declared in the corresponding [header](https://github.com/asardaes/dtwclust/blob/master/src/distances/distances.h),
 registered in the [initialization](https://github.com/asardaes/dtwclust/blob/master/src/init.cpp#L8),
 and [defined](https://github.com/asardaes/dtwclust/blob/master/src/distances/dtw-basic.cpp).
 Importantly, if the stand-alone version will serve as a basis for the `proxy` version,
-the [core calculations](https://github.com/asardaes/dtwclust/blob/master/src/distances/dtw-basic.cpp#L89) should be done independently of any R/Rcpp API,
+the [core calculations](https://github.com/asardaes/dtwclust/blob/master/src/distances/dtw-basic.cpp#L88) should be done independently of any R/Rcpp API,
 depending either on raw pointers,
 [custom wrapper classes](https://github.com/asardaes/dtwclust/blob/master/src/utils/SurrogateMatrix.h),
 or `RcppParallel`'s wrappers.
@@ -66,6 +66,12 @@ The factory method `calculate` takes 2 integers `i` and `j`,
 and it is expected that it returns the distance between `x[i]` and `y[j]`.
 Some calculators [dispatch](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L85) to the appropriate (univariate/multivariate) method,
 but [others](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L382) can do some more adjustments before dispatching.
+Also note how in some cases the core calculations are further [delegated](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L119) by calling special wrappers defined in their own [header](https://github.com/asardaes/dtwclust/blob/master/src/distances/distances-details.h),
+which don't use R or Rcpp's API.
+This avoids duplicating code that is used in stand-alone functions (described [above](#stand-alone-function)),
+but is not always necessary;
+for instance, the SbdCalculator does the [calculations directly](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L393),
+since the stand-alone version is implemented entirely in R.
 
 ### R side
 
