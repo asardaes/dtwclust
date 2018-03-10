@@ -459,12 +459,14 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #'
 #' @examples
 #'
+#' \dontrun{
 #' plot(pc_obj, type = "c", linetype = "solid",
 #'      labs.arg = list(title = "Clusters' centroids"))
 #'
 #' set.seed(15L)
 #' plot(pc_obj, labels = list(nudge_x = -5, nudge_y = 0.2),
 #'      clus = c(1L,4L))
+#' }
 #'
 plot.TSClusters <- function(x, y, ...,
                             clus = seq_len(x@k), labs.arg = NULL,

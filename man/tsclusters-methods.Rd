@@ -206,11 +206,13 @@ fc_obj <- new("FuzzyTSClusters",
 show(fc_obj)
 
 
+\dontrun{
 plot(pc_obj, type = "c", linetype = "solid",
      labs.arg = list(title = "Clusters' centroids"))
 
 set.seed(15L)
 plot(pc_obj, labels = list(nudge_x = -5, nudge_y = 0.2),
      clus = c(1L,4L))
+}
 
 }
