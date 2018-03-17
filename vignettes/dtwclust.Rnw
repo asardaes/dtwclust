@@ -1,9 +1,28 @@
+<<setup, include = FALSE, cache = FALSE>>=
+library("knitr")
+library("dtwclust")
+
+data("uciCT")
+
+# knitr defaults
+opts_chunk$set(fig.width = 8, fig.asp = 0.5625,
+               out.width = "\\linewidth",
+               fig.align = "center", fig.pos = "htbp",
+               cache = FALSE, echo = FALSE, autodep = TRUE)
+
+# use Sinput and Soutput environments
+# render_sweave()
+
+# prevent additional .sty files from being created
+opts_knit$set(self.contained = TRUE)
+@
+
 \documentclass[article,shortnames,nojss,noheadings]{jss}
 
 % Vignette options
 %\VignetteEngine{knitr::knitr_notangle}
 %\VignettePackage{dtwclust}
-%\VignetteDepends{TSclust, TSdist, cluster, doParallel}
+%\VignetteDepends{TSclust, TSdist, doParallel}
 %\VignetteIndexEntry{Comparing Time-Series Clustering Algorithms in R Using the dtwclust Package}
 %\VignetteEncoding{UTF-8}
 
@@ -100,25 +119,6 @@ showcasing how it can be used to evaluate many different time-series clustering 
 % ===========================================================================================================
 
 \begin{document}
-
-<<setup, include = FALSE, cache = FALSE>>=
-library("knitr")
-library("dtwclust")
-
-data("uciCT")
-
-# knitr defaults
-opts_chunk$set(fig.width = 8, fig.asp = 0.5625,
-               out.width = "\\linewidth",
-               fig.align = "center", fig.pos = "htbp",
-               cache = FALSE, echo = FALSE, autodep = TRUE)
-
-# use Sinput and Soutput environments
-# render_sweave()
-
-# prevent additional .sty files from being created
-opts_knit$set(self.contained = TRUE)
-@
 
 \section{Introduction}
 \label{sec:introduction}
@@ -826,6 +826,20 @@ it can support series with different length directly,
 with the caveat that the length of the resulting prototype will be the same as the length of the reference series that was initially chosen by the algorithm,
 and that the \code{symmetric1} or \code{symmetric2} step pattern should be used.
 
+\subsection{Soft-DTW centroid}
+\label{sec:sdtw-cent}
+
+Thanks to the gradient that can be computed as a by-product of the soft-DTW distance calculation
+(see \cref{sec:sdtw}),
+it is possible to define an objective function
+(see Equation (4) in \citet{cuturi2017})
+and subsequently minimize it with numerical optimization.
+In addition to the smoothing parameter of soft-DTW ($\gamma$),
+the optimization procedure considers the option of using normalizing weights for the input series,
+which noticeably alters the resulting centroids
+(see Figure 4 in \citet{cuturi2017}).
+The clustering and classification experiments performed by \citet{cuturi2017} showed that using soft-DTW (distance and centroid) provided quantitatively better results in many scenarios.
+
 \subsection{Shape extraction}
 \label{sec:shape}
 
@@ -868,20 +882,6 @@ namely that the length of the resulting prototype will depend on the length of t
 Technically, for multivariate series,
 the shape extraction algorithm could be applied for each variable $v$ of all involved series,
 but this was not explored by the authors of \kshape{}.
-
-\subsection{Soft-DTW centroid}
-\label{sec:sdtw-cent}
-
-Thanks to the gradient that can be computed as a by-product of the soft-DTW distance calculation
-(see \cref{sec:sdtw}),
-it is possible to define an objective function
-(see Equation (4) in \citet{cuturi2017})
-and subsequently minimize it with numerical optimization.
-In addition to the smoothing parameter of soft-DTW ($\gamma$),
-the optimization procedure considers the option of using normalizing weights for the input series,
-which noticeably alters the resulting centroids
-(see Figure 4 in \citet{cuturi2017}).
-The clustering and classification experiments performed by \citet{cuturi2017} showed that using soft-DTW (distance and centroid) provided quantitatively better results in many scenarios.
 
 \subsection{Fuzzy-based prototypes}
 \label{sec:fuzzy-cent}

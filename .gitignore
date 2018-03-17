@@ -15,6 +15,11 @@ vignettes/*.bbl
 vignettes/*.log
 vignettes/*.tex
 vignettes/*.pdf
+vignettes/*.sty
+vignettes/*.aux
+vignettes/*.out
+vignettes/*.blg
+vignettes/*.brf
 vignettes/**/
 
 # Experiments' results

@@ -17,9 +17,11 @@
 
 ^vignettes/cache
 ^vignettes/figure
+^vignettes/RJwrapper.*
 ^vignettes/.*\.gz
 ^vignettes/.*\.bbl
 ^vignettes/.*\.log
 ^vignettes/.*\.tex
+^vignettes/.*\.sty
 
 # ^tests/.*\.rds$
