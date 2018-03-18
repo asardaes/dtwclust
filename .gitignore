@@ -21,6 +21,8 @@ vignettes/*.out
 vignettes/*.blg
 vignettes/*.brf
 vignettes/**/
+!vignettes/RJwrapper.tex
+!vignettes/sarda.tex
 
 # Experiments' results
 timing-experiments/*.RData

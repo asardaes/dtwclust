@@ -1,100 +1,10 @@
-<<setup, include = FALSE, cache = FALSE>>=
-library("knitr")
-library("dtwclust")
+% !TeX root = RJwrapper.tex
+\title{Time-Series Clustering in R Using the \pkg{dtwclust} Package}
+\author{by Alexis Sard\'a-Espinosa}
 
-data("uciCT")
+\maketitle
 
-# knitr defaults
-opts_chunk$set(fig.width = 8, fig.asp = 0.5625,
-               out.width = "\\linewidth",
-               fig.align = "center", fig.pos = "htbp",
-               cache = FALSE, echo = FALSE, autodep = TRUE)
-
-# use Sinput and Soutput environments
-# render_sweave()
-
-# prevent additional .sty files from being created
-opts_knit$set(self.contained = TRUE)
-@
-
-\documentclass[article,shortnames,nojss,noheadings]{jss}
-
-% Vignette options
-%\VignetteEngine{knitr::knitr_notangle}
-%\VignettePackage{dtwclust}
-%\VignetteDepends{TSclust, TSdist, doParallel}
-%\VignetteIndexEntry{Comparing Time-Series Clustering Algorithms in R Using the dtwclust Package}
-%\VignetteEncoding{UTF-8}
-
-% Maths
-\usepackage{amsmath}
-
-% Captions in floating environments
-\usepackage[labelsep=colon,font=small,margin=5pt,format=hang]{caption}
-
-% For subcaptions in figures
-\usepackage{subcaption}
-
-% For professional looking tables
-\usepackage{booktabs}
-%\usepackage{multirow}
-%\usepackage{multicol}
-%\usepackage{longtable}
-%\usepackage{tabularx}
-
-% For \FloatBarrier
-\usepackage[section,below]{placeins}
-
-% References
-\usepackage[capitalise,noabbrev]{cleveref}
-
-% Avoid parentheses
-\crefformat{equation}{Equation~#1}
-\Crefformat{equation}{Equation~#1}
-
-% Used for knitr images from Rnw files
-\newcommand{\subfloat}[2][default for first parameter: need a sub-caption]{\subcaptionbox{#1}{#2}}
-
-% Allowed percentages of page a float can use
-\renewcommand{\textfraction}{0.05}
-\renewcommand{\topfraction}{0.95}
-\renewcommand{\bottomfraction}{0.95}
-\renewcommand{\floatpagefraction}{0.75}
-\setcounter{totalnumber}{5}
-
-% Shortcuts
-\newcommand{\R}{\proglang{R}}
-\newcommand{\dtwclust}{\pkg{dtwclust}}
-\newcommand{\dtwp}{\text{DTW}_p}
-\newcommand{\kshape}{\textit{k}-Shape}
-
-% Blank footnote
-\newcommand\blankfootnote[1]{%
-\begingroup
-\renewcommand\thefootnote{}\footnote{#1}%
-\addtocounter{footnote}{-1}%
-\endgroup
-}
-
-% ===========================================================================================================
-% Cover
-% ===========================================================================================================
-
-\title{Comparing Time-Series Clustering Algorithms in \R{} Using the \dtwclust{} Package}
-\Plaintitle{Comparing Time-Series Clustering Algorithms in R Using the dtwclust Package}
-
-\author{Alexis~Sard\'a-Espinosa}
-\date{\today}
-
-\Address{%
-Alexis Sard\'a-Espinosa\\
-\email{alexis.sarda@gmail.com}\\
-Disclaimer: The software package was developed\\
-independently of any organization or institution\\
-that is or has been associated with the author.
-}
-
-\Abstract{%
+\abstract{%
 Most clustering strategies have not changed considerably since their initial definition.
 The common improvements are either related to the distance measure used to assess dissimilarity,
 or the function used to calculate prototypes.
@@ -106,25 +16,21 @@ Since no single clustering algorithm can be said to perform best on all datasets
 different strategies must be tested and compared,
 so a common infrastructure can be advantageous.
 In this manuscript, a general overview of shape-based time-series clustering is given,
-including many specifics related to Dynamic Time Warping and other recently proposed techniques.
-At the same time, a description of the \dtwclust{} package for the \R{} statistical software is provided,
+including many specifics related to Dynamic Time Warping and associated techniques.
+At the same time, a description of the \CRANpkg{dtwclust} package for the R statistical software is provided,
 showcasing how it can be used to evaluate many different time-series clustering procedures.
 }
 
-\Keywords{time-series, clustering, \R{}, dynamic time warping, lower bound, cluster validity}
-\Plainkeywords{time-series, clustering, R, dynamic time warping, lower bound, cluster validity}
-
-% ===========================================================================================================
-% Main matter
-% ===========================================================================================================
-
-\begin{document}
+% Replaced:
+% - example with example, except where figures are used...
+% - code/code with code
+% - \\code\{.*\_.*} for underscores that need to be escaped within \code{}
+% - proglang with nothing
 
 \section{Introduction}
 \label{sec:introduction}
 
-\blankfootnote{This manuscript was last updated in version 5.2.0 of \dtwclust{}.}
-Cluster analysis is a task which concerns itself with the creation of groups of objects,
+Cluster analysis is a task that concerns itself with the creation of groups of objects,
 where each group is called a cluster.
 Ideally, all members of the same cluster are similar to each other,
 but are as dissimilar as possible from objects in a different cluster.
@@ -219,7 +125,7 @@ combining them is far from trivial.
 As such,
 it is desirable to have a common platform on which clustering algorithms can be tested and compared against each other.
 The \dtwclust{} package,
-developed for the \R{} statistical software \citep{rcore},
+developed for the R statistical software and part of its \ctv{TimeSeries} view,
 provides such functionality,
 and includes implementations of recently developed time-series clustering algorithms and optimizations.
 It serves as a bridge between classical clustering algorithms and time-series data,
@@ -236,23 +142,22 @@ or by applying suitable transformations and then clustering in the resulting spa
 We will describe the algorithms that are available in \dtwclust{},
 mentioning the most important characteristics of each and showing how the package can be used to evaluate them,
 as well as how other packages complement it.
-Additionally, the variations related to DTW and other common distances will be explored,
-and the parallelization strategies and optimizations included in the package will be described.
+Additionally, the variations related to DTW and other common distances will be explored.
 
-There are many available \R{} packages for data clustering.
-The \pkg{flexclust} package \citep{leisch2006} implements many partitional procedures,
-while the \pkg{cluster} package \citep{cluster} focuses more on hierarchical procedures and their evaluation;
+There are many available R packages for data clustering.
+The \CRANpkg{flexclust} package \citep{leisch2006} implements many partitional procedures,
+while the \CRANpkg{cluster} package \citep{cluster} focuses more on hierarchical procedures and their evaluation;
 neither of them, however, is specifically targeted at time-series data.
-Packages like \pkg{TSdist} \citep{tsdist} and \pkg{TSclust} \citep{montero2014} focus solely on dissimilarity measures for time-series,
+Packages like \CRANpkg{TSdist} \citep{tsdist} and \CRANpkg{TSclust} \citep{montero2014} focus solely on dissimilarity measures for time-series,
 the latter of which includes a single algorithm for clustering based on $p$ values.
-Another example is the \pkg{pdc} package \citep{brandmaier2015},
+Another example is the \CRANpkg{pdc} package \citep{brandmaier2015},
 which implements a specific clustering algorithm,
 namely one based on permutation distributions.
-The \pkg{dtw} package \citep{giorgino2009} implements extensive functionality with respect to DTW,
+The \CRANpkg{dtw} package \citep{giorgino2009} implements extensive functionality with respect to DTW,
 but does not include the lower bound techniques that can be very useful in time-series clustering.
 New clustering algorithms like \kshape{} \citep{paparrizos2015} and TADPole \citep{begum2015} are available to the public upon request,
-but were implemented in \proglang{MATLAB},
-making their combination with other \R{} packages cumbersome.
+but were implemented in MATLAB, 
+making their combination with other R packages cumbersome.
 Hence, the \dtwclust{} package is intended to provide a consistent and user-friendly way of interacting with classic and new clustering algorithms,
 taking into consideration the nuances of time-series data.
 
@@ -260,20 +165,16 @@ The rest of this manuscript is organized as follows.
 The information relevant to the distance measures will be presented in \cref{sec:distances}.
 Supported algorithms for prototype extraction will be discussed in \cref{sec:prototypes}.
 The main clustering algorithms will be described in \cref{sec:clustering}.
-The included parallelization strategies will be outlined in \cref{sec:parallel}.
 Basic information regarding cluster evaluation will be provided in \cref{sec:evaluation}.
 An overview of extensibility will be given in \cref{sec:extensibility},
 and the final remarks will be given in \cref{sec:conclusion}.
-Code examples will be deferred to the appendices.
-Note, however, that these examples are intentionally brief,
+Code examples are given from \cref{sec:clustering} onward,
+but note that they are intentionally brief,
 and do not necessarily represent a thorough procedure to choose or evaluate a clustering algorithm.
 The data used in all examples is included in the package (saved in a list called \code{CharTraj}),
 and is a subset of the character trajectories dataset found in \citet{lichman2013}:
 they are pen tip trajectories recorded for individual characters,
 and the subset contains 5 examples of the $x$ velocity for each considered character.
-Refer to \cref{app:notes} for some technical notes about the package,
-and for a more comprehensive overview of the state of the art in time-series clustering,
-please refer to the included references and the articles mentioned therein.
 
 \section{Distance measures}
 \label{sec:distances}
@@ -283,11 +184,8 @@ Calculating distances,
 as well as cross-distance matrices,
 between time-series objects is one of the cornerstones of any time-series clustering algorithm.
 It is a task that is repeated very often and loops across all data objects applying a suitable distance function.
-The \pkg{proxy} package \citep{proxy} provides a highly optimized and extensible framework for these calculations,
+The \CRANpkg{proxy} package \citep{proxy} provides an extensible framework for these calculations,
 and is used extensively by \dtwclust{}.
-It includes several common metrics,
-and users can register custom functions in its database.
-Please refer to \cref{app:proxy} for further information.
 
 The $l_1$ and $l_2$ vector norms,
 also known as Manhattan and Euclidean distances respectively,
@@ -301,7 +199,7 @@ such as multiple variables,
 serial correlation, etc.
 
 In the following sections a description of the distance functions included in \dtwclust{} will be provided;
-these functions are associated with shape-based time-series clustering,
+these are associated with shape-based time-series clustering,
 and either support DTW or provide an alternative to it.
 However, there are many other distance measures that can be used for time-series \citep{montero2014, tsdist}.
 
@@ -315,34 +213,35 @@ We will assume that all elements are equally spaced in time in order to avoid th
 \label{sec:dtw}
 
 DTW is a dynamic programming algorithm that compares two series and tries to find the optimum warping path between them under certain constraints,
-such as monotonicity.
-It started being used by the data mining community to overcome some of the limitations associated with the Euclidean distance \citep{keogh2004, berndt1994}.
+such as monotonicity \citep{berndt1994}.
+It started being used by the data mining community to overcome some of the limitations associated with the Euclidean distance \citep{keogh2004}.
 
 The easiest way to get an intuition of what DTW does is graphically.
 \Cref{fig:dtw-intuition} shows the alignment between two sample time-series $x$ and $y$.
 In this instance, the initial and final points of the series must match,
 but other points may be warped in time in order to find better matches.
 
-<<dtw-intuition, out.width = "0.75\\linewidth", fig.cap = "Sample alignment performed by the DTW algorithm between two series. The dashed blue lines exemplify how some points are mapped to each other, which shows how they can be warped in time. Note that the vertical position of each series was artificially altered for visualization.">>=
-dtw_example <- dtw(CharTraj[[1L]], CharTraj[[2L]], keep.internals = TRUE)
-plot(dtw_example, type = "two",
-     offset = 1, match.indices = 30,
-     match.col = "blue",
-     xlab = "Time", ylab = "Series")
-@
+\begin{figure}[htbp]
+
+{\centering \includegraphics[width=0.75\linewidth]{figure/dtw-intuition-1}
+
+}
+
+\caption{Sample alignment performed by the DTW algorithm between two series. The dashed blue lines exemplify how some points are mapped to each other, which shows how they can be warped in time. Note that the vertical position of each series was artificially altered for visualization.}\label{fig:dtw-intuition}
+\end{figure}
 
 DTW is computationally expensive.
 If $x$ has length $n$ and $y$ has length $m$,
 the DTW distance between them can be computed in $O(nm)$ time,
 which is quadratic if $m$ and $n$ are similar.
 Additionally, DTW is prone to implementation bias since its calculations are not easily vectorized and tend to be very slow in non-compiled programming languages.
-The \pkg{dtw} package \citep{giorgino2009} includes a \proglang{C} implementation of the dynamic programming step of the algorithm,
+The \pkg{dtw} package includes a C implementation of the dynamic programming step of the algorithm,
 which should be very fast;
 its level of generality may sacrifice some performance,
 but in most situations it will be negligible.
-Optionally, a basic custom implementation of the DTW algorithm is included with \pkg{dtwclust} in the \code{dtw_basic} function,
+Optionally, a basic custom implementation of the DTW algorithm is included with \dtwclust{} in the \code{dtw\_basic} function,
 which has less functionality but still supports the most common options,
-it has a \proglang{C} core as well,
+it has a C core as well,
 implements some memory optimizations,
 and it should be faster,
 especially when computing the DTW distance between several pairs of time-series.
@@ -382,26 +281,19 @@ If we define $\phi = \left\{ (1,1), \ldots, (n,m) \right\}$ as the set containin
 then the final distance would be computed with \cref{eq:dtwp},
 where $m_\phi$ is a per-step weighting coefficient and $M_\phi$ is the corresponding normalization constant \citep{giorgino2009}.
 
-<<dtw-path, fig.cap = "Visual representation of the optimum path found. The big square in the center represents the LCM created for these specific series.">>=
-plot(dtw_example, type = "three")
-@
+\begin{figure}[htbp]
+
+{\centering \includegraphics[width=\linewidth]{figure/dtw-path-1}
+
+}
+
+\caption{Visual representation of the optimum path found. The big square in the center represents the LCM created for these specific series.}\label{fig:dtw-path}
+\end{figure}
 
 \begin{equation}
 \label{eq:dtwp}
 \dtwp{}(x,y) = \left( \sum \frac{m_\phi \, lcm(k) ^ p}{M_\phi} \right) ^ {1/p}, \; \forall k \in \phi
 \end{equation}
-
-In this definition the choice of $l_p$ norm comes into play twice during the DTW the algorithm.
-The \pkg{dtw} package also makes internal use of \pkg{proxy} to calculate the LCM,
-and it allows changing the norm by means of its \code{dist.method} argument.
-However, as previously mentioned, the norm only affects the LCM if multivariate series are used.
-By default, \pkg{dtw} does not consider the $l_p$ norm in \cref{eq:dtwp} during step two of the algorithm,
-regardless of what is provided in \code{dist.method}.
-For this reason,
-a special version of $\text{DTW}_2$ is registered with \pkg{proxy} by \dtwclust{} (called simply \code{"DTW2"}),
-which also uses \pkg{dtw} for the core calculations,
-but also uses the $l_2$ norm in the second step.
-The \code{dtw_basic} function follows the above definition.
 
 The way in which the algorithm traverses through the LCM is primarily dictated by the chosen step pattern.
 It is a local constraint that determines which directions are allowed when moving ahead in the LCM as the cost is being aggregated,
@@ -416,10 +308,14 @@ The choice of step pattern also determines whether the corresponding DTW distanc
 (which may be important for series with different length).
 See \citet{giorgino2009} for a complete list of step patterns and to know which ones can be normalized.
 
-<<step-patterns, out.width = "0.45\\linewidth", fig.width = 4, fig.asp = 1, fig.cap = "Two common step patterns used by DTW when traversing the LCM. At each step, the lines denote the allowed directions that can be taken, as well as the weight associated with each one.", fig.subcap = c("\\code{symmetric1} step pattern", "\\code{symmetric2} step pattern")>>=
-plot(symmetric1)
-plot(symmetric2)
-@
+\begin{figure}[htbp]
+
+{\centering \subfloat[\code{symmetric1} step pattern\label{fig:step-patterns1}]{\includegraphics[width=0.45\linewidth]{figure/step-patterns-1} }\subfloat[\code{symmetric2} step pattern\label{fig:step-patterns2}]{\includegraphics[width=0.45\linewidth]{figure/step-patterns-2} }
+
+}
+
+\caption{Two common step patterns used by DTW when traversing the LCM. At each step, the lines denote the allowed directions that can be taken, as well as the weight associated with each one.}\label{fig:step-patterns}
+\end{figure}
 
 It should be noted that the DTW distance does not satisfy the triangle inequality,
 and it is not symmetric in general,
@@ -442,9 +338,14 @@ but they are mainly used to avoid pathological warping.
 It is common to use a window whose size is 10\% of the series' length,
 although sometimes smaller windows produce even better results \citep{keogh2004}.
 
-<<dtw-window-plot, out.width = "0.6\\linewidth", fig.asp = 1, fig.cap = "Visual representation of the Sakoe-Chiba constraint for DTW. The red elements will not be considered by the algorithm when traversing the LCM.">>=
-dtwWindow.plot(sakoeChibaWindow, window.size = 2, reference = 10, query = 10)
-@
+\begin{figure}[htbp]
+
+{\centering \includegraphics[width=0.6\linewidth]{figure/dtw-window-plot-1}
+
+}
+
+\caption{Visual representation of the Sakoe-Chiba constraint for DTW. The red elements will not be considered by the algorithm when traversing the LCM.}\label{fig:dtw-window-plot}
+\end{figure}
 
 Strictly speaking,
 if the series being compared have different lengths,
@@ -469,7 +370,6 @@ for all $(i,j)$ along the LCM diagonal.
 Thus, at each step, $2w + 1$ elements will fall within the window for a given window size $w$.
 This is the convention followed by \dtwclust{}.
 
-\FloatBarrier
 \subsubsection{Lower bounds for DTW}
 \label{sec:lbs}
 
@@ -481,8 +381,7 @@ classification of time-series,
 clustering,
 etc. \citep{keogh2005, begum2015}.
 Out of the existing DTW LBs,
-the two most effective are termed \code{LB_Keogh} \citep{keogh2005} and \code{LB_Improved} \citep{lemire2009},
-and they have been implemented in \dtwclust{} in the functions \code{lb_keogh} and \code{lb_improved}.
+the two most effective are termed \code{LB\_Keogh} \citep{keogh2005} and \code{LB\_Improved} \citep{lemire2009}.
 The reader is referred to the respective articles for detailed definitions and proofs of the LBs,
 however some important considerations will be further discussed here.
 
@@ -490,7 +389,7 @@ Each LB can be computed with a specific $l_p$ norm.
 Therefore, it follows that the $l_p$ norms used for DTW and LB calculations must match,
 such that $\text{LB}_p \leq \dtwp{}$.
 Moreover, $\text{LB\_Keogh}_p \leq \text{LB\_Improved}_p \leq \dtwp{}$,
-meaning that \code{LB_Improved} can provide a tighter LB.
+meaning that \code{LB\_Improved} can provide a tighter LB.
 It must be noted that the LBs are only defined for series of equal length and are not symmetric regardless of the $l_p$ norm used to compute them.
 Also note that the choice of step pattern affects the value of the DTW distance,
 changing the tightness of a given LB.
@@ -501,13 +400,14 @@ and are thus dependent on both the type and size of the window.
 Based on these, a running minimum and maximum are computed and, respectively, a lower and upper envelope are generated.
 \Cref{fig:envelope-plot} depicts a sample time-series with its corresponding envelopes for a Sakoe-Chiba window of size 15.
 
-<<envelope-plot, out.width = "0.75\\linewidth", fig.cap = "Visual representation of a time-series (shown as a solid black line) and its corresponding envelopes based on a Sakoe-Chiba window of size 15. The green dashed line represents the upper envelope, while the red dashed line represents the lower envelope.">>=
-envelopes <- compute_envelope(CharTraj[[2L]], window.size = 15)
-matplot(cbind(envelopes$lower, envelopes$upper),
-        type = "l", lty = 2, col = 2:3,
-        xlab = "Time", ylab = "Series")
-lines(CharTraj[[2L]])
-@
+\begin{figure}[htbp]
+
+{\centering \includegraphics[width=0.75\linewidth]{figure/envelope-plot-1}
+
+}
+
+\caption{Visual representation of a time-series (shown as a solid black line) and its corresponding envelopes based on a Sakoe-Chiba window of size 15. The green dashed line represents the upper envelope, while the red dashed line represents the lower envelope.}\label{fig:envelope-plot}
+\end{figure}
 
 When calculating the LBs between $x$ and $y$,
 one must be taken as a reference and the other one as a query.
@@ -517,9 +417,9 @@ denote this copy with $H$.
 The envelopes for the query are computed:
 $y$'s upper and lower envelopes (UE and LE respectively) are compared against $x$,
 so that the values of $H$ are updated according to \cref{eq:lb-envelope}.
-Subsequently, \code{LB_Keogh} is defined as in \cref{eq:lbk},
+Subsequently, \code{LB\_Keogh} is defined as in \cref{eq:lbk},
 where $\left\lVert \cdot \right\rVert_p$ is the $l_p$ norm of the series.
-The improvement made by \code{LB_Improved} consists in calculating a second vector $H'$ by using $H$ as query and $y$ as reference,
+The improvement made by \code{LB\_Improved} consists in calculating a second vector $H'$ by using $H$ as query and $y$ as reference,
 effectively defining the LB as in \cref{eq:lbi} (cf. Figure 5 in \citet{lemire2009}).
 
 \begin{subequations}
@@ -543,31 +443,15 @@ H_j = LE_j, \quad \forall x_j < LE_j
 In order for the LBs to be worth it,
 they must be computed in significantly less time than it takes to calculate the DTW distance.
 \citet{lemire2009} developed a streaming algorithm to calculate the envelopes using no more than $3n$ comparisons when using a Sakoe-Chiba window.
-This algorithm has been ported to \dtwclust{} using the \proglang{C++} programming language,
+This algorithm has been ported to \dtwclust{} using the C++ programming language,
 ensuring an efficient calculation,
 and it is exposed in the \code{compute\_envelope} function.
 
-\code{LB_Keogh} requires the calculation of one set of envelopes for every pair of series compared,
-whereas \code{LB_Improved} must calculate two sets of envelopes for every pair of series.
+\code{LB\_Keogh} requires the calculation of one set of envelopes for every pair of series compared,
+whereas \code{LB\_Improved} must calculate two sets of envelopes for every pair of series.
 If the LBs must be calculated between several time-series,
 some envelopes can be reused when a given series is compared against many others.
 This optimization is included in the LB functions registered with \pkg{proxy} by \dtwclust{}.
-
-The function \code{dtw_lb} included in \dtwclust{}
-(and the corresponding version registered with \pkg{proxy})
-leverages \code{LB_Improved} in order to find nearest neighbors faster.
-It first computes a distance matrix using only \code{LB_Improved}.
-Then, it looks for the nearest neighbor by taking the argument of the row-wise minima of the resulting matrix.
-Using this information, it updates the distance values of the nearest neighbors using the DTW distance.
-It continues this process iteratively until no changes in the nearest neighbors are detected.
-See \cref{app:dtw-lb} for specific examples.
-
-Because of the way it works,
-\code{dtw_lb} may only be useful if one is only interested in nearest neighbors,
-which is usually the case in partitional clustering.
-However, if partition around medoids is performed (see \cref{sec:pam}),
-the distance matrix should not be precomputed so that the matrices are correctly updated on each iteration.
-Additionally, a considerably large dataset would be needed before the overhead of DTW becomes much larger than that of \code{dtw_lb}'s iterations.
 
 \subsection{Global alignment kernel distance}
 \label{sec:gak}
@@ -655,9 +539,9 @@ although it is more expensive to compute in comparison to DTW.
 \exp \left( \log\left( \text{TGAK}(x,y,\sigma,T) \right) - \frac{\log\left( \text{TGAK}(x,x,\sigma,T) \right) + \log\left( \text{TGAK}(y,y,\sigma,T) \right)}{2} \right)
 \end{equation}
 
-A \proglang{C} implementation of the TGAK algorithm is available at its author's website%
+A C implementation of the TGAK algorithm is available at its author's website%
 \footnote{\url{http://marcocuturi.net/GA.html}, accessed on 2016-10-29}.
-An \R{} wrapper has been implemented in \dtwclust{} in the \code{GAK} function,
+An R wrapper has been implemented in \dtwclust{} in the \code{GAK} function,
 performing the aforementioned normalization and subtraction in order to obtain a distance measure that can be used in clustering procedures.
 
 \subsection{Soft-DTW}
@@ -705,7 +589,6 @@ SBD(x,y) = 1 - \frac{\max \left( NCCc(x,y) \right)}{\left\lVert x \right\rVert_2
 \end{equation}
 
 This distance can be efficiently computed by utilizing the Fast Fourier Transform (FFT) to obtain the NCCc sequence,
-which is how it is implemented in \dtwclust{} in the \code{SBD} function,
 although that might make it sensitive to numerical precision,
 especially in 32-bit architectures.
 It can be very fast,
@@ -782,11 +665,7 @@ Another possible advantage of PAM is that,
 since the data does not change,
 it is possible to precompute the whole distance matrix once and re-use it on each iteration,
 and even across different number of clusters and random repetitions.
-While this precomputation is not necessary,
-it usually saves time overall,
-so it is done by default by \dtwclust{}.
-However, this is not suitable for large datasets since the whole distance matrix has to be allocated at once,
-so it is also possible to deactivate this precomputation.
+However, this is not suitable for large datasets since the whole distance matrix has to be allocated at once.
 
 In the implementation included in the package,
 $k$ series from the data are randomly chosen as initial centroids.
@@ -820,7 +699,7 @@ and the mean is computed for each centroid point using the values contained in e
 This is iteratively repeated until a certain number of iterations are reached,
 or until convergence is assumed.
 
-The \dtwclust{} implementation of DBA is done in \proglang{C++} and includes several memory optimizations.
+The \dtwclust{} implementation of DBA is done in C++ and includes several memory optimizations.
 Nevertheless, it is more computationally expensive due to all the DTW calculations that must be performed.
 However, it is very competitive when using the DTW distance and,
 thanks to DTW itself,
@@ -846,24 +725,20 @@ The clustering and classification experiments performed by \citet{cuturi2017} sh
 \label{sec:shape}
 
 A recently proposed method to calculate time-series prototypes is termed shape extraction,
-and is part of the \kshape{} algorithm (see \cref{sec:kshape}) described in \citet{paparrizos2015};
-in \dtwclust{}, it is implemented in the \code{shape_extraction} function.
+and is part of the \kshape{} algorithm (see \cref{sec:kshape}) described in \citet{paparrizos2015}.
 As with the corresponding SBD (see \cref{sec:sbd}),
 the algorithm depends on NCCc,
 and it first uses it to match two series optimally.
 \Cref{fig:sbd-alignment} depicts the alignment that is performed using two sample series.
 
-<<sbd-alignment, out.width = "0.45\\linewidth", fig.width = 6, fig.cap = "Visualization of the NCCc-based alignment performed on two sample series. After alignment, the second (red) series is either truncated and/or prepended/appended with zeros so that its length matches the first(black) series.", fig.subcap = c("Series before alignment", "Series after alignment")>>=
-matplot(cbind(CharTraj[[61L]], CharTraj[[65L]]),
-        type = "l", lty = 1L,
-        xlab = "Time", ylab = "Series")
+\begin{figure}[htbp]
 
-sbd_align <- SBD(CharTraj[[61L]], CharTraj[[65L]])
+{\centering \subfloat[Series before alignment\label{fig:sbd-alignment1}]{\includegraphics[width=0.45\linewidth]{figure/sbd-alignment-1} }\subfloat[Series after alignment\label{fig:sbd-alignment2}]{\includegraphics[width=0.45\linewidth]{figure/sbd-alignment-2} }
 
-matplot(cbind(CharTraj[[61L]], sbd_align$yshift),
-        type = "l", lty = 1L,
-        xlab = "Time", ylab = "Series")
-@
+}
+
+\caption{Visualization of the NCCc-based alignment performed on two sample series. After alignment, the second (red) series is either truncated and/or prepended/appended with zeros so that its length matches the first(black) series.}\label{fig:sbd-alignment}
+\end{figure}
 
 As with DBA, a centroid series is needed,
 so one is usually randomly chosen from the data.
@@ -897,6 +772,13 @@ and it may not be suitable to use directly with raw time-series data.
 \section{Time-series clustering algorithms}
 \label{sec:clustering}
 
+The main clustering function in \dtwclust{} is \code{tsclust}.
+It returns classes of type \code{S4},
+inheriting from a base \code{TSClusters} class.
+The documentation of the slots can be found with \code{?"TSClusters-class"},
+and the methods with \code{?"TSClusters-methods"}.
+Controls are set via intermediary functions whose documentation can be found by typing \code{?"tsclust-controls"}.
+
 \subsection{Hierarchical clustering}
 \label{sec:hc}
 
@@ -928,23 +810,16 @@ As an example, single linkage takes the intergroup dissimilarity to be that of t
 There are many linkage methods available,
 although if the data can be ``easily'' grouped,
 they should all provide similar results.
-In \dtwclust{}, the native \R{} function \code{hclust} is used by default,
+In \dtwclust{}, the native R function \code{hclust} is used by default,
 and all its linkage methods are supported.
 However, it is possible to use other clustering functions,
-albeit with some limitations (see \cref{app:hc}).
+albeit with some limitations.
 
 The created hierarchy can be visualized as a binary tree where the height of each node is proportional to the value of the intergroup dissimilarity between its two daughter nodes \citep{hastie2009}.
 Such a plot is called a dendrogram,
-an example of which can be seen in \cref{fig:dendrogram}.
-These plots can be a useful way of summarizing the whole data in an interpretable way,
+which can be a useful way of summarizing the whole data in an interpretable way,
 although it may be deceptive,
 as the algorithms impose the hierarchical structure even if such structure is not inherent to the data \citep{hastie2009}.
-
-<<dendrogram, fig.width = 12, fig.cap = "Sample dendrogram created by using SBD and average linkage.">>=
-hc <- tsclust(CharTraj, type = "h", distance = "sbd",
-              control = hierarchical_control(method = "average"))
-plot(hc)
-@
 
 The dendrogram does not directly imply a certain number of clusters, but one can be induced.
 One option is to visually evaluate the dendrogram in order to assess the height at which the largest change in dissimilarity occurs,
@@ -959,18 +834,115 @@ Once the clusters have been obtained,
 it may be desirable to use them to create prototypes (see \cref{sec:prototypes}).
 At this point, any suitable prototyping function may be used,
 but we want to emphasize that this is not a mandatory step in hierarchical clustering.
-A complete set of examples is provided in \cref{app:hc}.
 
 Hierarchical clustering has the disadvantage that the whole distance matrix must be calculated for a given dataset,
 which in most cases has a time and memory complexity of $O(N^2)$ if $N$ is the total number of objects in the dataset.
 Thus, hierarchical procedures are usually used with relatively small datasets.
+
+\subsubsection{Hierarchical clustering examples}
+
+In the following call to \code{tsclust},
+specifying the value of \code{k} indicates the number of desired clusters,
+so that the \code{cutree} function is called internally.
+Additionally, the shape extraction function is provided in the \code{centroid} argument so that,
+once the \code{k} clusters are obtained,
+their prototypes are extracted.
+Therefore, the series are \textit{z}-normalized by means of the \code{zscore} function.
+The seed is provided because of the randomness in shape extraction when choosing a reference series (see \cref{sec:shape}).
+
+\begin{example}
+hc_sbd <- tsclust(CharTraj, type = "h", k = 20L,
+                  preproc = zscore, seed = 899,
+                  distance = "sbd", centroid = shape_extraction,
+                  control = hierarchical_control(method = "average"))
+
+# By default, the dendrogram is plotted in hierarchical clustering
+plot(hc_sbd)
+\end{example}
+
+\begin{figure}[htbp]
+	
+	{\centering \includegraphics[width=\linewidth]{figure/example-hc-1}
+		
+	}
+	
+	\caption{Resulting dendrogram after hierarchical clustering.}\label{fig:example-hc}
+\end{figure}
+
+\begin{example}
+# The series and the obtained prototypes can be plotted too
+plot(hc_sbd, type = "sc")
+\end{example}
+
+\begin{figure}[htbp]
+	
+	{\centering \includegraphics[width=\linewidth]{figure/example-hc-1-1}
+		
+	}
+	
+	\caption{Obtained clusters and their respective prototypes (centroids) shown as dashed lines.}\label{fig:example-hc-1}
+\end{figure}
+
+\begin{example}
+# Focusing on the first cluster
+plot(hc_sbd, type = "series", clus = 1L)
+plot(hc_sbd, type = "centroids", clus = 1L)
+\end{example}
+
+\begin{figure}[htbp]
+	
+	{\centering \subfloat[Series in cluster 1\label{fig:example-hc-21}]{\includegraphics[width=0.45\linewidth]{figure/example-hc-2-1} }\subfloat[Prototype obtained by applying shape extraction to cluster 1\label{fig:example-hc-22}]{\includegraphics[width=0.45\linewidth]{figure/example-hc-2-2} }
+		
+	}
+	
+	\caption{Side by side comparison of the series in the first cluster and the obtained prototype.}\label{fig:example-hc-2}
+\end{figure}
+
+\FloatBarrier
+
+This exemplifies the advantage of having independent functions for the SBD and shape extraction algorithms.
+Even though they were originally proposed for partitional clustering,
+using them in hierarchical procedures is also possible.
+
+It is also possible to use other functions for hierarchical procedures by providing them in the \code{method} argument.
+However, there are two important considerations:
+such a function will receive the lower triangular part of the distance matrix,
+and it should return a classed object that supports coercion to \code{hclust} objects via the \code{as.hclust} generic.
+The functions in the \pkg{cluster} package follow this convention,
+so, as an example, using them in conjunction with \dtwclust{} is straightforward.
+
+\begin{example}
+require("cluster")
+
+tsclust(CharTraj[1L:20L], type = "h", k = 4L,
+        distance = "dtw_basic",
+        control = hierarchical_control(method = diana),
+        args = tsclust_args(dist = list(window.size = 18L)))
+
+hierarchical clustering with 4 clusters
+Using dtw_basic distance
+Using PAM (Hierarchical) centroids
+Using method diana
+
+Time required for analysis:
+user  system elapsed
+0.072   0.000   0.046
+
+Cluster sizes with average intra-cluster distance:
+
+size   av_dist
+1    5  5.685692
+2    5  7.231309
+3    5  7.622881
+4    5 15.038478
+\end{example}
 
 \subsection{Partitional clustering}
 \label{sec:pc}
 
 Partitional clustering is a different strategy used to create partitions.
 In this case, the data is explicitly assigned to one and only one cluster out of $k$ total clusters.
-The total number of desired clusters must be specified beforehand,
+The number of desired clusters must be specified beforehand,
 which can be a limiting factor,
 although this can be ameliorated by using validity indices (see \cref{sec:evaluation}).
 
@@ -1015,7 +987,6 @@ Thus, it is common practice to test different random starts to evaluate several 
 It tends to produce spherical clusters,
 but has a lower complexity,
 so it can be applied to very large datasets.
-An example is given in \cref{app:pc}.
 
 \subsubsection{TADPole clustering}
 \label{sec:tadpole}
@@ -1028,7 +999,7 @@ it can be considered a kind of PAM clustering,
 since the centroids are always elements of the data.
 However, this algorithm is deterministic depending on the value of a cutoff distance ($d_c$).
 
-The algorithm first uses the DTW distance's upper and lower bounds (Euclidean distance and \code{LB_Keogh} respectively) to find series with many close neighbors (in DTW space).
+The algorithm first uses the DTW distance's upper and lower bounds (Euclidean distance and \code{LB\_Keogh} respectively) to find series with many close neighbors (in DTW space).
 Anything below $d_c$ is considered a neighbor.
 Aided with this information,
 the algorithm then tries to prune as many DTW calculations as possible in order to accelerate the clustering procedure.
@@ -1044,7 +1015,7 @@ Finally, the allocation of several distance matrices is required,
 making it similar to hierarchical procedures memory-wise,
 so its applicability is limited to relatively small datasets.
 
-\subsubsection[k-Shape clustering]{\kshape{} clustering}
+\subsubsection{\kshape{} clustering}
 \label{sec:kshape}
 
 The \kshape{} clustering algorithm was developed by \citet{paparrizos2015}.
@@ -1059,6 +1030,57 @@ In order to use this clustering algorithm,
 the main clustering function (\code{tsclust}) should be called with SBD as the distance measure,
 shape extraction as the centroid function,
 and \textit{z}-normalization as the preprocessing step.
+
+\subsubsection{Partitional clustering examples}
+
+In this example,
+four different partitional clustering strategies are used:
+one uses the $\text{DTW}_2$ distance and DBA centroids,
+then \code{dtw\_lb} and DBA centroids are used
+(which provides the same results as using the DTW distance directly; see \cref{sec:lbs}),
+then \kshape{},
+and finally TADPole.
+The results are evaluated using Variation of Information (see \cref{sec:evaluation}),
+with lower numbers indicating better results.
+Note that \textit{z}-normalization is applied by default when selecting shape extraction as the centroid function.
+For consistency, all algorithms used the reinterpolated and normalized data,
+since some algorithms require series of equal length.
+A subset of the data is used for speed.
+The outcome should not be generalized to other data,
+and normalization/reinterpolation may actually worsen some of the algorithms' performance.
+
+\begin{example}
+# Reinterpolate to same length
+data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
+# z-normalization
+data <- zscore(data[60L:100L])
+
+pc_dtw <- tsclust(data, k = 4L,
+                  distance = "dtw_basic", centroid = "dba",
+                  seed = 8,
+                  norm = "L2", window.size = 20L)
+
+pc_dtwlb <- tsclust(data, k = 4L,
+                    distance = "dtw_lb", centroid = "dba",
+                    seed = 8,
+                    norm = "L2", window.size = 20L,
+                    control = partitional_control(pam.precompute = FALSE))
+
+pc_ks <- tsclust(data, k = 4L,
+                 distance = "sbd", centroid = "shape",
+                 seed = 8)
+
+pc_tp <- tsclust(data, k = 4L, type = "t",
+                 seed = 8,
+                 control = tadpole_control(dc = 1.5,
+                                           window.size = 20L))
+
+sapply(list(DTW = pc_dtw, DTW_LB = pc_dtwlb, kShape = pc_ks, TADPole = pc_tp),
+       cvi, b = CharTrajLabels[60L:100L], type = "VI")
+
+   DTW.VI  DTW_LB.VI  kShape.VI TADPole.VI
+0.5017081  0.5017081  0.4353306  0.4901096
+\end{example}
 
 \subsection{Fuzzy clustering}
 \label{sec:fuzzy}
@@ -1077,8 +1099,7 @@ where all the rows must sum to 1
 (note that some authors use the transposed version of $u$).
 
 One of the most widely used versions of the algorithm is fuzzy c-means,
-which is described in \citet{bezdek1981},
-and is implemented in \dtwclust{}.
+which is described in \citet{bezdek1981}.
 It tries to create a fuzzy partition by minimizing the function in \cref{eq:fuzzy-objective} under the constraints given in \cref{eq:fuzzy-constraints}.
 The membership matrix $u$ is initialized randomly in such a way that the constraints are fulfilled.
 The exponent $m$ is known as the fuzziness exponent and should be greater than 1,
@@ -1109,7 +1130,6 @@ For instance,
 \citet{durso2009} used the autocorrelation function to extract a certain amount of coefficients from time-series,
 resulting in data with equal dimensionality,
 and performed fuzzy clustering on the autocorrelation coefficients.
-See \cref{app:fuzzy} for an example.
 
 \begin{equation}
 \label{eq:fcm-centroid}
@@ -1152,56 +1172,130 @@ once the algorithm has converged.
 Note that it is straightforward to change the fuzzy partition to a crisp one by taking the argument of the row-wise maxima of $u$ or of the row-wise minima of $d_{p,c}$ for all $p$,
 and assigning the respective series to the corresponding cluster only.
 
-\section{Parallel computation}
-\label{sec:parallel}
+\subsubsection{Fuzzy clustering example}
 
-Using parallelization is not something that is commonly explored explicitly in the literature,
-but it can be extremely useful in practical applications.
-In the case of time-series clustering,
-parallel computation can result in a very significant reduction in execution times.
+This example performs autocorrelation-based fuzzy clustering as proposed by \citet{durso2009}.
+Using the autocorrelation function can be used to overcome the problem of time-series with different length.
+Note, however, that this essentially changes the clustering space,
+using autocorrelation coefficients instead of the time-series themselves.
 
-There are some important considerations when using parallelization.
-First of all,
-there is a basic distinction between multi-process and multi-threaded parallelization.
-The optimal amount of parallel workers, i.e., subprocesses that can each handle a given task,
-is dependent on the computer processor that is being used and the number of physical processing cores and logical threads it can handle.
-Each worker may require additional RAM, and \R{} usually only works with data that is loaded on RAM.
-Finally, the overhead introduced for the orchestration of parallelization may be too large when compared to the amount of time needed to complete each task,
-which is especially true for relatively simple workloads.
-Therefore, using parallelization does not guarantee faster execution times,
-and should be tested in the context of a specific application.
+\begin{example}
+# Calculate autocorrelation up to 50th lag
+acf_fun <- function(dat, ...) {
+	lapply(dat, function(x) {
+		as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf)
+	})
+}
+# Fuzzy c-means
+fc <- tsclust(CharTraj[1:20], type = "f", k = 4L,
+              preproc = acf_fun, distance = "L2",
+              seed = 42)
+# Head of fuzzy membership matrix
+head(fc@fcluster, 5L)
+       cluster_1   cluster_2   cluster_3    cluster_4
+A.V1 0.944079794 0.010596054 0.020895926 0.0244282262
+A.V2 0.973024707 0.004558053 0.009814713 0.0126025278
+A.V3 0.910457782 0.013363454 0.026818391 0.0493603740
+A.V4 0.487954179 0.212700292 0.219111649 0.0802338802
+A.V5 0.557762811 0.172923239 0.188579412 0.0807345380
 
-Handling parallelization has been greatly simplified in \R{} by different software packages.
-The implementations done in \dtwclust{} use the \pkg{foreach} package \citep{foreach} for multi-processing,
-and \pkg{RcppParallel} for multi-threading \citep{rcppparallel}.
-See \cref{app:doParallel} for a specific example of multi-processing,
-and refer to the parallelization vignette for additional information.
+# Are constraints fulfilled?
+all.equal(rep(1, 20), rowSums(fc@fcluster), check.attributes = FALSE)
+[1] TRUE
 
-The documentation for each function specifies if they use parallelization and how,
-but in general,
-all distances included with \dtwclust{} use multi-threading,
-and multi-processing is leveraged during clustering.
-Before describing the different cases where \dtwclust{} can take advantage of multi-processing,
-it should also be noted that,
-by default,
-there is only one level of parallelization in that case.
-This means that all tasks performed by a given parallel worker's process are done sequentially,
-and they cannot take advantage of further parallelization even if there are workers available.
+# Plot crisp partition in the original space
+plot(fc, series = CharTraj[1:20], type = "series")
+\end{example}
 
-When performing partitional clustering,
-it is common to do many repetitions with different random seeds to account for different starting points.
-When many repetitions are specified directly to \code{tsclust},
-the package assigns each repetition to a different worker.
-This is also the case when the function is called with several values of \code{k},
-i.e., when different number of clusters are to be tested;
-this is detected in partitional, fuzzy and TADPole clustering.
-The included implementation of the TADPole algorithm also supports multi-processing for different values of the cutoff distance.
+\begin{figure}[htbp]
+	
+	{\centering \includegraphics[width=\linewidth]{figure/example-fuzzy-1}
+		
+	}
+	
+	\caption{Visualization of the clusters that would result from changing the fuzzy partition to a crisp one. Note that the original time-series are used, so the centroids are not shown, since the centroids are made of autocorrelation coefficients.}\label{fig:example-fuzzy}
+\end{figure}
 
-In the context of partitional clustering,
-calculating time-series prototypes is something that is done many times each iteration.
-Since clusters are mutually exclusive, the prototype calculations can be executed in parallel,
-but this is only worth it if the calculations are time consuming.
-Therefore, in \dtwclust{}, only DBA, shape extraction, and the soft-DTW centroid attempt to do multi-processing when used in partitional clustering.
+%\section{Parallel computation}
+%\label{sec:parallel}
+%
+%Using parallelization is not something that is commonly explored explicitly in the literature,
+%but it can be extremely useful in practical applications.
+%In the case of time-series clustering,
+%parallel computation can result in a very significant reduction in execution times.
+%
+%There are some important considerations when using parallelization.
+%First of all,
+%there is a basic distinction between multi-process and multi-threaded parallelization.
+%The optimal amount of parallel workers, i.e., subprocesses that can each handle a given task,
+%is dependent on the computer processor that is being used and the number of physical processing cores and logical threads it can handle.
+%Each worker may require additional RAM, and R usually only works with data that is loaded on RAM.
+%Finally, the overhead introduced for the orchestration of parallelization may be too large when compared to the amount of time needed to complete each task,
+%which is especially true for relatively simple workloads.
+%Therefore, using parallelization does not guarantee faster execution times,
+%and should be tested in the context of a specific application.
+%
+%Handling parallelization has been greatly simplified in R by different software packages.
+%The implementations done in \dtwclust{} use the \CRANpkg{foreach} package \citep{foreach} for multi-processing,
+%and \CRANpkg{RcppParallel} for multi-threading \citep{rcppparallel}.
+%
+%The documentation for each function specifies if they use parallelization and how,
+%but in general,
+%all distances included with \dtwclust{} use multi-threading,
+%and multi-processing is leveraged during clustering.
+%Before describing the different cases where \dtwclust{} can take advantage of multi-processing,
+%it should also be noted that,
+%by default,
+%there is only one level of parallelization in that case.
+%This means that all tasks performed by a given parallel worker's process are done sequentially,
+%and they cannot take advantage of further parallelization even if there are workers available.
+%
+%When performing partitional clustering,
+%it is common to do many repetitions with different random seeds to account for different starting points.
+%When many repetitions are specified directly to \code{tsclust},
+%the package assigns each repetition to a different worker.
+%This is also the case when the function is called with several values of \code{k},
+%i.e., when different number of clusters are to be tested;
+%this is detected in partitional, fuzzy and TADPole clustering.
+%The included implementation of the TADPole algorithm also supports multi-processing for different values of the cutoff distance.
+%
+%In the context of partitional clustering,
+%calculating time-series prototypes is something that is done many times each iteration.
+%Since clusters are mutually exclusive, the prototype calculations can be executed in parallel,
+%but this is only worth it if the calculations are time consuming.
+%Therefore, in \dtwclust{}, only DBA, shape extraction, and the soft-DTW centroid attempt to do multi-processing when used in partitional clustering.
+%
+%\subsection{Using the \pkg{doParallel} package for parallel computation}
+%
+%One way of using parallelization with R and \pkg{foreach} is by means of the \CRANpkg{doParallel} package \citep{doParallel}.
+%It provides a great level of abstraction so that users can easily configure a parallel backend which can be used by \dtwclust{}.
+%The example below does the backend registration and calls \code{tsclust},
+%returning to sequential computation after it finishes.
+%It only uses 2 parallel workers,
+%but more can be configured depending on each processor (see function \code{detectCores} in R).
+%Refer to \dtwclust{}'s parallelization vignette for more information.
+%
+%\begin{example}
+%require("doParallel")
+%
+%# Create parallel workers
+%workers <- makeCluster(2L)
+%# Preload dtwclust in each worker; not necessary but useful
+%invisible(clusterEvalQ(workers, library("dtwclust")))
+%# Register the backend; this step MUST be done
+%registerDoParallel(workers)
+%
+%# Backend detected automatically
+%pc_par <- tsclust(CharTraj[1L:20L], k = 4L,
+%                  distance = "dtw_basic", centroid = "dba",
+%                  window.size = 15L, seed = 938,
+%                  control = partitional_control(nrep = 2L))
+%
+%# Stop parallel workers
+%stopCluster(workers)
+%# Go back to sequential computation
+%registerDoSEQ()
+%\end{example}
 
 \section{Cluster evaluation}
 \label{sec:evaluation}
@@ -1256,13 +1350,95 @@ For example, the Silhouette index effectively needs the whole distance matrix be
 making it prohibitive in some cases.
 
 CVIs are not the only way to evaluate clustering results.
-The \pkg{clue} package \citep{hornik2005, clue} includes its own extensible framework for evaluation of cluster ensembles.
+The \CRANpkg{clue} package \citep{hornik2005, clue} includes its own extensible framework for evaluation of cluster ensembles.
 It does not directly deal with the clustering algorithms themselves,
 rather with ways of quantifying agreement and consensus between several clustering results.
 As such, it is directly compatible with the results from \dtwclust{},
 since it does not care how a partition/hierarchy was created.
-Support for the \pkg{clue} package functions is included,
-see \cref{app:evaluation} for more complete examples.
+Support for the \pkg{clue} package functions is included.
+
+\subsection{Cluster evaluation examples}
+
+The easiest way to evaluate partitional and hierarchical clustering results is with the \code{cvi} function,
+which supports both internal and external CVIs (in case the ground truth is known).
+In the following example, different numbers of clusters are computed and,
+using internal CVIs,
+it is possible to assess which one resulted in a partition with more ``purity''.
+The majority of indices suggest using $k = 4$ in this case.
+
+\begin{example}
+# subset
+data <- CharTraj[1L:20L]
+pc_k <- tsclust(data, k = 3L:5L,
+                distance = "dtw_basic", centroid = "pam",
+                seed = 94L)
+names(pc_k) <- paste0("k_", 3L:5L)
+sapply(pc_k, cvi, type = "internal")
+
+                k_3          k_4          k_5
+Sil    6.897035e-01 7.295148e-01 6.726453e-01
+SF     1.105005e-11 1.345888e-10 1.074494e-10
+CH     2.375816e+01 2.873765e+01 2.207096e+01
+DB     4.141004e-01 3.225955e-01 2.858009e-01
+DBstar 4.799175e-01 4.998963e-01 7.029138e-01
+D      1.054228e+00 7.078230e-01 4.430916e-01
+COP    1.176921e-01 7.768459e-02 7.153216e-02
+\end{example}
+
+If we choose the value of $k = 4$,
+we could then compare results among different random repetitions with help of the \pkg{clue} package (or with CVIs again).
+
+\begin{example}
+require("clue")
+
+pc_4 <- tsclust(data, type = "p", k = 4L,
+                distance = "dtw_basic", centroid = "pam",
+                control = partitional_control(nrep = 5L),
+                seed = 95L)
+                
+names(pc_4) <- paste0("r_", 1L:5L)
+pc_4 <- cl_ensemble(list = pc_4)
+cl_dissimilarity(pc_4)
+
+Dissimilarities using minimal Euclidean membership distance:
+
+         r_1      r_2      r_3      r_4
+r_2 3.464102
+r_3 0.000000 3.464102
+r_4 0.000000 3.464102 0.000000
+r_5 0.000000 3.464102 0.000000 0.000000
+
+# Confusion matrix
+table(Medoid = cl_class_ids(cl_medoid(pc_4)),
+      "True Classes" = rep(c(4L, 3L, 1L, 2L), each = 5L))
+
+       True Classes
+Medoid 1 2 3 4
+     1 5 0 0 0
+     2 0 5 0 0
+     3 0 0 5 0
+     4 0 0 0 5
+\end{example}
+
+The same could be done for hierarchical procedures, as the next example shows.
+All linkage methods yielded the same results.
+
+\begin{example}
+hclust_methods <-  c("single", "complete", "average", "mcquitty")
+hc <- tsclust(data, type = "h", k = 4L,
+              control = hierarchical_control(method = hclust_methods,
+              distmat = pc_4[[1L]]@distmat))
+
+names(hc) <- hclust_methods
+hc <- cl_ensemble(list = hc)
+cl_dissimilarity(hc)
+
+Dissimilarities using minimal Euclidean membership distance:
+         single complete average
+complete      0
+average       0        0
+mcquitty      0        0       0
+\end{example}
 
 \section{Package extensibility}
 \label{sec:extensibility}
@@ -1270,13 +1446,13 @@ see \cref{app:evaluation} for more complete examples.
 All of the clustering algorithms implemented in \dtwclust{} have something in common:
 they depend on a distance measure between time-series.
 By leveraging the \pkg{proxy} package,
-any suitable distance function can be used (see \cref{app:proxy}).
+any suitable distance function can be used.
 This fact alone already overcomes a severe limitation that other packages have,
-such as \pkg{flexclust} \citep{leisch2006} and \pkg{TSdist} \citep{tsdist}.
+such as \pkg{flexclust} and \pkg{TSdist}.
 
 Another important aspect of the clustering procedure is the extraction of centroids or time-series prototypes.
 The most common ones are already implemented in \dtwclust{},
-but it is also possible to provide custom centroid algorithms (see \cref{app:extensibility}).
+but it is also possible to provide custom centroid algorithms.
 Because of this, it would even be possible to implement a custom fuzzy clustering algorithm if desired.
 
 As previously mentioned,
@@ -1288,8 +1464,95 @@ or provided as a preprocessing function if desired
 
 Other clustering algorithms that make significant modifications would be harder to integrate by the user.
 However, it would still be possible,
-thanks to the open-source nature of \R{} and the fact that \dtwclust{} is hosted on GitHub%
+thanks to the open-source nature of R and the fact that \dtwclust{} is hosted on GitHub%
 \footnote{\url{https://github.com/asardaes/dtwclust}}.
+
+\subsection{Extensibility examples}
+
+In this example,
+a weighted mean centroid is desired and implemented as follows.
+The usefulness of such an approach is of course questionable.
+
+\begin{example}
+# Formal arguments before ... must be the same
+weighted_mean_cent <- function(x, cl_id, k, cent, cl_old, ..., weights) {
+	x <- Map(x, weights, f = function(ts, w) { w * ts })
+	x_split <- split(x, cl_id)
+	new_cent <- lapply(x_split, function(xx) {
+		xx <- do.call(rbind, xx)
+		colMeans(xx)
+	})
+}
+
+data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
+weights <- rep(c(0.9,1.1), each = 5L)
+tsclust(data[1L:10L], type = "p", k = 2L,
+        distance = "Manhattan",
+        centroid = weighted_mean_cent,
+        seed = 123,
+        args = tsclust_args(cent = list(weights = weights)))
+
+partitional clustering with 2 clusters
+Using manhattan distance
+Using weighted_mean_cent centroids
+
+Time required for analysis:
+user  system elapsed
+0.024   0.000   0.023
+
+Cluster sizes with average intra-cluster distance:
+
+size  av_dist
+1    5 15.05069
+2    5 18.99145
+\end{example}
+
+Other clustering algorithms that significantly alter the workflow in \dtwclust{} are harder to integrate by the user,
+although the provided formal class can still be of use.
+Formal objects can be created with the \code{new} function,
+which has a custom constructor registered.
+For instance, the following would reproduce the result of TADPole clustering,
+enabling the usage of the \code{cvi} function
+(and any other generic that has methods for appropriate \code{TSClusters} objects).
+
+\begin{example}
+tadp <- TADPole(data[1L:20L], k = 4L, dc = 1.5, window.size = 15L)
+
+tp_obj <- new("PartitionalTSClusters",
+              type = "tadpole",
+              datalist = data[1L:20L],
+              centroids = data[tadp$centroids],
+              cluster = tadp$cl,
+              dots = list(window.size = 15L,
+                          norm = "L2"),
+              distance = "dtw_lb",
+              centroid = "PAM_TADPole")
+
+cvi(tp_obj, CharTrajLabels[1L:20L], type = "external")
+
+ARI  RI   J  FM  VI
+1   1   1   1   0
+\end{example}
+
+Assuming the following results were obtained by applying \kshape{} independently of \dtwclust{},
+the following would reproduce the values in a formal class,
+which can then be used,
+for example,
+to predict cluster membership of new data.
+
+\begin{example}
+ks_obj <- new("PartitionalTSClusters",
+              type = "partitional",
+              datalist = zscore(CharTraj)[-100L],
+              centroids = zscore(CharTraj[seq(1L, 100L, 5L)]),
+              cluster = unclass(CharTrajLabels)[-100L],
+              distance = "sbd",
+              centroid = "shape")
+# Preprocessing is performed by ks_obj@family@preproc
+predict(ks_obj, newdata = CharTraj[100L])
+Z.V5
+5
+\end{example}
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -1297,12 +1560,12 @@ thanks to the open-source nature of \R{} and the fact that \dtwclust{} is hosted
 In this manuscript a general overview of shape-based time-series clustering was provided.
 This included a lot of information related to the DTW distance and its corresponding optimizations,
 such as constraints and lower bounding techniques.
-At the same time, the \dtwclust{} package for \R{} was described and showcased,
+At the same time, the \dtwclust{} package for R was described and showcased,
 demonstrating how it can be used to test and compare different procedures efficiently and unbiasedly by providing a common infrastructure.
 
 The package implements several different routines,
 most of which are related to the DTW algorithm.
-Nevertheless, its modular structure enables the user to customize and complement the included functionality by means of custom algorithms or even other \R{} packages,
+Nevertheless, its modular structure enables the user to customize and complement the included functionality by means of custom algorithms or even other R packages,
 as it was the case with \pkg{TSdist}, \pkg{cluster} and \pkg{clue}.
 These packages are more specialized, dealing with specific tasks
 (respectively: distance calculations, hierarchical clustering, cluster evaluation),
@@ -1318,7 +1581,7 @@ as well as what can or cannot be done with \dtwclust{}.
 
 Choosing a specific clustering algorithm for a given application is not an easy task.
 There are many factors to take into account and it is not possible to know a priori which one will yield the best results.
-The included implementations try to use the native (and heavily optimized) \R{} functions as much as possible,
+The included implementations try to use the native (and heavily optimized) R functions as much as possible,
 relying on compiled code where needed,
 so we hope that,
 if time-series clustering is required,
@@ -1328,483 +1591,12 @@ if time-series clustering is required,
 % Bibliography
 % ===========================================================================================================
 
-\newpage
 \bibliography{REFERENCES}
 
-% ===========================================================================================================
-% Appendices
-% ===========================================================================================================
-
-\newpage
-\appendix
-
-\section{Technical notes}
-\label{app:notes}
-
-After installation, the package and the sample data can be loaded and attached with the following code.
-
-<<load-pkg, echo = TRUE>>=
-library("dtwclust")
-data("uciCT")
-@
-
-The main clustering function is \code{tsclust}.
-It returns objects of type \code{S4},
-which are one way in which \R{} implements classes.
-The formal elements of the class are called \code{slots},
-and can be accessed with the \code{@} operator (instead of the usual \code{$}).
-The documentation of the slots can be found with \code{?"TSClusters-class"},
-and the methods with \code{?"TSClusters-methods"}.
-Controls are set via intermediary functions whose documentation can be found by typing \code{?"tsclust-controls"}.
-The function \code{compare_clusterings} and its helper functions can be used to execute many different clustering configurations in a convenient way.
-The \code{tsclust} function is used for the calculations.
-A series of examples are included in the documentation of the function.
-
-The random number generator of \R{} is set to L'Ecuyer-CMRG when \dtwclust{} is attached%
-\footnote{Via the \code{library} function. Loading without attaching the package would not change the generator.}
-in an attempt to preserve reproducibility.
-The user is free to change this afterwards by using the \code{RNGkind} function.
-
-This manuscript summarizes some of the theory behind the algorithms.
-However, the documentation of the different functions and the other vignettes%
-\footnote{\url{https://cran.r-project.org/web/packages/dtwclust/vignettes/}}
-include additional information regarding usability,
-and should also be considered when using the package.
-
-\section[Using the proxy package]{Using the \pkg{proxy} package}
-\label{app:proxy}
-
-The \pkg{proxy} package is one of the main dependencies of \dtwclust{}.
-It aggregates all its measures in a database object called \code{pr_DB}.
-This has the advantage that all registered functions can be used with the \code{proxy::dist} function,
-which results in a high level of consistency.
-Moreover, this also means that distance measures from \dtwclust{},
-other \R{} packages,
-or user-created can be exploited in different applications,
-even those that are not directly related to time-series clustering.
-All the distances mentioned in this manuscript are registered with \pkg{proxy} when \dtwclust{} is attached in \R{}.
-
-It is important to note that the \code{proxy::dist} function parses all matrix-like objects row-wise,
-meaning that, in the context of time-series clustering,
-it would consider the rows of a matrix or data frame as the individual time-series.
-Matrices and data frames cannot contain series with different length,
-something that can be circumvented by encapsulating the series in a list,
-each element of the list being a single series.
-Internally, \dtwclust{} coerces all provided data to a list,
-and it parses both matrices and data frames row-wise
-(see function \code{tslist}).
-Moreover, lists enable support for multivariate series,
-where a single multivariate time-series should be provided as a matrix where time spans the rows and the variables span the columns.
-Thus, several multivariate time-series should be provided as a list of matrices to ensure that they are correctly detected.
-Note, however, that not all distance and centroid functions support multivariate time-series.
-
-As a first example,
-the autocorrelation-based distance from the \pkg{TSclust} package \citep{montero2014} is registered with \pkg{proxy} so that it can be used either directly or with \dtwclust{}.
-
-<<example-register-tsclust, echo = TRUE, message = FALSE>>=
-require("TSclust")
-proxy::pr_DB$set_entry(FUN = diss.ACF, names = c("ACFD"),
-                       loop = TRUE, type = "metric", distance = TRUE,
-                       description = "Autocorrelation-based distance")
-
-# Taking just a subset of the data
-# Note that subsetting with single brackets preserves the list format
-proxy::dist(CharTraj[3:8], method = "ACFD", upper = TRUE)
-@
-
-In time-series clustering and classification,
-the dissimilarity measure plays a crucial role.
-The \pkg{TSdist} package \citep{tsdist} aggregates a large amount of distance measures specifically tailored to time-series.
-Thanks to the way \dtwclust{} is structured,
-making use of any of those distances is extremely simple,
-as the next example shows.
-
-<<example-register-tsdist, echo = TRUE, message = FALSE>>=
-require("TSdist")
-# Register the Fourier distance
-proxy::pr_DB$set_entry(FUN = FourierDistance, names = c("fourier"),
-                       loop = TRUE, type = "metric", distance = TRUE,
-                       description = "Distance with Fourier coefficients")
-
-# Fourier distance requires equal length
-data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
-
-# Partitional clustering
-tsclust(data[1L:10L], k = 2L, distance = "fourier", seed = 838)
-@
-
-The user is also free to modify or create distance functions and use them.
-For instance, a wrapper to the \code{dtw} function in \pkg{dtw} can be created in order to use the asymmetric step pattern and the normalized distance.
-
-<<example-register-ndtw, echo = TRUE, message = FALSE>>=
-# Normalized DTW
-ndtw <- function(x, y, ...) {
-    dtw(x, y, ...,
-        step.pattern = asymmetric,
-        distance.only = TRUE)$normalizedDistance
+\address{%
+Alexis Sard\'a-Espinosa\\
+\email{alexis.sarda@gmail.com}\\
+Disclaimer: The software package was developed\\
+independently of any organization or institution\\
+that is or has been associated with the author.
 }
-
-# Register the distance with proxy
-proxy::pr_DB$set_entry(FUN = ndtw, names = c("nDTW"),
-                       loop = TRUE, type = "metric", distance = TRUE,
-                       description = "Normalized, asymmetric DTW")
-
-# Partitional clustering
-tsclust(CharTraj[1L:10L], k = 2L,
-        distance = "nDTW", seed = 838)
-@
-
-\section{Finding nearest neighbors in DTW space}
-\label{app:dtw-lb}
-
-In the following example,
-the nearest neighbors in DTW space of the first 5 time-series are found in two different ways,
-first calculating all DTW distances,
-and then using \code{dtw_lb} to leverage \code{LB_Improved}.
-Since the LB is only defined for series of equal length,
-reinterpolation is performed.
-For such a small dataset,
-using \code{dtw_lb} instead of \code{dtw_basic} is probably slower.
-
-<<example-dtw-lb, echo = TRUE>>=
-# Reinterpolate to same length
-data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
-
-# Calculate the DTW distances between all elements
-system.time(D1 <- proxy::dist(data[1L:5L], data[6L:100L],
-                              method = "dtw_basic",
-                              window.size = 20L))
-
-# Nearest neighbors
-NN1 <- apply(D1, 1L, which.min)
-
-# Calculate the distance matrix with dtw_lb
-system.time(D2 <- dtw_lb(data[1L:5L], data[6L:100L],
-                         window.size = 20L))
-
-# Nearest neighbors
-NN2 <- apply(D2, 1L, which.min)
-
-# Same results?
-all(NN1 == NN2)
-@
-
-Finding nearest neighbors can be used for time-series classification.
-A very basic but surprisingly competitive algorithm is the 1-nearest-neighbor classifier,
-which could be implemented as follows.
-
-<<example-1nn-class, echo = TRUE>>=
-# Exclude a series as an example
-database <- data[-100L]
-
-classify_series <- function(query) {
-    # Nearest neighbor
-    nn <- which.min(dtw_lb(database, query,
-                           window.size = 18L,
-                           nn.margin = 2L))
-    # Return a label
-    CharTrajLabels[nn]
-}
-
-# 100-th series is a Z character
-classify_series(data[100L])
-@
-
-\section{Hierarchical clustering examples}
-\label{app:hc}
-
-In the following call to \code{tsclust},
-specifying the value of \code{k} indicates the number of desired clusters,
-so that the \code{cutree} function is called internally.
-Additionally, the shape extraction function is provided in the \code{centroid} argument so that,
-once the \code{k} clusters are obtained,
-their prototypes are extracted.
-Therefore, the series are \textit{z}-normalized by means of the \code{zscore} function.
-The seed is provided because of the randomness in shape extraction when choosing a reference series (see \cref{sec:shape}).
-
-<<example-hc, echo = TRUE, fig.cap = "Resulting dendrogram after hierarchical clustering.">>=
-hc_sbd <- tsclust(CharTraj, type = "h", k = 20L,
-                  preproc = zscore, seed = 899,
-                  distance = "sbd", centroid = shape_extraction,
-                  control = hierarchical_control(method = "average"))
-
-# By default, the dendrogram is plotted in hierarchical clustering
-plot(hc_sbd)
-@
-
-\FloatBarrier
-
-<<example-hc-1, echo = TRUE, fig.cap = "Obtained clusters and their respective prototypes (centroids) shown as dashed lines.">>=
-# The series and the obtained prototypes can be plotted too
-plot(hc_sbd, type = "sc")
-@
-
-\FloatBarrier
-
-<<example-hc-2, echo = TRUE, out.width = "0.45\\linewidth", fig.cap = "Side by side comparison of the series in the first cluster and the obtained prototype.", fig.subcap = c("Series in cluster 1", "Prototype obtained by applying shape extraction to cluster 1")>>=
-# Focusing on the first cluster
-plot(hc_sbd, type = "series", clus = 1L)
-plot(hc_sbd, type = "centroids", clus = 1L)
-@
-
-This exemplifies the advantage of having independent functions for the SBD and shape extraction algorithms.
-Even though they were originally proposed for partitional clustering,
-using them in hierarchical procedures is also possible.
-
-It is also possible to use other functions for hierarchical procedures by providing them in the \code{method} argument.
-However, there are two important considerations:
-such a function will receive the lower triangular part of the distance matrix,
-and it should return a classed object that supports coercion to \code{hclust} objects via the \code{as.hclust} generic.
-The functions in the \pkg{cluster} package \citep{cluster} follow this convention,
-so, as an example, using them in conjunction with \dtwclust{} is straightforward.
-
-<<example-hc-3, echo = TRUE, message = FALSE, warning = FALSE>>=
-require("cluster")
-
-tsclust(CharTraj[1L:20L], type = "h", k = 4L,
-        distance = "dtw_basic",
-        control = hierarchical_control(method = diana),
-        args = tsclust_args(dist = list(window.size = 18L)))
-@
-
-\section{Partitional clustering examples}
-\label{app:pc}
-
-In this example,
-four different partitional clustering strategies are used:
-one uses the $\text{DTW}_2$ distance and DBA centroids,
-then \code{dtw_lb} and DBA centroids are used
-(which provides the same results as using the DTW distance directly; see \cref{sec:lbs}),
-then \kshape{},
-and finally TADPole.
-The results are evaluated using Variation of Information (see \cref{sec:evaluation}),
-with lower numbers indicating better results.
-Note that \textit{z}-normalization is applied by default when selecting shape extraction as the centroid function.
-For consistency, all algorithms used the reinterpolated and normalized data,
-since some algorithms require series of equal length.
-A subset of the data is used for speed.
-The outcome should not be generalized to other data,
-and normalization/reinterpolation may actually worsen some of the algorithms' performance.
-
-<<example-pc, echo = TRUE, warning = FALSE>>=
-# Reinterpolate to same length
-data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
-
-# z-normalization
-data <- zscore(data[60L:100L])
-
-pc_dtw <- tsclust(data, k = 4L,
-                  distance = "dtw_basic", centroid = "dba",
-                  trace = TRUE, seed = 8,
-                  norm = "L2", window.size = 20L,
-                  args = tsclust_args(cent = list(trace = TRUE)))
-
-pc_dtwlb <- tsclust(data, k = 4L,
-                    distance = "dtw_lb", centroid = "dba",
-                    trace = TRUE, seed = 8,
-                    norm = "L2", window.size = 20L,
-                    control = partitional_control(pam.precompute = FALSE),
-                    args = tsclust_args(cent = list(trace = TRUE)))
-
-pc_ks <- tsclust(data, k = 4L,
-                 distance = "sbd", centroid = "shape",
-                 seed = 8, trace = TRUE)
-
-pc_tp <- tsclust(data, k = 4L, type = "t",
-                 seed = 8, trace = TRUE,
-                 control = tadpole_control(dc = 1.5,
-                                           window.size = 20L))
-
-sapply(list(DTW = pc_dtw, DTW_LB = pc_dtwlb, kShape = pc_ks, TADPole = pc_tp),
-       cvi, b = CharTrajLabels[60L:100L], type = "VI")
-@
-
-\newpage
-\section{Fuzzy clustering example}
-\label{app:fuzzy}
-
-This example performs autocorrelation-based fuzzy clustering as proposed by \citet{durso2009}.
-Using the autocorrelation function can be used to overcome the problem of time-series with different length.
-Note, however, that this essentially changes the clustering space,
-using autocorrelation coefficients instead of the time-series themselves.
-
-<<example-fuzzy, echo = TRUE, fig.cap = "Visualization of the clusters that would result from changing the fuzzy partition to a crisp one. Note that the original time-series are used, so the centroids are not shown, since the centroids are made of autocorrelation coefficients.">>=
-# Calculate autocorrelation up to 50th lag
-acf_fun <- function(dat, ...) {
-    lapply(dat, function(x) {
-        as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf)
-    })
-}
-
-# Fuzzy c-means
-fc <- tsclust(CharTraj[1:20], type = "f", k = 4L,
-              preproc = acf_fun, distance = "L2",
-              seed = 42)
-
-# Fuzzy membership matrix
-fc@fcluster
-
-# Are constraints fulfilled?
-all.equal(rep(1, 20), rowSums(fc@fcluster), check.attributes = FALSE)
-
-# Plot crisp partition in the original space
-plot(fc, series = CharTraj[1:20], type = "series")
-@
-
-\section[Using the doParallel package for parallel computation]{Using the \pkg{doParallel} package for parallel computation}
-\label{app:doParallel}
-
-One way of using parallelization with \R{} and \pkg{foreach} is by means of the \pkg{doParallel} package \citep{doParallel}.
-It provides a great level of abstraction so that users can easily configure a parallel backend which can be used by \dtwclust{}.
-The example below does the backend registration and calls \code{tsclust},
-returning to sequential computation after it finishes.
-It only uses 2 parallel workers,
-but more can be configured depending on each processor (see function \code{detectCores} in \R{}).
-Refer to \dtwclust{}'s parallelization vignette for more information.
-
-<<example-doParallel, echo = TRUE, message = FALSE>>=
-require("doParallel")
-
-# Create parallel workers
-workers <- makeCluster(2L)
-# Preload dtwclust in each worker; not necessary but useful
-invisible(clusterEvalQ(workers, library("dtwclust")))
-# Register the backend; this step MUST be done
-registerDoParallel(workers)
-
-# Backend detected automatically
-pc_par <- tsclust(CharTraj[1L:20L], k = 4L,
-                  distance = "dtw_basic", centroid = "dba",
-                  window.size = 15L, seed = 938,
-                  control = partitional_control(nrep = 2L))
-
-# Stop parallel workers
-stopCluster(workers)
-# Go back to sequential computation
-registerDoSEQ()
-@
-
-\section{Cluster evaluation examples}
-\label{app:evaluation}
-
-The easiest way to evaluate partitional and hierarchical clustering results is with the \code{cvi} function,
-which supports both internal and external CVIs (in case the ground truth is known).
-In the following example, different numbers of clusters are computed and,
-using internal CVIs,
-it is possible to assess which one resulted in a partition with more ``purity''.
-The majority of indices suggest using $k = 4$ in this case.
-
-<<example-cvis, echo = TRUE>>=
-# subset
-data <- CharTraj[1L:20L]
-pc_k <- tsclust(data, k = 3L:5L,
-                distance = "dtw_basic", centroid = "pam",
-                seed = 94L)
-names(pc_k) <- paste0("k_", 3L:5L)
-sapply(pc_k, cvi, type = "internal")
-@
-
-If we choose the value of $k = 4$,
-we could then compare results among different random repetitions with help of the \pkg{clue} package (or with CVIs again).
-
-<<example-clue-p, echo = TRUE, message = FALSE>>=
-require("clue")
-pc_4 <- tsclust(data, type = "p", k = 4L,
-                distance = "dtw_basic", centroid = "pam",
-                control = partitional_control(nrep = 5L),
-                seed = 95L)
-
-names(pc_4) <- paste0("r_", 1L:5L)
-pc_4 <- cl_ensemble(list = pc_4)
-cl_dissimilarity(pc_4)
-
-# Confusion matrix
-table(Medoid = cl_class_ids(cl_medoid(pc_4)),
-      "True Classes" = rep(c(4L, 3L, 1L, 2L), each = 5L))
-@
-
-The same could be done for hierarchical procedures, as the next example shows.
-All linkage methods yielded the same results.
-
-<<example-clue-h, echo = TRUE>>=
-hclust_methods <-  c("single", "complete", "average", "mcquitty")
-hc <- tsclust(data, type = "h", k = 4L,
-              control = hierarchical_control(method = hclust_methods,
-                                             distmat = pc_4[[1L]]@distmat))
-names(hc) <- hclust_methods
-hc <- cl_ensemble(list = hc)
-cl_dissimilarity(hc)
-@
-
-\section{Extensibility examples}
-\label{app:extensibility}
-
-In this example,
-a weighted mean centroid is desired and implemented as follows.
-The usefulness of such an approach is of course questionable.
-
-<<example-custom-cent, echo = TRUE>>=
-# Formal arguments before ... must be the same
-weighted_mean_cent <- function(x, cl_id, k, cent, cl_old, ..., weights) {
-    x <- Map(x, weights, f = function(ts, w) { w * ts })
-    x_split <- split(x, cl_id)
-    new_cent <- lapply(x_split, function(xx) {
-        xx <- do.call(rbind, xx)
-        colMeans(xx)
-    })
-}
-
-data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
-weights <- rep(c(0.9,1.1), each = 5L)
-tsclust(data[1L:10L], type = "p", k = 2L,
-        distance = "Manhattan",
-        centroid = weighted_mean_cent,
-        seed = 123,
-        args = tsclust_args(cent = list(weights = weights)))
-@
-
-Other clustering algorithms that significantly alter the workflow in \dtwclust{} are harder to integrate by the user,
-although the provided formal class can still be of use.
-Formal objects can be created with the \code{new} function,
-which has a custom constructor registered.
-For instance, the following would reproduce the result of TADPole clustering,
-enabling the usage of the \code{cvi} function
-(and any other generic that has methods for appropriate \code{TSClusters} objects).
-
-<<example-manual-tadpole, echo = TRUE>>=
-tadp <- TADPole(data[1L:20L], k = 4L,
-                dc = 1.5, window.size = 15L)
-
-tp_obj <- new("PartitionalTSClusters",
-              type = "tadpole",
-              datalist = data[1L:20L],
-              centroids = data[tadp$centroids],
-              cluster = tadp$cl,
-              dots = list(window.size = 15L,
-                          norm = "L2"),
-              distance = "dtw_lb",
-              centroid = "PAM_TADPole")
-
-cvi(tp_obj, CharTrajLabels[1L:20L], type = "external")
-@
-
-Assuming the following results were obtained by applying \kshape{} independently of \dtwclust{},
-the following would reproduce the values in a formal class,
-which can then be used,
-for example,
-to predict cluster membership of new data.
-
-<<example-manual-kshape, echo = TRUE>>=
-ks_obj <- new("PartitionalTSClusters",
-              type = "partitional",
-              datalist = zscore(CharTraj)[-100L],
-              centroids = zscore(CharTraj[seq(1L, 100L, 5L)]),
-              cluster = unclass(CharTrajLabels)[-100L],
-              distance = "sbd",
-              centroid = "shape")
-
-# Preprocessing is performed by ks_obj@family@preproc
-predict(ks_obj, newdata = CharTraj[100L])
-@
-
-\end{document}

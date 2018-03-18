@@ -1,0 +1,37 @@
+\documentclass[a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{RJournal}
+\usepackage{amsmath,amssymb,array}
+\usepackage{booktabs}
+
+% Captions in floating environments
+\usepackage[labelsep=colon,font=small,margin=5pt,format=hang]{caption}
+% For subcaptions in figures
+\usepackage{subcaption}
+% References
+\usepackage[capitalise,noabbrev]{cleveref}
+% Avoid parentheses
+\crefformat{equation}{Equation~#1}
+\Crefformat{equation}{Equation~#1}
+% Used for knitr images from Rnw files
+\newcommand{\subfloat}[2][default for first parameter: need a sub-caption]{\subcaptionbox{#1}{#2}}
+% Shortcuts
+\newcommand{\dtwclust}{\pkg{dtwclust}}
+\newcommand{\dtwp}{\text{DTW}_p}
+\newcommand{\kshape}{\textit{k}-Shape}
+
+\begin{document}
+
+%% do not edit, for illustration only
+\sectionhead{Contributed research article}
+\volume{XX}
+\volnumber{YY}
+\year{20ZZ}
+\month{AAAA}
+
+\begin{article}
+  \input{sarda}
+\end{article}
+
+\end{document}
