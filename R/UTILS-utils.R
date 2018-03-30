@@ -268,8 +268,6 @@ get_nthreads <- function() {
 # ==================================================================================================
 
 # allocate distance matrix for custom proxy loops
-#' @importFrom bigmemory big.matrix
-#'
 allocate_distmat <- function(x_len, y_len, pairwise, symmetric) {
     if (pairwise)
         D <- matrix(0, x_len, 1L)
