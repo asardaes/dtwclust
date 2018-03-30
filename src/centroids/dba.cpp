@@ -30,25 +30,17 @@ class DtwBacktrackCalculator : public DistanceCalculator
 {
 public:
     // constructor
-    DtwBacktrackCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y, const bool mv)
-        : is_multivariate_(mv)
+    DtwBacktrackCalculator(const Rcpp::List& dist_args, const Rcpp::List& x, const Rcpp::List& y)
+        : x_(x)
+        , y_(y)
     {
-        Rcpp::List dist_args(DIST_ARGS), x(X), y(Y);
         window_ = Rcpp::as<int>(dist_args["window.size"]);
         norm_ = Rcpp::as<double>(dist_args["norm"]);
         step_ = Rcpp::as<double>(dist_args["step.pattern"]);
         normalize_ = Rcpp::as<bool>(dist_args["normalize"]);
-        if (is_multivariate_) {
-            x_mv_ = TSTSList<Rcpp::NumericMatrix>(x);
-            y_mv_ = TSTSList<Rcpp::NumericMatrix>(y);
-        }
-        else {
-            x_uv_ = TSTSList<Rcpp::NumericVector>(x);
-            y_uv_ = TSTSList<Rcpp::NumericVector>(y);
-        }
         // set value of max_len_*_
-        max_len_x_ = this->maxLength(x, is_multivariate_);
-        max_len_y_ = this->maxLength(y, is_multivariate_);
+        max_len_x_ = this->maxLength(x_);
+        max_len_y_ = this->maxLength(y_);
         // make sure pointers are null
         gcm_ = nullptr;
         index1_ = nullptr;
@@ -68,15 +60,12 @@ public:
 
     // calculate for given indices (inherited)
     double calculate(const int i, const int j) override {
-        if (is_multivariate_)
-            return this->calculate(x_mv_[i], y_mv_[j]);
-        else
-            return this->calculate(x_uv_[i], y_uv_[j]);
+        return this->calculate(x_[i], y_[j]);
     }
 
     // calculate for given indices (custom for multivariate by-variable version)
     double calculate(const int i, const int j, const int k) {
-        return this->calculate(x_mv_[i], y_mv_[j], k);
+        return this->calculate(x_[i], y_[j], k);
     }
 
     // clone to setup helpers in each thread
@@ -88,51 +77,28 @@ public:
         return ptr;
     }
 
-    // input series (univariate)
-    TSTSList<Rcpp::NumericVector> x_uv_, y_uv_;
-    // input series (multivariate)
-    TSTSList<Rcpp::NumericMatrix> x_mv_, y_mv_;
+    // input series
+    TSTSList<arma::mat> x_, y_;
     // helpers for backtracking
     int path_, *index1_, *index2_;
 
 private:
-    // univariate calculate
-    double calculate(const RcppParallel::RVector<double>& x,
-                     const RcppParallel::RVector<double>& y)
+    // primary calculate
+    double calculate(const arma::mat& x, const arma::mat& y)
     {
         if (!gcm_ || !index1_ || !index2_) return -1;
-        int nx = x.length();
-        int ny = y.length();
         return dtw_basic_par(&x[0], &y[0],
-                             nx, ny, 1,
-                             window_, norm_, step_, normalize_,
-                             gcm_, index1_, index2_, &path_);
-    }
-
-    // by-series multivariate calculate
-    double calculate(const RcppParallel::RMatrix<double>& x,
-                     const RcppParallel::RMatrix<double>& y)
-    {
-        if (!gcm_ || !index1_ || !index2_) return -1;
-        int nx = x.nrow();
-        int ny = y.nrow();
-        int num_var = x.ncol();
-        return dtw_basic_par(&x[0], &y[0],
-                             nx, ny, num_var,
+                             x.n_rows, y.n_rows, x.n_cols,
                              window_, norm_, step_, normalize_,
                              gcm_, index1_, index2_, &path_);
     }
 
     // by-variable multivariate calculate
-    double calculate(const RcppParallel::RMatrix<double>& x,
-                     const RcppParallel::RMatrix<double>& y,
-                     const int k)
+    double calculate(const arma::mat& x, const arma::mat& y, const int k)
     {
         if (!gcm_ || !index1_ || !index2_) return -1;
-        int nx = x.nrow();
-        int ny = y.nrow();
-        return dtw_basic_par(&x[0] + (nx * k), &y[0] + (ny * k),
-                             nx, ny, 1,
+        return dtw_basic_par(&x[0] + (x.n_rows * k), &y[0] + (y.n_rows * k),
+                             x.n_rows, y.n_rows, 1,
                              window_, norm_, step_, normalize_,
                              gcm_, index1_, index2_, &path_);
     }
@@ -140,7 +106,7 @@ private:
     // input parameters
     int window_;
     double norm_, step_;
-    bool normalize_, is_multivariate_;
+    bool normalize_;
     // helper "matrix"
     double* gcm_;
     // to dimension helpers
@@ -177,7 +143,7 @@ public:
         // kahan sum step
         for (std::size_t i = begin; i < end; i++) {
             local_calculator->calculate(i,0);
-            const RcppParallel::RVector<double>& x = local_calculator->x_uv_[i];
+            const auto& x = local_calculator->x_[i];
             mutex_.lock();
             for (int ii = local_calculator->path_ - 1; ii >= 0; ii--) {
                 int i1 = local_calculator->index1_[ii] - 1;
@@ -233,13 +199,13 @@ public:
         // kahan sum step
         for (std::size_t i = begin; i < end; i++) {
             local_calculator->calculate(i,0);
-            const RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[i];
+            const auto& x = local_calculator->x_[i];
             mutex_.lock();
             for (int j = 0; j < static_cast<int>(new_cent_.ncol()); j++) {
                 for (int ii = local_calculator->path_ - 1; ii >= 0; ii--) {
                     int i1 = local_calculator->index1_[ii] - 1;
                     int i2 = local_calculator->index2_[ii] - 1;
-                    summer_.add(x(i1,j), i2, j);
+                    summer_.add(x.at(i1,j), i2, j);
                     num_vals_(i2,j) += 1;
                 }
             }
@@ -290,14 +256,14 @@ public:
         mutex_.unlock();
         // kahan sum step
         for (std::size_t i = begin; i < end; i++) {
-            const RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[i];
+            const auto& x = local_calculator->x_[i];
             for (int j = 0; j < static_cast<int>(new_cent_.ncol()); j++) {
                 local_calculator->calculate(i,0,j);
                 mutex_.lock();
                 for (int ii = local_calculator->path_ - 1; ii >= 0; ii--) {
                     int i1 = local_calculator->index1_[ii] - 1;
                     int i2 = local_calculator->index2_[ii] - 1;
-                    summer_.add(x(i1,j), i2, j);
+                    summer_.add(x.at(i1,j), i2, j);
                     num_vals_(i2,j) += 1;
                 }
                 mutex_.unlock();
@@ -325,7 +291,7 @@ private:
 
 // univariate
 bool average_step(Rcpp::NumericVector& new_cent,
-                  const Rcpp::IntegerVector num_vals,
+                  const Rcpp::IntegerVector& num_vals,
                   Rcpp::NumericVector& ref_cent)
 {
     bool converged = true;
@@ -377,15 +343,13 @@ void print_trace(const bool converged, const int iter)
 /* univariate DBA */
 // =================================================================================================
 
-SEXP dba_uv(const SEXP& X, const Rcpp::NumericVector& centroid, const SEXP& DOTS)
+SEXP dba_uv(const Rcpp::List& series, const Rcpp::NumericVector& centroid, const SEXP& DOTS)
 {
-    Rcpp::List series(X);
     Rcpp::NumericVector ref_cent = Rcpp::clone(centroid);
     Rcpp::NumericVector new_cent(ref_cent.length());
     Rcpp::IntegerVector num_vals(ref_cent.length());
 
-    SEXP Y = Rcpp::List::create(Rcpp::_["cent"] = ref_cent);
-    DtwBacktrackCalculator backtrack_calculator(DOTS, X, Y, false);
+    DtwBacktrackCalculator backtrack_calculator(DOTS, series, Rcpp::List::create(ref_cent));
     DbaUv parallel_worker(std::move(backtrack_calculator), new_cent, num_vals);
     int grain = series.length() / num_threads;
     if (grain == 0) grain = 1;
@@ -416,15 +380,13 @@ SEXP dba_uv(const SEXP& X, const Rcpp::NumericVector& centroid, const SEXP& DOTS
 /* multivariate DBA considering each variable separately */
 // =================================================================================================
 
-SEXP dba_mv_by_variable(const SEXP& X, const Rcpp::NumericMatrix& centroid, const SEXP& DOTS)
+SEXP dba_mv_by_variable(const Rcpp::List& series, const Rcpp::NumericMatrix& centroid, const SEXP& DOTS)
 {
-    Rcpp::List series(X);
     Rcpp::NumericMatrix ref_cent = Rcpp::clone(centroid);
     Rcpp::NumericMatrix new_cent(ref_cent.nrow(), ref_cent.ncol());
     Rcpp::IntegerMatrix num_vals(ref_cent.nrow(), ref_cent.ncol());
 
-    SEXP Y = Rcpp::List::create(Rcpp::_["cent"] = ref_cent);
-    DtwBacktrackCalculator backtrack_calculator(DOTS, X, Y, true);
+    DtwBacktrackCalculator backtrack_calculator(DOTS, series, Rcpp::List::create(ref_cent));
     DbaMvByVariable parallel_worker(std::move(backtrack_calculator), new_cent, num_vals);
     int grain = series.length() / num_threads;
     if (grain == 0) grain = 1;
@@ -455,15 +417,13 @@ SEXP dba_mv_by_variable(const SEXP& X, const Rcpp::NumericMatrix& centroid, cons
 /* multivariate DBA considering each series as a whole */
 // =================================================================================================
 
-SEXP dba_mv_by_series(const SEXP& X, const Rcpp::NumericMatrix& centroid, const SEXP& DOTS)
+SEXP dba_mv_by_series(const Rcpp::List& series, const Rcpp::NumericMatrix& centroid, const SEXP& DOTS)
 {
-    Rcpp::List series(X);
     Rcpp::NumericMatrix ref_cent = Rcpp::clone(centroid);
     Rcpp::NumericMatrix new_cent(ref_cent.nrow(), ref_cent.ncol());
     Rcpp::IntegerMatrix num_vals(ref_cent.nrow(), ref_cent.ncol());
 
-    SEXP Y = Rcpp::List::create(Rcpp::_["cent"] = ref_cent);
-    DtwBacktrackCalculator backtrack_calculator(DOTS, X, Y, true);
+    DtwBacktrackCalculator backtrack_calculator(DOTS, series, Rcpp::List::create(ref_cent));
     DbaMvBySeries parallel_worker(std::move(backtrack_calculator), new_cent, num_vals);
     int grain = series.length() / num_threads;
     if (grain == 0) grain = 1;

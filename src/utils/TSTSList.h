@@ -3,38 +3,42 @@
 
 #include <complex>
 #include <memory> // make_shared, shared_ptr
-#include <type_traits> // conditional, is_same
+#include <utility> // move
 #include <vector>
 
-#include <RcppArmadillo.h> // arma:: referenced here
-#include <RcppParallel.h>
+#include <RcppArmadillo.h>
 
 namespace dtwclust {
 
 // =================================================================================================
-/* Thread-Safe Time-Series List
- *   It should be constructed outside the thread though.
+/** Thread-Safe Time-Series List
+ *
+ *  It must be constructed outside the thread though.
+ *
+ *  TSTSType must be either arma::mat or arma::cx_mat.
  */
-// =================================================================================================
 
-// primary one
-template<typename SeriesType>
+// primary
+template<typename TSTSType>
 class TSTSList
 {
 public:
-    typedef typename std::conditional<
-        std::is_same<SeriesType, Rcpp::NumericVector>::value,
-        RcppParallel::RVector<double>,
-        RcppParallel::RMatrix<double>
-    >::type TSTSType;
     // constructors
     TSTSList() {} // dummy
     TSTSList(const Rcpp::List& series)
         : series_(std::make_shared<std::vector<TSTSType>>())
     {
         for (const SEXP& x : series) {
-            SeriesType x_rcpp(x);
-            series_->push_back(TSTSType(x_rcpp));
+            if (Rf_isMatrix(x)) {
+                Rcpp::NumericMatrix x_rcpp(x);
+                TSTSType x_arma(&x_rcpp[0], x_rcpp.nrow(), x_rcpp.ncol(), false, true);
+                series_->push_back(std::move(x_arma));
+            }
+            else {
+                Rcpp::NumericVector x_rcpp(x);
+                TSTSType x_arma(&x_rcpp[0], x_rcpp.length(), 1, false, true);
+                series_->push_back(std::move(x_arma));
+            }
         }
     }
     // operator[]
@@ -42,38 +46,47 @@ public:
     const TSTSType& operator[](const int i) const { return (*series_)[i]; }
     // length
     int length() const { return series_->size(); }
+    // iterators
+    typename std::vector<TSTSType>::iterator begin() { return series_->begin(); }
+    typename std::vector<TSTSType>::iterator end() { return series_->end(); }
+    typename std::vector<TSTSType>::const_iterator begin() const { return series_->cbegin(); }
+    typename std::vector<TSTSType>::const_iterator end() const { return series_->cend(); }
 
 private:
     std::shared_ptr<std::vector<TSTSType>> series_;
 };
 
-// specialization for complex vectors
+// specialization for complex case
 template<>
-class TSTSList<Rcpp::ComplexVector>
-{
+class TSTSList<arma::cx_mat> {
 public:
-    typedef arma::cx_vec TSTSType;
     // constructors
     TSTSList() {} // dummy
     TSTSList(const Rcpp::List& series)
-        : series_(std::make_shared<std::vector<TSTSType>>())
+        : series_(std::make_shared<std::vector<arma::cx_mat>>())
     {
+        // see http://rcpp-devel.r-forge.r-project.narkive.com/o5ubHVos/multiplication-of-complexvector
         for (const SEXP& x : series) {
+            // only complex vectors expected right now
             Rcpp::ComplexVector x_rcpp(x);
-            // see http://rcpp-devel.r-forge.r-project.narkive.com/o5ubHVos/multiplication-of-complexvector
-            arma::cx_vec x_arma(reinterpret_cast<std::complex<double>*>(x_rcpp.begin()),
-                                x_rcpp.length(), false, true);
-            series_->push_back(x_arma);
+            arma::cx_mat x_arma(reinterpret_cast<std::complex<double>*>(&x_rcpp[0]),
+                                x_rcpp.length(), 1, false, true);
+            series_->push_back(std::move(x_arma));
         }
     }
     // operator[]
-    TSTSType& operator[](const int i) { return (*series_)[i]; }
-    const TSTSType& operator[](const int i) const { return (*series_)[i]; }
+    arma::cx_mat& operator[](const int i) { return (*series_)[i]; }
+    const arma::cx_mat& operator[](const int i) const { return (*series_)[i]; }
     // length
     int length() const { return series_->size(); }
+    // iterators
+    typename std::vector<arma::cx_mat>::iterator begin() { return series_->begin(); }
+    typename std::vector<arma::cx_mat>::iterator end() { return series_->end(); }
+    typename std::vector<arma::cx_mat>::const_iterator begin() const { return series_->cbegin(); }
+    typename std::vector<arma::cx_mat>::const_iterator end() const { return series_->cend(); }
 
 private:
-    std::shared_ptr<std::vector<TSTSType>> series_;
+    std::shared_ptr<std::vector<arma::cx_mat>> series_;
 };
 
 } // namespace dtwclust

@@ -217,8 +217,7 @@ gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     distance <- "GAK" # read in C++, can't be temporary!
     distargs <- list(
         sigma = sigma,
-        window.size = window.size,
-        is.multivariate = mv
+        window.size = window.size
     )
     num_threads <- get_nthreads()
     .Call(C_distmat_loop,

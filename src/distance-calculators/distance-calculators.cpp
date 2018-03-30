@@ -5,7 +5,6 @@
 #include <string>
 
 #include <RcppArmadillo.h>
-#include <RcppParallel.h>
 
 #include "../distances/distances-details.h"  // dtw_basic_par, logGAK_par, lbi_core, lbk_core, soft_dtw
 #include "../utils/SurrogateMatrix.h"
@@ -51,25 +50,18 @@ DistanceCalculatorFactory::create(const std::string& dist, const SEXP& DIST_ARGS
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-DtwBasicCalculator::DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y) {
-    Rcpp::List dist_args(DIST_ARGS), x(X), y(Y);
+DtwBasicCalculator::DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+    : x_(X)
+    , y_(Y)
+    , gcm_(nullptr)
+{
+    Rcpp::List dist_args(DIST_ARGS);
     window_ = Rcpp::as<int>(dist_args["window.size"]);
     norm_ = Rcpp::as<double>(dist_args["norm"]);
     step_ = Rcpp::as<double>(dist_args["step.pattern"]);
     normalize_ = Rcpp::as<bool>(dist_args["normalize"]);
-    is_multivariate_ = Rcpp::as<bool>(dist_args["is.multivariate"]);
-    if (is_multivariate_) {
-        x_mv_ = TSTSList<Rcpp::NumericMatrix>(x);
-        y_mv_ = TSTSList<Rcpp::NumericMatrix>(y);
-    }
-    else {
-        x_uv_ = TSTSList<Rcpp::NumericVector>(x);
-        y_uv_ = TSTSList<Rcpp::NumericVector>(y);
-    }
     // set value of max_len_y_
-    max_len_y_ = this->maxLength(y, is_multivariate_);
-    // make sure pointer is null
-    gcm_ = nullptr;
+    max_len_y_ = this->maxLength(y_);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -83,12 +75,7 @@ DtwBasicCalculator::~DtwBasicCalculator() {
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
 double DtwBasicCalculator::calculate(const int i, const int j) {
-    if (is_multivariate_) {
-        return this->calculate(x_mv_[i], y_mv_[j]);
-    }
-    else {
-        return this->calculate(x_uv_[i], y_uv_[j]);
-    }
+    return this->calculate(x_[i], y_[j]);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -108,29 +95,10 @@ DtwBasicCalculator* DtwBasicCalculator::clone() const {
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
 
-// univariate
-double DtwBasicCalculator::calculate(
-        const RcppParallel::RVector<double>& x, const RcppParallel::RVector<double>& y)
-{
+double DtwBasicCalculator::calculate(const arma::mat& x, const arma::mat& y) {
     if (!gcm_) return -1;
-    int nx = x.length();
-    int ny = y.length();
-    int num_var = 1;
     return dtw_basic_par(&x[0], &y[0],
-                         nx, ny, num_var,
-                         window_, norm_, step_, normalize_, gcm_);
-}
-
-// multivariate
-double DtwBasicCalculator::calculate(
-        const RcppParallel::RMatrix<double>& x, const RcppParallel::RMatrix<double>& y)
-{
-    if (!gcm_) return -1;
-    int nx = x.nrow();
-    int ny = y.nrow();
-    int num_var = x.ncol();
-    return dtw_basic_par(&x[0], &y[0],
-                         nx, ny, num_var,
+                         x.n_rows, y.n_rows, x.n_cols,
                          window_, norm_, step_, normalize_, gcm_);
 }
 
@@ -141,24 +109,17 @@ double DtwBasicCalculator::calculate(
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-GakCalculator::GakCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y) {
-    Rcpp::List dist_args(DIST_ARGS), x(X), y(Y);
+GakCalculator::GakCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+    : x_(X)
+    , y_(Y)
+    , logs_(nullptr)
+{
+    Rcpp::List dist_args(DIST_ARGS);
     sigma_ = Rcpp::as<double>(dist_args["sigma"]);
     window_ = Rcpp::as<int>(dist_args["window.size"]);
-    is_multivariate_ = Rcpp::as<bool>(dist_args["is.multivariate"]);
-    if (is_multivariate_) {
-        x_mv_ = TSTSList<Rcpp::NumericMatrix>(x);
-        y_mv_ = TSTSList<Rcpp::NumericMatrix>(y);
-    }
-    else {
-        x_uv_ = TSTSList<Rcpp::NumericVector>(x);
-        y_uv_ = TSTSList<Rcpp::NumericVector>(y);
-    }
     // set values of max_len_*_
-    max_len_x_ = this->maxLength(x, is_multivariate_);
-    max_len_y_ = this->maxLength(y, is_multivariate_);
-    // make sure pointer is null
-    logs_ = nullptr;
+    max_len_x_ = this->maxLength(x_);
+    max_len_y_ = this->maxLength(y_);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -172,12 +133,7 @@ GakCalculator::~GakCalculator() {
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
 double GakCalculator::calculate(const int i, const int j) {
-    if (is_multivariate_) {
-        return this->calculate(x_mv_[i], y_mv_[j]);
-    }
-    else {
-        return this->calculate(x_uv_[i], y_uv_[j]);
-    }
+    return this->calculate(x_[i], y_[j]);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -197,26 +153,11 @@ GakCalculator* GakCalculator::clone() const {
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
 
-// univariate
-double GakCalculator::calculate(
-        const RcppParallel::RVector<double>& x, const RcppParallel::RVector<double>& y)
-{
+double GakCalculator::calculate(const arma::mat& x, const arma::mat& y) {
     if (!logs_) return -1;
-    int nx = x.length();
-    int ny = y.length();
-    int num_var = 1;
-    return logGAK_par(&x[0], &y[0], nx, ny, num_var, sigma_, window_, logs_);
-}
-
-// multivariate
-double GakCalculator::calculate(
-        const RcppParallel::RMatrix<double>& x, const RcppParallel::RMatrix<double>& y)
-{
-    if (!logs_) return -1;
-    int nx = x.nrow();
-    int ny = y.nrow();
-    int num_var = x.ncol();
-    return logGAK_par(&x[0], &y[0], nx, ny, num_var, sigma_, window_, logs_);
+    return logGAK_par(&x[0], &y[0],
+                      x.n_rows, y.n_rows, x.n_cols,
+                      sigma_, window_, logs_);
 }
 
 // =================================================================================================
@@ -226,21 +167,22 @@ double GakCalculator::calculate(
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-LbiCalculator::LbiCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y) {
-    Rcpp::List dist_args(DIST_ARGS), x(X), y(Y);
+LbiCalculator::LbiCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+    : x_(X)
+    , y_(Y)
+    , H_(nullptr)
+    , L2_(nullptr)
+    , U2_(nullptr)
+    , LB_(nullptr)
+{
+    Rcpp::List dist_args(DIST_ARGS);
     p_ = Rcpp::as<int>(dist_args["p"]);
     len_ = Rcpp::as<int>(dist_args["len"]);
     window_ = Rcpp::as<unsigned int>(dist_args["window.size"]);
-    x_uv_ = TSTSList<Rcpp::NumericVector>(x);
-    y_uv_ = TSTSList<Rcpp::NumericVector>(y);
     Rcpp::List LE((SEXP)dist_args["lower.env"]);
     Rcpp::List UE((SEXP)dist_args["upper.env"]);
-    lower_envelopes_ = TSTSList<Rcpp::NumericVector>(LE);
-    upper_envelopes_ = TSTSList<Rcpp::NumericVector>(UE);
-    H_ = nullptr;
-    L2_ = nullptr;
-    U2_ = nullptr;
-    LB_ = nullptr;
+    lower_envelopes_ = TSTSList<arma::mat>(LE);
+    upper_envelopes_ = TSTSList<arma::mat>(UE);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -273,18 +215,18 @@ LbiCalculator* LbiCalculator::clone() const {
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
 double LbiCalculator::calculate(const int i, const int j) {
-    return this->calculate(x_uv_[i], y_uv_[j], lower_envelopes_[j], upper_envelopes_[j]);
+    return this->calculate(x_[i], y_[j], lower_envelopes_[j], upper_envelopes_[j]);
 }
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
-double LbiCalculator::calculate(const RcppParallel::RVector<double>& x,
-                                const RcppParallel::RVector<double>& y,
-                                const RcppParallel::RVector<double>& lower_envelope,
-                                const RcppParallel::RVector<double>& upper_envelope)
+double LbiCalculator::calculate(const arma::mat& x, const arma::mat& y,
+                                const arma::mat& lower_envelope, const arma::mat& upper_envelope)
 {
-    return lbi_core(&x[0], &y[0], len_, window_, p_, &lower_envelope[0], &upper_envelope[0],
+    return lbi_core(&x[0], &y[0],
+                    len_, window_, p_,
+                    &lower_envelope[0], &upper_envelope[0],
                     L2_, U2_, H_, LB_);
 }
 
@@ -295,16 +237,17 @@ double LbiCalculator::calculate(const RcppParallel::RVector<double>& x,
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-LbkCalculator::LbkCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y) {
-    Rcpp::List dist_args(DIST_ARGS), x(X);
+LbkCalculator::LbkCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+    : x_(X)
+    , H_(nullptr)
+{
+    Rcpp::List dist_args(DIST_ARGS);
     p_ = Rcpp::as<int>(dist_args["p"]);
     len_ = Rcpp::as<int>(dist_args["len"]);
-    x_uv_ = TSTSList<Rcpp::NumericVector>(x);
     Rcpp::List LE((SEXP)dist_args["lower.env"]);
     Rcpp::List UE((SEXP)dist_args["upper.env"]);
-    lower_envelopes_ = TSTSList<Rcpp::NumericVector>(LE);
-    upper_envelopes_ = TSTSList<Rcpp::NumericVector>(UE);
-    H_ = nullptr;
+    lower_envelopes_ = TSTSList<arma::mat>(LE);
+    upper_envelopes_ = TSTSList<arma::mat>(UE);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -332,15 +275,14 @@ LbkCalculator* LbkCalculator::clone() const {
 // -------------------------------------------------------------------------------------------------
 double LbkCalculator::calculate(const int i, const int j) {
     // y is ignored here, only the envelopes matter
-    return this->calculate(x_uv_[i], lower_envelopes_[j], upper_envelopes_[j]);
+    return this->calculate(x_[i], lower_envelopes_[j], upper_envelopes_[j]);
 }
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
-double LbkCalculator::calculate(const RcppParallel::RVector<double>& x,
-                                const RcppParallel::RVector<double>& lower_envelope,
-                                const RcppParallel::RVector<double>& upper_envelope)
+double LbkCalculator::calculate(const arma::mat& x,
+                                const arma::mat& lower_envelope, const arma::mat& upper_envelope)
 {
     if (!H_) return -1;
     return lbk_core(&x[0], len_, p_, &lower_envelope[0], &upper_envelope[0], H_);
@@ -353,16 +295,17 @@ double LbkCalculator::calculate(const RcppParallel::RVector<double>& x,
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-SbdCalculator::SbdCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y) {
+SbdCalculator::SbdCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+    : x_(X)
+    , y_(Y)
+{
     // note cc_seq_truncated_ is not set here, it is allocated for each clone
     Rcpp::List dist_args(DIST_ARGS), x(X), y(Y);
     fftlen_ = Rcpp::as<int>(dist_args["fftlen"]);
-    x_uv_ = TSTSList<Rcpp::NumericVector>(x);
-    y_uv_ = TSTSList<Rcpp::NumericVector>(y);
     Rcpp::List fftx((SEXP)dist_args["fftx"]);
     Rcpp::List ffty((SEXP)dist_args["ffty"]);
-    fftx_ = TSTSList<Rcpp::ComplexVector>(fftx);
-    ffty_ = TSTSList<Rcpp::ComplexVector>(ffty);
+    fftx_ = TSTSList<arma::cx_mat>(fftx);
+    ffty_ = TSTSList<arma::cx_mat>(ffty);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -378,23 +321,17 @@ SbdCalculator* SbdCalculator::clone() const {
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
 double SbdCalculator::calculate(const int i, const int j) {
-    RcppParallel::RVector<double>& x_rcpp = x_uv_[i];
-    RcppParallel::RVector<double>& y_rcpp = y_uv_[j];
-    // avoid copying data (ptr, length, copy, strict)
-    const arma::vec x(x_rcpp.begin(), x_rcpp.length(), false, true);
-    const arma::vec y(y_rcpp.begin(), y_rcpp.length(), false, true);
-    // calculate distance
-    return this->calculate(x, y, fftx_[i], ffty_[j]);
+    return this->calculate(x_[i], y_[j], fftx_[i], ffty_[j]);
 }
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
-double SbdCalculator::calculate(const arma::vec& x, const arma::vec& y,
-                                const arma::cx_vec& fftx, const arma::cx_vec& ffty)
+double SbdCalculator::calculate(const arma::mat& x, const arma::mat& y,
+                                const arma::cx_mat& fftx, const arma::cx_mat& ffty)
 {
     // already normalizes by length
-    arma::vec cc_seq = arma::real(arma::ifft(fftx % ffty));
+    arma::mat cc_seq = arma::real(arma::ifft(fftx % ffty));
     double x_norm = arma::norm(x);
     double y_norm = arma::norm(y);
     // reorder truncated sequence
@@ -423,33 +360,22 @@ double SbdCalculator::calculate(const arma::vec& x, const arma::vec& y,
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-SdtwCalculator::SdtwCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y) {
-    Rcpp::List dist_args(DIST_ARGS), x(X), y(Y);
+SdtwCalculator::SdtwCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
+    : x_(X)
+    , y_(Y)
+{
+    Rcpp::List dist_args(DIST_ARGS);
     gamma_ = Rcpp::as<double>(dist_args["gamma"]);
-    is_multivariate_ = Rcpp::as<bool>(dist_args["is.multivariate"]);
-    if (is_multivariate_) {
-        x_mv_ = TSTSList<Rcpp::NumericMatrix>(x);
-        y_mv_ = TSTSList<Rcpp::NumericMatrix>(y);
-    }
-    else {
-        x_uv_ = TSTSList<Rcpp::NumericVector>(x);
-        y_uv_ = TSTSList<Rcpp::NumericVector>(y);
-    }
     // set values of max_len_*_
-    max_len_x_ = this->maxLength(x, is_multivariate_);
-    max_len_y_ = this->maxLength(y, is_multivariate_);
+    max_len_x_ = this->maxLength(x_);
+    max_len_y_ = this->maxLength(y_);
 }
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
 double SdtwCalculator::calculate(const int i, const int j) {
-    if (is_multivariate_) {
-        return this->calculate(x_mv_[i], y_mv_[j]);
-    }
-    else {
-        return this->calculate(x_uv_[i], y_uv_[j]);
-    }
+    return this->calculate(x_[i], y_[j]);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -469,25 +395,10 @@ SdtwCalculator* SdtwCalculator::clone() const {
 /* compute distance for two series */
 // -------------------------------------------------------------------------------------------------
 
-// univariate
-double SdtwCalculator::calculate(
-        const RcppParallel::RVector<double>& x, const RcppParallel::RVector<double>& y)
+double SdtwCalculator::calculate(const arma::mat& x, const arma::mat& y)
 {
     if (!cm_) return -1;
-    int nx = x.length();
-    int ny = y.length();
-    return sdtw(&x[0], &y[0], nx, ny, 1, gamma_, cm_);
-}
-
-// multivariate
-double SdtwCalculator::calculate(
-        const RcppParallel::RMatrix<double>& x, const RcppParallel::RMatrix<double>& y)
-{
-    if (!cm_) return -1;
-    int nx = x.nrow();
-    int ny = y.nrow();
-    int num_var = x.ncol();
-    return sdtw(&x[0], &y[0], nx, ny, num_var, gamma_, cm_);
+    return sdtw(&x[0], &y[0], x.n_rows, y.n_rows, x.n_cols, gamma_, cm_);
 }
 
 } // namespace dtwclust

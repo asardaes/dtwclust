@@ -150,7 +150,6 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
         norm = norm,
         step.pattern = step.pattern,
         backtrack = backtrack,
-        is.multivariate = mv,
         normalize = normalize
     )
     num_threads <- get_nthreads()

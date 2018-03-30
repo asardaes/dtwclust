@@ -28,21 +28,12 @@ public:
     virtual DistanceCalculator* clone() const = 0;
 
 protected:
-    int maxLength(const Rcpp::List& list, const bool is_multivariate) const {
-        int max_len = 0;
-        for (const SEXP& series : list) {
-            if (is_multivariate) {
-                Rcpp::NumericMatrix x(series);
-                int this_len = x.nrow();
-                if (this_len > max_len) max_len = this_len;
-            }
-            else {
-                Rcpp::NumericVector x(series);
-                int this_len = x.length();
-                if (this_len > max_len) max_len = this_len;
-            }
+    int maxLength(const TSTSList<arma::mat>& list) const {
+        unsigned int max_len = 0;
+        for (const arma::mat& x : list) {
+            if (x.n_rows > max_len) max_len = x.n_rows;
         }
-        return max_len;
+        return static_cast<int>(max_len);
     }
 };
 
@@ -71,18 +62,13 @@ public:
 
 private:
     // method calculate
-    double calculate(const RcppParallel::RVector<double>& x,
-                     const RcppParallel::RVector<double>& y);
-    double calculate(const RcppParallel::RMatrix<double>& x,
-                     const RcppParallel::RMatrix<double>& y);
+    double calculate(const arma::mat& x, const arma::mat& y);
     // input parameters
     int window_;
     double norm_, step_;
-    bool normalize_, is_multivariate_;
-    // input series (univariate)
-    TSTSList<Rcpp::NumericVector> x_uv_, y_uv_;
-    // input series (multivariate)
-    TSTSList<Rcpp::NumericMatrix> x_mv_, y_mv_;
+    bool normalize_;
+    // input series
+    TSTSList<arma::mat> x_, y_;
     // helper "matrix"
     double* gcm_;
     // to dimension gcm_
@@ -102,18 +88,12 @@ public:
 
 private:
     // method calculate
-    double calculate(const RcppParallel::RVector<double>& x,
-                     const RcppParallel::RVector<double>& y);
-    double calculate(const RcppParallel::RMatrix<double>& x,
-                     const RcppParallel::RMatrix<double>& y);
+    double calculate(const arma::mat& x, const arma::mat& y);
     // input parameters
     double sigma_;
     int window_;
-    bool is_multivariate_;
-    // input series (univariate)
-    TSTSList<Rcpp::NumericVector> x_uv_, y_uv_;
-    // input series (multivariate)
-    TSTSList<Rcpp::NumericMatrix> x_mv_, y_mv_;
+    // input series
+    TSTSList<arma::mat> x_, y_;
     // helper "matrix"
     double* logs_;
     // to dimension logs_
@@ -132,13 +112,11 @@ public:
     LbiCalculator* clone() const override;
 
 private:
-    double calculate(const RcppParallel::RVector<double>& x,
-                     const RcppParallel::RVector<double>& y,
-                     const RcppParallel::RVector<double>& lower_envelope,
-                     const RcppParallel::RVector<double>& upper_envelope);
+    double calculate(const arma::mat& x, const arma::mat& y,
+                     const arma::mat& lower_envelope, const arma::mat& upper_envelope);
     int p_, len_;
     unsigned int window_;
-    TSTSList<Rcpp::NumericVector> x_uv_, y_uv_, lower_envelopes_, upper_envelopes_;
+    TSTSList<arma::mat> x_, y_, lower_envelopes_, upper_envelopes_;
     double *H_, *L2_, *U2_, *LB_;
 };
 
@@ -154,11 +132,10 @@ public:
     LbkCalculator* clone() const override;
 
 private:
-    double calculate(const RcppParallel::RVector<double>& x,
-                     const RcppParallel::RVector<double>& lower_envelope,
-                     const RcppParallel::RVector<double>& upper_envelope);
+    double calculate(const arma::mat& x,
+                     const arma::mat& lower_envelope, const arma::mat& upper_envelope);
     int p_, len_;
-    TSTSList<Rcpp::NumericVector> x_uv_, lower_envelopes_, upper_envelopes_;
+    TSTSList<arma::mat> x_, lower_envelopes_, upper_envelopes_;
     double* H_;
 };
 
@@ -173,10 +150,10 @@ public:
     SbdCalculator* clone() const override;
 
 private:
-    double calculate(const arma::vec& x, const arma::vec& y,
-                     const arma::cx_vec& fftx, const arma::cx_vec& ffty);
-    TSTSList<Rcpp::NumericVector> x_uv_, y_uv_;
-    TSTSList<Rcpp::ComplexVector> fftx_, ffty_;
+    double calculate(const arma::mat& x, const arma::mat& y,
+                     const arma::cx_mat& fftx, const arma::cx_mat& ffty);
+    TSTSList<arma::mat> x_, y_;
+    TSTSList<arma::cx_mat> fftx_, ffty_;
     arma::vec cc_seq_truncated_;
     int fftlen_;
 };
@@ -193,17 +170,11 @@ public:
 
 private:
     // method calculate
-    double calculate(const RcppParallel::RVector<double>& x,
-                     const RcppParallel::RVector<double>& y);
-    double calculate(const RcppParallel::RMatrix<double>& x,
-                     const RcppParallel::RMatrix<double>& y);
+    double calculate(const arma::mat& x, const arma::mat& y);
     // input parameters
     double gamma_;
-    bool is_multivariate_;
-    // input series (univariate)
-    TSTSList<Rcpp::NumericVector> x_uv_, y_uv_;
-    // input series (multivariate)
-    TSTSList<Rcpp::NumericMatrix> x_mv_, y_mv_;
+    // input series
+    TSTSList<arma::mat> x_, y_;
     // helper "matrix"
     SurrogateMatrix<double> cm_;
     // to dimension cm_

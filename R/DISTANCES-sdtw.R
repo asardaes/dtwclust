@@ -68,8 +68,7 @@ sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ..., error.check = TRUE, pairw
     # calculate distance matrix
     distance <- "SDTW" # read in C++, can't be temporary!
     distargs <- list(
-        gamma = gamma,
-        is.multivariate = mv
+        gamma = gamma
     )
     num_threads <- get_nthreads()
     .Call(C_distmat_loop,

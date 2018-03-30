@@ -1,3 +1,5 @@
+Out of date as of 2018-03-30, will update...
+
 # Contributing a distance measure
 
 Thanks to the `proxy` package,

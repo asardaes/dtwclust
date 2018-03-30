@@ -60,29 +60,19 @@ class SdtwCentCalculator : public DistanceCalculator
 {
 public:
     // constructor
-    SdtwCentCalculator(const Rcpp::List& x, const Rcpp::List& y, const double gamma, const bool mv)
+    SdtwCentCalculator(const Rcpp::List& x, const Rcpp::List& y, const double gamma)
         : gamma_(gamma)
-        , is_multivariate_(mv)
+        , x_(x)
+        , y_(y)
     {
-        if (is_multivariate_) {
-            x_mv_ = TSTSList<Rcpp::NumericMatrix>(x);
-            y_mv_ = TSTSList<Rcpp::NumericMatrix>(y);
-        }
-        else {
-            x_uv_ = TSTSList<Rcpp::NumericVector>(x);
-            y_uv_ = TSTSList<Rcpp::NumericVector>(y);
-        }
         // set values of max_len_*_
-        max_len_x_ = this->maxLength(x, is_multivariate_);
-        max_len_y_ = this->maxLength(y, is_multivariate_);
+        max_len_x_ = this->maxLength(x_);
+        max_len_y_ = this->maxLength(y_);
     }
 
     // calculate for given indices
     double calculate(const int i, const int j) override {
-        if (is_multivariate_)
-            return this->calculate(x_mv_[i], y_mv_[j]);
-        else
-            return this->calculate(x_uv_[i], y_uv_[j]);
+        return this->calculate(x_[i], y_[j]);
     }
 
     // clone that sets helper matrices
@@ -93,30 +83,16 @@ public:
         return ptr;
     }
 
-    // univariate calculate
-    double calculate(const RcppParallel::RVector<double>& x, const RcppParallel::RVector<double>& y) {
+    // calculate
+    double calculate(const arma::mat& x, const arma::mat& y) {
         if (!cm_ || !dm_) return -1;
-        int nx = x.length();
-        int ny = y.length();
-        return sdtw(&x[0], &y[0], nx, ny, 1, gamma_, cm_, dm_);
-    }
-
-    // multivariate calculate
-    double calculate(const RcppParallel::RMatrix<double>& x, const RcppParallel::RMatrix<double>& y) {
-        if (!cm_ || !dm_) return -1;
-        int nx = x.nrow();
-        int ny = y.nrow();
-        int num_var = x.ncol();
-        return sdtw(&x[0], &y[0], nx, ny, num_var, gamma_, cm_, dm_);
+        return sdtw(&x[0], &y[0], x.n_rows, y.n_rows, x.n_cols, gamma_, cm_, dm_);
     }
 
     // input parameters
     double gamma_;
-    bool is_multivariate_;
-    // input series (univariate)
-    TSTSList<Rcpp::NumericVector> x_uv_, y_uv_;
-    // input series (multivariate)
-    TSTSList<Rcpp::NumericMatrix> x_mv_, y_mv_;
+    // input series
+    TSTSList<arma::mat> x_, y_;
     // helper "matrices"
     SurrogateMatrix<double> cm_, dm_;
     // to dimension cm_ and dm_
@@ -153,17 +129,17 @@ public:
         //   Includes the calculation of soft-DTW gradient + jacobian product.
         SurrogateMatrix<double>& cm = local_calculator->cm_;
         SurrogateMatrix<double>& dm = local_calculator->dm_;
-        const RcppParallel::RVector<double>& x = local_calculator->x_uv_[0];
-        int m = x.length();
+        const auto& x = local_calculator->x_[0];
+        int m = x.n_rows;
         for (std::size_t id = begin; id < end; id++) {
-            const RcppParallel::RVector<double>& y = local_calculator->y_uv_[id];
+            const auto& y = local_calculator->y_[id];
             double dist = local_calculator->calculate(0,id);
 
             mutex_.lock();
             objective_summer_.add(weights_[id] * dist, 0);
             mutex_.unlock();
 
-            int n = y.length();
+            int n = y.n_rows;
             init_matrices(m, n, cm, dm, em);
             for (int i = m; i > 0; i--) {
                 update_em(i, n, gamma_, cm, dm, em);
@@ -222,10 +198,10 @@ public:
         double* grad = nullptr;
         SurrogateMatrix<double>& cm = local_calculator->cm_;
         SurrogateMatrix<double>& dm = local_calculator->dm_;
-        const RcppParallel::RMatrix<double>& x = local_calculator->x_mv_[0];
-        int m = x.nrow(), dim = x.ncol();
+        const auto& x = local_calculator->x_[0];
+        int m = x.n_rows, dim = x.n_cols;
         for (std::size_t id = begin; id < end; id++) {
-            const RcppParallel::RMatrix<double>& y = local_calculator->y_mv_[id];
+            const auto& y = local_calculator->y_[id];
             double dist = local_calculator->calculate(0,id);
 
             mutex_.lock();
@@ -233,14 +209,14 @@ public:
             if (!grad) grad = new double[dim];
             mutex_.unlock();
 
-            int n = y.nrow();
+            int n = y.n_rows;
             init_matrices(m, n, cm, dm, em);
             for (int i = m; i > 0; i--) {
                 update_em(i, n, gamma_, cm, dm, em);
                 std::fill(grad, grad + dim, 0);
                 for (int j = 0; j < n; j++) {
                     for (int k = 0; k < dim; k++) {
-                        grad[k] += em(i%2,j+1) * 2 * (x(i-1,k) - y(j,k));
+                        grad[k] += em(i%2,j+1) * 2 * (x.at(i-1,k) - y.at(j,k));
                     }
                 }
 
@@ -285,8 +261,8 @@ extern "C" SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
         Rcpp::NumericMatrix cent(CENTROID);
         Rcpp::NumericMatrix gradient(cent.nrow(), cent.ncol());
         double objective = 0;
-        Rcpp::List x = Rcpp::List::create(Rcpp::_["cent"] = CENTROID);
-        SdtwCentCalculator dist_calculator(x, series, gamma, true);
+        Rcpp::List x = Rcpp::List::create(CENTROID);
+        SdtwCentCalculator dist_calculator(x, series, gamma);
         SdtwMv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma);
         RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
         return Rcpp::List::create(
@@ -298,8 +274,8 @@ extern "C" SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
         Rcpp::NumericVector cent(CENTROID);
         Rcpp::NumericVector gradient(cent.length());
         double objective = 0;
-        Rcpp::List x = Rcpp::List::create(Rcpp::_["cent"] = CENTROID);
-        SdtwCentCalculator dist_calculator(x, series, gamma, false);
+        Rcpp::List x = Rcpp::List::create(CENTROID);
+        SdtwCentCalculator dist_calculator(x, series, gamma);
         SdtwUv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma);
         RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
         return Rcpp::List::create(
