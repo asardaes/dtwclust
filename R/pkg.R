@@ -139,7 +139,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
     packageStartupMessage("dtwclust:\n",
                           "Setting random number generator to L'Ecuyer-CMRG (see RNGkind()).\n",
                           'To read the included vignettes type: browseVignettes("dtwclust").\n',
-                          'Please see news(package = "dtwclust") for important information.')
+                          'See news(package = "dtwclust") after package updates.')
 
     if (grepl("\\.9000$", utils::packageVersion("dtwclust")))
         packageStartupMessage("This is a developer version of dtwclust:\n",
