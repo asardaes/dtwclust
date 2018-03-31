@@ -1,6 +1,6 @@
 
 ## Update to version 5.3.0.9000
-* Minor internal optimizations
+Minor internal optimizations and documentation fixes.
 
 ## Test environments
 * Local GNU/Linux, R release

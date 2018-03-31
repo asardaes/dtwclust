@@ -4,9 +4,9 @@
 \alias{compare_clusterings}
 \title{Compare different clustering configurations}
 \usage{
-compare_clusterings(series = NULL, types = c("p", "h", "f", "t"), ...,
+compare_clusterings(series = NULL, types = c("p", "h", "f", "t"),
   configs = compare_clusterings_configs(types), seed = NULL,
-  trace = FALSE, score.clus = function(...) stop("No scoring"),
+  trace = FALSE, ..., score.clus = function(...) stop("No scoring"),
   pick.clus = function(...) stop("No picking"), shuffle.configs = FALSE,
   return.objects = FALSE, packages = character(0L),
   .errorhandling = "stop")
@@ -18,14 +18,14 @@ coerced to a list row-wise (see \code{\link[=tslist]{tslist()}}).}
 \item{types}{Clustering types. It must be any combination of (possibly abbreviated):
 "partitional", "hierarchical", "fuzzy", "tadpole."}
 
-\item{...}{Further arguments for \code{\link[=tsclust]{tsclust()}}, \code{score.clus} or \code{pick.clus}.}
-
 \item{configs}{The list of data frames with the desired configurations to run. See
 \code{\link[=pdc_configs]{pdc_configs()}} and \code{\link[=compare_clusterings_configs]{compare_clusterings_configs()}}.}
 
 \item{seed}{Seed for random reproducibility.}
 
 \item{trace}{Logical indicating that more output should be printed to screen.}
+
+\item{...}{Further arguments for \code{\link[=tsclust]{tsclust()}}, \code{score.clus} or \code{pick.clus}.}
 
 \item{score.clus}{A function that gets the list of results (and \code{...}) and scores each one. It
 may also be a named list of functions, one for each type of clustering. See Scoring section.}

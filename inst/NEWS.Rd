@@ -9,6 +9,7 @@
 
 \section{Changes in version 5.3.0.9000}{
 \itemize{
-    \item TBA
+    \item Added parameter \code{no.expand} to \code{compare_clusterings_configs}.
+    \item Documentation fixes.
 }
 }

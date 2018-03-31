@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 5.3.0.9000
+* Added parameter `no.expand` to `compare_clusterings_configs`.
+* Documentation fixes.
+
 ## Version 5.3.0
 * Added 2 shiny apps, see `interactive_clustering` and `ssdtwclust`.
 * Added another helper for `compare_clusterings`: `repeat_clustering`.

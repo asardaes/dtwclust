@@ -20,8 +20,6 @@
 #'
 #' @details
 #'
-#' All functions use [base::expand.grid()].
-#'
 #' The named lists are interpreted in the following way: the name of the list will be considered to
 #' be a function name, and the elements of the list will be the possible parameters for the
 #' function. Each function must have at least an empty list. The parameters may be vectors that
@@ -62,14 +60,13 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
     # ==============================================================================================
 
     if (length(shared) > 0L && length(share.config) > 0L) {
-        shared_names <- names(shared)
         # careful, singular and plural below
-        shared_cfg <- Map(shared, shared_names, f = function(shared_args, fun) {
-            cfg <- do.call(expand.grid,
-                           enlist(foo = fun,
-                                  dots = shared_args,
-                                  stringsAsFactors = FALSE),
-                           TRUE)
+        shared_cfg <- Map(shared, names(shared), f = function(shared_args, fun) {
+            cfg <- do.call(expand.grid, quote = TRUE, args = enlist(
+                foo = fun,
+                dots = shared_args,
+                stringsAsFactors = FALSE
+            ))
             names(cfg)[1L] <- type
             cfg
         })
@@ -93,19 +90,20 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
             if (!is.list(config) || is.null(config_names))
                 stop("All parameters must be named lists.")
             cfg <- Map(config, config_names, f = function(config_args, fun) {
-                cfg <- do.call(expand.grid,
-                               enlist(foo = fun,
-                                      stringsAsFactors = FALSE,
-                                      dots = config_args),
-                               TRUE)
+                cfg <- do.call(expand.grid, quote = TRUE, args = enlist(
+                    foo = fun,
+                    stringsAsFactors = FALSE,
+                    dots = config_args
+                ))
                 names(cfg)[1L] <- type
                 cfg
             })
             cfg <- dplyr::bind_rows(cfg)
-            if (clus_type %in% share.config) cfg <- dplyr::bind_rows(shared_cfg, cfg)
+            if (clus_type %in% share.config)
+                cfg <- dplyr::bind_rows(shared_cfg, cfg) # singular shared
             cfg
         })
-        cfgs <- c(cfgs, shared_cfgs)
+        cfgs <- c(cfgs, shared_cfgs) # plural shared
     }
     else {
         cfgs <- shared_cfgs
@@ -119,6 +117,7 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
 #' Create configurations for [compare_clusterings()]
 #'
 #' @export
+#' @importFrom dplyr bind_cols
 #'
 #' @param k A numeric vector with one or more elements specifying the number of clusters to test.
 #' @param types Clustering types. It must be any combination of (possibly abbreviated): partitional,
@@ -127,10 +126,10 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
 #' @param preprocs Preprocessing configurations. See details.
 #' @param distances Distance configurations. See details.
 #' @param centroids Centroid configurations. See details.
+#' @param no.expand A character vector indicating parameters that should *not* be expanded between
+#'   [pdc_configs()] configurations. See examples.
 #'
 #' @details
-#'
-#' This function uses [base::expand.grid()] and [base::merge()].
 #'
 #' Preprocessing, distance and centroid configurations are specified with the helper function
 #' [pdc_configs()], refer to the examples in [compare_clusterings()] to see how this is used.
@@ -145,10 +144,20 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
 #' configurations. Each data frame has an extra attribute `num.configs` specifying the number of
 #' configurations.
 #'
+#' @examples
+#'
+#' # compare this with leaving no.expand empty
+#' compare_clusterings_configs(
+#'     distances = pdc_configs("d", dtw_basic = list(window.size = 1L:2L, norm = c("L1", "L2"))),
+#'     centroids = pdc_configs("c", dba = list(window.size = 1L:2L, norm = c("L1", "L2"))),
+#'     no.expand = c("window.size", "norm")
+#' )
+#'
 compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, controls = NULL,
                                         preprocs = pdc_configs("preproc", none = list()),
                                         distances = pdc_configs("distance", dtw_basic = list()),
-                                        centroids = pdc_configs("centroid", default = list()))
+                                        centroids = pdc_configs("centroid", default = list()),
+                                        no.expand = character(0L))
 {
     # ==============================================================================================
     # Start
@@ -226,46 +235,47 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 
             if (class(control) != control_classes[type]) stop("Invalid ", type, " control")
 
+            # if it's within a list, it's to prevent expansion
             cfg <- switch(
                 type,
                 partitional = {
-                    do.call(expand.grid,
-                            enlist(k = list(k),
-                                   pam.precompute = control$pam.precompute,
-                                   iter.max = control$iter.max,
-                                   nrep = control$nrep,
-                                   symmetric = control$symmetric,
-                                   version = control$version,
-                                   stringsAsFactors = FALSE),
-                            TRUE)
+                    do.call(expand.grid, quote = TRUE, args = enlist(
+                        k = list(k),
+                        pam.precompute = control$pam.precompute,
+                        iter.max = control$iter.max,
+                        nrep = control$nrep,
+                        symmetric = control$symmetric,
+                        version = control$version,
+                        stringsAsFactors = FALSE
+                    ))
                 },
                 hierarchical = {
-                    do.call(expand.grid,
-                            enlist(k = list(k),
-                                   method = list(control$method),
-                                   symmetric = control$symmetric,
-                                   stringsAsFactors = FALSE),
-                            TRUE)
+                    do.call(expand.grid, quote = TRUE, args = enlist(
+                        k = list(k),
+                        method = list(control$method),
+                        symmetric = control$symmetric,
+                        stringsAsFactors = FALSE
+                    ))
                 },
                 fuzzy = {
-                    do.call(expand.grid,
-                            enlist(k = list(k),
-                                   fuzziness = control$fuzziness,
-                                   iter.max = control$iter.max,
-                                   delta = control$delta,
-                                   symmetric = control$symmetric,
-                                   version = control$version,
-                                   stringsAsFactors = FALSE),
-                            TRUE)
+                    do.call(expand.grid, quote = TRUE, args = enlist(
+                        k = list(k),
+                        fuzziness = control$fuzziness,
+                        iter.max = control$iter.max,
+                        delta = control$delta,
+                        symmetric = control$symmetric,
+                        version = control$version,
+                        stringsAsFactors = FALSE
+                    ))
                 },
                 tadpole = {
-                    do.call(expand.grid,
-                            enlist(k = list(k),
-                                   dc = list(control$dc),
-                                   window.size = control$window.size,
-                                   lb = control$lb,
-                                   stringsAsFactors = FALSE),
-                            TRUE)
+                    do.call(expand.grid, quote = TRUE, args = enlist(
+                        k = list(k),
+                        dc = list(control$dc),
+                        window.size = control$window.size,
+                        lb = control$lb,
+                        stringsAsFactors = FALSE
+                    ))
                 }
             )
 
@@ -273,27 +283,47 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
             # Merge configs
             # --------------------------------------------------------------------------------------
 
+            need_adjustment <- character(0L)
+
             # preproc
             if (!is.null(preproc) && nrow(preproc)) {
                 nms <- names(preproc)
-                nms_args <- nms != "preproc"
+                if (any(nms %in% no.expand)) need_adjustment <- c(need_adjustment, "preproc")
+                nms_args <- nms != "preproc" & !(nms %in% no.expand)
                 if (any(nms_args)) names(preproc)[nms_args] <- paste0(nms[nms_args], "_preproc")
-                cfg <- merge(cfg, preproc, all = TRUE)
+                cfg <- base::merge(cfg, preproc, all = TRUE)
             }
             # distance
             if (type != "tadpole" && !is.null(distance) && nrow(distance)) {
                 nms <- names(distance)
-                nms_args <- nms != "distance"
+                if (any(nms %in% no.expand)) need_adjustment <- c(need_adjustment, "distance")
+                nms_args <- nms != "distance" & !(nms %in% no.expand)
                 if (any(nms_args)) names(distance)[nms_args] <- paste0(nms[nms_args], "_distance")
-                cfg <- merge(cfg, distance, all = TRUE)
+                cfg <- base::merge(cfg, distance, all = TRUE)
             }
             # centroid
             if (!is.null(centroid) && nrow(centroid)) {
                 nms <- names(centroid)
-                nms_args <- nms != "centroid"
+                if (any(nms %in% no.expand)) need_adjustment <- c(need_adjustment, "centroid")
+                nms_args <- nms != "centroid" & !(nms %in% no.expand)
                 if (any(nms_args)) names(centroid)[nms_args] <- paste0(nms[nms_args], "_centroid")
-                cfg <- merge(cfg, centroid, all = TRUE)
+                cfg <- base::merge(cfg, centroid, all = TRUE)
             }
+
+            # adjust no.expand columns
+            if (length(need_adjustment) > 0L) {
+                adjust_cols <- cfg[, no.expand, drop = FALSE]
+                cfg <- cfg[, -which(names(cfg) %in% no.expand), drop = FALSE]
+                adjusted_cols <- lapply(need_adjustment, function(suffix) {
+                    pdc_cfg <- get_from_callers(suffix, mode = "list")
+                    cols <- intersect(names(pdc_cfg), no.expand)
+                    adjusted_cols <- adjust_cols[, cols, drop = FALSE]
+                    names(adjusted_cols) <- paste0(names(adjusted_cols), "_", suffix)
+                    adjusted_cols
+                })
+                cfg <- dplyr::bind_cols(cfg, adjusted_cols)
+            }
+
             # for info
             attr(cfg, "num.configs") <- switch(
                 type,
@@ -319,11 +349,11 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'   coerced to a list row-wise (see [tslist()]).
 #' @param types Clustering types. It must be any combination of (possibly abbreviated):
 #'   "partitional", "hierarchical", "fuzzy", "tadpole."
-#' @param ... Further arguments for [tsclust()], `score.clus` or `pick.clus`.
 #' @param configs The list of data frames with the desired configurations to run. See
 #'   [pdc_configs()] and [compare_clusterings_configs()].
 #' @param seed Seed for random reproducibility.
 #' @param trace Logical indicating that more output should be printed to screen.
+#' @param ... Further arguments for [tsclust()], `score.clus` or `pick.clus`.
 #' @param score.clus A function that gets the list of results (and `...`) and scores each one. It
 #'   may also be a named list of functions, one for each type of clustering. See Scoring section.
 #' @param pick.clus A function to pick the best result. See Picking section.
@@ -440,9 +470,9 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'
 #' @example man-examples/comparison-examples.R
 #'
-compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ...,
+compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
                                 configs = compare_clusterings_configs(types),
-                                seed = NULL, trace = FALSE,
+                                seed = NULL, trace = FALSE, ...,
                                 score.clus = function(...) stop("No scoring"),
                                 pick.clus = function(...) stop("No picking"),
                                 shuffle.configs = FALSE, return.objects = FALSE,
@@ -457,14 +487,17 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"), ..
     set.seed(seed)
     score_missing <- missing(score.clus)
     pick_missing <- missing(pick.clus)
+
     if (is.null(series)) stop("No series provided.")
     types <- match.arg(types, supported_clusterings, TRUE)
     .errorhandling <- match.arg(.errorhandling, c("stop", "remove", "pass"))
     if (!return.objects && score_missing)
         stop("Returning no objects and specifying no scoring function would return no useful results.")
+
     # coerce to list if necessary
     if (is.data.frame(series) || !is.list(series)) series <- tslist(series, TRUE)
     check_consistency(series, "vltslist")
+
     if (!is.function(score.clus) && !(is.list(score.clus) && all(sapply(score.clus, is.function))))
         stop("Invalid evaluation function(s)")
     else if (is.list(score.clus)) {

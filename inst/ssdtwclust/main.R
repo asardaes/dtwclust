@@ -59,7 +59,7 @@ main <- quote({
         # cent
         cent_args <- input$cluster__cent_args
         cent_args <- if (nzchar(cent_args)) parse_input(cent_args) else list()
-        cent_args$window.size <- NULL # to be sure, see hack further below
+        if (tolower(centroid) == "dba") cent_args$window.size <- as.integer(window_sizes)
         cent_cfg <- as.data.frame(c(list(centroid = centroid), cent_args), stringsAsFactors = FALSE)
         cent_cfg <- list(cent_cfg)
         names(cent_cfg) <- match.arg(type, c("partitional", "hierarchical", "tadpole"))
@@ -70,6 +70,7 @@ main <- quote({
         cfgs <- compare_clusterings_configs(
             types = type,
             k = k,
+            no.expand = "window.size",
             controls = control,
             preprocs = pdc_configs(
                 "preproc",
@@ -83,9 +84,6 @@ main <- quote({
             )),
             centroids = cent_cfg
         )
-        # a bit of a hack, but oh well
-        if (tolower(centroid) == "dba")
-            cfgs$partitional$window.size_centroid <- cfgs$partitional$window.size_distance
         # return
         args <- enlist(
             series = .series_,

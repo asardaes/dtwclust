@@ -7,7 +7,8 @@
 compare_clusterings_configs(types = c("p", "h", "f"), k = 2L,
   controls = NULL, preprocs = pdc_configs("preproc", none = list()),
   distances = pdc_configs("distance", dtw_basic = list()),
-  centroids = pdc_configs("centroid", default = list()))
+  centroids = pdc_configs("centroid", default = list()),
+  no.expand = character(0L))
 }
 \arguments{
 \item{types}{Clustering types. It must be any combination of (possibly abbreviated): partitional,
@@ -22,6 +23,9 @@ hierarchical, fuzzy, tadpole.}
 \item{distances}{Distance configurations. See details.}
 
 \item{centroids}{Centroid configurations. See details.}
+
+\item{no.expand}{A character vector indicating parameters that should \emph{not} be expanded between
+\code{\link[=pdc_configs]{pdc_configs()}} configurations. See examples.}
 }
 \value{
 A list for each clustering type, each of which includes a data frame with the computed and merged
@@ -32,12 +36,20 @@ configurations.
 Create configurations for \code{\link[=compare_clusterings]{compare_clusterings()}}
 }
 \details{
-This function uses \code{\link[base:expand.grid]{base::expand.grid()}} and \code{\link[base:merge]{base::merge()}}.
-
 Preprocessing, distance and centroid configurations are specified with the helper function
 \code{\link[=pdc_configs]{pdc_configs()}}, refer to the examples in \code{\link[=compare_clusterings]{compare_clusterings()}} to see how this is used.
 
 The controls list may be specified with the usual \link{tsclust-controls} functions. The names  of
 the list must correspond to "partitional", "hierarchical", "fuzzy" or "tadpole" clustering.
 Again, please refer to the examples in \code{\link[=compare_clusterings]{compare_clusterings()}}.
+}
+\examples{
+
+# compare this with leaving no.expand empty
+compare_clusterings_configs(
+    distances = pdc_configs("d", dtw_basic = list(window.size = 1L:2L, norm = c("L1", "L2"))),
+    centroids = pdc_configs("c", dba = list(window.size = 1L:2L, norm = c("L1", "L2"))),
+    no.expand = c("window.size", "norm")
+)
+
 }

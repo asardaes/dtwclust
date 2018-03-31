@@ -136,6 +136,18 @@ test_that("Using compare_clusterings_configs() works as expected.", {
         centroids = pdc_configs("c", default = list(foo = "bar"))
     ))
     expect_true(all(nrows_each_custom_config == 1L))
+
+    # no.expand
+    cfg <- compare_clusterings_configs(
+        types = "p",
+        distances = pdc_configs("d", dtw_basic = list(window.size = 1L:2L)),
+        centroids = pdc_configs("c", dba = list(window.size = 1L:2L)),
+        no.expand = c("window.size")
+    )
+    expect_identical(
+        cfg$partitional$window.size_distance,
+        cfg$partitional$window.size_centroid
+    )
 })
 
 # ==================================================================================================

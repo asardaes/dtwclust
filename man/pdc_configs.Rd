@@ -35,8 +35,6 @@ A list for each clustering, each of which includes a data frame with the compute
 Create preprocessing, distance and centroid configurations for \code{\link[=compare_clusterings_configs]{compare_clusterings_configs()}}.
 }
 \details{
-All functions use \code{\link[base:expand.grid]{base::expand.grid()}}.
-
 The named lists are interpreted in the following way: the name of the list will be considered to
 be a function name, and the elements of the list will be the possible parameters for the
 function. Each function must have at least an empty list. The parameters may be vectors that
