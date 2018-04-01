@@ -82,8 +82,8 @@ The functions essentially return their function arguments in a classed list, alt
 are performed.
 
 Regarding parameter \code{version}: the first version of partitional/fuzzy clustering implemented
-in the package always performed an extra iteration, which is unnecessary. Use version 2 to avoid
-this, but bear in mind that the results may vary slightly due to the missing iteration.
+in the package always performed an extra iteration, which is unnecessary. Use version 1 to mimic
+this previous behavior.
 }
 \section{Partitional}{
 
@@ -101,8 +101,8 @@ parallel, regardless of \code{pam.sparse}.
 so that the distance calculations can be done in parallel and the sparse matrix updated
 iteratively.
 \item If both \code{pam.precompute} and \code{pam.sparse} are \code{FALSE}, repetitions are done in parallel, and
-each repetition performs distance calculations sequentially, but the sparse matrix cannot be
-updated iteratively.
+each repetition performs distance calculations sequentially, but the distance matrix cannot
+be updated iteratively.
 }
 }
 

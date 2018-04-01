@@ -29,8 +29,8 @@
 #' are performed.
 #'
 #' Regarding parameter \code{version}: the first version of partitional/fuzzy clustering implemented
-#' in the package always performed an extra iteration, which is unnecessary. Use version 2 to avoid
-#' this, but bear in mind that the results may vary slightly due to the missing iteration.
+#' in the package always performed an extra iteration, which is unnecessary. Use version 1 to mimic
+#' this previous behavior.
 #'
 #' @section Partitional:
 #'
@@ -47,8 +47,8 @@
 #'     so that the distance calculations can be done in parallel and the sparse matrix updated
 #'     iteratively.
 #'   - If both `pam.precompute` and `pam.sparse` are `FALSE`, repetitions are done in parallel, and
-#'     each repetition performs distance calculations sequentially, but the sparse matrix cannot be
-#'     updated iteratively.
+#'     each repetition performs distance calculations sequentially, but the distance matrix cannot
+#'     be updated iteratively.
 #'
 partitional_control <- function(pam.precompute = TRUE,
                                 iter.max = 100L,

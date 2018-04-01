@@ -85,7 +85,7 @@ et al. (2013). The one specified in the former is used here.
 The formulas for the Silhouette index are not entirely correct in Arbelaitz et al. (2013), refer
 to Rousseeuw (1987) for the correct ones.
 
-The formulas for the PBMF index are not entirely unambiguous in the literature. The ones given in
+The formulas for the PBMF index are not entirely unambiguous in the literature, the ones given in
 Lin (2013) are used here.
 }
 \section{External CVIs}{
@@ -135,7 +135,7 @@ minimized).
 \item \code{"CH"} (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
 \item \code{"SF"} (~): Score Function (Saitta et al. (2007); to be maximized; see notes).
 }
-\item Fuzzy partitions (using the nomenclature used in Wang and Zhang (2007))
+\item Fuzzy partitions (using the nomenclature from Wang and Zhang (2007))
 \itemize{
 \item \code{"MPC"}: to be maximized.
 \item \code{"K"} (~): to be minimized.

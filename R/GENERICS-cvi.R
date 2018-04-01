@@ -83,7 +83,7 @@
 #'       minimized).
 #'     + `"CH"` (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
 #'     + `"SF"` (~): Score Function (Saitta et al. (2007); to be maximized; see notes).
-#'   - Fuzzy partitions (using the nomenclature used in Wang and Zhang (2007))
+#'   - Fuzzy partitions (using the nomenclature from Wang and Zhang (2007))
 #'     + `"MPC"`: to be maximized.
 #'     + `"K"` (~): to be minimized.
 #'     + `"T"`: to be minimized.
@@ -111,7 +111,7 @@
 #' The formulas for the Silhouette index are not entirely correct in Arbelaitz et al. (2013), refer
 #' to Rousseeuw (1987) for the correct ones.
 #'
-#' The formulas for the PBMF index are not entirely unambiguous in the literature. The ones given in
+#' The formulas for the PBMF index are not entirely unambiguous in the literature, the ones given in
 #' Lin (2013) are used here.
 #'
 #' @references

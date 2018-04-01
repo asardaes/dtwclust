@@ -453,7 +453,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'   preprocessing/distance/centroid arguments, and these names are used internally to recognize
 #'   them.
 #'
-#'   If some of these arguments are more complicated (e.g. matrices) and should *not* be expanded,
+#'   If some of these arguments are more complex (e.g. matrices) and should *not* be expanded,
 #'   consider passing them directly via the ellipsis (`...`) instead of using [pdc_configs()]. This
 #'   assumes that said arguments can be passed to all functions without affecting their results.
 #'

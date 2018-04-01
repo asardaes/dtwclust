@@ -49,10 +49,11 @@ being an exception. This is why this package is a dependency of \pkg{dtwclust}. 
 included distance functions are registered with \pkg{proxy} during attachment.
 }
 \references{
-Please refer to the package vignette references.
+Please refer to the package's vignette's references.
 }
 \seealso{
-\code{\link[=tsclust]{tsclust()}}, \code{\link[=compare_clusterings]{compare_clusterings()}}, \code{\link[proxy:dist]{proxy::dist()}}, \code{\link[dtw:dtw]{dtw::dtw()}}
+\code{\link[=tsclust]{tsclust()}}, \code{\link[=compare_clusterings]{compare_clusterings()}}, \code{\link[=interactive_clustering]{interactive_clustering()}}, \code{\link[=ssdtwclust]{ssdtwclust()}}, \code{\link[=dtw_basic]{dtw_basic()}},
+\code{\link[proxy:dist]{proxy::dist()}}.
 }
 \author{
 Alexis Sarda-Espinosa

@@ -52,11 +52,12 @@
 #'
 #' @references
 #'
-#' Please refer to the package vignette references.
+#' Please refer to the package's vignette's references.
 #'
 #' @seealso
 #'
-#' [tsclust()], [compare_clusterings()], [proxy::dist()], [dtw::dtw()]
+#' [tsclust()], [compare_clusterings()], [interactive_clustering()], [ssdtwclust()], [dtw_basic()],
+#' [proxy::dist()].
 #'
 #' @useDynLib dtwclust, .registration = TRUE
 #' @import foreach

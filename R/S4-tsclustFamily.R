@@ -37,7 +37,7 @@
 #'   - The function always returns a `crossdist` matrix.
 #'
 #'   Note that all distances implemented as part of \pkg{dtwclust} have custom proxy loops that use
-#'   multi-processing independently of \pkg{foreach}, so see their respective documentation to see
+#'   multi-threading independently of \pkg{foreach}, so see their respective documentation to see
 #'   what optimizations apply to each one.
 #'
 #'   For distances *not* included in \pkg{dtwclust}, the symmetric, parallel case mentioned above

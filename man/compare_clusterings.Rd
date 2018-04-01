@@ -146,7 +146,7 @@ Note that the configurations returned by the helper functions assign special nam
 preprocessing/distance/centroid arguments, and these names are used internally to recognize
 them.
 
-If some of these arguments are more complicated (e.g. matrices) and should \emph{not} be expanded,
+If some of these arguments are more complex (e.g. matrices) and should \emph{not} be expanded,
 consider passing them directly via the ellipsis (\code{...}) instead of using \code{\link[=pdc_configs]{pdc_configs()}}. This
 assumes that said arguments can be passed to all functions without affecting their results.
 

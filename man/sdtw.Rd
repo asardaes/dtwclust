@@ -25,7 +25,7 @@ Soft-DTW distance measure as proposed in Cuturi and Blondel (2017).
 }
 \details{
 Unlike other distances, soft-DTW can return negative values, and \code{sdtw(x, x)} is not always equal
-to zero. Like DTW, soft-DTW does not follow the triangle inequality, but it is always symmetric.
+to zero. Like DTW, soft-DTW does not fulfill the triangle inequality, but it is always symmetric.
 }
 \section{Parallel Computing}{
 

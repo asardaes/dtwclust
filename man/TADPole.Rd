@@ -61,8 +61,12 @@ that lie in dense areas (i.e. that have lots of neighbors) are taken as cluster 
 The algorithm relies on the DTW bounds, which are only defined for univariate time series of
 equal length.
 
-Parallelization is supported, but it will only be used if multiple \code{dc} values are specified in
-the same call.
+Parallelization is supported in the following way:
+\itemize{
+\item For multiple \code{dc} values, multi-processing with \code{\link[foreach:foreach]{foreach::foreach()}}.
+\item Otherwise, the internal distance calculations use multi-threading with
+\link[RcppParallel:RcppParallel]{RcppParallel::RcppParallel}.
+}
 
 The windowing constraint uses a centered window. The calculations expect a value in
 \code{window.size} that represents the distance between the point considered and one of the edges
@@ -87,11 +91,6 @@ in \code{10(2) + 1 = 21} observations falling within the window.
   workers do not have the number of threads explicitly specified, this function will default to 1
   thread per worker. See the parallelization vignette for more information
   (\code{browseVignettes("dtwclust")}).
-
-
-
-This function also takes advantage of multi-processing with a parallel backend (e.g. when using
-the \pkg{doParallel} package), but only for multiple values of \code{dc}.
 }
 
 \references{

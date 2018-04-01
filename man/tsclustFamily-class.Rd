@@ -55,7 +55,7 @@ with \code{\link[foreach:foreach]{foreach::foreach()}}), otherwise it will be se
 }
 
 Note that all distances implemented as part of \pkg{dtwclust} have custom proxy loops that use
-multi-processing independently of \pkg{foreach}, so see their respective documentation to see
+multi-threading independently of \pkg{foreach}, so see their respective documentation to see
 what optimizations apply to each one.
 
 For distances \emph{not} included in \pkg{dtwclust}, the symmetric, parallel case mentioned above

@@ -13,7 +13,7 @@
 #' @details
 #'
 #' Unlike other distances, soft-DTW can return negative values, and `sdtw(x, x)` is not always equal
-#' to zero. Like DTW, soft-DTW does not follow the triangle inequality, but it is always symmetric.
+#' to zero. Like DTW, soft-DTW does not fulfill the triangle inequality, but it is always symmetric.
 #'
 #' @return The Soft DTW distance.
 #'

@@ -27,7 +27,7 @@ and to \code{\link[stats:hclust]{stats::hclust()}} if it contains the \code{memb
 
 \item{distance}{A registered distance from \code{\link[proxy:dist]{proxy::dist()}}. Ignored for \code{type} \code{=} \code{"tadpole"}.}
 
-\item{centroid}{Either a supported string, an appropriate function to calculate centroids when
+\item{centroid}{Either a supported string, or an appropriate function to calculate centroids when
 using partitional/hierarchical/tadpole methods. See Centroids section.}
 
 \item{control}{An appropriate list of controls. See \link{tsclust-controls}.}

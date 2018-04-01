@@ -86,7 +86,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #' @param preproc Function to preprocess data. Defaults to [zscore()] *only* if `centroid` `=`
 #'   `"shape"`, but will be replaced by a custom function if provided.
 #' @param distance A registered distance from [proxy::dist()]. Ignored for `type` `=` `"tadpole"`.
-#' @param centroid Either a supported string, an appropriate function to calculate centroids when
+#' @param centroid Either a supported string, or an appropriate function to calculate centroids when
 #'   using partitional/hierarchical/tadpole methods. See Centroids section.
 #' @param control An appropriate list of controls. See [tsclust-controls].
 #' @param args An appropriate list of arguments for preprocessing, distance and centroid functions.

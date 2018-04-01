@@ -34,8 +34,11 @@
 #' The algorithm relies on the DTW bounds, which are only defined for univariate time series of
 #' equal length.
 #'
-#' Parallelization is supported, but it will only be used if multiple `dc` values are specified in
-#' the same call.
+#' Parallelization is supported in the following way:
+#'
+#' - For multiple `dc` values, multi-processing with [foreach::foreach()].
+#' - Otherwise, the internal distance calculations use multi-threading with
+#'   [RcppParallel::RcppParallel].
 #'
 #' @template window
 #'
@@ -51,11 +54,6 @@
 #' aforementioned elements.
 #'
 #' @template rcpp-parallel
-#'
-#' @section Parallel Computing:
-#'
-#'   This function also takes advantage of multi-processing with a parallel backend (e.g. when using
-#'   the \pkg{doParallel} package), but only for multiple values of `dc`.
 #'
 #' @references
 #'
