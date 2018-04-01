@@ -1,5 +1,3 @@
-Out of date as of 2018-03-30, will update...
-
 # Contributing a distance measure
 
 Thanks to the `proxy` package,
@@ -27,6 +25,7 @@ the [core calculations](https://github.com/asardaes/dtwclust/blob/master/src/dis
 depending either on raw pointers,
 [custom wrapper classes](https://github.com/asardaes/dtwclust/blob/master/src/utils/SurrogateMatrix.h),
 or `RcppParallel`'s wrappers.
+These can be declared in the [internal distances header](https://github.com/asardaes/dtwclust/blob/master/src/distances/distances-details.h).
 
 ## `proxy` function
 
@@ -35,8 +34,9 @@ A [`DistanceCalculator`](https://github.com/asardaes/dtwclust/blob/master/src/di
 The concrete class should be declared there,
 and added to the [factory](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L27).
 Since all time series are passed from R as a list of vectors, matrices, or complex vectors,
-there is a [templated class](https://github.com/asardaes/dtwclust/blob/master/src/utils/TSTSList.h) that works with `Rcpp`'s `NumericVector`, `NumericMatrix` and `ComplexVector`,
-saving them respectively as `RcppParallel`'s `RVector<double>`, `RMatrix<double>`, or Armadillo's `cx_vec` so that they are thread-safe.
+there is the `TSTSList` [templated class](https://github.com/asardaes/dtwclust/blob/master/src/utils/TSTSList.h) that works with `Rcpp`'s `NumericVector`, `NumericMatrix` and `ComplexVector`,
+saving them Armadillo's `mat` and `cx_mat` so that they are thread-safe.
+Univariate series are saved as matrices with 1 column.
 
 ### Constructor
 
@@ -44,8 +44,8 @@ It is expected that the `DistanceCalculator`'s constructor will take 3 `SEXP` pa
 any arguments for the distance,
 the time series in `x` (from `proxy`),
 and the time series in `y` (from `proxy`).
-See for example the [DtwBasicCalculator](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L47),
-and note that it handles univariate and multivariate series by expecting the R side to specify what was passed.
+See for example the [DtwBasicCalculator](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L53),
+and note that `x` and `y` are simply given to the `TSTSList` template.
 
 **Important**: if the concrete class has any private members that should be unique to each thread,
 they should *not* be defined in the constructor.
@@ -59,20 +59,20 @@ and each thread will `delete` the clone when it's done.
 If there are private members that should be unique to each thread
 (e.g. dynamically allocated memory),
 they should be set-up during cloning.
-See what [DtwBasicCalculator](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L101) does,
-and note its [destructor](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L78).
+See what [DtwBasicCalculator](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L88) does,
+and note its [destructor](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L70).
 
 ### Calculate
 
 The factory method `calculate` takes 2 integers `i` and `j`,
 and it is expected that it returns the distance between `x[i]` and `y[j]`.
-Some calculators [dispatch](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L85) to the appropriate (univariate/multivariate) method,
-but [others](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L382) can do some more adjustments before dispatching.
-Also note how in some cases the core calculations are further [delegated](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L119) by calling special wrappers defined in their own [header](https://github.com/asardaes/dtwclust/blob/master/src/distances/distances-details.h),
+Some calculators [dispatch](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L78) to the appropriate method directly,
+but [others](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L324) can pass more parameters as needed.
+Also note how in some cases the core calculations are further [delegated](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L100) by calling special wrappers defined in their own [header](https://github.com/asardaes/dtwclust/blob/master/src/distances/distances-details.h),
 which don't use R or Rcpp's API.
 This avoids duplicating code that is used in stand-alone functions (described [above](#stand-alone-function)),
 but is not always necessary;
-for instance, the SbdCalculator does the [calculations directly](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L393),
+for instance, the SbdCalculator does the [calculations directly](https://github.com/asardaes/dtwclust/blob/master/src/distance-calculators/distance-calculators.cpp#L330),
 since the stand-alone version is implemented entirely in R.
 
 ### R side
@@ -82,9 +82,9 @@ All functions have a similar structure:
 - [Check consistency of inputs](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L111)
 - [Prepare common parameters by evaluationg a pre-defined expression](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L123)
 - [Check consistency of distance parameters and put them in a list](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L126)
-- [Get the available number of threads](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L156)
-- [`.Call` `C_distmat_loop`](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L157)
-- [Final output adjustments](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L161)
+- [Get the available number of threads](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L155)
+- [`.Call` `C_distmat_loop`](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L156)
+- [Final output adjustments](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L160)
 
 They are registered with `proxy` during [attachment](https://github.com/asardaes/dtwclust/blob/master/R/pkg.R#L76),
 and unregistered during [unload](https://github.com/asardaes/dtwclust/blob/master/R/pkg.R#L149).
