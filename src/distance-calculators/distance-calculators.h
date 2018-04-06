@@ -5,7 +5,6 @@
 #include <string>
 
 #include <RcppArmadillo.h> // arma:: referenced here
-#include <RcppParallel.h>
 
 #include "../utils/SurrogateMatrix.h"
 #include "../utils/TSTSList.h"
