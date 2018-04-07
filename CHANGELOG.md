@@ -3,6 +3,7 @@
 ## Version 5.3.0.9000
 * Added parameter `no.expand` to `compare_clusterings_configs`.
 * Documentation fixes.
+* You should now be able to use this package without attaching it, with some caveats. See documentation for `dtwclust-package`.
 
 ## Version 5.3.0
 * Added 2 shiny apps, see `interactive_clustering` and `ssdtwclust`.

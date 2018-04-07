@@ -161,6 +161,7 @@ setnames_inplace <- function(vec, names) {
 `%op%` <- function(obj, ex) {
     # check to see if the workers have specified how many threads to use
     num_workers <- foreach::getDoParWorkers()
+    backend_name <- foreach::getDoParName()
     if (num_workers > 1L) {
         reset_workers <- foreach::foreach(
             i = 1L:num_workers,
@@ -178,16 +179,19 @@ setnames_inplace <- function(vec, names) {
         }
     }
     # check the RNGkind of the workers
-    if (foreach::getDoParName() != "doSEQ") {
+    if (backend_name != "doSEQ") {
         rng_kind <- foreach::foreach(
             i = 1L:num_workers,
             .combine = c,
             .multicombine = TRUE,
-            .inorder = FALSE,
-            .packages = "dtwclust"
+            .inorder = FALSE
         ) %dopar% {
             RNGkind("L'Ecuyer-CMRG")[1L]
         }
+    }
+    # do not load dtwclust in sequential cases
+    if (backend_name == "doSEQ" || (backend_name == "doFuture" && num_workers == 1L)) {
+        obj$packages <- setdiff(obj$packages, "dtwclust")
     }
     # evaluate expression
     withCallingHandlers({
@@ -210,13 +214,12 @@ setnames_inplace <- function(vec, names) {
         }
     }
     # reset RNGkind if needed
-    if (foreach::getDoParName() != "doSEQ" && any(rng_kind != dtwclust_rngkind)) {
+    if (backend_name != "doSEQ" && any(rng_kind != dtwclust_rngkind)) {
         foreach::foreach(
             rng_kind = rng_kind,
             .combine = c,
             .multicombine = TRUE,
-            .inorder = FALSE,
-            .packages = "dtwclust"
+            .inorder = FALSE
         ) %dopar% {
             RNGkind(rng_kind)
         }

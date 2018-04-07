@@ -11,5 +11,6 @@
 \itemize{
     \item Added parameter \code{no.expand} to \code{compare_clusterings_configs}.
     \item Documentation fixes.
+    \item You should now be able to use this package without attaching it, with some caveats. See documentation for \code{dtwclust-package}.
 }
 }

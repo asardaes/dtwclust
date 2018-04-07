@@ -86,8 +86,8 @@ All functions have a similar structure:
 - [`.Call` `C_distmat_loop`](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L156)
 - [Final output adjustments](https://github.com/asardaes/dtwclust/blob/master/R/DISTANCES-dtw-basic.R#L160)
 
-They are registered with `proxy` during [attachment](https://github.com/asardaes/dtwclust/blob/master/R/pkg.R#L76),
-and unregistered during [unload](https://github.com/asardaes/dtwclust/blob/master/R/pkg.R#L149).
+They are registered with `proxy` during [loading](https://github.com/asardaes/dtwclust/blob/master/R/pkg.R#L77),
+and unregistered during [unload](https://github.com/asardaes/dtwclust/blob/master/R/pkg.R#L152).
 
 ## Final details
 

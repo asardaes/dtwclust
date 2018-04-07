@@ -40,13 +40,12 @@
 #' This software package was developed independently of any organization or institution that is or
 #' has been associated with the author.
 #'
-#' There are a couple of reasons why this package will **not** work if it is not attached (via
-#' [base::library()]). For the specifics, continue reading.
+#' This package can be used without attaching it with [base::library()] with some caveats:
 #'
-#' The \pkg{methods} [package][methods::methods-package] must be attached in order for some internal
-#' inheritance to work properly. This is usually done automatically by `R`, with [utils::Rscript()]
-#' being an exception. This is why this package is a dependency of \pkg{dtwclust}. Additionally, the
-#' included distance functions are registered with \pkg{proxy} during attachment.
+#' - The \pkg{methods} [package][methods::methods-package] must be attached. `R` usually does this
+#'   automatically, but [utils::Rscript()] does not.
+#' - If you want to use the \pkg{proxy} version of [dtw::dtw()] (e.g. for clustering), you have to
+#'   attach the \pkg{dtw} package manually.
 #'
 #' @author Alexis Sarda-Espinosa
 #'
@@ -74,7 +73,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
 
 #' @importFrom utils packageVersion
 #'
-.onAttach <- function(lib, pkg) {
+.onLoad <- function(lib, pkg) {
     # Register DTW2
     if (!check_consistency("DTW2", "dist", silent = TRUE))
         proxy::pr_DB$set_entry(FUN = dtw2_proxy, names=c("DTW2", "dtw2"),
@@ -132,10 +131,12 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
                                description = "Soft-DTW",
                                PACKAGE = "dtwclust", PREFUN = proxy_prefun)
 
-    RNGkind(dtwclust_rngkind)
-
     # avoids default message if no backend exists
     if (is.null(foreach::getDoParName())) foreach::registerDoSEQ()
+}
+
+.onAttach <- function(lib, pkg) {
+    RNGkind(dtwclust_rngkind)
 
     packageStartupMessage("dtwclust:\n",
                           "Setting random number generator to L'Ecuyer-CMRG (see RNGkind()).\n",

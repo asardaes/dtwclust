@@ -40,13 +40,13 @@ For more information, please read the included package vignettes, which can be a
 This software package was developed independently of any organization or institution that is or
 has been associated with the author.
 
-There are a couple of reasons why this package will \strong{not} work if it is not attached (via
-\code{\link[base:library]{base::library()}}). For the specifics, continue reading.
-
-The \pkg{methods} \link[methods:methods-package]{package} must be attached in order for some internal
-inheritance to work properly. This is usually done automatically by \code{R}, with \code{\link[utils:Rscript]{utils::Rscript()}}
-being an exception. This is why this package is a dependency of \pkg{dtwclust}. Additionally, the
-included distance functions are registered with \pkg{proxy} during attachment.
+This package can be used without attaching it with \code{\link[base:library]{base::library()}} with some caveats:
+\itemize{
+\item The \pkg{methods} \link[methods:methods-package]{package} must be attached. \code{R} usually does this
+automatically, but \code{\link[utils:Rscript]{utils::Rscript()}} does not.
+\item If you want to use the \pkg{proxy} version of \code{\link[dtw:dtw]{dtw::dtw()}} (e.g. for clustering), you have to
+attach the \pkg{dtw} package manually.
+}
 }
 \references{
 Please refer to the package's vignette's references.

@@ -442,19 +442,26 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 rng0 <- lapply(parallel::splitIndices(length(.rng_), length(k)),
                                function(i) { .rng_[i] })
                 k0 <- k
-                # sequential allows the matrix to be updated iteratively
-                `%this_op%` <- if(inherits(control$distmat, "SparseDistmat")) `%do%` else `%op%`
+                # sequential allows the sparse matrix to be updated iteratively
+                if (inherits(control$distmat, "SparseDistmat")) {
+                    `%this_op%` <- `%do%`
+                    packages <- setdiff(control$packages, "dtwclust")
+                }
+                else {
+                    `%this_op%` <- `%op%`
+                    packages <- control$packages
+                }
                 # CHECK complains about non-initialization and globals
                 rng <- list()
                 i <- integer()
                 # cluster
                 pc_list <- foreach(k = k0, rng = rng0,
                                    .combine = c, .multicombine = TRUE,
-                                   .packages = control$packages,
+                                   .packages = packages,
                                    .export = export) %:%
                     foreach(i = 1L:nrep,
                             .combine = c, .multicombine = TRUE,
-                            .packages = control$packages,
+                            .packages = packages,
                             .export = export) %this_op%
                             {
                                 if (trace) message("Repetition ", i, " for k = ", k)

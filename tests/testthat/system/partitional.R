@@ -59,7 +59,8 @@ test_that("Partitional clustering works as expected.", {
                                distance = "dtw_basic", centroid = "pam", seed = 938,
                                args = tsclust_args(dist = list(window.size = 20L)),
                                control = partitional_control(pam.precompute = FALSE,
-                                                             pam.sparse = TRUE))
+                                                             pam.sparse = TRUE,
+                                                             nrep = 2L))[[1L]]
 
     pc_dtwb_npampre2 <- tsclust(data_reinterpolated_subset, type = "p", k = 4L,
                                 distance = "dtw_basic", centroid = "pam", seed = 938,
