@@ -355,7 +355,7 @@ However, there are some aspects that are worth discussing here.
 
 The first step in DTW involves creating a local cost matrix (LCM  or $lcm$),
 which has $n \times m$ dimensions.
-Such a matrix must be created for every pair of distances compared,
+Such a matrix must be created for every pair of series compared,
 meaning that memory requirements may grow quickly as the dataset size grows.
 Considering $x$ and $y$ as the input series,
 for each element $(i,j)$ of the LCM,

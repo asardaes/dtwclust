@@ -520,7 +520,7 @@ Also note that this implementations of DBA allocate the LCM used for backtrackin
 it does not matter if series have different lengths,
 as long as the LCM's dimensions are defined based on the longest series.
 
-```{r cent-dba-plot, fig.height=20, fig.cap="*The facets' rows indicate the DBA version and the window size used, 'byS' means 'by series' and 'byV' means 'by variable' (see DBA documentation). The facet's columns indicate how many threads were used. Note the different vertical scales for each row of the facets.*"}
+```{r cent-dba-plot, fig.height=20, fig.cap="*The facets' rows indicate the DBA version and the window size used. The facet's columns indicate how many threads were used. Note the different vertical scales for each row of the facets.*"}
 id_gg <- grepl("^DBA", cent_results$cent)
 ggplot(cent_results[id_gg,],
        aes(x = num_series,
