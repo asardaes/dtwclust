@@ -7,7 +7,7 @@
     Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/master/CHANGELOG.md}
 }
 
-\section{Changes in version 5.3.0.9000}{
+\section{Changes in version 5.3.1}{
 \itemize{
     \item Added parameter \code{no.expand} to \code{compare_clusterings_configs}.
     \item Documentation fixes.

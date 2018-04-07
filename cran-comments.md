@@ -1,5 +1,5 @@
 
-## Update to version 5.3.0.9000
+## Update to version 5.3.1
 Minor internal optimizations and documentation fixes.
 
 ## Test environments

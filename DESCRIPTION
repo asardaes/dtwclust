@@ -2,8 +2,8 @@ Package: dtwclust
 Type: Package
 Title: Time Series Clustering Along with Optimizations for the Dynamic Time
     Warping Distance
-Version: 5.3.0.9000
-Date: 2018-03-06
+Version: 5.3.1
+Date: 2018-04-07
 Depends:
     R (>= 3.2.0),
     methods,
