@@ -123,7 +123,12 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
 
     cldist <- base::as.matrix(distmat[cbind(1L:N, cluster)])
     clusinfo <- compute_clusinfo(k, cluster, cldist) # UTILS-utils.R
+
     names(centroids) <- NULL
+    if (inherits(control$distmat, "Distmat")) {
+        attr(centroids, "series_id") <- base::unname(control$distmat$id_cent)
+    }
+
     # return
     list(k = k,
          cluster = cluster,

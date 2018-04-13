@@ -133,6 +133,15 @@ function that takes a list of series as first input. It will also receive the co
 \code{args$cent} that match its formal arguments, and should return a single centroid series. These
 centroids are returned in the \code{centroids} slot. By default, a type of PAM centroid function is
 used.
+
+In the following cases, the \code{centroids} list will have an attribute \code{series_id} with an integer
+vector indicating which \code{series} were chosen as centroids:
+\itemize{
+\item Partitional clustering using "pam" centroid.
+\item Fuzzy clustering using "fcmdd" centroid.
+\item Hierarchical clustering with the default centroid extraction.
+\item TADPole clustering with the default centroid extraction.
+}
 }
 
 \section{Distance Measures}{

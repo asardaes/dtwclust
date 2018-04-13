@@ -176,6 +176,14 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'   centroids are returned in the `centroids` slot. By default, a type of PAM centroid function is
 #'   used.
 #'
+#'   In the following cases, the `centroids` list will have an attribute `series_id` with an integer
+#'   vector indicating which `series` were chosen as centroids:
+#'
+#'   - Partitional clustering using "pam" centroid.
+#'   - Fuzzy clustering using "fcmdd" centroid.
+#'   - Hierarchical clustering with the default centroid extraction.
+#'   - TADPole clustering with the default centroid extraction.
+#'
 #' @section Distance Measures:
 #'
 #'   The distance measure to be used with partitional, hierarchical and fuzzy clustering can be
@@ -645,13 +653,14 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                     }
                     else {
                         allcent <- function(...) {} # dummy
-                        centroids <- sapply(1L:k, function(kcent) {
+                        centroid_ids <- sapply(1L:k, function(kcent) {
                             id_k <- cluster == kcent
                             d_sub <- distmat[id_k, id_k, drop = FALSE]
                             id_centroid <- which.min(apply(d_sub, 1L, sum))
                             which(id_k)[id_centroid]
                         })
-                        centroids <- series[centroids]
+                        centroids <- series[centroid_ids]
+                        attr(centroids, "series_id") <- unname(centroid_ids)
                     }
 
                     methods::new("HierarchicalTSClusters",
@@ -744,6 +753,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 else {
                     allcent <- function(...) {}
                     centroids <- series[R$centroids]
+                    attr(centroids, "series_id") <- R$centroids
                 }
 
                 obj <- methods::new("PartitionalTSClusters",
