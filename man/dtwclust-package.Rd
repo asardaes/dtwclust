@@ -47,6 +47,9 @@ automatically, but \code{\link[utils:Rscript]{utils::Rscript()}} does not.
 \item If you want to use the \pkg{proxy} version of \code{\link[dtw:dtw]{dtw::dtw()}} (e.g. for clustering), you have to
 attach the \pkg{dtw} package manually.
 }
+
+Be careful with reproducibility, \code{R}'s random number generator is only changed session-wide if
+\pkg{dtwclust} is attached.
 }
 \references{
 Please refer to the package's vignette's references.

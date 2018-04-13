@@ -47,6 +47,9 @@
 #' - If you want to use the \pkg{proxy} version of [dtw::dtw()] (e.g. for clustering), you have to
 #'   attach the \pkg{dtw} package manually.
 #'
+#' Be careful with reproducibility, `R`'s random number generator is only changed session-wide if
+#' \pkg{dtwclust} is attached.
+#'
 #' @author Alexis Sarda-Espinosa
 #'
 #' @references
