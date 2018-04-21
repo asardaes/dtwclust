@@ -790,14 +790,16 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
                           silent = TRUE)
 
         if (inherits(scores, "try-error")) {
-            if (!score_missing) warning("The score.clus function(s) did not execute successfully.")
+            if (!score_missing) warning("The score.clus function(s) did not execute successfully:\n",
+                                        attr(scores, "condition")$message)
             scores <- NULL
             pick <- NULL
         }
         else {
             pick <- try(pick.clus(scores, objs_by_type, ...), silent = TRUE)
             if (inherits(pick, "try-error")) {
-                if (!pick_missing) warning("The pick.clus function did not execute successfully.")
+                if (!pick_missing) warning("The pick.clus function did not execute successfully:\n",
+                                           attr(pick, "condition")$message)
                 pick <- NULL
             }
         }
@@ -820,7 +822,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
         })
         pick <- try(pick.clus(scores, ...), silent = TRUE)
         if (inherits(pick, "try-error")) {
-            if (!pick_missing) warning("The pick.clus function did not execute successfully.")
+            if (!pick_missing) warning("The pick.clus function did not execute successfully:\n",
+                                       attr(pick, "condition")$message)
             pick <- NULL
         }
     }
@@ -907,7 +910,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
                            }),
                        silent = TRUE)
         if (inherits(results, "try-error")) {
-            warning("The scores could not be appended to the results data frame.")
+            warning("The scores could not be appended to the results data frame:\n",
+                    attr(results, "condition")$message)
             results <- configs_out
         }
     }
@@ -929,7 +933,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
                                 f = function(objs, res) { setnames_inplace(objs, res$config_id) }),
                             silent = TRUE)
         if (inherits(setnames_res, "try-error"))
-            warning("Could not assign names to returned objects.")
+            warning("Could not assign names to returned objects:\n",
+                    attr(setnames_res, "condition")$message)
         results <- c(results, objects = objs_by_type)
     }
 

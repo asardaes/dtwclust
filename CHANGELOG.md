@@ -2,6 +2,7 @@
 
 ## Version 5.3.1.9000
 * The `centroids` in the objects returned by `tsclust` now have an attribute `series_id` if said centroids were extracted from the provided series without modification. It is an integer vector indicating which series were chosen as centroids.
+* Improved warning messages in `compare_clusterings`.
 
 ## Version 5.3.1
 * Added parameter `no.expand` to `compare_clusterings_configs`.
