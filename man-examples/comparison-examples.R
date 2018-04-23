@@ -1,11 +1,11 @@
-## Fuzzy preprocessing: calculate autocorrelation up to 50th lag
-acf_fun <- function(dat, ...) {
-    lapply(dat, function(x) {
+# Fuzzy preprocessing: calculate autocorrelation up to 50th lag
+acf_fun <- function(series, ...) {
+    lapply(series, function(x) {
         as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf)
     })
 }
 
-## Define overall configuration
+# Define overall configuration
 cfgs <- compare_clusterings_configs(
     types = c("p", "h", "f", "t"),
     k = 19L:20L,
@@ -18,30 +18,30 @@ cfgs <- compare_clusterings_configs(
             method = "all"
         ),
         fuzzy = fuzzy_control(
-            ## notice the vector
+            # notice the vector
             fuzziness = c(2, 2.5),
             iter.max = 30L
         ),
         tadpole = tadpole_control(
-            ## notice the vectors
+            # notice the vectors
             dc = c(1.5, 2),
             window.size = 19L:20L
         )
     ),
     preprocs = pdc_configs(
         type = "preproc",
-        ## shared
+        # shared
         none = list(),
         zscore = list(center = c(FALSE)),
-        ## only for fuzzy
+        # only for fuzzy
         fuzzy = list(
             acf_fun = list()
         ),
-        ## only for tadpole
+        # only for tadpole
         tadpole = list(
             reinterpolate = list(new.length = 205L)
         ),
-        ## specify which should consider the shared ones
+        # specify which should consider the shared ones
         share.config = c("p", "h")
     ),
     distances = pdc_configs(
@@ -57,7 +57,7 @@ cfgs <- compare_clusterings_configs(
         partitional = list(
             pam = list()
         ),
-        ## special name 'default'
+        # special name 'default'
         hierarchical = list(
             default = list()
         ),
@@ -71,20 +71,20 @@ cfgs <- compare_clusterings_configs(
     )
 )
 
-## Number of configurations is returned as attribute
+# Number of configurations is returned as attribute
 num_configs <- sapply(cfgs, attr, which = "num.configs")
 cat("\nTotal number of configurations without considering optimizations:",
     sum(num_configs),
     "\n\n")
 
-## Define evaluation function based on CVI: Variation of Information
+# Define evaluation function based on CVI: Variation of Information
 score_fun <- function(obj_list, ...) {
     sapply(obj_list, function(obj) {
         cvi(obj@cluster, CharTrajLabels, type = "VI")
     })
 }
 
-## Function that chooses best result
+# Function that chooses best result
 pick_fun <- function(scores, obj_lists, ...) {
     best_considering_type <- sapply(scores, which.min)
     best_overall <- which.min(mapply(scores, best_considering_type,
@@ -92,7 +92,7 @@ pick_fun <- function(scores, obj_lists, ...) {
 
     best_obj <- obj_lists[[best_overall]][[best_considering_type[best_overall]]]
 
-    ## return
+    # return
     best_obj
 }
 
@@ -128,14 +128,14 @@ score_external <- function(obj_list, ...) {
     scores <- lapply(obj_list, function(obj) {
         indices <- cvi(obj@cluster, CharTrajLabels, type = "external")
 
-        ## invert VI to consider maximization
-        indices["VI"] <- 1 / indices["VI"]
+        # invert VI to consider maximization
+        indices["VI"] <- 1 - indices["VI"]
 
-        ## return
+        # return
         indices
     })
 
-    ## return
+    # return
     do.call(rbind, scores)
 }
 
@@ -151,21 +151,20 @@ pick_majority <- function(scores, obj_lists, ...) {
     })
 
     best_cvis_overall <- do.call(rbind,
-                                 mapply(scores, best_considering_type,
-                                        SIMPLIFY = FALSE,
-                                        FUN = function(score, row_id) {
-                                            score[row_id, , drop = FALSE]
-                                        }))
+                                 Map(scores, best_considering_type,
+                                     f = function(score, row_id) {
+                                         score[row_id, , drop = FALSE]
+                                     }))
 
     best_overall <- majority(apply(best_cvis_overall, 2L, which.max))
 
     best_obj <- obj_lists[[best_overall]][[best_considering_type[best_overall]]]
 
-    ## to find config later, see 'best config' below
-    attr(best_obj, "config_id") <- c(best_overall,
-                                     best_considering_type[best_overall])
+    # to find config later, see 'best config' below
+    attr(best_obj, "config_indexes") <- c(best_overall,
+                                          best_considering_type[best_overall])
 
-    ## return
+    # return
     best_obj
 }
 
@@ -178,9 +177,9 @@ comparison_majority <- compare_clusterings(CharTraj, types = c("p", "h", "f", "t
 
 plot(comparison_majority$pick)
 
-## best config
-config_id <- attr(comparison_majority$pick, "config_id")
-print(comparison_majority$results[[config_id[1L]]][config_id[2L], , drop = FALSE])
+# best config
+config_indexes <- attr(comparison_majority$pick, "config_indexes")
+print(comparison_majority$results[[config_indexes[1L]]][config_indexes[2L], , drop = FALSE])
 
 stopCluster(cl); registerDoSEQ()
 
