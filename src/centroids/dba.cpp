@@ -10,7 +10,7 @@
 #include "../distance-calculators/distance-calculators.h"
 #include "../distances/distances-details.h" // dtw_basic_par
 #include "../utils/TSTSList.h"
-#include "../utils/utils.h" // KahanSummer, Rflush
+#include "../utils/utils.h" // KahanSummer, Rflush, get_grain
 
 namespace dtwclust {
 
@@ -351,8 +351,8 @@ SEXP dba_uv(const Rcpp::List& series, const Rcpp::NumericVector& centroid, const
 
     DtwBacktrackCalculator backtrack_calculator(DOTS, series, Rcpp::List::create(ref_cent));
     DbaUv parallel_worker(std::move(backtrack_calculator), new_cent, num_vals);
-    int grain = series.length() / num_threads;
-    if (grain == 0) grain = 1;
+    int grain = get_grain(series.length(), num_threads);
+    if (grain == DTWCLUST_MIN_GRAIN) grain = 1;
 
     if (trace) Rcpp::Rcout << "\tDBA Iteration:";
     int iter = 1;
@@ -388,8 +388,8 @@ SEXP dba_mv_by_variable(const Rcpp::List& series, const Rcpp::NumericMatrix& cen
 
     DtwBacktrackCalculator backtrack_calculator(DOTS, series, Rcpp::List::create(ref_cent));
     DbaMvByVariable parallel_worker(std::move(backtrack_calculator), new_cent, num_vals);
-    int grain = series.length() / num_threads;
-    if (grain == 0) grain = 1;
+    int grain = get_grain(series.length(), num_threads);
+    if (grain == DTWCLUST_MIN_GRAIN) grain = 1;
 
     if (trace) Rcpp::Rcout << "\tDBA Iteration:";
     int iter = 1;
@@ -425,8 +425,8 @@ SEXP dba_mv_by_series(const Rcpp::List& series, const Rcpp::NumericMatrix& centr
 
     DtwBacktrackCalculator backtrack_calculator(DOTS, series, Rcpp::List::create(ref_cent));
     DbaMvBySeries parallel_worker(std::move(backtrack_calculator), new_cent, num_vals);
-    int grain = series.length() / num_threads;
-    if (grain == 0) grain = 1;
+    int grain = get_grain(series.length(), num_threads);
+    if (grain == DTWCLUST_MIN_GRAIN) grain = 1;
 
     if (trace) Rcpp::Rcout << "\tDBA Iteration:";
     int iter = 1;

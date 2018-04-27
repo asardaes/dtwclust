@@ -390,9 +390,7 @@ std::vector<double> nn_dist_2(const Rcpp::List& series,
     std::vector<double> delta(num_series);
     nearest_neighbors[0] = -1;
     double max_delta = 0;
-    // divide by 2 because even though the loop requires row-wise logic,
-    // only the lower triangular is checked
-    int grain = get_grain(num_series, num_threads) / 2;
+    int grain = get_grain(num_series, num_threads);
     PruningHelper parallel_worker(
             dist_calculator,
             id_cl,

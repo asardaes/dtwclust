@@ -9,27 +9,17 @@ namespace dtwclust {
 /* called by other C++ functions */
 // -------------------------------------------------------------------------------------------------
 
-// utils.cpp
-void Rflush();
+#define DTWCLUST_MIN_GRAIN 8
 
 // envelope.cpp
 void envelope_cpp(const double * const array, const int length, const unsigned int width,
                   double * const minvalues, double * const maxvalues);
 
 // utils.cpp
+void Rflush();
+int get_grain(const int n, const int num_threads);
 double kahan_sum(const double * const x, const int length);
-
-// utils.cpp
 void s2d(const int id, const int nrow, int& i, int& j);
-
-// grain parameter for multi-threading
-int inline get_grain(const int n, const int num_threads)
-    __attribute__((always_inline));
-int inline get_grain(const int n, const int num_threads) {
-    int grain = n / num_threads;
-    // min grain defined here
-    return (grain < 8) ? 8 : grain;
-}
 
 // for kahan sum (compensated sum)
 class KahanSummer

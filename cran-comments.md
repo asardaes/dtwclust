@@ -1,5 +1,6 @@
 
 ## Update to version 5.3.1.9000
+* Parallelization optimizations.
 
 ## Test environments
 * Local GNU/Linux, R release

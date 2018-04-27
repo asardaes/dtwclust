@@ -11,7 +11,7 @@
 #include "../distances/distances-details.h" // sdtw
 #include "../utils/SurrogateMatrix.h"
 #include "../utils/TSTSList.h"
-#include "../utils/utils.h" // KahanSummer
+#include "../utils/utils.h" // KahanSummer, get_grain
 
 namespace dtwclust {
 
@@ -254,8 +254,8 @@ extern "C" SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
     Rcpp::List series(SERIES);
     double gamma = Rcpp::as<double>(GAMMA);
     int num_threads = Rcpp::as<int>(NUM_THREADS);
-    int grain = series.length() / num_threads;
-    if (grain == 0) grain = 1;
+    int grain = get_grain(series.length(), num_threads);
+    if (grain == DTWCLUST_MIN_GRAIN) grain = 1;
     // compute objective and gradient
     if (Rcpp::as<bool>(MV)) {
         Rcpp::NumericMatrix cent(CENTROID);

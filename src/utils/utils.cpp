@@ -4,20 +4,22 @@
 
 namespace dtwclust {
 
-// =================================================================================================
-/* for Rcpp::Rcout */
-// =================================================================================================
+/* grain parameter for multi-threading */
+int get_grain(const int n, const int num_threads) {
+    int grain1 = n / num_threads / 10;
+    int grain2 = n / 100;
+    int grain = (grain1 < grain2) ? grain1 : grain2;
+    return (grain < DTWCLUST_MIN_GRAIN) ? DTWCLUST_MIN_GRAIN : grain;
+}
 
+/* for Rcpp::Rcout */
 void Rflush()
 {
     R_FlushConsole();
     R_ProcessEvents();
 }
 
-// =================================================================================================
 /* helper kahan_sum */
-// =================================================================================================
-
 double kahan_sum(const double * const x, const int length)
 {
     double sum = 0, c = 0;
@@ -30,12 +32,8 @@ double kahan_sum(const double * const x, const int length)
     return sum;
 }
 
-// =================================================================================================
 /* single to double indices for symmetric matrices without diagonal */
-// =================================================================================================
-
-void s2d(const int id, const int nrow, int& i, int& j)
-{
+void s2d(const int id, const int nrow, int& i, int& j) {
     // check if it's the first column
     if (id < (nrow - 1)) {
         i = id + 1;
