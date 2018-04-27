@@ -33,10 +33,8 @@ tslist <- function(series, simplify = FALSE) {
         mat <- unname(base::as.matrix(series))
         series <- vector("list", nrow(mat))
         if (!is.null(rnms)) setnames_inplace(series, rnms)
-        i <- 1L
-        while (i <= nrow(mat)) {
+        for (i in 1L:nrow(mat)) {
             series[[i]] <- mat[i,]
-            i <- i + 1L
         }
     }
     else if (is.numeric(series))

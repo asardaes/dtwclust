@@ -62,7 +62,7 @@ server <- function(input, output, session) {
             cmp
         }
     feedback_handler <- function(pair, type) {
-        cp <- switch(
+        cmp <- switch(
             type,
             "must_link" = `==`,
             "cannot_link" = `!=`
@@ -74,12 +74,10 @@ server <- function(input, output, session) {
             stringsAsFactors = FALSE
         )
         flags <- logical(nrow(cluster_ids))
-        i <- 1L
-        while (i <= nrow(cluster_ids)) {
+        for (i in 1L:nrow(cluster_ids)) {
             # + 2L due to cluster_ids having config_id and window_size as first two columns
-            flags[i] <- cp(cluster_ids[i, pair[1L] + 2L],
-                           cluster_ids[i, pair[2L] + 2L])
-            i <- i + 1L
+            flags[i] <- cmp(cluster_ids[i, pair[1L] + 2L],
+                            cluster_ids[i, pair[2L] + 2L])
         }
         df$complexity <- complexity(flags)
         df$best_window <- cluster_ids[which.max(flags), 2L]
