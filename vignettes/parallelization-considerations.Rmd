@@ -49,21 +49,50 @@ require(doParallel)
 registerDoParallel(workers)
 ```
 
-The documentation of the functions specify if they use parallelization,
-what type,
-and how they use it.
 For more details, continue reading.
+
+# Overview
+
+Parallelization with `RcppParallel` uses multi-threading.
+All available threads are used by default,
+but this can be changed with `RcppParallel::setThreadOptions`.
+The maximum number of threads can be checked with `RcppParallel::defaultNumThreads` or `parallel::detectCores`.
+Parallelization with `foreach` requires a backend to be registered.
+Some packages that provide backends are:
+
+- `doParallel`
+- `doMC`
+- `doSNOW`
+- `doFuture`
+- `doMPI`
+
+See also [this CRAN view](https://cran.r-project.org/web/views/HighPerformanceComputing.html).
+
+The `dtwclust` functions that use `RcppParallel` are:
+
+- `dtw_lb` for `dtw.func = "dtw_basic"`.
+- `DBA`.
+- `sdtw_cent`
+- The distance calculations in `TADPole`.
+- All distances registered with `proxy` by `dtwclust`.
+
+The `dtwclust` functions that use `foreach` are:
+
+- `tsclust` for partitional and fuzzy clustering when either more than one `k` is specified in the call,
+  or `nrep > 1` in `partitional_control`.
+- The distance calculations in `tsclust` for distances *not* included with `dtwclust` (more details below).
+- `TADPole` (also when called through `tsclust`) for multiple `dc` values.
+- `compare_clusterings` for each configuration.
+- The "shape", "dba" and "sdtw_cent" centroids in partitional clustering with `tsclust` if only one `k` is specified *and* `nrep = 1`.
+- `dtw_lb` for `dtw.func = "dtw"`.
 
 # Calculation of cross-distance matrices
 
 ## Distances included in `dtwclust`
 
 As mentioned above,
-parallelization in `dtwclust` always used `foreach`,
-so it was necessary to explicitly configure the parallel workers at first.
-Now all included distance functions that are registered with `proxy` rely on `RcppParallel`
-(and some centroid functions leverage multi-threading too),
-so it is no longer necessary to explicitly create `parallel` workers for the calculation of cross-distance matrices.
+all included distance functions that are registered with `proxy` rely on `RcppParallel`,
+so it is not necessary to explicitly create `parallel` workers for the calculation of cross-distance matrices.
 Nevertheless, creating workers will not prevent the distances to use multi-threading when it is appropriate
 (more on this later).
 Using `doParallel` as an example:
@@ -91,11 +120,10 @@ distmat <- proxy::dist(CharTraj, method = "dtw_basic")
 ## Distances not included with `dtwclust`
 
 As mentioned in its documentation,
-the `tsclustFamily` class has a distance function that wraps `proxy::dist` and,
+the `tsclustFamily` class (used by `tsclust`) has a distance function that wraps `proxy::dist` and,
 with some restrictions,
 can use parallelization even with distances not included with `dtwclust`.
-In that regard everything remains the same,
-which means that it still depends on `foreach` for non-`dtwclust` distances.
+This depends on `foreach` for non-`dtwclust` distances.
 For example:
 
 ```{r family-dist}
@@ -113,8 +141,6 @@ registerDoSEQ()
 
 ## Within `dtwclust`
 
-Some other included functions still use `foreach` for parallelization,
-most importantly `tsclust` and `compare_clusterings`.
 Internally, any call to `foreach` first performs the following checks:
 
 - Is there more than one parallel worker registered?
@@ -193,13 +219,14 @@ comparison_partitional <- compare_clusterings(CharTraj, types = "p",
                                               return.objects = TRUE)
 ```
 
-A purely sequential calculation (main process with 1 thread) took more than 30 minutes,
+A purely sequential calculation (main process with 1 thread) took more than 20 minutes,
 and the following parallelization scenarios were tested on a machine with 4 cores and 1 thread per core
-(each scenario tested only once):
+(each scenario tested only once with R v3.5.0):
 
-- 4 workers required 8.5 minutes to finish.
-- 2 workers and 2 threads per worker required 8.87 minutes to finish.
-- No workers and 4 threads required 12.5 minutes to finish.
+- 4 workers required 7.36 minutes to finish.
+- 2 workers and 2 threads per worker required 7.97 minutes to finish.
+- 2 workers and 4 threads per workrer required 7.46 minutes to finish.
+- No workers and 4 threads required 10.35 minutes to finish.
 
 The last scenario has the possible advantage that tracing is still possible.
 
