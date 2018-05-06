@@ -100,6 +100,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         y <- x
     else
         y <- tslist(y)
+    if (length(x) == 0L || length(y) == 0L) stop("Empty list received in x or y.")
     if (error.check) check_consistency(c(x,y), "tslist")
     if (is_multivariate(c(x,y))) stop("lb_keogh does not support multivariate series.")
     symmetric <- FALSE

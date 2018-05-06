@@ -112,6 +112,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     y_missing <- is.null(y)
     y <- if (y_missing) x else tslist(y)
     if (is_multivariate(c(x,y))) stop("dtw_lb does not support multivariate series.")
+    if (length(x) == 0L || length(y) == 0L) stop("Empty list received in x or y.")
     if (error.check) check_consistency(c(x,y), "tslist")
     if (dtw.func == "dtw")
         method <- if (norm == "L1") "DTW" else "DTW2"
