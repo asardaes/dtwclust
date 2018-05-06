@@ -134,10 +134,11 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
                     environment(allcent) <- allcent_env
                 }
                 else if (length(.Object@datalist) > 0L && !is.null(.Object@distmat)) {
-                    allcent <- function(dummy) {
+                    allcent <- function(...) {
                         datalist[which.min(apply(distmat, 1L, sum))] # for CVI's global_cent
                     }
 
+                    datalist <- distmat <- NULL # avoid check NOTE
                     allcent_env <- new.env(parent = .GlobalEnv)
                     allcent_env$datalist <- .Object@datalist
                     allcent_env$distmat <- .Object@distmat
@@ -165,9 +166,10 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
                     environment(allcent) <- allcent_env
                 }
                 else if (length(.Object@centroids) > 0L) {
+                    centroids <- NULL # avoid check NOTE
                     allcent_env <- new.env(parent = .GlobalEnv)
                     allcent_env$centroids <- .Object@centroids
-                    allcent <- function(dummy) { centroids[1L] } # for CVI's global_cent
+                    allcent <- function(...) { centroids[1L] } # for CVI's global_cent
                     environment(allcent) <- allcent_env
                 }
                 else {
