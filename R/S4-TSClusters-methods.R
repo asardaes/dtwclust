@@ -87,15 +87,23 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
     }
     .Object <- do.call(methods::callNextMethod, enlist(.Object = .Object, dots = dots), TRUE)
     .Object@call <- call
+
     # some "defaults"
     if (is.null(dots$preproc)) .Object@preproc <- "none"
     if (is.null(dots$k)) .Object@k <- length(.Object@centroids)
+
     if (is.null(dots$args))
         .Object@args <- tsclust_args(preproc = .Object@dots,
                                      dist = .Object@dots,
                                      cent = .Object@dots)
     else
         .Object@args <- adjust_args(.Object@args, .Object@dots) # UTILS-utils.R
+
+    if (length(.Object@type) > 0L && .Object@type == "tadpole") {
+        .Object@args$dist$window.size <- .Object@control$window.size
+        .Object@args$dist$norm <- "L2"
+    }
+
     # more helpful for hierarchical/tadpole
     if (override.family) {
         if (length(.Object@type) == 0L)
@@ -103,23 +111,79 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
         else if (length(.Object@distance) == 0L)
             warning("Could not override family, 'distance' slot is missing.")
         else {
-            centroids <- .Object@centroids
-            datalist <- .Object@datalist
-            preproc <- if (.Object@preproc == "none") .Object@family@preproc else match.fun(.Object@preproc)
-            if (.Object@type == "partitional" && length(.Object@centroid))
-                allcent <- all_cent2(.Object@centroid, .Object@control)
-            else if (.Object@type == "hierarchical" && length(formals(.Object@family@allcent)))
-                allcent <- .Object@family@allcent
-            else if (.Object@type == "hierarchical" && length(centroids))
-                allcent <- function(dummy) { # nocov start
-                    datalist[which.min(apply(.Object@distmat, 1L, sum))] # for CVI's global_cent
-                } # nocov end
-            else if (.Object@type == "tadpole" && length(centroids))
-                allcent <- function(dummy) { centroids[1L] } # for CVI's global_cent
-            else if (.Object@type == "fuzzy")
-                allcent <- .Object@centroid
+            if (.Object@preproc == "none")
+                preproc <- .Object@family@preproc
             else
+                preproc <- match.fun(.Object@preproc)
+
+            if (.Object@type == "partitional") {
+                if (length(.Object@centroid) > 0L) {
+                    allcent <- all_cent2(.Object@centroid, .Object@control)
+
+                    if (.Object@centroid == "shape" && .Object@preproc == "none") {
+                        preproc <- zscore
+                        .Object@preproc <- "zscore"
+                    }
+                }
+                else {
+                    allcent <- .Object@family@allcent
+                    warning("Could not override allcent in family, 'centroid' slot is missing.")
+                }
+            }
+            else if (.Object@type == "hierarchical") {
+                centfun <- try(match.fun(.Object@centroid), silent = TRUE)
+                if (!inherits(centfun, "try-error")) {
+                    allcent <- function(...) { list(centfun(...)) }
+                    allcent_env <- new.env(parent = .GlobalEnv)
+                    allcent_env$centfun <- centfun
+                    environment(allcent) <- allcent_env
+                }
+                else if (length(.Object@datalist) > 0L && !is.null(.Object@distmat)) {
+                    allcent <- function(dummy) {
+                        datalist[which.min(apply(distmat, 1L, sum))] # for CVI's global_cent
+                    }
+
+                    allcent_env <- new.env(parent = .GlobalEnv)
+                    allcent_env$datalist <- .Object@datalist
+                    allcent_env$distmat <- .Object@distmat
+                    environment(allcent) <- allcent_env
+                }
+                else {
+                    allcent <- .Object@family@allcent
+                    warning("Could not override allcent in family, 'datalist' or 'distmat' slots are missing.")
+                }
+            }
+            else if (.Object@type == "fuzzy") {
+                if (length(.Object@centroid) > 0L && .Object@centroid %in% centroids_fuzzy)
+                    allcent <- .Object@centroid
+                else {
+                    allcent <- .Object@family@allcent
+                    warning("Could not override allcent in family, 'centroid' slot is missing.")
+                }
+            }
+            else if (.Object@type == "tadpole") {
+                centfun <- try(match.fun(.Object@centroid), silent = TRUE)
+                if (!inherits(centfun, "try-error")) {
+                    allcent <- function(...) { list(centfun(...)) }
+                    allcent_env <- new.env(parent = .GlobalEnv)
+                    allcent_env$centfun <- centfun
+                    environment(allcent) <- allcent_env
+                }
+                else if (length(.Object@centroids) > 0L) {
+                    allcent_env <- new.env(parent = .GlobalEnv)
+                    allcent_env$centroids <- .Object@centroids
+                    allcent <- function(dummy) { centroids[1L] } # for CVI's global_cent
+                    environment(allcent) <- allcent_env
+                }
+                else {
+                    allcent <- .Object@family@allcent
+                    warning("Could not override allcent in family, 'centroids' slot is missing.")
+                }
+            }
+            else { # nocov start
                 allcent <- .Object@family@allcent
+                warning("Could not override allcent in family, 'type' slot is not recognized.")
+            } # nocov end
 
             .Object@family <- methods::new("tsclustFamily",
                                            dist = .Object@distance,
@@ -127,10 +191,6 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
                                            preproc = preproc,
                                            control = .Object@control,
                                            fuzzy = isTRUE(.Object@type == "fuzzy"))
-            if (.Object@type == "partitional" && .Object@centroid == "shape") {
-                .Object@family@preproc <- zscore
-                .Object@preproc <- "zscore"
-            }
         }
     }
     # just a filler
@@ -146,15 +206,18 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
 setMethod("initialize", "PartitionalTSClusters", function(.Object, ...) {
     .Object <- methods::callNextMethod()
     # some "defaults"
-    if (!length(.Object@iter)) .Object@iter <- 1L
-    if (!length(.Object@converged)) .Object@converged <- TRUE
-    if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
+    if (length(.Object@iter) == 0L) .Object@iter <- 1L
+    if (length(.Object@converged) == 0L) .Object@converged <- TRUE
+    if (!nrow(.Object@cldist) &&
+        length(formals(.Object@family@dist)) && length(.Object@cluster) &&
+        length(.Object@datalist) && length(.Object@centroids))
+        {
         # no cldist available, but dist and cluster can be used to calculate it
-        dm <- do.call(.Object@family@dist,
-                      enlist(.Object@datalist,
-                             .Object@centroids,
-                             dots = .Object@args$dist),
-                      TRUE)
+        dm <- do.call(.Object@family@dist, quote = TRUE, args = enlist(
+            .Object@datalist,
+            .Object@centroids,
+            dots = .Object@args$dist
+        ))
         .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist), .Object@cluster)])
         dimnames(.Object@cldist) <- NULL
     }
@@ -171,17 +234,16 @@ setMethod("initialize", "PartitionalTSClusters", function(.Object, ...) {
 #'
 setMethod("initialize", "HierarchicalTSClusters", function(.Object, ...) {
     .Object <- methods::callNextMethod()
-    # Replace distmat with NULL so that, if the distance function is called again,
-    # it won't subset it
-    if (length(formals(.Object@family@dist)))
-        eval(quote(control$distmat <- NULL), environment(.Object@family@dist))
+    # replace distmat with NULL so that, if the distance function is called again, it won't subset it
+    if (length(formals(.Object@family@dist)) > 0L)
+        environment(.Object@family@dist)$control$distmat <- NULL
     if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
         # no cldist available, but dist and cluster can be used to calculate it
-        dm <- do.call(.Object@family@dist,
-                      enlist(.Object@datalist,
-                             .Object@centroids,
-                             dots = .Object@args$dist),
-                      TRUE)
+        dm <- do.call(.Object@family@dist, quote = TRUE, args = enlist(
+            .Object@datalist,
+            .Object@centroids,
+            dots = .Object@args$dist
+        ))
         .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist),
                                                    .Object@cluster)])
         dimnames(.Object@cldist) <- NULL
@@ -200,20 +262,21 @@ setMethod("initialize", "HierarchicalTSClusters", function(.Object, ...) {
 setMethod("initialize", "FuzzyTSClusters", function(.Object, ...) {
     .Object <- methods::callNextMethod()
     # some "defaults"
-    if (!length(.Object@iter)) .Object@iter <- 1L
-    if (!length(.Object@converged)) .Object@converged <- TRUE
+    if (length(.Object@iter) == 0L) .Object@iter <- 1L
+    if (length(.Object@converged) == 0L) .Object@converged <- TRUE
     if (!nrow(.Object@fcluster)) {
         if (length(formals(.Object@family@dist))) {
             # no fcluster available, but dist and cluster function can be used to calculate it
-            dm <- do.call(.Object@family@dist,
-                          enlist(.Object@datalist,
-                                 .Object@centroids,
-                                 dots = .Object@args$dist),
-                          TRUE)
+            dm <- do.call(.Object@family@dist, quote = TRUE, args = enlist(
+                .Object@datalist,
+                .Object@centroids,
+                dots = .Object@args$dist
+            ))
             .Object@fcluster <- .Object@family@cluster(dm, m = .Object@control$fuzziness)
-            colnames(.Object@fcluster) <- paste0("cluster_", 1:.Object@k)
+            colnames(.Object@fcluster) <- paste0("cluster_", 1L:.Object@k)
             .Object@cluster <- max.col(.Object@fcluster, "first")
-        }else {
+        }
+        else {
             .Object@fcluster <- matrix(NA_real_) # nocov
         }
     }

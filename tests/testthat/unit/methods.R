@@ -25,6 +25,62 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
         "tsclustFamily"
     )
 
+    expect_warning(new("TSClusters"), "type.*missing")
+    expect_warning(new("TSClusters", type="dummy"), "distance.*missing")
+
+    # tadpole
+    expect_warning(
+        new("PartitionalTSClusters",
+            type = "tadpole",
+            k = 4L,
+            control = tadpole_control(1.5, 20L),
+            datalist = data_reinterpolated_subset[-2L],
+            cluster = rep(1L:4L, each = 5L)[-2L],
+            distance = "dtw_lb",
+            override.family = TRUE),
+        "allcent in family"
+    )
+    expect_s4_class(
+        tadpole_object <- new("PartitionalTSClusters",
+                              type = "tadpole",
+                              k = 4L,
+                              control = tadpole_control(1.5, 20L),
+                              datalist = data_reinterpolated_subset[-2L],
+                              centroids = data_reinterpolated_subset[seq(from = 1L, to = 16L, by = 5L)],
+                              cluster = rep(1L:4L, each = 5L)[-2L],
+                              distance = "dtw_lb",
+                              override.family = TRUE),
+        "PartitionalTSClusters"
+    )
+    expect_true(length(tadpole_object@family@allcent()) == 1L)
+    expect_s4_class(
+        tadpole_object <- new("PartitionalTSClusters",
+                              type = "tadpole",
+                              k = 4L,
+                              control = tadpole_control(1.5, 20L),
+                              datalist = data_reinterpolated_subset[-2L],
+                              centroids = data_reinterpolated_subset[seq(from = 1L, to = 16L, by = 5L)],
+                              cluster = rep(1L:4L, each = 5L)[-2L],
+                              distance = "dtw_lb",
+                              centroid = "dba",
+                              override.family = TRUE),
+        "PartitionalTSClusters"
+    )
+    expect_true(length(tadpole_object@family@allcent(data_reinterpolated_subset)) == 1L)
+
+    # partitional
+    expect_warning(
+        new("PartitionalTSClusters",
+            type = "partitional",
+            k = 4L,
+            control = partitional_control(),
+            datalist = data_subset[-2L],
+            centroids = data_subset[seq(from = 1L, to = 16L, by = 5L)],
+            cluster = rep(1L:4L, each = 5L)[-2L],
+            distance = "sbd",
+            override.family = TRUE),
+        "allcent in family"
+    )
     expect_s4_class(
         partitional_object <- new("PartitionalTSClusters",
                                   type = "partitional",
@@ -33,13 +89,25 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
                                   datalist = data_subset[-2L],
                                   centroids = data_subset[seq(from = 1L, to = 16L, by = 5L)],
                                   cluster = rep(1L:4L, each = 5L)[-2L],
-                                  preproc = "zscore",
                                   distance = "sbd",
                                   centroid = "shape",
                                   override.family = TRUE),
         "PartitionalTSClusters"
     )
 
+    # fuzzy
+    expect_warning(
+        new("FuzzyTSClusters",
+            type = "fuzzy",
+            k = 4L,
+            control = fuzzy_control(),
+            datalist = data_multivariate[-2L],
+            centroids = data_multivariate[seq(from = 1L, to = 16L, by = 5L)],
+            preproc = "zscore",
+            distance = "dtw_basic",
+            override.family = TRUE),
+        "allcent in family"
+    )
     expect_s4_class(
         fuzzy_object <- new("FuzzyTSClusters",
                             type = "fuzzy",
@@ -54,10 +122,45 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
         "FuzzyTSClusters"
     )
 
+    # hierarchical
+    dm <- proxy::dist(data_reinterpolated_subset, method = "L2")
+    expect_warning(
+        new("HierarchicalTSClusters",
+            hclust(dm),
+            type = "hierarchical",
+            k = 4L,
+            control = hierarchical_control(),
+            datalist = data_subset[-2L],
+            centroids = data_subset[seq(from = 1L, to = 16L, by = 5L)],
+            cluster = rep(1L:4L, each = 5L)[-2L],
+            preproc = "zscore",
+            distance = "sbd",
+            args = tsclust_args(preproc = list(center = FALSE)),
+            override.family = TRUE),
+        "allcent in family"
+    )
+    expect_s4_class(
+        hierarchical_object <- new("HierarchicalTSClusters",
+                                   hclust(dm),
+                                   type = "hierarchical",
+                                   k = 4L,
+                                   control = hierarchical_control(),
+                                   datalist = data_subset[-2L],
+                                   centroids = data_subset[seq(from = 1L, to = 16L, by = 5L)],
+                                   cluster = rep(1L:4L, each = 5L)[-2L],
+                                   preproc = "zscore",
+                                   distance = "sbd",
+                                   centroid = "dba",
+                                   args = tsclust_args(preproc = list(center = FALSE)),
+                                   distmat = dm,
+                                   override.family = TRUE),
+        "HierarchicalTSClusters"
+    )
+    expect_true(length(hierarchical_object@family@allcent(data_subset)) == 1L)
     # extra argument for preproc so that it is used in predict
     expect_s4_class(
         hierarchical_object <- new("HierarchicalTSClusters",
-                                   hclust(proxy::dist(data_reinterpolated_subset, method = "L2")),
+                                   hclust(dm),
                                    type = "hierarchical",
                                    k = 4L,
                                    control = hierarchical_control(),
@@ -68,6 +171,7 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
                                    distance = "sbd",
                                    centroid = "pam",
                                    args = tsclust_args(preproc = list(center = FALSE)),
+                                   distmat = dm,
                                    override.family = TRUE),
         "HierarchicalTSClusters"
     )
