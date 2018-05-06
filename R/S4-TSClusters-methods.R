@@ -99,11 +99,6 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
     else
         .Object@args <- adjust_args(.Object@args, .Object@dots) # UTILS-utils.R
 
-    if (length(.Object@type) > 0L && .Object@type == "tadpole") {
-        .Object@args$dist$window.size <- .Object@control$window.size
-        .Object@args$dist$norm <- "L2"
-    }
-
     # more helpful for hierarchical/tadpole
     if (override.family) {
         if (length(.Object@type) == 0L)

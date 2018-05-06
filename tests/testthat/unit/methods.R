@@ -44,11 +44,11 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
         tadpole_object <- new("PartitionalTSClusters",
                               type = "tadpole",
                               k = 4L,
-                              control = tadpole_control(1.5, 20L),
                               datalist = data_reinterpolated_subset[-2L],
                               centroids = data_reinterpolated_subset[seq(from = 1L, to = 16L, by = 5L)],
                               cluster = rep(1L:4L, each = 5L)[-2L],
                               distance = "dtw_lb",
+                              args = tsclust_args(dist = list(window.size = 10L, norm = "L2")),
                               override.family = TRUE),
         "PartitionalTSClusters"
     )
@@ -57,12 +57,12 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
         tadpole_object <- new("PartitionalTSClusters",
                               type = "tadpole",
                               k = 4L,
-                              control = tadpole_control(1.5, 20L),
                               datalist = data_reinterpolated_subset[-2L],
                               centroids = data_reinterpolated_subset[seq(from = 1L, to = 16L, by = 5L)],
                               cluster = rep(1L:4L, each = 5L)[-2L],
                               distance = "dtw_lb",
                               centroid = "dba",
+                              args = tsclust_args(dist = list(window.size = 10L, norm = "L2")),
                               override.family = TRUE),
         "PartitionalTSClusters"
     )
