@@ -299,7 +299,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
         if (length(seed) == 1L)
             set.seed(seed)
         else if (length(seed) == 7L)
-            assign(".Random.seed", seed, globalenv())
+            assign(".Random.seed", seed, .GlobalEnv)
         else
             stop("Invalid seed provided") # nocov
     }
@@ -426,7 +426,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             if (length(k) == 1L && nrep == 1L) {
                 # UTILS-rng.R
                 if (is.null(.rng_)) .rng_ <- rng_seq(1L, seed = seed, simplify = TRUE)
-                assign(".Random.seed", .rng_, globalenv())
+                assign(".Random.seed", .rng_, .GlobalEnv)
                 # just one repetition,
                 # done like this so dist/cent functions can take advantage of parallelization
                 pc_list <- list(do.call(pfclust,
@@ -473,7 +473,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                             .export = export) %this_op%
                             {
                                 if (trace) message("Repetition ", i, " for k = ", k)
-                                assign(".Random.seed", rng[[i]], globalenv())
+                                assign(".Random.seed", rng[[i]], .GlobalEnv)
 
                                 if (!check_consistency(dist_entry$names[1L], "dist"))
                                     do.call(proxy::pr_DB$set_entry, dist_entry, TRUE)
@@ -737,7 +737,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 .rng_ <- rng_seq(length(k) * length(control$dc), seed = seed, simplify = FALSE)
 
             RET <- Map(R, .rng_, f = function(R, rng) {
-                assign(".Random.seed", rng, globalenv())
+                assign(".Random.seed", rng, .GlobalEnv)
                 k <- length(R$centroids)
                 if (is.function(centroid)) {
                     allcent <- function(...) { list(centroid(...)) }

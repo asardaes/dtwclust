@@ -217,7 +217,7 @@ server <- function(input, output, session) {
             out_name <- input$evaluate__save_name
             if (nzchar(out_name)) {
                 tryCatch({
-                    assign(out_name, result(), globalenv())
+                    assign(out_name, result(), .GlobalEnv)
                     shinyjs::alert("Saved! Exit shiny app to update the global environment.")
                 },
                 error = function(e) {
