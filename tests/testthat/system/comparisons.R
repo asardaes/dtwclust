@@ -19,7 +19,8 @@ score_fun <- function(obj_list, lbls, ...) {
     })
 }
 
-pick_fun <- function(scores, obj_lists, ...) {
+pick_fun <- function(results, obj_lists, ...) {
+    scores <- lapply(results, function(result) { result$score })
     best_considering_type <- sapply(scores, which.min)
     best_overall <- which.min(mapply(scores, best_considering_type,
                                      FUN = function(score, id) { score[id] }))

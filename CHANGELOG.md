@@ -2,6 +2,7 @@
 
 ## Version 5.3.1.9000
 * Fixed the calculation of SF and CH CVIs for hierarchical clustering with default centroid extraction.
+* The data frames passed to `pick.clus` in `compare_clusterings` now also contain the configurations' data instead of just the scores. This will require adjustment of existing `pick.clus` functions.
 * The `centroids` in the objects returned by `tsclust` now have an attribute `series_id` if said centroids were extracted from the provided series without modification. It is an integer vector indicating which series were chosen as centroids.
 * Improved warning messages in `compare_clusterings`.
 * Multi-threading parallelization is now more medium-grained to hopefully balance load a bit better.

@@ -84,8 +84,9 @@ score_fun <- function(obj_list, ...) {
     })
 }
 
-# Function that chooses best result
-pick_fun <- function(scores, obj_lists, ...) {
+# Function that chooses best result (for the VI CVI!)
+pick_fun <- function(results, obj_lists, ...) {
+    scores <- lapply(results, function(result) { result$score })
     best_considering_type <- sapply(scores, which.min)
     best_overall <- which.min(mapply(scores, best_considering_type,
                                      FUN = function(score, id) { score[id] }))
@@ -139,22 +140,25 @@ score_external <- function(obj_list, ...) {
     do.call(rbind, scores)
 }
 
-pick_majority <- function(scores, obj_lists, ...) {
+pick_majority <- function(results, obj_lists, ...) {
+    scores <- lapply(results, function(result) {
+        result[c("RI", "ARI", "J", "FM", "VI")]
+    })
+
     majority <- function(x) {
         ux <- unique(x)
         ux[which.max(tabulate(match(x, ux)))]
     }
 
     best_considering_type <- sapply(scores, function(score) {
-        best_by_cvi <- apply(score, 2L, which.max)
-        majority(best_by_cvi)
+        best_by_cvi <- apply(score, 2L, which.max) # WARNING: these could all be distinct!
+        majority(best_by_cvi) # ... so this could simply choose the result with smallest config_id
     })
 
     best_cvis_overall <- do.call(rbind,
-                                 Map(scores, best_considering_type,
-                                     f = function(score, row_id) {
-                                         score[row_id, , drop = FALSE]
-                                     }))
+                                 Map(scores, best_considering_type, f = function(score, row_id) {
+                                     score[row_id, , drop = FALSE]
+                                 }))
 
     best_overall <- majority(apply(best_cvis_overall, 2L, which.max))
 

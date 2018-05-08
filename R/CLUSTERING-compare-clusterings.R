@@ -442,10 +442,10 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'
 #' @section Picking:
 #'
-#'   If `return.objects` is `TRUE`, the scores and the list of clustering results are given to
-#'   `pick.clus` as first and second arguments respectively, followed by `...`. Otherwise,
-#'   `pick.clus` will receive only the scores and the contents of `...` (since the results will not
-#'   be returned by the preceding step).
+#'   If `return.objects` is `TRUE`, the results' data frames and the list of [TSClusters-class]
+#'   objects are given to `pick.clus` as first and second arguments respectively, followed by `...`.
+#'   Otherwise, `pick.clus` will receive only the data frames and the contents of `...` (since the
+#'   objects will not be returned by the preceding step).
 #'
 #' @section Limitations:
 #'
@@ -793,15 +793,6 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
             if (!score_missing) warning("The score.clus function(s) did not execute successfully:\n",
                                         attr(scores, "condition")$message)
             scores <- NULL
-            pick <- NULL
-        }
-        else {
-            pick <- try(pick.clus(scores, objs_by_type, ...), silent = TRUE)
-            if (inherits(pick, "try-error")) {
-                if (!pick_missing) warning("The pick.clus function did not execute successfully:\n",
-                                           attr(pick, "condition")$message)
-                pick <- NULL
-            }
         }
     }
     else {
@@ -820,12 +811,6 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
             else
                 dplyr::bind_rows(lapply(passed_objs, base::as.data.frame))
         })
-        pick <- try(pick.clus(scores, ...), silent = TRUE)
-        if (inherits(pick, "try-error")) {
-            if (!pick_missing) warning("The pick.clus function did not execute successfully:\n",
-                                       attr(pick, "condition")$message)
-            pick <- NULL
-        }
     }
 
     # ==============================================================================================
@@ -894,7 +879,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
     })
 
     # ----------------------------------------------------------------------------------------------
-    # Add scores
+    # Add scores and pick
     # ----------------------------------------------------------------------------------------------
 
     # in case ordering is required below
@@ -909,14 +894,36 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
                                cbind(config, base::as.data.frame(score))
                            }),
                        silent = TRUE)
+
         if (inherits(results, "try-error")) {
             warning("The scores could not be appended to the results data frame:\n",
                     attr(results, "condition")$message)
             results <- configs_out
+            pick <- NULL
+        }
+        else {
+            if (return.objects) {
+                pick <- try(pick.clus(results, objs_by_type, ...), silent = TRUE)
+                if (inherits(pick, "try-error")) {
+                    if (!pick_missing) warning("The pick.clus function did not execute successfully:\n",
+                                               attr(pick, "condition")$message)
+                    pick <- NULL
+                }
+            }
+            else {
+                pick <- try(pick.clus(results, ...), silent = TRUE)
+                if (inherits(pick, "try-error")) {
+                    if (!pick_missing) warning("The pick.clus function did not execute successfully:\n",
+                                               attr(pick, "condition")$message)
+                    pick <- NULL
+                }
+            }
         }
     }
-    else
+    else {
         results <- configs_out
+        pick <- NULL
+    }
 
     # ==============================================================================================
     # List with all results
