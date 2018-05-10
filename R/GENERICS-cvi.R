@@ -142,6 +142,10 @@
 #' Wang, W., & Zhang, Y. (2007). On fuzzy cluster validity indices. Fuzzy sets and systems, 158(19),
 #' 2095-2117.
 #'
+#' @examples
+#'
+#' cvi(CharTrajLabels, sample(CharTrajLabels), type = c("ARI", "VI"))
+#'
 setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10) {
     # Only external CVIs for default, S4-TSClusters-methods.R has the internal ones
     if (is.null(b))

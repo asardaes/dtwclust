@@ -156,6 +156,11 @@ provided or not.
 }
 }
 
+\examples{
+
+cvi(CharTrajLabels, sample(CharTrajLabels), type = c("ARI", "VI"))
+
+}
 \references{
 Arbelaitz, O., Gurrutxaga, I., Muguerza, J., Perez, J. M., & Perona, I. (2013). An extensive
 comparative study of cluster validity indices. Pattern Recognition, 46(1), 243-256.
