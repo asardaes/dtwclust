@@ -9,6 +9,7 @@
 
 \section{Changes in version 5.3.1.9000}{
 \itemize{
+    \item Added another helper for \code{compare_clusterings}: \code{cvi_evaluators}.
     \item Fixed the calculation of SF and CH CVIs for hierarchical clustering with default centroid extraction.
     \item The data frames passed to \code{pick.clus} in \code{compare_clusterings} now also contain the configurations' data instead of just the scores. This will require adjustment of existing \code{pick.clus} functions.
     \item The \code{centroids} in the objects returned by \code{tsclust} now have an attribute \code{series_id} if said centroids were extracted from the provided series without modification. It is an integer vector indicating which series were chosen as centroids.

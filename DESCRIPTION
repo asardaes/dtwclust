@@ -3,7 +3,7 @@ Type: Package
 Title: Time Series Clustering Along with Optimizations for the Dynamic Time
     Warping Distance
 Version: 5.3.1.9000
-Date: 2018-04-13
+Date: 2018-05-10
 Depends:
     R (>= 3.2.0),
     methods,
@@ -65,6 +65,7 @@ Collate:
     'CENTROIDS-shape-extraction.R'
     'CLUSTERING-all-cent2.R'
     'CLUSTERING-compare-clusterings.R'
+    'CLUSTERING-cvi-evaluators.R'
     'CLUSTERING-ddist2.R'
     'CLUSTERING-partitional-fuzzy.R'
     'CLUSTERING-repeat-clustering.R'

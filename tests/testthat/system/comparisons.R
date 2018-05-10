@@ -13,30 +13,10 @@ acf_fun <- function(dat, ...) {
     })
 }
 
-score_fun <- function(obj_list, lbls, ...) {
-    sapply(obj_list, function(obj) {
-        cvi(obj@cluster, lbls, type = "VI")
-    })
-}
-
-pick_fun <- function(results, obj_lists, ...) {
-    scores <- lapply(results, function(result) { result$score })
-    best_considering_type <- sapply(scores, which.min)
-    best_overall <- which.min(mapply(scores, best_considering_type,
-                                     FUN = function(score, id) { score[id] }))
-
-    best_obj <- obj_lists[[best_overall]][[best_considering_type[best_overall]]]
-
-    ## return
-    best_obj
-}
-
-type_score_fun <- list(fuzzy = function(obj_list, lbls, ...) {
-    sapply(obj_list, function(obj) {
-        cvi(obj@cluster, lbls, type = "VI")
-    })
-})
-
+evaluators <- cvi_evaluators("VI", ground.truth = labels_subset)
+score_fun <- evaluators$score
+pick_fun <- evaluators$pick
+type_score_fun <- list(fuzzy = score_fun)
 bad_score_fun <- list(fuzzy = function(...) { list(1L:2L, 3L:5L) })
 
 cfgs <- compare_clusterings_configs(c("p", "h", "f", "t"), k = 2L:3L,
@@ -161,6 +141,207 @@ cfgs_sdtwc <- compare_clusterings_configs(types = "h", k = 2L,
 )
 
 # ==================================================================================================
+# CVI evaluators
+# ==================================================================================================
+
+test_that("cvi_evaluators work nicely with compare_clusterings.", {
+    # these should be unit tests, but oh well
+    expect_error(cvi_evaluators("external"), "ground.truth")
+    expect_error(cvi_evaluators("VI"), "ground.truth")
+
+    pick_inconclusive <- cvi_evaluators(c("RI", "ARI"), ground.truth = labels_subset)$pick
+
+    res <- list(data.frame(RI = 0:1, ARI = 1:0))
+    expect_error(pick_inconclusive(res), "inconclusive")
+
+    res <- list(data.frame(RI = c(0,1), ARI = c(0,2)),
+                data.frame(RI = c(2,0), ARI = c(1,0)))
+    expect_error(pick_inconclusive(res), "inconclusive")
+
+    # smaller cfgs
+    cfgs <- compare_clusterings_configs(c("h", "f"), k = 2L:3L,
+                                        controls = list(
+                                            hierarchical = hierarchical_control(
+                                                method = "average"
+                                            ),
+                                            fuzzy = fuzzy_control(
+                                                fuzziness = c(2, 2.5),
+                                                iter.max = 10L
+                                            )
+                                        ),
+                                        preprocs = pdc_configs(
+                                            type = "preproc",
+                                            ## shared
+                                            none = list(),
+                                            ## only for fuzzy
+                                            fuzzy = list(
+                                                acf_fun = list()
+                                            ),
+                                            ## specify which should consider the shared ones
+                                            share.config = c("h")
+                                        ),
+                                        distances = pdc_configs(
+                                            type = "distance",
+                                            sbd = list(),
+                                            fuzzy = list(
+                                                L2 = list()
+                                            ),
+                                            share.config = c("h")
+                                        ),
+                                        centroids = pdc_configs(
+                                            type = "centroid",
+                                            ## special name 'default'
+                                            hierarchical = list(
+                                                default = list()
+                                            ),
+                                            fuzzy = list(
+                                                fcmdd = list()
+                                            )
+                                        )
+    )
+
+    # non-fuzzy
+    ev_valid <- cvi_evaluators("valid", ground.truth = labels_subset)
+    ev_internal <- cvi_evaluators("internal", ground.truth = labels_subset)
+    ev_external <- cvi_evaluators("external", ground.truth = labels_subset)
+    ev_vi <- cvi_evaluators("VI", ground.truth = labels_subset)
+
+    # valid
+    with_objs <- compare_clusterings(data_reinterpolated_subset,
+                                     c("h"),
+                                     configs = cfgs, seed = 392L,
+                                     score.clus = ev_valid$score,
+                                     pick.clus = ev_valid$pick,
+                                     return.objects = TRUE)
+    without_objs <- compare_clusterings(data_reinterpolated_subset,
+                                        c("h"),
+                                        configs = cfgs, seed = 392L,
+                                        score.clus = ev_valid$score,
+                                        pick.clus = ev_valid$pick,
+                                        return.objects = FALSE)
+    expect_identical(with_objs$results, without_objs$results)
+    expect_identical(with_objs$pick$config, without_objs$pick)
+
+    # internal
+    with_objs <- compare_clusterings(data_reinterpolated_subset,
+                                     c("h"),
+                                     configs = cfgs, seed = 392L,
+                                     score.clus = ev_internal$score,
+                                     pick.clus = ev_internal$pick,
+                                     return.objects = TRUE)
+    without_objs <- compare_clusterings(data_reinterpolated_subset,
+                                        c("h"),
+                                        configs = cfgs, seed = 392L,
+                                        score.clus = ev_internal$score,
+                                        pick.clus = ev_internal$pick,
+                                        return.objects = FALSE)
+    expect_identical(with_objs$results, without_objs$results)
+    expect_identical(with_objs$pick$config, without_objs$pick)
+
+    # external
+    with_objs <- compare_clusterings(data_reinterpolated_subset,
+                                     c("h"),
+                                     configs = cfgs, seed = 392L,
+                                     score.clus = ev_external$score,
+                                     pick.clus = ev_external$pick,
+                                     return.objects = TRUE)
+    without_objs <- compare_clusterings(data_reinterpolated_subset,
+                                        c("h"),
+                                        configs = cfgs, seed = 392L,
+                                        score.clus = ev_external$score,
+                                        pick.clus = ev_external$pick,
+                                        return.objects = FALSE)
+    expect_identical(with_objs$results, without_objs$results)
+    expect_identical(with_objs$pick$config, without_objs$pick)
+
+    # vi
+    with_objs <- compare_clusterings(data_reinterpolated_subset,
+                                     c("h"),
+                                     configs = cfgs, seed = 392L,
+                                     score.clus = ev_vi$score,
+                                     pick.clus = ev_vi$pick,
+                                     return.objects = TRUE)
+    without_objs <- compare_clusterings(data_reinterpolated_subset,
+                                        c("h"),
+                                        configs = cfgs, seed = 392L,
+                                        score.clus = ev_vi$score,
+                                        pick.clus = ev_vi$pick,
+                                        return.objects = FALSE)
+    expect_identical(with_objs$results, without_objs$results)
+    expect_identical(with_objs$pick$config, without_objs$pick)
+
+    # fuzzy
+    ev_valid <- cvi_evaluators("valid", TRUE, ground.truth = labels_subset)
+    ev_internal <- cvi_evaluators("internal", TRUE, ground.truth = labels_subset)
+    ev_external <- cvi_evaluators("external", TRUE, ground.truth = labels_subset)
+    ev_vi <- cvi_evaluators("VI", TRUE, ground.truth = labels_subset)
+
+    # valid
+    with_objs <- compare_clusterings(data_reinterpolated_subset,
+                                     c("f"),
+                                     configs = cfgs, seed = 392L,
+                                     score.clus = ev_valid$score,
+                                     pick.clus = ev_valid$pick,
+                                     return.objects = TRUE)
+    without_objs <- compare_clusterings(data_reinterpolated_subset,
+                                        c("f"),
+                                        configs = cfgs, seed = 392L,
+                                        score.clus = ev_valid$score,
+                                        pick.clus = ev_valid$pick,
+                                        return.objects = FALSE)
+    expect_identical(with_objs$results, without_objs$results)
+    expect_identical(with_objs$pick$config, without_objs$pick)
+
+    # internal
+    with_objs <- compare_clusterings(data_reinterpolated_subset,
+                                     c("f"),
+                                     configs = cfgs, seed = 392L,
+                                     score.clus = ev_internal$score,
+                                     pick.clus = ev_internal$pick,
+                                     return.objects = TRUE)
+    without_objs <- compare_clusterings(data_reinterpolated_subset,
+                                        c("f"),
+                                        configs = cfgs, seed = 392L,
+                                        score.clus = ev_internal$score,
+                                        pick.clus = ev_internal$pick,
+                                        return.objects = FALSE)
+    expect_identical(with_objs$results, without_objs$results)
+    expect_identical(with_objs$pick$config, without_objs$pick)
+
+    # external
+    with_objs <- compare_clusterings(data_reinterpolated_subset,
+                                     c("f"),
+                                     configs = cfgs, seed = 392L,
+                                     score.clus = ev_external$score,
+                                     pick.clus = ev_external$pick,
+                                     return.objects = TRUE)
+    without_objs <- compare_clusterings(data_reinterpolated_subset,
+                                        c("f"),
+                                        configs = cfgs, seed = 392L,
+                                        score.clus = ev_external$score,
+                                        pick.clus = ev_external$pick,
+                                        return.objects = FALSE)
+    expect_identical(with_objs$results, without_objs$results)
+    expect_identical(with_objs$pick$config, without_objs$pick)
+
+    # vi
+    with_objs <- compare_clusterings(data_reinterpolated_subset,
+                                     c("f"),
+                                     configs = cfgs, seed = 392L,
+                                     score.clus = ev_vi$score,
+                                     pick.clus = ev_vi$pick,
+                                     return.objects = TRUE)
+    without_objs <- compare_clusterings(data_reinterpolated_subset,
+                                        c("f"),
+                                        configs = cfgs, seed = 392L,
+                                        score.clus = ev_vi$score,
+                                        pick.clus = ev_vi$pick,
+                                        return.objects = FALSE)
+    expect_identical(with_objs$results, without_objs$results)
+    expect_identical(with_objs$pick$config, without_objs$pick)
+})
+
+# ==================================================================================================
 # Compare clusterings
 # ==================================================================================================
 
@@ -190,28 +371,24 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
     expect_warning(no_pick <- compare_clusterings(data_reinterpolated_subset, c("f"),
                                                   configs = cfgs, seed = 392L,
                                                   score.clus = score_fun,
-                                                  pick.clus = function(...) stop("NO!"),
-                                                  lbls = labels_subset),
+                                                  pick.clus = function(...) stop("NO!")),
                    "pick.clus")
     expect_null(no_pick$pick)
     expect_true(!is.null(no_pick$scores))
 
     expect_warning(compare_clusterings(data_reinterpolated_subset, c("f"),
                                        configs = cfgs, seed = 392L,
-                                       score.clus = bad_score_fun,
-                                       lbls = labels_subset),
+                                       score.clus = bad_score_fun),
                    "scores.*not.*appended")
 
     type_score <- compare_clusterings(data_reinterpolated_subset, c("f"),
                                       configs = cfgs, seed = 392L,
-                                      score.clus = type_score_fun,
-                                      lbls = labels_subset)
+                                      score.clus = type_score_fun)
 
     type_score_objs <- compare_clusterings(data_reinterpolated_subset, c("f"),
                                            configs = cfgs, seed = 392L,
                                            return.objects = TRUE,
-                                           score.clus = type_score_fun,
-                                           lbls = labels_subset)
+                                           score.clus = type_score_fun)
 
     expect_identical(no_pick$results, type_score$results)
     expect_identical(no_pick$results, type_score_objs$results)
@@ -224,8 +401,7 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                                score.clus = score_fun,
                                                pick.clus = pick_fun,
                                                return.objects = TRUE,
-                                               shuffle.configs = TRUE,
-                                               lbls = labels_subset)
+                                               shuffle.configs = TRUE)
     )
 
     expect_equal_slots(
@@ -245,25 +421,22 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
 
     gak_comparison <- compare_clusterings(data_subset, "p",
                                           configs = cfgs_gak, seed = 190L,
-                                          score.clus = score_fun,
-                                          lbls = labels_subset)
+                                          score.clus = score_fun)
 
     do_this <- if (foreach::getDoParWorkers() > 1L) base::eval else testthat::expect_warning
     do_this({
         dba_comparison <- compare_clusterings(data_multivariate, "h",
                                               configs = cfgs_dba, seed = 294L,
-                                              score.clus = score_fun,
-                                              lbls = labels_subset)
+                                              score.clus = score_fun)
     })
 
     sdtwc_comparison <- compare_clusterings(data_subset, "h",
                                             configs = cfgs_sdtwc, seed = 3290L,
-                                            score.clus = score_fun,
-                                            lbls = labels_subset)
+                                            score.clus = score_fun)
 
     ## rds
-    all_comparisons$pick <- reset_nondeterministic(all_comparisons$pick)
-    all_comparisons$pick@call <- call("zas", foo = "bar")
+    all_comparisons$pick$object <- reset_nondeterministic(all_comparisons$pick$object)
+    all_comparisons$pick$object@call <- call("zas", foo = "bar")
     all_comparisons$proc_time <- NULL
     all_comparisons$objects.partitional <- NULL
     all_comparisons$objects.hierarchical <- NULL

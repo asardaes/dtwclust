@@ -236,25 +236,10 @@ cat("\\nTotal number of configurations without considering optimizations:",
     sum(num_configs),
     "\\n\\n")
 
-# Define evaluation function based on CVI: Variation of Information
-score_fun <- function(obj_list, ...) {
-    sapply(obj_list, function(obj) {
-        cvi(obj@cluster, CharTrajLabels, type = "VI")
-    })
-}
-
-# Function that chooses best result (for the VI CVI!)
-pick_fun <- function(results, obj_lists, ...) {
-    scores <- lapply(results, function(result) { result$score })
-    best_considering_type <- sapply(scores, which.min)
-    best_overall <- which.min(mapply(scores, best_considering_type,
-                                     FUN = function(score, id) { score[id] }))
-
-    best_obj <- obj_lists[[best_overall]][[best_considering_type[best_overall]]]
-
-    # return
-    best_obj
-}
+# Define evaluation functions based on CVI: Variation of Information (only crisp partition)
+vi_evaluators <- cvi_evaluators("VI", ground.truth = CharTrajLabels)
+score_fun <- vi_evaluators$score
+pick_fun <- vi_evaluators$pick
 
 # ====================================================================================
 # Short run with only fuzzy clustering
@@ -280,56 +265,10 @@ comparison_long <- compare_clusterings(CharTraj, types = c("p", "h", "f", "t"),
                                        pick.clus = pick_fun,
                                        return.objects = TRUE)
 
-# ------------------------------------------------------------------------------------
 # Using all external CVIs and majority vote
-# ------------------------------------------------------------------------------------
-
-score_external <- function(obj_list, ...) {
-    scores <- lapply(obj_list, function(obj) {
-        indices <- cvi(obj@cluster, CharTrajLabels, type = "external")
-
-        # invert VI to consider maximization
-        indices["VI"] <- 1 - indices["VI"]
-
-        # return
-        indices
-    })
-
-    # return
-    do.call(rbind, scores)
-}
-
-pick_majority <- function(results, obj_lists, ...) {
-    scores <- lapply(results, function(result) {
-        result[c("RI", "ARI", "J", "FM", "VI")]
-    })
-
-    majority <- function(x) {
-        ux <- unique(x)
-        ux[which.max(tabulate(match(x, ux)))]
-    }
-
-    best_considering_type <- sapply(scores, function(score) {
-        best_by_cvi <- apply(score, 2L, which.max) # WARNING: these could all be distinct!
-        majority(best_by_cvi) # ... so this could simply choose the result with smallest config_id
-    })
-
-    best_cvis_overall <- do.call(rbind,
-                                 Map(scores, best_considering_type, f = function(score, row_id) {
-                                     score[row_id, , drop = FALSE]
-                                 }))
-
-    best_overall <- majority(apply(best_cvis_overall, 2L, which.max))
-
-    best_obj <- obj_lists[[best_overall]][[best_considering_type[best_overall]]]
-
-    # to find config later, see 'best config' below
-    attr(best_obj, "config_indexes") <- c(best_overall,
-                                          best_considering_type[best_overall])
-
-    # return
-    best_obj
-}
+external_evaluators <- cvi_evaluators("external", ground.truth = CharTrajLabels)
+score_external <- external_evaluators$score
+pick_majority <- external_evaluators$pick
 
 comparison_majority <- compare_clusterings(CharTraj, types = c("p", "h", "f", "t"),
                                            configs = cfgs,
@@ -338,11 +277,9 @@ comparison_majority <- compare_clusterings(CharTraj, types = c("p", "h", "f", "t
                                            pick.clus = pick_majority,
                                            return.objects = TRUE)
 
-plot(comparison_majority$pick)
-
-# best config
-config_indexes <- attr(comparison_majority$pick, "config_indexes")
-print(comparison_majority$results[[config_indexes[1L]]][config_indexes[2L], , drop = FALSE])
+# best results
+plot(comparison_majority$pick$object)
+print(comparison_majority$pick$config)
 
 stopCluster(cl); registerDoSEQ()
 
