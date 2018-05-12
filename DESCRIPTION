@@ -2,7 +2,7 @@ Package: dtwclust
 Type: Package
 Title: Time Series Clustering Along with Optimizations for the Dynamic Time
     Warping Distance
-Version: 5.3.1.9000
+Version: 5.4.0
 Date: 2018-05-10
 Depends:
     R (>= 3.2.0),
@@ -48,10 +48,11 @@ Description: Time series clustering along with optimized techniques related
     Implementations of partitional, hierarchical, fuzzy, k-Shape and TADPole
     clustering are available. Functionality can be easily extended with
     custom distance measures and centroid definitions. Implementations of
-    DTW barycenter averaging and a distance based on global alignment kernels
-    are also provided. All included distance functions have custom loops
-    optimized for the calculation of cross-distance matrices, including
-    parallelization support. Several cluster validity indices are included.
+    DTW barycenter averaging, a distance based on global alignment kernels,
+    and the soft-DTW distance and centroid routines are also provided. 
+    All included distance functions have custom loops optimized for the 
+    calculation of cross-distance matrices, including parallelization support.
+    Several cluster validity indices are included.
 URL: https://github.com/asardaes/dtwclust
 BugReports: https://github.com/asardaes/dtwclust/issues
 License: GPL-3

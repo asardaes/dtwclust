@@ -1,5 +1,5 @@
 
-## Update to version 5.3.1.9000
+## Update to version 5.4.0
 * New function, parallelization optimizations and bug fixes.
 
 ## Test environments

@@ -130,7 +130,7 @@ void UndirectedGraph::dfs(const std::shared_ptr<Vertex>& vertex) {
     // ids start with 1 due to R
     if (visited_[vertex->id - 1])
         return;
-    visited_[vertex->id- 1] = true;
+    visited_[vertex->id - 1] = true;
     for (auto neighbor : vertex->neighbors)
         dfs(neighbor.lock());
 }
