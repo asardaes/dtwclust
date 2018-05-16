@@ -1630,8 +1630,8 @@ using autocorrelation coefficients instead of the time-series themselves.
 
 <<example-fuzzy, echo = TRUE, fig.cap = "Visualization of the clusters that would result from changing the fuzzy partition to a crisp one. Note that the original time-series are used, so the centroids are not shown, since the centroids are made of autocorrelation coefficients.">>=
 # Calculate autocorrelation up to 50th lag
-acf_fun <- function(dat, ...) {
-    lapply(dat, function(x) {
+acf_fun <- function(series, ...) {
+    lapply(series, function(x) {
         as.numeric(acf(x, lag.max = 50, plot = FALSE)$acf)
     })
 }
@@ -1687,7 +1687,7 @@ registerDoSEQ()
 \section{Cluster evaluation examples}
 \label{app:evaluation}
 
-The easiest way to evaluate partitional and hierarchical clustering results is with the \code{cvi} function,
+The easiest way to evaluate clustering results is with the \code{cvi} function,
 which supports both internal and external CVIs (in case the ground truth is known).
 In the following example, different numbers of clusters are computed and,
 using internal CVIs,
