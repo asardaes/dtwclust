@@ -368,8 +368,8 @@ require(scales)
 t <- seq(Sys.Date(), len = length(series[[1L]]), by = "day")
 gpc <- plot(pc.tadp, time = t, plot = FALSE)
 
-gpc + scale_x_date(labels = date_format("\%b-\%Y"),
-                   breaks = date_breaks("2 months"))
+gpc + ggplot2::scale_x_date(labels = date_format("\%b-\%Y"),
+                            breaks = date_breaks("2 months"))
 
 # ====================================================================================
 # Specifying a centroid function for prototype extraction in hierarchical clustering
@@ -394,18 +394,17 @@ cl <- makeCluster(detectCores())
 invisible(clusterEvalQ(cl, library(dtwclust)))
 registerDoParallel(cl)
 
-## Use constrained DTW and PAM (less than a second with 8 cores)
+## Use constrained DTW and PAM
 pc.dtw <- tsclust(CharTraj, k = 20L, seed = 3251, trace = TRUE,
                   args = tsclust_args(dist = list(window.size = 18L)))
 
-## Use constrained DTW with DBA centroids (~3 seconds with 8 cores)
+## Use constrained DTW with DBA centroids
 pc.dba <- tsclust(CharTraj, k = 20L, centroid = "dba",
                   seed = 3251, trace = TRUE,
                   args = tsclust_args(dist = list(window.size = 18L),
                                       cent = list(window.size = 18L)))
 
 #' Using distance based on global alignment kernels
-#' (~35 seconds with 8 cores for all repetitions)
 pc.gak <- tsclust(CharTraj, k = 20L,
                   distance = "gak",
                   centroid = "dba",
