@@ -113,7 +113,7 @@ pc <- tsclust(CharTraj, type = "partitional", k = 20L,
 #> Iteration 6: Changes / Distsum = 1 / 1347.486
 #> Iteration 7: Changes / Distsum = 0 / 1346.886
 #> 
-#>  Elapsed time is 0.493 seconds.
+#>  Elapsed time is 0.445 seconds.
 plot(pc)
 ```
 
@@ -130,7 +130,7 @@ hc <- tsclust(CharTraj, type = "hierarchical", k = 20L,
 #> Performing hierarchical clustering...
 #> Extracting centroids...
 #> 
-#>  Elapsed time is 0.244 seconds.
+#>  Elapsed time is 0.164 seconds.
 plot(hc)
 ```
 
@@ -140,8 +140,8 @@ plot(hc)
 
 ``` r
 # Calculate autocorrelation up to 50th lag, considering a list of time series as input
-acf_fun <- function(dat, ...) {
-    lapply(dat, function(x) as.numeric(acf(x, lag.max = 50L, plot = FALSE)$acf))
+acf_fun <- function(series, ...) {
+    lapply(series, function(x) { as.numeric(acf(x, lag.max = 50L, plot = FALSE)$acf) })
 }
 # Autocorrelation-based fuzzy c-means
 fc <- tsclust(CharTraj[1L:25L], type = "fuzzy", k = 5L,
@@ -155,7 +155,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.370   0.000   0.366 
+#>   0.105   0.000   0.107 
 #> 
 #> Head of fuzzy memberships:
 #> 
