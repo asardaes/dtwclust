@@ -1,6 +1,6 @@
 
-## Update to version 5.4.0
-* New function, parallelization optimizations and bug fixes.
+## Update to version 5.4.0.9000
+
 
 ## Test environments
 * Local GNU/Linux, R release
@@ -13,10 +13,7 @@
 
 ## R CMD check results
 * There were no ERRORs or WARNINGs
-* There were 3 NOTEs:
-  + Regarding spelling, TADPole is the name of an algorithm,
-    and it is written as such. Centroid/Partitional are maybe domain specific, 
-    but are written like that too.
+* There were 2 NOTEs:
   + The installed size is due to the 3 included vignettes (already compacted)
     and the compiled code (approx. 20% of the code).
   + GNU make is a system requirement due to RcppParallel
