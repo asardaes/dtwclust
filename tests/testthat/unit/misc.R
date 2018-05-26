@@ -8,6 +8,15 @@ context("    Miscellaneous functions")
 ols <- ls()
 
 # ==================================================================================================
+# compute_envelope
+# ==================================================================================================
+
+test_that("compute_envelope catches input errors.", {
+    expect_error(compute_envelope(matrix(0L,2L,2L)), "univariate")
+    expect_error(compute_envelope(1:3, 7L), "Window")
+})
+
+# ==================================================================================================
 # reinterpolate
 # ==================================================================================================
 
@@ -28,6 +37,8 @@ test_that("reinterpolate function works correctly for supported inputs.", {
 # ==================================================================================================
 
 test_that("NCCc function works correctly for supported inputs.", {
+    expect_true(is.infinite(NCCc(0, 1:2)))
+
     x_uv <- data[[1L]]
     x_mv <- data_multivariate[[1L]]
     invalid_inputs <- list(
@@ -103,6 +114,8 @@ test_that("%op% catches errors as expected.", {
 # ==================================================================================================
 
 test_that("PairTracker works as expected.", {
+    expect_error(dtwclust:::PairTracker$new(0L), "size")
+
     set.seed(103289L)
     tracker <- dtwclust:::PairTracker$new(3L)
     expect_error(tracker$link(0L, 1L, 0L), "Invalid indices")

@@ -349,14 +349,14 @@ update.TSClusters <- function(object, ..., evaluate = TRUE) {
             return(object)
         }
         else
-            return(object@call)
+            return(object@call) # nocov
     }
     new_call <- object@call
     new_call[names(args)] <- args
     if (evaluate)
         eval.parent(new_call, n = 2L)
     else
-        new_call
+        new_call # nocov
 }
 
 #' @rdname tsclusters-methods

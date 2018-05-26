@@ -172,7 +172,7 @@ setnames_inplace <- function(vec, names) {
         ) %dopar% {
             reset <- TRUE
             if (nzchar(Sys.getenv("RCPP_PARALLEL_NUM_THREADS")))
-                reset <- FALSE
+                reset <- FALSE # nocov
             else
                 RcppParallel::setThreadOptions(1L)
             reset
@@ -199,7 +199,7 @@ setnames_inplace <- function(vec, names) {
     },
     warning = function(w) {
         if (grepl("package:dtwclust", w$message, ignore.case = TRUE))
-            invokeRestart("muffleWarning")
+            invokeRestart("muffleWarning") # nocov
     })
     # reset parallel workers if needed
     if (num_workers > 1L && any(reset_workers)) {

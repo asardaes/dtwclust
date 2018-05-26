@@ -43,7 +43,8 @@ SparseDistmat <- methods::setRefClass(
                                              x = as.numeric(x),
                                              symmetric = control$symmetric)
 
-            if (isTRUE(control$symmetric) && distmat@uplo != "L") distmat <<- t(distmat)
+            if (isTRUE(control$symmetric) && distmat@uplo != "L")
+                distmat <<- t(distmat) # nocov
 
             # initialize C++ class
             distmat_indices <<- .Call(C_SparseDistmatIndices__new,

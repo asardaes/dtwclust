@@ -38,7 +38,7 @@ Distmat <- methods::setRefClass("Distmat",
                                                          diff_lengths = different_lengths(series),
                                                          silent = FALSE)
                                        if (class(control) != "PtCtrl")
-                                           stop("Invalid control provided.")
+                                           stop("Invalid control provided.") # nocov
                                    }
                                    # need another dist closure, otherwise it would be recursive
                                    control$distmat <- NULL
@@ -80,7 +80,9 @@ NULL
 #'
 setMethod(`[`, "Distmat", function(x, i, j, ..., drop = TRUE) {
     if (inherits(x$distmat, "uninitializedField")) {
-        if (inherits(x$distfun, "uninitializedField")) stop("Invalid internal Distmat instance.")
+        if (inherits(x$distfun, "uninitializedField"))
+            stop("Invalid internal Distmat instance.") # nocov
+
         centroids <- if (identical(i,j)) NULL else x$series[j]
         dm <- do.call(x$distfun,
                       enlist(x = x$series[i],

@@ -81,6 +81,8 @@ test_that("Operations with median centroid complete successfully.", {
 # ==================================================================================================
 
 test_that("Operations with shape centroid complete successfully.", {
+    expect_error(shape_extraction(x_mv, x[[1L]]), "Dimension inconsistency")
+
     family <- new("tsclustFamily", control = pt_ctrl, allcent = "shape")
 
     ## ---------------------------------------------------------- univariate
@@ -222,6 +224,17 @@ test_that("Operations with pam centroid complete successfully.", {
 # ==================================================================================================
 
 test_that("Operations with dba centroid complete successfully.", {
+    expect_error(dba(x[1L:5L], max.iter = 0L), "positive")
+    expect_error(dba(x[1L:5L], step.pattern = dtw::asymmetric), "step.pattern")
+
+    input_order1 <- dba(x[1L:5L], x[[1L]], step.pattern = dtw::symmetric1)
+    input_order2 <- dba(x[5L:1L], x[[1L]], step.pattern = dtw::symmetric1)
+    expect_equal(input_order1, input_order2)
+
+    one_delta <-  dba(x[1L:5L], x[[1L]], delta = 0.01)
+    many_delta <-  dba(x[1L:5L], x[[1L]], delta = c(0.01, 10))
+    expect_equal(one_delta, many_delta)
+
     family <- new("tsclustFamily", control = pt_ctrl, allcent = "dba")
 
     ## ---------------------------------------------------------- univariate
@@ -285,6 +298,9 @@ test_that("Operations with dba centroid complete successfully.", {
 # ==================================================================================================
 
 test_that("Operations with sdtw_cent centroid complete successfully.", {
+    expect_error(sdtw_cent(x, gamma = -1), "gamma.*positive")
+    expect_error(sdtw_cent(x, weights = 1), "weights.*length")
+
     family <- new("tsclustFamily", control = pt_ctrl, allcent = "sdtw_cent")
 
     ## ---------------------------------------------------------- univariate
