@@ -13,7 +13,7 @@ fuzzy_objective <- function(u, distmat, m) { sum(u^m * distmat^2) }
 pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, args) {
     N <- length(x)
     k <- as.integer(k)
-    if (is.null(control$version)) control$version <- 2L
+    if (is.null(control$version)) control$version <- 2L # nocov
 
     if (fuzzy && cent == "fcm") {
         cluster <- matrix(0, N, k)
@@ -98,7 +98,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
     }
 
     if (iter > control$iter.max) {
-        if (trace) cat("\n")
+        if (trace) cat("\n") # nocov
         converged <- FALSE
         iter <- control$iter.max
     }

@@ -185,7 +185,7 @@ gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     else if (sigma <= 0)
         stop("Parameter 'sigma' must be positive.")
 
-    fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
+    fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
     eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
@@ -231,7 +231,6 @@ gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         class(D) <- "pairdist"
     }
     else {
-        if (is.null(dim(D))) dim(D) <- dim_out
         if (normalize) D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
         dimnames(D) <- dim_names
         class(D) <- "crossdist"
@@ -248,6 +247,6 @@ gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
 # ==================================================================================================
 
 gak_simil <- function(x, y = NULL, ..., normalize = FALSE) {
-    if (normalize) warning("The proxy::simil version of GAK cannot be normalized.")
+    if (normalize) warning("The proxy::simil version of GAK cannot be normalized.") # nocov
     gak_proxy(x = x, y = y, ..., normalize = FALSE, .internal_ = TRUE)
 }

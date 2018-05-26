@@ -63,7 +63,7 @@
 #' http://dx.doi.org/10.1145/2783258.2783286}.
 #'
 TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk", trace = FALSE) {
-    if (missing(window.size)) stop("Please provide a positive window size")
+    if (missing(window.size)) stop("Please provide a positive window size") # nocov start
     if (missing(dc)) stop("Please provide the 'dc' parameter")
     if (any(dc < 0)) stop("The cutoff distance 'dc' must be positive")
     x <- tslist(data)
@@ -71,7 +71,7 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
     if (n < 2L) stop("data should have more than one time series")
     if (any(k > n)) stop("Number of clusters should be less than the number of time series")
     lb <- match.arg(lb, c("lbk", "lbi"))
-    if (trace) cat("Computing lower and upper bound matrices\n")
+    if (trace) cat("Computing lower and upper bound matrices\n") # nocov end
     # Calculate matrices with bounds (error check in lbk/lbi)
     LBM <- proxy::dist(x, x,
                        method = lb,

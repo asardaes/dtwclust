@@ -111,8 +111,8 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     x <- tslist(x)
     y_missing <- is.null(y)
     y <- if (y_missing) x else tslist(y)
-    if (is_multivariate(c(x,y))) stop("dtw_lb does not support multivariate series.")
-    if (length(x) == 0L || length(y) == 0L) stop("Empty list received in x or y.")
+    if (is_multivariate(c(x,y))) stop("dtw_lb does not support multivariate series.") # nocov start
+    if (length(x) == 0L || length(y) == 0L) stop("Empty list received in x or y.") # nocov end
     if (error.check) check_consistency(c(x,y), "tslist")
     if (dtw.func == "dtw")
         method <- if (norm == "L1") "DTW" else "DTW2"
@@ -160,7 +160,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                      .packages = "dtwclust",
                      .export = c("enlist", "call_dtwlb")) %op% {
                          if (nn.margin != 1L)
-                             warning("Column-wise nearest neighbors are not implemented for dtw::dtw")
+                             warning("Column-wise nearest neighbors are not implemented for dtw::dtw") # nocov
                          dots$pairwise <- TRUE
                          id_nn <- apply(distmat, 1L, which.min) # index of nearest neighbors
                          id_nn_prev <- id_nn + 1L # initialize all different
@@ -203,7 +203,7 @@ call_dtwlb <- function(x, y, distmat, ..., window.size, norm, margin, step.patte
     else if (identical(step.pattern, dtw::symmetric1))
         step.pattern <- 1
     else
-        stop("step.pattern must be either symmetric1 or symmetric2 (without quotes)")
+        stop("step.pattern must be either symmetric1 or symmetric2 (without quotes)") # nocov
 
     dots <- list(window.size = window.size,
                  norm = switch(norm, "L1" = 1, "L2" = 2),

@@ -100,11 +100,11 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         y <- x
     else
         y <- tslist(y)
-    if (length(x) == 0L || length(y) == 0L) stop("Empty list received in x or y.")
+    if (length(x) == 0L || length(y) == 0L) stop("Empty list received in x or y.") # nocov start
     if (error.check) check_consistency(c(x,y), "tslist")
-    if (is_multivariate(c(x,y))) stop("lb_keogh does not support multivariate series.")
+    if (is_multivariate(c(x,y))) stop("lb_keogh does not support multivariate series.") # nocov end
     symmetric <- FALSE
-    fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
+    fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
     eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
@@ -133,7 +133,6 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         class(D) <- "pairdist"
     }
     else {
-        if (is.null(dim(D))) dim(D) <- dim_out
         dimnames(D) <- dim_names
         class(D) <- "crossdist"
     }

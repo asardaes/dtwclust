@@ -535,12 +535,12 @@ plot.TSClusters <- function(x, y, ...,
                             labels = NULL)
 {
     # set default type if none was provided
-    if (!is.null(type))
+    if (!is.null(type)) # nocov start
         type <- match.arg(type, c("dendrogram", "series", "centroids", "sc"))
     else if (x@type == "hierarchical")
         type <- "dendrogram"
     else
-        type <- "sc"
+        type <- "sc" # nocov end
 
     # plot dendrogram?
     if (inherits(x, "HierarchicalTSClusters") && type == "dendrogram") {
@@ -558,7 +558,7 @@ plot.TSClusters <- function(x, y, ...,
     }
     else {
         if (length(x@datalist) < 1L)
-            stop("Provided object has no data. Please provide the data manually.")
+            stop("Provided object has no data. Please provide the data manually.") # nocov
         data <- x@datalist
     }
 
@@ -703,14 +703,14 @@ plot.TSClusters <- function(x, y, ...,
         ggplot2::theme_bw()
 
     # labs
-    if (!is.null(labs.arg))
+    if (!is.null(labs.arg)) # nocov start
         gg <- gg + ggplot2::labs(labs.arg)
     else
         gg <- gg + ggplot2::labs(title = title_str)
 
     # plot without warnings in case I added NAs for multivariate cases
     if (plot) suppressWarnings(graphics::plot(gg))
-    invisible(gg)
+    invisible(gg) # nocov end
 }
 
 #' @rdname tsclusters-methods
@@ -789,7 +789,8 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                         "\n\tSil\tD\tCOP")
         }
         # are no valid indices left?
-        if (length(type) == 0L) return(CVIs)
+        if (length(type) == 0L) return(CVIs) # nocov
+
         # calculate some values that both Davies-Bouldin indices use
         if (any(type %in% c("DB", "DBstar"))) {
             S <- a@clusinfo$av_dist
@@ -950,7 +951,7 @@ setMethod(
                 type <- setdiff(type, c("K", "T" ,"SC", "PBMF"))
             }
             # are no valid indices left?
-            if (length(type) == 0L) return(numeric(0L))
+            if (length(type) == 0L) return(numeric(0L)) # nocov
             # calculate global centroids if needed
             if (any(type %in% c("K", "SC", "PBMF"))) {
                 N <- length(a@datalist)

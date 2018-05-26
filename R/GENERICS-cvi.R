@@ -154,7 +154,8 @@ setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10
     a <- as.integer(a)
     b <- as.integer(b)
 
-    if (length(a) != length(b)) stop("External CVIs: the length of 'a' and 'b' must match.")
+    if (length(a) != length(b))
+        stop("External CVIs: the length of 'a' and 'b' must match.") # nocov
 
     type <- match.arg(type, several.ok = TRUE,
                       choices = c("RI", "ARI", "J", "FM", "VI", "valid", "external"))
@@ -198,12 +199,14 @@ setGeneric("cvi", def = function(a, b = NULL, type = "valid", ..., log.base = 10
 setMethod(
     "cvi", signature = methods::signature(a = "matrix"),
     function(a, b = NULL, type = "valid", ..., log.base = 10) {
-        if (is.null(b)) stop("A second set of cluster membership indices is required in 'b' for this/these CVI(s).")
+        if (is.null(b))
+            stop("A second set of cluster membership indices is required in 'b' for this/these CVI(s).")
         dim_b <- dim(b)
         b <- as.integer(b)
         dim(b) <- dim_b
         if (is.null(dim_b)) {
-            if (nrow(a) != length(b)) stop("External CVIs: 'a'-rows and 'b'-length must match.")
+            if (nrow(a) != length(b))
+                stop("External CVIs: 'a'-rows and 'b'-length must match.") # nocov
             temp <- matrix(0L, nrow(a), max(b))
             temp[cbind(1L:nrow(temp), b)] <- 1L
             b <- temp

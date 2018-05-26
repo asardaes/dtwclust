@@ -95,7 +95,7 @@ SBD <- function(x, y, znorm = FALSE, error.check = TRUE, return.shifted = TRUE) 
         CCseq <- NCCc(x, y, error.check = FALSE)
 
     m <- max(CCseq)
-    if (!return.shifted) return(1 - m)
+    if (!return.shifted) return(1 - m) # nocov
     shift <- which.max(CCseq) - max(nx, ny)
 
     if (is.null(swap)) {
@@ -137,7 +137,7 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     x <- tslist(x)
 
     if (error.check) check_consistency(x, "vltslist")
-    if (znorm) x <- zscore(x, error.check = FALSE)
+    if (znorm) x <- zscore(x, ..., error.check = FALSE) # nocov
 
     if (is.null(y)) {
         symmetric <- TRUE
@@ -153,7 +153,7 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         symmetric <- FALSE
         y <- tslist(y)
         if (error.check) check_consistency(y, "vltslist")
-        if (znorm) y <- zscore(y, error.check = FALSE)
+        if (znorm) y <- zscore(y, ..., error.check = FALSE) # nocov
 
         # Precompute FFTs, padding with zeros as necessary, which will be compensated later
         L <- max(lengths(x)) + max(lengths(y)) - 1L
@@ -162,8 +162,8 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         ffty <- lapply(y, function(v) { Conj(stats::fft(c(v, rep(0, fftlen - length(v))))) })
     }
 
-    if (is_multivariate(c(x,y))) stop("SBD does not support multivariate series.")
-    fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
+    if (is_multivariate(c(x,y))) stop("SBD does not support multivariate series.") # nocov
+    fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
     eval(prepare_expr) # UTILS-expressions.R
 
     # calculate distance matrix
@@ -184,7 +184,6 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         class(D) <- "pairdist"
     }
     else {
-        if (is.null(dim(D))) dim(D) <- dim_out
         dimnames(D) <- dim_names
         class(D) <- "crossdist"
     }

@@ -120,7 +120,7 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
         symmetric <- FALSE
     }
 
-    fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
+    fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
     eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
@@ -163,7 +163,6 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
         class(D) <- "pairdist"
     }
     else {
-        if (is.null(dim(D))) dim(D) <- dim_out
         dimnames(D) <- dim_names
         class(D) <- "crossdist"
     }

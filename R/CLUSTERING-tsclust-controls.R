@@ -59,8 +59,8 @@ partitional_control <- function(pam.precompute = TRUE,
                                 pam.sparse = FALSE,
                                 version = 2L)
 {
-    if (any(iter.max <= 0L)) stop("Maximum iterations must be positive")
-    if (any(nrep < 1L)) stop("Number of repetitions must be at least one")
+    if (any(iter.max <= 0L)) stop("Maximum iterations must be positive") # nocov start
+    if (any(nrep < 1L)) stop("Number of repetitions must be at least one") # nocov end
     # return
     structure(
         list(pam.precompute = as.logical(pam.precompute),
@@ -108,7 +108,7 @@ hierarchical_control <- function(method = "average",
                         "average", "mcquitty", "median", "centroid")
     }
     else if (!is.function(method))
-        stop("Argument 'method' must be either a supported character or a function.")
+        stop("Argument 'method' must be either a supported character or a function.") # nocov
     else
         attr(method, "name") <- as.character(substitute(method))[1L]
     # return
@@ -137,9 +137,9 @@ fuzzy_control <- function(fuzziness = 2,
                           version = 2L,
                           distmat = NULL)
 {
-    if (any(fuzziness <= 1)) stop("Fuzziness exponent should be greater than one")
+    if (any(fuzziness <= 1)) stop("Fuzziness exponent should be greater than one") # nocov start
     if (any(iter.max <= 0L)) stop("Maximum iterations must be positive")
-    if (any(delta < 0)) stop("Delta should be positive")
+    if (any(delta < 0)) stop("Delta should be positive") # nocov end
     # return
     structure(
         list(fuzziness = fuzziness,
@@ -170,7 +170,7 @@ tadpole_control <- function(dc,
                             window.size,
                             lb = "lbk")
 {
-    if (any(dc <= 0)) stop("Cutoff distance 'dc' must be positive")
+    if (any(dc <= 0)) stop("Cutoff distance 'dc' must be positive") # nocov
     window.size <- check_consistency(window.size, "window")
     lb <- match.arg(lb, c("lbk", "lbi"), several.ok = TRUE)
     # return

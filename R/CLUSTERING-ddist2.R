@@ -69,7 +69,8 @@ ddist2 <- function(distance, control) {
         }
 
         if (!is.null(control$distmat)) {
-            if (!inherits(control$distmat, "Distmat")) stop("Invalid distance matrix in control.")
+            if (!inherits(control$distmat, "Distmat"))
+                stop("Invalid distance matrix in control.") # nocov
             # internal class, sparse or full
             i <- 1L:length(x)
             j <- if (is.null(centroids)) i else control$distmat$id_cent

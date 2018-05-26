@@ -14,12 +14,11 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
         # see S4-Distmat.R
         if (!inherits(distmat, "Distmat")) distmat <- Distmat$new(distmat = distmat)
         distmat_provided <- TRUE
-        if (trace) cat("\n\tDistance matrix provided...\n\n")
+        if (trace) cat("\n\tDistance matrix provided...\n\n") # nocov
     }
     else if (isTRUE(control$pam.precompute) || cent_char == "fcmdd") {
         if (distance == "dtw_lb")
-            warning("Using dtw_lb with control$pam.precompute = TRUE is not ",
-                    "advised.")
+            warning("Using dtw_lb with control$pam.precompute = TRUE is not advised.") # nocov
         if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
         # see S4-Distmat.R
         distmat <- Distmat$new(distmat = do.call(
@@ -305,9 +304,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     }
     type <- match.arg(type, c("partitional", "hierarchical", "tadpole", "fuzzy"))
     series <- tslist(series, error.check) # coerce to list if necessary
-    if (any(k < 2L)) stop("At least two clusters must be defined")
+    if (any(k < 2L)) stop("At least two clusters must be defined") # nocov start
     if (any(k > length(series))) stop("Cannot have more clusters than series in the dataset")
-    if (!is.list(control)) stop("Invalid control argument")
+    if (!is.list(control)) stop("Invalid control argument") # nocov end
     MYCALL <- match.call(expand.dots = TRUE)
     dots <- list(...)
     args <- adjust_args(args, dots) # UTILS-utils.R
@@ -377,7 +376,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # ======================================================================================
 
             if (!inherits(control, "PtCtrl") && !inherits(control, "FzCtrl"))
-                stop("Invalid control provided")
+                stop("Invalid control provided") # nocov
             nrep <- if (is.null(control$nrep)) 1L else control$nrep
             if (!is.character(centroid) || !(cent_char %in% c("pam", "fcmdd")))
                 control$distmat <- NULL
@@ -574,12 +573,12 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # Hierarchical
             # ======================================================================================
 
-            if (!inherits(control, "HcCtrl")) stop("Invalid control provided")
+            if (!inherits(control, "HcCtrl")) stop("Invalid control provided") # nocov
             method <- control$method
             distmat <- control$distmat
             if (!is.function(centroid)) centroid <- NA
             if (distance == "dtw_lb")
-                warning("Using dtw_lb with hierarchical clustering is not advised.")
+                warning("Using dtw_lb with hierarchical clustering is not advised.") # nocov
 
             # --------------------------------------------------------------------------------------
             # Calculate distance matrix
@@ -700,8 +699,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # TADPole
             # ======================================================================================
 
-            if (!inherits(control, "TpCtrl")) stop("Invalid control provided")
-            if (!distance_missing) warning("The distance argument is ignored for TADPole.")
+            if (!inherits(control, "TpCtrl")) stop("Invalid control provided") # nocov start
+            if (!distance_missing)
+                warning("The distance argument is ignored for TADPole.") # nocov end
 
             # --------------------------------------------------------------------------------------
             # Parameters

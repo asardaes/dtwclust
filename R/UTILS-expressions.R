@@ -1,6 +1,5 @@
 prepare_expr <- quote({
     pairwise <- isTRUE(pairwise)
-    dim_out <- c(length(x), length(y))
     dim_names <- list(names(x), names(y))
     if (pairwise && length(x) != length(y))
         stop("Pairwise distances require the same amount of series in 'x' and 'y'.")

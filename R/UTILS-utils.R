@@ -37,8 +37,8 @@ check_consistency <- function(obj, case, ..., clus_type,
                 stop("Only the following distances are supported for series with different length:\n\t",
                      paste(distances_difflength, collapse = "\t"))
             else if (!(obj %in% distances_known) && trace)
-                message("Series have different lengths. ",
-                        "Please confirm that the provided distance function supports this.")
+                message("Series have different lengths. ", # nocov start
+                        "Please confirm that the provided distance function supports this.") # nocov end
         }
         # valid registered distance
         return(TRUE)
@@ -141,7 +141,7 @@ get_from_callers <- function(obj_name, mode = "any") {
 # Create combinations of all possible pairs
 call_pairs <- function(n = 2L) {
     n <- as.integer(n)
-    if (n < 2L) stop("At least two elements are needed to create pairs.")
+    if (n < 2L) stop("At least two elements are needed to create pairs.") # nocov
     .Call(C_pairs, n, PACKAGE = "dtwclust")
 }
 
@@ -149,7 +149,7 @@ call_pairs <- function(n = 2L) {
 setnames_inplace <- function(vec, names) {
     if (!is.vector(vec) || !is.vector(names)) stop("Both 'vec' and 'names' must be vectors.")
     if (length(vec) != length(names)) stop("Length mismatch when changing names in place.")
-    if (!is.character(names)) stop("Trying to set names in place with non-character names.")
+    if (!is.character(names)) stop("Trying to set names in place with non-character names.") # nocov
     invisible(.Call(C_setnames_inplace, vec, names, PACKAGE = "dtwclust"))
 }
 
@@ -237,7 +237,9 @@ split_parallel <- function(obj, margin = NULL) {
     if (num_workers == 1L) return(list(obj))
 
     num_tasks <- if (is.null(margin)) length(obj) else dim(obj)[margin]
-    if (!is.integer(num_tasks)) stop("Invalid attempt to split an object into parallel tasks")
+    if (!is.integer(num_tasks))
+        stop("Invalid attempt to split an object into parallel tasks") # nocov
+
     num_tasks <- parallel::splitIndices(num_tasks, num_workers)
     num_tasks <- num_tasks[lengths(num_tasks, use.names = FALSE) > 0L]
 
@@ -300,7 +302,7 @@ compute_clusinfo <- function(k, cluster, cldist) {
 # ==================================================================================================
 
 is_multivariate <- function(x) {
-    if (length(x) == 0L) stop("Empty list of series received.")
+    if (length(x) == 0L) stop("Empty list of series received.") # nocov
     ncols <- sapply(x, NCOL)
     if (any(diff(ncols) != 0L)) stop("Inconsistent dimensions across series.")
     any(ncols > 1L)

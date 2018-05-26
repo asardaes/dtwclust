@@ -29,7 +29,9 @@
 #'   probably be given to this function too.
 #'
 repeat_clustering <- function(series, clusterings, config_id, ...) {
-    if (is.null(clusterings$scores)) stop("No scores found, are you sure you need this function?")
+    if (is.null(clusterings$scores))
+        stop("No scores found, are you sure you need this function?") # nocov
+
     results <- clusterings$results
 
     # get used seed

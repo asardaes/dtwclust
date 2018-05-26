@@ -56,13 +56,13 @@ sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ..., error.check = TRUE, pairw
         symmetric <- FALSE
     }
 
-    fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
+    fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
     eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
     if (!pairwise && symmetric)
         diagonal <- sdtw_proxy(x, gamma = gamma, error.check = FALSE, pairwise = TRUE)
-    if (gamma <= 0) stop("The gamma paramter must be positive")
+    if (gamma <= 0) stop("The 'gamma' parameter must be positive")
     mv <- is_multivariate(c(x, y))
 
     # calculate distance matrix
@@ -80,7 +80,6 @@ sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ..., error.check = TRUE, pairw
         class(D) <- "pairdist"
     }
     else {
-        if (is.null(dim(D))) dim(D) <- dim_out
         dimnames(D) <- dim_names
         if (symmetric) D[cbind(1L:dim_out[1L], 1L:dim_out[2L])] <- diagonal
         class(D) <- "crossdist"

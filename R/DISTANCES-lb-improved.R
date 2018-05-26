@@ -83,7 +83,8 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
     norm <- match.arg(norm, c("L1", "L2"))
     if (length(x) != length(y)) stop("The series must have the same length")
     window.size <- check_consistency(window.size, "window")
-    if (is_multivariate(list(x, y))) stop("lb_improved does not support multivariate series.")
+    if (is_multivariate(list(x, y)))
+        stop("lb_improved does not support multivariate series.") # nocov
     if (error.check) {
         check_consistency(x, "ts")
         check_consistency(y, "ts")
@@ -125,11 +126,11 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         y <- x
     else
         y <- tslist(y)
-    if (length(x) == 0L || length(y) == 0L) stop("Empty list received in x or y.")
+    if (length(x) == 0L || length(y) == 0L) stop("Empty list received in x or y.") # nocov start
     if (error.check) check_consistency(c(x,y), "tslist")
-    if (is_multivariate(c(x,y))) stop("lb_improved does not support multivariate series.")
+    if (is_multivariate(c(x,y))) stop("lb_improved does not support multivariate series.") # nocov end
     symmetric <- FALSE
-    fill_type <- mat_type <- dim_out <- dim_names <- NULL # avoid warning about undefined globals
+    fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
     eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
@@ -159,13 +160,12 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         class(D) <- "pairdist"
     }
     else {
-        if (is.null(dim(D))) dim(D) <- dim_out
         dimnames(D) <- dim_names
         class(D) <- "crossdist"
     }
     if (force.symmetry && !pairwise) {
         if (nrow(D) != ncol(D))
-            warning("Unable to force symmetry. Resulting distance matrix is not square.")
+            warning("Unable to force symmetry. Resulting distance matrix is not square.") # nocov
         else
             .Call(C_force_lb_symmetry, D, PACKAGE = "dtwclust")
     }

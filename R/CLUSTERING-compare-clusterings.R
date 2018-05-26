@@ -88,7 +88,7 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
         cfgs <- Map(specific, names(specific), f = function(config, clus_type) {
             config_names <- names(config)
             if (!is.list(config) || is.null(config_names))
-                stop("All parameters must be named lists.")
+                stop("All parameters must be named lists.") # nocov
             cfg <- Map(config, config_names, f = function(config_args, fun) {
                 cfg <- do.call(expand.grid, quote = TRUE, args = enlist(
                     foo = fun,
@@ -233,7 +233,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
             # Control configs
             # --------------------------------------------------------------------------------------
 
-            if (class(control) != control_classes[type]) stop("Invalid ", type, " control")
+            if (class(control) != control_classes[type]) stop("Invalid ", type, " control") # nocov
 
             # if it's within a list, it's to prevent expansion
             cfg <- switch(
@@ -488,14 +488,14 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
     score_missing <- missing(score.clus)
     pick_missing <- missing(pick.clus)
 
-    if (is.null(series)) stop("No series provided.")
+    if (is.null(series)) stop("No series provided.") # nocov
     types <- match.arg(types, supported_clusterings, TRUE)
     .errorhandling <- match.arg(.errorhandling, c("stop", "remove", "pass"))
     if (!return.objects && score_missing)
         stop("Returning no objects and specifying no scoring function would return no useful results.")
 
     # coerce to list if necessary
-    if (is.data.frame(series) || !is.list(series)) series <- tslist(series, TRUE)
+    if (is.data.frame(series) || !is.list(series)) series <- tslist(series, TRUE) # nocov
     check_consistency(series, "vltslist")
 
     if (!is.function(score.clus) && !(is.list(score.clus) && all(sapply(score.clus, is.function))))
@@ -505,7 +505,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
             stop("The names of the 'score.clus' argument do not correspond to the provided 'types'")
         score.clus <- score.clus[types]
     }
-    if (!is.function(pick.clus)) stop("Invalid pick function")
+    if (!is.function(pick.clus)) stop("Invalid pick function") # nocov
 
     # ----------------------------------------------------------------------------------------------
     # Misc parameters
@@ -541,11 +541,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
 
     processed_series <- Map(configs, types, f = function(config, type) {
         preproc_cols <- grepl("_?preproc$", names(config))
-        preproc_df <- config[, preproc_cols, drop = FALSE]
-        if (nrow(preproc_df) > 0L)
-            preproc_df <- unique(preproc_df)
-        else
-            return(NULL)
+        preproc_df <- unique(config[, preproc_cols, drop = FALSE])
         preproc_args <- grepl("_preproc$", names(preproc_df))
 
         if (trace) {
@@ -694,7 +690,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
                 distance <- cfg$distance
                 dist_entry <- dist_entries[[distance]]
                 if (!check_consistency(dist_entry$names[1L], "dist"))
-                    do.call(proxy::pr_DB$set_entry, dist_entry, TRUE)
+                    do.call(proxy::pr_DB$set_entry, dist_entry, TRUE) # nocov
             }
             else distance <- NULL # dummy
 
