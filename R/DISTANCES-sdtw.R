@@ -81,7 +81,7 @@ sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ..., error.check = TRUE, pairw
     }
     else {
         dimnames(D) <- dim_names
-        if (symmetric) D[cbind(1L:dim_out[1L], 1L:dim_out[2L])] <- diagonal
+        if (symmetric) diag(D) <- diagonal
         class(D) <- "crossdist"
     }
     attr(D, "method") <- "SDTW"
