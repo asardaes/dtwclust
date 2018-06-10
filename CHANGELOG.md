@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 5.4.1
+* Fixed the distance calculation done by the `dtw2` wrapper.
+
 ## Version 5.4.0
 * Added another helper for `compare_clusterings`: `cvi_evaluators`.
 * Fixed the calculation of SF and CH CVIs for hierarchical clustering with default centroid extraction.

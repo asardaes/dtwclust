@@ -1,6 +1,6 @@
 
-## Update to version 5.4.0.9000
-
+## Update to version 5.4.1
+Fixed a bug in one of the included distances.
 
 ## Test environments
 * Local GNU/Linux, R release
