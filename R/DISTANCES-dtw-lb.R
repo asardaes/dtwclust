@@ -120,7 +120,6 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
         method <- toupper(dtw.func)
 
     dots <- list(...)
-    dots$dist.method <- "L1"
     dots$norm <- norm
     dots$window.size <- window.size
     dots$window.type <- if (is.null(window.size)) "none" else "slantedband"

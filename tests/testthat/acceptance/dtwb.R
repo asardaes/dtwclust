@@ -13,8 +13,8 @@ ols <- ls()
 
 test_that("dtw_basic gives the same results as dtw/dtw2", {
     for (rep in 1L:100L) {
-        i <- sample(length(data), 1L)
-        j <- sample(length(data), 1L)
+        i <- sample(length(CharTraj), 1L)
+        j <- sample(length(CharTraj), 1L)
         norm <- sample(c("L1", "L2"), 1L)
 
         if (i <= 50L)
@@ -32,16 +32,29 @@ test_that("dtw_basic gives the same results as dtw/dtw2", {
         else
             window.type <- "slantedband"
 
-        x <- data[[i]]
-        y <- data[[j]]
+        if (sample(2L, 1L) == 1L) {
+            x <- CharTraj[[i]]
+            y <- CharTraj[[j]]
+        }
+        else {
+            x <- CharTrajMV[[i]]
+            y <- CharTrajMV[[j]]
+        }
 
         if (norm == "L1")
-            d1 <- dtw(x, y, step.pattern = step.pattern,
-                      window.type = window.type, window.size = window.size,
-                      keep.internals = TRUE)
+            suppressWarnings(
+                d1 <- dtw(x, y,
+                          dist.method = "L1",
+                          step.pattern = step.pattern,
+                          window.type = window.type,
+                          window.size = window.size,
+                          keep.internals = TRUE)
+            )
         else
-            d1 <- dtw2(x, y, step.pattern = step.pattern,
-                       window.type = window.type, window.size = window.size,
+            d1 <- dtw2(x, y,
+                       step.pattern = step.pattern,
+                       window.type = window.type,
+                       window.size = window.size,
                        keep.internals = TRUE)
 
         storage.mode(d1$index1) <- "integer"
@@ -59,19 +72,29 @@ test_that("dtw_basic gives the same results as dtw/dtw2", {
             expect_equal(d1$normalizedDistance, d3, info = paste("Indices:", i, j, "- Norm:", norm))
         }
 
-        expect_equal(d1$index1, d2$index1, info = paste("Indices:", i, j, "- Norm:", norm))
-        expect_equal(d1$index2, d2$index2, info = paste("Indices:", i, j, "- Norm:", norm))
+        expect_identical(d1$index1, d2$index1, info = paste("Indices:", i, j, "- Norm:", norm))
+        expect_identical(d1$index2, d2$index2, info = paste("Indices:", i, j, "- Norm:", norm))
     }
 
-    D1_L1 <- proxy::dist(data[31L:46L], data[71L:86L], method = "dtw")
-    D2_L1 <- proxy::dist(data[31L:46L], data[71L:86L], method = "dtw_basic")
+    D1_L1 <- proxy::dist(CharTraj[31L:46L], CharTraj[71L:86L], method = "dtw")
+    D2_L1 <- proxy::dist(CharTraj[31L:46L], CharTraj[71L:86L], method = "dtw_basic")
 
     expect_equivalent(D1_L1, D2_L1, info = "dtw vs dtw_basic")
 
-    D1_L2 <- proxy::dist(data[31L:46L], data[71L:86L], method = "dtw2")
-    D2_L2 <- proxy::dist(data[31L:16L], data[71L:16L], method = "dtw_basic", norm = "L2")
+    D1_L2 <- proxy::dist(CharTraj[31L:46L], CharTraj[71L:86L], method = "dtw2")
+    D2_L2 <- proxy::dist(CharTraj[31L:16L], CharTraj[71L:16L], method = "dtw_basic", norm = "L2")
 
     expect_equivalent(D1_L1, D2_L1, info = "dtw2 vs dtw_basic")
+
+    D1_L1 <- proxy::dist(CharTrajMV[31L:46L], CharTrajMV[71L:86L], method = "dtw", dist.method = "L1")
+    D2_L1 <- proxy::dist(CharTrajMV[31L:46L], CharTrajMV[71L:86L], method = "dtw_basic")
+
+    expect_equivalent(D1_L1, D2_L1, info = "dtw vs dtw_basic (multivariate)")
+
+    D1_L2 <- proxy::dist(CharTrajMV[31L:46L], CharTrajMV[71L:86L], method = "dtw2")
+    D2_L2 <- proxy::dist(CharTrajMV[31L:16L], CharTrajMV[71L:16L], method = "dtw_basic", norm = "L2")
+
+    expect_equivalent(D1_L1, D2_L1, info = "dtw2 vs dtw_basic (multivariate)")
 })
 
 # ==================================================================================================

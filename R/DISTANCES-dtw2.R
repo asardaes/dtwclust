@@ -31,7 +31,7 @@
 #' @return An object of class `dtw`.
 #'
 dtw2 <- function(x, y, ...) {
-    lcm <- proxy::dist(x, y, method = "L1")
+    lcm <- proxy::dist(x, y, method = "L2")
     d <- dtw::dtw(x = lcm^2, y = NULL, ...)
     d$distance <- sqrt(d$distance)
 

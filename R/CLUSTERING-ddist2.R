@@ -91,8 +91,12 @@ ddist2 <- function(distance, control) {
 
             # dtw uses L2 by default, but in dtwclust I want dtw to use L1 by default
             # Important for multivariate series
-            if (toupper(dist_entry$names[1L]) == "DTW" && is.null(dots$dist.method))
+            if (toupper(dist_entry$names[1L]) == "DTW" &&
+                is.null(dots$dist.method) &&
+                is_multivariate(c(x, centroids)))
+            {
                 dots$dist.method <- "L1"
+            }
 
             # If the function doesn't have '...', remove invalid arguments from 'dots'
             valid_args <- names(dots)
