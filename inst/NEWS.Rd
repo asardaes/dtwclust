@@ -7,8 +7,8 @@
     Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/master/CHANGELOG.md}
 }
 
-\section{Changes in version 5.4.1}{
+\section{Changes in version 5.4.1.9000}{
 \itemize{
-    \item Fixed the distance calculation done by the \code{dtw2} wrapper.
+    \item TBD
 }
 }
