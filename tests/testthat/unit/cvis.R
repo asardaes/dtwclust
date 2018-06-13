@@ -172,8 +172,10 @@ test_that("CVIs work also for hierarchical and TADPole with custom centroid", {
     hc <- tsclust(data_reinterpolated_subset, type = "h", k = 4L,
                   distance = "sbd", centroid = shape_extraction)
 
-    expect_warning(cvis_tadp_cent <- cvi(tadp, labels_subset))
+    cvis_tadp_cent <- cvi(tadp, labels_subset)
+    expect_length(cvis_tadp_cent, 12L)
     cvis_hc_cent <- cvi(hc, labels_subset)
+    expect_length(cvis_hc_cent, 12L)
 
     # refs
     assign("cvis_tadp_cent", cvis_tadp_cent, persistent)

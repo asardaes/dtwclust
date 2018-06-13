@@ -1,7 +1,10 @@
 # Changelog
 
+## Version 5.4.1.9000
+* Fixed the calculation of internal CVIs for clusterings done with TADPole.
+
 ## Version 5.4.1
-* Fixed the distance calculation done by the `dtw2` wrapper.
+* Fixed the distance calculation done by the `dtw2` wrapper for multivariate series.
 
 ## Version 5.4.0
 * Added another helper for `compare_clusterings`: `cvi_evaluators`.

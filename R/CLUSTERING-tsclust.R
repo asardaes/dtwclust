@@ -707,8 +707,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # Parameters
             # --------------------------------------------------------------------------------------
 
-            # mainly for predict generic
-            distfun <- ddist2("dtw_lb", control = control)
+            # for predict and cvi
+            distfun <- ddist2("dtw_basic", control = control)
             # for family@dist
             args$dist$window.size <- control$window.size
             args$dist$norm <- "L2"
