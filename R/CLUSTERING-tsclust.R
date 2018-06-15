@@ -305,7 +305,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     type <- match.arg(type, c("partitional", "hierarchical", "tadpole", "fuzzy"))
     series <- tslist(series, error.check) # coerce to list if necessary
     if (any(k < 2L)) stop("At least two clusters must be defined") # nocov start
-    if (any(k > length(series))) stop("Cannot have more clusters than series in the dataset")
+    if (any(k >= length(series))) stop("Cannot have more clusters than series in the dataset")
     if (!is.list(control)) stop("Invalid control argument") # nocov end
     MYCALL <- match.call(expand.dots = TRUE)
     dots <- list(...)
