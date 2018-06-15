@@ -74,10 +74,16 @@ or GAK.
 }
 \note{
 In the original definition of many internal and fuzzy CVIs, the Euclidean distance and a mean
-centroid was used. The implementations here change this, making use of whatever distance/centroid
-was chosen during clustering. However, some of the CVIs assume that the distances are symmetric,
-since cross-distance matrices are calculated and only the upper/lower triangulars are considered.
-A warning will be given if the matrices are not symmetric and the CVI assumes so.
+centroid was used. \strong{The implementations here change this, making use of whatever
+distance/centroid was chosen during clustering}. However, some of the CVIs assume that the
+distances are symmetric, since cross-distance matrices are calculated and only the upper/lower
+triangulars are considered. A warning will be given if the matrices are not symmetric and the CVI
+assumes so.
+
+Because of the above, calculating CVIs for clusterings made with \code{\link[=TADPole]{TADPole()}} is a special case.
+Since TADPole uses 3 distances during its exeuction (DTW, LB_Keogh and Euclidean), it is not
+obvious which one should be used for the calculation of CVIs. Nevertheless, \code{\link[=dtw_basic]{dtw_basic()}} is used
+by default.
 
 The formula for the SF index in Saitta et al. (2007) does not correspond to the one in Arbelaitz
 et al. (2013). The one specified in the former is used here.
