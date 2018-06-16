@@ -123,7 +123,7 @@ showcasing how it can be used to evaluate many different time-series clustering 
 \section{Introduction}
 \label{sec:introduction}
 
-\blankfootnote{This manuscript was last updated in version 5.2.0 of \dtwclust{}.}
+\blankfootnote{This manuscript was last updated in version 5.4.1.9000 of \dtwclust{}.}
 Cluster analysis is a task which concerns itself with the creation of groups of objects,
 where each group is called a cluster.
 Ideally, all members of the same cluster are similar to each other,
@@ -304,6 +304,12 @@ In the following sections a description of the distance functions included in \d
 these functions are associated with shape-based time-series clustering,
 and either support DTW or provide an alternative to it.
 However, there are many other distance measures that can be used for time-series \citep{montero2014, tsdist}.
+It is worth noting that,
+even though some of the distances are also available in other \R{} packages
+(e.g. DTW in \pkg{dtw} \citep{giorgino2009} or Keogh's DTW lower bound in \pkg{TSdist} \citep{tsdist}),
+the implementations in \dtwclust{} are optimized for speed,
+since all of them are implemented in \proglang{C++} and have custom loops for computation of cross-distance matrices,
+including multi-threading support.
 
 To facilitate notation,
 we define a time-series as a vector (or set of vectors in case of multivariate series) $x$.
@@ -342,9 +348,9 @@ its level of generality may sacrifice some performance,
 but in most situations it will be negligible.
 Optionally, a basic custom implementation of the DTW algorithm is included with \pkg{dtwclust} in the \code{dtw_basic} function,
 which has less functionality but still supports the most common options,
-it has a \proglang{C} core as well,
+it has a \proglang{C++} core,
 implements some memory optimizations,
-and it should be faster,
+and it is faster,
 especially when computing the DTW distance between several pairs of time-series.
 
 The DTW distance can potentially deal with series of different length directly.
@@ -1086,7 +1092,8 @@ with a common default value of 2.
 Originally, the distance $d_{p,c}$ was defined as the Euclidean distance between the $p$-th object and the $c$-th fuzzy centroid,
 so that the objective was written in terms of the squared Euclidean distance.
 However, the definition of this distance can change (see, e.g., \citet{durso2009}),
-and doing so in \dtwclust{} is straightforward,
+and, in contrast to other \R{} packages that implement fuzzy clustering,
+doing so in \dtwclust{} is straightforward,
 since it only entails registering the corresponding distance function with \pkg{proxy}.
 
 \begin{subequations}
@@ -1242,14 +1249,15 @@ although other indices can be implemented by the user.
 However, in the original definition of many internal and fuzzy CVIs,
 the Euclidean distance and a mean centroid was used.
 The implementations in \dtwclust{} change this,
-making use of whatever distance/centroid was utilized during clustering,
-without further intervention from the user.
+making use of whatever distance/centroid was utilized during clustering without further intervention from the user.
 Nevertheless, note that many CVIs assume symmetric distance functions.
 
 Knowing which CVI will work best cannot be determined a priori,
 so they should be tested for each specific application.
-Usually, many CVIs are utilized and compared to each other,
-maybe using a majority vote to decide on a final result.
+Many CVIs can be utilized and compared to each other,
+maybe using a majority vote to decide on a final result,
+but there is no best CVI,
+and it is important to conceptually understand what a given CVI measures in order to appropriately interpret its results.
 Furthermore, it should be noted that many CVIs perform additional distance and/or centroid calculations when being computed,
 which can be very considerable if using DTW.
 For example, the Silhouette index effectively needs the whole distance matrix between the original series to be calculated,
