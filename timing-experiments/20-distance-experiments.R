@@ -53,7 +53,7 @@ t1 <- proc.time()
 # lb_keogh
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning lb_keogh experiments for single series\n")
+mycat("\tRunning lb_keogh experiments for single series\n")
 dist_lbk_single <- with(
     new.env(),
     {
@@ -89,7 +89,7 @@ dist_lbk_single <- with(
 # lb_improved
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning lb_improved experiments for single series\n")
+mycat("\tRunning lb_improved experiments for single series\n")
 dist_lbi_single <- with(
     new.env(),
     {
@@ -119,7 +119,7 @@ dist_lbi_single <- with(
 # sbd
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning sbd experiments for single series\n")
+mycat("\tRunning sbd experiments for single series\n")
 dist_sbd_single <- with(
     new.env(),
     {
@@ -145,7 +145,7 @@ dist_sbd_single <- with(
 # dtw univariate
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning dtw experiments for single univariate series\n")
+mycat("\tRunning dtw experiments for single univariate series\n")
 dist_dtw_univariate_single <- with(
     new.env(),
     {
@@ -177,7 +177,7 @@ dist_dtw_univariate_single <- with(
 # dtw_multivariate
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning dtw experiments for single multivariate series\n")
+mycat("\tRunning dtw experiments for single multivariate series\n")
 dist_dtw_multivariate_single <- with(
     new.env(),
     {
@@ -209,7 +209,7 @@ dist_dtw_multivariate_single <- with(
 # sdtw univariate
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning sdtw experiments for single univariate series\n")
+mycat("\tRunning sdtw experiments for single univariate series\n")
 dist_sdtw_univariate_single <- with(
     new.env(),
     {
@@ -235,7 +235,7 @@ dist_sdtw_univariate_single <- with(
 # sdtw multivariate
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning sdtw experiments for single multivariate series\n")
+mycat("\tRunning sdtw experiments for single multivariate series\n")
 dist_sdtw_multivariate_single <- with(
     new.env(),
     {
@@ -261,7 +261,7 @@ dist_sdtw_multivariate_single <- with(
 # unnormalized gak univariate
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning unnormalized_gak experiments for single univariate series\n")
+mycat("\tRunning unnormalized_gak experiments for single univariate series\n")
 dist_unnormalized_gak_univariate_single <- with(
     new.env(),
     {
@@ -295,7 +295,7 @@ dist_unnormalized_gak_univariate_single <- with(
 # unnormalized gak multivariate
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning unnormalized_gak experiments for single multivariate series\n")
+mycat("\tRunning unnormalized_gak experiments for single multivariate series\n")
 dist_unnormalized_gak_multivariate_single <- with(
     new.env(),
     {
@@ -329,7 +329,7 @@ dist_unnormalized_gak_multivariate_single <- with(
 # normalized gak univariate
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning normalized_gak experiments for single univariate series\n")
+mycat("\tRunning normalized_gak experiments for single univariate series\n")
 dist_normalized_gak_univariate_single <- with(
     new.env(),
     {
@@ -363,7 +363,7 @@ dist_normalized_gak_univariate_single <- with(
 # normalized gak multivariate
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning normalized_gak experiments for single multivariate series\n")
+mycat("\tRunning normalized_gak experiments for single multivariate series\n")
 dist_normalized_gak_multivariate_single <- with(
     new.env(),
     {
@@ -494,10 +494,10 @@ cat("\n")
 # lb_keogh
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning lb_keogh experiments for multiple series\n")
+mycat("\tRunning lb_keogh experiments for multiple series\n")
 # Loop along number of parallel workers
 dist_lbk_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
-    cat("\t\t")
+    mycat("\t\t")
 
     # Set number of threads to use
     RcppParallel::setThreadOptions(num_threads)
@@ -539,9 +539,9 @@ dist_lbk_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_t
 # lb_improved
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning lb_improved experiments for multiple series\n")
+mycat("\tRunning lb_improved experiments for multiple series\n")
 dist_lbi_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
-    cat("\t\t")
+    mycat("\t\t")
     RcppParallel::setThreadOptions(num_threads)
 
     benchmarks <- lapply(series, function(this_series) {
@@ -579,9 +579,9 @@ dist_lbi_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_t
 #' NOTE: dtw_lb's experiments make more sense if the series in x and y are different, that's why
 #' id_series is different here.
 
-cat("\tRunning dtw_lb experiments for multiple series\n")
+mycat("\tRunning dtw_lb experiments for multiple series\n")
 dist_dtwlb_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
-    cat("\t\t")
+    mycat("\t\t")
     RcppParallel::setThreadOptions(num_threads)
 
     id_series <- rbind(
@@ -624,9 +624,9 @@ dist_dtwlb_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num
 # sbd
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning sbd experiments for multiple series\n")
+mycat("\tRunning sbd experiments for multiple series\n")
 dist_sbd_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
-    cat("\t\t")
+    mycat("\t\t")
     RcppParallel::setThreadOptions(num_threads)
 
     benchmarks <- lapply(series, function(this_series) {
@@ -659,9 +659,9 @@ dist_sbd_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_t
 # dtw univariate
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning dtw experiments for multiple univariate series\n")
+mycat("\tRunning dtw experiments for multiple univariate series\n")
 dist_dtw_univariate_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
-    cat("\t\t")
+    mycat("\t\t")
     RcppParallel::setThreadOptions(num_threads)
 
     benchmarks <- lapply(series, function(this_series) {
@@ -699,9 +699,9 @@ dist_dtw_univariate_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, fun
 # dtw multivariate
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning dtw experiments for multiple multivariate series\n")
+mycat("\tRunning dtw experiments for multiple multivariate series\n")
 dist_dtw_multivariate_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
-    cat("\t\t")
+    mycat("\t\t")
     RcppParallel::setThreadOptions(num_threads)
 
     benchmarks <- lapply(series_mv, function(this_series) {
@@ -752,9 +752,9 @@ id_series <- rbind(
 )
 id_series <- id_series[order(id_series[,1L] * id_series[,2L]),]
 
-cat("\tRunning sdtw experiments for multiple univariate series\n")
+mycat("\tRunning sdtw experiments for multiple univariate series\n")
 dist_sdtw_univariate_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
-    cat("\t\t")
+    mycat("\t\t")
     RcppParallel::setThreadOptions(num_threads)
 
     benchmarks <- lapply(series, function(this_series) {
@@ -787,9 +787,9 @@ dist_sdtw_univariate_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, fu
 # normalized gak univariate
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning normalized_gak experiments for multiple univariate series\n")
+mycat("\tRunning normalized_gak experiments for multiple univariate series\n")
 dist_ngak_univariate_multiple <- dplyr::bind_rows(lapply(num_threads_to_test, function(num_threads) {
-    cat("\t\t")
+    mycat("\t\t")
     RcppParallel::setThreadOptions(num_threads)
 
     benchmarks <- lapply(series, function(this_series) {

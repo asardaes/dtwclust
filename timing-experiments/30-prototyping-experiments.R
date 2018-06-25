@@ -62,7 +62,7 @@ t1 <- proc.time()
 # univariate shape_extraction
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning shape_extraction experiments for univariate series\n")
+mycat("\tRunning shape_extraction experiments for univariate series\n")
 cent_shape_univariate <- with(
     new.env(),
     {
@@ -96,7 +96,7 @@ cent_shape_univariate <- with(
 # multivariate shape_extraction
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning shape_extraction experiments for multivariate series\n")
+mycat("\tRunning shape_extraction experiments for multivariate series\n")
 cent_shape_multivariate <- with(
     new.env(),
     {
@@ -130,13 +130,13 @@ cent_shape_multivariate <- with(
 # univariate dba
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning dba experiments for univariate series\n")
+mycat("\tRunning dba experiments for univariate series\n")
 cent_dba_univariate <- with(
     new.env(),
     {
         # Loop across number of threads to test
         dplyr::bind_rows(lapply(num_threads, function(num_threads) {
-            cat("\t\t")
+            mycat("\t\t")
             RcppParallel::setThreadOptions(num_threads)
 
             # Loop along extracted subsets
@@ -177,13 +177,13 @@ cent_dba_univariate <- with(
 # multivariate dba byS
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning dba experiments for multivariate series (by-series)\n")
+mycat("\tRunning dba experiments for multivariate series (by-series)\n")
 cent_dba_multivariate_byS <- with(
     new.env(),
     {
         # Loop across number of threads to test
         dplyr::bind_rows(lapply(num_threads, function(num_threads) {
-            cat("\t\t")
+            mycat("\t\t")
             RcppParallel::setThreadOptions(num_threads)
 
             # Loop along extracted subsets
@@ -225,13 +225,13 @@ cent_dba_multivariate_byS <- with(
 # multivariate dba byV
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning dba experiments for multivariate series (by-variable)\n")
+mycat("\tRunning dba experiments for multivariate series (by-variable)\n")
 cent_dba_multivariate_byV <- with(
     new.env(),
     {
         # Loop across number of threads to test
         dplyr::bind_rows(lapply(num_threads, function(num_threads) {
-            cat("\t\t")
+            mycat("\t\t")
             RcppParallel::setThreadOptions(num_threads)
 
             # Loop along extracted subsets
@@ -273,13 +273,13 @@ cent_dba_multivariate_byV <- with(
 # univariate sdtw_cent
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning sdtw_cent experiments for univariate series\n")
+mycat("\tRunning sdtw_cent experiments for univariate series\n")
 cent_sdtw_univariate <- with(
     new.env(),
     {
         # Loop across number of threads to test
         dplyr::bind_rows(lapply(num_threads, function(num_threads) {
-            cat("\t\t")
+            mycat("\t\t")
             RcppParallel::setThreadOptions(num_threads)
 
             # Loop along subset of extracted subsets
@@ -317,13 +317,13 @@ cent_sdtw_univariate <- with(
 # multivariate sdtw_cent
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning sdtw_cent experiments for multivariate series\n")
+mycat("\tRunning sdtw_cent experiments for multivariate series\n")
 cent_sdtw_multivariate <- with(
     new.env(),
     {
         # Loop across number of threads to test
         dplyr::bind_rows(lapply(num_threads, function(num_threads) {
-            cat("\t\t")
+            mycat("\t\t")
             RcppParallel::setThreadOptions(num_threads)
 
             # Loop along subset of extracted subsets

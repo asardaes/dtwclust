@@ -42,9 +42,9 @@ t1 <- proc.time()
 
 # NOTE: all clustering experiments will use tsclust() to include overhead of corresponding checks
 
-cat("\tRunning TADPole experiments\n")
+mycat("\tRunning TADPole experiments\n")
 clus_tadpole_results <- dplyr::bind_rows(lapply(num_series, function(num_series) {
-    cat("\t\t")
+    mycat("\t\t")
 
     # Get subset and reinterpolate to equal length
     series <- lapply(series, function(s) { s[1L:num_series] })

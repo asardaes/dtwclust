@@ -4,6 +4,10 @@ suppressPackageStartupMessages({
     library("dplyr")
 })
 
+mycat <- function(...) {
+    cat(format(Sys.time(), "[%a %b %d %X %Y]"), ...)
+}
+
 #' Set this to TRUE to run a subset of the experiments with less evaluations. "Short" is relative
 #' though, it will still take a few hours to complete.
 #' The short experiments were used during initial setup to fine-tune the parameters.

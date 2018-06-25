@@ -50,9 +50,9 @@ t1 <- proc.time()
 # PAM
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning dtw_basic vs dtw_lb clustering experiments (PAM)\n")
+mycat("\tRunning dtw_basic vs dtw_lb clustering experiments (PAM)\n")
 clus_dtwb_dtwlb_pam_results <- dplyr::bind_rows(lapply(num_series, function(num_series) {
-    cat("\t\t")
+    mycat("\t\t")
 
     # Get subset and reinterpolate to equal length
     series <- lapply(series, function(s) { s[1L:num_series] })
@@ -115,9 +115,9 @@ clus_dtwb_dtwlb_pam_results <- dplyr::bind_rows(lapply(num_series, function(num_
 # PAM vs repetitions
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning dtw_basic vs dtw_lb clustering experiments (PAM vs nrep)\n")
+mycat("\tRunning dtw_basic vs dtw_lb clustering experiments (PAM vs nrep)\n")
 clus_dtwb_dtwlb_pamrep_results <- dplyr::bind_rows(lapply(num_series, function(num_series) {
-    cat("\t\t")
+    mycat("\t\t")
 
     # Get subset and reinterpolate to equal length
     series <- lapply(series, function(s) { s[1L:num_series] })
@@ -187,9 +187,9 @@ clus_dtwb_dtwlb_pamrep_results <- dplyr::bind_rows(lapply(num_series, function(n
 # DBA
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning dtw_basic vs dtw_lb clustering experiments (DBA)\n")
+mycat("\tRunning dtw_basic vs dtw_lb clustering experiments (DBA)\n")
 clus_dtwb_dtwlb_dba_results <- dplyr::bind_rows(lapply(num_series, function(num_series) {
-    cat("\t\t")
+    mycat("\t\t")
 
     # Get subset and reinterpolate to equal length
     series <- lapply(series, function(s) { s[1L:num_series] })
@@ -247,9 +247,9 @@ clus_dtwb_dtwlb_dba_results <- dplyr::bind_rows(lapply(num_series, function(num_
 # non-symmetric
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning experiments for sparse PAM vs different k \n")
+mycat("\tRunning experiments for sparse PAM vs different k \n")
 clus_pam_sparse_k_results <- dplyr::bind_rows(lapply(num_series, function(num_series) {
-    cat("\t\t")
+    mycat("\t\t")
 
     # Get subset
     series <- lapply(series, function(s) { s[1L:num_series] })
@@ -303,9 +303,9 @@ clus_pam_sparse_k_results <- dplyr::bind_rows(lapply(num_series, function(num_se
 # symmetric
 # --------------------------------------------------------------------------------------------------
 
-cat("\tRunning experiments for sparse, symmetric PAM vs different k \n")
+mycat("\tRunning experiments for sparse, symmetric PAM vs different k \n")
 clus_pam_sparse_symmetric_k_results <- dplyr::bind_rows(lapply(num_series, function(num_series) {
-    cat("\t\t")
+    mycat("\t\t")
 
     # Get subset
     series <- lapply(series, function(s) { s[1L:num_series] })
