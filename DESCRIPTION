@@ -3,7 +3,7 @@ Type: Package
 Title: Time Series Clustering Along with Optimizations for the Dynamic Time
     Warping Distance
 Version: 5.4.1.9000
-Date: 2018-06-13
+Date: 2018-06-27
 Depends:
     R (>= 3.2.0),
     methods,
@@ -62,6 +62,7 @@ SystemRequirements: C++11, GNU make
 RoxygenNote: 6.0.1
 Collate: 
     'CENTROIDS-dba.R'
+    'CENTROIDS-pam.R'
     'CENTROIDS-sdtw-cent.R'
     'CENTROIDS-shape-extraction.R'
     'CLUSTERING-all-cent2.R'

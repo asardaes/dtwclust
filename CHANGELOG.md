@@ -1,7 +1,8 @@
 # Changelog
 
 ## Version 5.4.1.9000
-* Fixed the calculation of internal CVIs for clusterings done with TADPole.
+* Added a standalone function to extract centroids for partition around medoids: `pam_cent`.
+* "Fixed" the calculation of internal CVIs for clusterings done with TADPole.
 
 ## Version 5.4.1
 * Fixed the distance calculation done by the `dtw2` wrapper for multivariate series.

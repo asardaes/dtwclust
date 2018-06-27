@@ -217,6 +217,16 @@ test_that("Operations with pam centroid complete successfully.", {
     ## ---------------------------------------------------------- refs
     assign("cent_pam", cent_pam, persistent)
     assign("cent_mv_pam", cent_mv_pam, persistent)
+
+    ## ---------------------------------------------------------- standalone
+    expect_error(pam_cent(x))
+
+    dm <- proxy::dist(x[6L:10L], method = "dtw_basic", window.size = 15L)
+    pam_cent_no_distmat <- pam_cent(x, "dtw_basic", 6L:10L, window.size = 15L)
+    expect_identical(attr(pam_cent_no_distmat, "series_id"), 7L)
+    pam_cent_with_distmat <- pam_cent(x[6L:10L], distmat = dm)
+    expect_identical(attr(pam_cent_with_distmat, "series_id"), 2L)
+    expect_equal(pam_cent_with_distmat, pam_cent_no_distmat, check.attributes = FALSE)
 })
 
 # ==================================================================================================

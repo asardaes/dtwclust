@@ -39,12 +39,9 @@ all_cent2 <- function(case = NULL, control) {
         id_x <- lapply(id_changed, function(cl_num) { which(cl_id == cl_num) })
         # return
         Map(id_x, id_changed, f = function(i_x, i_cl) {
-            d <- control$distmat[i_x, i_x, drop = FALSE]
-            d <- rowSums(d) # d can be normal matrix or from Matrix package, so no namespace here
-            id_cent <- i_x[which.min(d)]
-            i_cent <- x[[id_cent]]
-            control$distmat$id_cent[i_cl] <- id_cent
-            i_cent
+            # must specify because the one defined in this environment has same name (historic)
+            dtwclust::pam_cent(x, ids = i_x, distmat = control$distmat, ...,
+                               .i_cl_ = i_cl, error.check = FALSE)
         })
     }
 
