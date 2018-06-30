@@ -172,8 +172,8 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'   As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid
 #'   function that takes a list of series as first input. It will also receive the contents of
 #'   `args$cent` that match its formal arguments, and should return a single centroid series. These
-#'   centroids are returned in the `centroids` slot. By default, a type of PAM centroid function is
-#'   used.
+#'   centroids are returned in the `centroids` slot. By default, the medoid of each cluster is
+#'   extracted (similar to what [pam_cent()] does).
 #'
 #'   In the following cases, the `centroids` list will have an attribute `series_id` with an integer
 #'   vector indicating which `series` were chosen as centroids:
@@ -198,16 +198,16 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'     [dtw2()].
 #'   - `"dtw_basic"`: A custom version of DTW with less functionality, but faster. See
 #'     [dtw_basic()].
-#'   - `"dtw_lb"`: DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some
-#'     computations are avoided by first estimating the distance matrix with Lemire's lower bound
-#'     and then iteratively refining with DTW. See [dtw_lb()]. Not suitable for `pam.precompute` =
-#'     `TRUE` nor hierarchical clustering.
+#'   - `"dtw_lb"`: DTW with L1 or L2 norm and a Sakoe-Chiba constraint. Some computations are
+#'     avoided by first estimating the distance matrix with Lemire's lower bound and then
+#'     iteratively refining with DTW. See [dtw_lb()]. Not suitable for `pam.precompute` = `TRUE` nor
+#'     hierarchical clustering.
 #'   - `"lbk"`: Keogh's lower bound for DTW with either L1 or L2 norm for the Sakoe-Chiba
 #'     constraint. See [lb_keogh()].
 #'   - `"lbi"`: Lemire's lower bound for DTW with either L1 or L2 norm for the Sakoe-Chiba
 #'     constraint. See [lb_improved()].
-#'   - `"sbd"`: Shape-based distance. See [SBD()].
-#'   - `"gak"`: Global alignment kernels. See [GAK()].
+#'   - `"sbd"`: Shape-based distance. See [sbd()].
+#'   - `"gak"`: Global alignment kernels. See [gak()].
 #'   - `"sdtw"`: Soft-DTW. See [sdtw()].
 #'
 #'   Out of the aforementioned, only the distances based on DTW lower bounds *don't* support series

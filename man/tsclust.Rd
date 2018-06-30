@@ -131,8 +131,8 @@ final centroids will have this same length.
 As special cases, if hierarchical or tadpole clustering is used, you can provide a centroid
 function that takes a list of series as first input. It will also receive the contents of
 \code{args$cent} that match its formal arguments, and should return a single centroid series. These
-centroids are returned in the \code{centroids} slot. By default, a type of PAM centroid function is
-used.
+centroids are returned in the \code{centroids} slot. By default, the medoid of each cluster is
+extracted (similar to what \code{\link[=pam_cent]{pam_cent()}} does).
 
 In the following cases, the \code{centroids} list will have an attribute \code{series_id} with an integer
 vector indicating which \code{series} were chosen as centroids:
@@ -160,16 +160,16 @@ can use one of the following custom implementations (all registered with \code{p
 \code{\link[=dtw2]{dtw2()}}.
 \item \code{"dtw_basic"}: A custom version of DTW with less functionality, but faster. See
 \code{\link[=dtw_basic]{dtw_basic()}}.
-\item \code{"dtw_lb"}: DTW with L1 or L2 norm and optionally a Sakoe-Chiba constraint. Some
-computations are avoided by first estimating the distance matrix with Lemire's lower bound
-and then iteratively refining with DTW. See \code{\link[=dtw_lb]{dtw_lb()}}. Not suitable for \code{pam.precompute} =
-\code{TRUE} nor hierarchical clustering.
+\item \code{"dtw_lb"}: DTW with L1 or L2 norm and a Sakoe-Chiba constraint. Some computations are
+avoided by first estimating the distance matrix with Lemire's lower bound and then
+iteratively refining with DTW. See \code{\link[=dtw_lb]{dtw_lb()}}. Not suitable for \code{pam.precompute} = \code{TRUE} nor
+hierarchical clustering.
 \item \code{"lbk"}: Keogh's lower bound for DTW with either L1 or L2 norm for the Sakoe-Chiba
 constraint. See \code{\link[=lb_keogh]{lb_keogh()}}.
 \item \code{"lbi"}: Lemire's lower bound for DTW with either L1 or L2 norm for the Sakoe-Chiba
 constraint. See \code{\link[=lb_improved]{lb_improved()}}.
-\item \code{"sbd"}: Shape-based distance. See \code{\link[=SBD]{SBD()}}.
-\item \code{"gak"}: Global alignment kernels. See \code{\link[=GAK]{GAK()}}.
+\item \code{"sbd"}: Shape-based distance. See \code{\link[=sbd]{sbd()}}.
+\item \code{"gak"}: Global alignment kernels. See \code{\link[=gak]{gak()}}.
 \item \code{"sdtw"}: Soft-DTW. See \code{\link[=sdtw]{sdtw()}}.
 }
 
