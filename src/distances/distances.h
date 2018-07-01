@@ -7,10 +7,10 @@
 namespace dtwclust {
 
 extern "C" {
-    SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
-                   SEXP m, SEXP n, SEXP num_var,
-                   SEXP norm, SEXP step, SEXP backtrack, SEXP normalize,
-                   SEXP distmat);
+    SEXP dtw_basic(SEXP X, SEXP Y, SEXP WINDOW,
+                   SEXP X_LEN, SEXP Y_LEN, SEXP NUM_VAR,
+                   SEXP NORM, SEXP STEP, SEXP BACKTRACK, SEXP NORMALIZE,
+                   SEXP LCM);
 
     SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U);
 

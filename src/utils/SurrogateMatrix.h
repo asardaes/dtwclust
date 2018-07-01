@@ -2,6 +2,7 @@
 #define DTWCLUST_SURROGATEMATRIX_HPP_
 
 #include <algorithm> // std::fill
+#include <cstddef> // std::size_t
 
 namespace dtwclust {
 
@@ -11,11 +12,17 @@ class SurrogateMatrix
 {
 public:
     SurrogateMatrix() : x_(nullptr), own_x_(false) {}
-    SurrogateMatrix(const int nrows, const int ncols, T * const x = nullptr)
-        : x_(x ? x : new T[nrows * ncols])
+    SurrogateMatrix(const std::size_t nrows, const std::size_t ncols)
+        : x_(new T[nrows * ncols])
         , nrows_(nrows)
         , ncols_(ncols)
-        , own_x_(!x)
+        , own_x_(true)
+    { }
+    SurrogateMatrix(const std::size_t nrows, const std::size_t ncols, T * const x)
+        : x_(x)
+        , nrows_(nrows)
+        , ncols_(ncols)
+        , own_x_(false)
     { }
 
     SurrogateMatrix& operator=(const SurrogateMatrix&) = delete;
@@ -31,7 +38,7 @@ public:
         if (own_x_) {
             if (other.x_) {
                 x_ = new T[nrows_ * ncols_];
-                for (int id = 0; id < (nrows_ * ncols_); id++)
+                for (std::size_t id = 0; id < (nrows_ * ncols_); id++)
                     x_[id] = other.x_[id];
             }
             else {
@@ -60,19 +67,27 @@ public:
         return *this;
     }
 
-    T& operator()(const int row, const int col) {
+    std::size_t ncol() const {
+        return ncols_;
+    }
+
+    std::size_t nrow() const {
+        return nrows_;
+    }
+
+    T& operator()(const std::size_t row, const std::size_t col) {
         return x_[row + col * nrows_];
     }
 
-    const T operator()(const int row, const int col) const {
+    const T operator()(const std::size_t row, const std::size_t col) const {
         return x_[row + col * nrows_];
     }
 
-    T& operator[](const int id) {
+    T& operator[](const std::size_t id) {
         return x_[id];
     }
 
-    const T operator[](const int id) const {
+    const T operator[](const std::size_t id) const {
         return x_[id];
     }
 
@@ -86,7 +101,7 @@ public:
 
 private:
     T *x_;
-    int nrows_, ncols_;
+    std::size_t nrows_, ncols_;
     bool own_x_;
 };
 

@@ -55,7 +55,6 @@ class DtwBasicCalculator : public DistanceCalculator
 {
 public:
     DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
-    ~DtwBasicCalculator();
     double calculate(const int i, const int j) override;
     DtwBasicCalculator* clone() const override;
 
@@ -69,7 +68,7 @@ private:
     // input series
     TSTSList<arma::mat> x_, y_;
     // helper "matrix"
-    double* gcm_;
+    SurrogateMatrix<double> lcm_;
     // to dimension gcm_
     int max_len_y_;
 };

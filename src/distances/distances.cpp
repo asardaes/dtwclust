@@ -10,31 +10,37 @@ namespace dtwclust {
 /* dtw_basic */
 // =================================================================================================
 
-extern "C" SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
-                          SEXP m, SEXP n, SEXP num_var,
-                          SEXP norm, SEXP step, SEXP backtrack, SEXP normalize,
-                          SEXP distmat)
+extern "C" SEXP dtw_basic(SEXP X, SEXP Y, SEXP WINDOW,
+                          SEXP X_LEN, SEXP Y_LEN, SEXP NUM_VAR,
+                          SEXP NORM, SEXP STEP, SEXP BACKTRACK, SEXP NORMALIZE,
+                          SEXP LCM)
 {
-    double d;
-    int nx = Rf_asInteger(m);
-    int ny = Rf_asInteger(n);
-    double* D = REAL(distmat);
-    dtwclust_tuple_t tuple[3];
+    BEGIN_RCPP
+    double *lcm = REAL(LCM);
+    int nx = Rf_asInteger(X_LEN);
+    int ny = Rf_asInteger(Y_LEN);
+    int nv = Rf_asInteger(NUM_VAR);
+    SurrogateMatrix<const double> x(nx, nv, REAL(X));
+    SurrogateMatrix<const double> y(ny, nv, REAL(Y));
 
-    if (Rf_asLogical(backtrack)) {
+    if (Rf_asLogical(BACKTRACK)) {
+        SurrogateMatrix<double> wrapped_lcm(nx + 1, ny + 1, lcm);
+
         // longest possible path, length will be adjusted in R
-        SEXP index1 = PROTECT(Rf_allocVector(INTSXP, nx + ny));
-        SEXP index2 = PROTECT(Rf_allocVector(INTSXP, nx + ny));
+        SEXP INDEX1 = PROTECT(Rf_allocVector(INTSXP, nx + ny));
+        SEXP INDEX2 = PROTECT(Rf_allocVector(INTSXP, nx + ny));
+        SurrogateMatrix<int> index1(nx + ny, 1, INTEGER(INDEX1));
+        SurrogateMatrix<int> index2(nx + ny, 1, INTEGER(INDEX2));
 
         // calculate distance
-        d = dtw_basic_c(D, tuple,
-                        REAL(x), REAL(y), Rf_asInteger(window),
-                        nx, ny, Rf_asInteger(num_var),
-                        Rf_asReal(norm), Rf_asReal(step), 1);
-        if (Rf_asLogical(normalize)) d /= nx + ny;
+        double d = dtw_basic_c(wrapped_lcm, x, y,
+                               Rf_asInteger(WINDOW), Rf_asReal(NORM), Rf_asReal(STEP),
+                               true);
+
+        if (Rf_asLogical(NORMALIZE)) d /= nx + ny;
 
         // actual length of path
-        int path = backtrack_steps(D, nx, ny, INTEGER(index1), INTEGER(index2));
+        int path = backtrack_steps(wrapped_lcm, index1, index2, nx, ny);
 
         // put results in a list
         SEXP list_names = PROTECT(Rf_allocVector(STRSXP, 4));
@@ -45,8 +51,8 @@ extern "C" SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
 
         SEXP ret = PROTECT(Rf_allocVector(VECSXP, 4));
         SET_VECTOR_ELT(ret, 0, PROTECT(Rf_ScalarReal(d)));
-        SET_VECTOR_ELT(ret, 1, index1);
-        SET_VECTOR_ELT(ret, 2, index2);
+        SET_VECTOR_ELT(ret, 1, INDEX1);
+        SET_VECTOR_ELT(ret, 2, INDEX2);
         SET_VECTOR_ELT(ret, 3, PROTECT(Rf_ScalarInteger(path)));
         Rf_setAttrib(ret, R_NamesSymbol, list_names);
 
@@ -54,17 +60,20 @@ extern "C" SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
         return ret;
     }
     else {
+        SurrogateMatrix<double> wrapped_lcm(2, ny + 1, lcm);
+
         // calculate distance
-        d = dtw_basic_c(D, tuple,
-                        REAL(x), REAL(y), Rf_asInteger(window),
-                        nx, ny, Rf_asInteger(num_var),
-                        Rf_asReal(norm), Rf_asReal(step), 0);
-        if (Rf_asLogical(normalize)) d /= nx + ny;
+        double d = dtw_basic_c(wrapped_lcm, x, y,
+                               Rf_asInteger(WINDOW), Rf_asReal(NORM), Rf_asReal(STEP),
+                               false);
+
+        if (Rf_asLogical(NORMALIZE)) d /= nx + ny;
 
         SEXP ret = PROTECT(Rf_ScalarReal(d));
         UNPROTECT(1);
         return ret;
     }
+    END_RCPP
 }
 
 // =================================================================================================
@@ -102,6 +111,7 @@ extern "C" SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U)
 extern "C" SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var,
                        SEXP sigma, SEXP window, SEXP logs)
 {
+    BEGIN_RCPP
     /*
      * Inputs are, in this order
      * A N1 x d matrix (d-variate time series with N1 observations)
@@ -132,6 +142,7 @@ extern "C" SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var,
                      Rf_asReal(sigma), triangular,
                      REAL(logs));
     return Rf_ScalarReal(d);
+    END_RCPP
 }
 
 // =================================================================================================

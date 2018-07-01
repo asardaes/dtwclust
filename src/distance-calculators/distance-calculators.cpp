@@ -53,7 +53,6 @@ DistanceCalculatorFactory::create(const std::string& dist, const SEXP& DIST_ARGS
 DtwBasicCalculator::DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
     : x_(X)
     , y_(Y)
-    , gcm_(nullptr)
 {
     Rcpp::List dist_args(DIST_ARGS);
     window_ = Rcpp::as<int>(dist_args["window.size"]);
@@ -62,13 +61,6 @@ DtwBasicCalculator::DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, con
     normalize_ = Rcpp::as<bool>(dist_args["normalize"]);
     // set value of max_len_y_
     max_len_y_ = this->maxLength(y_);
-}
-
-// -------------------------------------------------------------------------------------------------
-/* destructor */
-// -------------------------------------------------------------------------------------------------
-DtwBasicCalculator::~DtwBasicCalculator() {
-    if (gcm_) delete[] gcm_;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -87,7 +79,7 @@ double DtwBasicCalculator::calculate(const int i, const int j) {
 // ------------------------------------------------------------------------------------------------
 DtwBasicCalculator* DtwBasicCalculator::clone() const {
     DtwBasicCalculator* ptr = new DtwBasicCalculator(*this);
-    ptr->gcm_ = new double[2 * (max_len_y_ + 1)];
+    ptr->lcm_ = SurrogateMatrix<double>(2, max_len_y_ + 1);
     return ptr;
 }
 
@@ -96,10 +88,11 @@ DtwBasicCalculator* DtwBasicCalculator::clone() const {
 // -------------------------------------------------------------------------------------------------
 
 double DtwBasicCalculator::calculate(const arma::mat& x, const arma::mat& y) {
-    if (!gcm_) return -1;
-    return dtw_basic_par(&x[0], &y[0],
-                         x.n_rows, y.n_rows, x.n_cols,
-                         window_, norm_, step_, normalize_, gcm_);
+    if (!lcm_) return -1;
+
+    SurrogateMatrix<const double> temp_x(x.n_rows, x.n_cols, &x[0]);
+    SurrogateMatrix<const double> temp_y(y.n_rows, y.n_cols, &y[0]);
+    return dtw_basic_par(lcm_, temp_x, temp_y, window_, norm_, step_, normalize_);
 }
 
 // =================================================================================================

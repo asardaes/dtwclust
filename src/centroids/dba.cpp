@@ -9,6 +9,7 @@
 
 #include "../distance-calculators/distance-calculators.h"
 #include "../distances/distances-details.h" // dtw_basic_par
+#include "../utils/SurrogateMatrix.h"
 #include "../utils/TSTSList.h"
 #include "../utils/utils.h" // KahanSummer, Rflush, get_grain
 
@@ -41,22 +42,7 @@ public:
         // set value of max_len_*_
         max_len_x_ = this->maxLength(x_);
         max_len_y_ = this->maxLength(y_);
-        // make sure pointers are null
-        gcm_ = nullptr;
-        index1_ = nullptr;
-        index2_ = nullptr;
     }
-
-    // destructor
-    ~DtwBacktrackCalculator() {
-        if (gcm_) delete[] gcm_;
-        if (index1_) delete[] index1_;
-        if (index2_) delete[] index2_;
-    }
-
-    // default copy/move constructor (must be explicitly defined due to custom destructor)
-    DtwBacktrackCalculator(const DtwBacktrackCalculator&) = default;
-    DtwBacktrackCalculator(DtwBacktrackCalculator&&) = default;
 
     // calculate for given indices (inherited)
     double calculate(const int i, const int j) override {
@@ -71,36 +57,41 @@ public:
     // clone to setup helpers in each thread
     DtwBacktrackCalculator* clone() const override {
         DtwBacktrackCalculator* ptr = new DtwBacktrackCalculator(*this);
-        ptr->gcm_ = new double[(max_len_x_ + 1) * (max_len_y_ + 1)];
-        ptr->index1_ = new int[max_len_x_ + max_len_y_];
-        ptr->index2_ = new int[max_len_x_ + max_len_y_];
+        ptr->lcm_ = SurrogateMatrix<double>(max_len_x_ + 1, max_len_y_ + 1);
+        ptr->index1_ = SurrogateMatrix<int>(max_len_x_ + max_len_y_, 1);
+        ptr->index2_ = SurrogateMatrix<int>(max_len_x_ + max_len_y_, 1);
         return ptr;
     }
 
     // input series
     TSTSList<arma::mat> x_, y_;
     // helpers for backtracking
-    int path_, *index1_, *index2_;
+    int path_;
+    SurrogateMatrix<int> index1_, index2_;
 
 private:
     // primary calculate
     double calculate(const arma::mat& x, const arma::mat& y)
     {
-        if (!gcm_ || !index1_ || !index2_) return -1;
-        return dtw_basic_par(&x[0], &y[0],
-                             x.n_rows, y.n_rows, x.n_cols,
+        if (!lcm_ || !index1_ || !index2_) return -1;
+
+        SurrogateMatrix<const double> temp_x(x.n_rows, x.n_cols, &x[0]);
+        SurrogateMatrix<const double> temp_y(y.n_rows, y.n_cols, &y[0]);
+        return dtw_basic_par(lcm_, temp_x, temp_y,
                              window_, norm_, step_, normalize_,
-                             gcm_, index1_, index2_, &path_);
+                             index1_, index2_, path_);
     }
 
     // by-variable multivariate calculate
     double calculate(const arma::mat& x, const arma::mat& y, const int k)
     {
-        if (!gcm_ || !index1_ || !index2_) return -1;
-        return dtw_basic_par(&x[0] + (x.n_rows * k), &y[0] + (y.n_rows * k),
-                             x.n_rows, y.n_rows, 1,
+        if (!lcm_ || !index1_ || !index2_) return -1;
+
+        SurrogateMatrix<const double> temp_x(x.n_rows, 1, &x[0] + (x.n_rows * k));
+        SurrogateMatrix<const double> temp_y(y.n_rows, 1, &y[0] + (y.n_rows * k));
+        return dtw_basic_par(lcm_, temp_x, temp_y,
                              window_, norm_, step_, normalize_,
-                             gcm_, index1_, index2_, &path_);
+                             index1_, index2_, path_);
     }
 
     // input parameters
@@ -108,7 +99,7 @@ private:
     double norm_, step_;
     bool normalize_;
     // helper "matrix"
-    double* gcm_;
+    SurrogateMatrix<double> lcm_;
     // to dimension helpers
     int max_len_x_, max_len_y_;
 };
