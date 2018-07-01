@@ -71,8 +71,7 @@ public:
 
 private:
     // primary calculate
-    double calculate(const arma::mat& x, const arma::mat& y)
-    {
+    double calculate(const arma::mat& x, const arma::mat& y) {
         if (!lcm_ || !index1_ || !index2_) return -1;
 
         SurrogateMatrix<const double> temp_x(x.n_rows, x.n_cols, &x[0]);
@@ -83,12 +82,11 @@ private:
     }
 
     // by-variable multivariate calculate
-    double calculate(const arma::mat& x, const arma::mat& y, const id_t k)
-    {
+    double calculate(const arma::mat& x, const arma::mat& y, const id_t k) {
         if (!lcm_ || !index1_ || !index2_) return -1;
 
-        SurrogateMatrix<const double> temp_x(x.n_rows, 1, &x[0] + (x.n_rows * k));
-        SurrogateMatrix<const double> temp_y(y.n_rows, 1, &y[0] + (y.n_rows * k));
+        SurrogateMatrix<const double> temp_x(x.n_rows, 1, &x[0] + (k * x.n_rows));
+        SurrogateMatrix<const double> temp_y(y.n_rows, 1, &y[0] + (k * y.n_rows));
         return dtw_basic_par(lcm_, temp_x, temp_y,
                              window_, norm_, step_, normalize_,
                              index1_, index2_, path_);
@@ -136,9 +134,9 @@ public:
             local_calculator->calculate(i,0);
             const auto& x = local_calculator->x_[i];
             mutex_.lock();
-            for (int ii = local_calculator->path_ - 1; ii >= 0; ii--) {
-                int i1 = local_calculator->index1_[ii] - 1;
-                int i2 = local_calculator->index2_[ii] - 1;
+            for (id_t ii = 0; ii < local_calculator->path_; ii++) {
+                id_t i1 = local_calculator->index1_[ii] - 1;
+                id_t i2 = local_calculator->index2_[ii] - 1;
                 summer_.add(x[i1], i2);
                 num_vals_[i2] += 1;
             }
@@ -192,10 +190,10 @@ public:
             local_calculator->calculate(i,0);
             const auto& x = local_calculator->x_[i];
             mutex_.lock();
-            for (int j = 0; j < static_cast<int>(new_cent_.ncol()); j++) {
-                for (int ii = local_calculator->path_ - 1; ii >= 0; ii--) {
-                    int i1 = local_calculator->index1_[ii] - 1;
-                    int i2 = local_calculator->index2_[ii] - 1;
+            for (id_t j = 0; j < new_cent_.ncol(); j++) {
+                for (id_t ii = 0; ii < local_calculator->path_; ii++) {
+                    id_t i1 = local_calculator->index1_[ii] - 1;
+                    id_t i2 = local_calculator->index2_[ii] - 1;
                     summer_.add(x.at(i1,j), i2, j);
                     num_vals_(i2,j) += 1;
                 }
@@ -248,12 +246,12 @@ public:
         // kahan sum step
         for (id_t i = begin; i < end; i++) {
             const auto& x = local_calculator->x_[i];
-            for (int j = 0; j < static_cast<int>(new_cent_.ncol()); j++) {
+            for (id_t j = 0; j < new_cent_.ncol(); j++) {
                 local_calculator->calculate(i,0,j);
                 mutex_.lock();
-                for (int ii = local_calculator->path_ - 1; ii >= 0; ii--) {
-                    int i1 = local_calculator->index1_[ii] - 1;
-                    int i2 = local_calculator->index2_[ii] - 1;
+                for (id_t ii = 0; ii < local_calculator->path_; ii++) {
+                    id_t i1 = local_calculator->index1_[ii] - 1;
+                    id_t i2 = local_calculator->index2_[ii] - 1;
                     summer_.add(x.at(i1,j), i2, j);
                     num_vals_(i2,j) += 1;
                 }
@@ -286,7 +284,7 @@ bool average_step(Rcpp::NumericVector& new_cent,
                   Rcpp::NumericVector& ref_cent)
 {
     bool converged = true;
-    for (int i = 0; i < ref_cent.length(); i++) {
+    for (id_t i = 0; i < ref_cent.length(); i++) {
         new_cent[i] /= num_vals[i];
         if (std::abs(new_cent[i] - ref_cent[i]) >= delta) converged = false;
         ref_cent[i] = new_cent[i];
@@ -300,8 +298,8 @@ bool average_step(Rcpp::NumericMatrix& new_cent,
                   Rcpp::NumericMatrix& ref_cent)
 {
     bool converged = true;
-    for (int j = 0; j < new_cent.ncol(); j++) {
-        for (int i = 0; i < new_cent.nrow(); i++) {
+    for (id_t j = 0; j < new_cent.ncol(); j++) {
+        for (id_t i = 0; i < new_cent.nrow(); i++) {
             new_cent(i,j) /= num_vals(i,j);
             if (std::abs(new_cent(i,j) - ref_cent(i,j)) >= delta) converged = false;
             ref_cent(i,j) = new_cent(i,j);

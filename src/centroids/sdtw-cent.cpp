@@ -20,36 +20,36 @@ namespace dtwclust {
 /* helpers */
 // =================================================================================================
 
-void init_matrices(const int m, const int n,
+void init_matrices(const id_t m, const id_t n,
                    SurrogateMatrix<double>& cm,
                    SurrogateMatrix<double>& dm,
                    SurrogateMatrix<double>& em)
 {
-    for (int i = 1; i <= m; i++) {
-        dm(i-1,n) = 0;
-        cm(i,n+1) = R_NegInf;
+    for (id_t i = 1; i <= m; i++) {
+        dm(i-1, n) = 0;
+        cm(i, n+1) = R_NegInf;
     }
-    for (int j = 1; j <= n; j++) {
-        dm(m,j-1) = 0;
-        cm(m+1,j) = R_NegInf;
+    for (id_t j = 1; j <= n; j++) {
+        dm(m, j-1) = 0;
+        cm(m+1, j) = R_NegInf;
     }
-    cm(m+1,n+1) = cm(m,n);
+    cm(m+1, n+1) = cm(m,n);
     dm(m,n) = 0;
     em.fill(0);
-    em((m+1)%2,n+1) = 1;
+    em((m+1)%2, n+1) = 1;
 }
 
-void update_em(const int i, const int n, const double gamma,
+void update_em(const id_t i, const id_t n, const double gamma,
                SurrogateMatrix<double>& cm,
                SurrogateMatrix<double>& dm,
                SurrogateMatrix<double>& em)
 {
     double a, b, c;
-    for (int j = n; j > 0; j--) {
-        a = exp((cm(i+1,j) - cm(i,j) - dm(i,j-1)) / gamma);
-        b = exp((cm(i,j+1) - cm(i,j) - dm(i-1,j)) / gamma);
-        c = exp((cm(i+1,j+1) - cm(i,j) - dm(i,j)) / gamma);
-        em(i%2,j) = a * em((i+1)%2,j) + b * em(i%2,j+1) + c * em((i+1)%2,j+1);
+    for (id_t j = n; j > 0; j--) {
+        a = exp((cm(i+1, j) - cm(i,j) - dm(i, j-1)) / gamma);
+        b = exp((cm(i, j+1) - cm(i,j) - dm(i-1, j)) / gamma);
+        c = exp((cm(i+1, j+1) - cm(i,j) - dm(i,j)) / gamma);
+        em(i%2, j) = a * em((i+1)%2, j) + b * em(i%2, j+1) + c * em((i+1)%2, j+1);
     }
 }
 
@@ -131,7 +131,7 @@ public:
         SurrogateMatrix<double>& cm = local_calculator->cm_;
         SurrogateMatrix<double>& dm = local_calculator->dm_;
         const auto& x = local_calculator->x_[0];
-        int m = x.n_rows;
+        id_t m = x.n_rows;
         for (std::size_t id = begin; id < end; id++) {
             const auto& y = local_calculator->y_[id];
             double dist = local_calculator->calculate(0,id);
@@ -140,12 +140,12 @@ public:
             objective_summer_.add(weights_[id] * dist, 0);
             mutex_.unlock();
 
-            int n = y.n_rows;
+            id_t n = y.n_rows;
             init_matrices(m, n, cm, dm, em);
-            for (int i = m; i > 0; i--) {
+            for (id_t i = m; i > 0; i--) {
                 update_em(i, n, gamma_, cm, dm, em);
                 double grad = 0;
-                for (int j = 0; j < n; j++) grad += em(i%2,j+1) * 2 * (x[i-1] - y[j]);
+                for (id_t j = 0; j < n; j++) grad += em(i%2, j+1) * 2 * (x[i-1] - y[j]);
 
                 mutex_.lock();
                 gradient_summer_.add(weights_[id] * grad, i-1);
@@ -200,7 +200,7 @@ public:
         SurrogateMatrix<double>& cm = local_calculator->cm_;
         SurrogateMatrix<double>& dm = local_calculator->dm_;
         const auto& x = local_calculator->x_[0];
-        int m = x.n_rows, dim = x.n_cols;
+        id_t m = x.n_rows, dim = x.n_cols;
         for (std::size_t id = begin; id < end; id++) {
             const auto& y = local_calculator->y_[id];
             double dist = local_calculator->calculate(0,id);
@@ -210,14 +210,14 @@ public:
             if (!grad) grad = new double[dim];
             mutex_.unlock();
 
-            int n = y.n_rows;
+            id_t n = y.n_rows;
             init_matrices(m, n, cm, dm, em);
-            for (int i = m; i > 0; i--) {
+            for (id_t i = m; i > 0; i--) {
                 update_em(i, n, gamma_, cm, dm, em);
                 std::fill(grad, grad + dim, 0);
-                for (int j = 0; j < n; j++) {
-                    for (int k = 0; k < dim; k++) {
-                        grad[k] += em(i%2,j+1) * 2 * (x.at(i-1,k) - y.at(j,k));
+                for (id_t j = 0; j < n; j++) {
+                    for (id_t k = 0; k < dim; k++) {
+                        grad[k] += em(i%2, j+1) * 2 * (x.at(i-1, k) - y.at(j,k));
                     }
                 }
 
@@ -225,7 +225,7 @@ public:
                 for (int k = 0; k < dim; k++) gradient_summer_.add(weights_[id] * grad[k], i-1, k);
                 mutex_.unlock();
 
-                if (i == m) em((m+1)%2,n+1) = 0;
+                if (i == m) em((m+1)%2, n+1) = 0;
             }
         }
         // finish

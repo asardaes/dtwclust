@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "utils.h" // id_t
+
 namespace dtwclust {
 
 // for kahan sum (compensated sum)
@@ -11,7 +13,7 @@ class KahanSummer
 public:
     KahanSummer(double * const x, const int nrows, const int ncols = 1);
     void reset();
-    void add(const double value, const int i, const int j = 0);
+    void add(const double value, const id_t i, const id_t j = 0);
 
 private:
     double* const x_;
