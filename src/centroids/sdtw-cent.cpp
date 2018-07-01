@@ -222,7 +222,8 @@ public:
                 }
 
                 mutex_.lock();
-                for (int k = 0; k < dim; k++) gradient_summer_.add(weights_[id] * grad[k], i-1, k);
+                for (id_t k = 0; k < dim; k++)
+                    gradient_summer_.add(weights_[id] * grad[k], i-1, k);
                 mutex_.unlock();
 
                 if (i == m) em((m+1)%2, n+1) = 0;

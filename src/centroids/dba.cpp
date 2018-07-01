@@ -134,9 +134,9 @@ public:
             local_calculator->calculate(i,0);
             const auto& x = local_calculator->x_[i];
             mutex_.lock();
-            for (id_t ii = 0; ii < local_calculator->path_; ii++) {
-                id_t i1 = local_calculator->index1_[ii] - 1;
-                id_t i2 = local_calculator->index2_[ii] - 1;
+            for (int ii = 0; ii < local_calculator->path_; ii++) {
+                int i1 = local_calculator->index1_[ii] - 1;
+                int i2 = local_calculator->index2_[ii] - 1;
                 summer_.add(x[i1], i2);
                 num_vals_[i2] += 1;
             }
@@ -191,9 +191,9 @@ public:
             const auto& x = local_calculator->x_[i];
             mutex_.lock();
             for (id_t j = 0; j < new_cent_.ncol(); j++) {
-                for (id_t ii = 0; ii < local_calculator->path_; ii++) {
-                    id_t i1 = local_calculator->index1_[ii] - 1;
-                    id_t i2 = local_calculator->index2_[ii] - 1;
+                for (int ii = 0; ii < local_calculator->path_; ii++) {
+                    int i1 = local_calculator->index1_[ii] - 1;
+                    int i2 = local_calculator->index2_[ii] - 1;
                     summer_.add(x.at(i1,j), i2, j);
                     num_vals_(i2,j) += 1;
                 }
@@ -249,9 +249,9 @@ public:
             for (id_t j = 0; j < new_cent_.ncol(); j++) {
                 local_calculator->calculate(i,0,j);
                 mutex_.lock();
-                for (id_t ii = 0; ii < local_calculator->path_; ii++) {
-                    id_t i1 = local_calculator->index1_[ii] - 1;
-                    id_t i2 = local_calculator->index2_[ii] - 1;
+                for (int ii = 0; ii < local_calculator->path_; ii++) {
+                    int i1 = local_calculator->index1_[ii] - 1;
+                    int i2 = local_calculator->index2_[ii] - 1;
                     summer_.add(x.at(i1,j), i2, j);
                     num_vals_(i2,j) += 1;
                 }
@@ -284,7 +284,7 @@ bool average_step(Rcpp::NumericVector& new_cent,
                   Rcpp::NumericVector& ref_cent)
 {
     bool converged = true;
-    for (id_t i = 0; i < ref_cent.length(); i++) {
+    for (int i = 0; i < ref_cent.length(); i++) {
         new_cent[i] /= num_vals[i];
         if (std::abs(new_cent[i] - ref_cent[i]) >= delta) converged = false;
         ref_cent[i] = new_cent[i];
@@ -298,8 +298,8 @@ bool average_step(Rcpp::NumericMatrix& new_cent,
                   Rcpp::NumericMatrix& ref_cent)
 {
     bool converged = true;
-    for (id_t j = 0; j < new_cent.ncol(); j++) {
-        for (id_t i = 0; i < new_cent.nrow(); i++) {
+    for (int j = 0; j < new_cent.ncol(); j++) {
+        for (int i = 0; i < new_cent.nrow(); i++) {
             new_cent(i,j) /= num_vals(i,j);
             if (std::abs(new_cent(i,j) - ref_cent(i,j)) >= delta) converged = false;
             ref_cent(i,j) = new_cent(i,j);
