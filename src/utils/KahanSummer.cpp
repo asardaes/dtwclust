@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "KahanSummer.h"
 
 #include <algorithm> // std::fill
 #include <vector>

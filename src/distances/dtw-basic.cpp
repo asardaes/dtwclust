@@ -1,4 +1,4 @@
-#include "distances-details.h"
+#include "details.h"
 
 #include <cstddef> // std::size_t
 #include <stdlib.h>

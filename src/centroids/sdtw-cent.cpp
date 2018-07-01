@@ -1,4 +1,4 @@
-#include "centroids.h"
+#include "R-gateways.h"
 
 #include <algorithm> // std::fill
 #include <math.h> // exp
@@ -7,11 +7,12 @@
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
-#include "../distance-calculators/distance-calculators.h"
-#include "../distances/distances-details.h" // sdtw
+#include "../distances/calculators.h"
+#include "../distances/details.h" // sdtw
+#include "../utils/KahanSummer.h"
 #include "../utils/SurrogateMatrix.h"
 #include "../utils/TSTSList.h"
-#include "../utils/utils.h" // KahanSummer, get_grain
+#include "../utils/utils.h" // get_grain
 
 namespace dtwclust {
 

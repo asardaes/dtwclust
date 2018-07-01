@@ -5,8 +5,8 @@
 
 #include <RcppArmadillo.h>
 
-#include "../distance-calculators/distance-calculators.h"
-#include "../distmat/distmat.h"
+#include "../distances/calculators.h"
+#include "distmat.h"
 
 namespace dtwclust {
 

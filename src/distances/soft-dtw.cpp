@@ -1,4 +1,4 @@
-#include "distances-details.h"
+#include "details.h"
 
 #include <algorithm> // std::max
 #include <math.h> // exp, log, pow

@@ -1,10 +1,10 @@
-#include "distmat-loops.h"
+#include "R-gateways.h"
 
 #include <RcppArmadillo.h>
 
-#include "../distance-calculators/distance-calculators.h"
-#include "../distmat/distmat.h"
-#include "../distmat-fillers/distmat-fillers.h"
+#include "../distances/calculators.h"
+#include "distmat.h"
+#include "fillers.h"
 
 namespace dtwclust {
 

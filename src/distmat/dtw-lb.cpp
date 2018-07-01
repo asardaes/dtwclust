@@ -1,4 +1,4 @@
-#include "distmat-loops.h"
+#include "R-gateways.h"
 
 #include <cstddef> // std::size_t
 #include <memory> // shared_ptr
@@ -6,7 +6,7 @@
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
-#include "../distance-calculators/distance-calculators.h"
+#include "../distances/calculators.h"
 #include "../utils/utils.h" // get_grain
 
 namespace dtwclust {

@@ -1,4 +1,4 @@
-#include "centroids.h"
+#include "R-gateways.h"
 
 #include <cmath> // std::abs
 #include <cstddef> // std::size_t
@@ -7,11 +7,12 @@
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
-#include "../distance-calculators/distance-calculators.h"
-#include "../distances/distances-details.h" // dtw_basic_par
+#include "../distances/calculators.h"
+#include "../distances/details.h" // dtw_basic_par
+#include "../utils/KahanSummer.h"
 #include "../utils/SurrogateMatrix.h"
 #include "../utils/TSTSList.h"
-#include "../utils/utils.h" // KahanSummer, Rflush, get_grain
+#include "../utils/utils.h" // Rflush, get_grain
 
 namespace dtwclust {
 

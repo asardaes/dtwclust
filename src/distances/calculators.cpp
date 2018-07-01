@@ -1,4 +1,4 @@
-#include "distance-calculators.h"
+#include "calculators.h"
 
 #include <algorithm> // std::max
 #include <memory> // make_shared
@@ -6,7 +6,7 @@
 
 #include <RcppArmadillo.h>
 
-#include "../distances/distances-details.h"  // dtw_basic_par, logGAK_par, lbi_core, lbk_core, soft_dtw
+#include "details.h"  // dtw_basic_par, logGAK_par, lbi_core, lbk_core, soft_dtw
 #include "../utils/SurrogateMatrix.h"
 
 namespace dtwclust {

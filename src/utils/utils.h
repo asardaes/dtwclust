@@ -1,8 +1,6 @@
 #ifndef DTWCLUST_UTILS_HPP_
 #define DTWCLUST_UTILS_HPP_
 
-#include <vector>
-
 namespace dtwclust {
 
 // -------------------------------------------------------------------------------------------------
@@ -20,20 +18,6 @@ void Rflush();
 int get_grain(const int n, const int num_threads);
 double kahan_sum(const double * const x, const int length);
 void s2d(const int id, const int nrow, int& i, int& j);
-
-// for kahan sum (compensated sum)
-class KahanSummer
-{
-public:
-    KahanSummer(double * const x, const int nrows, const int ncols = 1);
-    void reset();
-    void add(const double value, const int i, const int j = 0);
-
-private:
-    double* const x_;
-    int nrows_;
-    std::vector<double> c_, y_, t_;
-};
 
 } // namespace dtwclust
 

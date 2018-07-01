@@ -1,8 +1,8 @@
-#include "distances.h"
+#include "R-gateways.h"
 
 #include <Rcpp.h>
 
-#include "distances-details.h"
+#include "details.h"
 
 namespace dtwclust {
 

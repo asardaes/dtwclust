@@ -1,4 +1,4 @@
-#include "tadpole.h"
+#include "R-gateways.h"
 
 #include <algorithm> // std::sort
 #include <atomic> // atomic_int
@@ -11,10 +11,48 @@
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
-#include "../distance-calculators/distance-calculators.h"
+#include "../distances/calculators.h"
 #include "../utils/utils.h" // Rflush, get_grain, s2d
 
 namespace dtwclust {
+
+// =================================================================================================
+/* Templates */
+// =================================================================================================
+
+// see https://stackoverflow.com/questions/1577475/c-sorting-and-keeping-track-of-indexes
+template <typename T>
+std::vector<size_t> stable_sort_ind(const std::vector<T>& v, const bool decreasing)
+{
+    // initialize original index locations
+    std::vector<size_t> idx(v.size());
+    std::iota(idx.begin(), idx.end(), 0);
+
+    // sort indexes based on comparing values in v
+    if (decreasing)
+        std::stable_sort(idx.begin(), idx.end(),
+                         [&v](size_t i1, size_t i2) { return v[i1] > v[i2]; });
+    else
+        std::stable_sort(idx.begin(), idx.end(),
+                         [&v](size_t i1, size_t i2) { return v[i1] < v[i2]; });
+
+    return idx;
+}
+
+// see https://stackoverflow.com/a/22183350/5793905
+template <typename T>
+void reorder(std::vector<T>& v, std::vector<size_t>& order)
+{
+    // for all elements to put in place
+    for (size_t i = 0; i < v.size(); ++i) {
+        // while order[i] is not yet in place
+        // every swap places at least one element in its proper place
+        while (order[i] != order[order[i]]) {
+            std::swap(v[order[i]], v[order[order[i]]]);
+            std::swap(order[i], order[order[i]]);
+        }
+    }
+}
 
 // =================================================================================================
 /* class that stores lower triangular of a matrix and knows how to access it */
@@ -366,7 +404,7 @@ std::vector<double> nn_dist_1(const std::vector<double>& rho, const int num_seri
     }
     delta_ub[0] = max_delta;
     auto id_orig = stable_sort_ind(id_rho_sorted, false);
-    reorder(delta_ub, id_orig); // template in tadpole.h
+    reorder(delta_ub, id_orig); // template
     return delta_ub;
 }
 
@@ -505,7 +543,7 @@ SEXP tadpole_cpp(const Rcpp::List& series,
     Rflush();
     std::vector<double> delta_ub = nn_dist_1(rho, num_series, distmat, UBM);
 
-    // get indices of sorted rho (using template function from tadpole.h)
+    // get indices of sorted rho
     std::vector<double> helper = rho;
     for (int i = 0; i < num_series; i++) helper[i] *= delta_ub[i];
     auto id_cl = stable_sort_ind(helper, true);

@@ -50,7 +50,7 @@
  * v1.0 of Global Alignment Kernel, March 25th 2011.
  */
 
-#include "distances-details.h"
+#include "details.h"
 
 #include <stdlib.h>
 #include <math.h>
