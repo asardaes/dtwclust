@@ -12,7 +12,7 @@
 #include "../utils/KahanSummer.h"
 #include "../utils/SurrogateMatrix.h"
 #include "../utils/TSTSList.h"
-#include "../utils/utils.h" // get_grain
+#include "../utils/utils.h" // get_grain, id_t
 
 namespace dtwclust {
 
@@ -72,7 +72,7 @@ public:
     }
 
     // calculate for given indices
-    double calculate(const int i, const int j) override {
+    double calculate(const id_t i, const id_t j) override {
         return this->calculate(x_[i], y_[j]);
     }
 

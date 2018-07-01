@@ -66,7 +66,7 @@ DtwBasicCalculator::DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, con
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double DtwBasicCalculator::calculate(const int i, const int j) {
+double DtwBasicCalculator::calculate(const id_t i, const id_t j) {
     return this->calculate(x_[i], y_[j]);
 }
 
@@ -125,7 +125,7 @@ GakCalculator::~GakCalculator() {
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double GakCalculator::calculate(const int i, const int j) {
+double GakCalculator::calculate(const id_t i, const id_t j) {
     return this->calculate(x_[i], y_[j]);
 }
 
@@ -207,7 +207,7 @@ LbiCalculator* LbiCalculator::clone() const {
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double LbiCalculator::calculate(const int i, const int j) {
+double LbiCalculator::calculate(const id_t i, const id_t j) {
     return this->calculate(x_[i], y_[j], lower_envelopes_[j], upper_envelopes_[j]);
 }
 
@@ -266,7 +266,7 @@ LbkCalculator* LbkCalculator::clone() const {
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double LbkCalculator::calculate(const int i, const int j) {
+double LbkCalculator::calculate(const id_t i, const id_t j) {
     // y is ignored here, only the envelopes matter
     return this->calculate(x_[i], lower_envelopes_[j], upper_envelopes_[j]);
 }
@@ -313,7 +313,7 @@ SbdCalculator* SbdCalculator::clone() const {
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double SbdCalculator::calculate(const int i, const int j) {
+double SbdCalculator::calculate(const id_t i, const id_t j) {
     return this->calculate(x_[i], y_[j], fftx_[i], ffty_[j]);
 }
 
@@ -367,7 +367,7 @@ SdtwCalculator::SdtwCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP&
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
 // -------------------------------------------------------------------------------------------------
-double SdtwCalculator::calculate(const int i, const int j) {
+double SdtwCalculator::calculate(const id_t i, const id_t j) {
     return this->calculate(x_[i], y_[j]);
 }
 

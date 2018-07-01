@@ -1,7 +1,6 @@
 #include "R-gateways.h"
 
 #include <cmath> // std::abs
-#include <cstddef> // std::size_t
 #include <utility> // std::move
 
 #include <RcppArmadillo.h>
@@ -12,7 +11,7 @@
 #include "../utils/KahanSummer.h"
 #include "../utils/SurrogateMatrix.h"
 #include "../utils/TSTSList.h"
-#include "../utils/utils.h" // Rflush, get_grain
+#include "../utils/utils.h" // Rflush, get_grain, id_t
 
 namespace dtwclust {
 
@@ -46,12 +45,12 @@ public:
     }
 
     // calculate for given indices (inherited)
-    double calculate(const int i, const int j) override {
+    double calculate(const id_t i, const id_t j) override {
         return this->calculate(x_[i], y_[j]);
     }
 
     // calculate for given indices (custom for multivariate by-variable version)
-    double calculate(const int i, const int j, const int k) {
+    double calculate(const id_t i, const id_t j, const id_t k) {
         return this->calculate(x_[i], y_[j], k);
     }
 
@@ -84,7 +83,7 @@ private:
     }
 
     // by-variable multivariate calculate
-    double calculate(const arma::mat& x, const arma::mat& y, const int k)
+    double calculate(const arma::mat& x, const arma::mat& y, const id_t k)
     {
         if (!lcm_ || !index1_ || !index2_) return -1;
 
@@ -127,13 +126,13 @@ public:
     }
 
     // parallel loop across specified range
-    void operator()(std::size_t begin, std::size_t end) {
+    void operator()(id_t begin, id_t end) {
         // local copy of calculator so it is setup separately for each thread
         mutex_.lock();
         DtwBacktrackCalculator* local_calculator = backtrack_calculator_.clone();
         mutex_.unlock();
         // kahan sum step
-        for (std::size_t i = begin; i < end; i++) {
+        for (id_t i = begin; i < end; i++) {
             local_calculator->calculate(i,0);
             const auto& x = local_calculator->x_[i];
             mutex_.lock();
@@ -183,13 +182,13 @@ public:
     }
 
     // parallel loop across specified range
-    void operator()(std::size_t begin, std::size_t end) {
+    void operator()(id_t begin, id_t end) {
         // local copy of calculator so it is setup separately for each thread
         mutex_.lock();
         DtwBacktrackCalculator* local_calculator = backtrack_calculator_.clone();
         mutex_.unlock();
         // kahan sum step
-        for (std::size_t i = begin; i < end; i++) {
+        for (id_t i = begin; i < end; i++) {
             local_calculator->calculate(i,0);
             const auto& x = local_calculator->x_[i];
             mutex_.lock();
@@ -241,13 +240,13 @@ public:
     }
 
     // parallel loop across specified range
-    void operator()(std::size_t begin, std::size_t end) {
+    void operator()(id_t begin, id_t end) {
         // local copy of calculator so it is setup separately for each thread
         mutex_.lock();
         DtwBacktrackCalculator* local_calculator = backtrack_calculator_.clone();
         mutex_.unlock();
         // kahan sum step
-        for (std::size_t i = begin; i < end; i++) {
+        for (id_t i = begin; i < end; i++) {
             const auto& x = local_calculator->x_[i];
             for (int j = 0; j < static_cast<int>(new_cent_.ncol()); j++) {
                 local_calculator->calculate(i,0,j);

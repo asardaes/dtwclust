@@ -1,7 +1,11 @@
 #ifndef DTWCLUST_UTILS_HPP_
 #define DTWCLUST_UTILS_HPP_
 
+#include <cstddef> // std::size_t
+
 namespace dtwclust {
+
+typedef std::size_t id_t;
 
 // -------------------------------------------------------------------------------------------------
 /* called by other C++ functions */
