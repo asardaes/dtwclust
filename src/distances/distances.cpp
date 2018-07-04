@@ -101,8 +101,11 @@ extern "C" SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U)
 {
     BEGIN_RCPP
     Rcpp::NumericVector x(X), lower(L), upper(U);
-    Rcpp::NumericVector H(x.length());
-    return Rcpp::wrap(lbk_core(&x[0], x.length(), Rcpp::as<int>(P), &lower[0], &upper[0], &H[0]));
+    SurrogateMatrix<const double> temp_x(x.length(), 1, &x[0]);
+    SurrogateMatrix<const double> temp_l(lower.length(), 1, &lower[0]);
+    SurrogateMatrix<const double> temp_u(upper.length(), 1, &upper[0]);
+    SurrogateMatrix<double> H(x.length(), 1);
+    return Rcpp::wrap(lbk_core(temp_x, Rcpp::as<int>(P), temp_l, temp_u, H));
     END_RCPP
 }
 

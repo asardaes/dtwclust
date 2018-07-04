@@ -125,7 +125,6 @@ class LbkCalculator : public DistanceCalculator
 {
 public:
     LbkCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
-    ~LbkCalculator();
     double calculate(const id_t i, const id_t j) override;
     LbkCalculator* clone() const override;
 
@@ -134,7 +133,7 @@ private:
                      const arma::mat& lower_envelope, const arma::mat& upper_envelope);
     int p_, len_;
     TSTSList<arma::mat> x_, lower_envelopes_, upper_envelopes_;
-    double* H_;
+    SurrogateMatrix<double> H_;
 };
 
 // -------------------------------------------------------------------------------------------------

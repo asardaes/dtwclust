@@ -205,10 +205,8 @@ double LbiCalculator::calculate(const arma::mat& x, const arma::mat& y,
 
 // -------------------------------------------------------------------------------------------------
 /* constructor */
-// -------------------------------------------------------------------------------------------------
 LbkCalculator::LbkCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
     : x_(X)
-    , H_(nullptr)
 {
     Rcpp::List dist_args(DIST_ARGS);
     p_ = Rcpp::as<int>(dist_args["p"]);
@@ -220,22 +218,10 @@ LbkCalculator::LbkCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y
 }
 
 // -------------------------------------------------------------------------------------------------
-/* destructor */
-// -------------------------------------------------------------------------------------------------
-LbkCalculator::~LbkCalculator() {
-    if (H_) delete[] H_;
-}
-
-// -------------------------------------------------------------------------------------------------
-/* clone that sets helper matrix
-*   This is needed because instances of this class are supposed to be called from different
-*   threads, and each one needs its own independent matrix to perform the calculations. Each thread
-*   has to lock a mutex and then call this method before calculating the distance.
-*/
-// ------------------------------------------------------------------------------------------------
+/* clone */
 LbkCalculator* LbkCalculator::clone() const {
     LbkCalculator* ptr = new LbkCalculator(*this);
-    ptr->H_ = new double[len_];
+    ptr->H_ = SurrogateMatrix<double>(len_, 1);
     return ptr;
 }
 
@@ -254,7 +240,11 @@ double LbkCalculator::calculate(const arma::mat& x,
                                 const arma::mat& lower_envelope, const arma::mat& upper_envelope)
 {
     if (!H_) return -1;
-    return lbk_core(&x[0], len_, p_, &lower_envelope[0], &upper_envelope[0], H_);
+
+    SurrogateMatrix<const double> temp_x(len_, 1, &x[0]);
+    SurrogateMatrix<const double> temp_l(len_, 1, &lower_envelope[0]);
+    SurrogateMatrix<const double> temp_u(len_, 1, &upper_envelope[0]);
+    return lbk_core(temp_x, p_, temp_l, temp_u, H_);
 }
 
 // =================================================================================================

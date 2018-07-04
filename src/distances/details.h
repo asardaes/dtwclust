@@ -53,9 +53,11 @@ double lbi_core(const double * const x, const double * const y,
                 double * const L2, double * const U2, double * const H, double * const LB);
 
 // lbk.cpp
-double lbk_core(const double * const x, const int length, const int p,
-                const double * const lower_envelope, const double * const upper_envelope,
-                double * const H);
+double lbk_core(const SurrogateMatrix<const double>& x,
+                const int p,
+                const SurrogateMatrix<const double>& lower_envelope,
+                const SurrogateMatrix<const double>& upper_envelope,
+                SurrogateMatrix<double>& H);
 
 // logGAK.cpp
 double logGAK_c(const SurrogateMatrix<const double>& seq1 ,
