@@ -39,11 +39,13 @@
  ***** END LICENSE BLOCK *****
  *
  * REVISIONS:
- * This version is functionally equivalent to v1.03, adapted to be called from R. The 'logs'
- * variable is allocated in R (see its purpose below). The 'LOGP' macro was changed to an in-line
- * function.
+ * The current version explicitly makes a cast to double before computing i / window in order to
+ * ensure that integer division is not used.
  *
  * Previous versions:
+ * v1.04 (2018-07-04) Functionally equivalent to v1.03, adapted to be called from R. The 'logs'
+ * variable is allocated in R (see its purpose below). The 'LOGP' macro was changed to an in-line
+ * function.
  * v1.03 Added log1p function for windows platforms, September 12th 2011.
  * v1.02 Changed some C syntax that was not compiled properly on Windows platforms, June 8th
  * v1.01 of Global Alignment Kernel, May 12th 2011 (updated comments fields)
