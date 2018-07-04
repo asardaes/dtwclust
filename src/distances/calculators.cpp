@@ -135,14 +135,9 @@ double GakCalculator::calculate(const arma::mat& x, const arma::mat& y) {
 
 // -------------------------------------------------------------------------------------------------
 /* constructor */
-// -------------------------------------------------------------------------------------------------
 LbiCalculator::LbiCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
     : x_(X)
     , y_(Y)
-    , H_(nullptr)
-    , L2_(nullptr)
-    , U2_(nullptr)
-    , LB_(nullptr)
 {
     Rcpp::List dist_args(DIST_ARGS);
     p_ = Rcpp::as<int>(dist_args["p"]);
@@ -155,47 +150,34 @@ LbiCalculator::LbiCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y
 }
 
 // -------------------------------------------------------------------------------------------------
-/* destructor */
-// -------------------------------------------------------------------------------------------------
-LbiCalculator::~LbiCalculator() {
-    if (H_) delete[] H_;
-    if (L2_) delete[] L2_;
-    if (U2_) delete[] U2_;
-    if (LB_) delete[] LB_;
-}
-
-// -------------------------------------------------------------------------------------------------
-/* clone that sets helper matrix
-*   This is needed because instances of this class are supposed to be called from different
-*   threads, and each one needs its own independent matrix to perform the calculations. Each thread
-*   has to lock a mutex and then call this method before calculating the distance.
-*/
-// ------------------------------------------------------------------------------------------------
+/* clone */
 LbiCalculator* LbiCalculator::clone() const {
     LbiCalculator* ptr = new LbiCalculator(*this);
-    ptr->H_ = new double[len_];
-    ptr->L2_ = new double[len_];
-    ptr->U2_ = new double[len_];
-    ptr->LB_ = new double[len_];
+    ptr->H_ = SurrogateMatrix<double>(len_, 1);
+    ptr->L2_ = SurrogateMatrix<double>(len_, 1);
+    ptr->U2_ = SurrogateMatrix<double>(len_, 1);
+    ptr->LB_ = SurrogateMatrix<double>(len_, 1);
     return ptr;
 }
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
-// -------------------------------------------------------------------------------------------------
 double LbiCalculator::calculate(const id_t i, const id_t j) {
     return this->calculate(x_[i], y_[j], lower_envelopes_[j], upper_envelopes_[j]);
 }
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
-// -------------------------------------------------------------------------------------------------
 double LbiCalculator::calculate(const arma::mat& x, const arma::mat& y,
                                 const arma::mat& lower_envelope, const arma::mat& upper_envelope)
 {
-    return lbi_core(&x[0], &y[0],
-                    len_, window_, p_,
-                    &lower_envelope[0], &upper_envelope[0],
+    SurrogateMatrix<const double> temp_x(len_, 1, &x[0]);
+    SurrogateMatrix<const double> temp_y(len_, 1, &y[0]);
+    SurrogateMatrix<const double> temp_l(len_, 1, &lower_envelope[0]);
+    SurrogateMatrix<const double> temp_u(len_, 1, &upper_envelope[0]);
+    return lbi_core(temp_x, temp_y,
+                    window_, p_,
+                    temp_l, temp_u,
                     L2_, U2_, H_, LB_);
 }
 

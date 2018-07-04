@@ -105,7 +105,6 @@ class LbiCalculator : public DistanceCalculator
 {
 public:
     LbiCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
-    ~LbiCalculator();
     double calculate(const id_t i, const id_t j) override;
     LbiCalculator* clone() const override;
 
@@ -115,7 +114,7 @@ private:
     int p_, len_;
     unsigned int window_;
     TSTSList<arma::mat> x_, y_, lower_envelopes_, upper_envelopes_;
-    double *H_, *L2_, *U2_, *LB_;
+    SurrogateMatrix<double> H_, L2_, U2_, LB_;
 };
 
 // -------------------------------------------------------------------------------------------------

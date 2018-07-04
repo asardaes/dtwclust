@@ -82,8 +82,12 @@ extern "C" SEXP SparseDistmatIndices__getNewIndices(SEXP xptr, SEXP i, SEXP j, S
 extern "C" SEXP envelope(SEXP series, SEXP window) {
     BEGIN_RCPP
     Rcpp::NumericVector x(series);
-    Rcpp::NumericVector L(x.size()), U(x.size());
-    envelope_cpp(&x[0], x.length(), Rcpp::as<unsigned int>(window), &L[0], &U[0]);
+    int n = x.length();
+    Rcpp::NumericVector L(n), U(n);
+    SurrogateMatrix<double> temp_x(n, 1, &x[0]);
+    SurrogateMatrix<double> temp_l(n, 1, &L[0]);
+    SurrogateMatrix<double> temp_u(n, 1, &U[0]);
+    envelope_cpp(temp_x, Rcpp::as<unsigned int>(window), temp_l, temp_u);
     Rcpp::List ret;
     ret["lower"] = L;
     ret["upper"] = U;

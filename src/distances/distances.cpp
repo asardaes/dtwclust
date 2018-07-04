@@ -86,10 +86,17 @@ extern "C" SEXP lbi(SEXP X, SEXP Y, SEXP WINDOW, SEXP P, SEXP L, SEXP U)
 {
     BEGIN_RCPP
     Rcpp::NumericVector x(X), y(Y), lower(L), upper(U);
-    Rcpp::NumericVector L2(x.length()), U2(x.length()), H(x.length()), LB(x.length());
-    return Rcpp::wrap(lbi_core(&x[0], &y[0], x.length(),
+    SurrogateMatrix<const double> temp_x(x.length(), 1, &x[0]);
+    SurrogateMatrix<const double> temp_y(y.length(), 1, &y[0]);
+    SurrogateMatrix<const double> temp_l(lower.length(), 1, &lower[0]);
+    SurrogateMatrix<const double> temp_u(upper.length(), 1, &upper[0]);
+    SurrogateMatrix<double> L2(x.length(), 1);
+    SurrogateMatrix<double> U2(x.length(), 1);
+    SurrogateMatrix<double> H(x.length(), 1);
+    SurrogateMatrix<double> LB(x.length(), 1);
+    return Rcpp::wrap(lbi_core(temp_x, temp_y,
                                Rcpp::as<unsigned int>(WINDOW), Rcpp::as<int>(P),
-                               &lower[0], &upper[0], &L2[0], &U2[0], &H[0], &LB[0]));
+                               temp_l, temp_u, L2, U2, H, LB));
     END_RCPP
 }
 

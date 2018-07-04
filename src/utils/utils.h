@@ -3,6 +3,8 @@
 
 #include <cstddef> // std::size_t
 
+#include "SurrogateMatrix.h"
+
 namespace dtwclust {
 
 typedef std::size_t id_t;
@@ -14,8 +16,8 @@ typedef std::size_t id_t;
 #define DTWCLUST_MIN_GRAIN 8
 
 // envelope.cpp
-void envelope_cpp(const double * const array, const int length, const unsigned int width,
-                  double * const minvalues, double * const maxvalues);
+void envelope_cpp(const SurrogateMatrix<double>& array, const unsigned int width,
+                  SurrogateMatrix<double>& minvalues, SurrogateMatrix<double>& maxvalues);
 
 // utils.cpp
 void Rflush();

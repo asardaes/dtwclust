@@ -47,10 +47,16 @@ double dtw_basic_par(SurrogateMatrix<double>& lcm,
                      int& path);
 
 // lbi.cpp
-double lbi_core(const double * const x, const double * const y,
-                const int length, const unsigned int window_size, const int p,
-                const double * const lower_envelope, const double * const upper_envelope,
-                double * const L2, double * const U2, double * const H, double * const LB);
+double lbi_core(const SurrogateMatrix<const double>& x,
+                const SurrogateMatrix<const double>& y,
+                const unsigned int window_size,
+                const int p,
+                const SurrogateMatrix<const double>& lower_envelope,
+                const SurrogateMatrix<const double>& upper_envelope,
+                SurrogateMatrix<double>& L2,
+                SurrogateMatrix<double>& U2,
+                SurrogateMatrix<double>& H,
+                SurrogateMatrix<double>& LB);
 
 // lbk.cpp
 double lbk_core(const SurrogateMatrix<const double>& x,

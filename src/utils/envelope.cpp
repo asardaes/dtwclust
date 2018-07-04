@@ -2,6 +2,8 @@
 
 #include <deque>
 
+#include "SurrogateMatrix.h"
+
 namespace dtwclust {
 
 /*
@@ -11,15 +13,15 @@ namespace dtwclust {
  */
 
 // thread-safe
-void envelope_cpp(const double * const array, const int length, const unsigned int width,
-                  double * const minvalues, double * const maxvalues)
+void envelope_cpp(const SurrogateMatrix<double>& array, const unsigned int width,
+                  SurrogateMatrix<double>& minvalues, SurrogateMatrix<double>& maxvalues)
 {
     unsigned int constraint = (width - 1) / 2;
-    unsigned int array_size = static_cast<unsigned int>(length);
+    id_t array_size = array.nrow();
     std::deque<int> maxfifo, minfifo;
     maxfifo.push_back(0);
     minfifo.push_back(0);
-    for(unsigned int i = 1; i < array_size; ++i) {
+    for(id_t i = 1; i < array_size; ++i) {
         if(i >= constraint + 1) {
             maxvalues[i - constraint - 1] = array[maxfifo.front()];
             minvalues[i - constraint - 1] = array[minfifo.front()];
@@ -45,7 +47,7 @@ void envelope_cpp(const double * const array, const int length, const unsigned i
         else if(i == width + minfifo.front())
             minfifo.pop_front();
     }
-    for(unsigned int i = array_size; i <= array_size + constraint; ++i) {
+    for(id_t i = array_size; i <= array_size + constraint; ++i) {
         maxvalues[i - constraint - 1] = array[maxfifo.front()];
         minvalues[i - constraint - 1] = array[minfifo.front()];
         if(i - maxfifo.front() >= width) maxfifo.pop_front();
