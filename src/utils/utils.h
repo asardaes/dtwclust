@@ -22,7 +22,7 @@ void envelope_cpp(const SurrogateMatrix<double>& array, const unsigned int width
 // utils.cpp
 void Rflush();
 int get_grain(const int n, const int num_threads);
-double kahan_sum(const double * const x, const int length);
+double kahan_sum(const SurrogateMatrix<double>& x);
 void s2d(const int id, const int nrow, int& i, int& j);
 
 } // namespace dtwclust

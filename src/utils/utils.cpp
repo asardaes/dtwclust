@@ -2,6 +2,8 @@
 
 #include <R.h>
 
+#include "SurrogateMatrix.h"
+
 namespace dtwclust {
 
 /* grain parameter for multi-threading */
@@ -20,10 +22,10 @@ void Rflush()
 }
 
 /* helper kahan_sum */
-double kahan_sum(const double * const x, const int length)
+double kahan_sum(const SurrogateMatrix<double>& x)
 {
     double sum = 0, c = 0;
-    for (int i = 0; i < length; i++) {
+    for (id_t i = 0; i < x.nrow(); i++) {
         double y = x[i] - c;
         double t = sum + y;
         c = (t - sum) - y;

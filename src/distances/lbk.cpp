@@ -27,7 +27,7 @@ double lbk_core(const SurrogateMatrix<const double>& x,
         if (p > 1) H[i] *= H[i];
     }
 
-    lb = kahan_sum(&H[0], length);
+    lb = kahan_sum(H);
     if (p > 1) lb = std::sqrt(lb);
     return lb;
 }

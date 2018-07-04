@@ -51,7 +51,7 @@ double lbi_core(const SurrogateMatrix<const double>& x,
         LB[i] += temp;
     }
 
-    lb = kahan_sum(&LB[0], length);
+    lb = kahan_sum(LB);
     if (p > 1) lb = std::sqrt(lb);
     return lb;
 }
