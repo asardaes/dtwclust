@@ -209,7 +209,6 @@ LbkCalculator* LbkCalculator::clone() const {
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
-// -------------------------------------------------------------------------------------------------
 double LbkCalculator::calculate(const id_t i, const id_t j) {
     // y is ignored here, only the envelopes matter
     return this->calculate(x_[i], lower_envelopes_[j], upper_envelopes_[j]);
@@ -217,7 +216,6 @@ double LbkCalculator::calculate(const id_t i, const id_t j) {
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
-// -------------------------------------------------------------------------------------------------
 double LbkCalculator::calculate(const arma::mat& x,
                                 const arma::mat& lower_envelope, const arma::mat& upper_envelope)
 {
@@ -235,7 +233,6 @@ double LbkCalculator::calculate(const arma::mat& x,
 
 // -------------------------------------------------------------------------------------------------
 /* constructor */
-// -------------------------------------------------------------------------------------------------
 SbdCalculator::SbdCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
     : x_(X)
     , y_(Y)
@@ -251,7 +248,6 @@ SbdCalculator::SbdCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y
 
 // -------------------------------------------------------------------------------------------------
 /* clone */
-// ------------------------------------------------------------------------------------------------
 SbdCalculator* SbdCalculator::clone() const {
     SbdCalculator* ptr = new SbdCalculator(*this);
     ptr->cc_seq_truncated_ = arma::vec(fftlen_);
@@ -260,14 +256,12 @@ SbdCalculator* SbdCalculator::clone() const {
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
-// -------------------------------------------------------------------------------------------------
 double SbdCalculator::calculate(const id_t i, const id_t j) {
     return this->calculate(x_[i], y_[j], fftx_[i], ffty_[j]);
 }
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
-// -------------------------------------------------------------------------------------------------
 double SbdCalculator::calculate(const arma::mat& x, const arma::mat& y,
                                 const arma::cx_mat& fftx, const arma::cx_mat& ffty)
 {
@@ -300,7 +294,6 @@ double SbdCalculator::calculate(const arma::mat& x, const arma::mat& y,
 
 // -------------------------------------------------------------------------------------------------
 /* constructor */
-// -------------------------------------------------------------------------------------------------
 SdtwCalculator::SdtwCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
     : x_(X)
     , y_(Y)
@@ -314,18 +307,12 @@ SdtwCalculator::SdtwCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP&
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
-// -------------------------------------------------------------------------------------------------
 double SdtwCalculator::calculate(const id_t i, const id_t j) {
     return this->calculate(x_[i], y_[j]);
 }
 
 // -------------------------------------------------------------------------------------------------
-/* clone that sets helper matrix
-*   This is needed because instances of this class are supposed to be called from different
-*   threads, and each one needs its own independent matrix to perform the calculations. Each thread
-*   has to lock a mutex and then call this method before calculating the distance.
-*/
-// ------------------------------------------------------------------------------------------------
+/* clone */
 SdtwCalculator* SdtwCalculator::clone() const {
     SdtwCalculator* ptr = new SdtwCalculator(*this);
     ptr->cm_ = SurrogateMatrix<double>(max_len_x_ + 2, max_len_y_ + 2);
@@ -334,12 +321,13 @@ SdtwCalculator* SdtwCalculator::clone() const {
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
-// -------------------------------------------------------------------------------------------------
-
 double SdtwCalculator::calculate(const arma::mat& x, const arma::mat& y)
 {
     if (!cm_) return -1;
-    return sdtw(&x[0], &y[0], x.n_rows, y.n_rows, x.n_cols, gamma_, cm_);
+
+    SurrogateMatrix<const double> temp_x(x.n_rows, x.n_cols, &x[0]);
+    SurrogateMatrix<const double> temp_y(y.n_rows, y.n_cols, &y[0]);
+    return sdtw(temp_x, temp_y, gamma_, cm_);
 }
 
 } // namespace dtwclust

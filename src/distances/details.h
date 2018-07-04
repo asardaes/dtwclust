@@ -73,17 +73,10 @@ double logGAK_c(const SurrogateMatrix<const double>& seq1 ,
                 SurrogateMatrix<double>& logs);
 
 // soft-dtw.cpp
-double soft_min(double a, double b, double c, const double gamma);
-double squared_euclidean(const double * const x, const double * const y,
-                         const int i, const int j,
-                         const int x_nrows, const int y_nrows, const int ncols);
-double sdtw(const double * const x, const double * const y,
-            const int nx, const int ny, const int num_vars,
+double sdtw(const SurrogateMatrix<const double>& x, const SurrogateMatrix<const double>& y,
             const double gamma, SurrogateMatrix<double>& costmat);
-double sdtw(const double * const x, const double * const y,
-            const int nx, const int ny, const int num_vars,
-            const double gamma, SurrogateMatrix<double>& costmat,
-            SurrogateMatrix<double>& distmat);
+double sdtw(const SurrogateMatrix<const double>& x, const SurrogateMatrix<const double>& y,
+            const double gamma, SurrogateMatrix<double>& costmat, SurrogateMatrix<double>& distmat);
 
 } // namespace dtwclust
 

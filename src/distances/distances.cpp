@@ -155,47 +155,26 @@ extern "C" SEXP logGAK(SEXP X, SEXP Y, SEXP NX, SEXP NY, SEXP NUM_VAR,
 /* soft-DTW */
 // =================================================================================================
 
-// dynamic programming
-template<typename SeriesType>
-double dp_recursion(const SeriesType& x, const SeriesType& y,
-                    Rcpp::NumericMatrix& costmat, const double gamma,
-                    const int nx, const int ny, const int num_vars)
-{
-    for (int i = 1; i <= nx; i++) {
-        for (int j = 1; j <= ny; j++) {
-            double point_norm = squared_euclidean(&x[0], &y[0], i-1, j-1, nx, ny, num_vars);
-            costmat(i,j) = point_norm + soft_min(costmat(i-1, j),
-                                                 costmat(i-1, j-1),
-                                                 costmat(i, j-1),
-                                                 gamma);
-        }
-    }
-    return costmat(nx, ny);
-}
-
-// gateway
 extern "C" SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP MV)
 {
     BEGIN_RCPP
     Rcpp::NumericMatrix costmat(COSTMAT);
+    SurrogateMatrix<double> cm(costmat.nrow(), costmat.ncol(), &costmat[0]);
     bool is_multivariate = Rcpp::as<bool>(MV);
     double gamma = Rcpp::as<double>(GAMMA);
-    // initialize costmat values
-    costmat(0,0) = 0;
-    for (int i = 1; i < costmat.nrow(); i++) costmat(i,0) = R_PosInf;
-    for (int j = 1; j < costmat.ncol(); j++) costmat(0,j) = R_PosInf;
+
     // compute distance
     if (is_multivariate) {
         Rcpp::NumericMatrix x(X), y(Y);
-        return Rcpp::wrap(
-            dp_recursion<Rcpp::NumericMatrix>(
-                x, y, costmat, gamma, x.nrow(), y.nrow(), x.ncol()));
+        SurrogateMatrix<const double> temp_x(x.nrow(), x.ncol(), &x[0]);
+        SurrogateMatrix<const double> temp_y(y.nrow(), y.ncol(), &y[0]);
+        return Rcpp::wrap(sdtw(temp_x, temp_y, gamma, cm));
     }
     else {
         Rcpp::NumericVector x(X), y(Y);
-        return Rcpp::wrap(
-            dp_recursion<Rcpp::NumericVector>(
-                x, y, costmat, gamma, x.length(), y.length(), 1));
+        SurrogateMatrix<const double> temp_x(x.length(), 1, &x[0]);
+        SurrogateMatrix<const double> temp_y(y.length(), 1, &y[0]);
+        return Rcpp::wrap(sdtw(temp_x, temp_y, gamma, cm));
     }
     END_RCPP
 }

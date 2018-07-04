@@ -87,7 +87,10 @@ public:
     // calculate
     double calculate(const arma::mat& x, const arma::mat& y) {
         if (!cm_ || !dm_) return -1;
-        return sdtw(&x[0], &y[0], x.n_rows, y.n_rows, x.n_cols, gamma_, cm_, dm_);
+
+        SurrogateMatrix<const double> temp_x(x.n_rows, x.n_cols, &x[0]);
+        SurrogateMatrix<const double> temp_y(y.n_rows, y.n_cols, &y[0]);
+        return sdtw(temp_x, temp_y, gamma_, cm_, dm_);
     }
 
     // input parameters
