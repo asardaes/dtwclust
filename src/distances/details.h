@@ -4,6 +4,7 @@
 #include <type_traits> // conditional
 
 #include "../utils/SurrogateMatrix.h"
+#include "../utils/utils.h" // id_t
 
 namespace dtwclust {
 
@@ -57,14 +58,11 @@ double lbk_core(const double * const x, const int length, const int p,
                 double * const H);
 
 // logGAK.cpp
-double logGAK_c(double const *seq1 , double const *seq2,
-                int const nX, int const nY, int const num_var,
-                double const sigma, int const triangular,
-                double *logs);
-double logGAK_par(double const * const x, double const * const y,
-                  int const nx, int const ny, int const num_var,
-                  double const sigma, int const triangular,
-                  double * const logs);
+double logGAK_c(const SurrogateMatrix<const double>& seq1 ,
+                const SurrogateMatrix<const double>& seq2,
+                const double sigma,
+                const id_t triangular,
+                SurrogateMatrix<double>& logs);
 
 // soft-dtw.cpp
 double soft_min(double a, double b, double c, const double gamma);

@@ -52,10 +52,12 @@
 
 #include "details.h"
 
-#include <stdlib.h>
-#include <math.h>
+#include <math.h> // log, exp
 
 #include <R.h> // R_NegInf
+
+#include "../utils/SurrogateMatrix.h"
+#include "../utils/utils.h" // id_t
 
 namespace dtwclust {
 
@@ -63,17 +65,23 @@ namespace dtwclust {
 #define LOG0 -10000          // log(0)
 
 // LOGP
-double inline LOGP(double const x, double const y)
+double inline LOGP(const double x, const double y)
     __attribute__((always_inline));
-double inline LOGP(double const x, double const y) {
+double inline LOGP(const double x, const double y) {
     return (x > y) ? x + log1p(exp(y - x)) : y + log1p(exp(x - y));
 }
 
+// subtract two unsigned so that the result is still unsigned
+inline id_t udiff(const id_t x, const id_t y) {
+    return (x > y) ? x - y : y - x;
+}
+
 // global alignment kernel
-double logGAK_c(double const *seq1 , double const *seq2,
-                int const nX, int const nY, int const num_var,
-                double const sigma, int const triangular,
-                double *logs)
+double logGAK_c(const SurrogateMatrix<const double>& seq1 ,
+                const SurrogateMatrix<const double>& seq2,
+                const double sigma,
+                const id_t triangular,
+                SurrogateMatrix<double>& logs)
 {
     /*
      * Implementation of the (Triangular) global alignment kernel.
@@ -84,19 +92,30 @@ double logGAK_c(double const *seq1 , double const *seq2,
      * seq1 is a first sequence represented as a matrix of real elements.
      *   Each line i corresponds to the vector of observations at time i.
      * seq2 is the second sequence formatted in the same way.
-     * nX, nY and num_var provide the number of lines of seq1 and seq2.
      * sigma stands for the bandwidth of the \phi_\sigma distance used kernel
      * triangular is a parameter which parameterizes the triangular kernel
      */
 
-    int i, j, ii, cur, old, frompos1, frompos2, frompos3;
+    id_t nx = seq1.nrow();
+    id_t ny = seq2.nrow();
+    // If triangular is smaller than the difference in length of the time series,
+    // the kernel is equal to zero, i.e. its log is set to -Inf
+    if (triangular > 0 && udiff(nx,ny) > triangular)
+        return R_NegInf;
+
+    // must be the same as seq2.ncol()
+    id_t num_var = seq1.ncol();
+    id_t i, j, ii, cur, old, frompos1, frompos2, frompos3;
     double gram, Sig, aux, sum;
 
-    int curpos = 0;                 // R compilation in windows gives warning about uninitialization...
-    int trimax = (nX > nY) ? nX - 1 : nY - 1; // Maximum of abs(i-j) when 1<=i<=nX and 1<=j<=nY
-    int cl = trimax + 2;            // length of a column for the dynamic programming
+    // R compilation in windows gives warning about uninitialization...
+    id_t curpos = 0;
+    // Maximum of abs(i-j) when 1<=i<=nx and 1<=j<=ny
+    id_t trimax = (nx > ny) ? nx - 1 : ny - 1;
+    // length of a column for the dynamic programming
+    id_t cl = trimax + 2;
 
-    // logs is the array that will stores two successive columns of the (nX+1) x (nY+1)
+    // logs is the array that will stores two successive columns of the (nx+1) x (ny+1)
     // table used to compute the final kernel value, as well as the triangular coefficients
     // in the third 'column'
 
@@ -125,26 +144,26 @@ double logGAK_c(double const *seq1 , double const *seq2,
     old = 0;      // Indexes [cl..2*cl-1] were used for column 0
 
     /************************************************/
-    /* Next iterations : processing columns 1 .. nX */
+    /* Next iterations : processing columns 1 .. nx */
     /************************************************/
-    // Main loop to vary the position for i=1..nX
-    for (i = 1; i <= nX; i++) {
-        // Special update for positions (i=1..nX,j=0)
+    // Main loop to vary the position for i=1..nx
+    for (i = 1; i <= nx; i++) {
+        // Special update for positions (i=1..nx,j=0)
         curpos = cur * cl;                  // index of the state (i,0)
         logs[curpos] = LOG0;
-        // Secondary loop to vary the position for j=1..nY
-        for (j = 1; j <= nY; j++) {
+        // Secondary loop to vary the position for j=1..ny
+        for (j = 1; j <= ny; j++) {
             curpos = cur * cl + j;          // index of the state (i,j)
-            if (logs[abs(i-j) + 2*cl] > LOG0) {
+            if (logs[udiff(i,j) + 2*cl] > LOG0) {
                 frompos1 = old*cl + j;      // index of the state (i-1,j)
                 frompos2 = cur*cl + j-1;    // index of the state (i,j-1)
                 frompos3 = old*cl + j-1;    // index of the state (i-1,j-1)
                 // We first compute the kernel value
                 sum = 0;
                 for (ii = 0; ii < num_var; ii++) {
-                    sum += pow(seq1[i-1 + ii*nX] - seq2[j-1 + ii*nY], 2);
+                    sum += pow(seq1[i-1 + ii*nx] - seq2[j-1 + ii*ny], 2);
                 }
-                gram = logs[abs(i-j) + 2*cl] + sum*Sig;
+                gram = logs[udiff(i,j) + 2*cl] + sum*Sig;
                 gram -= log(2 - exp(gram));
                 // Doing the updates now, in two steps
                 aux = LOGP(logs[frompos1], logs[frompos2]);
@@ -158,26 +177,8 @@ double logGAK_c(double const *seq1 , double const *seq2,
         cur = 1 - cur;
         old = 1 - old;
     }
-    aux = logs[curpos];
     // Return the logarithm of the Global Alignment Kernel
-    return aux;
-}
-
-// a version compatible with RcppParallel
-double logGAK_par(double const * const x, double const * const y,
-                  int const nx, int const ny, int const num_var,
-                  double const sigma, int const triangular,
-                  double * const logs)
-{
-    double d;
-    // If triangular is smaller than the difference in length of the time series,
-    // the kernel is equal to zero,
-    // i.e. its log is set to -Inf
-    if (triangular > 0 && abs(nx - ny) > triangular)
-        d = R_NegInf;
-    else
-        d = logGAK_c(x, y, nx, ny, num_var, sigma, triangular, logs);
-    return d;
+    return logs[curpos];
 }
 
 } // namespace dtwclust

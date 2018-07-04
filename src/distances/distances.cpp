@@ -3,6 +3,8 @@
 #include <Rcpp.h>
 
 #include "details.h"
+#include "../utils/SurrogateMatrix.h"
+#include "../utils/utils.h" // id_t
 
 namespace dtwclust {
 
@@ -108,8 +110,8 @@ extern "C" SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U)
 /* logGAK */
 // =================================================================================================
 
-extern "C" SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var,
-                       SEXP sigma, SEXP window, SEXP logs)
+extern "C" SEXP logGAK(SEXP X, SEXP Y, SEXP NX, SEXP NY, SEXP NUM_VAR,
+                       SEXP SIGMA, SEXP WINDOW, SEXP LOGS)
 {
     BEGIN_RCPP
     /*
@@ -126,22 +128,16 @@ extern "C" SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var,
      * A (max(N1,N2) + 1) x 3 matrix of doubles
      */
 
-    int triangular = Rf_asInteger(window);
-    int nX = Rf_asInteger(nx);
-    int nY = Rf_asInteger(ny);
-    double d;
-
-    // If triangular is smaller than the difference in length of the time series,
-    // the kernel is equal to zero,
-    // i.e. its log is set to -Inf
-    if (triangular > 0 && abs(nX - nY) > triangular)
-        d = R_NegInf;
-    else
-        d = logGAK_c(REAL(x), REAL(y),
-                     nX, nY, Rf_asInteger(num_var),
-                     Rf_asReal(sigma), triangular,
-                     REAL(logs));
-    return Rf_ScalarReal(d);
+    int nx = Rf_asInteger(NX);
+    int ny = Rf_asInteger(NY);
+    int num_var = Rf_asInteger(NUM_VAR);
+    int nlogs = (nx > ny) ? nx + 1 : ny + 1;
+    SurrogateMatrix<const double> x(nx, num_var, REAL(X));
+    SurrogateMatrix<const double> y(ny, num_var, REAL(Y));
+    SurrogateMatrix<double> logs(nlogs, 3, REAL(LOGS));
+    return Rf_ScalarReal(
+        logGAK_c(x, y, Rf_asReal(SIGMA), static_cast<id_t>(Rf_asInteger(WINDOW)), logs)
+    );
     END_RCPP
 }
 

@@ -16,8 +16,8 @@ extern "C" {
 
     SEXP lbk(SEXP X, SEXP P, SEXP L, SEXP U);
 
-    SEXP logGAK(SEXP x, SEXP y, SEXP nx, SEXP ny, SEXP num_var,
-                SEXP sigma, SEXP window, SEXP logs);
+    SEXP logGAK(SEXP X, SEXP Y, SEXP NX, SEXP NY, SEXP NUM_VAR,
+                SEXP SIGMA, SEXP WINDOW, SEXP LOGS);
 
     SEXP soft_dtw(SEXP X, SEXP Y, SEXP GAMMA, SEXP COSTMAT, SEXP MV);
 }

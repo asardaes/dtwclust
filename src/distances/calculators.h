@@ -81,7 +81,6 @@ class GakCalculator : public DistanceCalculator
 {
 public:
     GakCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y);
-    ~GakCalculator();
     double calculate(const id_t i, const id_t j) override;
     GakCalculator* clone() const override;
 
@@ -94,7 +93,7 @@ private:
     // input series
     TSTSList<arma::mat> x_, y_;
     // helper "matrix"
-    double* logs_;
+    SurrogateMatrix<double> logs_;
     // to dimension logs_
     int max_len_x_, max_len_y_;
 };

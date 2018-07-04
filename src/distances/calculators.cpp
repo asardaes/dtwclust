@@ -6,8 +6,9 @@
 
 #include <RcppArmadillo.h>
 
-#include "details.h"  // dtw_basic_par, logGAK_par, lbi_core, lbk_core, soft_dtw
+#include "details.h"  // dtw_basic_par, logGAK, lbi_core, lbk_core, soft_dtw
 #include "../utils/SurrogateMatrix.h"
+#include "../utils/utils.h" // id_t
 
 namespace dtwclust {
 
@@ -49,7 +50,6 @@ DistanceCalculatorFactory::create(const std::string& dist, const SEXP& DIST_ARGS
 
 // -------------------------------------------------------------------------------------------------
 /* constructor */
-// -------------------------------------------------------------------------------------------------
 DtwBasicCalculator::DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
     : x_(X)
     , y_(Y)
@@ -65,18 +65,12 @@ DtwBasicCalculator::DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, con
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
-// -------------------------------------------------------------------------------------------------
 double DtwBasicCalculator::calculate(const id_t i, const id_t j) {
     return this->calculate(x_[i], y_[j]);
 }
 
 // -------------------------------------------------------------------------------------------------
-/* clone that sets helper matrix
-*   This is needed because instances of this class are supposed to be called from different
-*   threads, and each one needs its own independent matrix to perform the calculations. Each thread
-*   has to lock a mutex and then call this method before calculating the distance.
-*/
-// ------------------------------------------------------------------------------------------------
+/* clone */
 DtwBasicCalculator* DtwBasicCalculator::clone() const {
     DtwBasicCalculator* ptr = new DtwBasicCalculator(*this);
     ptr->lcm_ = SurrogateMatrix<double>(2, max_len_y_ + 1);
@@ -85,8 +79,6 @@ DtwBasicCalculator* DtwBasicCalculator::clone() const {
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
-// -------------------------------------------------------------------------------------------------
-
 double DtwBasicCalculator::calculate(const arma::mat& x, const arma::mat& y) {
     if (!lcm_) return -1;
 
@@ -101,11 +93,9 @@ double DtwBasicCalculator::calculate(const arma::mat& x, const arma::mat& y) {
 
 // -------------------------------------------------------------------------------------------------
 /* constructor */
-// -------------------------------------------------------------------------------------------------
 GakCalculator::GakCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
     : x_(X)
     , y_(Y)
-    , logs_(nullptr)
 {
     Rcpp::List dist_args(DIST_ARGS);
     sigma_ = Rcpp::as<double>(dist_args["sigma"]);
@@ -116,41 +106,27 @@ GakCalculator::GakCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y
 }
 
 // -------------------------------------------------------------------------------------------------
-/* destructor */
-// -------------------------------------------------------------------------------------------------
-GakCalculator::~GakCalculator() {
-    if (logs_) delete[] logs_;
-}
-
-// -------------------------------------------------------------------------------------------------
 /* compute distance for two lists of series and given indices */
-// -------------------------------------------------------------------------------------------------
 double GakCalculator::calculate(const id_t i, const id_t j) {
     return this->calculate(x_[i], y_[j]);
 }
 
 // -------------------------------------------------------------------------------------------------
-/* clone that sets helper matrix
-*   This is needed because instances of this class are supposed to be called from different
-*   threads, and each one needs its own independent matrix to perform the calculations. Each thread
-*   has to lock a mutex and then call this method before calculating the distance.
-*/
-// ------------------------------------------------------------------------------------------------
+/* clone */
 GakCalculator* GakCalculator::clone() const {
     GakCalculator* ptr = new GakCalculator(*this);
-    ptr->logs_ = new double[(std::max(max_len_x_, max_len_y_) + 1) * 3];
+    ptr->logs_ = SurrogateMatrix<double>(std::max(max_len_x_, max_len_y_) + 1, 3);
     return ptr;
 }
 
 // -------------------------------------------------------------------------------------------------
 /* compute distance for two series */
-// -------------------------------------------------------------------------------------------------
-
 double GakCalculator::calculate(const arma::mat& x, const arma::mat& y) {
     if (!logs_) return -1;
-    return logGAK_par(&x[0], &y[0],
-                      x.n_rows, y.n_rows, x.n_cols,
-                      sigma_, window_, logs_);
+
+    SurrogateMatrix<const double> temp_x(x.n_rows, x.n_cols, &x[0]);
+    SurrogateMatrix<const double> temp_y(y.n_rows, y.n_cols, &y[0]);
+    return logGAK_c(temp_x, temp_y, sigma_, static_cast<id_t>(window_), logs_);
 }
 
 // =================================================================================================
