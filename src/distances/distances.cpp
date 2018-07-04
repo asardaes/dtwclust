@@ -33,16 +33,12 @@ extern "C" SEXP dtw_basic(SEXP X, SEXP Y, SEXP WINDOW,
         SEXP INDEX2 = PROTECT(Rf_allocVector(INTSXP, nx + ny));
         SurrogateMatrix<int> index1(nx + ny, 1, INTEGER(INDEX1));
         SurrogateMatrix<int> index2(nx + ny, 1, INTEGER(INDEX2));
+        int path = 0;
 
         // calculate distance
-        double d = dtw_basic_c(wrapped_lcm, x, y,
-                               Rf_asInteger(WINDOW), Rf_asReal(NORM), Rf_asReal(STEP),
-                               true);
-
-        if (Rf_asLogical(NORMALIZE)) d /= nx + ny;
-
-        // actual length of path
-        int path = backtrack_steps(wrapped_lcm, index1, index2, nx, ny);
+        double d = dtw_basic(wrapped_lcm, x, y,
+                             Rf_asInteger(WINDOW), Rf_asReal(NORM), Rf_asReal(STEP),
+                             Rf_asLogical(NORMALIZE), index1, index2, path);
 
         // put results in a list
         SEXP list_names = PROTECT(Rf_allocVector(STRSXP, 4));
@@ -65,15 +61,11 @@ extern "C" SEXP dtw_basic(SEXP X, SEXP Y, SEXP WINDOW,
         SurrogateMatrix<double> wrapped_lcm(2, ny + 1, lcm);
 
         // calculate distance
-        double d = dtw_basic_c(wrapped_lcm, x, y,
-                               Rf_asInteger(WINDOW), Rf_asReal(NORM), Rf_asReal(STEP),
-                               false);
+        double d = dtw_basic(wrapped_lcm, x, y,
+                             Rf_asInteger(WINDOW), Rf_asReal(NORM), Rf_asReal(STEP),
+                             Rf_asLogical(NORMALIZE));
 
-        if (Rf_asLogical(NORMALIZE)) d /= nx + ny;
-
-        SEXP ret = PROTECT(Rf_ScalarReal(d));
-        UNPROTECT(1);
-        return ret;
+        return Rcpp::wrap(d);
     }
     END_RCPP
 }

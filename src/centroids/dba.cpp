@@ -7,7 +7,7 @@
 #include <RcppParallel.h>
 
 #include "../distances/calculators.h"
-#include "../distances/details.h" // dtw_basic_par
+#include "../distances/details.h" // dtw_basi
 #include "../utils/KahanSummer.h"
 #include "../utils/SurrogateMatrix.h"
 #include "../utils/TSTSList.h"
@@ -76,9 +76,9 @@ private:
 
         SurrogateMatrix<const double> temp_x(x.n_rows, x.n_cols, &x[0]);
         SurrogateMatrix<const double> temp_y(y.n_rows, y.n_cols, &y[0]);
-        return dtw_basic_par(lcm_, temp_x, temp_y,
-                             window_, norm_, step_, normalize_,
-                             index1_, index2_, path_);
+        return dtw_basic(lcm_, temp_x, temp_y,
+                         window_, norm_, step_, normalize_,
+                         index1_, index2_, path_);
     }
 
     // by-variable multivariate calculate
@@ -87,9 +87,9 @@ private:
 
         SurrogateMatrix<const double> temp_x(x.n_rows, 1, &x[0] + (k * x.n_rows));
         SurrogateMatrix<const double> temp_y(y.n_rows, 1, &y[0] + (k * y.n_rows));
-        return dtw_basic_par(lcm_, temp_x, temp_y,
-                             window_, norm_, step_, normalize_,
-                             index1_, index2_, path_);
+        return dtw_basic(lcm_, temp_x, temp_y,
+                         window_, norm_, step_, normalize_,
+                         index1_, index2_, path_);
     }
 
     // input parameters

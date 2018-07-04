@@ -167,29 +167,29 @@ double dtw_basic_c(SurrogateMatrix<double>& lcm,
 
 // versions compatible with RcppParallel
 
-double dtw_basic_par(SurrogateMatrix<double>& lcm,
-                     const SurrogateMatrix<const double>& x,
-                     const SurrogateMatrix<const double>& y,
-                     const int window,
-                     const double norm,
-                     const double step,
-                     const bool normalize)
+double dtw_basic(SurrogateMatrix<double>& lcm,
+                 const SurrogateMatrix<const double>& x,
+                 const SurrogateMatrix<const double>& y,
+                 const int window,
+                 const double norm,
+                 const double step,
+                 const bool normalize)
 {
     double d = dtw_basic_c(lcm, x, y, window, norm, step, false);
     if (normalize) d /= x.nrow() + y.nrow();
     return d;
 }
 
-double dtw_basic_par(SurrogateMatrix<double>& lcm,
-                     const SurrogateMatrix<const double>& x,
-                     const SurrogateMatrix<const double>& y,
-                     const int window,
-                     const double norm,
-                     const double step,
-                     const bool normalize,
-                     SurrogateMatrix<int>& index1,
-                     SurrogateMatrix<int>& index2,
-                     int& path)
+double dtw_basic(SurrogateMatrix<double>& lcm,
+                 const SurrogateMatrix<const double>& x,
+                 const SurrogateMatrix<const double>& y,
+                 const int window,
+                 const double norm,
+                 const double step,
+                 const bool normalize,
+                 SurrogateMatrix<int>& index1,
+                 SurrogateMatrix<int>& index2,
+                 int& path)
 {
     double d = dtw_basic_c(lcm, x, y, window, norm, step, true);
     if (normalize) d /= x.nrow() + y.nrow();

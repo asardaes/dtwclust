@@ -6,7 +6,7 @@
 
 #include <RcppArmadillo.h>
 
-#include "details.h"  // dtw_basic_par, logGAK, lbi_core, lbk_core, soft_dtw
+#include "details.h"  // dtw_basic, logGAK, lbi_core, lbk_core, soft_dtw
 #include "../utils/SurrogateMatrix.h"
 #include "../utils/utils.h" // id_t
 
@@ -84,7 +84,7 @@ double DtwBasicCalculator::calculate(const arma::mat& x, const arma::mat& y) {
 
     SurrogateMatrix<const double> temp_x(x.n_rows, x.n_cols, &x[0]);
     SurrogateMatrix<const double> temp_y(y.n_rows, y.n_cols, &y[0]);
-    return dtw_basic_par(lcm_, temp_x, temp_y, window_, norm_, step_, normalize_);
+    return dtw_basic(lcm_, temp_x, temp_y, window_, norm_, step_, normalize_);
 }
 
 // =================================================================================================

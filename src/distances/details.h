@@ -16,35 +16,23 @@ namespace dtwclust {
 typedef std::conditional<sizeof(void*) == 4, volatile double, double>::type dtwclust_tuple_t;
 
 // dtw-basic.cpp
-int backtrack_steps(const SurrogateMatrix<double>& lcm,
-                    SurrogateMatrix<int>& index1,
-                    SurrogateMatrix<int>& index2,
-                    const std::size_t nx,
-                    const std::size_t ny);
-double dtw_basic_c(SurrogateMatrix<double>& lcm,
-                   const SurrogateMatrix<const double>& x,
-                   const SurrogateMatrix<const double>& y,
-                   const int w,
-                   const double norm,
-                   const double step,
-                   const bool backtrack);
-double dtw_basic_par(SurrogateMatrix<double>& lcm,
-                     const SurrogateMatrix<const double>& x,
-                     const SurrogateMatrix<const double>& y,
-                     const int window,
-                     const double norm,
-                     const double step,
-                     const bool normalize);
-double dtw_basic_par(SurrogateMatrix<double>& lcm,
-                     const SurrogateMatrix<const double>& x,
-                     const SurrogateMatrix<const double>& y,
-                     const int window,
-                     const double norm,
-                     const double step,
-                     const bool normalize,
-                     SurrogateMatrix<int>& index1,
-                     SurrogateMatrix<int>& index2,
-                     int& path);
+double dtw_basic(SurrogateMatrix<double>& lcm,
+                 const SurrogateMatrix<const double>& x,
+                 const SurrogateMatrix<const double>& y,
+                 const int window,
+                 const double norm,
+                 const double step,
+                 const bool normalize);
+double dtw_basic(SurrogateMatrix<double>& lcm,
+                 const SurrogateMatrix<const double>& x,
+                 const SurrogateMatrix<const double>& y,
+                 const int window,
+                 const double norm,
+                 const double step,
+                 const bool normalize,
+                 SurrogateMatrix<int>& index1,
+                 SurrogateMatrix<int>& index2,
+                 int& path);
 
 // lbi.cpp
 double lbi_core(const SurrogateMatrix<const double>& x,
