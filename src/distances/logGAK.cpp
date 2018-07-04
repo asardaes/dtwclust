@@ -124,7 +124,7 @@ double logGAK_c(const SurrogateMatrix<const double>& seq1 ,
     aux = triangular ? LOG0 : 0;
     for (i = 0; i <= trimax; i++) {
         if (triangular > 0 && i < ii)
-            logs[i + 2*cl] = log(static_cast<double>(1 - i / triangular));
+            logs[i + 2*cl] = log(1 - static_cast<double>(i) / triangular);
         else
             logs[i + 2*cl] = aux;
     }
