@@ -48,7 +48,7 @@ double soft_min(double a, double b, double c, const double gamma)
 double sdtw(const SurrogateMatrix<const double>& x, const SurrogateMatrix<const double>& y,
             const double gamma, SurrogateMatrix<double>& costmat)
 {
-    id_t nx = x.nrow(), ny = y.nrow(), num_vars = x.ncol();
+    id_t nx = x.nrow(), ny = y.nrow();
     // initialize costmat values
     costmat[0] = 0;
     for (id_t i = 1; i < nx+2; i++) costmat(i,0) = R_PosInf;
@@ -69,7 +69,7 @@ double sdtw(const SurrogateMatrix<const double>& x, const SurrogateMatrix<const 
 double sdtw(const SurrogateMatrix<const double>& x, const SurrogateMatrix<const double>& y,
             const double gamma, SurrogateMatrix<double>& costmat, SurrogateMatrix<double>& distmat)
 {
-    id_t nx = x.nrow(), ny = y.nrow(), num_vars = x.ncol();
+    id_t nx = x.nrow(), ny = y.nrow();
     // initialize costmat values
     costmat[0] = 0;
     for (id_t i = 1; i < nx+2; i++) costmat(i,0) = R_PosInf;
