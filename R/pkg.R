@@ -74,8 +74,6 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
     list(x = x, y = y, pairwise = pairwise, p = params, reg_entry = reg_entry)
 }
 
-#' @importFrom utils packageVersion
-#'
 .onLoad <- function(lib, pkg) {
     # Register DTW2
     if (!check_consistency("DTW2", "dist", silent = TRUE))
@@ -138,6 +136,8 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
     if (is.null(foreach::getDoParName())) foreach::registerDoSEQ()
 }
 
+#' @importFrom utils packageVersion
+#'
 .onAttach <- function(lib, pkg) {
     RNGkind(dtwclust_rngkind)
 
