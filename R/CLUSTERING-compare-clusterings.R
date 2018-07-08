@@ -309,6 +309,12 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                 if (any(nms_args)) names(centroid)[nms_args] <- paste0(nms[nms_args], "_centroid")
                 cfg <- base::merge(cfg, centroid, all = TRUE)
             }
+            # special case: tadpole
+            tadpole_controls <- names(formals(tadpole_control))
+            if (type == "tadpole" && any(no.expand %in% tadpole_controls)) {
+                need_adjustment <- c(need_adjustment, "tadpole")
+                tadpole <- cfg[, tadpole_controls, drop = FALSE]
+            }
 
             # adjust no.expand columns
             if (length(need_adjustment) > 0L) {
@@ -318,7 +324,8 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                     pdc_cfg <- get_from_callers(suffix, mode = "list")
                     cols <- intersect(names(pdc_cfg), no.expand)
                     adjusted_cols <- adjust_cols[, cols, drop = FALSE]
-                    names(adjusted_cols) <- paste0(names(adjusted_cols), "_", suffix)
+                    if (suffix != "tadpole")
+                        names(adjusted_cols) <- paste0(names(adjusted_cols), "_", suffix)
                     adjusted_cols
                 })
                 cfg <- dplyr::bind_cols(cfg, adjusted_cols)
