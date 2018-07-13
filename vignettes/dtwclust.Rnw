@@ -36,7 +36,7 @@ opts_knit$set(self.contained = TRUE)
 \usepackage{subcaption}
 
 % For professional looking tables
-\usepackage{booktabs}
+\usepackage{booktabs, array}
 %\usepackage{multirow}
 %\usepackage{multicol}
 %\usepackage{longtable}
@@ -158,8 +158,8 @@ They pose some challenging issues due to the large size and high dimensionality 
 In this context,
 dimensionality of a series is related to time,
 and it can be understood as the length of the series.
-Additionally, a single time-series object may be constituted of several values that change on the same time scale,
-in which case they are identified as multivariate time-series.
+Additionally, a single time-series may be constituted by several values that change on the same time scale,
+in which case they are named multivariate time-series.
 
 There are many techniques to modify time-series in order to reduce dimensionality,
 and they mostly deal with the way time-series are represented.
@@ -256,12 +256,13 @@ making their combination with other \R{} packages cumbersome.
 Hence, the \dtwclust{} package is intended to provide a consistent and user-friendly way of interacting with classic and new clustering algorithms,
 taking into consideration the nuances of time-series data.
 
-The rest of this manuscript is organized as follows.
+The rest of this is organized as follows.
 The information relevant to the distance measures will be presented in \cref{sec:distances}.
 Supported algorithms for prototype extraction will be discussed in \cref{sec:prototypes}.
 The main clustering algorithms will be described in \cref{sec:clustering}.
 The included parallelization strategies will be outlined in \cref{sec:parallel}.
 Basic information regarding cluster evaluation will be provided in \cref{sec:evaluation}.
+The functions provided for more complicated clustering workflows are described in \cref{sec:comparison}.
 An overview of extensibility will be given in \cref{sec:extensibility},
 and the final remarks will be given in \cref{sec:conclusion}.
 Code examples will be deferred to the appendices.
@@ -303,12 +304,15 @@ serial correlation, etc.
 In the following sections a description of the distance functions included in \dtwclust{} will be provided;
 these functions are associated with shape-based time-series clustering,
 and either support DTW or provide an alternative to it.
-However, there are many other distance measures that can be used for time-series \citep{montero2014, tsdist}.
+The included distances are a basis for some of the prototyping functions described in \cref{sec:prototypes},
+as well as the clustering routines from \cref{sec:clustering},
+but there are many other distance measures that can be used for time-series clustering and classification \citep{montero2014, tsdist}.
 It is worth noting that,
-even though some of the distances are also available in other \R{} packages
-(e.g. DTW in \pkg{dtw} \citep{giorgino2009} or Keogh's DTW lower bound in \pkg{TSdist} \citep{tsdist}),
+even though some of these distances are also available in other R packages,
+e.g. DTW in \pkg{dtw} or Keogh's DTW lower bound in \pkg{TSdist}
+(see \cref{sec:dtw} and \cref{sec:lbs}),
 the implementations in \dtwclust{} are optimized for speed,
-since all of them are implemented in \proglang{C++} and have custom loops for computation of cross-distance matrices,
+since all of them are implemented in C++ and have custom loops for computation of cross-distance matrices,
 including multi-threading support.
 
 To facilitate notation,
@@ -671,12 +675,26 @@ performing the aforementioned normalization and subtraction in order to obtain a
 
 Following with the idea of the TGAK,
 i.e., of regularizing DTW by smoothing it,
-\citet{cuturi2017} called the resulting DTW score a soft-DTW,
-and discussed its differentiability.
+\citet{cuturi2017} proposed a unified algorithm using a parameterized soft-minimum as shown in \cref{eq:soft-dtw}
+(where $\Delta(x,y)$ represents the LCM),
+and called the resulting discrepancy a soft-DTW,
+discussing its differentiability.
 Thanks to this property,
 a gradient function can be obtained,
 and \citet{cuturi2017} developed a more efficient way to compute it.
 This can be then used to calculate centroids with numerical optimization as discussed in \cref{sec:sdtw-cent}.
+
+\begin{subequations}
+\label{eq:soft-dtw}
+\begin{gather}
+\text{dtw}_\gamma(x,y) = \text{min} ^ \gamma \lbrace \langle A, \Delta(x,y) \rangle, A \in \mathcal{A}(n,m) \rbrace \\
+\text{min} ^ \gamma \lbrace a_1, \ldots, a_n \rbrace =
+\begin{cases}
+\text{min}_{i \leq n} a_i, \quad \gamma = 0 \\
+-\gamma \log \sum_{i=1}^{n} e^{-a_i / \gamma}, \quad \gamma > 0
+\end{cases}
+\end{gather}
+\end{subequations}
 
 However, as a stand-alone distance measure,
 the soft-DTW distance has some disadvantages:
@@ -687,7 +705,7 @@ and also has quadratic complexity with respect to the series' lengths.
 On the other hand,
 it is a symmetric distance,
 it supports multivariate series as well as different lengths,
-and it can provide differently smoothed results by means of a user-defined parameter $\gamma > 0$.
+and it can provide differently smoothed results by means of a user-defined parameter $\gamma$.
 
 \subsection{Shape-based distance}
 \label{sec:sbd}
@@ -722,6 +740,32 @@ and it supports (univariate) series of different length directly.
 Additionally, some FFTs can be reused when computing the SBD between several series;
 this optimization is also included in the SBD function registered with \pkg{proxy} by \dtwclust{}.
 
+\subsection{Summary of distance measures}
+\label{sec:distances-summary}
+
+The distances described in this section are the ones implemented in \dtwclust{},
+which serve as basis for the algorithms presented in \cref{sec:prototypes} and \cref{sec:clustering}.
+\Cref{tab:distances} summarizes the salient characteristics of these distances.
+
+\begin{table}[htp]
+	\renewcommand{\arraystretch}{1.5}
+	\centering
+	\begin{tabular}{*{6}{>{\small\centering\arraybackslash}p{0.13\linewidth}}}
+		\toprule
+		Distance & Computational cost & Normalized & Symmetric & Multivariate support & Support for length differences \\
+		\midrule
+		LB\_Keogh & Low & No & No & No & No \\
+		LB\_Improved & Low & No & No & No & No \\
+		DTW & Medium & Can be* & Can be* & Yes & Yes \\
+		GAK & High & Yes & Yes & Yes & Yes \\
+		Soft-DTW & High & Yes & Yes & Yes & Yes \\
+		SBD & Low & Yes & Yes & No & Yes \\
+		\bottomrule
+	\end{tabular}
+	\caption{Characteristics of time-series distance measures implemented in \dtwclust{}. Regarding the cells marked with an asterisk: the DTW distance can be normalized for certain step patterns, and can be symmetric for symmetric step patterns when either no window constraints are used, or all time-series have the same length if constraints are indeed used.}
+	\label{tab:distances}
+\end{table}
+
 \section{Time-series prototypes}
 \label{sec:prototypes}
 
@@ -730,13 +774,22 @@ It is expected that all series within a cluster are similar to each other,
 and one may be interested in trying to define a time-series that effectively summarizes the most important characteristics of all series in a given cluster.
 This series is sometimes referred to as an average series,
 and prototyping is also sometimes called time-series averaging,
-however we will prefer the term ``prototyping'',
+but we will prefer the term ``prototyping'',
 although calling them time-series centroids is also common.
-The prototypes could be used for visualization aid or to perform time-series classification,
-but in the context of clustering,
+
+Computing prototypes is commonly done as a sub-routine of a larger task.
+In the context of clustering (see \cref{sec:clustering}),
 partitional procedures rely heavily on the prototyping function,
-since the resulting prototypes are used as cluster centroids;
-more information will be provided in \cref{sec:clustering}.
+since the resulting prototypes are used as cluster centroids.
+Prototyping could even be a pre-processing step,
+whereby different samples from the same source can be summarized before clustering
+(e.g., for the character trajectories dataset,
+all trajectories from the same character can be summarized and then groups of similar characters could be sought),
+thus reducing the amount of data and execution time.
+Another example is time-series classification based on nearest-neighbors,
+which can be optimized by considering only group-prototypes as neighbors instead of the union of all groups.
+Nevertheless, it is important to note that the distance used in the overall task should be congruent with the chosen centroid,
+e.g. using the DTW distance for DTW-based prototypes.
 
 The choice of prototyping function is closely related to the chosen distance measure and,
 in a similar fashion,
@@ -900,6 +953,40 @@ which works like a weighted average.
 Therefore, it will only work with data of equal dimension,
 and it may not be suitable to use directly with raw time-series data.
 
+\subsection{Summary of prototyping functions}
+\label{sec:prototypes-summary}
+
+\Cref{tab:centroids} summarizes the time-series prototyping functions implemented in \dtwclust{},
+including the distance measure they are based upon,
+where applicable.
+It is worth mentioning that,
+as will be described in \cref{sec:clustering},
+the choice of distance and prototyping function is very important for time-series clustering,
+and it may be ill-advised to use a distance measure that does not correspond to the one used by the prototyping function.
+Using PAM is an exception,
+because the medoids are not modified,
+so any distance can be used to choose a medoid.
+It is possible to use custom prototyping functions for time-series clustering
+(see \cref{sec:extensibility}),
+but it is important to maintain congruence with the chosen distance measure.
+
+\begin{table}
+\renewcommand{\arraystretch}{1.5}
+\centering
+\begin{tabular}{*{2}{>{\centering\arraybackslash}p{0.3\linewidth}} >{\raggedright\arraybackslash}p{0.3\linewidth}}
+	\toprule
+	Prototyping function & Distance used & Algorithm used \\
+	\midrule
+	PAM & --- & Time-series with minimum sum of distances to the other series in the group. \\
+	DBA & DTW & Average of points grouped according to DTW alignments. \\
+	Soft-DTW centroid & Soft-DTW & Numerical optimization using the derivative of soft-DTW. \\
+	Shape extraction & SBD & Normalized eigenvector of a matrix created with SBD-aligned series. \\
+	\bottomrule
+\end{tabular}
+\caption{Time-series prototyping functions implemented in \dtwclust{}, and their corresponding distance measures.}
+\label{tab:centroids}
+\end{table}
+
 \section{Time-series clustering algorithms}
 \label{sec:clustering}
 
@@ -913,7 +1000,7 @@ as the level in the hierarchy increases,
 clusters are created by merging the clusters from the next lower level,
 such that an ordered sequence of groupings is obtained \citep{hastie2009}.
 In order to decide how the merging is performed,
-a similarity measure between groups should be specified,
+a (dis)similarity measure between groups should be specified,
 in addition to the one that is used to calculate pairwise similarities.
 However, a specific number of clusters does not need to be specified for the hierarchy to be created,
 and the procedure is deterministic,
@@ -1244,13 +1331,57 @@ or how the partition came to be.
 The Silhouette index \citep{rousseeuw1987} is an example of an internal CVI,
 whereas the Variation of Information \citep{meilua2003} is an external CVI.
 
-Several of the best-performing CVIs according to \citet{wang2007}, \citet{arbelaitz2013}, and \cite{lei2017} are implemented in \dtwclust{} in the \code{cvi} function,
-although other indices can be implemented by the user.
-However, in the original definition of many internal and fuzzy CVIs,
-the Euclidean distance and a mean centroid was used.
+Several of the best-performing CVIs according to \citet{wang2007}, \citet{arbelaitz2013}, and \cite{lei2017} are implemented in \dtwclust{} in the \code{cvi} function.
+\Cref{tab:cvis} specifies which ones are available and some of their particularities.
+
+\begin{table}[htbp]
+	\renewcommand{\arraystretch}{1.2}
+	\centering
+	\begin{tabular}{>{\small\raggedright\arraybackslash}p{0.2\linewidth} *{3}{>{\small\centering\arraybackslash}p{0.15\linewidth}} >{\small\raggedleft\arraybackslash}p{0.2\linewidth}}
+		\toprule
+		CVI & Internal or external & Crisp or fuzzy partitions & Minimized or Maximized & Considerations \\
+		\midrule
+		Rand & External & Crisp & Maximized & --- \\
+		Adjusted rand & External & Crisp & Maximized & --- \\
+		Jaccard & External & Crisp & Maximized & --- \\
+		Fowlkes-Mallows & External & Crisp & Maximized & --- \\
+		Variation of information & External & Crisp & Minimized & --- \\
+		\midrule
+		Soft rand & External & Fuzzy & Maximized & --- \\
+		Soft adjusted rand & External & Fuzzy & Maximized & --- \\
+		Soft variation of information & External & Fuzzy & Minimized & --- \\
+		Soft normalized mutual information & External & Fuzzy & Maximized & --- \\
+		\midrule
+		Silhouette & Internal & Crisp & Maximized & Requires the whole cross-distance matrix. \\
+		Dunn & Internal & Crisp & Maximized & Requires the whole cross-distance matrix. \\
+		COP & Internal & Crisp & Minimized & Requires the whole cross-distance matrix. \\
+		Davies-Bouldin & Internal & Crisp & Minimized & Calculates distances to the computed cluster centroids. \\
+		Modified Davies-Bouldin (DB*) & Internal & Crisp & Minimized & Calculates distances to the computed cluster centroids. \\
+		Calinski-Harabasz & Internal & Crisp & Maximized & Calculates a global centroid. \\
+		Score function & Internal & Crisp & Maximized & Calculates a global centroid. \\
+		\midrule
+		MPC & Internal & Fuzzy & Maximized & --- \\
+		K & Internal & Fuzzy & Minimized & Calculates a global centroid. \\
+		T & Internal & Fuzzy & Minimized & --- \\
+		SC & Internal & Fuzzy & Maximized & Calculates a global centroid. \\
+		PBMF & Internal & Fuzzy & Maximized & Calculates a global centroid. \\
+		\bottomrule
+	\end{tabular}
+	\caption{Cluster validity indices included in \dtwclust{}. Internal fuzzy CVIs use the nomenclature from \citet{wang2007}.}
+	\label{tab:cvis}
+\end{table}
+
+There are some advantages and corresponding caveats with respect to the \dtwclust{} implementations.
+Many internal CVIs require additional distance calculations,
+and some also compute so-called global centroids
+(a centroid that uses the whole dataset),
+which were calculated with, respectively,
+the Euclidean distance and a mean centroid in the original definition.
 The implementations in \dtwclust{} change this,
-making use of whatever distance/centroid was utilized during clustering without further intervention from the user.
-Nevertheless, note that many CVIs assume symmetric distance functions.
+making use of whatever distance/centroid was utilized during clustering without further intervention from the user,
+so it is possible to leverage the distance and centroid functions that support time-series.
+Nevertheless, many CVIs assume symmetric distance functions,
+so the \code{cvi} function warns the user when this is not fulfilled.
 
 Knowing which CVI will work best cannot be determined a priori,
 so they should be tested for each specific application.
@@ -1258,10 +1389,10 @@ Many CVIs can be utilized and compared to each other,
 maybe using a majority vote to decide on a final result,
 but there is no best CVI,
 and it is important to conceptually understand what a given CVI measures in order to appropriately interpret its results.
-Furthermore, it should be noted that many CVIs perform additional distance and/or centroid calculations when being computed,
-which can be very considerable if using DTW.
-For example, the Silhouette index effectively needs the whole distance matrix between the original series to be calculated,
-making it prohibitive in some cases.
+Furthermore, it should be noted that,
+due to additional distance and/or centroid calculations,
+computing CVIs can be prohibitive in some cases.
+For example, the Silhouette index effectively needs the whole distance matrix between the original series to be calculated.
 
 CVIs are not the only way to evaluate clustering results.
 The \pkg{clue} package \citep{hornik2005, clue} includes its own extensible framework for evaluation of cluster ensembles.
@@ -1269,8 +1400,40 @@ It does not directly deal with the clustering algorithms themselves,
 rather with ways of quantifying agreement and consensus between several clustering results.
 As such, it is directly compatible with the results from \dtwclust{},
 since it does not care how a partition/hierarchy was created.
-Support for the \pkg{clue} package functions is included,
+Support for the \pkg{clue} package framework is included,
 see \cref{app:evaluation} for more complete examples.
+
+\section[Comparing clustering algorithms with dtwclust]{Comparing clustering algorithms with \dtwclust{}}
+\label{sec:comparison}
+
+As we have seen, there are several aspects that must be considered for time-series clustering.
+Some examples are:
+
+\begin{itemize}
+	\item Pre-processing of data, possibly changing the decision space.
+	\item Type of clustering (partitional, hierarchical, etc.).
+	\item Number of desired or expected clusters.
+	\item Choice of distance measure, along with its parameterization.
+	\item Choice of centroid function and its parameterization.
+	      This may also depend on the chosen distance.
+	\item Evaluation of clustering results.
+	\item Computational cost, which depends not only on the size of the dataset,
+	      but also on the complexity of the aforementioned aspects.
+\end{itemize}
+
+In order to facilitate more laborious workflows,
+\dtwclust{} includes the \code{compare\_clusterings} function which,
+along with its helper functions,
+optimizes the way the different clustering algorithms can be executed.
+Its main advantage is that it leverages parallelization.
+In order to avoid data copies and communication overhead in these scenarios,
+\code{compare\_clusterings} is coded in a way that,
+by default,
+less data is returned from the parallel processes.
+Nevertheless, as is shown in \cref{app:comparison},
+the results can be fully re-created in the main process on demand.
+With this infrastructure,
+it is possible to cover the whole clustering workflow with \dtwclust{}.
 
 \section{Package extensibility}
 \label{sec:extensibility}
@@ -1280,7 +1443,7 @@ they depend on a distance measure between time-series.
 By leveraging the \pkg{proxy} package,
 any suitable distance function can be used (see \cref{app:proxy}).
 This fact alone already overcomes a severe limitation that other packages have,
-such as \pkg{flexclust} \citep{leisch2006} and \pkg{TSdist} \citep{tsdist}.
+such as \pkg{flexclust} \citep{leisch2006}.
 
 Another important aspect of the clustering procedure is the extraction of centroids or time-series prototypes.
 The most common ones are already implemented in \dtwclust{},
@@ -1332,16 +1495,16 @@ so we hope that,
 if time-series clustering is required,
 \dtwclust{} can serve as a starting point.
 
-% ===========================================================================================================
+% =================================================================================================
 % Bibliography
-% ===========================================================================================================
+% =================================================================================================
 
 \newpage
 \bibliography{REFERENCES}
 
-% ===========================================================================================================
+% =================================================================================================
 % Appendices
-% ===========================================================================================================
+% =================================================================================================
 
 \newpage
 \appendix
@@ -1744,6 +1907,82 @@ hc <- cl_ensemble(list = hc)
 cl_dissimilarity(hc)
 @
 
+\section{Compare clusterings example}
+\label{app:comparison}
+
+The configuration is specified with two helper functions:
+\code{compare\_clusterings\_configs} and \code{pdc\_configs}.
+It tests partitional clustering with DTW distance and DBA centroids,
+exploring different values for window size and norm.
+The value of the window size can have a very significant effect on clustering quality \citep{dau2016}%
+\footnote{The strategy presented in this reference is also included in \dtwclust{} in the \code{ssdtwclust} function,
+and it is implemented by leveraging \code{compare\_clusterings}.},
+but there is no single size that performs best on all datasets,
+so it is important to assess its effect on each specific case.
+
+Since the ground truth is known in this scenario,
+an external CVI is chosen for evaluation:
+the adjusted Rand index.
+The \code{cvi\_evaluators} function generates functions that can be passed to \code{compare\_clusterings} which, internally, use the \code{cvi} function
+(see \cref{sec:evaluation}).
+
+<<example-comparison, echo = TRUE>>=
+cfg <- compare_clusterings_configs(
+    types = "partitional",
+    k = 20L,
+    controls = list(
+        partitional = partitional_control(
+            iter.max = 20L
+        )
+    ),
+    distances = pdc_configs(
+        "distance",
+        partitional = list(
+            dtw_basic = list(
+                window.size = seq(from = 10L, to = 30L, by = 5L),
+                norm = c("L1", "L2")
+            )
+        )
+    ),
+    centroids = pdc_configs(
+        "centroid",
+        share.config = c("p"),
+        dba = list(
+            window.size = seq(from = 10L, to = 30L, by = 5L),
+            norm = c("L1", "L2")
+        )
+    ),
+    no.expand = c(
+        "window.size",
+        "norm"
+    )
+)
+
+evaluators <- cvi_evaluators("ARI", ground.truth = CharTrajLabels)
+
+comparison <- compare_clusterings(CharTraj, types = "partitional",
+                                  configs = cfg, seed = 8L,
+                                  score.clus = evaluators$score,
+                                  pick.clus = evaluators$pick)
+
+# some rows and columns from the results data frame
+head(comparison$results$partitional[, c("distance",
+                                        "centroid",
+                                        "window.size_distance",
+                                        "norm_distance",
+                                        "ARI")])
+@
+
+Based on the ARI,
+one of the configurations was picked as the best one,
+and it is possible to obtain the clustering object by calling \code{repeat\_clustering}:
+
+<<example-repeat-clustering, echo = TRUE>>=
+clusters <- repeat_clustering(CharTraj, comparison, comparison$pick$config_id)
+
+matrix(clusters@cluster, ncol = 5L, byrow = TRUE)
+@
+
 \section{Extensibility examples}
 \label{app:extensibility}
 
@@ -1780,8 +2019,10 @@ enabling the usage of the \code{cvi} function
 (and any other generic that has methods for appropriate \code{TSClusters} objects).
 
 <<example-manual-tadpole, echo = TRUE>>=
-tadp <- TADPole(data[1L:20L], k = 4L,
-                dc = 1.5, window.size = 15L)
+tadp <- TADPole(data[1L:20L],
+                k = 4L,
+                dc = 1.5,
+                window.size = 15L)
 
 tp_obj <- new("PartitionalTSClusters",
               type = "tadpole",

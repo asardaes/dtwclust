@@ -4,6 +4,7 @@
 * Added a standalone function to extract centroids for partition around medoids: `pam_cent`.
 * Fixed the calculation of GAK for non-`NULL` windows.
 * "Fixed" the calculation of internal CVIs for clusterings done with TADPole.
+* Vignette updates.
 
 ## Version 5.4.1
 * Fixed the distance calculation done by the `dtw2` wrapper for multivariate series.

@@ -64,7 +64,7 @@ They pose some challenging issues due to the large size and high dimensionality 
 In this context,
 dimensionality of a series is related to time,
 and it can be understood as the length of the series.
-Additionally, a single time-series object may be constituted of several values that change on the same time scale,
+Additionally, a single time-series object may be constituted by several values that change on the same time scale,
 in which case they are identified as multivariate time-series.
 
 There are many techniques to modify time-series in order to reduce dimensionality,
@@ -156,7 +156,7 @@ namely one based on permutation distributions.
 The \CRANpkg{dtw} package \citep{giorgino2009} implements extensive functionality with respect to DTW,
 but does not include the lower bound techniques that can be very useful in time-series clustering.
 New clustering algorithms like \kshape{} \citep{paparrizos2015} and TADPole \citep{begum2015} are available to the public upon request,
-but were implemented in MATLAB, 
+but were implemented in MATLAB,
 making their combination with other R packages cumbersome.
 Hence, the \dtwclust{} package is intended to provide a consistent and user-friendly way of interacting with classic and new clustering algorithms,
 taking into consideration the nuances of time-series data.
@@ -647,11 +647,11 @@ considering different series lengths and window sizes.
 The time for each point in the graph was computed by repeating the calculation 100 times and extracting the median time.
 
 \begin{figure}[htbp]
-	
+
 	{\centering \includegraphics[width=\linewidth]{figure/lbk-single-benchmark}
-		
+
 	}
-	
+
 	\caption{Execution times of two implementations of \code{LB\_Keogh} considering different time series lengths and window sizes. Note the different vertical scales, although both are in microseconds. The package of each implementation is written between parentheses.}\label{fig:lbk-single-benchmark}
 \end{figure}
 
@@ -666,11 +666,11 @@ As with \code{LB\_Keogh},
 a comparison of the DTW implementations' execution times can be seen in \cref{fig:dtw-single-benchmark}.
 
 \begin{figure}[htbp]
-	
+
 	{\centering \includegraphics[width=\linewidth]{figure/dtw-single-benchmark}
-		
+
 	}
-	
+
 	\caption{Execution times of two implementations of DTW considering different time series lengths and window sizes. Note the different vertical scales, although both are in microseconds. The package of each implementation is written between parentheses.}\label{fig:dtw-single-benchmark}
 \end{figure}
 
@@ -684,10 +684,10 @@ and only calculates the necessary warping envelopes once,
 although it can be appreciated that this does not have a significant effect.
 
 \begin{figure}[htbp]
-	
-	{\centering \includegraphics[width=\linewidth]{figure/lbk-multiple-benchmark}		
+
+	{\centering \includegraphics[width=\linewidth]{figure/lbk-multiple-benchmark}
 	}
-	
+
 	\caption{Execution times of the  two implementations of \code{LB\_Keogh} when calculating cross-distance matrices. The points on the left of the dashed line represent square matrices, whereas the ones on the right only have one dimension of the cross-distance matrix increased (the one that results in more envelope calculations). Note the different vertical scales, although both are in milliseconds. The package of each implementation is written between parentheses.}\label{fig:lbk-multiple-benchmark}
 \end{figure}
 
@@ -697,11 +697,11 @@ even single-threaded,
 and it can benefit from parallelization essentially proportionally to the number of threads available.
 
 \begin{figure}[htbp]
-	
+
 	{\centering \includegraphics[width=\linewidth]{figure/dtw-multiple-benchmark}
-		
+
 	}
-	
+
 	\caption{Execution times of the  two implementations of DTW when calculating cross-distance matrices. Note the different vertical scales, although both are in seconds. The package of each implementation is written between parentheses.}\label{fig:dtw-multiple-benchmark}
 \end{figure}
 
@@ -1280,16 +1280,16 @@ pc_4 <- tsclust(data, type = "p", k = 4L,
                 distance = "dtw_basic", centroid = "pam",
                 control = partitional_control(nrep = 5L),
                 seed = 95L)
-                
+
 names(pc_4) <- paste0("r_", 1L:5L)
 pc_4 <- cl_ensemble(list = pc_4)
 cl_dissimilarity(pc_4)
 
 Dissimilarities using minimal Euclidean membership distance:
          r_1      r_2      r_3      r_4
-r_2 3.464102                           
-r_3 0.000000 3.464102                  
-r_4 0.000000 3.464102 0.000000         
+r_2 3.464102
+r_3 0.000000 3.464102
+r_4 0.000000 3.464102 0.000000
 r_5 0.000000 3.464102 0.000000 0.000000
 
 table(Medoid = cl_class_ids(cl_medoid(pc_4)),
