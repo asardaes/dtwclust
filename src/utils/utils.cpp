@@ -35,7 +35,7 @@ double kahan_sum(const SurrogateMatrix<double>& x)
 }
 
 /* single to double indices for symmetric matrices without diagonal */
-void s2d(const int id, const int nrow, int& i, int& j) {
+void s2d(const id_t id, const id_t nrow, id_t& i, id_t& j) {
     // check if it's the first column
     if (id < (nrow - 1)) {
         i = id + 1;
@@ -45,8 +45,8 @@ void s2d(const int id, const int nrow, int& i, int& j) {
     // otherwise start at second column
     i = 2;
     j = 1;
-    int start_id = nrow - 1;
-    int end_id = nrow * 2 - 4;
+    id_t start_id = nrow - 1;
+    id_t end_id = nrow * 2 - 4;
     // j is ready after this while loop finishes
     while (!(id >= start_id && id <= end_id)) {
         start_id = end_id + 1;

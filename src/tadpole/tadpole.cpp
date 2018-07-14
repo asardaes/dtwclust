@@ -12,7 +12,7 @@
 #include <RcppParallel.h>
 
 #include "../distances/calculators.h"
-#include "../utils/utils.h" // Rflush, get_grain, s2d
+#include "../utils/utils.h" // Rflush, get_grain, s2d, id_t
 
 namespace dtwclust {
 
@@ -199,7 +199,7 @@ public:
          *   3 - not within dc, prune
          *   4 - identical series
          */
-        int i, j;
+        id_t i, j;
         for (std::size_t id = begin; id < end; id++) {
             s2d(id, LBM_.nrow(), i, j);
             if (LBM_(i,j) <= dc_ && UBM_(i,j) > dc_) {

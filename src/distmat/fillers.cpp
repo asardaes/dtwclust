@@ -7,7 +7,7 @@
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
 
-#include "../utils/utils.h" // get_grain, s2d
+#include "../utils/utils.h" // get_grain, s2d, id_t
 
 namespace dtwclust {
 
@@ -194,7 +194,7 @@ public:
         DistanceCalculator* dist_calculator = dist_calculator_->clone();
         mutex_.unlock();
         // fill distances
-        int i, j;
+        id_t i, j;
         for (std::size_t id = begin; id < end; id++) {
             s2d(id, nrows_, i, j);
             double dist = dist_calculator->calculate(i,j);
