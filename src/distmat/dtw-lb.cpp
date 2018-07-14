@@ -79,10 +79,10 @@ private:
 void set_nn(const Rcpp::NumericMatrix& distmat, SurrogateMatrix<int>& nn, const int margin)
 {
     if (margin == 1) {
-        for (id_t i = 0; i < distmat.nrow(); i++) {
+        for (int i = 0; i < distmat.nrow(); i++) {
             double d = distmat(i,0);
             nn[i] = 0;
-            for (id_t j = 1; j < distmat.ncol(); j++) {
+            for (int j = 1; j < distmat.ncol(); j++) {
                 double temp = distmat(i,j);
                 if (temp < d) {
                     d = temp;
@@ -92,10 +92,10 @@ void set_nn(const Rcpp::NumericMatrix& distmat, SurrogateMatrix<int>& nn, const 
         }
     }
     else {
-        for (id_t j = 0; j < distmat.ncol(); j++) {
+        for (int j = 0; j < distmat.ncol(); j++) {
             double d = distmat(0,j);
             nn[j] = 0;
-            for (id_t i = 1; i < distmat.nrow(); i++) {
+            for (int i = 1; i < distmat.nrow(); i++) {
                 double temp = distmat(i,j);
                 if (temp < d) {
                     d = temp;
