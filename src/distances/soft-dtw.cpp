@@ -48,22 +48,8 @@ double soft_min(double a, double b, double c, const double gamma)
 double sdtw(const SurrogateMatrix<const double>& x, const SurrogateMatrix<const double>& y,
             const double gamma, SurrogateMatrix<double>& costmat)
 {
-    id_t nx = x.nrow(), ny = y.nrow();
-    // initialize costmat values
-    costmat[0] = 0;
-    for (id_t i = 1; i < nx+2; i++) costmat(i,0) = R_PosInf;
-    for (id_t j = 1; j < ny+2; j++) costmat(0,j) = R_PosInf;
-    // compute distance
-    for (id_t i = 1; i <= nx; i++) {
-        for (id_t j = 1; j <= ny; j++) {
-            double point_norm = squared_euclidean(x, y, i-1, j-1);
-            costmat(i,j) = point_norm + soft_min(costmat(i-1,j),
-                                                 costmat(i-1,j-1),
-                                                 costmat(i,j-1),
-                                                 gamma);
-        }
-    }
-    return costmat(nx,ny);
+    SurrogateMatrix<double> dummy_distmat;
+    return sdtw(x, y, gamma, costmat, dummy_distmat);
 }
 
 double sdtw(const SurrogateMatrix<const double>& x, const SurrogateMatrix<const double>& y,
@@ -82,7 +68,7 @@ double sdtw(const SurrogateMatrix<const double>& x, const SurrogateMatrix<const 
                                                  costmat(i-1,j-1),
                                                  costmat(i,j-1),
                                                  gamma);
-            distmat(i-1,j-1) = point_norm;
+            if (distmat) distmat(i-1,j-1) = point_norm;
         }
     }
     return costmat(nx,ny);
