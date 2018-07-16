@@ -140,13 +140,31 @@ test_that("Using compare_clusterings_configs() works as expected.", {
     # no.expand
     cfg <- compare_clusterings_configs(
         types = "p",
+        preprocs = pdc_configs("p", pre = list(window.size = 1L:2L)),
         distances = pdc_configs("d", dtw_basic = list(window.size = 1L:2L)),
         centroids = pdc_configs("c", dba = list(window.size = 1L:2L)),
         no.expand = c("window.size")
     )
     expect_identical(
+        cfg$partitional$window.size_preproc,
+        cfg$partitional$window.size_distance
+    )
+    expect_identical(
         cfg$partitional$window.size_distance,
         cfg$partitional$window.size_centroid
+    )
+
+    cfg_tp <- compare_clusterings_configs(
+        types = "t",
+        controls = list(
+            tadpole = tadpole_control(1.5, 1L:2L)
+        ),
+        centroids = pdc_configs("c", dba = list(window.size = 1L:2L)),
+        no.expand = c("window.size")
+    )
+    expect_identical(
+        cfg_tp$tadpole$window.size,
+        cfg_tp$tadpole$window.size_centroid
     )
 })
 

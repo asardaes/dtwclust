@@ -346,6 +346,17 @@ test_that("cvi_evaluators work nicely with compare_clusterings.", {
 # ==================================================================================================
 
 test_that("Compare clusterings works for the minimum set with all possibilities.", {
+    errored_cfg <- compare_clusterings_configs("t",controls = list(
+        tadpole = tadpole_control(1.5, 10L)
+    ))
+    errored_cfg$tadpole$window.size <- NULL
+    expect_warning(
+        errored <- compare_clusterings(data_reinterpolated_subset, "t", errored_cfg,
+                                       .errorhandling = "pass",
+                                       score.clus = function(...) {})
+    )
+    expect_true(inherits(errored$scores$tadpole[[1L]], "error"))
+
     expect_warning(errorpass_comp <- compare_clusterings(data_subset, c("p", "h", "f"),
                                                          configs = compare_clusterings_configs(k = 2L:3L),
                                                          seed = 932L, return.objects = TRUE,
@@ -374,7 +385,16 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                                   pick.clus = function(...) stop("NO!")),
                    "pick.clus")
     expect_null(no_pick$pick)
-    expect_true(!is.null(no_pick$scores))
+    expect_true(!is.null(no_pick$scores$fuzzy))
+
+    expect_warning(no_pick_with_objects <- compare_clusterings(data_reinterpolated_subset, c("f"),
+                                                               configs = cfgs, seed = 392L,
+                                                               return.objects = TRUE,
+                                                               score.clus = score_fun,
+                                                               pick.clus = function(...) stop("NO!")),
+                   "pick.clus")
+    expect_null(no_pick_with_objects$pick)
+    expect_true(!is.null(no_pick_with_objects$scores$fuzzy))
 
     expect_warning(compare_clusterings(data_reinterpolated_subset, c("f"),
                                        configs = cfgs, seed = 392L,
