@@ -95,21 +95,6 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
     }
 
     # set control args
-    if (clus_type == "hierarchical") {
-        control_args$method <- as.character(control_args$method)
-        method_char <- control_args$method
-        hclust_methods <- c(
-            "ward.D",
-            "ward.D2",
-            "single",
-            "complete",
-            "average",
-            "mcquitty",
-            "median",
-            "centroid"
-        )
-        if (!(method_char %in% hclust_methods)) control_args$method <- match.fun(method_char)
-    }
     args$control <- do.call(paste0(clus_type, "_control"), control_args, TRUE)
 
     # set remaining tsclust args
@@ -138,6 +123,5 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
     ret@dots$.rng_ <- NULL
     ret@preproc <- preproc_char
     if (centroid_char != "default") ret@centroid <- centroid_char
-    if (clus_type == "hierarchical") ret@method <- method_char
     ret
 }

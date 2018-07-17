@@ -38,6 +38,7 @@ test_that("Errors in control argument are detected correctly by tsclust.", {
     expect_error(tsclust(data, control = NA), "control")
     expect_error(tsclust(data, control = mean), "control")
     expect_error(tsclust(data, control = TRUE), "control")
+    expect_error(tsclust(data, control = partitional_control(distmat = matrix(0, 2L, 2L))))
 })
 
 # ==================================================================================================

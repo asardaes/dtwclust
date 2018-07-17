@@ -274,6 +274,7 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
                 info = "Plotting series and centroids providing data returns a gg object invisibly")
     expect_true(inherits(plot(fuzzy_object, type = "series", plot = FALSE, labels = list()), "ggplot"),
                 info = "Plotting multivariate series returns a gg object invisibly")
+    expect_s3_class(plot(tadpole_object, plot = FALSE, size = 1.5), "ggplot")
 
     # ----------------------------------------------------------------------------------------------
     # predict

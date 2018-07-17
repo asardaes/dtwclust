@@ -475,7 +475,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                 assign(".Random.seed", rng[[i]], .GlobalEnv)
 
                                 if (!check_consistency(dist_entry$names[1L], "dist"))
-                                    do.call(proxy::pr_DB$set_entry, dist_entry, TRUE)
+                                    do.call(proxy::pr_DB$set_entry, dist_entry, TRUE) # nocov
 
                                 # return
                                 list(

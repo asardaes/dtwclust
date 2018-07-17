@@ -59,6 +59,14 @@ test_that("Included proxy distances can be called and give expected dimensions."
     }
 })
 
+test_that("Parameter errors in included distances are detected.", {
+    expect_error(proxy::dist(data_subset, method = "sdtw", gamma = -1))
+    expect_error(proxy::dist(data_subset, method = "gak", sigma = -1))
+    expect_error(proxy::dist(data_subset, method = "dtw_basic", step.pattern = dtw::asymmetric))
+    expect_error(proxy::dist(data_subset, method = "dtw_basic",
+                             step.pattern = dtw::symmetric1, normalize = TRUE))
+})
+
 # ==================================================================================================
 # proxy pairwise distances
 # ==================================================================================================
@@ -67,7 +75,9 @@ test_that("Included proxy distances can be called for pairwise = TRUE and give e
     for (distance in dtwclust:::distances_included) {
         ## sbd doesn't always return zero, so tolerance is left alone here
 
-        d <- proxy::dist(x, method = distance, window.size = 15L, pairwise = TRUE)
+        d <- proxy::dist(x, method = distance,
+                         window.size = 15L, step.pattern = dtw::symmetric1,
+                         pairwise = TRUE)
         class(d) <- "numeric"
         expect_null(dim(d))
         expect_identical(length(d), length(x), info = paste(distance, "pairwise single-arg"))
@@ -75,7 +85,9 @@ test_that("Included proxy distances can be called for pairwise = TRUE and give e
             expect_equal(d, rep(0, length(d)), check.attributes = FALSE,
                          info = paste(distance, "pairwise single all zero"))
 
-        d2 <- proxy::dist(x, x, method = distance, window.size = 15L, pairwise = TRUE)
+        d2 <- proxy::dist(x, x, method = distance,
+                          window.size = 15L, step.pattern = dtw::symmetric1,
+                          pairwise = TRUE)
         class(d2) <- "numeric"
         expect_null(dim(d2))
         expect_identical(length(d2), length(x), info = paste(distance, "pairwise double-arg"))
@@ -96,23 +108,20 @@ test_that("Included proxy distances can be called for pairwise = TRUE and give e
 
 test_that("Included proxy similarities can be called and give expected dimensions.", {
     for (distance in c("uGAK")) {
-        d <- proxy::simil(x, method = distance, window.size = 15L, sigma = 100)
+        d <- proxy::simil(x, method = distance, sigma = 100)
         expect_identical(dim(d), c(length(x), length(x)), info = paste(distance, "single-arg"))
 
-        d2 <- proxy::simil(x, x, method = distance, window.size = 15L, sigma = 100)
+        d2 <- proxy::simil(x, x, method = distance, sigma = 100)
         expect_equal(d2, d, check.attributes = FALSE,
                      info = paste(distance, "double-arg"))
 
-        d3 <- proxy::simil(x[1L], x, method = distance, window.size = 15L, sigma = 100)
+        d3 <- proxy::simil(x[1L], x, method = distance, sigma = 100)
         class(d3) <- "matrix"
         expect_identical(dim(d3), c(1L, length(x)), info = paste(distance, "one-vs-many"))
 
-        d4 <- proxy::simil(x, x[1L], method = distance, window.size = 15L, sigma = 100)
+        d4 <- proxy::simil(x, x[1L], method = distance, sigma = 100)
         class(d4) <- "matrix"
         expect_identical(dim(d4), c(length(x), 1L), info = paste(distance, "many-vs-one"))
-
-        ## dtw_lb will give different results below because of how it works
-        if (distance == "dtw_lb") next
 
         expect_equal(d3, d[1L, , drop = FALSE], check.attributes = FALSE,
                      info = paste(distance, "one-vs-many-vs-distmat"))

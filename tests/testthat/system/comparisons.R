@@ -454,6 +454,10 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                             configs = cfgs_sdtwc, seed = 3290L,
                                             score.clus = score_fun)
 
+    expect_error(repeat_clustering(data_subset, sdtwc_comparison, "config1_1"))
+    expect_s4_class(repeat_clustering(data_subset, sdtwc_comparison, "config1"),
+                    "HierarchicalTSClusters")
+
     ## rds
     all_comparisons$pick$object <- reset_nondeterministic(all_comparisons$pick$object)
     all_comparisons$pick$object@call <- call("zas", foo = "bar")

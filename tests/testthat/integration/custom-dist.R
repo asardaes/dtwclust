@@ -7,20 +7,29 @@ context("    Custom proxy distances and tsclust")
 ## Original objects in env
 ols <- ls()
 
+# test version without ellipsis
+ndtw <- function(x, y, step.pattern = symmetric2,
+                 window.type = "none", window.size = NULL,
+                 open.end = FALSE, open.begin = FALSE)
+{
+    dtw::dtw(x, y, distance.only = TRUE,
+             step.pattern = step.pattern,
+             window.type = window.type,
+             window.size = window.size,
+             open.end = open.end,
+             open.begin = open.begin)$normalizedDistance
+}
+
+if (!pr_DB$entry_exists("nDTW"))
+    proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
+                           loop = TRUE, type = "metric", distance = TRUE,
+                           description = "Normalized DTW with L1 norm")
+
 # ==================================================================================================
 # Registered with proxy
 # ==================================================================================================
 
 test_that("Calling tsclust after registering a custom distance works as expected.", {
-    ndtw <- function(x, y, ...) {
-        dtw::dtw(x, y, distance.only = TRUE, ...)$normalizedDistance
-    }
-
-    if (!pr_DB$entry_exists("nDTW"))
-        proxy::pr_DB$set_entry(FUN = ndtw, names=c("nDTW"),
-                               loop = TRUE, type = "metric", distance = TRUE,
-                               description = "Normalized DTW with L1 norm")
-
     ## ---------------------------------------------------------- non-symmetric
     pc_ndtw <- tsclust(data_subset, k = 4, distance = "nDTW", seed = 8319L,
                        control = partitional_control(version = 1L))
@@ -40,7 +49,8 @@ test_that("Calling tsclust after registering a custom distance works as expected
 
     ## ---------------------------------------------------------- custom params
     pc_ndtw_par <- tsclust(data_subset, k = 4, distance = "nDTW", seed = 8319L,
-                           args = tsclust_args(dist = list(window.size = 18L,
+                           args = tsclust_args(dist = list(window.type = "slantedband",
+                                                           window.size = 18L,
                                                            open.begin = TRUE,
                                                            open.end = TRUE,
                                                            step.pattern = asymmetric)))

@@ -7,6 +7,19 @@ context("    Miscellaneous functions")
 # Original objects in env
 ols <- ls()
 
+test_that("Corner cases for check_consistency.", {
+    expect_error(dtwclust:::check_consistency(list(), "tslist"), "empty")
+    expect_error(dtwclust:::check_consistency(list(), "vltslist"), "empty")
+    expect_error(dtwclust:::check_consistency(-1L, "window"), "negative")
+    expect_warning(
+        dtwclust:::check_consistency("foo", "cent",
+                                     clus_type = "hierarchical",
+                                     cent_char = "bar",
+                                     cent_missing = FALSE),
+        "ignored"
+    )
+})
+
 # ==================================================================================================
 # compute_envelope
 # ==================================================================================================

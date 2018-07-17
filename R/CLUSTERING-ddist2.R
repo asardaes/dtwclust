@@ -95,7 +95,7 @@ ddist2 <- function(distance, control) {
                 is.null(dots$dist.method) &&
                 is_multivariate(c(x, centroids)))
             {
-                dots$dist.method <- "L1"
+                dots$dist.method <- "L1" # nocov
             }
 
             # If the function doesn't have '...', remove invalid arguments from 'dots'
@@ -213,7 +213,7 @@ ddist2 <- function(distance, control) {
                 }
                 else {
                     centroids <- lapply(1L:foreach::getDoParWorkers(), function(dummy) { centroids })
-                    if (length(centroids) > length(x)) centroids <- centroids[1L:length(x)]
+                    if (length(centroids) > length(x)) centroids <- centroids[1L:length(x)] # nocov
                     combine <- rbind
                 }
 

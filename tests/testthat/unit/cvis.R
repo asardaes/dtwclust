@@ -88,6 +88,7 @@ test_that("Internal and external fuzzy CVIs are identical to the valid ones", {
     ecvis <- cvi(fc, labels_subset, type = "external")
     expect_identical(icvis[internal_fuzzy_cvis], base_fcvis[internal_fuzzy_cvis])
     expect_identical(ecvis[external_fuzzy_cvis], base_fcvis[external_fuzzy_cvis])
+    expect_identical(base_fcvis[external_fuzzy_cvis], cvi(fc@fcluster, labels_subset))
     expect_error(cvi(fc@fcluster, type = "internal"))
     expect_error(cvi(fc, type = "external"))
 })

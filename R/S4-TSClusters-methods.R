@@ -573,7 +573,7 @@ plot.TSClusters <- function(x, y, ...,
         clusters <- split(data, factor(x@cluster, levels = 1L:x@k), drop = FALSE)
         for (id_clus in 1L:x@k) {
             cluster <- clusters[[id_clus]]
-            if (length(cluster) < 1L) next # empty cluster
+            if (length(cluster) < 1L) next # nocov (empty cluster)
             nc <- NCOL(cluster[[1L]])
             len <- sapply(cluster, NROW)
             L <- max(len, NROW(centroids[[id_clus]]))
@@ -595,7 +595,7 @@ plot.TSClusters <- function(x, y, ...,
     L2 <- lengths(centroids)
     # timestamp consistency
     if (!is.null(time) && length(time) < max(L1, L2))
-        stop("Length mismatch between values and timestamps")
+        stop("Length mismatch between values and timestamps") # nocov
     # Check if data was z-normalized
     if (x@preproc == "zscore")
         title_str <- "Clusters' members (z-normalized)"

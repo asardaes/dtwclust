@@ -84,7 +84,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
     if (length(x) != length(y)) stop("The series must have the same length")
     window.size <- check_consistency(window.size, "window")
     if (is_multivariate(list(x, y)))
-        stop("lb_improved does not support multivariate series.") # nocov
+        stop("lb_improved does not support multivariate series.")
     if (error.check) {
         check_consistency(x, "ts")
         check_consistency(y, "ts")
@@ -108,7 +108,7 @@ lb_improved <- function(x, y, window.size = NULL, norm = "L1",
     d <- .Call(C_lbi, x, y, window.size, p, lower.env, upper.env, PACKAGE = "dtwclust")
     if (force.symmetry) {
         d2 <- lb_improved(x = y, y = x, window.size = window.size, norm = norm, error.check = FALSE)
-        if (d2 > d) d <- d2
+        if (d2 > d) d <- d2 # nocov
     }
     # return
     d

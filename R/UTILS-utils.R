@@ -13,7 +13,7 @@ check_consistency <- function(obj, case, ..., clus_type,
         if (anyNA(obj)) stop("There are missing values in the series")
     }
     else if (case %in% c("tslist", "vltslist")) {
-        if (!is.list(obj)) stop("Oops, data should already be a list by this point...")
+        if (!is.list(obj)) stop("Oops, data should already be a list by this point...") # nocov
         if (length(obj) < 1L) stop("Data is empty")
         if (case == "tslist" && different_lengths(obj)) stop("All series must have the same length")
         sapply(obj, check_consistency, case = "ts", ...)
@@ -256,7 +256,7 @@ split_parallel <- function(obj, margin = NULL) {
 # This only works if it's used after split_parallel()
 validate_pairwise <- function(x, y) {
     if (!identical(lengths(x, use.names = FALSE), lengths(y, use.names = FALSE)))
-        stop("Pairwise distances require the same amount of series in 'x' and 'y'.")
+        stop("Pairwise distances require the same amount of series in 'x' and 'y'.") # nocov
 
     invisible(NULL)
 }

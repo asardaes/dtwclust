@@ -90,6 +90,17 @@ test_that("Invalid inputs are detected correctly in the distance functions.", {
             if (!(foo %in% supports_mv)) {
                 expect_error(do.call(foo, list(x = x_mv, y = x_mv)),
                              info = paste("function", foo, "with multivariate input"))
+
+                expect_error(do.call(foo, list(x = x_uv, y = x_mv)),
+                             info = paste("function", foo, "with multivariate y"))
+
+                expect_error(do.call(foo, list(x = x_mv, y = x_uv)),
+                             info = paste("function", foo, "with multivariate x"))
+
+            }
+            else {
+                expect_error(do.call(foo, list(x = x_mv, y = x_uv)),
+                             info = paste("function", foo, "with mismatched multivariate input"))
             }
 
             if (!(foo %in% supports_diff_lengths)) {
@@ -228,11 +239,18 @@ test_that("Backtracking in dtw_basic() works.", {
     expect_identical(multivariate_result$index1, multivariate_result$index2)
 })
 
+test_that("Inconsistencies in parameters for dtw_basic() are detected.", {
+    expect_error(dtw_basic(x_uv, x_uv, step.pattern = dtw::asymmetric), "step.pattern")
+    expect_error(dtw_basic(x_uv, x_uv, step.pattern = dtw::symmetric1, normalize = TRUE),
+                 "normalize")
+})
+
 # ==================================================================================================
 # GAK
 # ==================================================================================================
 
 test_that("GAK can estimate sigma.", {
+    expect_error(GAK(1, 2, sigma = -1))
     gak_distance <- GAK(data[[1L]], data[[100L]])
     expect_gt(attr(gak_distance, "sigma"), 0)
 })
