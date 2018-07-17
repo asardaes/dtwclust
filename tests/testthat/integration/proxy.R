@@ -62,6 +62,7 @@ test_that("Included proxy distances can be called and give expected dimensions."
 test_that("Parameter errors in included distances are detected.", {
     expect_error(proxy::dist(data_multivariate, method = "dtw_lb"), "multivariate")
     expect_error(proxy::dist(list(), method = "dtw_lb"), "Empty")
+    expect_error(proxy::dist(data_subset, list(), method = "dtw_lb"), "Empty")
     expect_error(proxy::dist(data_subset, method = "sdtw", gamma = -1))
     expect_error(proxy::dist(data_subset, method = "gak", sigma = -1))
     expect_error(proxy::dist(data_subset, method = "dtw_basic", step.pattern = dtw::asymmetric))

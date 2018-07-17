@@ -38,7 +38,7 @@ tslist <- function(series, simplify = FALSE) {
         }
     }
     else if (is.numeric(series))
-        series <- list(series)
+        series <- list(series) # nocov
     else if (!is.list(series))
         stop("Unsupported data type.")
     # coerce to simple types that are known to work
