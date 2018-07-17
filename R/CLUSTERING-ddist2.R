@@ -142,7 +142,8 @@ ddist2 <- function(distance, control) {
                         .export = export
                     ) %op% {
                         if (!check_consistency(dist_entry$names[1L], "dist"))
-                            do.call(proxy::pr_DB$set_entry, dist_entry, TRUE)
+                            do.call(proxy::pr_DB$set_entry, dist_entry, TRUE) # nocov
+
                         dd <- bigmemory::attach.big.matrix(d_desc)
                         if (isTRUE(attr(ids, "trimat"))) {
                             # assign upper part of lower triangular

@@ -8,7 +8,16 @@ context("    Included distances")
 ols <- ls()
 
 # Functions
-functions <- c("lb_keogh", "lb_improved", "dtw_lb", "SBD", "dtw_basic", "GAK", "sdtw")
+functions <- c("lb_keogh", "lb_improved", "SBD", "dtw_basic", "GAK", "sdtw")
+needs_window <- c("lb_keogh", "lb_improved")
+
+enlist <- function(...) {
+    dots <- list(...)
+    if (get("foo", parent.frame()) %in% needs_window) {
+        dots <- c(dots, list(window.size = 1L))
+    }
+    dots
+}
 
 # Support
 supports_mv <- c("dtw_basic", "GAK", "sdtw")
@@ -27,10 +36,6 @@ args <- list(
         list(window.size = 15L, norm = "L1", force.symmetry = TRUE),
         list(window.size = 15L, norm = "L2", force.symmetry = FALSE),
         list(window.size = 15L, norm = "L2", force.symmetry = TRUE)
-    ),
-    dtw_lb = list(
-        list(window.size = 15L, norm = "L1"),
-        list(window.size = 15L, norm = "L2")
     ),
     SBD = list(
         list(znorm = FALSE),
@@ -81,32 +86,34 @@ invalid_inputs <- list(
 test_that("Invalid inputs are detected correctly in the distance functions.", {
     for (foo in functions) {
         for (input in names(invalid_inputs)) {
-            expect_error(do.call(foo, list(x = invalid_inputs[[input]], y = x_uv)),
+            expect_error(do.call(foo, enlist(x = invalid_inputs[[input]], y = x_uv)),
                          info = paste("function", foo, "with", input, "input in x"))
 
-            expect_error(do.call(foo, list(x = x_uv, y = invalid_inputs[[input]])),
+            expect_error(do.call(foo, enlist(x = x_uv, y = invalid_inputs[[input]])),
                          info = paste("function", foo, "with", input, "input in y"))
+        }
 
-            if (!(foo %in% supports_mv)) {
-                expect_error(do.call(foo, list(x = x_mv, y = x_mv)),
-                             info = paste("function", foo, "with multivariate input"))
+        if (!(foo %in% supports_mv)) {
+            expect_error(do.call(foo, enlist(x = x_mv, y = x_mv)),
+                         "multivariate",
+                         info = paste("function", foo, "with multivariate input"))
 
-                expect_error(do.call(foo, list(x = x_uv, y = x_mv)),
-                             info = paste("function", foo, "with multivariate y"))
+            expect_error(do.call(foo, enlist(x = x_uv, y = x_mv)),
+                         info = paste("function", foo, "with multivariate y"))
 
-                expect_error(do.call(foo, list(x = x_mv, y = x_uv)),
-                             info = paste("function", foo, "with multivariate x"))
+            expect_error(do.call(foo, enlist(x = x_mv, y = x_uv)),
+                         info = paste("function", foo, "with multivariate x"))
 
-            }
-            else {
-                expect_error(do.call(foo, list(x = x_mv, y = x_uv)),
-                             info = paste("function", foo, "with mismatched multivariate input"))
-            }
+        }
+        else {
+            expect_error(do.call(foo, enlist(x = x_mv, y = x_uv)),
+                         info = paste("function", foo, "with mismatched multivariate input"))
+        }
 
-            if (!(foo %in% supports_diff_lengths)) {
-                expect_error(do.call(foo, list(x = x_uv, y = y_uv_diff_length)),
-                             info = paste("function", foo, "with different-length input"))
-            }
+        if (!(foo %in% supports_diff_lengths)) {
+            expect_error(do.call(foo, enlist(x = x_uv, y = y_uv_diff_length)),
+                         "length",
+                         info = paste("function", foo, "with different-length input"))
         }
     }
 })
