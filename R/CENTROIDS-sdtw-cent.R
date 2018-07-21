@@ -26,7 +26,7 @@ sdtw_cent_nloptr <- function(centroid, series, gamma, weights, mv, dim0)
 #'
 #' @details
 #'
-#' Note that you can trace the optimization by specifing `print_level > 0` in `opts`.
+#' Note that you can trace the optimization by specifying `print_level > 0` in `opts`.
 #'
 #' @template rcpp-parallel
 #'

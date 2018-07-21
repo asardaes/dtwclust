@@ -107,7 +107,7 @@
 #' assumes so.
 #'
 #' Because of the above, calculating CVIs for clusterings made with [TADPole()] is a special case.
-#' Since TADPole uses 3 distances during its exeuction (DTW, LB_Keogh and Euclidean), it is not
+#' Since TADPole uses 3 distances during its execution (DTW, LB_Keogh and Euclidean), it is not
 #' obvious which one should be used for the calculation of CVIs. Nevertheless, [dtw_basic()] is used
 #' by default.
 #'

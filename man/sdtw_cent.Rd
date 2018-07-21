@@ -36,7 +36,7 @@ results (except for \code{solution}, which is the returned centroid).
 Soft-DTW centroid function as proposed in Cuturi and Blondel (2017).
 }
 \details{
-Note that you can trace the optimization by specifing \code{print_level > 0} in \code{opts}.
+Note that you can trace the optimization by specifying \code{print_level > 0} in \code{opts}.
 }
 \section{Parallel Computing}{
 

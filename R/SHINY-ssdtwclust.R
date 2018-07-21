@@ -45,7 +45,7 @@
 #'   [parallel::clusterExport()], as well as the examples below.
 #'
 #'   The range of window sizes is specified with a slider, and represents the size as a percentage
-#'   of the shortest series' length. The `step` parameter indicates how spaced appart should the
+#'   of the shortest series' length. The `step` parameter indicates how spaced apart should the
 #'   sizes be (parameter `'by'` in [base::seq()]). A 0-size window should only be used if all series
 #'   have the same length. If the series have different lengths, using small window sizes can be
 #'   problematic if the length differences are very big, see the notes in [dtw_basic()].
@@ -77,7 +77,7 @@
 #'
 #' @section Evaluate:
 #'
-#'   This section provides numerical results for reference. The latests results can be saved in the
+#'   This section provides numerical results for reference. The latest results can be saved in the
 #'   global environment, which includes clustering results, constraints so far, and the suggested
 #'   window size. Since this includes everything returned by [compare_clusterings()], you could also
 #'   use [repeat_clustering()] afterwards.

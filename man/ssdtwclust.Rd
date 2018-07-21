@@ -58,7 +58,7 @@ with the necessary packages and/or functions. See \code{\link[parallel:clusterEv
 \code{\link[parallel:clusterExport]{parallel::clusterExport()}}, as well as the examples below.
 
 The range of window sizes is specified with a slider, and represents the size as a percentage
-of the shortest series' length. The \code{step} parameter indicates how spaced appart should the
+of the shortest series' length. The \code{step} parameter indicates how spaced apart should the
 sizes be (parameter \code{'by'} in \code{\link[base:seq]{base::seq()}}). A 0-size window should only be used if all series
 have the same length. If the series have different lengths, using small window sizes can be
 problematic if the length differences are very big, see the notes in \code{\link[=dtw_basic]{dtw_basic()}}.
@@ -93,7 +93,7 @@ any clustering.
 \section{Evaluate}{
 
 
-This section provides numerical results for reference. The latests results can be saved in the
+This section provides numerical results for reference. The latest results can be saved in the
 global environment, which includes clustering results, constraints so far, and the suggested
 window size. Since this includes everything returned by \code{\link[=compare_clusterings]{compare_clusterings()}}, you could also
 use \code{\link[=repeat_clustering]{repeat_clustering()}} afterwards.
