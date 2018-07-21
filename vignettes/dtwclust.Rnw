@@ -123,7 +123,7 @@ showcasing how it can be used to evaluate many different time-series clustering 
 \section{Introduction}
 \label{sec:introduction}
 
-\blankfootnote{This manuscript was last updated in version 5.4.1.9000 of \dtwclust{}.}
+\blankfootnote{This manuscript was last updated in version 5.5.0 of \dtwclust{}.}
 Cluster analysis is a task which concerns itself with the creation of groups of objects,
 where each group is called a cluster.
 Ideally, all members of the same cluster are similar to each other,

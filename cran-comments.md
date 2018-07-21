@@ -1,5 +1,6 @@
 
-## Update to version 5.4.1
+## Update to version 5.5.0
+Bug fixes and vignette updates.
 
 ## Test environments
 * Local GNU/Linux, R release
