@@ -17,7 +17,7 @@ The distance must be registered in \code{\link[proxy:pr_DB]{proxy::pr_DB()}}.}
 
 \item{distmat}{Optionally, a pre-computed cross-distance matrix of \emph{all} \code{series}.}
 
-\item{...}{Any extra parameters for the `distance`` function that may be used.}
+\item{...}{Any extra parameters for the \code{distance} function that may be used.}
 
 \item{error.check}{Logical indicating whether the function should try to detect inconsistencies
 and give more informative errors messages. Also used internally to avoid repeating checks.}
