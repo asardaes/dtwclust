@@ -13,31 +13,30 @@ r:
   - release
   - devel
 env:
-  - COMPILER=gxx-5
+  - COMPILER=gxx-7
 matrix:
   fast_finish: true
   include:
     - os: osx
-      osx_image: xcode9.2
       r: release
-      env: COMPILER=clang-4
+      env: COMPILER=clang
   allow_failures:
     - r: devel
-# see http://thecoatlessprofessor.com/programming/r/selecting-an-alternative-compiler-for-r-package-testing-on-travis-ci/
+# see https://thecoatlessprofessor.com/programming/selecting-an-alternative-compiler-for-r-package-testing-on-travis-ci/
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - gcc-5
-      - g++-5
-      - gfortran-5
+      - gcc-7
+      - g++-7
+      - gfortran-7
 before_install:
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
       sudo tlmgr install placeins cleveref framed;
     else
-      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 60 --slave /usr/bin/g++ g++ /usr/bin/g++-5;
-      sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-5 50;
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7;
+      sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-7 50;
     fi
 after_success:
   - if [[ ("$TRAVIS_R_VERSION" != "devel") && ("$TRAVIS_OS_NAME" == "linux") ]]; then
