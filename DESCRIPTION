@@ -33,7 +33,6 @@ Suggests:
     doParallel,
     knitr,
     parallelDist,
-    rmarkdown,
     testthat,
     TSclust,
     TSdist
