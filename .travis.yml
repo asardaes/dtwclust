@@ -27,10 +27,12 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+      - sourceline: "ppa:marutter/c2d4u3.5"
     packages:
       - gcc-7
       - g++-7
       - gfortran-7
+      - rcppeigen
 before_install:
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
       sudo tlmgr install placeins cleveref framed;
