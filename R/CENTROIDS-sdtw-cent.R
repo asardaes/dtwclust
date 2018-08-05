@@ -79,11 +79,12 @@ sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, le
     ))
 
     cent_out <- opt$solution
-    opt$call <- opt$solution <- NULL
     if (mv) {
         dim(cent_out) <- dim0
         dimnames(cent_out) <- nm0
     }
+
+    opt$call <- opt$solution <- opt$version <- NULL
     attr(cent_out, "nloptr_results") <- opt
     # return
     cent_out
