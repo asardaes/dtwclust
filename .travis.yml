@@ -31,11 +31,7 @@ addons:
       - gcc-7
       - g++-7
       - gfortran-7
-      - r-cran-bigmemory
-      - r-cran-dplyr
-      - r-cran-nloptr
       - r-cran-rspectra
-      - r-cran-stringr
 before_install:
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
       sudo tlmgr install placeins cleveref framed;
