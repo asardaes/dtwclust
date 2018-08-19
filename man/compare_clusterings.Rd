@@ -7,9 +7,9 @@
 compare_clusterings(series = NULL, types = c("p", "h", "f", "t"),
   configs = compare_clusterings_configs(types), seed = NULL,
   trace = FALSE, ..., score.clus = function(...) stop("No scoring"),
-  pick.clus = function(...) stop("No picking"), shuffle.configs = FALSE,
-  return.objects = FALSE, packages = character(0L),
-  .errorhandling = "stop")
+  pick.clus = function(...) stop("No picking"),
+  shuffle.configs = FALSE, return.objects = FALSE,
+  packages = character(0L), .errorhandling = "stop")
 }
 \arguments{
 \item{series}{A list of series, a numeric matrix or a data frame. Matrices and data frames are

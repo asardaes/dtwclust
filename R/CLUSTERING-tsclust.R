@@ -117,7 +117,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'
 #' An object with an appropriate class from [TSClusters-class].
 #'
-#' If `control@nrep > 1` and a partitional procedure is used, `length(method)` `> 1` and
+#' If `control$nrep > 1` and a partitional procedure is used, `length(method)` `> 1` and
 #' hierarchical procedures are used, or `length(k)` `>` `1`, a list of objects is returned.
 #'
 #' @section Centroid Calculation:

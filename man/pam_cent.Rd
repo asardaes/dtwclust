@@ -4,8 +4,8 @@
 \alias{pam_cent}
 \title{Centroid for partition around medoids}
 \usage{
-pam_cent(series, distance, ids = seq_along(series), distmat = NULL, ...,
-  error.check = TRUE)
+pam_cent(series, distance, ids = seq_along(series), distmat = NULL,
+  ..., error.check = TRUE)
 }
 \arguments{
 \item{series}{The time series in one of the formats accepted by \code{\link[=tslist]{tslist()}}.}

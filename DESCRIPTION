@@ -2,8 +2,17 @@ Package: dtwclust
 Type: Package
 Title: Time Series Clustering Along with Optimizations for the Dynamic Time
     Warping Distance
+Description: Time series clustering along with optimized techniques related
+    to the Dynamic Time Warping distance and its corresponding lower bounds.
+    Implementations of partitional, hierarchical, fuzzy, k-Shape and TADPole
+    clustering are available. Functionality can be easily extended with
+    custom distance measures and centroid definitions. Implementations of
+    DTW barycenter averaging, a distance based on global alignment kernels,
+    and the soft-DTW distance and centroid routines are also provided. 
+    All included distance functions have custom loops optimized for the 
+    calculation of cross-distance matrices, including parallelization support.
+    Several cluster validity indices are included.
 Version: 5.5.0.9000
-Date: 2018-07-22
 Depends:
     R (>= 3.2.0),
     methods,
@@ -29,6 +38,10 @@ Imports:
     reshape2,
     shiny,
     shinyjs
+LinkingTo:
+    Rcpp,
+    RcppArmadillo,
+    RcppParallel
 Suggests:
     doParallel,
     knitr,
@@ -36,29 +49,19 @@ Suggests:
     testthat,
     TSclust,
     TSdist
-LinkingTo:
-    Rcpp,
-    RcppArmadillo,
-    RcppParallel
+Date: 2018-08-19
 Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
-Description: Time series clustering along with optimized techniques related
-    to the Dynamic Time Warping distance and its corresponding lower bounds.
-    Implementations of partitional, hierarchical, fuzzy, k-Shape and TADPole
-    clustering are available. Functionality can be easily extended with
-    custom distance measures and centroid definitions. Implementations of
-    DTW barycenter averaging, a distance based on global alignment kernels,
-    and the soft-DTW distance and centroid routines are also provided. 
-    All included distance functions have custom loops optimized for the 
-    calculation of cross-distance matrices, including parallelization support.
-    Several cluster validity indices are included.
-URL: https://github.com/asardaes/dtwclust
 BugReports: https://github.com/asardaes/dtwclust/issues
 License: GPL-3
-LazyData: TRUE
+URL: https://github.com/asardaes/dtwclust
 NeedsCompilation: yes
 SystemRequirements: C++11, GNU make
-RoxygenNote: 6.0.1
+Encoding: UTF-8
+LazyData: TRUE
+RoxygenNote: 6.1.0
+Roxygen: list(markdown = TRUE)
+VignetteBuilder: knitr
 Collate: 
     'CENTROIDS-dba.R'
     'CENTROIDS-pam.R'
@@ -103,5 +106,3 @@ Collate:
     'UTILS-utils.R'
     'UTILS-zscore.R'
     'pkg.R'
-VignetteBuilder: knitr
-Roxygen: list(markdown = TRUE)

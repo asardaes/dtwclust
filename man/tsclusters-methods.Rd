@@ -31,8 +31,9 @@
 
 \S4method{predict}{TSClusters}(object, newdata = NULL, ...)
 
-\method{plot}{TSClusters}(x, y, ..., clus = seq_len(x@k), labs.arg = NULL,
-  series = NULL, time = NULL, plot = TRUE, type = NULL, labels = NULL)
+\method{plot}{TSClusters}(x, y, ..., clus = seq_len(x@k),
+  labs.arg = NULL, series = NULL, time = NULL, plot = TRUE,
+  type = NULL, labels = NULL)
 
 \S4method{plot}{TSClusters,missing}(x, y, ..., clus = seq_len(x@k),
   labs.arg = NULL, series = NULL, time = NULL, plot = TRUE,

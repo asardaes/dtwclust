@@ -5,8 +5,8 @@
 \title{Helper function for preprocessing/distance/centroid configurations}
 \usage{
 pdc_configs(type = c("preproc", "distance", "centroid"), ...,
-  partitional = NULL, hierarchical = NULL, fuzzy = NULL, tadpole = NULL,
-  share.config = c("p", "h", "f", "t"))
+  partitional = NULL, hierarchical = NULL, fuzzy = NULL,
+  tadpole = NULL, share.config = c("p", "h", "f", "t"))
 }
 \arguments{
 \item{type}{Which type of function is being targeted by this configuration.}

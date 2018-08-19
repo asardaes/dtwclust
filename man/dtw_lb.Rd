@@ -4,8 +4,9 @@
 \alias{dtw_lb}
 \title{DTW distance matrix guided by Lemire's improved lower bound}
 \usage{
-dtw_lb(x, y = NULL, window.size = NULL, norm = "L1", error.check = TRUE,
-  pairwise = FALSE, dtw.func = "dtw_basic", nn.margin = 1L, ...)
+dtw_lb(x, y = NULL, window.size = NULL, norm = "L1",
+  error.check = TRUE, pairwise = FALSE, dtw.func = "dtw_basic",
+  nn.margin = 1L, ...)
 }
 \arguments{
 \item{x, y}{A matrix or data frame where rows are time series, or a list of time series.}
@@ -63,20 +64,20 @@ in \code{y}, so be careful with the provided order and \code{nn.margin} (see exa
 \section{Parallel Computing}{
 
 
-  Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
-  overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
+overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 
-  This function uses the \code{\link[RcppParallel:RcppParallel-package]{RcppParallel}} package
-  for parallelization. It uses all available threads by default (see
-  \code{\link[RcppParallel:defaultNumThreads]{RcppParallel::defaultNumThreads()}}), but this can
-  be changed by the user with
-  \code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
+This function uses the \code{\link[RcppParallel:RcppParallel-package]{RcppParallel}} package
+for parallelization. It uses all available threads by default (see
+\code{\link[RcppParallel:defaultNumThreads]{RcppParallel::defaultNumThreads()}}), but this can
+be changed by the user with
+\code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
 
-  An exception to the above is when this function is called within a
-  \code{\link[foreach:foreach]{foreach}} parallel loop \strong{made by dtwclust}. If the parallel
-  workers do not have the number of threads explicitly specified, this function will default to 1
-  thread per worker. See the parallelization vignette for more information
-  (\code{browseVignettes("dtwclust")}).
+An exception to the above is when this function is called within a
+\code{\link[foreach:foreach]{foreach}} parallel loop \strong{made by dtwclust}. If the parallel
+workers do not have the number of threads explicitly specified, this function will default to 1
+thread per worker. See the parallelization vignette for more information
+(\code{browseVignettes("dtwclust")}).
 }
 
 \examples{

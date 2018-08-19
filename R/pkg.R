@@ -43,7 +43,7 @@
 #' This package can be used without attaching it with [base::library()] with some caveats:
 #'
 #' - The \pkg{methods} [package][methods::methods-package] must be attached. `R` usually does this
-#'   automatically, but [utils::Rscript()] does not.
+#'   automatically, but [utils::Rscript()] only does so in R version 3.5.0 and above.
 #' - If you want to use the \pkg{proxy} version of [dtw::dtw()] (e.g. for clustering), you have to
 #'   attach the \pkg{dtw} package manually.
 #'

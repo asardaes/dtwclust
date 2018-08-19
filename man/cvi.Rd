@@ -14,13 +14,14 @@
 \usage{
 cvi(a, b = NULL, type = "valid", ..., log.base = 10)
 
-\S4method{cvi}{matrix}(a, b = NULL, type = "valid", ..., log.base = 10)
+\S4method{cvi}{matrix}(a, b = NULL, type = "valid", ...,
+  log.base = 10)
 
 \S4method{cvi}{PartitionalTSClusters}(a, b = NULL, type = "valid", ...,
   log.base = 10)
 
-\S4method{cvi}{HierarchicalTSClusters}(a, b = NULL, type = "valid", ...,
-  log.base = 10)
+\S4method{cvi}{HierarchicalTSClusters}(a, b = NULL, type = "valid",
+  ..., log.base = 10)
 
 \S4method{cvi}{FuzzyTSClusters}(a, b = NULL, type = "valid", ...,
   log.base = 10)
