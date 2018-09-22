@@ -2,6 +2,53 @@
 # Helpers
 # ==================================================================================================
 
+# Use existing distmat if available
+use_distmat <- function(distmat, x, centroids) {
+    if (!inherits(distmat, "Distmat"))
+        stop("Invalid distance matrix in control.") # nocov
+    # internal class, sparse or full
+    i <- 1L:length(x)
+    j <- if (is.null(centroids)) i else distmat$id_cent
+    distmat[i, j, drop = FALSE]
+}
+
+# Extra distance parameters in case of parallel computation
+# They can be for the function or for proxy::dist
+#' @importFrom proxy dist
+#'
+get_dots <- function(dist_entry, x, centroids, ...) {
+    dots <- list(...)
+
+    # Added defaults
+    if (is.null(dots$window.size)) {
+        dots$window.type <- "none"
+    }
+    else if (is.null(dots$window.type)) {
+        dots$window.type <- "slantedband"
+    }
+
+    dots$error.check <- FALSE
+
+    # dtw uses L2 by default, but in dtwclust I want dtw to use L1 by default
+    # Important for multivariate series
+    if (tolower(dist_entry$names[1L]) == "dtw" && is.null(dots$dist.method) && is_multivariate(c(x, centroids))) {
+        dots$dist.method <- "L1" # nocov
+    }
+
+    # If the function doesn't have '...', remove invalid arguments from 'dots'
+    valid_args <- names(dots)
+    if (is.function(dist_entry$FUN)) {
+        if (!has_dots(dist_entry$FUN)) {
+            valid_args <- union(names(formals(proxy::dist)), names(formals(dist_entry$FUN)))
+        }
+    }
+    else {
+        valid_args <- names(formals(proxy::dist))
+    }
+
+    dots[intersect(names(dots), valid_args)]
+}
+
 # Function to split indices for the symmetric, parallel, proxy case
 #' @importFrom parallel splitIndices
 #'
@@ -42,11 +89,57 @@ split_parallel_symmetric <- function(n, num_workers, adjust = 0L) {
     ids[sort(chunk_sizes, index.return = TRUE)$ix]
 }
 
+# calculate only half the distance matrix in parallel
+#' @importFrom bigmemory attach.big.matrix
+#' @importFrom proxy dist
+#'
+parallel_symmetric <- function(d_desc, ids, x, distance, dots) {
+    dd <- bigmemory::attach.big.matrix(d_desc)
+    if (isTRUE(attr(ids, "trimat"))) {
+        # assign upper part of lower triangular
+        ul <- ids$ul
+        if (length(ul) > 1L) {
+            dd[ul,ul] <- base::as.matrix(quoted_call(
+                proxy::dist,
+                x = x[ul],
+                y = NULL,
+                method = distance,
+                dots = dots
+            ))
+        }
+
+        # assign lower part of lower triangular
+        ll <- ids$ll
+        if (length(ll) > 1L) {
+            dd[ll,ll] <- base::as.matrix(quoted_call(
+                proxy::dist,
+                x = x[ll],
+                y = NULL,
+                method = distance,
+                dots = dots
+            ))
+        }
+    }
+    else {
+        # assign matrix chunks
+        rows <- attr(ids, "rows")
+        mat_chunk <- base::as.matrix(quoted_call(
+            proxy::dist,
+            x = x[rows],
+            y = x[ids],
+            method = distance,
+            dots = dots
+        ))
+
+        dd[rows,ids] <- mat_chunk
+        dd[ids,rows] <- t(mat_chunk)
+    }
+}
+
 # ==================================================================================================
 # Return a custom distance function that calls registered functions of proxy
 # ==================================================================================================
 
-#' @importFrom bigmemory attach.big.matrix
 #' @importFrom bigmemory big.matrix
 #' @importFrom bigmemory describe
 #' @importFrom proxy dist
@@ -57,200 +150,133 @@ ddist2 <- function(distance, control) {
     dist_entry <- proxy::pr_DB$get_entry(distance)
     symmetric <- isTRUE(control$symmetric)
 
+    # variables/functions from the parent environments that should be exported
+    export <- c("check_consistency", "quoted_call", "parallel_symmetric", "distance", "dist_entry")
+
+    ret <- function(result, ...) {
+        ret <- structure(result, method = toupper(distance), ...)
+        if (!is.null(attr(ret, "call"))) {
+            attr(ret, "call") <- NULL
+        }
+        ret
+    }
+
     # Closures capture the values of the objects from the environment where they're created
     distfun <- function(x, centroids = NULL, ...) {
         x <- tslist(x)
         if (!is.null(centroids)) centroids <- tslist(centroids)
+
         if (length(x) == 1L && is.null(centroids)) {
-            return(structure(matrix(0, 1L, 1L),
-                             class = "crossdist",
-                             method = toupper(distance),
-                             dimnames = list(names(x), names(x))))
+            return(ret(base::matrix(0, 1L, 1L),
+                       class = "crossdist",
+                       dimnames = list(names(x), names(x))))
         }
 
         if (!is.null(control$distmat)) {
-            if (!inherits(control$distmat, "Distmat"))
-                stop("Invalid distance matrix in control.") # nocov
-            # internal class, sparse or full
-            i <- 1L:length(x)
-            j <- if (is.null(centroids)) i else control$distmat$id_cent
-            d <- control$distmat[i, j, drop = FALSE]
+            return(ret(use_distmat(control$distmat, x, centroids)))
+        }
+
+        dots <- get_dots(dist_entry, x, centroids, ...)
+
+        if (!dist_entry$loop) {
+            # CUSTOM LOOP, LET THEM HANDLE OPTIMIZATIONS
+            dm <- base::as.matrix(quoted_call(
+                proxy::dist, x = x, y = centroids, method = distance, dots = dots
+            ))
+
+            if (isTRUE(dots$pairwise)) {
+                dim(dm) <- NULL
+                return(ret(dm, class = "pairdist"))
+            }
+            else {
+                return(ret(dm, class = "crossdist"))
+            }
+        }
+
+        if (is.null(centroids) && symmetric && !isTRUE(dots$pairwise)) {
+            if (foreach::getDoParWorkers() > 1L) {
+                # WHOLE SYMMETRIC DISTMAT IN PARALLEL
+                # Only half of it is computed
+                # proxy can do this if y = NULL, but not in parallel
+                len <- length(x)
+
+                # undo bigmemory's seed change, backwards reproducibility
+                seed <- get0(".Random.seed", .GlobalEnv, mode = "integer")
+                d <- bigmemory::big.matrix(len, len, "double", 0)
+                d_desc <- bigmemory::describe(d)
+                assign(".Random.seed", seed, .GlobalEnv)
+
+                ids <- integer() # "initialize", so CHECK doesn't complain about globals
+                foreach(
+                    ids = split_parallel_symmetric(len, foreach::getDoParWorkers()),
+                    .combine = c,
+                    .multicombine = TRUE,
+                    .noexport = c("d"),
+                    .packages = c(control$packages, "bigmemory"),
+                    .export = export
+                ) %op% {
+                    if (!check_consistency(dist_entry$names[1L], "dist")) {
+                        do.call(proxy::pr_DB$set_entry, dist_entry, TRUE) # nocov
+                    }
+
+                    parallel_symmetric(d_desc, ids, x, distance, dots)
+                    NULL
+                }
+
+                # coerce to normal matrix
+                return(ret(d[,], class = "crossdist", dimnames = list(names(x), names(x))))
+            }
+            else {
+                # WHOLE SYMMETRIC DISTMAT WITH CUSTOM LOOP OR SEQUENTIAL proxy LOOP
+                dm <- base::as.matrix(quoted_call(
+                    proxy::dist, x = x, y = NULL, method = distance, dots = dots
+                ))
+
+                return(ret(dm, class = "crossdist"))
+            }
+        }
+
+        # WHOLE DISTMAT OR SUBDISTMAT OR NOT SYMMETRIC
+        if (is.null(centroids)) centroids <- x
+        dim_names <- list(names(x), names(centroids)) # x and centroids may change in parallel!
+        x <- split_parallel(x)
+
+        if (isTRUE(dots$pairwise)) {
+            centroids <- split_parallel(centroids)
+            validate_pairwise(x, centroids)
+            combine <- c
         }
         else {
-            # distmat not available, calculate it
-            # Extra distance parameters in case of parallel computation
-            # They can be for the function or for proxy::dist
-            dots <- list(...)
-
-            # Added defaults
-            if (is.null(dots$window.size))
-                dots$window.type <- "none"
-            else if (is.null(dots$window.type))
-                dots$window.type <- "slantedband"
-            dots$error.check <- FALSE
-
-            # dtw uses L2 by default, but in dtwclust I want dtw to use L1 by default
-            # Important for multivariate series
-            if (toupper(dist_entry$names[1L]) == "DTW" &&
-                is.null(dots$dist.method) &&
-                is_multivariate(c(x, centroids)))
-            {
-                dots$dist.method <- "L1" # nocov
-            }
-
-            # If the function doesn't have '...', remove invalid arguments from 'dots'
-            valid_args <- names(dots)
-            if (is.function(dist_entry$FUN)) {
-                if (!has_dots(dist_entry$FUN))
-                    valid_args <- union(names(formals(proxy::dist)), names(formals(dist_entry$FUN)))
-            }
-            else {
-                valid_args <- names(formals(proxy::dist))
-            }
-            dots <- dots[intersect(names(dots), valid_args)]
-
-            # variables/functions from the parent environments that should be exported
-            export <- c("distance", "dist_entry", "check_consistency", "enlist")
-
-            if (tolower(distance) %in% distances_included) {
-                # DTWCLUST DISTANCES, LET THEM HANDLE OPTIMIZATIONS
-                d <- do.call(proxy::dist,
-                             enlist(x = x,
-                                    y = centroids,
-                                    method = distance,
-                                    dots = dots),
-                             TRUE)
-            }
-            else if (is.null(centroids) && symmetric && !isTRUE(dots$pairwise)) {
-                if (dist_entry$loop && foreach::getDoParWorkers() > 1L) {
-                    # WHOLE SYMMETRIC DISTMAT IN PARALLEL
-                    # Only half of it is computed
-                    # proxy can do this if y = NULL, but not in parallel
-                    len <- length(x)
-                    seed <- get0(".Random.seed", .GlobalEnv, mode = "integer")
-                    d <- bigmemory::big.matrix(len, len, "double", 0)
-                    d_desc <- bigmemory::describe(d)
-                    assign(".Random.seed", seed, .GlobalEnv)
-
-                    ids <- integer() # 'initialize', so CHECK doesn't complain about globals
-                    foreach(
-                        ids = split_parallel_symmetric(len, foreach::getDoParWorkers()),
-                        .combine = c,
-                        .multicombine = TRUE,
-                        .noexport = c("d"),
-                        .packages = c(control$packages, "bigmemory"),
-                        .export = export
-                    ) %op% {
-                        if (!check_consistency(dist_entry$names[1L], "dist"))
-                            do.call(proxy::pr_DB$set_entry, dist_entry, TRUE) # nocov
-
-                        dd <- bigmemory::attach.big.matrix(d_desc)
-                        if (isTRUE(attr(ids, "trimat"))) {
-                            # assign upper part of lower triangular
-                            ul <- ids$ul
-                            if (length(ul) > 1L)
-                                dd[ul,ul] <- base::as.matrix(do.call(
-                                    proxy::dist,
-                                    enlist(x = x[ul],
-                                           y = NULL,
-                                           method = distance,
-                                           dots = dots),
-                                    TRUE
-                                ))
-                            # assign lower part of lower triangular
-                            ll <- ids$ll
-                            if (length(ll) > 1L)
-                                dd[ll,ll] <- base::as.matrix(do.call(
-                                    proxy::dist,
-                                    enlist(x = x[ll],
-                                           y = NULL,
-                                           method = distance,
-                                           dots = dots),
-                                    TRUE
-                                ))
-                        }
-                        else {
-                            rows <- attr(ids, "rows")
-                            mat_chunk <- base::as.matrix(do.call(
-                                proxy::dist,
-                                enlist(x = x[rows],
-                                       y = x[ids],
-                                       method = distance,
-                                       dots = dots),
-                                TRUE
-                            ))
-                            # assign matrix chunks
-                            dd[rows,ids] <- mat_chunk
-                            dd[ids,rows] <- t(mat_chunk)
-                        }
-                        # return from parallel foreach
-                        NULL
-                    }
-                    d <- d[,] # coerce to normal matrix
-                    attr(d, "class") <- "crossdist"
-                    attr(d, "dimnames") <- list(names(x), names(x))
-                }
-                else {
-                    # WHOLE SYMMETRIC DISTMAT WITH CUSTOM LOOP OR SEQUENTIAL proxy LOOP
-                    d <- base::as.matrix(do.call(proxy::dist,
-                                                 enlist(x = x,
-                                                        y = NULL,
-                                                        method = distance,
-                                                        dots = dots),
-                                                 TRUE))
-                    class(d) <- "crossdist"
-                }
-            }
-            else {
-                # WHOLE DISTMAT OR SUBDISTMAT OR NOT SYMMETRIC
-                if (is.null(centroids)) centroids <- x
-                dim_names <- list(names(x), names(centroids))
-                x <- split_parallel(x)
-
-                if (isTRUE(dots$pairwise)) {
-                    centroids <- split_parallel(centroids)
-                    validate_pairwise(x, centroids)
-                    combine <- c
-                }
-                else {
-                    centroids <- lapply(1L:foreach::getDoParWorkers(), function(dummy) { centroids })
-                    if (length(centroids) > length(x)) centroids <- centroids[1L:length(x)] # nocov
-                    combine <- rbind
-                }
-
-                d <- foreach(x = x, centroids = centroids,
-                             .combine = combine,
-                             .multicombine = TRUE,
-                             .packages = control$packages,
-                             .export = export) %op% {
-                                 if (!check_consistency(dist_entry$names[1L], "dist"))
-                                     do.call(proxy::pr_DB$set_entry, dist_entry, TRUE)
-
-                                 # 'dots' has all extra arguments that are valid
-                                 dd <- do.call(proxy::dist,
-                                               enlist(x = x,
-                                                      y = centroids,
-                                                      method = distance,
-                                                      dots = dots),
-                                               TRUE)
-
-                                 dd
-                             }
-
-                if (isTRUE(dots$pairwise)) {
-                    attr(d, "class") <- "pairdist"
-                }
-                else {
-                    attr(d, "class") <- "crossdist"
-                    attr(d, "dimnames") <- dim_names
-                }
-            }
+            centroids <- lapply(1L:foreach::getDoParWorkers(), function(dummy) { centroids })
+            if (length(centroids) > length(x)) centroids <- centroids[1L:length(x)] # nocov
+            combine <- rbind
         }
-        attr(d, "method") <- toupper(distance)
-        attr(d, "call") <- NULL
+
+        d <- foreach(
+            x = x, centroids = centroids,
+            .combine = combine,
+            .multicombine = TRUE,
+            .packages = control$packages,
+            .export = export
+        ) %op% {
+            if (!check_consistency(dist_entry$names[1L], "dist")) {
+                do.call(proxy::pr_DB$set_entry, dist_entry, TRUE)
+            }
+
+            quoted_call(proxy::dist, x = x, y = centroids, method = distance, dots = dots)
+        }
+
+        if (isTRUE(dots$pairwise)) {
+            attr(d, "class") <- "pairdist"
+        }
+        else {
+            attr(d, "class") <- "crossdist"
+            attr(d, "dimnames") <- dim_names
+        }
         # return
-        d
+        ret(d)
     }
-    # return enclosed function
+
+    # return closure
     distfun
 }

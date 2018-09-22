@@ -82,7 +82,7 @@ test_that("Included proxy distances can be called for pairwise = TRUE and give e
                          window.size = 15L, step.pattern = dtw::symmetric1,
                          pairwise = TRUE)
         class(d) <- "numeric"
-        expect_null(dim(d))
+        expect_null(dim(d), paste("distance =", distance))
         expect_identical(length(d), length(x), info = paste(distance, "pairwise single-arg"))
         if (distance != "sdtw")
             expect_equal(d, rep(0, length(d)), check.attributes = FALSE,
@@ -92,7 +92,7 @@ test_that("Included proxy distances can be called for pairwise = TRUE and give e
                           window.size = 15L, step.pattern = dtw::symmetric1,
                           pairwise = TRUE)
         class(d2) <- "numeric"
-        expect_null(dim(d2))
+        expect_null(dim(d2), paste("distance =", distance))
         expect_identical(length(d2), length(x), info = paste(distance, "pairwise double-arg"))
         if (distance != "sdtw")
             expect_equal(d, rep(0, length(d2)), check.attributes = FALSE,

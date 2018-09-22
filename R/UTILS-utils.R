@@ -134,6 +134,11 @@ get_from_callers <- function(obj_name, mode = "any") {
     stop("Could not find object '", obj_name, "' of mode '", mode, "'") # nocov
 }
 
+# do.call but always quoted
+quoted_call <- function(fun, ..., dots = NULL) {
+    do.call(fun, enlist(..., dots = dots), quote = TRUE)
+}
+
 # ==================================================================================================
 # Helper C/C++ functions
 # ==================================================================================================
