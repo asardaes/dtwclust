@@ -25,10 +25,11 @@ test_that("Parallel computation gives the same results as sequential", {
     require(doParallel)
 
     cl <- makeCluster(num_workers)
+    clusterExport(cl, "num_workers", environment())
     invisible(clusterEvalQ(cl, {
         library(dtwclust)
-        # environment variables get inherited by the workers when they are created, so reset this
-        RcppParallel::setThreadOptions()
+        # environment variables get inherited by the workers when they are created, so set this
+        if (!nzchar(Sys.getenv("R_COVR"))) RcppParallel::setThreadOptions(num_workers)
         # to test that other RNGkinds won't affect
         RNGkind("default")
     }))

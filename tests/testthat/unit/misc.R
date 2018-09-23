@@ -110,6 +110,11 @@ test_that("zscore function works correctly for supported inputs.", {
 
 test_that("%op% catches errors as expected.", {
     skip_if(foreach::getDoParWorkers() %% 2L == 1L, "sequential or FORK case")
+    prev_threads <- foreach(dummy = 1L:foreach::getDoParWorkers()) %dopar% {
+        nthreads <- as.integer(Sys.getenv("RCPP_PARALLEL_NUM_THREADS", "1"))
+        RcppParallel::setThreadOptions()
+        nthreads
+    }
     expect_error(
         dtwclust:::`%op%`(foreach(i = 1L:2L, .packages = "dtwclust"), {
             if (i == 1L) stop("test") else NULL
@@ -121,6 +126,10 @@ test_that("%op% catches errors as expected.", {
     sapply(workers_threads, function(nthreads_env_var) {
         expect_false(nzchar(nthreads_env_var))
     })
+    foreach(nthreads = prev_threads) %dopar% {
+        RcppParallel::setThreadOptions(nthreads)
+        NULL
+    }
 })
 
 # ==================================================================================================
