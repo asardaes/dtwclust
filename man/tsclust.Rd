@@ -117,8 +117,8 @@ always one of the time series in the data. In this case, the distance matrix can
 pre-computed once using all time series in the data and then re-used at each iteration. It
 usually saves overhead overall for small datasets (see \link{tsclust-controls}).
 \item "fcm": Fuzzy c-means. Only supported for fuzzy clustering and used by default in that case.
-\item "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering. It \strong{always} precomputes the
-whole cross-distance matrix.
+\item "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering. It \strong{always} precomputes/uses
+the whole cross-distance matrix.
 }
 
 The \code{dba}, \code{shape} and \code{sdtw_cent} implementations check for parallelization. Note that only

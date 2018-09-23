@@ -29,7 +29,6 @@
 #'
 #' @return The improved lower bound for the DTW distance.
 #'
-#' @template rcpp-parallel
 #' @template proxy
 #'
 #' @section Note:

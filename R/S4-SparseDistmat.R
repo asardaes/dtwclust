@@ -36,7 +36,7 @@ SparseDistmat <- methods::setRefClass(
             if (list(...)$distance != "sdtw")
                 x <- 0
             else
-                x <- do.call(distfun, enlist(series, pairwise = TRUE, dots = dist_args), TRUE)
+                x <- quoted_call(distfun, series, pairwise = TRUE, dots = dist_args)
 
             distmat <<- Matrix::sparseMatrix(i = 1L:length(series),
                                              j = 1L:length(series),
@@ -101,12 +101,14 @@ setMethod(`[`, "SparseDistmat", function(x, i, j, ..., drop = TRUE) {
 
     # update distmat if necessary
     if (nrow(id_new) > 0L) {
-        x$distmat[id_new] <- as.numeric(do.call(x$distfun,
-                                                enlist(x = x$series[id_new[, 1L]],
-                                                       centroids = x$series[id_new[, 2L]],
-                                                       pairwise = TRUE,
-                                                       dots = x$dist_args),
-                                                TRUE))
+        x$distmat[id_new] <- as.numeric(quoted_call(
+            x$distfun,
+            x = x$series[id_new[, 1L]],
+            centroids = x$series[id_new[, 2L]],
+            pairwise = TRUE,
+            dots = x$dist_args
+        ))
+
         if (x$symmetric) x$distmat <- Matrix::forceSymmetric(x$distmat, "L")
     }
     # return

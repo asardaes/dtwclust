@@ -34,6 +34,10 @@ The medoid's index is determined by taking the \eqn{arg min} of the \code{distma
 }
 \examples{
 
-pam_cent(CharTraj, "dtw_basic", ids = 6L:10L, window.size = 15L)
+# Computes the distance matrix for all series
+pam_cent(CharTraj, "dtw_basic", ids = 6L:10L, window.size = 15L) # series_id = 7L
+
+# Computes the distance matrix for the chosen subset only
+pam_cent(CharTraj[6L:10L], "dtw_basic", window.size = 15L) # series_id = 2L
 
 }

@@ -19,13 +19,14 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         cluster <- matrix(0, N, k)
         cluster[, -1L] <- stats::runif(N * (k - 1L)) / (k - 1L)
         cluster[, 1L] <- 1 - apply(cluster[, -1L, drop = FALSE], 1L, sum)
-        centroids <- do.call(family@allcent,
-                             enlist(x = x,
-                                    cl_id = cluster,
-                                    k = k,
-                                    cl_old = cluster,
-                                    dots = subset_dots(args$cent, family@allcent)),
-                             TRUE)
+        centroids <- quoted_call(
+            family@allcent,
+            x = x,
+            cl_id = cluster,
+            k = k,
+            cl_old = cluster,
+            dots = subset_dots(args$cent, family@allcent)
+        )
     }
     else {
         id_cent <- sample(N, k)
@@ -39,17 +40,18 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
     objective_old <- Inf
     dmi <- cbind(1L:N, integer(N))
     while (iter <= control$iter.max) {
-        distmat <- do.call(family@dist, enlist(x = x, centroids = centroids, dots = args$dist), TRUE)
+        distmat <- quoted_call(family@dist, x = x, centroids = centroids, dots = args$dist)
         cluster <- family@cluster(distmat = distmat, m = control$fuzziness)
         if (control$version < 2L) { # nocov start
-            centroids <- do.call(family@allcent,
-                                 enlist(x = x,
-                                        cl_id = cluster,
-                                        k = k,
-                                        cent = centroids,
-                                        cl_old = clustold,
-                                        dots = subset_dots(args$cent, family@allcent)),
-                                 TRUE)
+            centroids <- quoted_call(
+                family@allcent,
+                x = x,
+                cl_id = cluster,
+                k = k,
+                cent = centroids,
+                cl_old = clustold,
+                dots = subset_dots(args$cent, family@allcent)
+            )
         } # nocov end
 
         # NOTE: a custom fuzzy centroid function that doesn't want to rely on the usual fuzzy
@@ -86,14 +88,16 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
         }
         iter <- iter + 1L
         if (control$version > 1L)
-            centroids <- do.call(family@allcent,
-                                 enlist(x = x,
-                                        cl_id = cluster,
-                                        k = k,
-                                        cent = centroids,
-                                        cl_old = clustold,
-                                        dots = subset_dots(args$cent, family@allcent)),
-                                 TRUE)
+            centroids <- quoted_call(
+                family@allcent,
+                x = x,
+                cl_id = cluster,
+                k = k,
+                cent = centroids,
+                cl_old = clustold,
+                dots = subset_dots(args$cent, family@allcent)
+            )
+
         clustold <- dmi[, 2L]
     }
 
@@ -107,7 +111,7 @@ pfclust <- function (x, k, family, control, fuzzy = FALSE, cent, trace = FALSE, 
     }
 
     if (control$version < 2L) { # nocov start
-        distmat <- do.call(family@dist, enlist(x = x, centroids = centroids, dots = args$dist), TRUE)
+        distmat <- quoted_call(family@dist, x = x, centroids = centroids, dots = args$dist)
         cluster <- family@cluster(distmat = distmat, m = control$fuzziness)
     } # nocov end
 

@@ -3,6 +3,7 @@
 #' Extract the medoid time series based on a distance measure.
 #'
 #' @export
+#' @importFrom Matrix rowSums
 #'
 #' @param series The time series in one of the formats accepted by [tslist()].
 #' @param distance A character indicating which distance to use. Only needed if `distmat` is `NULL`.
@@ -23,7 +24,11 @@
 #'
 #' @examples
 #'
-#' pam_cent(CharTraj, "dtw_basic", ids = 6L:10L, window.size = 15L)
+#' # Computes the distance matrix for all series
+#' pam_cent(CharTraj, "dtw_basic", ids = 6L:10L, window.size = 15L) # series_id = 7L
+#'
+#' # Computes the distance matrix for the chosen subset only
+#' pam_cent(CharTraj[6L:10L], "dtw_basic", window.size = 15L) # series_id = 2L
 #'
 pam_cent <- function(series, distance, ids = seq_along(series), distmat = NULL, ...,
                      error.check = TRUE)
@@ -61,10 +66,11 @@ pam_cent <- function(series, distance, ids = seq_along(series), distmat = NULL, 
     d <- rowSums(d) # d can be normal matrix or from Matrix package, so no namespace here
     id_cent <- ids[which.min(d)]
     cent <- series[[id_cent]]
+
     if (is.null(i_cl))
         attr(cent, "series_id") <- id_cent
     else
         distmat$id_cent[i_cl] <- id_cent
-    # return
+
     cent
 }

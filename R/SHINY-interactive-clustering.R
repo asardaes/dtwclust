@@ -22,19 +22,19 @@
 #'   This part of the app wraps [tsclust()], so you should be familiar with it. Some remarks:
 #'
 #'   - Specifying a custom centroid or hierarchical method expects the name of a function available
-#'     in the R session (without quotes). Naturally, any required package should be loaded before
-#'     calling `interactive_clustering`. For example, if you want to use [cluster::agnes()], you
-#'     should load \pkg{cluster} beforehand.
+#'   in the R session (without quotes). Naturally, any required package should be loaded before
+#'   calling `interactive_clustering`. For example, if you want to use [cluster::agnes()], you
+#'   should load \pkg{cluster} beforehand.
 #'   - A random seed of 0 means that it will be left as `NULL` when calling [tsclust()].
 #'   - The input fields for Extra parameters (distance, centroid and ellipsis) expect a comma-
-#'     separated sequence of key-value pairs. For example: `window.size = 10L`, `trace = TRUE`. You
-#'     should be able to pass any variables available in the R session's global environment.
+#'   separated sequence of key-value pairs. For example: `window.size = 10L`, `trace = TRUE`. You
+#'   should be able to pass any variables available in the R session's global environment.
 #'   - Regarding plot parameters:
 #'     + The `Clusters` field is like the integer IDs from the Explore section.
 #'     + The `Labels` field is passed to the plot method (see [TSClusters-methods]). You can specify
-#'       several values like with the Extra parameters, e.g.: `nudge_x = 10`, `nudge_y = 1`. You can
-#'       type an empty space to activate them with the defaults, and delete everything to hide them.
-#'       Note that the location of the labels is random each time.
+#'     several values like with the Extra parameters, e.g.: `nudge_x = 10`, `nudge_y = 1`. You can
+#'     type an empty space to activate them with the defaults, and delete everything to hide them.
+#'     Note that the location of the labels is random each time.
 #'
 #'   The plot area reacts to the plot parameters, but the actual clustering with [tsclust()] won't
 #'   be executed until you click the `Cluster!` button. **The plot can take a couple of seconds to

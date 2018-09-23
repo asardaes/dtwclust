@@ -38,7 +38,7 @@ sdtw_cent_nloptr <- function(centroid, series, gamma, weights, mv, dim0)
 #'   problems.
 #'
 #' @return The resulting centroid, with attribute `nloptr_results` specifying the optimization
-#' results (except for `solution`, which is the returned centroid).
+#'   results (except for `solution`, which is the returned centroid).
 #'
 #' @references
 #'
@@ -66,17 +66,18 @@ sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, le
     dots <- dots[intersect(names(dots), setdiff(names(formals(nloptr::nloptr)), "..."))]
     dim0 <- dim(centroid)
     if (mv) nm0 <- dimnames(centroid)
-    opt <- do.call(what = nloptr::nloptr, quote = TRUE, args = enlist(
+    opt <- quoted_call(
+        nloptr::nloptr,
         x0 = centroid,
         eval_f = sdtw_cent_nloptr,
         opts = opts,
-        dots = dots,
         series = series,
         gamma = gamma,
         weights = weights,
         mv = mv,
-        dim0 = dim0
-    ))
+        dim0 = dim0,
+        dots = dots
+    )
 
     cent_out <- opt$solution
     if (mv) {
@@ -86,6 +87,5 @@ sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, le
 
     opt$call <- opt$solution <- opt$version <- NULL
     attr(cent_out, "nloptr_results") <- opt
-    # return
     cent_out
 }

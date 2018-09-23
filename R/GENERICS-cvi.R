@@ -80,7 +80,7 @@
 #'     + `"COP"` (!): COP index (Arbelaitz et al. (2013); to be minimized).
 #'     + `"DB"` (?): Davies-Bouldin index (Arbelaitz et al. (2013); to be minimized).
 #'     + `"DBstar"` (?): Modified Davies-Bouldin index (DB*) (Kim and Ramakrishna (2005); to be
-#'       minimized).
+#'     minimized).
 #'     + `"CH"` (~): Calinski-Harabasz index (Arbelaitz et al. (2013); to be maximized).
 #'     + `"SF"` (~): Score Function (Saitta et al. (2007); to be maximized; see notes).
 #'   - Fuzzy partitions (using the nomenclature from Wang and Zhang (2007))
@@ -93,7 +93,7 @@
 #' @section Additionally:
 #'
 #'   - `"valid"`: Returns all valid indices depending on the type of `a` and whether `b` was
-#'     provided or not.
+#'   provided or not.
 #'   - `"internal"`: Returns all internal CVIs. Only supported for [TSClusters-class] objects.
 #'   - `"external"`: Returns all external CVIs. Requires `b` to be provided.
 #'

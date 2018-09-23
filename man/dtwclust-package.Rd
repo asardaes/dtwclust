@@ -43,7 +43,7 @@ has been associated with the author.
 This package can be used without attaching it with \code{\link[base:library]{base::library()}} with some caveats:
 \itemize{
 \item The \pkg{methods} \link[methods:methods-package]{package} must be attached. \code{R} usually does this
-automatically, but \code{\link[utils:Rscript]{utils::Rscript()}} only does so in R version 3.5.0 and above.
+automatically, but \code{\link[utils:Rscript]{utils::Rscript()}} only does so in R versions 3.5.0 and above.
 \item If you want to use the \pkg{proxy} version of \code{\link[dtw:dtw]{dtw::dtw()}} (e.g. for clustering), you have to
 attach the \pkg{dtw} package manually.
 }

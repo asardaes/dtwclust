@@ -62,11 +62,7 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
     if (length(shared) > 0L && length(share.config) > 0L) {
         # careful, singular and plural below
         shared_cfg <- Map(shared, names(shared), f = function(shared_args, fun) {
-            cfg <- do.call(expand.grid, quote = TRUE, args = enlist(
-                foo = fun,
-                dots = shared_args,
-                stringsAsFactors = FALSE
-            ))
+            cfg <- quoted_call(expand.grid, foo = fun, stringsAsFactors = FALSE, dots = shared_args)
             names(cfg)[1L] <- type
             cfg
         })
@@ -90,11 +86,7 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
             if (!is.list(config) || is.null(config_names))
                 stop("All parameters must be named lists.") # nocov
             cfg <- Map(config, config_names, f = function(config_args, fun) {
-                cfg <- do.call(expand.grid, quote = TRUE, args = enlist(
-                    foo = fun,
-                    stringsAsFactors = FALSE,
-                    dots = config_args
-                ))
+                cfg <- quoted_call(expand.grid, foo = fun, stringsAsFactors = FALSE, dots = config_args)
                 names(cfg)[1L] <- type
                 cfg
             })
@@ -134,9 +126,9 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
 #' Preprocessing, distance and centroid configurations are specified with the helper function
 #' [pdc_configs()], refer to the examples in [compare_clusterings()] to see how this is used.
 #'
-#' The controls list may be specified with the usual [tsclust-controls] functions. The names  of
-#' the list must correspond to "partitional", "hierarchical", "fuzzy" or "tadpole" clustering.
-#' Again, please refer to the examples in [compare_clusterings()].
+#' The controls list may be specified with the usual [tsclust-controls] functions. The names of the
+#' list must correspond to "partitional", "hierarchical", "fuzzy" or "tadpole" clustering. Again,
+#' please refer to the examples in [compare_clusterings()].
 #'
 #' @return
 #'
@@ -239,7 +231,8 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
             cfg <- switch(
                 type,
                 partitional = {
-                    do.call(expand.grid, quote = TRUE, args = enlist(
+                    quoted_call(
+                        expand.grid,
                         k = list(k),
                         pam.precompute = control$pam.precompute,
                         iter.max = control$iter.max,
@@ -247,18 +240,20 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                         symmetric = control$symmetric,
                         version = control$version,
                         stringsAsFactors = FALSE
-                    ))
+                    )
                 },
                 hierarchical = {
-                    do.call(expand.grid, quote = TRUE, args = enlist(
+                    quoted_call(
+                        expand.grid,
                         k = list(k),
                         method = list(control$method),
                         symmetric = control$symmetric,
                         stringsAsFactors = FALSE
-                    ))
+                    )
                 },
                 fuzzy = {
-                    do.call(expand.grid, quote = TRUE, args = enlist(
+                    quoted_call(
+                        expand.grid,
                         k = list(k),
                         fuzziness = control$fuzziness,
                         iter.max = control$iter.max,
@@ -266,16 +261,17 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
                         symmetric = control$symmetric,
                         version = control$version,
                         stringsAsFactors = FALSE
-                    ))
+                    )
                 },
                 tadpole = {
-                    do.call(expand.grid, quote = TRUE, args = enlist(
+                    quoted_call(
+                        expand.grid,
                         k = list(k),
                         dc = list(control$dc),
                         window.size = control$window.size,
                         lb = control$lb,
                         stringsAsFactors = FALSE
-                    ))
+                    )
                 }
             )
 
@@ -390,7 +386,7 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #' A list with:
 #'
 #' - `results`: A list of data frames with the flattened configs and the corresponding scores
-#'   returned by `score.clus`.
+#' returned by `score.clus`.
 #' - `scores`: The scores given by `score.clus`.
 #' - `pick`: The object returned by `pick.clus`.
 #' - `proc_time`: The measured execution time, using [base::proc.time()].
@@ -441,8 +437,8 @@ compare_clusterings_configs <- function(types = c("p", "h", "f"), k = 2L, contro
 #'   scores <- lapply(list_of_lists, score.clus, ...)
 #'   ```
 #'
-#'   Otherwise, `score.clus` should be a list of functions with the same names as the list above,
-#'   so that `score.clus$partitional` is used to score `list_of_lists$partitional` and so on (via
+#'   Otherwise, `score.clus` should be a list of functions with the same names as the list above, so
+#'   that `score.clus$partitional` is used to score `list_of_lists$partitional` and so on (via
 #'   [base::Map()]).
 #'
 #'   Therefore, the scores returned shall always be a list of lists with first-level names as above.
@@ -577,10 +573,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
                 else
                     preproc_args <- list()
 
-                ret <- do.call(preproc_fun,
-                               enlist(series,
-                                      dots = preproc_args),
-                               TRUE)
+                ret <- quoted_call(preproc_fun, series, dots = preproc_args)
                 attr(ret, "config") <- as.list(this_config) # leave version with possible NAs here!
             }
             else {
@@ -629,7 +622,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
         export <- c("trace", "score.clus", "return.objects",
                     "dots",
                     "centroids_included",
-                    "check_consistency", "enlist", "subset_dots", "get_from_callers", "setnames_inplace",
+                    "check_consistency", "quoted_call", "enlist", "subset_dots", "get_from_callers",
+                    "setnames_inplace",
                     custom_preprocs, custom_centroids)
 
         # ------------------------------------------------------------------------------------------
@@ -672,7 +666,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
                                else list()
                            })
             setnames_inplace(args, c("preproc", "dist", "cent"))
-            args <- do.call(tsclust_args, args = args, TRUE)
+            args <- do.call(tsclust_args, args, TRUE)
 
             # ----------------------------------------------------------------------------------
             # controls for this configuration
@@ -738,16 +732,13 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
             }
             else if (type %in% c("partitional", "fuzzy") && centroid_char %in% centroids_included) {
                 # with included centroid
-                tsc <- do.call(tsclust,
-                               enlist(centroid = centroid_char, dots = this_args),
-                               TRUE)
+                tsc <- quoted_call(tsclust, centroid = centroid_char, dots = this_args)
             }
             else {
                 # with centroid function
-                tsc <- do.call(tsclust,
-                               enlist(centroid = get_from_callers(centroid_char, "function"),
-                                      dots = this_args),
-                               TRUE)
+                tsc <- quoted_call(tsclust,
+                                   centroid = get_from_callers(centroid_char, "function"),
+                                   dots = this_args)
             }
 
             if (inherits(tsc, "TSClusters"))
@@ -767,7 +758,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
 
             if (!return.objects) {
                 if (!is.function(score.clus)) score.clus <- score.clus[[type]]
-                ret <- list(do.call(score.clus, enlist(ret, dots = dots), TRUE))
+                ret <- list(quoted_call(score.clus, ret, dots = dots))
             }
             # return config result from foreach()
             ret

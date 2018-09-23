@@ -39,9 +39,9 @@ Create configurations for \code{\link[=compare_clusterings]{compare_clusterings(
 Preprocessing, distance and centroid configurations are specified with the helper function
 \code{\link[=pdc_configs]{pdc_configs()}}, refer to the examples in \code{\link[=compare_clusterings]{compare_clusterings()}} to see how this is used.
 
-The controls list may be specified with the usual \link{tsclust-controls} functions. The names  of
-the list must correspond to "partitional", "hierarchical", "fuzzy" or "tadpole" clustering.
-Again, please refer to the examples in \code{\link[=compare_clusterings]{compare_clusterings()}}.
+The controls list may be specified with the usual \link{tsclust-controls} functions. The names of the
+list must correspond to "partitional", "hierarchical", "fuzzy" or "tadpole" clustering. Again,
+please refer to the examples in \code{\link[=compare_clusterings]{compare_clusterings()}}.
 }
 \examples{
 

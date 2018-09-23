@@ -42,13 +42,13 @@
 #'   Parallel computations for PAM centroids have the following considerations:
 #'
 #'   - If `pam.precompute` is `TRUE`, both distance matrix calculations and repetitions are done in
-#'     parallel, regardless of `pam.sparse`.
+#'   parallel, regardless of `pam.sparse`.
 #'   - If `pam.precompute` is `FALSE` and `pam.sparse` is `TRUE`, repetitions are done sequentially,
-#'     so that the distance calculations can be done in parallel and the sparse matrix updated
-#'     iteratively.
+#'   so that the distance calculations can be done in parallel and the sparse matrix updated
+#'   iteratively.
 #'   - If both `pam.precompute` and `pam.sparse` are `FALSE`, repetitions are done in parallel, and
-#'     each repetition performs distance calculations sequentially, but the distance matrix cannot
-#'     be updated iteratively.
+#'   each repetition performs distance calculations sequentially, but the distance matrix cannot be
+#'   updated iteratively.
 #'
 partitional_control <- function(pam.precompute = TRUE,
                                 iter.max = 100L,
@@ -190,13 +190,9 @@ tadpole_control <- function(dc,
 #' @param dist A list of arguments for a distance function to be used in [tsclust()].
 #' @param cent A list of arguments for a centroid function to be used in [tsclust()].
 #'
-tsclust_args <- function(preproc = list(), dist = list(), cent = list())
-{
+tsclust_args <- function(preproc = list(), dist = list(), cent = list()) {
     structure(
-        list(preproc = preproc,
-             dist = dist,
-             cent = cent),
+        list(preproc = preproc, dist = dist, cent = cent),
         "class" = c(control_classes[["args"]])
     )
 }
-

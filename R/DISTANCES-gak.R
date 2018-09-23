@@ -55,7 +55,6 @@ estimate_sigma <- function(x, y, within_proxy) {
 #' The logarithm of the GAK if `normalize = FALSE`, otherwise 1 minus the normalized GAK. The value
 #' of `sigma` is assigned as an attribute of the result.
 #'
-#' @template rcpp-parallel
 #' @template proxy
 #' @template symmetric
 #'

@@ -31,7 +31,6 @@
 #'   - `index1`: `x` indices for the matched elements in the warping path.
 #'   - `index2`: `y` indices for the matched elements in the warping path.
 #'
-#' @template rcpp-parallel
 #' @template proxy
 #' @template symmetric
 #' @section Proxy version:
@@ -45,7 +44,7 @@
 #' installations compared to 64 bit ones.
 #'
 #' An infinite distance value indicates that the constraints could not be fulfilled, probably due to
-#' a too small `window.size`.
+#' a too small `window.size` or a very large length difference between the series.
 #'
 #' @example man-examples/multivariate-dtw.R
 #'

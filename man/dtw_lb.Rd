@@ -57,6 +57,8 @@ in \code{10(2) + 1 = 21} observations falling within the window.
 \note{
 This function uses a lower bound that is only defined for time series of equal length.
 
+The \code{\link[proxy:dist]{proxy::dist()}} version simply calls this function.
+
 A considerably large dataset is probably necessary before this is faster than using \code{\link[=dtw_basic]{dtw_basic()}}
 with \code{\link[proxy:dist]{proxy::dist()}}. Also note that \code{\link[=lb_improved]{lb_improved()}} calculates warping envelopes for the series
 in \code{y}, so be careful with the provided order and \code{nn.margin} (see examples).

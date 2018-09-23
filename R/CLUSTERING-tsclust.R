@@ -21,12 +21,11 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
             warning("Using dtw_lb with control$pam.precompute = TRUE is not advised.") # nocov
         if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
         # see S4-Distmat.R
-        distmat <- Distmat$new(distmat = do.call(
+        distmat <- Distmat$new(distmat = quoted_call(
             family@dist,
-            enlist(x = series,
-                   centroids = NULL,
-                   dots = args$dist),
-            TRUE
+            x = series,
+            centroids = NULL,
+            dots = args$dist
         ))
     }
     else {
@@ -132,7 +131,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'
 #'   - `x`: The *whole* data list (`list(ts1, ts2, ts3)`)
 #'   - `cl_id`: An integer vector with length equal to the number of series in `data`, indicating
-#'     which cluster a series belongs to (`c(1L, 2L, 2L)`)
+#'   which cluster a series belongs to (`c(1L, 2L, 2L)`)
 #'   - `k`: The desired number of total clusters (`2L`)
 #'   - `cent`: The current centroids in order, in a list (`list(centroid1, centroid2)`)
 #'   - `cl_old`: The membership vector of the *previous* iteration (`c(1L, 1L, 2L)`)
@@ -149,17 +148,17 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'   among the \eqn{j} series that belong to the same cluster for all time points \eqn{t_i}.
 #'   - "median": The median along each dimension. Similar to mean.
 #'   - "shape": Shape averaging. By default, all series are z-normalized in this case, since the
-#'     resulting centroids will also have this normalization. See [shape_extraction()] for more
-#'     details.
+#'   resulting centroids will also have this normalization. See [shape_extraction()] for more
+#'   details.
 #'   - "dba": DTW Barycenter Averaging. See [DBA()] for more details.
 #'   - "sdtw_cent": Soft-DTW centroids, See [sdtw_cent()] for more details.
 #'   - "pam": Partition around medoids (PAM). This basically means that the cluster centroids are
-#'     always one of the time series in the data. In this case, the distance matrix can be
-#'     pre-computed once using all time series in the data and then re-used at each iteration. It
-#'     usually saves overhead overall for small datasets (see [tsclust-controls]).
+#'   always one of the time series in the data. In this case, the distance matrix can be
+#'   pre-computed once using all time series in the data and then re-used at each iteration. It
+#'   usually saves overhead overall for small datasets (see [tsclust-controls]).
 #'   - "fcm": Fuzzy c-means. Only supported for fuzzy clustering and used by default in that case.
-#'   - "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering. It **always** precomputes the
-#'     whole cross-distance matrix.
+#'   - "fcmdd": Fuzzy c-medoids. Only supported for fuzzy clustering. It **always** precomputes/uses
+#'   the whole cross-distance matrix.
 #'
 #'   The `dba`, `shape` and `sdtw_cent` implementations check for parallelization. Note that only
 #'   `shape`, `dba`, `sdtw_cent`, `pam` and `fcmdd` support series of different length. Also note
@@ -195,17 +194,17 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'
 #'   - `"dtw"`: DTW, optionally with a Sakoe-Chiba/Slanted-band constraint. Done with [dtw::dtw()].
 #'   - `"dtw2"`: DTW with L2 norm and optionally a Sakoe-Chiba/Slanted-band constraint. See
-#'     [dtw2()].
+#'   [dtw2()].
 #'   - `"dtw_basic"`: A custom version of DTW with less functionality, but faster. See
-#'     [dtw_basic()].
+#'   [dtw_basic()].
 #'   - `"dtw_lb"`: DTW with L1 or L2 norm and a Sakoe-Chiba constraint. Some computations are
-#'     avoided by first estimating the distance matrix with Lemire's lower bound and then
-#'     iteratively refining with DTW. See [dtw_lb()]. Not suitable for `pam.precompute` = `TRUE` nor
-#'     hierarchical clustering.
+#'   avoided by first estimating the distance matrix with Lemire's lower bound and then
+#'   iteratively refining with DTW. See [dtw_lb()]. Not suitable for `pam.precompute` = `TRUE` nor
+#'   hierarchical clustering.
 #'   - `"lbk"`: Keogh's lower bound for DTW with either L1 or L2 norm for the Sakoe-Chiba
-#'     constraint. See [lb_keogh()].
+#'   constraint. See [lb_keogh()].
 #'   - `"lbi"`: Lemire's lower bound for DTW with either L1 or L2 norm for the Sakoe-Chiba
-#'     constraint. See [lb_improved()].
+#'   constraint. See [lb_improved()].
 #'   - `"sbd"`: Shape-based distance. See [sbd()].
 #'   - `"gak"`: Global alignment kernels. See [gak()].
 #'   - `"sdtw"`: Soft-DTW. See [sdtw()].
@@ -316,13 +315,13 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
     # ----------------------------------------------------------------------------------------------
 
     if (!is.null(preproc) && is.function(preproc)) {
-        series <- do.call(preproc, enlist(series, dots = subset_dots(args$preproc, preproc)), TRUE)
+        series <- quoted_call(preproc, series, dots = subset_dots(args$preproc, preproc))
         preproc_char <- as.character(substitute(preproc))[1L]
     }
     else if (type == "partitional" && is.character(centroid) && centroid == "shape") {
         preproc <- zscore
         preproc_char <- "zscore"
-        series <- do.call(zscore, enlist(series, dots = args$preproc), TRUE)
+        series <- quoted_call(zscore, series, dots = args$preproc)
     }
     else if (is.null(preproc)) {
         preproc <- function(x, ...) { x } # nocov
@@ -428,21 +427,22 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 assign(".Random.seed", .rng_, .GlobalEnv)
                 # just one repetition,
                 # done like this so dist/cent functions can take advantage of parallelization
-                pc_list <- list(do.call(pfclust,
-                                        enlist(x = series,
-                                               k = k,
-                                               family = family,
-                                               control = control,
-                                               fuzzy = isTRUE(type == "fuzzy"),
-                                               cent = cent_char,
-                                               trace = trace,
-                                               args = args),
-                                        TRUE))
+                pc_list <- list(quoted_call(
+                    pfclust,
+                    x = series,
+                    k = k,
+                    family = family,
+                    control = control,
+                    fuzzy = isTRUE(type == "fuzzy"),
+                    cent = cent_char,
+                    trace = trace,
+                    args = args
+                ))
             }
             else {
                 # I need to re-register any custom distances in each parallel worker
                 dist_entry <- proxy::pr_DB$get_entry(distance)
-                export <- c("pfclust", "check_consistency", "enlist")
+                export <- c("pfclust", "check_consistency", "quoted_call")
                 if (is.null(.rng_))
                     .rng_ <- rng_seq(length(k) * nrep, seed = seed, simplify = FALSE) # UTILS-rng.R
                 # if %do% is used, the outer loop replaces values in this envir
@@ -478,18 +478,17 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                     do.call(proxy::pr_DB$set_entry, dist_entry, TRUE) # nocov
 
                                 # return
-                                list(
-                                    do.call(pfclust,
-                                            enlist(x = series,
-                                                   k = k,
-                                                   family = family,
-                                                   control = control,
-                                                   fuzzy = isTRUE(type == "fuzzy"),
-                                                   cent = cent_char,
-                                                   trace = trace,
-                                                   args = args),
-                                            TRUE)
-                                )
+                                list(quoted_call(
+                                    pfclust,
+                                    x = series,
+                                    k = k,
+                                    family = family,
+                                    control = control,
+                                    fuzzy = isTRUE(type == "fuzzy"),
+                                    cent = cent_char,
+                                    trace = trace,
+                                    args = args
+                                ))
                             }
             }
 
@@ -601,9 +600,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             }
             else {
                 if (trace) cat("\nCalculating distance matrix...\n")
-                distmat <- do.call(distfun,
-                                   enlist(x = series, centroids = NULL, dots = args$dist),
-                                   TRUE)
+                distmat <- quoted_call(distfun, x = series, centroids = NULL, dots = args$dist)
             }
 
             # --------------------------------------------------------------------------------------
@@ -623,10 +620,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             }
             else {
                 # Using provided function
-                hc <- list(do.call(method,
-                                   args = enlist(stats::as.dist(distmat),
-                                                 dots = subset_dots(dots, method)),
-                                   TRUE))
+                hc <- list(quoted_call(method, stats::as.dist(distmat), dots = subset_dots(dots, method)))
                 method <- attr(method, "name")
             }
 
@@ -644,10 +638,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                         environment(allcent) <- new.env(parent = .GlobalEnv)
                         assign("centroid", centroid, environment(allcent))
                         centroids <- lapply(1L:k, function(kcent) {
-                            do.call(centroid,
-                                    enlist(series[cluster == kcent],
-                                           dots = subset_dots(args$cent, centroid)),
-                                    TRUE)
+                            quoted_call(centroid,
+                                        series[cluster == kcent],
+                                        dots = subset_dots(args$cent, centroid))
                         })
                     }
                     else {
@@ -744,10 +737,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                     environment(allcent) <- new.env(parent = .GlobalEnv)
                     assign("centroid", centroid, environment(allcent))
                     centroids <- lapply(1L:k, function(kcent) {
-                        do.call(centroid,
-                                enlist(series[R$cl == kcent],
-                                       dots = subset_dots(args$cent, centroid)),
-                                TRUE)
+                        quoted_call(centroid,
+                                    series[R$cl == kcent],
+                                    dots = subset_dots(args$cent, centroid))
                     })
                 }
                 else {

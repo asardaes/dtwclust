@@ -47,16 +47,15 @@
 #'
 #' @section Multivariate series:
 #'
-#'   There are currently 2 versions of DBA implemented for multivariate series:
+#'   There are currently 2 versions of DBA implemented for multivariate series (see examples):
 #'
 #'   - If `mv.ver = "by-variable"`, then each variable of each series in `X` and `centroid` are
-#'     extracted, and the univariate version of the algorithm is applied to each set of variables,
-#'     binding the results by column. Therefore, the DTW backtracking is different for each
-#'     variable.
+#'   extracted, and the univariate version of the algorithm is applied to each set of variables,
+#'   binding the results by column. Therefore, the DTW backtracking is different for each variable.
 #'   - If `mv.ver = "by-series"`, then all variables are considered at the same time, so the DTW
-#'     backtracking is computed based on each multivariate series as a whole. This version was
-#'     implemented in version 4.0.0 of \pkg{dtwclust}, and it is faster, but not necessarily more
-#'     correct.
+#'   backtracking is computed based on each multivariate series as a whole. This version was
+#'   implemented in version 4.0.0 of \pkg{dtwclust}, and it is faster, but not necessarily more
+#'   correct.
 #'
 #' @note
 #'
@@ -86,10 +85,7 @@ DBA <- function(X, centroid = NULL, ...,
         check_consistency(centroid, "ts")
     }
 
-    if (is.null(window.size))
-        window.size <- -1L
-    else
-        window.size <- check_consistency(window.size, "window")
+    window.size <- if (is.null(window.size)) -1L else check_consistency(window.size, "window")
 
     if (max.iter < 1L)
         stop("Maximum iterations must be positive.")

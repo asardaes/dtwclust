@@ -63,9 +63,9 @@
 #'
 #'   - Allocate a logical flag vector with length equal to the number of tested window sizes.
 #'   - For each window size, set the corresponding flag to `TRUE` if the constraint given by the
-#'     user is fulfilled.
+#'   user is fulfilled.
 #'   - Calculate complexity as: (number of sign changes in the vector) / (number of window sizes -
-#'     1L) / (maximum number of *contiguous* `TRUE` flags).
+#'   1L) / (maximum number of *contiguous* `TRUE` flags).
 #'
 #'   You can provide your own function in the `complexity` parameter. It will receive the flag
 #'   vector as only input, and a single number is expected as a result.

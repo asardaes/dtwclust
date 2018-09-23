@@ -41,6 +41,8 @@
 #'
 #' This function uses a lower bound that is only defined for time series of equal length.
 #'
+#' The [proxy::dist()] version simply calls this function.
+#'
 #' A considerably large dataset is probably necessary before this is faster than using [dtw_basic()]
 #' with [proxy::dist()]. Also note that [lb_improved()] calculates warping envelopes for the series
 #' in `y`, so be careful with the provided order and `nn.margin` (see examples).
@@ -108,12 +110,15 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     dtw.func <- match.arg(dtw.func, c("dtw", "dtw_basic"))
     nn.margin <- as.integer(nn.margin)
     if (nn.margin != 1L) nn.margin <- 2L
+
     x <- tslist(x)
     y_missing <- is.null(y)
     y <- if (y_missing) x else tslist(y)
+
     if (length(x) == 0L || length(y) == 0L) stop("Empty list received in x or y.")
     if (is_multivariate(c(x,y))) stop("dtw_lb does not support multivariate series.")
     if (error.check) check_consistency(c(x,y), "tslist")
+
     if (dtw.func == "dtw")
         method <- if (norm == "L1") "DTW" else "DTW2"
     else
@@ -123,11 +128,10 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     dots$norm <- norm
     dots$window.size <- window.size
     dots$window.type <- if (is.null(window.size)) "none" else "slantedband"
+
     if (pairwise) {
         distfun <- ddist2(method, list(packages = "dtwclust")) # parallelization here
-        return(do.call(distfun, quote = TRUE, args = enlist(
-            x = x, centroids = y, pairwise = TRUE, dots = dots
-        )))
+        return(quoted_call(distfun, x = x, centroids = y, pairwise = TRUE, dots = dots))
     }
 
     # NOTE: I tried starting with LBK estimate, refining with LBI and then DTW but, overall,
@@ -146,7 +150,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
     if (method == "DTW_BASIC") {
         # modifies distmat in place
         dots$margin <- nn.margin
-        do.call(call_dtwlb, enlist(x = x, y = y, distmat = D, dots = dots), TRUE)
+        quoted_call(call_dtwlb, x = x, y = y, distmat = D, dots = dots)
     }
     else {
         D <- split_parallel(D, 1L)
@@ -157,7 +161,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                      .combine = rbind,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
-                     .export = c("enlist", "call_dtwlb")) %op% {
+                     .export = c("quoted_call", "call_dtwlb")) %op% {
                          if (nn.margin != 1L)
                              warning("Column-wise nearest neighbors are not implemented for dtw::dtw") # nocov
                          dots$pairwise <- TRUE
@@ -168,12 +172,13 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                              id_changed <- which(id_nn_prev != id_nn)
                              id_nn_prev <- id_nn
 
-                             d_sub <- do.call(proxy::dist,
-                                              enlist(x = x[id_changed],
-                                                     y = y[id_nn[id_changed]],
-                                                     method = method,
-                                                     dots = dots),
-                                              TRUE)
+                             d_sub <- quoted_call(
+                                 proxy::dist,
+                                 x = x[id_changed],
+                                 y = y[id_nn[id_changed]],
+                                 method = method,
+                                 dots = dots
+                             )
 
                              distmat[id_mat[id_changed, , drop = FALSE]] <- d_sub
                              id_nn <- apply(distmat, 1L, which.min)

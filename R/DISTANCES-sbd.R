@@ -23,10 +23,9 @@
 #'
 #' @return For `return.shifted = FALSE`, the numeric distance value, otherwise a list with:
 #'
-#'   - `dist`: The shape-based distance between `x` and `y`.
-#'   - `yshift`: A shifted version of `y` so that it optimally matches `x` (based on [NCCc()]).
+#' - `dist`: The shape-based distance between `x` and `y`.
+#' - `yshift`: A shifted version of `y` so that it optimally matches `x` (based on [NCCc()]).
 #'
-#' @template rcpp-parallel
 #' @template proxy
 #' @template symmetric
 #' @section Proxy version:

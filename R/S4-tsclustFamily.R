@@ -30,10 +30,10 @@
 #'   - The second argument is called `centroids` (inconsistent with [proxy::dist()]).
 #'   - If `control$distmat` is *not* `NULL`, the function will try to subset it.
 #'   - If `control$symmetric` is `TRUE`, `centroids` is `NULL`, *and* there is no argument
-#'     `pairwise` that is `TRUE`, only half the distance matrix will be computed.
+#'   `pairwise` that is `TRUE`, only half the distance matrix will be computed.
 #'     + If the distance was registered in [proxy::pr_DB] with `loop = TRUE` and more than one
-#'       parallel worker is detected, the computation will be in parallel (using multi-processing
-#'       with [foreach::foreach()]), otherwise it will be sequential with [proxy::dist()].
+#'     parallel worker is detected, the computation will be in parallel (using multi-processing with
+#'     [foreach::foreach()]), otherwise it will be sequential with [proxy::dist()].
 #'   - The function always returns a `crossdist` matrix.
 #'
 #'   Note that all distances implemented as part of \pkg{dtwclust} have custom proxy loops that use

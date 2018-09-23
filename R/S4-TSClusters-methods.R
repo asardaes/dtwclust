@@ -43,7 +43,7 @@ NULL
 #'   - `control*`: A [tsclust-controls] object with the desired parameters.
 #'   - `distance*`: A string indicating the distance that should be used.
 #'   - `centroid*`: A string indicating the centroid to use (only necessary for partitional
-#'     clustering).
+#'   clustering).
 #'
 #'   *Necessary when overriding the default family for the calculation of other slots, CVIs or
 #'   prediction. Maybe not always needed, e.g. for plotting.
@@ -85,6 +85,8 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
         call <- dots$call
         dots$call <- NULL
     }
+
+    # no quoted_call here, apparently do.call evaluates as parent and callNextMethod needs that
     .Object <- do.call(methods::callNextMethod, enlist(.Object = .Object, dots = dots), TRUE)
     .Object@call <- call
 
@@ -210,11 +212,12 @@ setMethod("initialize", "PartitionalTSClusters", function(.Object, ...) {
         length(.Object@datalist) && length(.Object@centroids))
         {
         # no cldist available, but dist and cluster can be used to calculate it
-        dm <- do.call(.Object@family@dist, quote = TRUE, args = enlist(
+        dm <- quoted_call(
+            .Object@family@dist,
             .Object@datalist,
             .Object@centroids,
             dots = .Object@args$dist
-        ))
+        )
         .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist), .Object@cluster)])
         dimnames(.Object@cldist) <- NULL
     }
@@ -236,11 +239,12 @@ setMethod("initialize", "HierarchicalTSClusters", function(.Object, ...) {
         environment(.Object@family@dist)$control$distmat <- NULL
     if (!nrow(.Object@cldist) && length(formals(.Object@family@dist)) && length(.Object@cluster)) {
         # no cldist available, but dist and cluster can be used to calculate it
-        dm <- do.call(.Object@family@dist, quote = TRUE, args = enlist(
+        dm <- quoted_call(
+            .Object@family@dist,
             .Object@datalist,
             .Object@centroids,
             dots = .Object@args$dist
-        ))
+        )
         .Object@cldist <- base::as.matrix(dm[cbind(1L:length(.Object@datalist),
                                                    .Object@cluster)])
         dimnames(.Object@cldist) <- NULL
@@ -264,11 +268,12 @@ setMethod("initialize", "FuzzyTSClusters", function(.Object, ...) {
     if (!nrow(.Object@fcluster)) {
         if (length(formals(.Object@family@dist))) {
             # no fcluster available, but dist and cluster function can be used to calculate it
-            dm <- do.call(.Object@family@dist, quote = TRUE, args = enlist(
+            dm <- quoted_call(
+                .Object@family@dist,
                 .Object@datalist,
                 .Object@centroids,
                 dots = .Object@args$dist
-            ))
+            )
             .Object@fcluster <- .Object@family@cluster(dm, m = .Object@control$fuzziness)
             colnames(.Object@fcluster) <- paste0("cluster_", 1L:.Object@k)
             .Object@cluster <- max.col(.Object@fcluster, "first")
@@ -386,12 +391,12 @@ setMethod("update", methods::signature(object = "TSClusters"), update.TSClusters
 #'   centroids obtained from clustering is performed:
 #'
 #'   1. `newdata` is preprocessed with `object@family@preproc` using the parameters in
-#'      `object@args$preproc`.
+#'   `object@args$preproc`.
 #'   2. A cross-distance matrix between the processed series and `object@centroids` is computed with
-#'      `object@family@dist` using the parameters in `object@args$dist`.
+#'   `object@family@dist` using the parameters in `object@args$dist`.
 #'   3. For non-fuzzy clustering, the series are assigned to their nearest centroid's cluster. For
-#'      fuzzy clustering, the fuzzy membership matrix for the series is calculated. In both cases,
-#'      the function in `object@family@cluster` is used.
+#'   fuzzy clustering, the fuzzy membership matrix for the series is calculated. In both cases,
+#'   the function in `object@family@cluster` is used.
 #'
 predict.TSClusters <- function(object, newdata = NULL, ...) {
     if (is.null(newdata)) {
@@ -404,16 +409,17 @@ predict.TSClusters <- function(object, newdata = NULL, ...) {
         newdata <- tslist(newdata)
         check_consistency(newdata, "vltslist")
         nm <- names(newdata)
-        newdata <- do.call(object@family@preproc,
-                           args = enlist(newdata,
-                                         dots = subset_dots(object@args$preproc,
-                                                            object@family@preproc)),
-                           TRUE)
-        distmat <- do.call(object@family@dist,
-                           args = enlist(x = newdata,
-                                         centroids = object@centroids,
-                                         dots = object@args$dist),
-                           TRUE)
+        newdata <- quoted_call(
+            object@family@preproc,
+            newdata,
+            dots = subset_dots(object@args$preproc, object@family@preproc)
+        )
+        distmat <- quoted_call(
+            object@family@dist,
+            x = newdata,
+            centroids = object@centroids,
+            dots = object@args$dist
+        )
         ret <- object@family@cluster(distmat = distmat, m = object@control$fuzziness)
         if (inherits(object, "FuzzyTSClusters"))
             dimnames(ret) <- list(nm, paste0("cluster_", 1L:ncol(ret)))
@@ -770,11 +776,12 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                     type <- setdiff(type, c("Sil", "D", "COP"))
                 }
                 else {
-                    distmat <- do.call(a@family@dist,
-                                       args = enlist(x = a@datalist,
-                                                     centroids = NULL,
-                                                     dots = a@args$dist),
-                                       TRUE)
+                    distmat <- quoted_call(
+                        a@family@dist,
+                        x = a@datalist,
+                        centroids = NULL,
+                        dots = a@args$dist
+                    )
                 }
             }
             else {
@@ -795,11 +802,12 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
         if (any(type %in% c("DB", "DBstar"))) {
             S <- a@clusinfo$av_dist
             # distance between centroids
-            distcent <- do.call(a@family@dist,
-                                args = enlist(x = a@centroids,
-                                              centroids = NULL,
-                                              dots = a@args$dist),
-                                TRUE)
+            distcent <- quoted_call(
+                a@family@dist,
+                x = a@centroids,
+                centroids = NULL,
+                dots = a@args$dist
+            )
             distcent <- base::as.matrix(distcent)
             if (!base::isSymmetric(distcent))
                 warning("Internal CVIs: centroids' cross-distance matrix is NOT symmetric, ",
@@ -811,27 +819,25 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
         if (any(type %in% c("SF", "CH"))) {
             N <- length(a@datalist)
             if (a@type == "partitional") {
-                global_cent <- do.call(a@family@allcent,
-                                       args = enlist(x = a@datalist,
-                                                     cl_id = rep(1L, N),
-                                                     k = 1L,
-                                                     cent = a@datalist[sample(N, 1L)],
-                                                     cl_old = rep(0L, N),
-                                                     dots = a@args$cent),
-                                       TRUE)
+                global_cent <- quoted_call(
+                    a@family@allcent,
+                    x = a@datalist,
+                    cl_id = rep(1L, N),
+                    k = 1L,
+                    cent = a@datalist[sample(N, 1L)],
+                    cl_old = rep(0L, N),
+                    dots = a@args$cent
+                )
             }
             else {
-                global_cent <- do.call(a@family@allcent,
-                                       args = enlist(a@datalist,
-                                                     dots = subset_dots(a@args$cent,
-                                                                        a@family@allcent)),
-                                       TRUE)
+                global_cent <- quoted_call(a@family@allcent,
+                                           a@datalist,
+                                           dots = subset_dots(a@args$cent, a@family@allcent))
             }
-            dist_global_cent <- do.call(a@family@dist,
-                                        args = enlist(x = a@centroids,
-                                                      centroids = global_cent,
-                                                      dots = a@args$dist),
-                                        TRUE)
+            dist_global_cent <- quoted_call(a@family@dist,
+                                            x = a@centroids,
+                                            centroids = global_cent,
+                                            dots = a@args$dist)
             dim(dist_global_cent) <- NULL
         }
 
@@ -955,34 +961,34 @@ setMethod(
             # calculate global centroids if needed
             if (any(type %in% c("K", "SC", "PBMF"))) {
                 N <- length(a@datalist)
-                global_cent <- do.call(a@family@allcent,
-                                       args = enlist(x = a@datalist,
-                                                     cl_id = cbind(rep(1L, N)),
-                                                     k = 1L,
-                                                     dots = a@args$cent),
-                                       TRUE)
-                dist_global_cent <- do.call(a@family@dist,
-                                            args = enlist(x = a@centroids,
-                                                          centroids = global_cent,
-                                                          dots = a@args$dist),
-                                            TRUE)
+                global_cent <- quoted_call(
+                    a@family@allcent,
+                    x = a@datalist,
+                    cl_id = cbind(rep(1L, N)),
+                    k = 1L,
+                    dots = a@args$cent
+                )
+                dist_global_cent <- quoted_call(
+                    a@family@dist,
+                    x = a@centroids,
+                    centroids = global_cent,
+                    dots = a@args$dist
+                )
                 dim(dist_global_cent) <- NULL
             }
             # distance between centroids
             if (any(type %in% c("K", "T", "PBMF"))) {
-                distcent <- do.call(a@family@dist,
-                                    args = enlist(x = a@centroids,
-                                                  centroids = NULL,
-                                                  dots = a@args$dist),
-                                    TRUE)
+                distcent <- quoted_call(a@family@dist,
+                                        x = a@centroids,
+                                        centroids = NULL,
+                                        dots = a@args$dist)
             }
             # distance between series and centroids
             if (any(type %in% c("K", "T", "SC", "PBMF"))) {
-                dsc <- do.call(a@family@dist,
-                               args = enlist(x = a@datalist,
-                                             centroids = a@centroids,
-                                             dots = a@args$dist),
-                               TRUE)
+                dsc <- quoted_call(a@family@dist,
+                                   x = a@datalist,
+                                   centroids = a@centroids,
+                                   dots = a@args$dist)
             }
             CVIs <- c(CVIs, sapply(type, function(CVI) {
                 switch(EXPR = CVI,
@@ -1029,11 +1035,10 @@ setMethod(
                        "PBMF" = {
                            u <- a@fcluster
                            m <- a@control$fuzziness
-                           dsgc <- do.call(a@family@dist,
-                                           args = enlist(x = a@datalist,
-                                                         centroids = global_cent,
-                                                         dots = a@args$dist),
-                                           TRUE)
+                           dsgc <- quoted_call(a@family@dist,
+                                               x = a@datalist,
+                                               centroids = global_cent,
+                                               dots = a@args$dist)
                            factor1 <- 1 / a@k
                            factor2 <- sum(dsgc) / sum(dsc * (u ^ m))
                            factor3 <- max(distcent[!diag(a@k)])

@@ -97,8 +97,8 @@ parallel, regardless of \code{pam.sparse}.
 so that the distance calculations can be done in parallel and the sparse matrix updated
 iteratively.
 \item If both \code{pam.precompute} and \code{pam.sparse} are \code{FALSE}, repetitions are done in parallel, and
-each repetition performs distance calculations sequentially, but the distance matrix cannot
-be updated iteratively.
+each repetition performs distance calculations sequentially, but the distance matrix cannot be
+updated iteratively.
 }
 }
 

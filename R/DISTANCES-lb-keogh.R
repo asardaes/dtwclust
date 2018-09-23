@@ -10,14 +10,13 @@
 #' @inherit lb_improved details
 #' @inheritSection lb_improved Note
 #'
-#' @template rcpp-parallel
 #' @template proxy
 #'
 #' @return A list with:
 #'
-#'   - `d`: The lower bound of the DTW distance.
-#'   - `upper.env`: The time series of `y`'s upper envelope.
-#'   - `lower.env`: The time series of `y`'s lower envelope.
+#' - `d`: The lower bound of the DTW distance.
+#' - `upper.env`: The time series of `y`'s upper envelope.
+#' - `lower.env`: The time series of `y`'s lower envelope.
 #'
 #' @references
 #'

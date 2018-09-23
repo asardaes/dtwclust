@@ -111,11 +111,11 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
     args$series <- series
     args$type <- clus_type
     args$seed <- seed
-    args$args <- do.call(tsclust_args,
-                         list(preproc = preproc_args,
-                              dist = distance_args,
-                              cent = centroid_args),
-                         TRUE)
+    args$args <- do.call(tsclust_args, quote = TRUE, args = list(
+        preproc = preproc_args,
+        dist = distance_args,
+        cent = centroid_args)
+    )
 
     # create TSClusters
     ret <- do.call(tsclust, c(args, list(...)), TRUE)

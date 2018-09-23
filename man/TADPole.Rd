@@ -64,8 +64,7 @@ equal length.
 Parallelization is supported in the following way:
 \itemize{
 \item For multiple \code{dc} values, multi-processing with \code{\link[foreach:foreach]{foreach::foreach()}}.
-\item Otherwise, the internal distance calculations use multi-threading with
-\link[RcppParallel:RcppParallel]{RcppParallel::RcppParallel}.
+\item The internal distance calculations use multi-threading with \link[RcppParallel:RcppParallel]{RcppParallel::RcppParallel}.
 }
 
 The windowing constraint uses a centered window. The calculations expect a value in

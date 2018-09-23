@@ -37,8 +37,7 @@
 #' Parallelization is supported in the following way:
 #'
 #' - For multiple `dc` values, multi-processing with [foreach::foreach()].
-#' - Otherwise, the internal distance calculations use multi-threading with
-#'   [RcppParallel::RcppParallel].
+#' - The internal distance calculations use multi-threading with [RcppParallel::RcppParallel].
 #'
 #' @template window
 #'

@@ -84,11 +84,7 @@ setMethod(`[`, "Distmat", function(x, i, j, ..., drop = TRUE) {
             stop("Invalid internal Distmat instance.") # nocov
 
         centroids <- if (identical(i,j)) NULL else x$series[j]
-        dm <- do.call(x$distfun,
-                      enlist(x = x$series[i],
-                             centroids = centroids,
-                             dots = x$dist_args),
-                      TRUE)
+        dm <- quoted_call(x$distfun, x = x$series[i], centroids = centroids, dots = x$dist_args)
     }
     else {
         dm <- x$distmat[i, j, drop = drop]
