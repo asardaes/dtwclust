@@ -85,6 +85,14 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
         call <- dots$call
         dots$call <- NULL
     }
+    # apparently a non-NULL value is needed if proc_time class is virtual?
+    if (is.null(dots$proctime)) {
+        dots$proctime <- tic
+        fill_proctime <- TRUE
+    }
+    else {
+        fill_proctime <- FALSE # nocov
+    }
 
     # no quoted_call here, apparently do.call evaluates as parent and callNextMethod needs that
     .Object <- do.call(methods::callNextMethod, enlist(.Object = .Object, dots = dots), TRUE)
@@ -193,7 +201,7 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
         }
     }
     # just a filler
-    if (!length(.Object@proctime)) .Object@proctime <- proc.time() - tic
+    if (fill_proctime) .Object@proctime <- proc.time() - tic
     # return
     .Object
 })
@@ -550,7 +558,7 @@ plot.TSClusters <- function(x, y, ...,
 
     # plot dendrogram?
     if (inherits(x, "HierarchicalTSClusters") && type == "dendrogram") {
-        x <- methods::S3Part(x, strictS3 = TRUE)
+        x <- methods::S3Part(x, strictS3 = TRUE, "hclust")
         if (plot) graphics::plot(x, ...)
         return(invisible(NULL))
     }
