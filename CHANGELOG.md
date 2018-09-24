@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 5.5.1
+* Documentation fixes.
+* The registration of `hclust` and `proc_time` with `setOldClass` now leaves them as virtual classes.
+
 ## Version 5.5.0
 * Added a standalone function to extract centroids for partition around medoids: `pam_cent`.
 * Fixed the calculation of GAK for non-`NULL` windows.

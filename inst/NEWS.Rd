@@ -7,8 +7,9 @@
     Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/master/CHANGELOG.md}
 }
 
-\section{Changes in version 5.5.0.9000}{
+\section{Changes in version 5.5.1}{
 \itemize{
-    \item TBD
+    \item Documentation fixes.
+    \item The registration of \code{hclust} and \code{proc_time} with \code{setOldClass} now leaves them as virtual classes.
 }
 }

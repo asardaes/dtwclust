@@ -1,5 +1,7 @@
 
-## Update to version ...
+## Update to version 5.5.1
+* Documentation fixes.
+* Fixes related to setOldClass calls.
 
 ## Test environments
 * Local GNU/Linux, R release
