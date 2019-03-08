@@ -2,6 +2,7 @@ data(uciCT)
 options(deparse.max.lines = 2L)
 RNGkind("default")
 default_rngkind <- RNGkind()[1L]
+suppressWarnings(RNGversion("3.5.0"))
 
 # environment to save objects for regression tests
 persistent <- new.env()
