@@ -59,7 +59,7 @@ NeedsCompilation: yes
 SystemRequirements: C++11, GNU make
 Encoding: UTF-8
 LazyData: TRUE
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
 Collate: 
