@@ -256,7 +256,7 @@ making their combination with other \R{} packages cumbersome.
 Hence, the \dtwclust{} package is intended to provide a consistent and user-friendly way of interacting with classic and new clustering algorithms,
 taking into consideration the nuances of time-series data.
 
-The rest of this is organized as follows.
+The rest of this manuscript is organized as follows.
 The information relevant to the distance measures will be presented in \cref{sec:distances}.
 Supported algorithms for prototype extraction will be discussed in \cref{sec:prototypes}.
 The main clustering algorithms will be described in \cref{sec:clustering}.
