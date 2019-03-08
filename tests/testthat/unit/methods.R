@@ -276,6 +276,10 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
                 info = "Plotting multivariate series returns a gg object invisibly")
     expect_s3_class(plot(tadpole_object, plot = FALSE, size = 1.5), "ggplot")
 
+    object_with_repeated_series <- partitional_object
+    object_with_repeated_series@datalist[[1L]] <- object_with_repeated_series@datalist[[2L]]
+    expect_s3_class(plot(object_with_repeated_series, plot = FALSE, labels = list()), "ggplot")
+
     # ----------------------------------------------------------------------------------------------
     # predict
     # ----------------------------------------------------------------------------------------------

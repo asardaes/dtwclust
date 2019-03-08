@@ -696,6 +696,7 @@ plot.TSClusters <- function(x, y, ...,
                 for (i in seq_along(df_series)) {
                     this_df <- df_series[[i]]
                     for (not_this in df_series[-i]) {
+                        if (isTRUE(all.equal(not_this, this_df, check.attributes = FALSE))) next
                         this_df <- dplyr::anti_join(this_df, not_this, by = c("t", "value"))
                     }
                     ret[[i]] <- dplyr::sample_n(this_df, 1L)
