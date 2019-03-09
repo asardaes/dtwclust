@@ -22,7 +22,7 @@ opts_knit$set(self.contained = TRUE)
 % Vignette options
 %\VignetteEngine{knitr::knitr_notangle}
 %\VignettePackage{dtwclust}
-%\VignetteDepends{TSclust, TSdist, doParallel}
+%\VignetteDepends{clue, cluster, doParallel}
 %\VignetteIndexEntry{Comparing Time-Series Clustering Algorithms in R Using the dtwclust Package}
 %\VignetteEncoding{UTF-8}
 
@@ -1572,15 +1572,11 @@ Note, however, that not all distance and centroid functions support multivariate
 As a first example,
 the autocorrelation-based distance from the \pkg{TSclust} package \citep{montero2014} is registered with \pkg{proxy} so that it can be used either directly or with \dtwclust{}.
 
-<<example-register-tsclust, echo = TRUE, message = FALSE>>=
+<<example-register-tsclust, echo = TRUE, eval = FALSE>>=
 require("TSclust")
 proxy::pr_DB$set_entry(FUN = diss.ACF, names = c("ACFD"),
                        loop = TRUE, type = "metric", distance = TRUE,
                        description = "Autocorrelation-based distance")
-
-# Taking just a subset of the data
-# Note that subsetting with single brackets preserves the list format
-proxy::dist(CharTraj[3:8], method = "ACFD", upper = TRUE)
 @
 
 In time-series clustering and classification,
@@ -1588,21 +1584,7 @@ the dissimilarity measure plays a crucial role.
 The \pkg{TSdist} package \citep{tsdist} aggregates a large amount of distance measures specifically tailored to time-series.
 Thanks to the way \dtwclust{} is structured,
 making use of any of those distances is extremely simple,
-as the next example shows.
-
-<<example-register-tsdist, echo = TRUE, message = FALSE>>=
-require("TSdist")
-# Register the Fourier distance
-proxy::pr_DB$set_entry(FUN = FourierDistance, names = c("fourier"),
-                       loop = TRUE, type = "metric", distance = TRUE,
-                       description = "Distance with Fourier coefficients")
-
-# Fourier distance requires equal length
-data <- reinterpolate(CharTraj, new.length = max(lengths(CharTraj)))
-
-# Partitional clustering
-tsclust(data[1L:10L], k = 2L, distance = "fourier", seed = 838)
-@
+as the previous example showed.
 
 The user is also free to modify or create distance functions and use them.
 For instance, a wrapper to the \code{dtw} function in \pkg{dtw} can be created in order to use the asymmetric step pattern and the normalized distance.
@@ -1669,12 +1651,10 @@ which could be implemented as follows.
 database <- data[-100L]
 
 classify_series <- function(query) {
-    # Nearest neighbor
-    nn <- which.min(dtw_lb(database, query,
-                           window.size = 18L,
-                           nn.margin = 2L))
-    # Return a label
-    CharTrajLabels[nn]
+    d <- dtw_lb(database, query, window.size = 18L, nn.margin = 2L)
+
+    # Return label of nearest neighbor
+    CharTrajLabels[which.min(d)]
 }
 
 # 100-th series is a Z character
@@ -1693,7 +1673,7 @@ their prototypes are extracted.
 Therefore, the series are \textit{z}-normalized by means of the \code{zscore} function.
 The seed is provided because of the randomness in shape extraction when choosing a reference series (see \cref{sec:shape}).
 
-<<example-hc, echo = TRUE, fig.cap = "Resulting dendrogram after hierarchical clustering.">>=
+<<example-hc, echo = TRUE, out.width = "0.8\\linewidth", fig.cap = "Resulting dendrogram after hierarchical clustering.">>=
 hc_sbd <- tsclust(CharTraj, type = "h", k = 20L,
                   preproc = zscore, seed = 899,
                   distance = "sbd", centroid = shape_extraction,

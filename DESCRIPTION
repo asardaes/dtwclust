@@ -45,11 +45,8 @@ LinkingTo:
 Suggests:
     doParallel,
     knitr,
-    parallelDist,
-    testthat,
-    TSclust,
-    TSdist
-Date: 2018-10-18
+    testthat
+Date: 2019-03-09
 Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
 BugReports: https://github.com/asardaes/dtwclust/issues
