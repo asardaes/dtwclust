@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 5.5.2
+* Fixed plotting of clusters with labels when a cluster has repeated series.
+
 ## Version 5.5.1
 * Documentation fixes.
 * The registration of `hclust` and `proc_time` with `setOldClass` now leaves them as virtual classes.

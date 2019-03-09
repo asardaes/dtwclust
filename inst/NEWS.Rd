@@ -7,8 +7,8 @@
     Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/master/CHANGELOG.md}
 }
 
-\section{Changes in version 5.5.1.9000}{
+\section{Changes in version 5.5.2}{
 \itemize{
-    \item TBD.
+    \item Fixed plotting of clusters with labels when a cluster has repeated series.
 }
 }

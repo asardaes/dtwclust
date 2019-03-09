@@ -1,5 +1,7 @@
 
-## Update to version
+## Update to version 5.5.2
+* Fixed failing R-devel tests.
+* Bug fix.
 
 ## Test environments
 * Local GNU/Linux, R release
