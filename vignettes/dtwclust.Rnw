@@ -22,7 +22,7 @@ opts_knit$set(self.contained = TRUE)
 % Vignette options
 %\VignetteEngine{knitr::knitr_notangle}
 %\VignettePackage{dtwclust}
-%\VignetteDepends{clue, cluster, doParallel}
+%\VignetteDepends{doParallel}
 %\VignetteIndexEntry{Comparing Time-Series Clustering Algorithms in R Using the dtwclust Package}
 %\VignetteEncoding{UTF-8}
 
