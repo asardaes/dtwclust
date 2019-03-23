@@ -1,7 +1,5 @@
 
-## Update to version 5.5.2
-* Fixed failing R-devel tests.
-* Bug fix.
+## Update to version ...
 
 ## Test environments
 * Local GNU/Linux, R release
@@ -18,6 +16,3 @@
   + The installed size is due to the 3 included vignettes (already compacted)
     and the compiled code (approx. 20% of the code).
   + GNU make is a system requirement due to RcppParallel
-
-## Additional issues
-* UBSAN: the errors stem from the RcppParallel package and can be safely ignored.
