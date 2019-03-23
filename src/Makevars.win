@@ -1,11 +1,10 @@
 CXX_STD = CXX11
-PKG_CXXFLAGS += -DRCPP_PARALLEL_USE_TBB=1
+PKG_CXXFLAGS += -DRCPP_PARALLEL_USE_TBB=1 -DRCPP_USE_UNWIND_PROTECT
 
 # Needed due to RcppArmadillo
 PKG_LIBS += $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 # Needed due to RcppParallel
-PKG_LIBS += $(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" \
-              -e "RcppParallel::RcppParallelLibs()")
+PKG_LIBS += $(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e "RcppParallel::RcppParallelLibs()")
 
 # Get source files (see https://stackoverflow.com/a/27794283/5793905 but note the quotes)
 CPP_SOURCES = $(shell find . -type f -name '*.cpp')
