@@ -222,7 +222,7 @@ void SymmetricFiller::fill() const {
     SymmetricFillWorker fill_worker(dist_calculator_, distmat_);
     // number of elements in square matrix without including diagonal
     int nrows = distmat_->nrow();
-    int size = nrows * (nrows + 1) / 2 - nrows;
+    int size = nrows * (nrows - 1) / 2;
     int grain = get_grain(size, num_threads_);
     RcppParallel::parallelFor(0, size, fill_worker, grain);
 }
