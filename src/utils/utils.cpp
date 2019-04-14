@@ -34,31 +34,14 @@ double kahan_sum(const SurrogateMatrix<double>& x)
     return sum;
 }
 
-/* single to double indices for symmetric matrices without diagonal */
+/**
+ * single to double indices for symmetric matrices without diagonal
+ * https://stackoverflow.com/a/27088560/5793905
+ * https://math.stackexchange.com/questions/646117/how-to-find-a-function-mapping-matrix-indices
+ */
 void s2d(const id_t id, const id_t nrow, id_t& i, id_t& j) {
-    // check if it's the first column
-    if (id < (nrow - 1)) {
-        i = id + 1;
-        j = 0;
-        return;
-    }
-    // otherwise start at second column
-    i = 2;
-    j = 1;
-    id_t start_id = nrow - 1;
-    id_t end_id = nrow * 2 - 4;
-    // j is ready after this while loop finishes
-    while (!(id >= start_id && id <= end_id)) {
-        start_id = end_id + 1;
-        end_id = start_id + nrow - j - 3;
-        i++;
-        j++;
-    }
-    // while loop for i
-    while (start_id < id) {
-        i++;
-        start_id++;
-    }
+    j = nrow - 2 - static_cast<id_t>(sqrt(-8 * id + 4 * nrow * (nrow - 1) - 7) / 2 - 0.5);
+    i = id + j + 1 - nrow * (nrow - 1) / 2 + (nrow - j) * ((nrow - j) - 1) / 2;
 }
 
 } // namespace dtwclust
