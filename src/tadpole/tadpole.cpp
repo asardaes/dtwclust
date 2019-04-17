@@ -191,6 +191,7 @@ public:
         mutex_.lock();
         DistanceCalculator* dist_calculator = dist_calculator_->clone();
         mutex_.unlock();
+
         /*
          * Flag definition
          *   0 - DTW calculated, and it lies below dc
@@ -199,13 +200,19 @@ public:
          *   3 - not within dc, prune
          *   4 - identical series
          */
-        id_t i, j;
+        id_t i = LBM_.nrow();
+        id_t j;
         for (std::size_t id = begin; id < end; id++) {
-            s2d(id, LBM_.nrow(), i, j);
+            if (i >= LBM_.nrow() - 1)
+                s2d(id, LBM_.nrow(), i, j); // move to next column
+            else
+                i++; // same column still valid, only increase row
+
             if (LBM_(i,j) <= dc_ && UBM_(i,j) > dc_) {
                 num_dist_op_++;
                 double dtw_dist = dist_calculator->calculate(i,j);
                 distmat_[id] = dtw_dist;
+
                 if (dtw_dist <= dc_)
                     flags_[id] = 0;
                 else
@@ -221,6 +228,7 @@ public:
                 flags_[id] = 4; // nocov
             }
         }
+
         mutex_.lock();
         delete dist_calculator;
         mutex_.unlock();

@@ -7,6 +7,8 @@
 #include <RcppParallel.h>
 #include <Rinternals.h>
 
+#include "../utils/utils.h" // id_t
+
 namespace dtwclust {
 
 // -------------------------------------------------------------------------------------------------
@@ -16,9 +18,9 @@ class Distmat
 {
 public:
     virtual ~Distmat() {};
-    virtual double& operator() (const int i, const int j) = 0;
-    virtual int nrow() const = 0;
-    virtual int ncol() const = 0;
+    virtual double& operator() (const id_t i, const id_t j) = 0;
+    virtual id_t nrow() const = 0;
+    virtual id_t ncol() const = 0;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -37,9 +39,9 @@ class RDistmat : public Distmat
 {
 public:
     RDistmat(const SEXP& D);
-    double& operator() (const int i, const int j) override;
-    int nrow() const override;
-    int ncol() const override;
+    double& operator() (const id_t i, const id_t j) override;
+    id_t nrow() const override;
+    id_t ncol() const override;
 
 private:
     RcppParallel::RMatrix<double> distmat_;

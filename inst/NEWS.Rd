@@ -9,6 +9,6 @@
 
 \section{Changes in version 5.5.2.9000}{
 \itemize{
-    \item TBD.
+    \item Internal speed optimizations.
 }
 }

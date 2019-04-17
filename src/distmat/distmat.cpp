@@ -35,12 +35,12 @@ RDistmat::RDistmat(const SEXP& D)
 { }
 
 // operator() for assignment
-double& RDistmat::operator() (const int i, const int j) {
+double& RDistmat::operator() (const id_t i, const id_t j) {
     return distmat_(i,j);
 }
 
 // dimensions
-int RDistmat::nrow() const { return distmat_.nrow(); }
-int RDistmat::ncol() const { return distmat_.ncol(); }
+id_t RDistmat::nrow() const { return distmat_.nrow(); }
+id_t RDistmat::ncol() const { return distmat_.ncol(); }
 
 } // namespace dtwclust
