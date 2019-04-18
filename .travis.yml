@@ -41,14 +41,12 @@ before_install:
     fi
   - |
     redirectToTmp() {
-      cmd="$@"
-      echo $cmd
-      $cmd > /tmp/std.out
+      command "$@" > /tmp/std.out
       tail /tmp/std.out
     }
     Rscript() {
       args="${@:2}"
-      cmd="Rscript --verbose -e ${args@Q}"
+      cmd="Rscript -e '$args'"
       travis_wait redirectToTmp $cmd
     }
 after_success:
