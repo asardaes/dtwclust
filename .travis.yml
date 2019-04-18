@@ -40,14 +40,13 @@ before_install:
       sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-7 50;
     fi
   - |
-    redirectToTmp() {
-      command "$@" > /tmp/std.out
-      tail /tmp/std.out
-    }
     Rscript() {
       args="${@:2}"
-      cmd="Rscript -e '$args'"
-      travis_wait redirectToTmp $cmd
+      echo "f <- file('/tmp/rs.out', 'wt'); sink(f); try({" > /tmp/rs.in
+      echo $args >> /tmp/rs.in
+      echo "}); close(f)" >> /tmp/rs.in
+      travis_wait command Rscript "/tmp/rs.in"
+      tail /tmp/rs.out
     }
 after_success:
   - if [[ ("$TRAVIS_R_VERSION" != "devel") && ("$TRAVIS_OS_NAME" == "linux") ]]; then
