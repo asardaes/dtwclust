@@ -25,8 +25,8 @@ matrix:
 # see https://thecoatlessprofessor.com/programming/selecting-an-alternative-compiler-for-r-package-testing-on-travis-ci/
 addons:
   apt:
-    #sources:
-      #- ubuntu-toolchain-r-test
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
       - gcc-7
       - g++-7
