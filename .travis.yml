@@ -39,8 +39,18 @@ before_install:
       sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7;
       sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-7 50;
     fi
-  # https://unix.stackexchange.com/a/109790/219144
-  - Rscript() { echo Hiding Rscript output; travis_wait command Rscript "-e sink('/dev/null') $@"; }
+  - |
+    redirectToTmp() {
+      cmd="$@"
+      echo $cmd
+      $cmd > /tmp/std.out
+      tail /tmp/std.out
+    }
+    Rscript() {
+      args="${@:2}"
+      cmd="Rscript --verbose -e ${args@Q}"
+      travis_wait redirectToTmp $cmd
+    }
 after_success:
   - if [[ ("$TRAVIS_R_VERSION" != "devel") && ("$TRAVIS_OS_NAME" == "linux") ]]; then
       Rscript codecov.R;
