@@ -45,7 +45,10 @@ before_install:
       echo "f <- file('/tmp/rs.out', 'wt'); sink(f, type='o'); sink(f, type='m'); try({" > /tmp/rs.in
       echo $args >> /tmp/rs.in
       echo "}); closeAllConnections()" >> /tmp/rs.in
-      travis_wait command Rscript "/tmp/rs.in"
+      # https://github.com/travis-ci/travis-ci/issues/4190#issuecomment-353342526
+      while sleep 10; do echo "=====[ still running ]====="; done &
+      command Rscript "/tmp/rs.in"
+      kill %1
       tail -n 50 /tmp/rs.out
     }
 after_success:
