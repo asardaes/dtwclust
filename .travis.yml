@@ -40,7 +40,7 @@ before_install:
       sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-7 50;
     fi
   # https://unix.stackexchange.com/a/109790/219144
-  - Rscript() { echo Hiding Rscript output; travis_wait command Rscript "$@" > /dev/null; }
+  - Rscript() { echo Hiding Rscript output; travis_wait command Rscript "-e sink('/dev/null') $@"; }
 after_success:
   - if [[ ("$TRAVIS_R_VERSION" != "devel") && ("$TRAVIS_OS_NAME" == "linux") ]]; then
       Rscript codecov.R;
