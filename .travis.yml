@@ -43,10 +43,10 @@ before_install:
     Rscript() {
       # https://github.com/travis-ci/travis-ci/issues/4190#issuecomment-353342526
       while sleep 60; do echo "=====[ still running ]====="; done &
-      command Rscript "$@" > /tmp/rs.out
+      command Rscript "$@" > /dev/null 2>&1
       kill %1
-      tail -n 50 /tmp/rs.out
     }
+    Rscript -e 'print("A");print(1);'
 after_success:
   - if [[ ("$TRAVIS_R_VERSION" != "devel") && ("$TRAVIS_OS_NAME" == "linux") ]]; then
       Rscript codecov.R;
