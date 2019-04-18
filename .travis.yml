@@ -42,7 +42,7 @@ before_install:
   - |
     Rscript() {
       args="${@:2}"
-      echo "f <- file('/tmp/rs.out', 'wt'); sink(f, "o"); sink(f, "m"); try({" > /tmp/rs.in
+      echo "f <- file('/tmp/rs.out', 'wt'); sink(f, type='o'); sink(f, type='m'); try({" > /tmp/rs.in
       echo $args >> /tmp/rs.in
       echo "}); close(f)" >> /tmp/rs.in
       travis_wait command Rscript "/tmp/rs.in"
