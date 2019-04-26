@@ -10,7 +10,7 @@ options(testthat.default_reporter = "summary")
 #' To test in a local machine:
 #' Sys.setenv(NOT_CRAN = "true"); test_dir("tests/testthat/")
 #' OR
-#' devtools::test() # broken, can't figure out why
+#' devtools::test() # fixed? https://github.com/r-lib/devtools/issues/1832
 #'
 #' To disable parallel tests, before calling test() run:
 #'
