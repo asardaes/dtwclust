@@ -2,6 +2,7 @@
 
 ## Version 5.5.2.9000
 * Internal speed optimizations.
+* Added support for interruption of multi-threaded tasks via `RcppThread`.
 
 ## Version 5.5.2
 * Fixed plotting of clusters with labels when a cluster has repeated series.

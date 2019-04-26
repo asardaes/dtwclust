@@ -10,5 +10,6 @@
 \section{Changes in version 5.5.2.9000}{
 \itemize{
     \item Internal speed optimizations.
+    \item Added support for interruption of multi-threaded tasks via \pkg{RcppThread}.
 }
 }

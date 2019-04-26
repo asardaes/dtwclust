@@ -5,8 +5,9 @@
 
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
+#include <RcppThread.h>
 
-#include "../utils/utils.h" // get_grain, s2d, id_t
+#include "../utils/utils.h" // get_grain, s2d, id_t, interrupt_grain
 
 namespace dtwclust {
 
@@ -55,9 +56,11 @@ class PairwiseFillWorker : public RcppParallel::Worker {
 public:
     // constructor
     PairwiseFillWorker(const std::shared_ptr<DistanceCalculator>& dist_calculator,
-                       const std::shared_ptr<Distmat>& distmat)
+                       const std::shared_ptr<Distmat>& distmat,
+                       const int grain)
         : dist_calculator_(dist_calculator)
         , distmat_(distmat)
+        , interrupt_grain_(interrupt_grain(grain, 10, 1000))
     { }
 
     // parallel loop across specified range
@@ -66,10 +69,13 @@ public:
         mutex_.lock();
         DistanceCalculator* dist_calculator = dist_calculator_->clone();
         mutex_.unlock();
+
         // fill distances
         for (id_t i = begin; i < end; i++) {
+            if (RcppThread::isInterrupted(i % interrupt_grain_ == 0)) break; // nocov
             (*distmat_)(i,0) = dist_calculator->calculate(i,i);
         }
+
         // delete local calculator
         mutex_.lock();
         delete dist_calculator;
@@ -79,6 +85,7 @@ public:
 private:
     const std::shared_ptr<DistanceCalculator> dist_calculator_;
     std::shared_ptr<Distmat> distmat_;
+    const int interrupt_grain_;
     // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
     tthread::mutex mutex_;
 };
@@ -87,10 +94,11 @@ private:
 /* public fill method */
 // -------------------------------------------------------------------------------------------------
 void PairwiseFiller::fill() const {
-    PairwiseFillWorker fill_worker(dist_calculator_, distmat_);
     int size = distmat_->nrow();
     int grain = get_grain(size, num_threads_);
+    PairwiseFillWorker fill_worker(dist_calculator_, distmat_, grain);
     RcppParallel::parallelFor(0, size, fill_worker, grain);
+    RcppThread::checkUserInterrupt();
 }
 
 // =================================================================================================
@@ -116,10 +124,12 @@ class PrimaryFillWorker : public RcppParallel::Worker {
 public:
     // constructor
     PrimaryFillWorker(const std::shared_ptr<DistanceCalculator>& dist_calculator,
-                      const std::shared_ptr<Distmat>& distmat)
+                      const std::shared_ptr<Distmat>& distmat,
+                      const int grain)
         : dist_calculator_(dist_calculator)
         , distmat_(distmat)
         , ncols_(distmat->ncol())
+        , interrupt_grain_(interrupt_grain(grain, 10, 1000))
     { }
 
     // parallel loop across specified range
@@ -128,12 +138,17 @@ public:
         mutex_.lock();
         DistanceCalculator* dist_calculator = dist_calculator_->clone();
         mutex_.unlock();
+
         // fill distances
         for (id_t i = begin; i < end; i++) {
+            if (RcppThread::isInterrupted()) break; // nocov
+
             for (id_t j = 0; j < ncols_; j++) {
+                if (RcppThread::isInterrupted(j % interrupt_grain_ == 0)) break; // nocov
                 (*distmat_)(i,j) = dist_calculator->calculate(i,j);
             }
         }
+
         // delete local calculator
         mutex_.lock();
         delete dist_calculator;
@@ -143,7 +158,8 @@ public:
 private:
     const std::shared_ptr<DistanceCalculator> dist_calculator_;
     std::shared_ptr<Distmat> distmat_;
-    id_t ncols_;
+    const id_t ncols_;
+    const int interrupt_grain_;
     // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
     tthread::mutex mutex_;
 };
@@ -152,10 +168,11 @@ private:
 /* public fill method */
 // -------------------------------------------------------------------------------------------------
 void PrimaryFiller::fill() const {
-    PrimaryFillWorker fill_worker(dist_calculator_, distmat_);
     int size = distmat_->nrow();
     int grain = get_grain(size, num_threads_);
+    PrimaryFillWorker fill_worker(dist_calculator_, distmat_, grain);
     RcppParallel::parallelFor(0, size, fill_worker, grain);
+    RcppThread::checkUserInterrupt();
 }
 
 // =================================================================================================
@@ -180,10 +197,12 @@ class SymmetricFillWorker : public RcppParallel::Worker {
 public:
     // constructor
     SymmetricFillWorker(const std::shared_ptr<DistanceCalculator>& dist_calculator,
-                        const std::shared_ptr<Distmat>& distmat)
+                        const std::shared_ptr<Distmat>& distmat,
+                        const int grain)
         : dist_calculator_(dist_calculator)
         , distmat_(distmat)
         , nrows_(distmat->nrow())
+        , interrupt_grain_(interrupt_grain(grain, 10, 1000))
     { }
 
     // parallel loop across specified range
@@ -197,6 +216,8 @@ public:
         id_t i = nrows_;
         id_t j;
         for (id_t id = begin; id < end; id++) {
+            if (RcppThread::isInterrupted(id % interrupt_grain_ == 0)) break; // nocov
+
             if (i >= nrows_ - 1)
                 s2d(id, nrows_, i, j); // move to next column
             else
@@ -217,6 +238,7 @@ private:
     const std::shared_ptr<DistanceCalculator> dist_calculator_;
     std::shared_ptr<Distmat> distmat_;
     const id_t nrows_;
+    const int interrupt_grain_;
     // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
     tthread::mutex mutex_;
 };
@@ -225,12 +247,13 @@ private:
 /* public fill method */
 // -------------------------------------------------------------------------------------------------
 void SymmetricFiller::fill() const {
-    SymmetricFillWorker fill_worker(dist_calculator_, distmat_);
     // number of elements in square matrix without including diagonal
     int nrows = distmat_->nrow();
     int size = nrows * (nrows - 1) / 2;
     int grain = get_grain(size, num_threads_);
+    SymmetricFillWorker fill_worker(dist_calculator_, distmat_, grain);
     RcppParallel::parallelFor(0, size, fill_worker, grain);
+    RcppThread::checkUserInterrupt();
 }
 
 } // namespace dtwclust

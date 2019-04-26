@@ -14,6 +14,15 @@ int get_grain(const int n, const int num_threads) {
     return (grain < DTWCLUST_MIN_GRAIN) ? DTWCLUST_MIN_GRAIN : grain;
 }
 
+/* how often to check for user interrupt inside a thread */
+int interrupt_grain(const int grain, const int min, const int max, const int factor) {
+    int result = grain / factor;
+    if (result < min) result = min;
+    if (result > max) result = max;
+    if (result < 1) result = 1;
+    return result;
+}
+
 /* for Rcpp::Rcout */
 void Rflush()
 {

@@ -10,9 +10,10 @@
 
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
+#include <RcppThread.h>
 
 #include "../distances/calculators.h"
-#include "../utils/utils.h" // Rflush, get_grain, s2d, id_t
+#include "../utils/utils.h" // Rflush, get_grain, s2d, id_t, interrupt_grain
 
 namespace dtwclust {
 
@@ -175,7 +176,8 @@ public:
                        const Rcpp::NumericMatrix& UBM,
                        LowerTriMat<double>& distmat,
                        LowerTriMat<int>& flags,
-                       std::atomic_int& num_dist_op)
+                       std::atomic_int& num_dist_op,
+                       const int grain)
         : dc_(dc)
         , dist_calculator_(dist_calculator)
         , LBM_(LBM)
@@ -183,6 +185,7 @@ public:
         , distmat_(distmat)
         , flags_(flags)
         , num_dist_op_(num_dist_op)
+        , interrupt_grain_(interrupt_grain(grain, 10000, 100000))
     { }
 
     // parallel loop across specified range
@@ -203,6 +206,8 @@ public:
         id_t i = LBM_.nrow();
         id_t j;
         for (std::size_t id = begin; id < end; id++) {
+            if (RcppThread::isInterrupted(id % interrupt_grain_ == 0)) break; // nocov
+
             if (i >= LBM_.nrow() - 1)
                 s2d(id, LBM_.nrow(), i, j); // move to next column
             else
@@ -241,6 +246,7 @@ private:
     LowerTriMat<double>& distmat_;
     LowerTriMat<int>& flags_;
     std::atomic_int& num_dist_op_;
+    const int interrupt_grain_;
     // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
     tthread::mutex mutex_;
 };
@@ -259,7 +265,8 @@ public:
                   std::vector<int>& nearest_neighbors,
                   std::vector<double>& delta,
                   std::atomic_int& num_dist_op,
-                  double& max_delta)
+                  double& max_delta,
+                  const int grain)
         : dist_calculator_(dist_calculator)
         , LBM_(LBM)
         , UBM_(UBM)
@@ -271,6 +278,7 @@ public:
         , nearest_neighbors_(nearest_neighbors)
         , num_dist_op_(num_dist_op)
         , max_delta_(max_delta)
+        , interrupt_grain_(interrupt_grain(grain, 10000, 100000))
     { }
 
     // parallel loop across specified range
@@ -279,7 +287,10 @@ public:
         mutex_.lock();
         DistanceCalculator* dist_calculator = dist_calculator_->clone();
         mutex_.unlock();
+
         for (std::size_t i = begin; i < end; i++) {
+            if (RcppThread::isInterrupted(i % interrupt_grain_ == 0)) break; // nocov
+
             int which_min_delta = -1;
             double min_delta = R_PosInf;
             for (std::size_t j = 0; j < i; j++) {
@@ -309,12 +320,15 @@ public:
                     }
                 }
             }
+
             delta_[i] = min_delta;
             nearest_neighbors_[i] = which_min_delta;
+
             mutex_.lock();
             if (min_delta > max_delta_) max_delta_ = min_delta;
             mutex_.unlock();
         }
+
         mutex_.lock();
         delete dist_calculator;
         mutex_.unlock();
@@ -331,6 +345,7 @@ private:
     std::vector<int>& nearest_neighbors_;
     std::atomic_int& num_dist_op_;
     double& max_delta_;
+    const int interrupt_grain_;
     // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
     tthread::mutex mutex_;
 };
@@ -359,9 +374,13 @@ std::vector<double> local_density(const Rcpp::List& series,
             UBM,
             distmat,
             flags,
-            num_dist_op
+            num_dist_op,
+            grain
     );
+
     RcppParallel::parallelFor(0, distmat.length(), parallel_worker, grain);
+    RcppThread::checkUserInterrupt();
+
     bool no_peaks = true;
     for (int i = 0; i < num_series; i++) {
         for (int j = 0; j < num_series; j++) {
@@ -371,13 +390,16 @@ std::vector<double> local_density(const Rcpp::List& series,
         }
         if (rho[i] > 0) no_peaks = false;
     }
+
     if (no_peaks) Rcpp::stop("No density peaks detected, choose a different value for cutoff distance 'dc'");
+
     // get min and max
     double min_rho = num_series+1, max_rho = -1;
     for (double const &this_rho : rho) {
         if (this_rho < min_rho) min_rho = this_rho;
         if (this_rho > max_rho) max_rho = this_rho;
     }
+
     // normalize
     double den = max_rho - min_rho;
     for (double& this_rho : rho) {
@@ -386,6 +408,7 @@ std::vector<double> local_density(const Rcpp::List& series,
         else
             this_rho = (this_rho - min_rho) / den;
     }
+
     return rho;
 }
 
@@ -398,6 +421,7 @@ std::vector<double> nn_dist_1(const std::vector<double>& rho, const int num_seri
 {
     std::vector<double> delta_ub(num_series);
     auto id_rho_sorted = stable_sort_ind(rho, true);
+
     double max_delta = 0;
     for (int i = 1; i < num_series; i++) {
         double min_ub_i = R_PosInf;
@@ -407,9 +431,11 @@ std::vector<double> nn_dist_1(const std::vector<double>& rho, const int num_seri
             if (Rcpp::NumericVector::is_na(ub_i)) ub_i = UBM(ii,jj);
             if (ub_i < min_ub_i) min_ub_i = ub_i;
         }
+
         delta_ub[i] = min_ub_i;
         if (min_ub_i > max_delta) max_delta = min_ub_i;
     }
+
     delta_ub[0] = max_delta;
     auto id_orig = stable_sort_ind(id_rho_sorted, false);
     reorder(delta_ub, id_orig); // template
@@ -448,9 +474,13 @@ std::vector<double> nn_dist_2(const Rcpp::List& series,
             nearest_neighbors,
             delta,
             num_dist_op,
-            max_delta
+            max_delta,
+            grain
     );
+
     RcppParallel::parallelFor(1, num_series, parallel_worker, grain);
+    RcppThread::checkUserInterrupt();
+
     delta[0] = max_delta;
     // get min and max
     double min_delta = num_series + 1;
@@ -459,6 +489,7 @@ std::vector<double> nn_dist_2(const Rcpp::List& series,
         if (this_delta < min_delta) min_delta = this_delta;
         if (this_delta > max_delta) max_delta = this_delta;
     }
+
     // normalize
     double den = max_delta - min_delta;
     for (double& this_delta : delta) {
@@ -467,6 +498,7 @@ std::vector<double> nn_dist_2(const Rcpp::List& series,
         else
             this_delta = (this_delta - min_delta) / den;
     }
+
     return delta;
 }
 

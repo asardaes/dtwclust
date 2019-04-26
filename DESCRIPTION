@@ -41,12 +41,13 @@ Imports:
 LinkingTo:
     Rcpp,
     RcppArmadillo,
-    RcppParallel
+    RcppParallel,
+    RcppThread
 Suggests:
     doParallel,
     knitr,
     testthat
-Date: 2019-03-23
+Date: 2019-04-26
 Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
 BugReports: https://github.com/asardaes/dtwclust/issues

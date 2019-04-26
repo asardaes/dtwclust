@@ -6,13 +6,14 @@
 
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
+#include <RcppThread.h>
 
 #include "../distances/calculators.h"
 #include "../distances/details.h" // sdtw
 #include "../utils/KahanSummer.h"
 #include "../utils/SurrogateMatrix.h"
 #include "../utils/TSTSList.h"
-#include "../utils/utils.h" // get_grain, id_t
+#include "../utils/utils.h" // get_grain, id_t, interrupt_grain
 
 namespace dtwclust {
 
@@ -114,12 +115,14 @@ public:
            const Rcpp::NumericVector& weights,
            Rcpp::NumericVector& gradient,
            double& objective,
-           const double gamma)
+           const double gamma,
+           const int grain)
         : dist_calculator_(dist_calculator)
         , weights_(weights)
         , gamma_(gamma)
         , gradient_summer_(&gradient[0], gradient.length())
         , objective_summer_(&objective, 1)
+        , interrupt_grain_(interrupt_grain(grain, 1, 10))
     { }
 
     // parallel loop across specified range
@@ -129,6 +132,7 @@ public:
         SdtwCentCalculator* local_calculator = dist_calculator_.clone();
         SurrogateMatrix<double> em(2, local_calculator->max_len_y_ + 2);
         mutex_.unlock();
+
         // calculations for these series
         //   Includes the calculation of soft-DTW gradient + jacobian product.
         SurrogateMatrix<double>& cm = local_calculator->cm_;
@@ -136,6 +140,8 @@ public:
         const auto& x = local_calculator->x_[0];
         id_t m = x.n_rows;
         for (std::size_t id = begin; id < end; id++) {
+            if (RcppThread::isInterrupted(id % interrupt_grain_ == 0)) break; // nocov
+
             const auto& y = local_calculator->y_[id];
             double dist = local_calculator->calculate(0,id);
 
@@ -157,6 +163,7 @@ public:
                 if (i == m) em((m+1)%2,n+1) = 0;
             }
         }
+
         // finish
         mutex_.lock();
         delete local_calculator;
@@ -168,6 +175,7 @@ private:
     const RcppParallel::RVector<double> weights_;
     double gamma_;
     KahanSummer gradient_summer_, objective_summer_;
+    const int interrupt_grain_;
     tthread::mutex mutex_;
 };
 
@@ -182,12 +190,14 @@ public:
            const Rcpp::NumericVector& weights,
            Rcpp::NumericMatrix& gradient,
            double& objective,
-           const double gamma)
+           const double gamma,
+           const int grain)
         : dist_calculator_(dist_calculator)
         , weights_(weights)
         , gamma_(gamma)
         , gradient_summer_(&gradient[0], gradient.nrow(), gradient.ncol())
         , objective_summer_(&objective, 1)
+        , interrupt_grain_(interrupt_grain(grain, 1, 10))
     { }
 
     // parallel loop across specified range
@@ -197,6 +207,7 @@ public:
         SdtwCentCalculator* local_calculator = dist_calculator_.clone();
         SurrogateMatrix<double> em(2, local_calculator->max_len_y_ + 2);
         mutex_.unlock();
+
         // calculations for these series
         //   Includes the calculation of soft-DTW gradient + jacobian product.
         double* grad = nullptr;
@@ -205,6 +216,8 @@ public:
         const auto& x = local_calculator->x_[0];
         id_t m = x.n_rows, dim = x.n_cols;
         for (std::size_t id = begin; id < end; id++) {
+            if (RcppThread::isInterrupted(id % interrupt_grain_ == 0)) break; // nocov
+
             const auto& y = local_calculator->y_[id];
             double dist = local_calculator->calculate(0,id);
 
@@ -232,6 +245,7 @@ public:
                 if (i == m) em((m+1)%2, n+1) = 0;
             }
         }
+
         // finish
         mutex_.lock();
         delete local_calculator;
@@ -244,6 +258,7 @@ private:
     const RcppParallel::RVector<double> weights_;
     double gamma_;
     KahanSummer gradient_summer_, objective_summer_;
+    const int interrupt_grain_;
     tthread::mutex mutex_;
 };
 
@@ -261,15 +276,20 @@ extern "C" SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
     int num_threads = Rcpp::as<int>(NUM_THREADS);
     int grain = get_grain(series.length(), num_threads);
     if (grain == DTWCLUST_MIN_GRAIN) grain = 1;
+
     // compute objective and gradient
     if (Rcpp::as<bool>(MV)) {
         Rcpp::NumericMatrix cent(CENTROID);
         Rcpp::NumericMatrix gradient(cent.nrow(), cent.ncol());
+
         double objective = 0;
         Rcpp::List x = Rcpp::List::create(CENTROID);
+
         SdtwCentCalculator dist_calculator(x, series, gamma);
-        SdtwMv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma);
+        SdtwMv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma, grain);
         RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
+        RcppThread::checkUserInterrupt();
+
         return Rcpp::List::create(
             Rcpp::_["objective"] = objective,
             Rcpp::_["gradient"] = gradient
@@ -278,11 +298,15 @@ extern "C" SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
     else {
         Rcpp::NumericVector cent(CENTROID);
         Rcpp::NumericVector gradient(cent.length());
+
         double objective = 0;
         Rcpp::List x = Rcpp::List::create(CENTROID);
+
         SdtwCentCalculator dist_calculator(x, series, gamma);
-        SdtwUv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma);
+        SdtwUv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma, grain);
         RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
+        RcppThread::checkUserInterrupt();
+
         return Rcpp::List::create(
             Rcpp::_["objective"] = objective,
             Rcpp::_["gradient"] = gradient

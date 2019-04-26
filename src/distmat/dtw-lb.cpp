@@ -5,9 +5,10 @@
 
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
+#include <RcppThread.h>
 
 #include "../distances/calculators.h"
-#include "../utils/utils.h" // get_grain, id_t
+#include "../utils/utils.h" // get_grain, id_t, interrupt_grain
 
 namespace dtwclust {
 
@@ -22,12 +23,14 @@ public:
                        const SurrogateMatrix<int>& id_nn,
                        Rcpp::NumericMatrix& distmat,
                        const std::shared_ptr<DistanceCalculator>& dist_calculator,
-                       int margin)
+                       int margin,
+                       const int grain)
         : id_changed_(id_changed)
         , id_nn_(id_nn)
         , distmat_(distmat)
         , dist_calculator_(dist_calculator)
         , margin_(margin)
+        , interrupt_grain_(interrupt_grain(grain, 1000, 10000))
     { }
 
     // parallel loop across specified range
@@ -36,9 +39,12 @@ public:
         mutex_.lock();
         DistanceCalculator* dist_calculator = dist_calculator_->clone();
         mutex_.unlock();
+
         // update distances
         if (margin_ == 1) {
             for (std::size_t i = begin; i < end; i++) {
+                if (RcppThread::isInterrupted(i % interrupt_grain_ == 0)) break; // nocov
+
                 if (id_changed_[i]) {
                     int j = id_nn_[i];
                     distmat_(i,j) = dist_calculator->calculate(i,j);
@@ -47,12 +53,15 @@ public:
         }
         else {
             for (std::size_t j = begin; j < end; j++) {
+                if (RcppThread::isInterrupted(j % interrupt_grain_ == 0)) break; // nocov
+
                 if (id_changed_[j]) {
                     int i = id_nn_[j];
                     distmat_(i,j) = dist_calculator->calculate(i,j);
                 }
             }
         }
+
         mutex_.lock();
         delete dist_calculator;
         mutex_.unlock();
@@ -67,7 +76,9 @@ private:
     // distance calculator
     const std::shared_ptr<DistanceCalculator> dist_calculator_;
     // margin for update
-    int margin_;
+    const int margin_;
+    // how often to check for interrupt
+    const int interrupt_grain_;
     // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
     tthread::mutex mutex_;
 };
@@ -139,20 +150,24 @@ void dtw_lb_cpp(const Rcpp::List& X,
                 const int num_threads)
 {
     auto dist_calculator = DistanceCalculatorFactory().create("DTW_BASIC", DOTS, X, Y);
+
     int len = margin == 1 ? distmat.nrow() : distmat.ncol();
     SurrogateMatrix<int> id_nn(len, 1);
     SurrogateMatrix<int> id_nn_prev(len, 1);
     SurrogateMatrix<bool> id_changed(len, 1);
-    DtwDistanceUpdater dist_updater(id_changed, id_nn, distmat, dist_calculator, margin);
+
+    int grain = get_grain(len, num_threads);
+    DtwDistanceUpdater dist_updater(id_changed, id_nn, distmat, dist_calculator, margin, grain);
+
     set_nn(distmat, id_nn, margin);
     for (id_t i = 0; i < id_nn.nrow(); i++) id_nn_prev[i] = id_nn[i] + 1; // initialize different
-    int grain = get_grain(len, num_threads);
+
     while (!check_finished(id_nn, id_nn_prev, id_changed)) {
-        Rcpp::checkUserInterrupt();
         // update nn_prev
         for (id_t i = 0; i < id_nn.nrow(); i++) id_nn_prev[i] = id_nn[i];
         // calculate dtw distance if necessary
         RcppParallel::parallelFor(0, len, dist_updater, grain);
+        RcppThread::checkUserInterrupt();
         // update nearest neighbors
         set_nn(distmat, id_nn, margin);
     }

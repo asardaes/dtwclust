@@ -22,6 +22,7 @@ void envelope_cpp(const SurrogateMatrix<double>& array, const unsigned int width
 // utils.cpp
 void Rflush();
 int get_grain(const int n, const int num_threads);
+int interrupt_grain(const int grain, const int min, const int max, const int factor = 1000);
 double kahan_sum(const SurrogateMatrix<double>& x);
 void s2d(const id_t id, const id_t nrow, id_t& i, id_t& j);
 
