@@ -31,7 +31,8 @@ details.}
 
 \item{iter.max}{Integer. Maximum number of allowed iterations for partitional/fuzzy clustering.}
 
-\item{nrep}{Integer. How many times to repeat clustering with different starting points.}
+\item{nrep}{Integer. How many times to repeat clustering with different starting points (i.e.,
+different random seeds).}
 
 \item{symmetric}{Logical flag. Is the distance function symmetric? In other words, is \code{dist(x,y)}
 == \code{dist(y,x)}? If \code{TRUE}, only half the distance matrix needs to be computed. Automatically

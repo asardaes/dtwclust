@@ -11,7 +11,8 @@
 #'   each iteration if using PAM centroids. Otherwise calculate distances at every iteration. See
 #'   details.
 #' @param iter.max Integer. Maximum number of allowed iterations for partitional/fuzzy clustering.
-#' @param nrep Integer. How many times to repeat clustering with different starting points.
+#' @param nrep Integer. How many times to repeat clustering with different starting points (i.e.,
+#'   different random seeds).
 #' @param symmetric Logical flag. Is the distance function symmetric? In other words, is `dist(x,y)`
 #'   == `dist(y,x)`? If `TRUE`, only half the distance matrix needs to be computed. Automatically
 #'   detected and overridden for the distances included in \pkg{dtwclust}.
