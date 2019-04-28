@@ -119,7 +119,7 @@ setMethod("initialize", "TSClusters", function(.Object, ..., override.family = T
             if (.Object@preproc == "none")
                 preproc <- .Object@family@preproc
             else
-                preproc <- match.fun(.Object@preproc)
+                preproc <- get_from_callers(.Object@preproc, "function")
 
             if (.Object@type == "partitional") {
                 if (length(.Object@centroid) > 0L) {

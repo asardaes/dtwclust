@@ -1,6 +1,7 @@
 # Changelog
 
 ## Version 5.5.2.9000
+* Fixed a bug in the way `compare_clusterings` handled preprocessing of series.
 * Internal speed optimizations.
 * Added support for interruption of multi-threaded tasks via `RcppThread`.
 

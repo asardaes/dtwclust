@@ -100,14 +100,17 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
     # set remaining tsclust args
     centroid_char <- args$centroid
     if (centroid_char != "default") {
-        if (clus_type %in% c("hierarchical", "tadpole") || !(centroid_char %in% centroids_included))
-            args$centroid <- match.fun(args$centroid)
+        if (clus_type %in% c("hierarchical", "tadpole") || !(centroid_char %in% centroids_included)) {
+            centroid <- get_from_callers(centroid_char, "function")
+            args$centroid <- as.name("centroid")
+        }
     }
     else {
         args$centroid <- NULL
     }
     preproc_char <- if (is.null(args$preproc)) "none" else args$preproc
-    args$preproc <- if (preproc_char == "none") NULL else match.fun(args$preproc)
+    preproc <- if (preproc_char == "none") NULL else get_from_callers(preproc_char, "function")
+    args$preproc <- as.name("preproc")
     args$series <- series
     args$type <- clus_type
     args$seed <- seed
@@ -118,7 +121,7 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
     )
 
     # create TSClusters
-    ret <- do.call(tsclust, c(args, list(...)), TRUE)
+    ret <- do.call(tsclust, c(args, list(...)), FALSE)
     ret@args <- lapply(ret@args, function(arg) { arg$.rng_ <- NULL; arg })
     ret@dots$.rng_ <- NULL
     ret@preproc <- preproc_char
