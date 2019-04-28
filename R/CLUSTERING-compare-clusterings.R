@@ -634,12 +634,11 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
         i <- nrow(config)
         objs <- foreach::foreach(
             i = seq_len(i),
-            .combine = list,
+            .combine = c,
             .multicombine = TRUE,
             .packages = packages,
             .export = export,
-            .errorhandling = .errorhandling,
-            .maxcombine = if (isTRUE(i > 100L)) i else 100L
+            .errorhandling = .errorhandling
         ) %op% {
             cfg <- config[i, , drop = FALSE]
             seed <- seeds[[i]]
@@ -652,19 +651,19 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
             # obtain args from configuration
             # ----------------------------------------------------------------------------------
 
-            args <- lapply(c("preproc", "distance", "centroid"),
-                           function(func) {
-                               col_ids <- grepl(paste0("_", func, "$"), names(cfg))
-                               if (cfg[[func]] != "none" && any(col_ids)) {
-                                   this_args <- as.list(cfg[, col_ids, drop = FALSE])
-                                   names(this_args) <- sub(paste0("_", func, "$"),
-                                                           "",
-                                                           names(this_args))
-                                   # return
-                                   this_args[!sapply(this_args, is.na)]
-                               }
-                               else list()
-                           })
+            args <- lapply(c("preproc", "distance", "centroid"), function(func) {
+                col_ids <- grepl(paste0("_", func, "$"), names(cfg))
+                if (cfg[[func]] != "none" && any(col_ids)) {
+                    this_args <- as.list(cfg[, col_ids, drop = FALSE])
+                    names(this_args) <- sub(paste0("_", func, "$"),
+                                            "",
+                                            names(this_args))
+                    # return
+                    this_args[!sapply(this_args, is.na)]
+                }
+                else list()
+            })
+
             setnames_inplace(args, c("preproc", "dist", "cent"))
             args <- do.call(tsclust_args, args, TRUE)
 
@@ -763,18 +762,26 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
             # return config result from foreach()
             ret
         }
-        # foreach() with one 'iteration' does NOT call .combine function
-        if (i == 1L) objs <- list(objs)
+
+        class(objs) <- NULL
         if (.errorhandling == "pass") {
-            failed_cfgs <- sapply(objs, function(obj) { inherits(obj, "error") })
+            failed_cfgs <- sapply(objs, function(obj) { !inherits(obj, "TSClusters") })
             if (any(failed_cfgs)) {
                 warning("At least one of the ", type, " configurations resulted in an error.")
-                # make one more list level so unlist() below leaves errors as one object
-                objs[failed_cfgs] <- lapply(objs[failed_cfgs], list)
+
+                # a simple error is a list with 2 elements: message and call, so I need to re-pack
+                # each pair of elements in a single element of the objs list
+                which_failed <- which(failed_cfgs)[seq(from = 1L, by = 2L, length.out = sum(failed_cfgs) / 2)]
+                for (failed_cfg_id in which_failed) {
+                    objs[[failed_cfg_id]] <- structure(objs[failed_cfg_id:(failed_cfg_id + 1L)],
+                                                       class = c("simpleError", "error", "condition"))
+                }
+                names(objs)[which_failed] <- paste0("failure_", seq_along(which_failed))
+                objs[which_failed + 1L] <- NULL
             }
         }
-        # return scores/TSClusters from Map()
-        unlist(objs, recursive = FALSE)
+
+        objs
     })
 
     # ==============================================================================================
