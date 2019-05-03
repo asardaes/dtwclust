@@ -35,6 +35,6 @@ dtwclustTimings <- list(
 )
 
 file <- if (short_experiments) "dtwclustTimings.RData" else "../data/dtwclustTimings.rda"
-save("dtwclustTimings", file = file)
+save("dtwclustTimings", file = file, version = 2, compress = TRUE)
 
 message("\nFinished after: ", toc["elapsed"], " seconds")
