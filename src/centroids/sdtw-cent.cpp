@@ -6,14 +6,14 @@
 
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
-#include <RcppThread.h>
 
 #include "../distances/calculators.h"
 #include "../distances/details.h" // sdtw
 #include "../utils/KahanSummer.h"
+#include "../utils/ParallelWorker.h"
 #include "../utils/SurrogateMatrix.h"
 #include "../utils/TSTSList.h"
-#include "../utils/utils.h" // get_grain, id_t, interrupt_grain
+#include "../utils/utils.h" // get_grain, id_t
 
 namespace dtwclust {
 
@@ -108,7 +108,7 @@ public:
 /* the parallel worker for the univariate version */
 // =================================================================================================
 
-class SdtwUv : public RcppParallel::Worker {
+class SdtwUv : public ParallelWorker {
 public:
     // constructor
     SdtwUv(const SdtwCentCalculator&& dist_calculator,
@@ -117,16 +117,16 @@ public:
            double& objective,
            const double gamma,
            const int grain)
-        : dist_calculator_(dist_calculator)
+        : ParallelWorker(grain, 1, 10)
+        , dist_calculator_(dist_calculator)
         , weights_(weights)
         , gamma_(gamma)
         , gradient_summer_(&gradient[0], gradient.length())
         , objective_summer_(&objective, 1)
-        , interrupt_grain_(interrupt_grain(grain, 1, 10))
     { }
 
     // parallel loop across specified range
-    void operator()(std::size_t begin, std::size_t end) {
+    void work_it(std::size_t begin, std::size_t end) override {
         // local copy of calculator so it is setup separately for each thread
         mutex_.lock();
         SdtwCentCalculator* local_calculator = dist_calculator_.clone();
@@ -140,7 +140,7 @@ public:
         const auto& x = local_calculator->x_[0];
         id_t m = x.n_rows;
         for (std::size_t id = begin; id < end; id++) {
-            if (RcppThread::isInterrupted(id % interrupt_grain_ == 0)) break; // nocov
+            if (is_interrupted(id)) break; // nocov
 
             const auto& y = local_calculator->y_[id];
             double dist = local_calculator->calculate(0,id);
@@ -175,15 +175,13 @@ private:
     const RcppParallel::RVector<double> weights_;
     double gamma_;
     KahanSummer gradient_summer_, objective_summer_;
-    const int interrupt_grain_;
-    tthread::mutex mutex_;
 };
 
 // =================================================================================================
 /* the parallel worker for the multivariate version */
 // =================================================================================================
 
-class SdtwMv : public RcppParallel::Worker {
+class SdtwMv : public ParallelWorker {
 public:
     // constructor
     SdtwMv(const SdtwCentCalculator&& dist_calculator,
@@ -192,16 +190,16 @@ public:
            double& objective,
            const double gamma,
            const int grain)
-        : dist_calculator_(dist_calculator)
+        : ParallelWorker(grain, 1, 10)
+        , dist_calculator_(dist_calculator)
         , weights_(weights)
         , gamma_(gamma)
         , gradient_summer_(&gradient[0], gradient.nrow(), gradient.ncol())
         , objective_summer_(&objective, 1)
-        , interrupt_grain_(interrupt_grain(grain, 1, 10))
     { }
 
     // parallel loop across specified range
-    void operator()(std::size_t begin, std::size_t end) {
+    void work_it(std::size_t begin, std::size_t end) override {
         // local copy of calculator so it is setup separately for each thread
         mutex_.lock();
         SdtwCentCalculator* local_calculator = dist_calculator_.clone();
@@ -216,7 +214,7 @@ public:
         const auto& x = local_calculator->x_[0];
         id_t m = x.n_rows, dim = x.n_cols;
         for (std::size_t id = begin; id < end; id++) {
-            if (RcppThread::isInterrupted(id % interrupt_grain_ == 0)) break; // nocov
+            if (is_interrupted(id)) break; // nocov
 
             const auto& y = local_calculator->y_[id];
             double dist = local_calculator->calculate(0,id);
@@ -258,8 +256,6 @@ private:
     const RcppParallel::RVector<double> weights_;
     double gamma_;
     KahanSummer gradient_summer_, objective_summer_;
-    const int interrupt_grain_;
-    tthread::mutex mutex_;
 };
 
 // =================================================================================================
@@ -287,8 +283,7 @@ extern "C" SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
 
         SdtwCentCalculator dist_calculator(x, series, gamma);
         SdtwMv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma, grain);
-        RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
-        RcppThread::checkUserInterrupt();
+        parallel_for(0, series.length(), parallel_worker, grain);
 
         return Rcpp::List::create(
             Rcpp::_["objective"] = objective,
@@ -304,8 +299,7 @@ extern "C" SEXP sdtw_cent(SEXP SERIES, SEXP CENTROID,
 
         SdtwCentCalculator dist_calculator(x, series, gamma);
         SdtwUv parallel_worker(std::move(dist_calculator), WEIGHTS, gradient, objective, gamma, grain);
-        RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
-        RcppThread::checkUserInterrupt();
+        parallel_for(0, series.length(), parallel_worker, grain);
 
         return Rcpp::List::create(
             Rcpp::_["objective"] = objective,

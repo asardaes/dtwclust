@@ -5,14 +5,14 @@
 
 #include <RcppArmadillo.h>
 #include <RcppParallel.h>
-#include <RcppThread.h>
 
 #include "../distances/calculators.h"
 #include "../distances/details.h" // dtw_basi
 #include "../utils/KahanSummer.h"
+#include "../utils/ParallelWorker.h"
 #include "../utils/SurrogateMatrix.h"
 #include "../utils/TSTSList.h"
-#include "../utils/utils.h" // Rflush, get_grain, id_t, interrupt_grain
+#include "../utils/utils.h" // Rflush, get_grain, id_t
 
 namespace dtwclust {
 
@@ -107,18 +107,18 @@ private:
 /* the parallel worker for the univariate version */
 // =================================================================================================
 
-class DbaUv : public RcppParallel::Worker {
+class DbaUv : public ParallelWorker {
 public:
     // constructor
     DbaUv(const DtwBacktrackCalculator&& backtrack_calculator,
           const Rcpp::NumericVector& new_cent,
           const Rcpp::IntegerVector& num_vals,
           const int grain)
-        : backtrack_calculator_(backtrack_calculator)
+        : ParallelWorker(grain, 50, 100)
+        , backtrack_calculator_(backtrack_calculator)
         , new_cent_(new_cent)
         , num_vals_(num_vals)
         , summer_(&new_cent_[0], new_cent_.length())
-        , interrupt_grain_(interrupt_grain(grain, 50, 100))
     { }
 
     // for reusability
@@ -127,7 +127,7 @@ public:
     }
 
     // parallel loop across specified range
-    void operator()(id_t begin, id_t end) {
+    void work_it(id_t begin, id_t end) override {
         // local copy of calculator so it is setup separately for each thread
         mutex_.lock();
         DtwBacktrackCalculator* local_calculator = backtrack_calculator_.clone();
@@ -135,7 +135,7 @@ public:
 
         // kahan sum step
         for (id_t i = begin; i < end; i++) {
-            if (RcppThread::isInterrupted(i % interrupt_grain_ == 0)) break; // nocov
+            if (is_interrupted(i)) break; // nocov
 
             local_calculator->calculate(i,0);
             const auto& x = local_calculator->x_[i];
@@ -162,27 +162,24 @@ private:
     RcppParallel::RVector<int> num_vals_;
     // sum helper
     KahanSummer summer_;
-    const int interrupt_grain_;
-    // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
-    tthread::mutex mutex_;
 };
 
 // =================================================================================================
 /* the parallel worker for the multivariate by-series version */
 // =================================================================================================
 
-class DbaMvBySeries : public RcppParallel::Worker {
+class DbaMvBySeries : public ParallelWorker {
 public:
     // constructor
     DbaMvBySeries(const DtwBacktrackCalculator&& backtrack_calculator,
                   const Rcpp::NumericMatrix& new_cent,
                   const Rcpp::IntegerMatrix& num_vals,
                   const int grain)
-        : backtrack_calculator_(backtrack_calculator)
+        : ParallelWorker(grain, 50, 100)
+        , backtrack_calculator_(backtrack_calculator)
         , new_cent_(new_cent)
         , num_vals_(num_vals)
         , summer_(&new_cent_[0], new_cent_.nrow(), new_cent_.ncol())
-        , interrupt_grain_(interrupt_grain(grain, 50, 100))
     { }
 
     // for reusability
@@ -191,7 +188,7 @@ public:
     }
 
     // parallel loop across specified range
-    void operator()(id_t begin, id_t end) {
+    void work_it(id_t begin, id_t end) override {
         // local copy of calculator so it is setup separately for each thread
         mutex_.lock();
         DtwBacktrackCalculator* local_calculator = backtrack_calculator_.clone();
@@ -199,7 +196,7 @@ public:
 
         // kahan sum step
         for (id_t i = begin; i < end; i++) {
-            if (RcppThread::isInterrupted(i % interrupt_grain_ == 0)) break; // nocov
+            if (is_interrupted(i)) break; // nocov
 
             local_calculator->calculate(i,0);
             const auto& x = local_calculator->x_[i];
@@ -228,27 +225,24 @@ private:
     RcppParallel::RMatrix<int> num_vals_;
     // sum helper
     KahanSummer summer_;
-    const int interrupt_grain_;
-    // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
-    tthread::mutex mutex_;
 };
 
 // =================================================================================================
 /* the parallel worker for the multivariate by-variable version */
 // =================================================================================================
 
-class DbaMvByVariable : public RcppParallel::Worker {
+class DbaMvByVariable : public ParallelWorker {
 public:
     // constructor
     DbaMvByVariable(const DtwBacktrackCalculator&& backtrack_calculator,
                     const Rcpp::NumericMatrix& new_cent,
                     const Rcpp::IntegerMatrix& num_vals,
                     const int grain)
-        : backtrack_calculator_(backtrack_calculator)
+        : ParallelWorker(grain, 10, 50)
+        , backtrack_calculator_(backtrack_calculator)
         , new_cent_(new_cent)
         , num_vals_(num_vals)
         , summer_(&new_cent_[0], new_cent_.nrow(), new_cent_.ncol())
-        , interrupt_grain_(interrupt_grain(grain, 10, 50))
     { }
 
     // for reusability
@@ -257,7 +251,7 @@ public:
     }
 
     // parallel loop across specified range
-    void operator()(id_t begin, id_t end) {
+    void work_it(id_t begin, id_t end) override {
         // local copy of calculator so it is setup separately for each thread
         mutex_.lock();
         DtwBacktrackCalculator* local_calculator = backtrack_calculator_.clone();
@@ -265,7 +259,7 @@ public:
 
         // kahan sum step
         for (id_t i = begin; i < end; i++) {
-            if (RcppThread::isInterrupted(i % interrupt_grain_ == 0)) break; // nocov
+            if (is_interrupted(i)) break; // nocov
 
             const auto& x = local_calculator->x_[i];
             for (id_t j = 0; j < new_cent_.ncol(); j++) {
@@ -294,9 +288,6 @@ private:
     RcppParallel::RMatrix<int> num_vals_;
     // sum helper
     KahanSummer summer_;
-    const int interrupt_grain_;
-    // for synchronization during memory allocation (from TinyThread++, comes with RcppParallel)
-    tthread::mutex mutex_;
 };
 
 // =================================================================================================
@@ -375,8 +366,7 @@ SEXP dba_uv(const Rcpp::List& series, const Rcpp::NumericVector& centroid, const
         num_vals.fill(0);
         parallel_worker.reset();
         // sum step
-        RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
-        RcppThread::checkUserInterrupt();
+        parallel_for(0, series.length(), parallel_worker, grain);
         // average step with check for 'convergence' and update ref_cent
         bool converged = average_step(new_cent, num_vals, ref_cent);
         print_trace(converged, iter);
@@ -412,8 +402,7 @@ SEXP dba_mv_by_variable(const Rcpp::List& series, const Rcpp::NumericMatrix& cen
         num_vals.fill(0);
         parallel_worker.reset();
         // sum step
-        RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
-        RcppThread::checkUserInterrupt();
+        parallel_for(0, series.length(), parallel_worker, grain);
         // average step with check for 'convergence' and update ref_cent
         bool converged = average_step(new_cent, num_vals, ref_cent);
         print_trace(converged, iter);
@@ -449,8 +438,7 @@ SEXP dba_mv_by_series(const Rcpp::List& series, const Rcpp::NumericMatrix& centr
         num_vals.fill(0);
         parallel_worker.reset();
         // sum step
-        RcppParallel::parallelFor(0, series.length(), parallel_worker, grain);
-        RcppThread::checkUserInterrupt();
+        parallel_for(0, series.length(), parallel_worker, grain);
         // average step with check for 'convergence' and update ref_cent
         bool converged = average_step(new_cent, num_vals, ref_cent);
         print_trace(converged, iter);
