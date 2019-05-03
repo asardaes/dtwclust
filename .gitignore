@@ -10,19 +10,12 @@ src/**/*.o
 src/*.so
 
 # Vignette
-vignettes/*.gz
-vignettes/*.bbl
-vignettes/*.log
-vignettes/*.tex
-vignettes/*.pdf
-vignettes/*.sty
-vignettes/*.aux
-vignettes/*.out
-vignettes/*.blg
-vignettes/*.brf
-vignettes/**/
+vignettes/*
+!vignettes/*.Rnw
+!vignettes/*.Rmd
 !vignettes/RJwrapper.tex
 !vignettes/sarda.tex
+!vignettes/sarda.R
 
 # Experiments' results
 timing-experiments/*.RData

@@ -18,6 +18,7 @@
 ^vignettes/cache
 ^vignettes/figure
 ^vignettes/RJwrapper.*
+^vignettes/.*\.R$
 ^vignettes/.*\.gz
 ^vignettes/.*\.bbl
 ^vignettes/.*\.log
