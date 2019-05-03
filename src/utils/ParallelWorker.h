@@ -4,6 +4,7 @@
 #include <cstddef> // std::size_t
 
 #include <RcppParallel.h>
+#undef ERROR // collision between R.h and mingw_32/i686-w64-mingw32/include/windows.h
 #include <RcppThread.h>
 
 namespace dtwclust {
