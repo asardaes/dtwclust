@@ -4,6 +4,7 @@
 * Fixed a bug in the way `compare_clusterings` handled preprocessing of series.
 * Internal speed optimizations.
 * Added support for interruption of multi-threaded tasks via `RcppThread`.
+* Updated timing experiments.
 
 ## Version 5.5.2
 * Fixed plotting of clusters with labels when a cluster has repeated series.

@@ -7,7 +7,7 @@ output:
         fig_width: 6.5
         fig_height: 7
 vignette: >
-    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEngine{knitr::rmarkdown_notangle}
     %\VignettePackage{dtwclust}
     %\VignetteIndexEntry{Parallelization considerations for dtwclust}
     %\VignetteEncoding{UTF-8}

@@ -11,7 +11,7 @@ vignette: >
     %\VignettePackage{dtwclust}
     %\VignetteIndexEntry{Timing experiments for dtwclust}
     %\VignetteEncoding{UTF-8}
-    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEngine{knitr::rmarkdown_notangle}
 bibliography: REFERENCES.bib
 editor_options: 
   chunk_output_type: console
@@ -127,13 +127,9 @@ a series of timing experiments were made.
 Said experiments were not concerned with correctness or accuracy,
 only with timing characteristics.
 
-The experiments were re-run with `R` v3.5.0 and `dtwclust` v5.5.0.
-Because of the changes introduced
-(see [the parallelization vignette](parallelization-considerations.html)),
-the results have changed in comparison to the original ones
-(which used `dtwclust` v4.0.3).
-The `microbenchmark` package (v1.4.4) was also used for most of the experiments.
-The computer used was running GNU/Linux (LTS kernel v4.15) with an `i5-6500` Intel processor (4 cores) and 16GB of RAM.
+The experiments were run with `R` v3.6.0 and `dtwclust` v5.5.3.
+The `microbenchmark` package (v1.4.6) was also used for most of the experiments.
+The computer used was running GNU/Linux (LTS kernel v4.19) with an `i5-6500` Intel processor (4 cores) and 16GB of RAM.
 The whole set of experiments took approximately `r exec_time` hours to complete.
 The data used comes from the Character Trajectories set [@lichman2013],
 which have different lengths and are originally multivariate series with 3 variables;
