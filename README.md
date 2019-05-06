@@ -1,14 +1,14 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/dtwclust)](https://cran.r-project.org/package=dtwclust)
 [![Travis-CI Build
 Status](https://travis-ci.org/asardaes/dtwclust.svg?branch=master)](https://travis-ci.org/asardaes/dtwclust)
 [![AppVeyor Build
 Status](https://ci.appveyor.com/api/projects/status/github/asardaes/dtwclust?branch=master&svg=true)](https://ci.appveyor.com/project/asardaes/dtwclust)
 [![codecov](https://codecov.io/gh/asardaes/dtwclust/branch/master/graph/badge.svg)](https://codecov.io/gh/asardaes/dtwclust)
-[![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](http://cranlogs.r-pkg.org/badges/dtwclust)
+<http://cranlogs.r-pkg.org/badges/dtwclust>
 
-Time Series Clustering Along with Optimizations for the Dynamic Time Warping (DTW) Distance
-===========================================================================================
+# Time Series Clustering Along with Optimizations for the Dynamic Time Warping (DTW) Distance
 
 Time series clustering with a wide variety of strategies and a series of
 optimizations specific to the Dynamic Time Warping (DTW) distance and
@@ -27,39 +27,37 @@ DTW.
 
 For more information:
 
--   [Vignette with
+  - [Vignette with
     theory](https://cran.r-project.org/web/packages/dtwclust/vignettes/dtwclust.pdf)
     (with examples in the appendices)
--   [Timing
+  - [Timing
     experiments](https://cran.r-project.org/web/packages/dtwclust/vignettes/timing-experiments.html)
--   [Parallelization
+  - [Parallelization
     considerations](https://cran.r-project.org/web/packages/dtwclust/vignettes/parallelization-considerations.html)
--   [Functions’
+  - [Functions’
     documentation](https://cran.r-project.org/web/packages/dtwclust/dtwclust.pdf)
--   [Sample shiny
+  - [Sample shiny
     app](https://asardaes.shinyapps.io/dtwclust-tsclust-interactive/)
--   [CRAN’s time series
+  - [CRAN’s time series
     view](https://cran.r-project.org/web/views/TimeSeries.html)
 
-Implementations
----------------
+## Implementations
 
--   Partitional, hierarchical and fuzzy clustering
-    -   k-Shape clustering
-        -   Shape-based distance
-        -   Shape extraction for time series
-    -   TADPole clustering
--   An optimized version of DTW
--   Keogh’s and Lemire’s DTW lower bounds
--   Global alignment kernel (GAK) distance
--   DTW Barycenter Averaging
--   Soft-DTW (distance and centroid)
--   Some multivariate support (GAK, DTW and soft-DTW)
--   Cluster validity indices (crisp and fuzzy, internal and external)
--   Parallelization for most functions
+  - Partitional, hierarchical and fuzzy clustering
+      - k-Shape clustering
+          - Shape-based distance
+          - Shape extraction for time series
+      - TADPole clustering
+  - An optimized version of DTW
+  - Keogh’s and Lemire’s DTW lower bounds
+  - Global alignment kernel (GAK) distance
+  - DTW Barycenter Averaging
+  - Soft-DTW (distance and centroid)
+  - Some multivariate support (GAK, DTW and soft-DTW)
+  - Cluster validity indices (crisp and fuzzy, internal and external)
+  - Parallelization for most functions
 
-Installation
-------------
+## Installation
 
 The latest version from CRAN can be installed with
 `install.packages("dtwclust")`.
@@ -78,8 +76,7 @@ If you’re wondering about which version to install, take a look at the
 integration builds to make sure everything is working, but do note that
 they tend to fail for reasons unrelated to the package’s functionality.
 
-License
--------
+## License
 
 GNU General Public License v3.0. See [license](LICENSE) and
 [copyrights](inst/COPYRIGHTS).
@@ -87,8 +84,7 @@ GNU General Public License v3.0. See [license](LICENSE) and
 This software package was developed independently of any organization or
 institution that is or has been associated with the author.
 
-Examples
---------
+## Examples
 
 ``` r
 # Load series
@@ -105,19 +101,16 @@ pc <- tsclust(CharTraj, type = "partitional", k = 20L,
 #> 
 #>  Precomputing distance matrix...
 #> 
-#> Iteration 1: Changes / Distsum = 100 / 1665.433
-#> Iteration 2: Changes / Distsum = 19 / 1433.538
-#> Iteration 3: Changes / Distsum = 3 / 1417.581
-#> Iteration 4: Changes / Distsum = 5 / 1360.806
-#> Iteration 5: Changes / Distsum = 2 / 1358.508
-#> Iteration 6: Changes / Distsum = 1 / 1347.486
-#> Iteration 7: Changes / Distsum = 0 / 1346.886
+#> Iteration 1: Changes / Distsum = 100 / 1361.256
+#> Iteration 2: Changes / Distsum = 8 / 1101.633
+#> Iteration 3: Changes / Distsum = 2 / 1036.096
+#> Iteration 4: Changes / Distsum = 0 / 1031.353
 #> 
-#>  Elapsed time is 0.445 seconds.
+#>  Elapsed time is 0.412 seconds.
 plot(pc)
 ```
 
-![](README-partitional-1.png)
+![](README-partitional-1.png)<!-- -->
 
 ### Hierarchical
 
@@ -130,11 +123,11 @@ hc <- tsclust(CharTraj, type = "hierarchical", k = 20L,
 #> Performing hierarchical clustering...
 #> Extracting centroids...
 #> 
-#>  Elapsed time is 0.164 seconds.
+#>  Elapsed time is 0.147 seconds.
 plot(hc)
 ```
 
-![](README-hierarchical-1.png)
+![](README-hierarchical-1.png)<!-- -->
 
 ### Fuzzy
 
@@ -155,7 +148,7 @@ fc
 #> 
 #> Time required for analysis:
 #>    user  system elapsed 
-#>   0.105   0.000   0.107 
+#>    0.03    0.00    0.03 
 #> 
 #> Head of fuzzy memberships:
 #> 
@@ -177,4 +170,4 @@ mvc <- tsclust(CharTrajMV[1L:20L], k = 4L, distance = "gak", seed = 390L)
 plot(mvc, labels = list(nudge_x = -10, nudge_y = 1))
 ```
 
-![](README-multivariate-1.png)
+![](README-multivariate-1.png)<!-- -->
