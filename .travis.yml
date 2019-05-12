@@ -51,7 +51,7 @@ before_install:
       return $status
     }
 after_success:
-  - if [[ ("$TRAVIS_R_VERSION" != "devel") && ("$TRAVIS_OS_NAME" == "linux") ]]; then
+  - if [[ ("$TRAVIS_R_VERSION_STRING" == "release") && ("$TRAVIS_OS_NAME" == "linux") ]]; then
       Rscript codecov.R;
     fi
 notifications:
