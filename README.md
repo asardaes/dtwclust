@@ -6,7 +6,7 @@ Status](https://travis-ci.org/asardaes/dtwclust.svg?branch=master)](https://trav
 [![AppVeyor Build
 Status](https://ci.appveyor.com/api/projects/status/github/asardaes/dtwclust?branch=master&svg=true)](https://ci.appveyor.com/project/asardaes/dtwclust)
 [![codecov](https://codecov.io/gh/asardaes/dtwclust/branch/master/graph/badge.svg)](https://codecov.io/gh/asardaes/dtwclust)
-<http://cranlogs.r-pkg.org/badges/dtwclust>
+[![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](https://cran.r-project.org/package=dtwclust)
 
 # Time Series Clustering Along with Optimizations for the Dynamic Time Warping (DTW) Distance
 
