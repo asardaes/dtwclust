@@ -5,10 +5,6 @@ sudo: required
 r_build_args: "--compact-vignettes"
 r_packages:
   - devtools
-os:
-  - linux
-r:
-  - devel
 env:
   - COMPILER=gxx-7
 matrix:
@@ -21,13 +17,16 @@ matrix:
         - covr
       after_success:
         - Rscript codecov.R
+    - os: linux
+      r: devel
     - os: osx
       r: release
       env: COMPILER=clang
       before_install:
         - sudo tlmgr install placeins cleveref framed
   allow_failures:
-    - r: devel
+    - os: linux
+      r: devel
 # see https://thecoatlessprofessor.com/programming/selecting-an-alternative-compiler-for-r-package-testing-on-travis-ci/
 addons:
   apt:
@@ -37,7 +36,6 @@ addons:
       - gcc-7
       - g++-7
       - gfortran-7
-      #- r-cran-rspectra
 before_install:
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7
   - sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-7 50
