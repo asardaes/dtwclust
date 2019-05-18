@@ -5,21 +5,27 @@ sudo: required
 r_build_args: "--compact-vignettes"
 r_packages:
   - devtools
-r_github_packages:
-  - r-lib/covr
 os:
   - linux
 r:
-  - release
   - devel
 env:
   - COMPILER=gxx-7
 matrix:
   fast_finish: true
   include:
+    - os: linux
+      r: release
+      r_packages:
+        - devtools
+        - covr
+      after_success:
+        - Rscript codecov.R
     - os: osx
       r: release
       env: COMPILER=clang
+      before_install:
+        - sudo tlmgr install placeins cleveref framed
   allow_failures:
     - r: devel
 # see https://thecoatlessprofessor.com/programming/selecting-an-alternative-compiler-for-r-package-testing-on-travis-ci/
@@ -33,12 +39,8 @@ addons:
       - gfortran-7
       #- r-cran-rspectra
 before_install:
-  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
-      sudo tlmgr install placeins cleveref framed;
-    else
-      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7;
-      sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-7 50;
-    fi
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7
+  - sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-7 50
   - |
     Rscript() {
       # https://github.com/travis-ci/travis-ci/issues/4190#issuecomment-353342526
@@ -50,10 +52,6 @@ before_install:
       tail -n 50 /tmp/rs.out
       return $status
     }
-after_success:
-  - if [[ ("$TRAVIS_R_VERSION_STRING" == "release") && ("$TRAVIS_OS_NAME" == "linux") ]]; then
-      Rscript codecov.R;
-    fi
 notifications:
   email:
     on_success: change
