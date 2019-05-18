@@ -46,6 +46,7 @@ LinkingTo:
 Suggests:
     doParallel,
     knitr,
+    rmarkdown,
     testthat
 Date: 2019-04-26
 Author: Alexis Sarda-Espinosa
