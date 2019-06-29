@@ -643,7 +643,7 @@ The triangular constraint is similar to the window constraints that can be used 
 When $T = 0$ or $T \rightarrow \infty$,
 the TGAK converges to the original GA kernel.
 When $T = 1$, the TGAK becomes a slightly modified Gaussian kernel that can only compare series of equal length.
-If $T > 1$, then only the alignments that fulfil $-T < \pi_1(i) - \pi_2(i) < T$ are considered.
+If $T > 1$, then only the alignments that fulfill $-T < \pi_1(i) - \pi_2(i) < T$ are considered.
 
 \citet{cuturi2011} also proposed a strategy to estimate the value of $\sigma$ based on the time-series themselves and their lengths,
 namely $c \cdot \text{med}(\left\lVert x - y \right\rVert) \cdot \sqrt{\text{med}(|\text{x}|)}$,
@@ -1016,8 +1016,8 @@ starting with all data in one cluster and dividing them until each member is in 
 Both strategies suffer from a lack of flexibility,
 because they cannot perform adjustments once a split or merger has been done.
 
-The intergroup dissimilarity is also known as linkage.
-As an example, single linkage takes the intergroup dissimilarity to be that of the closest (least dissimilar) pair \citep{hastie2009}.
+The inter-group dissimilarity is also known as linkage.
+As an example, single linkage takes the inter-group dissimilarity to be that of the closest (least dissimilar) pair \citep{hastie2009}.
 There are many linkage methods available,
 although if the data can be ``easily'' grouped,
 they should all provide similar results.
@@ -1026,7 +1026,7 @@ and all its linkage methods are supported.
 However, it is possible to use other clustering functions,
 albeit with some limitations (see \cref{app:hc}).
 
-The created hierarchy can be visualized as a binary tree where the height of each node is proportional to the value of the intergroup dissimilarity between its two daughter nodes \citep{hastie2009}.
+The created hierarchy can be visualized as a binary tree where the height of each node is proportional to the value of the inter-group dissimilarity between its two daughter nodes \citep{hastie2009}.
 Such a plot is called a dendrogram,
 an example of which can be seen in \cref{fig:dendrogram}.
 These plots can be a useful way of summarizing the whole data in an interpretable way,
@@ -1067,7 +1067,7 @@ The total number of desired clusters must be specified beforehand,
 which can be a limiting factor,
 although this can be ameliorated by using validity indices (see \cref{sec:evaluation}).
 
-Partitional procedures can be stated as combinatorial optimization problems that minimize the intracluster distance while maximizing the intercluster distance.
+Partitional procedures can be stated as combinatorial optimization problems that minimize the intra-cluster distance while maximizing the inter-cluster distance.
 However, finding a global optimum would require enumerating all possible groupings,
 something which is infeasible even for relatively small datasets \citep{hastie2009}.
 Therefore, iterative greedy descent strategies are used instead,

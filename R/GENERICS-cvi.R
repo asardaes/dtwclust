@@ -9,9 +9,9 @@
 #' @importFrom methods setGeneric
 #'
 #' @param a An object returned by [tsclust()], for crisp partitions a vector that can be coerced to
-#'   integers which indicate the cluster memeberships, or the membership matrix for soft clustering.
+#'   integers which indicate the cluster memberships, or the membership matrix for soft clustering.
 #' @param b If needed, a vector that can be coerced to integers which indicate the cluster
-#'   memeberships. The ground truth (if known) should be provided here.
+#'   memberships. The ground truth (if known) should be provided here.
 #' @param type Character vector indicating which indices are to be computed. See supported values
 #'   below.
 #' @param ... Arguments to pass to and from other methods.

@@ -65,7 +65,7 @@ The latest version from CRAN can be installed with
 If you want to test the latest version from github, first install the
 [prerequisites for R package
 development](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites)
-(LaTeX is only neccesary if you want to build the vignette) as well as
+(LaTeX is only necessary if you want to build the vignette) as well as
 the [remotes package](https://cran.r-project.org/package=remotes), and
 then type `remotes::install_github("asardaes/dtwclust")`.
 

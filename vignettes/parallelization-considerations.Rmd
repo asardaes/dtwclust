@@ -225,7 +225,7 @@ and the following parallelization scenarios were tested on a machine with 4 core
 
 - 4 workers required 7.36 minutes to finish.
 - 2 workers and 2 threads per worker required 7.97 minutes to finish.
-- 2 workers and 4 threads per workrer required 7.46 minutes to finish.
+- 2 workers and 4 threads per worker required 7.46 minutes to finish.
 - No workers and 4 threads required 10.35 minutes to finish.
 
 The last scenario has the possible advantage that tracing is still possible.

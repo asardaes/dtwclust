@@ -27,7 +27,7 @@
 #' series will be chosen at random and used as reference. The output series will then have the same
 #' length as the chosen series.
 #'
-#' This centroid computation is casted as an optimization problem called maximization of Rayleigh
+#' This centroid computation is cast as an optimization problem called maximization of Rayleigh
 #' Quotient. It depends on the [SBD()] algorithm. See the cited article for more details.
 #'
 #' @return Centroid time series (z-normalized).
