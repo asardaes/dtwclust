@@ -2,6 +2,7 @@
 % Please edit documentation in R/pkg.R
 \docType{package}
 \name{dtwclust-package}
+\alias{dtwclust}
 \alias{dtwclust-package}
 \title{Time series clustering along with optimizations for the Dynamic Time Warping distance}
 \description{

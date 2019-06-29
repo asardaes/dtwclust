@@ -3,7 +3,6 @@
 #' Time series clustering with a wide variety of strategies and a series of optimizations specific
 #' to the Dynamic Time Warping (DTW) distance and its corresponding lower bounds (LBs).
 #'
-#' @docType package
 #' @name dtwclust-package
 #'
 #' @details
@@ -66,7 +65,7 @@
 #' @importFrom Rcpp evalCpp
 #' @importFrom RcppParallel RcppParallelLibs
 #'
-NULL
+"_PACKAGE"
 
 # PREFUN for some of my proxy distances so that they support 'pairwise' directly
 proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
