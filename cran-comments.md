@@ -1,6 +1,6 @@
 
 ## Update to version 5.5.3.9000
-
+Fixed compilation in Solaris
 
 ## Test environments
 * Local GNU/Linux, R release
