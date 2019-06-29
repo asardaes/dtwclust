@@ -1,6 +1,6 @@
 
-## Update to version 5.5.3
-Bug fixes and internal optimizations. Updated timing experiments too.
+## Update to version 5.5.3.9000
+
 
 ## Test environments
 * Local GNU/Linux, R release
