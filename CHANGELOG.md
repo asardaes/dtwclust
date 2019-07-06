@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 5.5.4
+* Fixed compilation on Solaris.
+
 ## Version 5.5.3
 * Fixed a bug in the way `compare_clusterings` handled preprocessing of series.
 * Internal speed optimizations.
