@@ -15,15 +15,13 @@ int get_grain(const int n, const int num_threads) {
 }
 
 /* for Rcpp::Rcout */
-void Rflush()
-{
+void Rflush() {
     R_FlushConsole();
     R_ProcessEvents();
 }
 
 /* helper kahan_sum */
-double kahan_sum(const SurrogateMatrix<double>& x)
-{
+double kahan_sum(const SurrogateMatrix<double>& x) {
     double sum = 0, c = 0;
     for (id_t i = 0; i < x.nrow(); i++) {
         double y = x[i] - c;
@@ -40,7 +38,9 @@ double kahan_sum(const SurrogateMatrix<double>& x)
  * https://math.stackexchange.com/questions/646117/how-to-find-a-function-mapping-matrix-indices
  */
 void s2d(const id_t id, const id_t nrow, id_t& i, id_t& j) {
-    j = nrow - 2 - static_cast<id_t>(sqrt(static_cast<double>(-8 * id + 4 * nrow * (nrow - 1) - 7)) / 2 - 0.5);
+    // tmp to avoid ambiguity
+    double tmp = static_cast<double>(-8 * id + 4 * nrow * (nrow - 1) - 7);
+    j = nrow - 2 - static_cast<id_t>(sqrt(tmp) / 2 - 0.5);
     i = id + j + 1 - nrow * (nrow - 1) / 2 + (nrow - j) * ((nrow - j) - 1) / 2;
 }
 
