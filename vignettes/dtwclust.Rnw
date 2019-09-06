@@ -52,9 +52,6 @@ opts_knit$set(self.contained = TRUE)
 \crefformat{equation}{Equation~#1}
 \Crefformat{equation}{Equation~#1}
 
-% Used for knitr images from Rnw files
-\newcommand{\subfloat}[2][default for first parameter: need a sub-caption]{\subcaptionbox{#1}{#2}}
-
 % Allowed percentages of page a float can use
 \renewcommand{\textfraction}{0.05}
 \renewcommand{\topfraction}{0.95}
