@@ -1,6 +1,5 @@
 
-## Update to version 5.5.4
-Fixed compilation in Solaris.
+## Update to version 5.5.4.9000
 
 ## Test environments
 * Local GNU/Linux, R release
