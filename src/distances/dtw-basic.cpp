@@ -173,9 +173,11 @@ double dtw_basic(SurrogateMatrix<double>& lcm,
                  const int window,
                  const double norm,
                  const double step,
-                 const bool normalize)
+                 const bool normalize,
+                 const bool sqrt_dist)
 {
     double d = dtw_basic_c(lcm, x, y, window, norm, step, false);
+    if (!sqrt_dist) d *= d;
     if (normalize) d /= x.nrow() + y.nrow();
     return d;
 }
@@ -187,11 +189,13 @@ double dtw_basic(SurrogateMatrix<double>& lcm,
                  const double norm,
                  const double step,
                  const bool normalize,
+                 const bool sqrt_dist,
                  SurrogateMatrix<int>& index1,
                  SurrogateMatrix<int>& index2,
                  int& path)
 {
     double d = dtw_basic_c(lcm, x, y, window, norm, step, true);
+    if (!sqrt_dist) d *= d;
     if (normalize) d /= x.nrow() + y.nrow();
     path = backtrack_steps(lcm, index1, index2, x.nrow(), y.nrow());
     return d;

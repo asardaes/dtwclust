@@ -14,7 +14,7 @@ namespace dtwclust {
 
 extern "C" SEXP dtw_basic(SEXP X, SEXP Y, SEXP WINDOW,
                           SEXP X_LEN, SEXP Y_LEN, SEXP NUM_VAR,
-                          SEXP NORM, SEXP STEP, SEXP BACKTRACK, SEXP NORMALIZE,
+                          SEXP NORM, SEXP STEP, SEXP BACKTRACK, SEXP NORMALIZE, SEXP SQRT_DIST,
                           SEXP LCM)
 {
     BEGIN_RCPP
@@ -38,7 +38,8 @@ extern "C" SEXP dtw_basic(SEXP X, SEXP Y, SEXP WINDOW,
         // calculate distance
         double d = dtw_basic(wrapped_lcm, x, y,
                              Rf_asInteger(WINDOW), Rf_asReal(NORM), Rf_asReal(STEP),
-                             Rf_asLogical(NORMALIZE), index1, index2, path);
+                             Rf_asLogical(NORMALIZE), Rf_asLogical(SQRT_DIST),
+                             index1, index2, path);
 
         // put results in a list
         SEXP list_names = PROTECT(Rf_allocVector(STRSXP, 4));
@@ -63,7 +64,7 @@ extern "C" SEXP dtw_basic(SEXP X, SEXP Y, SEXP WINDOW,
         // calculate distance
         double d = dtw_basic(wrapped_lcm, x, y,
                              Rf_asInteger(WINDOW), Rf_asReal(NORM), Rf_asReal(STEP),
-                             Rf_asLogical(NORMALIZE));
+                             Rf_asLogical(NORMALIZE), Rf_asLogical(SQRT_DIST));
 
         return Rcpp::wrap(d);
     }

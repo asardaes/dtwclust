@@ -214,7 +214,8 @@ call_dtwlb <- function(x, y, distmat, ..., window.size, norm, margin, step.patte
                  step.pattern = step.pattern,
                  backtrack = FALSE,
                  is.multivariate = FALSE,
-                 normalize = FALSE)
+                 normalize = FALSE,
+                 sqrt.dist = TRUE)
 
     # UTILS-utils.R
     num_threads <- get_nthreads()

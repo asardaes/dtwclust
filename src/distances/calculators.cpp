@@ -59,6 +59,7 @@ DtwBasicCalculator::DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, con
     norm_ = Rcpp::as<double>(dist_args["norm"]);
     step_ = Rcpp::as<double>(dist_args["step.pattern"]);
     normalize_ = Rcpp::as<bool>(dist_args["normalize"]);
+    sqrt_dist_ = Rcpp::as<bool>(dist_args["sqrt.dist"]);
     // set value of max_len_y_
     max_len_y_ = this->maxLength(y_);
 }
@@ -84,7 +85,7 @@ double DtwBasicCalculator::calculate(const arma::mat& x, const arma::mat& y) {
 
     SurrogateMatrix<const double> temp_x(x.n_rows, x.n_cols, &x[0]);
     SurrogateMatrix<const double> temp_y(y.n_rows, y.n_cols, &y[0]);
-    return dtw_basic(lcm_, temp_x, temp_y, window_, norm_, step_, normalize_);
+    return dtw_basic(lcm_, temp_x, temp_y, window_, norm_, step_, normalize_, sqrt_dist_);
 }
 
 // =================================================================================================

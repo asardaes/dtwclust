@@ -13,7 +13,7 @@ static R_CallMethodDef callMethods[] = {
     CALLDEF(PairTracker__getUnseenPair, 1),
     CALLDEF(dba, 9),
     CALLDEF(distmat_loop, 8),
-    CALLDEF(dtw_basic, 11),
+    CALLDEF(dtw_basic, 12),
     CALLDEF(dtw_lb, 6),
     CALLDEF(envelope, 2),
     CALLDEF(force_lb_symmetry, 1),

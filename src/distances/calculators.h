@@ -66,6 +66,7 @@ private:
     int window_;
     double norm_, step_;
     bool normalize_;
+    bool sqrt_dist_;
     // input series
     TSTSList<arma::mat> x_, y_;
     // helper "matrix"

@@ -11,11 +11,13 @@
 #' @param x,y Time series. Multivariate series must have time spanning the rows and variables
 #'   spanning the columns.
 #' @param window.size Size for slanted band window. `NULL` means no constraint.
-#' @param norm Norm for the DTW calculation, "L1" for Manhattan or "L2" for Euclidean.
+#' @param norm Norm for the LCM calculation, "L1" for Manhattan or "L2" for (squared) Euclidean. See
+#'   notes.
 #' @param step.pattern Step pattern for DTW. Only `symmetric1` or `symmetric2` supported here. Note
 #'   that these are *not* characters. See [dtw::stepPattern].
 #' @param backtrack Also compute the warping path between series? See details.
 #' @param normalize Should the distance be normalized? Only supported for `symmetric2`.
+#' @param sqrt.dist Only relevant for `norm = "L2"`, see notes.
 #' @param ... Currently ignored.
 #' @template error-check
 #'
@@ -40,6 +42,12 @@
 #'
 #' @note
 #'
+#' The elements of the local cost matrix are calculated by using either Manhattan or squared
+#' Euclidean distance. This is determined by the `norm` parameter. When the squared Euclidean
+#' version is used, the square root of the resulting DTW distance is calculated at the end (as
+#' defined in Ratanamahatana and Keogh 2004; Lemire 2009; see vignette references). This can be
+#' avoided by passing `FALSE` in `sqrt.dist`.
+#'
 #' The DTW algorithm (and the functions that depend on it) might return different values in 32 bit
 #' installations compared to 64 bit ones.
 #'
@@ -50,7 +58,7 @@
 #'
 dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
                       step.pattern = dtw::symmetric2, backtrack = FALSE,
-                      normalize = FALSE, ..., error.check = TRUE)
+                      normalize = FALSE, sqrt.dist = TRUE, ..., error.check = TRUE)
 {
     if (error.check) {
         check_consistency(x, "ts")
@@ -75,6 +83,7 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
     norm <- switch(norm, "L1" = 1, "L2" = 2)
     backtrack <- isTRUE(backtrack)
     normalize <- isTRUE(normalize)
+    sqrt.dist <- isTRUE(sqrt.dist)
     if (normalize && step.pattern == 1) stop("Unable to normalize with chosen step pattern.")
 
     if (backtrack)
@@ -84,7 +93,7 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 
     d <- .Call(C_dtw_basic, x, y, window.size,
                NROW(x), NROW(y), NCOL(x),
-               norm, step.pattern, backtrack, normalize,
+               norm, step.pattern, backtrack, normalize, sqrt.dist,
                gcm, PACKAGE = "dtwclust")
 
     if (backtrack) {
@@ -105,7 +114,8 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 #'
 dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
                             step.pattern = dtw::symmetric2,
-                            normalize = FALSE, ..., error.check = TRUE, pairwise = FALSE)
+                            normalize = FALSE, sqrt.dist = TRUE, ...,
+                            error.check = TRUE, pairwise = FALSE)
 {
     x <- tslist(x)
     if (error.check) check_consistency(x, "vltslist")
@@ -136,9 +146,13 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
         stop("step.pattern must be either symmetric1 or symmetric2 (without quotes)")
 
     normalize <- isTRUE(normalize)
+    sqrt.dist <- isTRUE(sqrt.dist)
+
     if (normalize && step.pattern == 1) stop("Unable to normalize with chosen step pattern.")
+
     norm <- match.arg(norm, c("L1", "L2"))
     norm <- switch(norm, "L1" = 1, "L2" = 2)
+
     mv <- is_multivariate(c(x, y))
     backtrack <- FALSE
 
@@ -149,7 +163,8 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
         norm = norm,
         step.pattern = step.pattern,
         backtrack = backtrack,
-        normalize = normalize
+        normalize = normalize,
+        sqrt.dist = sqrt.dist
     )
     num_threads <- get_nthreads()
     .Call(C_distmat_loop,

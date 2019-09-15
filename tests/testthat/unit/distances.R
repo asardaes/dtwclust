@@ -252,6 +252,19 @@ test_that("Inconsistencies in parameters for dtw_basic() are detected.", {
                  "normalize")
 })
 
+test_that("dtw_basic can behave like dtw::dtw for multivariate series and squared L2 norm.", {
+    a <- data_multivariate[[1L]]
+    b <- data_multivariate[[2L]]
+    dm <- proxy::dist(a, b, method = "L2") ^ 2
+    dtw_dist <- dtw::dtw(dm)
+
+    dtw_basic_dist <- dtw_basic(a, b, norm = "L2", sqrt.dist = FALSE)
+    expect_equal(dtw_basic_dist, dtw_dist$distance)
+
+    normalized_dtw_basic_dist <- dtw_basic(a, b, norm = "L2", sqrt.dist = FALSE, normalize = TRUE)
+    expect_equal(normalized_dtw_basic_dist, dtw_dist$normalizedDistance)
+})
+
 # ==================================================================================================
 # GAK
 # ==================================================================================================

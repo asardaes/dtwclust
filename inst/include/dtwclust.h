@@ -54,11 +54,11 @@ SEXP dba(SEXP X, SEXP CENT,
 
 SEXP dtw_basic(SEXP x, SEXP y, SEXP window,
                SEXP m, SEXP n, SEXP num_var,
-               SEXP norm, SEXP step, SEXP backtrack, SEXP normalize,
+               SEXP norm, SEXP step, SEXP backtrack, SEXP normalize, SEXP sqrt_dist,
                SEXP distmat)
 {
-    DTWCLUST_GET_FUN(1,1, "dtw_basic");
-    return fun(x, y, window, m, n, num_var, norm, step, backtrack, normalize, distmat);
+    DTWCLUST_GET_FUN(1,2, "dtw_basic");
+    return fun(x, y, window, m, n, num_var, norm, step, backtrack, normalize, sqrt_dist, distmat);
 }
 
 SEXP dtw_lb(SEXP X, SEXP Y, SEXP D, SEXP MARGIN, SEXP DOTS, SEXP NUM_THREADS)

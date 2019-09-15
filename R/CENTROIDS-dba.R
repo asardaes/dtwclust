@@ -113,7 +113,8 @@ DBA <- function(X, centroid = NULL, ...,
         norm = norm,
         step.pattern = step.pattern,
         backtrack = TRUE,
-        normalize = FALSE
+        normalize = FALSE,
+        sqrt.dist = TRUE
     )
     num_threads <- get_nthreads()
     new_cent <- .Call(C_dba,

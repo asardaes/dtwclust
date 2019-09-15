@@ -78,7 +78,7 @@ private:
         SurrogateMatrix<const double> temp_x(x.n_rows, x.n_cols, &x[0]);
         SurrogateMatrix<const double> temp_y(y.n_rows, y.n_cols, &y[0]);
         return dtw_basic(lcm_, temp_x, temp_y,
-                         window_, norm_, step_, normalize_,
+                         window_, norm_, step_, normalize_, true,
                          index1_, index2_, path_);
     }
 
@@ -89,7 +89,7 @@ private:
         SurrogateMatrix<const double> temp_x(x.n_rows, 1, &x[0] + (k * x.n_rows));
         SurrogateMatrix<const double> temp_y(y.n_rows, 1, &y[0] + (k * y.n_rows));
         return dtw_basic(lcm_, temp_x, temp_y,
-                         window_, norm_, step_, normalize_,
+                         window_, norm_, step_, normalize_, true,
                          index1_, index2_, path_);
     }
 

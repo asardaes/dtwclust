@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 5.5.5
+* Function `dtw_basic` gained parameter `sqrt.dist`.
+
 ## Version 5.5.4
 * Fixed compilation on Solaris.
 

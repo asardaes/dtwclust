@@ -6,7 +6,7 @@
 \usage{
 dtw_basic(x, y, window.size = NULL, norm = "L1",
   step.pattern = dtw::symmetric2, backtrack = FALSE,
-  normalize = FALSE, ..., error.check = TRUE)
+  normalize = FALSE, sqrt.dist = TRUE, ..., error.check = TRUE)
 }
 \arguments{
 \item{x, y}{Time series. Multivariate series must have time spanning the rows and variables
@@ -14,7 +14,8 @@ spanning the columns.}
 
 \item{window.size}{Size for slanted band window. \code{NULL} means no constraint.}
 
-\item{norm}{Norm for the DTW calculation, "L1" for Manhattan or "L2" for Euclidean.}
+\item{norm}{Norm for the LCM calculation, "L1" for Manhattan or "L2" for (squared) Euclidean. See
+notes.}
 
 \item{step.pattern}{Step pattern for DTW. Only \code{symmetric1} or \code{symmetric2} supported here. Note
 that these are \emph{not} characters. See \link[dtw:stepPattern]{dtw::stepPattern}.}
@@ -22,6 +23,8 @@ that these are \emph{not} characters. See \link[dtw:stepPattern]{dtw::stepPatter
 \item{backtrack}{Also compute the warping path between series? See details.}
 
 \item{normalize}{Should the distance be normalized? Only supported for \code{symmetric2}.}
+
+\item{sqrt.dist}{Only relevant for \code{norm = "L2"}, see notes.}
 
 \item{...}{Currently ignored.}
 
@@ -51,6 +54,12 @@ observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+
 in \code{10(2) + 1 = 21} observations falling within the window.
 }
 \note{
+The elements of the local cost matrix are calculated by using either Manhattan or squared
+Euclidean distance. This is determined by the \code{norm} parameter. When the squared Euclidean
+version is used, the square root of the resulting DTW distance is calculated at the end (as
+defined in Ratanamahatana and Keogh 2004; Lemire 2009; see vignette references). This can be
+avoided by passing \code{FALSE} in \code{sqrt.dist}.
+
 The DTW algorithm (and the functions that depend on it) might return different values in 32 bit
 installations compared to 64 bit ones.
 

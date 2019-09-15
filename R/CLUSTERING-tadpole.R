@@ -88,7 +88,8 @@ TADPole <- function(data, k = 2L, dc, window.size, error.check = TRUE, lb = "lbk
                      backtrack = FALSE,
                      gcm = matrix(0, 2L, len),
                      is.multivariate = FALSE,
-                     normalize = FALSE)
+                     normalize = FALSE,
+                     sqrt.dist = TRUE)
 
     RET <- foreach(
         dc = dc, .combine = c, .multicombine = TRUE,

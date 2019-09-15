@@ -22,7 +22,9 @@ double dtw_basic(SurrogateMatrix<double>& lcm,
                  const int window,
                  const double norm,
                  const double step,
-                 const bool normalize);
+                 const bool normalize,
+                 const bool sqrt_dist);
+
 double dtw_basic(SurrogateMatrix<double>& lcm,
                  const SurrogateMatrix<const double>& x,
                  const SurrogateMatrix<const double>& y,
@@ -30,6 +32,7 @@ double dtw_basic(SurrogateMatrix<double>& lcm,
                  const double norm,
                  const double step,
                  const bool normalize,
+                 const bool sqrt_dist,
                  SurrogateMatrix<int>& index1,
                  SurrogateMatrix<int>& index2,
                  int& path);
