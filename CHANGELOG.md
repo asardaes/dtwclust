@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 5.5.5.9000
+* Adjustments for future R 4.0.0 version: matrices now also inherit from `array`.
+
 ## Version 5.5.5
 * Function `dtw_basic` gained parameter `sqrt.dist`.
 

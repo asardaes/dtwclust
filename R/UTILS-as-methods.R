@@ -21,7 +21,7 @@ setGeneric("as.matrix", package = "base")
 #'
 as.matrix.crossdist <- function(x, ...) {
     x <- cbind(x)
-    class(x) <- "matrix"
+    class(x) <- c("matrix", "array")
     x
 }
 
@@ -30,7 +30,7 @@ as.matrix.crossdist <- function(x, ...) {
 #'
 as.matrix.pairdist <- function(x, ...) {
     x <- cbind(x)
-    class(x) <- "matrix"
+    class(x) <- c("matrix", "array")
     x
 }
 

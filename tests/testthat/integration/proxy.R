@@ -24,11 +24,11 @@ test_that("Included proxy distances can be called and give expected dimensions."
                      info = paste(distance, "double-arg"))
 
         d3 <- proxy::dist(x[1L], x, method = distance, window.size = 15L, sigma = 100, normalize = TRUE)
-        class(d3) <- "matrix"
+        class(d3) <- c("matrix", "array")
         expect_identical(dim(d3), c(1L, length(x)), info = paste(distance, "one-vs-many"))
 
         d4 <- proxy::dist(x, x[1L], method = distance, window.size = 15L, sigma = 100, normalize = TRUE)
-        class(d4) <- "matrix"
+        class(d4) <- c("matrix", "array")
         expect_identical(dim(d4), c(length(x), 1L), info = paste(distance, "many-vs-one"))
 
         # dtw_lb will give different results below because of how it works
@@ -119,11 +119,11 @@ test_that("Included proxy similarities can be called and give expected dimension
                      info = paste(distance, "double-arg"))
 
         d3 <- proxy::simil(x[1L], x, method = distance, sigma = 100)
-        class(d3) <- "matrix"
+        class(d3) <- c("matrix", "array")
         expect_identical(dim(d3), c(1L, length(x)), info = paste(distance, "one-vs-many"))
 
         d4 <- proxy::simil(x, x[1L], method = distance, sigma = 100)
-        class(d4) <- "matrix"
+        class(d4) <- c("matrix", "array")
         expect_identical(dim(d4), c(length(x), 1L), info = paste(distance, "many-vs-one"))
 
         expect_equal(d3, d[1L, , drop = FALSE], check.attributes = FALSE,

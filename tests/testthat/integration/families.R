@@ -29,7 +29,7 @@ test_that("Operations with tsclustFamily@dist and lbk give expected results", {
     sub_distmat <- family@dist(x, centroids, window.size = window.size)
     pdist <- family@dist(x, window.size = window.size, pairwise = TRUE)
     class(pdist) <- NULL
-    class(sub_distmat) <- "matrix"
+    class(sub_distmat) <- c("matrix", "array")
 
     expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
                  check.attributes = FALSE)
@@ -99,7 +99,7 @@ test_that("Operations with tsclustFamily@dist and lbi give expected results", {
     sub_distmat <- family@dist(x, centroids, window.size = window.size)
     pdist <- family@dist(x, window.size = window.size, pairwise = TRUE)
     class(pdist) <- NULL
-    class(sub_distmat) <- "matrix"
+    class(sub_distmat) <- c("matrix", "array")
 
     expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
                  check.attributes = FALSE)
@@ -169,7 +169,7 @@ test_that("Operations with tsclustFamily@dist and sbd give expected results", {
     sub_distmat <- family@dist(x, centroids)
     pdist <- family@dist(x, pairwise = TRUE)
     class(pdist) <- NULL
-    class(sub_distmat) <- "matrix"
+    class(sub_distmat) <- c("matrix", "array")
 
     expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
                  check.attributes = FALSE)
@@ -288,7 +288,7 @@ test_that("Operations with tsclustFamily@dist and dtw give expected results", {
     sub_distmat <- family@dist(x, centroids, window.size = window.size)
     pdist <- family@dist(x, window.size = window.size, pairwise = TRUE)
     class(pdist) <- NULL
-    class(sub_distmat) <- "matrix"
+    class(sub_distmat) <- c("matrix", "array")
 
     expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
                  check.attributes = FALSE)
@@ -336,7 +336,7 @@ test_that("Operations with tsclustFamily@dist and dtw2 give expected results", {
     sub_distmat <- family@dist(x, centroids, window.size = window.size)
     pdist <- family@dist(x, window.size = window.size, pairwise = TRUE)
     class(pdist) <- NULL
-    class(sub_distmat) <- "matrix"
+    class(sub_distmat) <- c("matrix", "array")
 
     expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
                  check.attributes = FALSE)
@@ -384,7 +384,7 @@ test_that("Operations with tsclustFamily@dist and dtw_basic give expected result
     sub_distmat <- family@dist(x, centroids, window.size = window.size)
     pdist <- family@dist(x, window.size = window.size, pairwise = TRUE)
     class(pdist) <- NULL
-    class(sub_distmat) <- "matrix"
+    class(sub_distmat) <- c("matrix", "array")
 
     expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
                  check.attributes = FALSE)
@@ -456,7 +456,7 @@ test_that("Operations with tsclustFamily@dist and gak give expected results", {
     sub_distmat <- family@dist(x, centroids, window.size = window.size, sigma = 100)
     pdist <- family@dist(x, window.size = window.size, pairwise = TRUE, sigma = 100)
     class(pdist) <- NULL
-    class(sub_distmat) <- "matrix"
+    class(sub_distmat) <- c("matrix", "array")
 
     expect_equal(pdist, rep(0, length(pdist)), info = "Pairwise",
                  check.attributes = FALSE)
@@ -526,7 +526,7 @@ test_that("Operations with tsclustFamily@dist and sdtw give expected results", {
     whole_distmat <- family@dist(x)
     sub_distmat <- family@dist(x, centroids)
     pdist <- family@dist(x, pairwise = TRUE)
-    class(sub_distmat) <- "matrix"
+    class(sub_distmat) <- c("matrix", "array")
 
     # different because sdtw(x,x) != 0
     expect_identical(length(pdist), length(x), info = "Pairwise")

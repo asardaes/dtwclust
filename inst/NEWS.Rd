@@ -7,8 +7,8 @@
     Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/master/CHANGELOG.md}
 }
 
-\section{Changes in version 5.5.5}{
+\section{Changes in version 5.5.5.9000}{
 \itemize{
-    \item Function \code{dtw_basic} gained parameter \code{sqrt.dist}.
+    \item Adjustments for future R 4.0.0 version: matrices now also inherit from \code{array}.
 }
 }

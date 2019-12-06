@@ -19,6 +19,7 @@ matrix:
         - Rscript codecov.R
     - os: linux
       r: devel
+      env: _R_CLASS_MATRIX_ARRAY_=true
     - os: osx
       r: release
       env: COMPILER=clang

@@ -305,14 +305,14 @@ test_that("Methods for TSClusters objects are dispatched correctly.", {
 
 test_that("Included as.* methods are dispatched correctly.", {
     crossdist <- proxy::dist(data_reinterpolated_subset, data_reinterpolated_subset)
-    expect_true(class(base::as.matrix(crossdist)) == "matrix")
+    expect_true(inherits(base::as.matrix(crossdist), "matrix"))
     expect_s3_class(base::as.data.frame(crossdist), "data.frame")
     expect_identical(dim(base::as.matrix(crossdist)), dim(as.data.frame(crossdist)),
                      info = "Changing a crossdist class to matrix/data.frame does not alter dimensions")
 
     pairdist <- proxy::dist(data_reinterpolated_subset[1L:10L], data_reinterpolated_subset[11L:20L],
                             pairwise = TRUE)
-    expect_true(class(base::as.matrix(pairdist)) == "matrix")
+    expect_true(inherits(base::as.matrix(pairdist), "matrix"))
     expect_s3_class(base::as.data.frame(pairdist), "data.frame")
     expect_identical(dim(base::as.matrix(pairdist)), dim(as.data.frame(pairdist)),
                      info = "Changing a pairdist class to matrix/data.frame results in equal dimensions")

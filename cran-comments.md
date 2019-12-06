@@ -1,7 +1,5 @@
 
-## Update to version 5.5.5
-- Fixed building of vignette accounting for new subcaption version.
-- Added citation information, although the DOI page is not yet active.
+## Update to version 5.5.5.9000
 
 ## Test environments
 * Local GNU/Linux, R release
