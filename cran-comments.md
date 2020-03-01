@@ -1,8 +1,5 @@
 
-## Update to version 5.5.6
-Changed tests that assumed matrices have a single class,
-which caused problems with upcoming R
-(since matrices will also inherit from array).
+## Update to version
 
 ## Test environments
 * Local GNU/Linux, R release

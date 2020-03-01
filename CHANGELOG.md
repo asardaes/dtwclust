@@ -1,5 +1,7 @@
 # Changelog
 
+## Version 5.5.6.9000
+
 ## Version 5.5.6
 * Adjustments for future R 4.0.0 version: matrices now also inherit from `array`.
 
