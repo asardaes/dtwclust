@@ -9,6 +9,6 @@
 
 \section{Changes in version 5.5.6.9000}{
 \itemize{
-    \item TBD.
+    \item Series order is now preserved in plots of included shiny apps.
 }
 }

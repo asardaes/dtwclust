@@ -16,17 +16,20 @@ explore__tidy_series <- function(series) {
             lapply(1L:num_col, function(j) { this_series[, j, drop = TRUE] })
         })
     }
+
     # transform to data frame
     dfm <- reshape2::melt(series)
-    dfm$L1 <- factor(dfm$L1)
+    dfm$L1 <- factor(dfm$L1, levels = names(series))
     if (num_col > 1L) dfm$L2 <- factor(dfm$L2)
     col_names <- colnames(dfm)
     col_names[col_names == "L1"] <- "Series"
     colnames(dfm) <- col_names
+
     # time indices
     dfm$t <- unlist(lapply(num_rows, function(len) {
         rep(seq(from = 1L, to = len), num_col)
     }))
+
     # return
     dfm
 }
