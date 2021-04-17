@@ -3,22 +3,29 @@
 # Download script file from GitHub
 init:
   ps: |
-        Get-Date
         $ErrorActionPreference = "Stop"
-install:
-  ps: |
-        Import-Module '.\scripts\appveyor-tool.ps1'
-        Bootstrap
+        Invoke-WebRequest http://raw.github.com/krlmlr/r-appveyor/master/scripts/appveyor-tool.ps1 -OutFile "..\appveyor-tool.ps1"
+        Import-Module '..\appveyor-tool.ps1'
 
-# Adapt as necessary starting from here
+install:
+  ps: Bootstrap
+
+cache:
+  - C:\RLibrary
 
 platform: x64
 
 environment:
-  global:
-    R_VERSION: release
-    R_ARCH: x64
-    NOT_CRAN: 'true'
+  NOT_CRAN: true
+  # env vars that may need to be set, at least temporarily, from time to time
+  # see https://github.com/krlmlr/r-appveyor#readme for details
+  # USE_RTOOLS: true
+  # R_REMOTES_STANDALONE: true
+
+# Adapt as necessary starting from here
+
+  R_VERSION: release
+  R_ARCH: x64
 
 build_script:
   - travis-tool.sh install_deps
