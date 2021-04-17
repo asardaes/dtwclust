@@ -693,14 +693,19 @@ plot.TSClusters <- function(x, y, ...,
                 df_cluster$L1 <- factor(df_cluster$L1, levels = unique(df_cluster$L1))
                 df_series <- split(df_cluster[c("t", "value", "cl")], df_cluster$L1)
                 ret <- vector("list", length(df_series))
+
                 for (i in seq_along(df_series)) {
                     this_df <- df_series[[i]]
+
                     for (not_this in df_series[-i]) {
-                        if (isTRUE(all.equal(not_this, this_df, check.attributes = FALSE))) next
+                        if (nrow(this_df) == nrow(not_this) && isTRUE(all.equal(not_this, this_df, check.attributes = FALSE))) {
+                            next
+                        }
                         this_df <- dplyr::anti_join(this_df, not_this, by = c("t", "value"))
                     }
                     ret[[i]] <- dplyr::sample_n(this_df, 1L)
                 }
+
                 # return
                 dplyr::bind_rows(ret)
             }))
