@@ -1,13 +1,12 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 language: r
 cache: packages
-sudo: required
 r_build_args: "--compact-vignettes"
 r_packages:
   - devtools
 env:
   - COMPILER=gxx-7
-matrix:
+jobs:
   fast_finish: true
   include:
     - os: linux
@@ -19,8 +18,8 @@ matrix:
         - Rscript codecov.R
     - os: linux
       r: devel
-      env: _R_CLASS_MATRIX_ARRAY_=true
     - os: osx
+      osx_image: xcode12.2
       r: release
       env: COMPILER=clang
       before_install:
@@ -45,9 +44,11 @@ before_install:
       # https://github.com/travis-ci/travis-ci/issues/4190#issuecomment-353342526
       # https://unix.stackexchange.com/a/109790/219144
       while sleep 60; do echo "=====[ still running ]====="; tail -n 10 /tmp/rs.out; done &
-      command Rscript "$@" > /tmp/rs.out 2>&1
+      pid=$!
+      command Rscript "$@" &>/tmp/rs.out
       local status=$?
-      kill %1
+      kill "$pid"
+      echo "=====[ done ]====="
       tail -n 50 /tmp/rs.out
       return $status
     }
