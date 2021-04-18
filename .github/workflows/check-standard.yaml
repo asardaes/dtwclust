@@ -7,6 +7,8 @@ on:
   pull_request:
     branches:
       - master
+  schedule:
+    - cron: "0 0 1 * ?"
 
 name: R-CMD-check
 
@@ -32,6 +34,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        # https://community.codecov.io/t/stuck-in-processing-and-unable-to-find-report-content-in-the-storage-archive/2534
+        with:
+          fetch-depth: 2
 
       - uses: r-lib/actions/setup-r@v1
         with:
@@ -75,10 +80,16 @@ jobs:
           tinytex:::install_yihui_pkgs()
         shell: Rscript {0}
 
+      # Otherwise building the vignette on Windows fails
+      - name: Preinstall release version of package
+        if: runner.os == 'Windows'
+        run: |
+          remotes::install_cran("dtwclust")
+        shell: Rscript {0}
+
       - name: Check
         env:
           _R_CHECK_CRAN_INCOMING_REMOTE_: false
-          _R_CHECK_LIMIT_CORES_: "TRUE"
         run: |
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(build_args = "--compact-vignettes", args = c("--no-manual", "--as-cran"), error_on = "error", check_dir = "check")
@@ -90,6 +101,7 @@ jobs:
         run: |
           Rscript -e 'remotes::install_cran("covr")'
           Rscript codecov.R
+        continue-on-error: true
 
       - name: Upload check results
         if: failure()
