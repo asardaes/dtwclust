@@ -1,6 +1,13 @@
+---
+output:
+  md_document:
+    variant: gfm
+---
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/dtwclust)](https://cran.r-project.org/package=dtwclust)
+[![R-CMD-check](https://github.com/asardaes/dtwclust/workflows/R-CMD-check/badge.svg)](https://github.com/asardaes/dtwclust/actions)
 [![Travis-CI Build
 Status](https://travis-ci.org/asardaes/dtwclust.svg?branch=master)](https://travis-ci.org/asardaes/dtwclust)
 [![AppVeyor Build
@@ -27,35 +34,35 @@ DTW.
 
 For more information:
 
-  - [Vignette with
+-   [Vignette with
     theory](https://cran.r-project.org/web/packages/dtwclust/vignettes/dtwclust.pdf)
     (with examples in the appendices)
-  - [Timing
+-   [Timing
     experiments](https://cran.r-project.org/web/packages/dtwclust/vignettes/timing-experiments.html)
-  - [Parallelization
+-   [Parallelization
     considerations](https://cran.r-project.org/web/packages/dtwclust/vignettes/parallelization-considerations.html)
-  - [Functions’
+-   [Functions’
     documentation](https://cran.r-project.org/web/packages/dtwclust/dtwclust.pdf)
-  - [Sample shiny
+-   [Sample shiny
     app](https://asardaes.shinyapps.io/dtwclust-tsclust-interactive/)
-  - [CRAN’s time series
+-   [CRAN’s time series
     view](https://cran.r-project.org/web/views/TimeSeries.html)
 
 ## Implementations
 
-  - Partitional, hierarchical and fuzzy clustering
-      - k-Shape clustering
-          - Shape-based distance
-          - Shape extraction for time series
-      - TADPole clustering
-  - An optimized version of DTW
-  - Keogh’s and Lemire’s DTW lower bounds
-  - Global alignment kernel (GAK) distance
-  - DTW Barycenter Averaging
-  - Soft-DTW (distance and centroid)
-  - Some multivariate support (GAK, DTW and soft-DTW)
-  - Cluster validity indices (crisp and fuzzy, internal and external)
-  - Parallelization for most functions
+-   Partitional, hierarchical and fuzzy clustering
+    -   k-Shape clustering
+        -   Shape-based distance
+        -   Shape extraction for time series
+    -   TADPole clustering
+-   An optimized version of DTW
+-   Keogh’s and Lemire’s DTW lower bounds
+-   Global alignment kernel (GAK) distance
+-   DTW Barycenter Averaging
+-   Soft-DTW (distance and centroid)
+-   Some multivariate support (GAK, DTW and soft-DTW)
+-   Cluster validity indices (crisp and fuzzy, internal and external)
+-   Parallelization for most functions
 
 ## Installation
 

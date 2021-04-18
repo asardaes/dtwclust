@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 ```
 
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/dtwclust)](https://cran.r-project.org/package=dtwclust)
+[![R-CMD-check](https://github.com/asardaes/dtwclust/workflows/R-CMD-check/badge.svg)](https://github.com/asardaes/dtwclust/actions)
 [![Travis-CI Build Status](https://travis-ci.org/asardaes/dtwclust.svg?branch=master)](https://travis-ci.org/asardaes/dtwclust)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/asardaes/dtwclust?branch=master&svg=true)](https://ci.appveyor.com/project/asardaes/dtwclust)
 [![codecov](https://codecov.io/gh/asardaes/dtwclust/branch/master/graph/badge.svg)](https://codecov.io/gh/asardaes/dtwclust)
