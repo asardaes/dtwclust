@@ -1,8 +1,3 @@
----
-output:
-  md_document:
-    variant: gfm
----
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
