@@ -3,8 +3,7 @@
 on:
   push:
     branches:
-      - dev/github-actions
-      - master
+      - '**'
   pull_request:
     branches:
       - master
@@ -82,7 +81,7 @@ jobs:
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(build_args = "--compact-vignettes", args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
-        continue-on-error: ${{ matrix.config.r == 'devel' }}
+        continue-on-error: true # ${{ matrix.config.r == 'devel' }}
 
       - name: Test coverage
         if: runner.os == 'Linux' && matrix.config.r == 'release'
@@ -90,9 +89,17 @@ jobs:
           Rscript -e 'remotes::install_cran("covr")'
           Rscript codecov.R
 
+      - name: Parse missing tex dependencies
+        if: failure()
+        run: tinytex::parse_packages("vignettes/dtwclust.log")
+        shell: Rscript {0}
+        continue-on-error: true
+
       - name: Upload check results
         if: failure()
-        uses: actions/upload-artifact@main
+        uses: actions/upload-artifact@v2
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
-          path: check
+          path: |
+            check
+            *.log
