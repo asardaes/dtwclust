@@ -43,7 +43,7 @@ jobs:
 
       - name: Set up tex in OSX
         if: runner.os == 'macOS'
-        run: tlmgr install placeins cleveref framed
+        run: tlmgr install placeins cleveref
 
       - name: Query dependencies
         run: |
@@ -81,7 +81,7 @@ jobs:
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck(build_args = "--compact-vignettes", args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
-        continue-on-error: true # ${{ matrix.config.r == 'devel' }}
+        continue-on-error: ${{ matrix.config.r == 'devel' }}
 
       - name: Test coverage
         if: runner.os == 'Linux' && matrix.config.r == 'release'
@@ -90,7 +90,6 @@ jobs:
           Rscript codecov.R
 
       - name: Parse missing tex dependencies
-        if: failure()
         run: tinytex::parse_packages("vignettes/dtwclust.log")
         shell: Rscript {0}
         continue-on-error: true
