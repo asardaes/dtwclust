@@ -8,10 +8,6 @@ output:
 
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/dtwclust)](https://cran.r-project.org/package=dtwclust)
 [![R-CMD-check](https://github.com/asardaes/dtwclust/workflows/R-CMD-check/badge.svg)](https://github.com/asardaes/dtwclust/actions)
-[![Travis-CI Build
-Status](https://travis-ci.org/asardaes/dtwclust.svg?branch=master)](https://travis-ci.org/asardaes/dtwclust)
-[![AppVeyor Build
-Status](https://ci.appveyor.com/api/projects/status/github/asardaes/dtwclust?branch=master&svg=true)](https://ci.appveyor.com/project/asardaes/dtwclust)
 [![codecov](https://codecov.io/gh/asardaes/dtwclust/branch/master/graph/badge.svg)](https://codecov.io/gh/asardaes/dtwclust)
 [![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](https://cran.r-project.org/package=dtwclust)
 
@@ -78,10 +74,9 @@ then type `remotes::install_github("asardaes/dtwclust")`.
 
 If you’re wondering about which version to install, take a look at the
 [CHANGELOG](CHANGELOG.md) file, I try to keep it updated. Check the
-[Unix](https://travis-ci.org/asardaes/dtwclust) and
-[Windows](https://ci.appveyor.com/project/asardaes/dtwclust) continuous
-integration builds to make sure everything is working, but do note that
-they tend to fail for reasons unrelated to the package’s functionality.
+[continuous integration
+builds](https://github.com/asardaes/dtwclust/actions) to make sure
+everything is working.
 
 ## License
 
