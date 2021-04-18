@@ -72,6 +72,7 @@ jobs:
         run: |
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
+          tinytex:::install_yihui_pkgs()
         shell: Rscript {0}
 
       - name: Check
@@ -89,11 +90,6 @@ jobs:
           Rscript -e 'remotes::install_cran("covr")'
           Rscript codecov.R
 
-      - name: Parse missing tex dependencies
-        run: tinytex::parse_packages("vignettes/dtwclust.log")
-        shell: Rscript {0}
-        continue-on-error: true
-
       - name: Upload check results
         if: failure()
         uses: actions/upload-artifact@v2
@@ -101,4 +97,3 @@ jobs:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: |
             check
-            *.log
