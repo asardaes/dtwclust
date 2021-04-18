@@ -78,9 +78,10 @@ jobs:
       - name: Check
         env:
           _R_CHECK_CRAN_INCOMING_REMOTE_: false
+          _R_CHECK_LIMIT_CORES_: "TRUE"
         run: |
           options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(build_args = "--compact-vignettes", args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
+          rcmdcheck::rcmdcheck(build_args = "--compact-vignettes", args = c("--no-manual", "--as-cran"), error_on = "error", check_dir = "check")
         shell: Rscript {0}
         continue-on-error: ${{ matrix.config.r == 'devel' }}
 
