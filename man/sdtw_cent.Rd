@@ -4,9 +4,15 @@
 \alias{sdtw_cent}
 \title{Centroid calculation based on soft-DTW}
 \usage{
-sdtw_cent(series, centroid = NULL, gamma = 0.01, weights = rep(1,
-  length(series)), ..., opts = list(algorithm = "NLOPT_LD_LBFGS", maxeval
-  = 20L), error.check = TRUE)
+sdtw_cent(
+  series,
+  centroid = NULL,
+  gamma = 0.01,
+  weights = rep(1, length(series)),
+  ...,
+  opts = list(algorithm = "NLOPT_LD_LBFGS", maxeval = 20L),
+  error.check = TRUE
+)
 }
 \arguments{
 \item{series}{A matrix or data frame where each row is a time series, or a list where each

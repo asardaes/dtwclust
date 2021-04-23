@@ -4,14 +4,20 @@
 \alias{pam_cent}
 \title{Centroid for partition around medoids}
 \usage{
-pam_cent(series, distance, ids = seq_along(series), distmat = NULL,
-  ..., error.check = TRUE)
+pam_cent(
+  series,
+  distance,
+  ids = seq_along(series),
+  distmat = NULL,
+  ...,
+  error.check = TRUE
+)
 }
 \arguments{
 \item{series}{The time series in one of the formats accepted by \code{\link[=tslist]{tslist()}}.}
 
 \item{distance}{A character indicating which distance to use. Only needed if \code{distmat} is \code{NULL}.
-The distance must be registered in \code{\link[proxy:pr_DB]{proxy::pr_DB()}}.}
+The distance must be registered in \code{\link[proxy:registry]{proxy::pr_DB()}}.}
 
 \item{ids}{Integer vector indicating which of the \code{series} should be considered.}
 

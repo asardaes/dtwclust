@@ -4,8 +4,16 @@
 \alias{lb_improved}
 \title{Lemire's improved DTW lower bound}
 \usage{
-lb_improved(x, y, window.size = NULL, norm = "L1", lower.env = NULL,
-  upper.env = NULL, force.symmetry = FALSE, error.check = TRUE)
+lb_improved(
+  x,
+  y,
+  window.size = NULL,
+  norm = "L1",
+  lower.env = NULL,
+  upper.env = NULL,
+  force.symmetry = FALSE,
+  error.check = TRUE
+)
 }
 \arguments{
 \item{x}{A time series (reference).}

@@ -4,8 +4,13 @@
 \alias{zscore}
 \title{Wrapper for z-normalization}
 \usage{
-zscore(x, ..., multivariate = FALSE, keep.attributes = FALSE,
-  error.check = TRUE)
+zscore(
+  x,
+  ...,
+  multivariate = FALSE,
+  keep.attributes = FALSE,
+  error.check = TRUE
+)
 }
 \arguments{
 \item{x}{Data to normalize. Either a vector, a matrix/data.frame where each row is to be

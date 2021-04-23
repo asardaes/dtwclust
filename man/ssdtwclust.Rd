@@ -54,8 +54,8 @@ This part of the app implements the main procedure by leveraging \code{\link[=co
 interface is similar to \code{\link[=interactive_clustering]{interactive_clustering()}}, so it's worth checking its documentation
 too. Since \code{\link[=compare_clusterings]{compare_clusterings()}} supports parallelization with \code{\link[foreach:foreach]{foreach::foreach()}}, you can
 register a parallel backend before opening the shiny app, but you should pre-load the workers
-with the necessary packages and/or functions. See \code{\link[parallel:clusterEvalQ]{parallel::clusterEvalQ()}} and
-\code{\link[parallel:clusterExport]{parallel::clusterExport()}}, as well as the examples below.
+with the necessary packages and/or functions. See \code{\link[parallel:clusterApply]{parallel::clusterEvalQ()}} and
+\code{\link[parallel:clusterApply]{parallel::clusterExport()}}, as well as the examples below.
 
 The range of window sizes is specified with a slider, and represents the size as a percentage
 of the shortest series' length. The \code{step} parameter indicates how spaced apart should the

@@ -50,7 +50,7 @@ Note that the location of the labels is random each time.
 }
 
 The plot area reacts to the plot parameters, but the actual clustering with \code{\link[=tsclust]{tsclust()}} won't
-be executed until you click the \code{Cluster!} button. \strong{The plot can take a couple of seconds to
+be executed until you click the \verb{Cluster!} button. \strong{The plot can take a couple of seconds to
 load!} Plotting multivariate series might generate warnings about missing values, they can be
 safely ignored.
 

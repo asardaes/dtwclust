@@ -4,11 +4,15 @@
 \alias{compare_clusterings_configs}
 \title{Create clustering configurations.}
 \usage{
-compare_clusterings_configs(types = c("p", "h", "f"), k = 2L,
-  controls = NULL, preprocs = pdc_configs("preproc", none = list()),
+compare_clusterings_configs(
+  types = c("p", "h", "f"),
+  k = 2L,
+  controls = NULL,
+  preprocs = pdc_configs("preproc", none = list()),
   distances = pdc_configs("distance", dtw_basic = list()),
   centroids = pdc_configs("centroid", default = list()),
-  no.expand = character(0L))
+  no.expand = character(0L)
+)
 }
 \arguments{
 \item{types}{Clustering types. It must be any combination of (possibly abbreviated): partitional,

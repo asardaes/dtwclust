@@ -4,8 +4,7 @@
 \alias{shape_extraction}
 \title{Shape average of several time series}
 \usage{
-shape_extraction(X, centroid = NULL, znorm = FALSE, ...,
-  error.check = TRUE)
+shape_extraction(X, centroid = NULL, znorm = FALSE, ..., error.check = TRUE)
 }
 \arguments{
 \item{X}{A matrix or data frame where each row is a time series, or a list where each element is

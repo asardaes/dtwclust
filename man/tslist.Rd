@@ -26,7 +26,7 @@ For matrices and data frames, each \strong{row} is considered as one time series
 simply passed through.
 }
 \note{
-The function assumes that matrix-like objects can be first coerced via \code{\link[base:as.matrix]{base::as.matrix()}}, so
+The function assumes that matrix-like objects can be first coerced via \code{\link[base:matrix]{base::as.matrix()}}, so
 that the result can be indexed with \code{series[i, ]}.
 
 No consistency checks are performed by this function.

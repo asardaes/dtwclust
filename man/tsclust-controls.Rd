@@ -9,16 +9,33 @@
 \alias{tsclust_args}
 \title{Control parameters for clusterings with \code{\link[=tsclust]{tsclust()}}}
 \usage{
-partitional_control(pam.precompute = TRUE, iter.max = 100L,
-  nrep = 1L, symmetric = FALSE, packages = character(0L),
-  distmat = NULL, pam.sparse = FALSE, version = 2L)
+partitional_control(
+  pam.precompute = TRUE,
+  iter.max = 100L,
+  nrep = 1L,
+  symmetric = FALSE,
+  packages = character(0L),
+  distmat = NULL,
+  pam.sparse = FALSE,
+  version = 2L
+)
 
-hierarchical_control(method = "average", symmetric = FALSE,
-  packages = character(0L), distmat = NULL)
+hierarchical_control(
+  method = "average",
+  symmetric = FALSE,
+  packages = character(0L),
+  distmat = NULL
+)
 
-fuzzy_control(fuzziness = 2, iter.max = 100L, delta = 0.001,
-  packages = character(0L), symmetric = FALSE, version = 2L,
-  distmat = NULL)
+fuzzy_control(
+  fuzziness = 2,
+  iter.max = 100L,
+  delta = 0.001,
+  packages = character(0L),
+  symmetric = FALSE,
+  version = 2L,
+  distmat = NULL
+)
 
 tadpole_control(dc, window.size, lb = "lbk")
 
@@ -107,7 +124,7 @@ updated iteratively.
 
 
 There are some limitations when using a custom hierarchical function in \code{method}: it will
-receive the lower triangular of the distance matrix as first argument (see \code{\link[stats:as.dist]{stats::as.dist()}})
+receive the lower triangular of the distance matrix as first argument (see \code{\link[stats:dist]{stats::as.dist()}})
 and the result should support the \code{\link[stats:as.hclust]{stats::as.hclust()}} generic. This functionality was added
 with the \pkg{cluster} package in mind, since its functions follow this convention, but other
 functions could be used if they are adapted to work similarly.

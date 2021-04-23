@@ -4,11 +4,20 @@
 \alias{tsclust}
 \title{Time series clustering}
 \usage{
-tsclust(series = NULL, type = "partitional", k = 2L, ...,
-  preproc = NULL, distance = "dtw_basic", centroid = ifelse(type ==
-  "fuzzy", "fcm", "pam"), control = do.call(paste0(type, "_control"),
-  list()), args = tsclust_args(), seed = NULL, trace = FALSE,
-  error.check = TRUE)
+tsclust(
+  series = NULL,
+  type = "partitional",
+  k = 2L,
+  ...,
+  preproc = NULL,
+  distance = "dtw_basic",
+  centroid = ifelse(type == "fuzzy", "fcm", "pam"),
+  control = do.call(paste0(type, "_control"), list()),
+  args = tsclust_args(),
+  seed = NULL,
+  trace = FALSE,
+  error.check = TRUE
+)
 }
 \arguments{
 \item{series}{A list of series, a numeric matrix or a data frame. Matrices and data frames are
@@ -46,7 +55,7 @@ and give more informative errors messages. Also used internally to avoid repeati
 \value{
 An object with an appropriate class from \linkS4class{TSClusters}.
 
-If \code{control$nrep > 1} and a partitional procedure is used, \code{length(method)} \code{> 1} and
+If \code{control$nrep > 1} and a partitional procedure is used, \code{length(method)} \verb{> 1} and
 hierarchical procedures are used, or \code{length(k)} \code{>} \code{1}, a list of objects is returned.
 }
 \description{
@@ -151,7 +160,7 @@ vector indicating which \code{series} were chosen as centroids:
 The distance measure to be used with partitional, hierarchical and fuzzy clustering can be
 modified with the \code{distance} parameter. The supported option is to provide a string, which must
 represent a compatible distance registered with \code{proxy}'s \code{\link[proxy:dist]{proxy::dist()}}. Registration is done
-via \code{\link[proxy:pr_DB]{proxy::pr_DB()}}, and extra parameters can be provided in \code{args$dist} (see the examples).
+via \code{\link[proxy:registry]{proxy::pr_DB()}}, and extra parameters can be provided in \code{args$dist} (see the examples).
 
 Note that you are free to create your own distance functions and register them. Optionally, you
 can use one of the following custom implementations (all registered with \code{proxy}):
@@ -206,7 +215,7 @@ generic (see also \link{TSClusters-methods}).
 
 Due to their stochastic nature, partitional clustering is usually repeated several times with
 different random seeds to allow for different starting points. This function uses
-\code{\link[parallel:nextRNGStream]{parallel::nextRNGStream()}} to obtain different seed streams for each repetition, utilizing the
+\code{\link[parallel:RngStream]{parallel::nextRNGStream()}} to obtain different seed streams for each repetition, utilizing the
 \code{seed} parameter (if provided) to initialize it. If more than one repetition is made, the
 streams are returned in an attribute called \code{rng}.
 
@@ -237,7 +246,7 @@ distance is included with \pkg{dtwclust} or not, see the caveats in \linkS4class
 If you register a parallel backend and special packages must be loaded, provide their names in
 the \code{packages} element of \code{control}. Note that "dtwclust" is always loaded in each parallel
 worker, so that doesn't need to be included. Alternatively, you may want to pre-load
-\pkg{dtwclust} in each worker with \code{\link[parallel:clusterEvalQ]{parallel::clusterEvalQ()}}.
+\pkg{dtwclust} in each worker with \code{\link[parallel:clusterApply]{parallel::clusterEvalQ()}}.
 }
 
 \examples{

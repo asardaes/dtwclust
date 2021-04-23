@@ -19,7 +19,7 @@ list is provided in \code{x}.}
 Reinterpolated time series
 }
 \description{
-This function is just a wrapper for the native function \code{\link[stats:approx]{stats::approx()}} to do simple linear
+This function is just a wrapper for the native function \code{\link[stats:approxfun]{stats::approx()}} to do simple linear
 reinterpolation. It also supports matrices, data frames, and lists of time series.
 }
 \details{

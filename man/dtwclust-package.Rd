@@ -32,7 +32,7 @@ wrapper for multiple tests in \code{\link[=compare_clusterings]{compare_clusteri
 
 Please note the random number generator is set to L'Ecuyer-CMRG when \pkg{dtwclust} is attached
 in an attempt to preserve reproducibility. You are free to change this afterwards if you wish
-(see \code{\link[base:RNGkind]{base::RNGkind()}}), but \pkg{dtwclust} will always use L'Ecuyer-CMRG internally.
+(see \code{\link[base:Random]{base::RNGkind()}}), but \pkg{dtwclust} will always use L'Ecuyer-CMRG internally.
 
 For more information, please read the included package vignettes, which can be accessed by typing
 \code{browseVignettes("dtwclust")}.

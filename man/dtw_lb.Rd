@@ -4,9 +4,17 @@
 \alias{dtw_lb}
 \title{DTW distance matrix guided by Lemire's improved lower bound}
 \usage{
-dtw_lb(x, y = NULL, window.size = NULL, norm = "L1",
-  error.check = TRUE, pairwise = FALSE, dtw.func = "dtw_basic",
-  nn.margin = 1L, ...)
+dtw_lb(
+  x,
+  y = NULL,
+  window.size = NULL,
+  norm = "L1",
+  error.check = TRUE,
+  pairwise = FALSE,
+  dtw.func = "dtw_basic",
+  nn.margin = 1L,
+  ...
+)
 }
 \arguments{
 \item{x, y}{A matrix or data frame where rows are time series, or a list of time series.}

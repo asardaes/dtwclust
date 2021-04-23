@@ -5,13 +5,31 @@
 \alias{dba}
 \title{DTW Barycenter Averaging}
 \usage{
-DBA(X, centroid = NULL, ..., window.size = NULL, norm = "L1",
-  max.iter = 20L, delta = 0.001, error.check = TRUE, trace = FALSE,
-  mv.ver = "by-variable")
+DBA(
+  X,
+  centroid = NULL,
+  ...,
+  window.size = NULL,
+  norm = "L1",
+  max.iter = 20L,
+  delta = 0.001,
+  error.check = TRUE,
+  trace = FALSE,
+  mv.ver = "by-variable"
+)
 
-dba(X, centroid = NULL, ..., window.size = NULL, norm = "L1",
-  max.iter = 20L, delta = 0.001, error.check = TRUE, trace = FALSE,
-  mv.ver = "by-variable")
+dba(
+  X,
+  centroid = NULL,
+  ...,
+  window.size = NULL,
+  norm = "L1",
+  max.iter = 20L,
+  delta = 0.001,
+  error.check = TRUE,
+  trace = FALSE,
+  mv.ver = "by-variable"
+)
 }
 \arguments{
 \item{X}{A matrix or data frame where each row is a time series, or a list where each element is
@@ -33,7 +51,7 @@ Euclidean distance.}
 
 \item{max.iter}{Maximum number of iterations allowed.}
 
-\item{delta}{At iteration \code{i}, if \code{all(abs(centroid_{i}} \code{-} \code{centroid_{i-1})} \code{< delta)},
+\item{delta}{At iteration \code{i}, if \verb{all(abs(centroid_\{i\}} \code{-} \verb{centroid_\{i-1\})} \verb{< delta)},
 convergence is assumed.}
 
 \item{error.check}{Logical indicating whether the function should try to detect inconsistencies
