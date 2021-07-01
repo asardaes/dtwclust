@@ -109,7 +109,7 @@ test_that("zscore function works correctly for supported inputs.", {
 # ==================================================================================================
 
 test_that("%op% catches errors as expected.", {
-    skip_if(foreach::getDoParWorkers() %% 2L == 1L, "sequential or FORK case")
+    skip_if(foreach::getDoParWorkers() %% 2L == 1L, "sequential case")
     prev_threads <- foreach(dummy = 1L:foreach::getDoParWorkers()) %dopar% {
         nthreads <- as.integer(Sys.getenv("RCPP_PARALLEL_NUM_THREADS", "1"))
         RcppParallel::setThreadOptions()

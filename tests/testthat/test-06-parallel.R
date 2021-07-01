@@ -47,29 +47,3 @@ test_that("Parallel computation gives the same results as sequential", {
     registerDoSEQ()
     rm(cl)
 })
-
-test_that("Parallel FORK computation gives the same results as sequential", {
-    skip_on_cran()
-    skip_on_ci()
-    skip_on_os("windows")
-    skip_if(nzchar(Sys.getenv("R_COVR")), "calculating coverage")
-
-    if (getOption("dtwclust_skip_par_tests", FALSE)) {
-        skip("Parallel tests disabled explicitly.")
-    }
-
-    # Also test FORK in Linux
-    cat(" - Test FORKs:\n")
-
-    cl <- makeCluster(num_workers - 1L, "FORK")
-    invisible(clusterEvalQ(cl, RcppParallel::setThreadOptions(2L)))
-    registerDoParallel(cl)
-
-    # Filter excludes files that have "parallel" in them, otherwise it would be recursive
-    res <- test_dir("./", filter = "parallel", invert = TRUE)
-    expect_s3_class(res, "testthat_results")
-
-    stopCluster(cl)
-    stopImplicitCluster()
-    registerDoSEQ()
-})
