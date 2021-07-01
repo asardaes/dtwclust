@@ -719,7 +719,7 @@ plot.TSClusters <- function(x, y, ...,
     # add facets, remove legend, apply kinda black-white theme
     gg <- gg +
         ggplot2::facet_wrap(~cl, scales = "free_y") +
-        ggplot2::guides(colour = FALSE) +
+        ggplot2::guides(colour = "none") +
         ggplot2::theme_bw()
 
     # labs
