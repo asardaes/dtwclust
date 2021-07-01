@@ -85,7 +85,11 @@ sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, le
         dimnames(cent_out) <- nm0
     }
 
-    opt$call <- opt$solution <- opt$version <- NULL
-    attr(cent_out, "nloptr_results") <- opt
+    if (getOption("dtwclust_sdtw_cent_return_nloptr", TRUE)) {
+        opt$call <- opt$solution <- NULL
+        attr(cent_out, "nloptr_results") <- opt
+    }
+
+    # return
     cent_out
 }

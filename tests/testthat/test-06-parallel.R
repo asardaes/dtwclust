@@ -32,6 +32,8 @@ test_that("Parallel computation gives the same results as sequential", {
         if (!nzchar(Sys.getenv("R_COVR"))) RcppParallel::setThreadOptions(num_workers)
         # to test that other RNGkinds won't affect
         RNGkind("default")
+        # for regression tests' comparisons
+        options(dtwclust_sdtw_cent_return_nloptr = FALSE)
     }))
     registerDoParallel(cl)
 
