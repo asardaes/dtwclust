@@ -29,6 +29,12 @@ with(persistent, {
         expect_known_value(cent_mv_dba, file_name(cent_mv_dba, x32 = TRUE), tolerance = tol, info = "Multivariate")
 
         expect_known_value(cent_mv_dba_bys, file_name(cent_mv_dba_bys), info = "DBA by series")
+    })
+
+    test_that("Centroids calculated with SDTWC families give the same results as references.", {
+        skip_on_cran()
+        skip_if(tolower(Sys.info()[["sysname"]]) == "windows" & isTRUE(as.logical(Sys.getenv("CI"))), "On Windows CI")
+
         expect_known_value(cent_sdtwc, file_name(cent_sdtwc), tolerance = 1e-6, info = "SDTWC Univariate")
         expect_known_value(cent_mv_sdtwc, file_name(cent_mv_sdtwc), info = "SDTWC Multivariate")
     })
