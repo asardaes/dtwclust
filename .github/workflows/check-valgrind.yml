@@ -1,0 +1,62 @@
+on: push
+
+name: R-CMD-check-with-valgrind
+
+jobs:
+  R-CMD-check:
+    runs-on: ${{ matrix.config.os }}
+
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: ubuntu-latest, r: 'release'}
+          - {os: ubuntu-latest, r: 'devel', http-user-agent: 'release'}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: r-lib/actions/setup-pandoc@v1
+
+      - uses: r-lib/actions/setup-r@v1
+        with:
+          r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v1
+        with:
+          extra-packages: rcmdcheck
+      
+      - uses: r-lib/actions/setup-tinytex@v1
+
+      - name: Install Yihui packages
+        run: |
+          Rscript -e 'tinytex:::install_yihui_pkgs()'
+
+      - name: Check with valgrind
+        env:
+          NOT_CRAN: false
+          VALGRIND_OPTS: "--tool=memcheck --leak-check=full"
+        run: |
+          R CMD build .
+          R --vanilla CMD check dtwclust_*.tar.gz --as-cran --use-valgrind --no-manual
+          
+
+      - name: Show testthat output
+        if: always()
+        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
+        shell: bash
+
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          path: check
