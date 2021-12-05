@@ -50,6 +50,8 @@ jobs:
           Rscript -e 'tinytex:::install_yihui_pkgs()'
 
       - uses: r-lib/actions/check-r-package@v1
+        with:
+          build_args: '"--compact-vignettes", "--no-manual"'
         continue-on-error: ${{ matrix.config.r == 'devel' }}
 
       - name: Show testthat output
