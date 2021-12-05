@@ -14,7 +14,7 @@ jobs:
         with:
           path: |
             src
-          key: san-4-${{ hashFiles('src/**') }}
+          key: san-5-${{ hashFiles('src/**') }}
     outputs:
       run_check: ${{ steps.cache_hit.outputs.cache-hit }}
   R-CMD-check:
