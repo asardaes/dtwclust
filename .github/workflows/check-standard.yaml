@@ -33,10 +33,6 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v1
 
-      - name: Set up tex in OSX
-        if: runner.os == 'macOS'
-        run: tlmgr install placeins cleveref
-
       - uses: r-lib/actions/setup-r@v1
         with:
           r-version: ${{ matrix.config.r }}
@@ -52,12 +48,6 @@ jobs:
       - name: Install Yihui packages
         run: |
           Rscript -e 'tinytex:::install_yihui_pkgs()'
-
-      # Otherwise building the vignette on Windows fails
-      - name: Preinstall release version of package
-        if: runner.os == 'Windows'
-        run: |
-          Rscript -e 'install.packages("dtwclust")'
 
       - uses: r-lib/actions/check-r-package@v1
         continue-on-error: ${{ matrix.config.r == 'devel' }}
