@@ -78,4 +78,6 @@ jobs:
         uses: actions/upload-artifact@main
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
-          path: '*.Rcheck/*'
+          path: |
+            '*.Rcheck/*.out'
+            '*.Rcheck/*.log'
