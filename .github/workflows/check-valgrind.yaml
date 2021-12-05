@@ -19,7 +19,7 @@ jobs:
       run_check: ${{ steps.cache_hit.outputs.cache-hit }}
   R-CMD-check:
     needs: pre-condition
-    if: needs.pre-condition.outputs.run_check == 'true'
+    if: needs.pre-condition.outputs.run_check != 'true'
 
     strategy:
       fail-fast: false
