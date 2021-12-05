@@ -43,7 +43,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v1
         with:
           extra-packages: rcmdcheck
-      
+
       - uses: r-lib/actions/setup-tinytex@v1
 
       - name: Install Yihui packages

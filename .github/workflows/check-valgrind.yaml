@@ -3,10 +3,23 @@ on: push
 name: R-CMD-check-with-valgrind
 
 jobs:
-  R-CMD-check:
-    runs-on: ${{ matrix.config.os }}
+  pre-condition:
+    name: Check hash of src files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+      - id: cache_hit
+        uses: actions/cache@v2
+        with:
+          path: |
+            src
+          key: ${{ hashFiles('src/**') }}
+    outputs:
+      run_check: ${{ steps.cache_hit.outputs.cache-hit }}
+  R-CMD-check:
+    needs: pre-condition
+    if: needs.pre-condition.outputs.run_check == 'true'
 
     strategy:
       fail-fast: false
@@ -14,6 +27,9 @@ jobs:
         config:
           - {os: ubuntu-latest, r: 'release'}
           - {os: ubuntu-latest, r: 'devel', http-user-agent: 'release'}
+
+    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -37,7 +53,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v1
         with:
           extra-packages: rcmdcheck
-      
+
       - uses: r-lib/actions/setup-tinytex@v1
 
       - name: Install Yihui packages
