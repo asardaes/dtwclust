@@ -22,6 +22,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install valgrind
+        run: |
+          /usr/bin/sudo DEBIAN_FRONTEND=noninteractive apt-get install -y valgrind
+
       - uses: r-lib/actions/setup-pandoc@v1
 
       - uses: r-lib/actions/setup-r@v1
@@ -47,7 +51,6 @@ jobs:
         run: |
           R CMD build .
           R --vanilla CMD check dtwclust_*.tar.gz --as-cran --use-valgrind --no-manual
-          
 
       - name: Show testthat output
         if: always()
