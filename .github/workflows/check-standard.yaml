@@ -52,6 +52,7 @@ jobs:
       - uses: r-lib/actions/check-r-package@v1
         with:
           build_args: '"--compact-vignettes", "--no-manual"'
+          error-on: '"error"' # osx complains about vignette compaction
         continue-on-error: ${{ matrix.config.r == 'devel' }}
 
       - name: Show testthat output
