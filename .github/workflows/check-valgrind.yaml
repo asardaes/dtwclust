@@ -79,5 +79,5 @@ jobs:
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: |
-            '*.Rcheck/*.out'
-            '*.Rcheck/*.log'
+            *.Rcheck/*.out
+            *.Rcheck/*.log

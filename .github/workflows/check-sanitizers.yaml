@@ -71,5 +71,5 @@ jobs:
         with:
           name: ${{ matrix.config.img }}-results
           path: |
-            '*.Rcheck/*.out'
-            '*.Rcheck/*.log'
+            *.Rcheck/*.out
+            *.Rcheck/*.log
