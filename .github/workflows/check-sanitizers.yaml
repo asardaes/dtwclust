@@ -14,7 +14,7 @@ jobs:
         with:
           path: |
             src
-          key: san-2-${{ hashFiles('src/**') }}
+          key: san-3-${{ hashFiles('src/**') }}
     outputs:
       run_check: ${{ steps.cache_hit.outputs.cache-hit }}
   R-CMD-check:
@@ -55,7 +55,7 @@ jobs:
       - name: Check with sanitizers
         env:
           NOT_CRAN: false
-          #ASAN_OPTIONS: "detect_leaks=0"
+          ASAN_OPTIONS: "detect_leaks=0"
         run: |
           Rdevel CMD build --no-build-vignettes --no-manual .
           Rdevel --vanilla CMD check *.tar.gz --as-cran --no-manual
