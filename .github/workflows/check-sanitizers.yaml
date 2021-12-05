@@ -1,0 +1,67 @@
+on: push
+
+name: R-CMD-check-with-sanitizers
+
+jobs:
+  pre-condition:
+    name: Check hash of src files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: cache_hit
+        uses: actions/cache@v2
+        with:
+          path: |
+            src
+          key: san-0-${{ hashFiles('src/**') }}
+    outputs:
+      run_check: ${{ steps.cache_hit.outputs.cache-hit }}
+  R-CMD-check:
+    needs: pre-condition
+    if: needs.pre-condition.outputs.run_check != 'true'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: ubuntu-latest, img: 'r-devel-san'}
+          - {os: ubuntu-latest, img: 'r-devel-ubsan-clang'}
+
+    runs-on: ${{ matrix.config.os }}
+    container: rocker/${{ matrix.config.img }}:latest
+    name: ${{ matrix.config.os }} (${{ matrix.config.img }})
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install dependencies
+        shell: Rscript-devel {0}
+        run: |
+          install.packages("remotes")
+          library("remotes")
+          update(dev_package_deps(dependencies = TRUE))
+
+      - name: Check with sanitizers
+        env:
+          NOT_CRAN: false
+          #ASAN_OPTIONS: "detect_leaks=0"
+        run: |
+          Rdevel CMD build --no-build-vignettes --no-manual .
+          Rdevel --vanilla CMD check *.tar.gz --as-cran --no-manual
+
+      - name: Show testthat output
+        if: always()
+        run: find *.Rcheck -name 'testthat.Rout*' -exec cat '{}' \; || true
+        shell: bash
+
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ matrix.config.img }}-results
+          path: '*.Rcheck/**'

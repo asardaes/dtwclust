@@ -66,11 +66,11 @@ jobs:
           VALGRIND_OPTS: "--tool=memcheck --leak-check=full"
         run: |
           R CMD build .
-          R --vanilla CMD check dtwclust_*.tar.gz --as-cran --use-valgrind --no-manual
+          R --vanilla CMD check *.tar.gz --as-cran --use-valgrind --no-manual
 
       - name: Show testthat output
         if: always()
-        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
+        run: find *.Rcheck -name 'testthat.Rout*' -exec cat '{}' \; || true
         shell: bash
 
       - name: Upload check results
@@ -78,4 +78,4 @@ jobs:
         uses: actions/upload-artifact@main
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
-          path: check
+          path: '*.Rcheck/**'
