@@ -94,6 +94,7 @@ sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, le
     dots <- list(...)
 
     if (isNamespaceLoaded("nloptr")) { # nocov start
+        backend <- "nloptr"
         nloptr <- get("nloptr", asNamespace("nloptr"), mode = "function")
         dots <- dots[intersect(names(dots), setdiff(names(formals(nloptr)), "..."))]
 
@@ -113,6 +114,7 @@ sdtw_cent <- function(series, centroid = NULL, gamma = 0.01, weights = rep(1, le
         cent_out <- opt$solution
     } # nocov end
     else {
+        backend <- "stats"
         dots <- dots[intersect(names(dots), setdiff(names(formals(stats::optim)), "..."))]
 
         if (missing(opts)) {
