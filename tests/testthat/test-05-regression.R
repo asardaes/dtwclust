@@ -1,5 +1,3 @@
-context("Regression tests")
-
 if (identical(Sys.getenv("NOT_CRAN"), "true")) {
     source("regression/proxy.R", TRUE)
     source("regression/dtwb.R", TRUE)

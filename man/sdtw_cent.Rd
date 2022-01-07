@@ -10,8 +10,8 @@ sdtw_cent(
   gamma = 0.01,
   weights = rep(1, length(series)),
   ...,
-  opts = list(algorithm = "NLOPT_LD_LBFGS", maxeval = 20L),
-  error.check = TRUE
+  error.check = TRUE,
+  opts = list(algorithm = "NLOPT_LD_LBFGS", maxeval = 20L)
 )
 }
 \arguments{
@@ -27,22 +27,26 @@ characteristics as the matrices in \code{series}.}
 
 \item{weights}{A vector of weights for each element of \code{series}.}
 
-\item{...}{Further arguments for \code{\link[nloptr:nloptr]{nloptr::nloptr()}} (except \code{opts} and \code{...}).}
-
-\item{opts}{List of options to pass to \code{\link[nloptr:nloptr]{nloptr::nloptr()}}.}
+\item{...}{Further arguments for the optimization backend (except \code{opts} for \code{nloptr}, \code{control}
+for \code{optim}, and \code{...} for both).}
 
 \item{error.check}{Logical indicating whether the function should try to detect inconsistencies
 and give more informative errors messages. Also used internally to avoid repeating checks.}
+
+\item{opts}{List of options to pass to \code{nloptr} or \code{\link[stats:optim]{stats::optim()}}'s \code{control}. The defaults in
+the function's formals are for \code{nloptr}, but the value will be adjusted for \code{optim} if needed.}
 }
 \value{
-The resulting centroid, with attribute \code{nloptr_results} specifying the optimization
-results (except for \code{solution}, which is the returned centroid).
+The resulting centroid, with the optimization results as attributes (except for the
+returned centroid).
 }
 \description{
 Soft-DTW centroid function as proposed in Cuturi and Blondel (2017).
 }
 \details{
-Note that you can trace the optimization by specifying \code{print_level > 0} in \code{opts}.
+This function can delegate the optimization to the \pkg{nloptr} package. For that to happen, you
+must load it with either \code{\link[base:library]{base::library()}} or \code{\link[base:ns-load]{base::loadNamespace()}}. If the aforementioned is
+not fulfilled, the function will delegate to \code{\link[stats:optim]{stats::optim()}}.
 }
 \section{Parallel Computing}{
 

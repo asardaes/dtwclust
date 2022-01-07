@@ -1,5 +1,3 @@
-context("Parallel tests")
-
 # =================================================================================================
 # run all tests with a parallel backend
 # =================================================================================================
@@ -33,7 +31,7 @@ test_that("Parallel computation gives the same results as sequential", {
         # to test that other RNGkinds won't affect
         RNGkind("default")
         # for regression tests' comparisons
-        options(dtwclust_sdtw_cent_return_nloptr = FALSE)
+        options(dtwclust_sdtw_cent_return_attrs = FALSE)
     }))
     registerDoParallel(cl)
 

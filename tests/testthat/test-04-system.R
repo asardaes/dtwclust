@@ -1,5 +1,3 @@
-context("System tests")
-
 source("system/invalid-inputs.R", TRUE)
 source("system/data-formats.R", TRUE)
 source("system/preproc.R", TRUE)

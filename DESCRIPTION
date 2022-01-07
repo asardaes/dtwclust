@@ -31,7 +31,6 @@ Imports:
     ggplot2,
     ggrepel,
     Matrix,
-    nloptr,
     RSpectra,
     Rcpp,
     RcppParallel (>= 4.4.0),
@@ -48,7 +47,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
-Date: 2021-04-17
+Date: 2022-01-07
 Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
 BugReports: https://github.com/asardaes/dtwclust/issues
