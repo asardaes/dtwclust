@@ -166,7 +166,7 @@ proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
 release_questions <- function() {
     c(
         "Changed .Rbuildignore to exclude test rds files?",
-        "Built the binary with --compact-vignettes?",
+        "Built the binary with --compact-vignettes=both?",
         "Set vignette's cache to FALSE?"
     )
 }
