@@ -53,8 +53,8 @@
 #'
 #' Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .'' *Pattern
 #' Recognition*, **42**(9), pp. 2169 - 2180. ISSN 0031-3203,
-#' \url{http://dx.doi.org/10.1016/j.patcog.2008.11.030},
-#' \url{http://www.sciencedirect.com/science/article/pii/S0031320308004925}.
+#' \doi{10.1016/j.patcog.2008.11.030},
+#' \url{https://www.sciencedirect.com/science/article/pii/S0031320308004925}.
 #'
 #' @seealso
 #'

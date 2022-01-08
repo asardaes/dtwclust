@@ -2,6 +2,7 @@
 
 ## Version 5.5.6.9000
 * Series order is now preserved in plots of included shiny apps.
+* The optimization in `sdtw_cent` now uses `stats::optim` by default.
 
 ## Version 5.5.6
 * Adjustments for future R 4.0.0 version: matrices now also inherit from `array`.

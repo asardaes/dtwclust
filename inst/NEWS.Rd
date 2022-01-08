@@ -10,5 +10,6 @@
 \section{Changes in version 5.5.6.9000}{
 \itemize{
     \item Series order is now preserved in plots of included shiny apps.
+    \item The optimization in \code{sdtw_cent} now uses \code{stats::optim} by default.
 }
 }
