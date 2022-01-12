@@ -26,4 +26,5 @@
 ^vignettes/.*\.tex
 ^vignettes/.*\.sty
 
+^revdep$
 # ^tests/.*\.rds$

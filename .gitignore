@@ -22,6 +22,9 @@ timing-experiments/*.RData
 timing-experiments/*.mat
 timing-experiments/CharTrajCSV
 
+# revdep
+revdep
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db

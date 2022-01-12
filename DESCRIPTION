@@ -46,7 +46,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
-Date: 2022-01-12
+Date: 2022-01-13
 Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
 BugReports: https://github.com/asardaes/dtwclust/issues
