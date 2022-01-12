@@ -1,5 +1,8 @@
 
 ## Update to version
+* Addressed upcoming archival of nloptr.
+* Account or potential archival of bigmemory.
+* Minor bug fixes and documentation updates.
 
 ## Test environments
 * Local GNU/Linux, R release

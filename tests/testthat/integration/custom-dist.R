@@ -31,14 +31,14 @@ if (!pr_DB$entry_exists("nDTW"))
 
 test_that("Calling tsclust after registering a custom distance works as expected.", {
     ## ---------------------------------------------------------- non-symmetric
-    pc_ndtw <- tsclust(data_subset, k = 4, distance = "nDTW", seed = 8319L,
+    pc_ndtw <- tsclust(data_subset, k = 4L, distance = "nDTW", seed = 8319L,
                        control = partitional_control(version = 1L))
     pc_ndtw <- reset_nondeterministic(pc_ndtw)
 
     ## ---------------------------------------------------------- symmetric
-    pc_ndtw_sym <- tsclust(data_subset, k = 4, distance = "nDTW",
-                           seed = 8319, control = partitional_control(symmetric = TRUE,
-                                                                      version = 1L))
+    pc_ndtw_sym <- tsclust(data_subset, k = 4L, distance = "nDTW", seed = 8319L,
+                           control = partitional_control(symmetric = TRUE,
+                                                         version = 1L))
     pc_ndtw_sym <- reset_nondeterministic(pc_ndtw_sym)
 
     ## just for expect below

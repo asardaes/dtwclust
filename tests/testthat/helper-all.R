@@ -1,7 +1,8 @@
 data(uciCT)
 options(deparse.max.lines = 2L)
 suppressWarnings(RNGversion("3.5.0"))
-options(dtwclust_sdtw_cent_return_attrs = FALSE)
+options(dtwclust_sdtw_cent_return_attrs = FALSE,
+        dtwclust_suggest_bigmemory = FALSE)
 
 # environment to save objects for regression tests
 persistent <- new.env()

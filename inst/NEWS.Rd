@@ -11,5 +11,6 @@
 \itemize{
     \item Series order is now preserved in plots of included shiny apps.
     \item The optimization in \code{sdtw_cent} now uses \code{stats::optim} by default.
+    \item Dropped strong dependency on \code{bigmemory} in case it is archived. It will still be used if available.
 }
 }

@@ -90,11 +90,11 @@ split_parallel_symmetric <- function(n, num_workers, adjust = 0L) {
 }
 
 # calculate only half the distance matrix in parallel
-#' @importFrom bigmemory attach.big.matrix
 #' @importFrom proxy dist
 #'
 parallel_symmetric <- function(d_desc, ids, x, distance, dots) {
-    dd <- bigmemory::attach.big.matrix(d_desc)
+    attach.big.matrix <- get("attach.big.matrix", asNamespace("bigmemory"), mode = "function")
+    dd <- attach.big.matrix(d_desc)
     if (isTRUE(attr(ids, "trimat"))) {
         # assign upper part of lower triangular
         ul <- ids$ul
@@ -140,8 +140,6 @@ parallel_symmetric <- function(d_desc, ids, x, distance, dots) {
 # Return a custom distance function that calls registered functions of proxy
 # ==================================================================================================
 
-#' @importFrom bigmemory big.matrix
-#' @importFrom bigmemory describe
 #' @importFrom proxy dist
 #' @importFrom proxy pr_DB
 #'
@@ -149,6 +147,7 @@ ddist2 <- function(distance, control) {
     # I need to re-register any custom distances in each parallel worker
     dist_entry <- proxy::pr_DB$get_entry(distance)
     symmetric <- isTRUE(control$symmetric)
+    warned <- FALSE
 
     # variables/functions from the parent environments that should be exported
     export <- c("check_consistency", "quoted_call", "parallel_symmetric", "distance", "dist_entry")
@@ -194,7 +193,9 @@ ddist2 <- function(distance, control) {
         }
 
         if (is.null(centroids) && symmetric && !isTRUE(dots$pairwise)) {
-            if (foreach::getDoParWorkers() > 1L) {
+            multiple_workers <- foreach::getDoParWorkers() > 1L
+
+            if (multiple_workers && require("bigmemory", quietly = TRUE)) {
                 # WHOLE SYMMETRIC DISTMAT IN PARALLEL
                 # Only half of it is computed
                 # proxy can do this if y = NULL, but not in parallel
@@ -202,8 +203,10 @@ ddist2 <- function(distance, control) {
 
                 # undo bigmemory's seed change, backwards reproducibility
                 seed <- get0(".Random.seed", .GlobalEnv, mode = "integer")
-                d <- bigmemory::big.matrix(len, len, "double", 0)
-                d_desc <- bigmemory::describe(d)
+                big.matrix <- get("big.matrix", asNamespace("bigmemory"), mode = "function")
+                bigmemory_describe <- get("describe", asNamespace("bigmemory"), mode = "function")
+                d <- big.matrix(len, len, "double", 0)
+                d_desc <- bigmemory_describe(d)
                 assign(".Random.seed", seed, .GlobalEnv)
 
                 ids <- integer() # "initialize", so CHECK doesn't complain about globals
@@ -225,6 +228,12 @@ ddist2 <- function(distance, control) {
 
                 # coerce to normal matrix
                 return(ret(d[,], class = "crossdist", dimnames = list(names(x), names(x))))
+            }
+            else if (multiple_workers && !warned && isTRUE(getOption("dtwclust_suggest_bigmemory", TRUE))) {
+                warned <<- TRUE
+                warning("Package 'bigmemory' is not available, cannot parallelize computation with '",
+                        distance,
+                        "'. Use options(dtwclust_suggest_bigmemory = FALSE) to avoid this warning.")
             }
             else {
                 # WHOLE SYMMETRIC DISTMAT WITH CUSTOM LOOP OR SEQUENTIAL proxy LOOP

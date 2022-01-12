@@ -47,9 +47,10 @@ the following considerations.
 \item If \code{control$symmetric} is \code{TRUE}, \code{centroids} is \code{NULL}, \emph{and} there is no argument
 \code{pairwise} that is \code{TRUE}, only half the distance matrix will be computed.
 \itemize{
-\item If the distance was registered in \link[proxy:registry]{proxy::pr_DB} with \code{loop = TRUE} and more than one
-parallel worker is detected, the computation will be in parallel (using multi-processing with
-\code{\link[foreach:foreach]{foreach::foreach()}}), otherwise it will be sequential with \code{\link[proxy:dist]{proxy::dist()}}.
+\item If the distance was registered in \link[proxy:registry]{proxy::pr_DB} with \code{loop = TRUE}, the \pkg{bigmemory}
+package is available, and more than one parallel worker is detected, the computation will
+be in parallel (using multi-processing with \code{\link[foreach:foreach]{foreach::foreach()}}), otherwise it will be
+sequential with \code{\link[proxy:dist]{proxy::dist()}}.
 }
 \item The function always returns a \code{crossdist} matrix.
 }

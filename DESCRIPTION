@@ -22,7 +22,6 @@ Imports:
     parallel,
     stats,
     utils,
-    bigmemory,
     clue,
     cluster,
     dplyr,
@@ -47,7 +46,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
-Date: 2022-01-07
+Date: 2022-01-12
 Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
 BugReports: https://github.com/asardaes/dtwclust/issues
