@@ -24,6 +24,12 @@
 #'
 #' Refer to the examples in [compare_clusterings()].
 #'
+#' @note
+#'
+#' To avoid ambiguity, if this function is used, configurations for both fuzzy and crisp clusterings
+#' should *not* be provided in the same call to [compare_clusterings()]. In such cases, the scoring
+#' function may fail entirely, e.g. if it was created with `type = "valid"`.
+#'
 #' @return A list with two functions: `score` and `pick`.
 #'
 cvi_evaluators <- function(type = "valid", fuzzy = FALSE, ground.truth = NULL) {

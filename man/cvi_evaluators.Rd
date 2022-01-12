@@ -34,3 +34,8 @@ with the chosen \linkS4class{TSClusters} object and the corresponding configurat
 
 Refer to the examples in \code{\link[=compare_clusterings]{compare_clusterings()}}.
 }
+\note{
+To avoid ambiguity, if this function is used, configurations for both fuzzy and crisp clusterings
+should \emph{not} be provided in the same call to \code{\link[=compare_clusterings]{compare_clusterings()}}. In such cases, the scoring
+function may fail entirely, e.g. if it was created with \code{type = "valid"}.
+}
