@@ -1,17 +1,17 @@
 
-## Update to version
+## Update to version 5.5.7
 * Addressed upcoming archival of nloptr.
 * Account or potential archival of bigmemory.
 * Minor bug fixes and documentation updates.
 
 ## Test environments
 * Local GNU/Linux, R release
-* Local Windows 10, R release
+* Local Windows, R release
 * win-builder (devel and release)
-* Travis CI
+* GitHub CI
   + Linux: devel and release
   + OSX: release
-* AppVeyor (x32 and x64)
+  + Windows: release (x32 and x64)
 
 ## R CMD check results
 * There were no ERRORs or WARNINGs

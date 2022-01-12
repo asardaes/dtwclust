@@ -12,7 +12,7 @@ Description: Time series clustering along with optimized techniques related
     All included distance functions have custom loops optimized for the 
     calculation of cross-distance matrices, including parallelization support.
     Several cluster validity indices are included.
-Version: 5.5.6.9000
+Version: 5.5.7
 Depends:
     R (>= 3.3.0),
     methods,

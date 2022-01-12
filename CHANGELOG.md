@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 5.5.6.9000
+## Version 5.5.7
 * Series order is now preserved in plots of included shiny apps.
 * The optimization in `sdtw_cent` now uses `stats::optim` by default.
 * Dropped strong dependency on `bigmemory` in case it is archived. It can still be used if available.
