@@ -43,7 +43,8 @@
 #'
 #'   For distances *not* included in \pkg{dtwclust}, the symmetric, parallel case mentioned above
 #'   makes chunks for parallel workers, but they are not perfectly balanced, so some workers might
-#'   finish before the others.
+#'   finish before the others. You **must** load or attach the \pkg{bigmemory} package for this to
+#'   take place; see [base::library()] or [base::loadNamespace()].
 #'
 #' @section Centroid function:
 #'

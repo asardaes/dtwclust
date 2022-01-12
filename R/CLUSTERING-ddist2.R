@@ -195,7 +195,7 @@ ddist2 <- function(distance, control) {
         if (is.null(centroids) && symmetric && !isTRUE(dots$pairwise)) {
             multiple_workers <- foreach::getDoParWorkers() > 1L
 
-            if (multiple_workers && require("bigmemory", quietly = TRUE)) {
+            if (multiple_workers && isNamespaceLoaded("bigmemory")) {
                 # WHOLE SYMMETRIC DISTMAT IN PARALLEL
                 # Only half of it is computed
                 # proxy can do this if y = NULL, but not in parallel

@@ -31,34 +31,30 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: r-lib/actions/setup-pandoc@v1
+      - uses: r-lib/actions/setup-pandoc@v2
 
-      - uses: r-lib/actions/setup-r@v1
+      - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v1
+      - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: rcmdcheck
+          extra-packages: |<
+            any::rcmdcheck
+            any::bigmemory
 
-      - uses: r-lib/actions/setup-tinytex@v1
+      - uses: r-lib/actions/setup-tinytex@v2
 
       - name: Install Yihui packages
         run: |
           Rscript -e 'tinytex:::install_yihui_pkgs()'
 
-      - uses: r-lib/actions/check-r-package@v1
+      - uses: r-lib/actions/check-r-package@v2
         with:
-          build_args: '"--compact-vignettes=both", "--no-manual"'
-          error-on: '"error"' # osx complains about vignette compaction
+          build_args: 'c("--compact-vignettes=both", "--no-manual")'
         continue-on-error: ${{ matrix.config.r == 'devel' }}
-
-      - name: Show testthat output
-        if: always()
-        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
-        shell: bash
 
       - name: Test coverage
         if: runner.os == 'Linux' && matrix.config.r == 'release'
@@ -66,10 +62,3 @@ jobs:
           Rscript -e 'install.packages("covr")'
           Rscript codecov.R
         continue-on-error: true
-
-      - name: Upload check results
-        if: failure()
-        uses: actions/upload-artifact@main
-        with:
-          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
-          path: check

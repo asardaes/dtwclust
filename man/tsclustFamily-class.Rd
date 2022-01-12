@@ -61,7 +61,8 @@ what optimizations apply to each one.
 
 For distances \emph{not} included in \pkg{dtwclust}, the symmetric, parallel case mentioned above
 makes chunks for parallel workers, but they are not perfectly balanced, so some workers might
-finish before the others.
+finish before the others. You \strong{must} load or attach the \pkg{bigmemory} package for this to
+take place; see \code{\link[base:library]{base::library()}} or \code{\link[base:ns-load]{base::loadNamespace()}}.
 }
 
 \section{Centroid function}{
