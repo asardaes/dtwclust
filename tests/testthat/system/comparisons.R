@@ -479,6 +479,36 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
     expect_s4_class(repeat_clustering(data_subset, simple_gak, "config1"), "TSClusters")
 })
 
+test_that("Results data frame for hierarchical clustering is correct (GH issue #57).", {
+    cfgs <- compare_clusterings_configs(types = "h", k = 2L:3L,
+                                        controls = list(
+                                            hierarchical = hierarchical_control(method = "all")
+                                        ),
+                                        preprocs = pdc_configs(
+                                            "preproc",
+                                            none = list()
+                                        ),
+                                        distances = pdc_configs(
+                                            "distance",
+                                            sbd = list()
+                                        ),
+                                        centroids = pdc_configs(
+                                            "centroid",
+                                            shape_extraction = list()
+                                        ))
+
+    cmp <- compare_clusterings(data_subset, "h", configs = cfgs, seed = 329L, return.objects = TRUE)
+
+    ignored <- Map(seq_len(nrow(cmp$results$hierarchical)),
+                   split.data.frame(cmp$results$hierarchical, factor(cmp$results$hierarchical$config_id,
+                                                                     cmp$results$hierarchical$config_id)), # prevent factor re-ordering
+                   cmp$objects.hierarchical,
+                   f = function(i, res, obj) {
+                       expect_identical(obj@k, res$k, info = paste("Row", i))
+                       expect_identical(obj@method, res$method, info = paste("Row", i))
+                   })
+})
+
 # ==================================================================================================
 # clean
 # ==================================================================================================
