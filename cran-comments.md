@@ -1,8 +1,5 @@
 
-## Update to version 5.5.7
-* Addressed upcoming archival of nloptr.
-* Account or potential archival of bigmemory.
-* Minor bug fixes and documentation updates.
+## Update to version
 
 ## Test environments
 * Local GNU/Linux, R release

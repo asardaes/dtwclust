@@ -876,7 +876,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
                     this_config <- config[i, , drop = FALSE]
                     method <- unlist(this_config$method)
                     this_config <- this_config[setdiff(names(this_config), c("k", "method"))]
-                    df <- expand.grid(k = k, method = method, stringsAsFactors = FALSE)
+                    df <- expand.grid(method = method, k = k, stringsAsFactors = FALSE)[c("k", "method")]
                     make_unique_ids(df, this_config) # see EOF
                 })
             },

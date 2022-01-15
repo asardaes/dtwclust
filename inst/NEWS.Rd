@@ -7,10 +7,8 @@
     Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/master/CHANGELOG.md}
 }
 
-\section{Changes in version 5.5.7}{
+\section{Changes in version 5.5.7.9000}{
 \itemize{
-    \item Series order is now preserved in plots of included shiny apps.
-    \item The optimization in \code{sdtw_cent} now uses \code{stats::optim} by default.
-    \item Dropped strong dependency on \code{bigmemory} in case it is archived. It can still be used if available.
+    \item For \code{compare_clusterings}, fixed a bug that caused the order of columns "k" and "method" to be wrong in the data frame with results for hierarchical configurations.
 }
 }
