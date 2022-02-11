@@ -45,6 +45,7 @@ jobs:
           extra-packages: |
             any::rcmdcheck
             any::bigmemory
+            any::dtwclust
 
       - uses: r-lib/actions/setup-tinytex@v2
 
