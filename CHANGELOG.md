@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 5.5.7.9000
+## Version 5.5.8
 * For `compare_clusterings`, fixed a bug that caused the order of columns "k" and "method" to be wrong in the data frame with results for hierarchical configurations.
 
 ## Version 5.5.7
