@@ -1,6 +1,5 @@
 
-## Update to version 5.5.8
-Fix ordering bug in compare_clusterings.
+## Update to version 5.5.9
 
 ## Test environments
 * Local GNU/Linux, R release
