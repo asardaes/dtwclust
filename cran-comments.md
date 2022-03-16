@@ -1,5 +1,6 @@
 
 ## Update to version 5.5.9
+* Remove instances of deprecated C++ templates as requested.
 
 ## Test environments
 * Local GNU/Linux, R release
