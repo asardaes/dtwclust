@@ -28,14 +28,14 @@ public:
     TSTSList(const Rcpp::List& series)
         : series_(std::make_shared<std::vector<TSTSType>>())
     {
-        for (const SEXP& x : series) {
+        for (const auto& x : series) {
             if (Rf_isMatrix(x)) {
-                Rcpp::NumericMatrix x_rcpp(x);
+                Rcpp::NumericMatrix x_rcpp(Rcpp::wrap(x));
                 TSTSType x_arma(&x_rcpp[0], x_rcpp.nrow(), x_rcpp.ncol(), false, true);
                 series_->push_back(std::move(x_arma));
             }
             else {
-                Rcpp::NumericVector x_rcpp(x);
+                Rcpp::NumericVector x_rcpp(Rcpp::wrap(x));
                 TSTSType x_arma(&x_rcpp[0], x_rcpp.length(), 1, false, true);
                 series_->push_back(std::move(x_arma));
             }
@@ -66,9 +66,9 @@ public:
         : series_(std::make_shared<std::vector<arma::cx_mat>>())
     {
         // see http://rcpp-devel.r-forge.r-project.narkive.com/o5ubHVos/multiplication-of-complexvector
-        for (const SEXP& x : series) {
+        for (const auto& x : series) {
             // only complex vectors expected right now
-            Rcpp::ComplexVector x_rcpp(x);
+            Rcpp::ComplexVector x_rcpp(Rcpp::wrap(x));
             arma::cx_mat x_arma(reinterpret_cast<std::complex<double>*>(&x_rcpp[0]),
                                 x_rcpp.length(), 1, false, true);
             series_->push_back(std::move(x_arma));
