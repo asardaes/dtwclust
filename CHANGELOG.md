@@ -1,7 +1,7 @@
 # Changelog
 
 ## Version 5.5.9
-* Remove some deprecated interfaces from the C++ code.
+* Removed some deprecated interfaces from the C++ code.
 
 ## Version 5.5.8
 * For `compare_clusterings`, fixed a bug that caused the order of columns "k" and "method" to be wrong in the data frame with results for hierarchical configurations.

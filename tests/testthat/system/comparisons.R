@@ -509,6 +509,41 @@ test_that("Results data frame for hierarchical clustering is correct (GH issue #
                    })
 })
 
+test_that("step.pattern can be provided in a nested list (GH issue #59)", {
+    cfgs <- compare_clusterings_configs(
+        types = "p",
+        k = 4L,
+        controls = list(
+            partitional = partitional_control(
+                iter.max = 30L,
+                nrep = 1L
+            )
+        ),
+        preprocs = pdc_configs(
+            type = "preproc",
+            none = list(),
+            share.config = c("p")
+        ),
+        distances = pdc_configs(
+            type = "distance",
+            dtw_basic = list(
+                norm = c("L1", "L2"),
+                step.pattern = list(dtw::symmetric1, dtw::symmetric2)
+            ),
+            share.config = c("p", "h")
+        ),
+        centroids = pdc_configs(
+            type = "centroid",
+            partitional = list(
+                pam = list()
+            )
+        )
+    )
+
+    cmp <- compare_clusterings(data_subset, "p", configs = cfgs, seed = 329L, return.objects = TRUE)
+    expect_identical(length(cmp$objects.partitional), 4L)
+})
+
 # ==================================================================================================
 # clean
 # ==================================================================================================

@@ -667,10 +667,18 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
                     names(this_args) <- sub(paste0("_", func, "$"),
                                             "",
                                             names(this_args))
-                    # return
-                    this_args[!sapply(this_args, is.na)]
+
+                    ans <- this_args[!sapply(this_args, is.na)]
+                    if (any(sapply(ans, is.list))) {
+                        unlist(ans, recursive = FALSE)
+                    }
+                    else {
+                        ans
+                    }
                 }
-                else list()
+                else {
+                    list()
+                }
             })
 
             setnames_inplace(args, c("preproc", "dist", "cent"))
