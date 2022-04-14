@@ -1,5 +1,6 @@
 
-## Update to version 
+## Update to version 5.5.10
+* Enhanced compare_clusterings to allow complex parameters in lists.
 
 ## Test environments
 * Local GNU/Linux, R release

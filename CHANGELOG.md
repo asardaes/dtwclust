@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 5.5.10
+* Enhanced `compare_clusterings` to allow complex parameters in lists (#59).
+
 ## Version 5.5.9
 * Removed some deprecated interfaces from the C++ code.
 

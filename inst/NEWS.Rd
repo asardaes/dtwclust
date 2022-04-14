@@ -9,6 +9,6 @@
 
 \section{Changes in version 5.5.10}{
 \itemize{
-    \item TBD.
+    \item Enhanced \code{compare_clusterings} to allow complex parameters in lists.
 }
 }
