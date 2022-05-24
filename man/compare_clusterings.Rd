@@ -128,8 +128,10 @@ applicable \code{types} exist; first-level list names in bold):
 }
 
 If \code{score.clus} is a function, it will be applied to the available partitional, hierarchical,
-fuzzy and/or tadpole results via:\preformatted{scores <- lapply(list_of_lists, score.clus, ...)
-}
+fuzzy and/or tadpole results via:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{scores <- lapply(list_of_lists, score.clus, ...)
+}\if{html}{\out{</div>}}
 
 Otherwise, \code{score.clus} should be a list of functions with the same names as the list above, so
 that \code{score.clus$partitional} is used to score \code{list_of_lists$partitional} and so on (via

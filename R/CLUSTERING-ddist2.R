@@ -235,7 +235,7 @@ ddist2 <- function(distance, control) {
                         distance,
                         "'. Use options(dtwclust_suggest_bigmemory = FALSE) to avoid this warning.")
             }
-            else {
+            else if (!multiple_workers) {
                 # WHOLE SYMMETRIC DISTMAT WITH CUSTOM LOOP OR SEQUENTIAL proxy LOOP
                 dm <- base::as.matrix(quoted_call(
                     proxy::dist, x = x, y = NULL, method = distance, dots = dots

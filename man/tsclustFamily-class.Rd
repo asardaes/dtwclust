@@ -46,12 +46,6 @@ the following considerations.
 \item If \code{control$distmat} is \emph{not} \code{NULL}, the function will try to subset it.
 \item If \code{control$symmetric} is \code{TRUE}, \code{centroids} is \code{NULL}, \emph{and} there is no argument
 \code{pairwise} that is \code{TRUE}, only half the distance matrix will be computed.
-\itemize{
-\item If the distance was registered in \link[proxy:registry]{proxy::pr_DB} with \code{loop = TRUE}, the \pkg{bigmemory}
-package is available, and more than one parallel worker is detected, the computation will
-be in parallel (using multi-processing with \code{\link[foreach:foreach]{foreach::foreach()}}), otherwise it will be
-sequential with \code{\link[proxy:dist]{proxy::dist()}}.
-}
 \item The function always returns a \code{crossdist} matrix.
 }
 
@@ -59,10 +53,21 @@ Note that all distances implemented as part of \pkg{dtwclust} have custom proxy 
 multi-threading independently of \pkg{foreach}, so see their respective documentation to see
 what optimizations apply to each one.
 
-For distances \emph{not} included in \pkg{dtwclust}, the symmetric, parallel case mentioned above
-makes chunks for parallel workers, but they are not perfectly balanced, so some workers might
-finish before the others. You \strong{must} load or attach the \pkg{bigmemory} package for this to
-take place; see \code{\link[base:library]{base::library()}} or \code{\link[base:ns-load]{base::loadNamespace()}}.
+For distances \emph{not} included in \pkg{dtwclust}, the computation can be in parallel using
+multi-processing with \code{\link[foreach:foreach]{foreach::foreach()}}. If you install and load or attach (see
+\code{\link[base:library]{base::library()}} or \code{\link[base:ns-load]{base::loadNamespace()}}) the \pkg{bigmemory} package, the function will
+take advantage of said package when all of the following conditions are met, reducing the
+overhead of data copying across processes:
+\itemize{
+\item \code{control$symmetric} is \code{TRUE}
+\item \code{centroids} is \code{NULL}
+\item \code{pairwise} is \code{FALSE} or \code{NULL}
+\item The distance was registered in \link[proxy:registry]{proxy::pr_DB} with \code{loop = TRUE}
+\item A parallel backend with more than 1 worker has been registered with \pkg{foreach}
+}
+
+This symmetric, parallel case makes chunks for parallel workers, but they are not perfectly
+balanced, so some workers might finish before the others.
 }
 
 \section{Centroid function}{
