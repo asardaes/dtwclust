@@ -6,6 +6,7 @@
 #'
 #' Reference class that is used internally for cross-distance matrices.
 #'
+#' @importFrom methods is
 #' @importFrom methods setRefClass
 #'
 #' @field distmat A distance matrix.
@@ -37,7 +38,7 @@ Distmat <- methods::setRefClass("Distmat",
                                                          trace = FALSE,
                                                          diff_lengths = different_lengths(series),
                                                          silent = FALSE)
-                                       if (class(control) != "PtCtrl")
+                                       if (!methods::is(control, "PtCtrl"))
                                            stop("Invalid control provided.") # nocov
                                    }
                                    # need another dist closure, otherwise it would be recursive

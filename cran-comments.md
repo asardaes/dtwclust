@@ -9,7 +9,7 @@ Specify minimum Matrix version as suggested by their maintainers, and documentat
 * GitHub CI
   + Linux: devel and release
   + OSX: release
-  + Windows: release (x32 and x64)
+  + Windows: release
 
 ## R CMD check results
 * There were no ERRORs or WARNINGs
