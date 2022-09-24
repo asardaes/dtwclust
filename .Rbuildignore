@@ -26,5 +26,6 @@
 ^vignettes/.*\.tex
 ^vignettes/.*\.sty
 
+^CRAN-SUBMISSION$
 ^revdep$
 # ^tests/.*\.rds$

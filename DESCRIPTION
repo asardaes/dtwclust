@@ -29,7 +29,7 @@ Imports:
     foreach,
     ggplot2,
     ggrepel,
-    Matrix,
+    Matrix (>= 1.5-0),
     RSpectra,
     Rcpp,
     RcppParallel (>= 4.4.0),
@@ -46,7 +46,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
-Date: 2022-05-24
+Date: 2022-09-24
 Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
 BugReports: https://github.com/asardaes/dtwclust/issues
@@ -56,7 +56,7 @@ NeedsCompilation: yes
 SystemRequirements: C++11, GNU make
 Encoding: UTF-8
 LazyData: TRUE
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
 Collate: 
