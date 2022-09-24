@@ -1,5 +1,6 @@
 
-## Update to version 
+## Update to version 5.5.11
+Specify minimum Matrix version as suggested by their maintainers, and documentation updates.
 
 ## Test environments
 * Local GNU/Linux, R release

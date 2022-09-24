@@ -17,7 +17,8 @@
 #' for picking. They always assume that no errors occurred.
 #'
 #' The scoring function takes the CVIs that are to be minimized and "inverts" them by taking their
-#' reciprocal so that maximization can be considered. Its ellipsis (`...`) is passed to [cvi()].
+#' reciprocal so that maximization can be considered uniformly for the purpose of majority voting.
+#' Its ellipsis (`...`) is passed to [cvi()].
 #'
 #' The picking function returns the best configuration if `return.objects` is `FALSE`, or a list
 #' with the chosen [TSClusters-class] object and the corresponding configuration otherwise.
@@ -61,6 +62,16 @@ cvi_evaluators <- function(type = "valid", fuzzy = FALSE, ground.truth = NULL) {
             stop("The ground.truth is needed for external CVIs.")
     }
 
+    internal <- intersect(type, internal)
+    external <- intersect(type, external)
+
+    if (any(c(internal, external) %in% minimize)) {
+        message("Some of the chosen CVIs are to be minized,",
+                " but their values will be inverted by the scoring function.",
+                " See this function's documentation for more details,",
+                " and use suppressMessages to avoid this message.")
+    }
+
     majority <- function(x) {
         ux <- unique(x)
         ux[which.max(tabulate(match(x, ux)))]
@@ -68,9 +79,6 @@ cvi_evaluators <- function(type = "valid", fuzzy = FALSE, ground.truth = NULL) {
 
     score <- function(objs, ...) {
         do.call(rbind, lapply(objs, function(obj) {
-            internal <- intersect(type, internal)
-            external <- intersect(type, external)
-
             if (length(internal) > 0L)
                 cvis <- cvi(a = obj, type = internal, ...)
             else

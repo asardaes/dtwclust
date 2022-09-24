@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 5.5.11
+* Documentation update (#61).
+* Specify minimum supported version of package `Matrix`.
+
 ## Version 5.5.10
 * Enhanced `compare_clusterings` to allow complex parameters in lists (#59).
 

@@ -44,7 +44,7 @@
 #' additional distance calculations when being computed, which can be very considerable if using DTW
 #' or GAK.
 #'
-#' @return The chosen CVIs
+#' @return The chosen CVIs.
 #'
 #' @section External CVIs:
 #'

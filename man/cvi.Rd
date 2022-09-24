@@ -36,7 +36,7 @@ below.}
 \item{log.base}{Base of the logarithm to be used in the calculation of VI (see details).}
 }
 \value{
-The chosen CVIs
+The chosen CVIs.
 }
 \description{
 Compute different cluster validity indices (CVIs) of a given cluster partition, using the
