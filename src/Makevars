@@ -1,4 +1,3 @@
-CXX_STD = CXX11
 PKG_CXXFLAGS += -DRCPP_USE_UNWIND_PROTECT
 
 # Needed due to RcppArmadillo

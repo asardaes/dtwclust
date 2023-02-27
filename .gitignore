@@ -3,6 +3,7 @@
 .Rhistory
 .RData
 README_cache/
+CRAN-SUBMISSION
 
 # src
 src/*.dll

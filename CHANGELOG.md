@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 5.5.12
+* Remove explicit C++ requirements.
+
 ## Version 5.5.11
 * Documentation update (#61).
 * Specify minimum supported version of package `Matrix`.

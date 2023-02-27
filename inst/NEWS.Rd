@@ -7,9 +7,8 @@
     Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/master/CHANGELOG.md}
 }
 
-\section{Changes in version 5.5.11}{
+\section{Changes in version 5.5.12}{
 \itemize{
-    \item Documentation update.
-    \item Specify minimum supported version of package \pkg{Matrix}.
+    \item Remove explicit C++ requirements.
 }
 }

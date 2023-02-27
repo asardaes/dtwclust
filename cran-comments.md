@@ -1,6 +1,6 @@
 
-## Update to version 5.5.11
-Specify minimum Matrix version as suggested by their maintainers, and documentation updates.
+## Update to version 5.5.12
+Remove explicit C++ requirements.
 
 ## Test environments
 * Local GNU/Linux, R release
