@@ -7,14 +7,14 @@ jobs:
     name: Check hash of src files
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - id: cache_hit
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             src
-          key: san-6-${{ hashFiles('src/**') }}
+          key: san-${{ hashFiles('src/**') }}
     outputs:
       run_check: ${{ steps.cache_hit.outputs.cache-hit }}
   R-CMD-check:
@@ -37,9 +37,9 @@ jobs:
       R_KEEP_PKG_SOURCE: yes
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             /usr/local/lib/R/site-library
