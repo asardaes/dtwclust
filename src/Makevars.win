@@ -1,4 +1,4 @@
-PKG_CXXFLAGS += -DRCPP_PARALLEL_USE_TBB=1
+PKG_CXXFLAGS += $(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e "RcppParallel::CxxFlags()")
 
 # Needed due to RcppArmadillo
 PKG_LIBS += $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
