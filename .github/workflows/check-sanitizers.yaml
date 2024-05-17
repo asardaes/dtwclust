@@ -50,7 +50,8 @@ jobs:
         run: |
           install.packages("remotes")
           library("remotes")
-          install_cran(c("codetools", "Matrix", "lattice", "bigmemory"), force = TRUE)
+          install_cran(c("Matrix", "lattice", "bigmemory"))
+          install_cran(c("codetools", "cluster"), force = TRUE)
           update(dev_package_deps(dependencies = TRUE))
 
       - name: Check with sanitizers
