@@ -161,7 +161,7 @@ dtw_lb <- function(x, y = NULL, window.size = NULL, norm = "L1",
                      .combine = rbind,
                      .multicombine = TRUE,
                      .packages = "dtwclust",
-                     .export = c("quoted_call", "call_dtwlb")) %op% {
+                     .export = c("quoted_call", "call_dtwlb", "do_call")) %op% {
                          if (nn.margin != 1L)
                              warning("Column-wise nearest neighbors are not implemented for dtw::dtw") # nocov
                          dots$pairwise <- TRUE
