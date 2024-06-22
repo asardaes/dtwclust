@@ -502,8 +502,8 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #'   via the ellipsis (`...`).
 #'
 #'   Otherwise, the function plots the time series of each cluster along with the obtained centroid.
-#'   The default values for cluster centroids are: `linetype = "dashed"`, `size = 1.5`, `colour =
-#'   "black"`, `alpha = 0.5`. You can change this by means of the ellipsis (`...`).
+#'   The default values for cluster centroids are: `linetype = "dashed"`, `linewidth = 1.5`,
+#'   `colour = "black"`, `alpha = 0.5`. You can change this by means of the ellipsis (`...`).
 #'
 #'   You can choose what to plot with the `type` parameter. Possible options are:
 #'
@@ -673,7 +673,7 @@ plot.TSClusters <- function(x, y, ...,
         if (length(list(...)) == 0L)
             gg <- gg + ggplot2::geom_line(data = dfcm[dfcm$cl %in% clus, ],
                                           linetype = "dashed",
-                                          size = 1.5,
+                                          linewidth = 1.5,
                                           colour = "black",
                                           alpha = 0.5)
         else

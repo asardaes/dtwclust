@@ -158,7 +158,8 @@ dendrogram is plotted by default; you can pass any extra parameters to \code{\li
 via the ellipsis (\code{...}).
 
 Otherwise, the function plots the time series of each cluster along with the obtained centroid.
-The default values for cluster centroids are: \code{linetype = "dashed"}, \code{size = 1.5}, \code{colour = "black"}, \code{alpha = 0.5}. You can change this by means of the ellipsis (\code{...}).
+The default values for cluster centroids are: \code{linetype = "dashed"}, \code{linewidth = 1.5},
+\code{colour = "black"}, \code{alpha = 0.5}. You can change this by means of the ellipsis (\code{...}).
 
 You can choose what to plot with the \code{type} parameter. Possible options are:
 \itemize{
