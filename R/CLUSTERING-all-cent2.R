@@ -52,7 +52,7 @@ shape_cent <- function(x, x_split, cent, id_changed, cl_id, ..., distmat) {
             .combine = c,
             .multicombine = TRUE,
             .packages = "dtwclust",
-            .export = c("quoted_call", "do_call")) %op% {
+            .export = c("quoted_call")) %op% {
                 Map(x_split, cent, f = function(x, cent) {
                     quoted_call(shape_extraction, X = x, centroid = cent, dots = dots)
                 })
@@ -72,7 +72,7 @@ dba_cent <- function(x, x_split, cent, id_changed, cl_id, ..., distmat) {
             .combine = c,
             .multicombine = TRUE,
             .packages = "dtwclust",
-            .export = c("quoted_call", "do_call")) %op% {
+            .export = c("quoted_call")) %op% {
                 Map(x_split, cent, f = function(x, cent) {
                     quoted_call(DBA, X = x, centroid = cent, dots = dots)
                 })
@@ -92,7 +92,7 @@ sdtw_cent_cent <- function(x, x_split, cent, id_changed, cl_id, ..., distmat) {
             .combine = c,
             .multicombine = TRUE,
             .packages = "dtwclust",
-            .export = c("quoted_call", "do_call")) %op% {
+            .export = c("quoted_call")) %op% {
                 Map(x_split, cent, f = function(x, cent) {
                     quoted_call(sdtw_cent, series = x, centroid = cent, dots = dots)
                 })
