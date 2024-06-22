@@ -455,7 +455,7 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #' @importFrom dplyr bind_rows
 #' @importFrom dplyr sample_n
 #' @importFrom methods S3Part
-#' @importFrom ggplot2 aes_string
+#' @importFrom ggplot2 aes
 #' @importFrom ggplot2 facet_wrap
 #' @importFrom ggplot2 geom_line
 #' @importFrom ggplot2 geom_vline
@@ -466,6 +466,7 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #' @importFrom ggrepel geom_label_repel
 #' @importFrom graphics plot
 #' @importFrom reshape2 melt
+#' @importFrom rlang .data
 #'
 #' @param y Ignored.
 #' @param clus A numeric vector indicating which clusters to plot.
@@ -504,7 +505,7 @@ setMethod("predict", methods::signature(object = "TSClusters"), predict.TSCluste
 #'   arguments for [ggrepel::geom_label_repel()] and will be passed along. The following are
 #'   set by the plot method if they are not provided:
 #'
-#'   - `"mapping"`: set to [aes_string][ggplot2::aes_string](x = "t", y = "value", label = "label")
+#'   - `"mapping"`: set to [aes][ggplot2::aes](x = t, y = value, label = label)
 #'   - `"data"`: a data frame with as many rows as series in the `datalist` and 4 columns:
 #'     + `t`: x coordinate of the label for each series.
 #'     + `value`: y coordinate of the label for each series.
@@ -651,9 +652,9 @@ plot.TSClusters <- function(x, y, ...,
                                      value = numeric(),
                                      cl = factor(),
                                      color = factor()),
-                          ggplot2::aes_string(x = "t",
-                                              y = "value",
-                                              group = "L1"))
+                          ggplot2::aes(x = .data$t,
+                                       y = .data$value,
+                                       group = .data$L1))
 
     # add centroids first if appropriate, so that they are at the very back
     if (type %in% c("sc", "centroids")) {
@@ -669,7 +670,8 @@ plot.TSClusters <- function(x, y, ...,
 
     # add series next if appropriate
     if (type %in% c("sc", "series"))
-        gg <- gg + ggplot2::geom_line(data = dfm[dfm$cl %in% clus, ], aes_string(colour = "color"))
+        gg <- gg + ggplot2::geom_line(data = dfm[dfm$cl %in% clus, ],
+                                      ggplot2::aes(colour = .data$color))
 
     # add vertical lines to separate variables of multivariate series
     if (mv) {
@@ -677,13 +679,13 @@ plot.TSClusters <- function(x, y, ...,
                              vbreaks = as.numeric(1L:(nc - 1L) %o% sapply(centroids, NROW)))
         gg <- gg + ggplot2::geom_vline(data = ggdata[ggdata$cl %in% clus, , drop = FALSE],
                                        colour = "black", linetype = "longdash",
-                                       ggplot2::aes_string(xintercept = "vbreaks"))
+                                       ggplot2::aes(xintercept = .data$vbreaks))
     }
 
     # add labels
     if (type %in% c("sc", "series") && is.list(labels)) {
         if (is.null(labels$mapping))
-            labels$mapping <- ggplot2::aes_string(x = "t", y = "value", label = "label")
+            labels$mapping <- ggplot2::aes(x = .data$t, y = .data$value, label = .data$label)
         if (is.null(labels$data) && !is.null(names(x@datalist))) {
             label <- names(x@datalist)[x@cluster %in% clus]
             label <- split(label, x@cluster[x@cluster %in% clus])

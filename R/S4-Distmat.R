@@ -95,4 +95,5 @@ setMethod(`[`, "Distmat", function(x, i, j, ..., drop = TRUE) {
     dm
 })
 
+#' @exportS3Method base::dim
 dim.Distmat <- function(x) { dim(x$distmat) } # nocov

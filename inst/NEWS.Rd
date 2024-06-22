@@ -7,8 +7,8 @@
     Full changelog available at \url{https://github.com/asardaes/dtwclust/blob/master/CHANGELOG.md}
 }
 
-\section{Changes in version 5.5.12}{
+\section{Changes in version 5.5.12.9000}{
 \itemize{
-    \item Remove explicit C++ requirements.
+    \item Update Makevars for ARM version of Windows.
 }
 }

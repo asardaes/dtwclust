@@ -173,7 +173,7 @@ the series and at least provide an empty list in the \code{labels} argument. Thi
 arguments for \code{\link[ggrepel:geom_text_repel]{ggrepel::geom_label_repel()}} and will be passed along. The following are
 set by the plot method if they are not provided:
 \itemize{
-\item \code{"mapping"}: set to \link[ggplot2:aes_]{aes_string}(x = "t", y = "value", label = "label")
+\item \code{"mapping"}: set to \link[ggplot2:aes]{aes}(x = t, y = value, label = label)
 \item \code{"data"}: a data frame with as many rows as series in the \code{datalist} and 4 columns:
 \itemize{
 \item \code{t}: x coordinate of the label for each series.

@@ -38,11 +38,12 @@ explore__tidy_series <- function(series) {
 #' This helper will produce the plot in the Explore tab panel.
 #'
 #' @keywords internal
-#' @importFrom ggplot2 aes_string
+#' @importFrom ggplot2 aes
 #' @importFrom ggplot2 facet_wrap
 #' @importFrom ggplot2 geom_line
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 theme_bw
+#' @importFrom rlang .data
 #'
 #' @param ids A character with the expression that should yield the integer ids.
 #' @param df The data frame with the melted time series.
@@ -51,10 +52,10 @@ explore__tidy_series <- function(series) {
 explore__plot <- function(ids, df, series) {
     if (!is.integer(ids)) ids <- as.integer(eval(parse(n = 1L, text = ids)))
     df <- df[unclass(df$Series) %in% ids, , drop = FALSE]
-    gg <- ggplot2::ggplot(df, ggplot2::aes_string(x = "t",
-                                                  y = "value",
-                                                  color = "Series",
-                                                  group = "Series"))
+    gg <- ggplot2::ggplot(df, ggplot2::aes(x = .data$t,
+                                           y = .data$value,
+                                           color = .data$Series,
+                                           group = .data$Series))
     gg <- gg + ggplot2::geom_line()
     # add facets to separate variables of multivariate series
     if (is_multivariate(series)) {

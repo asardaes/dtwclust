@@ -1,10 +1,9 @@
 
-## Update to version 5.5.12
-Remove explicit C++ requirements.
+## Update to version TBD
+* Update Makevars for ARM version of Windows.
 
 ## Test environments
 * Local GNU/Linux, R release
-* Local Windows, R release
 * win-builder (devel and release)
 * GitHub CI
   + Linux: devel and release

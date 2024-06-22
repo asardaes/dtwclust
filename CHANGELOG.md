@@ -1,5 +1,8 @@
 # Changelog
 
+## Version master
+* Update Makevars for ARM version of Windows.
+
 ## Version 5.5.12
 * Remove explicit C++ requirements.
 
