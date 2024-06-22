@@ -100,7 +100,9 @@ check_consistency <- function(obj, case, ..., clus_type,
 different_lengths <- function(x) { any(diff(lengths(x)) != 0L) }
 
 # Enlist parameters for do.calls
-enlist <- function(..., dots = NULL) { c(list(...), dots) }
+#' @importFrom rlang !!!
+#' @importFrom rlang list2
+enlist <- function(..., dots = NULL) { rlang::list2(..., !!!dots) }
 
 # Check if a function has the ellipsis in its formals
 has_dots <- function(foo) { is.function(foo) && !is.null(formals(foo)$`...`) }

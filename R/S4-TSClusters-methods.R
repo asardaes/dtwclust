@@ -19,6 +19,7 @@ NULL
 #' @importFrom methods callNextMethod
 #' @importFrom methods initialize
 #' @importFrom methods new
+#' @importFrom rlang enexprs
 #'
 #' @param .Object A `TSClusters` prototype. You *shouldn't* use this, see Initialize section and the
 #'   examples.
@@ -73,29 +74,40 @@ NULL
 #'
 setMethod("initialize", "TSClusters", function(.Object, ..., override.family = TRUE) {
     tic <- proc.time()
-    dots <- list(...)
+    parent_dots <- list(...)
+    dots <- rlang::enexprs(...)
+    dots$.Object <- quote(.Object)
+
     # some minor checks
-    if (!is.null(dots$datalist)) dots$datalist <- tslist(dots$datalist)
-    if (!is.null(dots$centroids)) dots$centroids <- tslist(dots$centroids)
+    if (!is.null(parent_dots$datalist)) {
+        datalist <- tslist(parent_dots$datalist)
+        dots$datalist <- quote(datalist)
+    }
+    if (!is.null(parent_dots$centroids)) {
+        centroids <- tslist(parent_dots$centroids)
+        dots$centroids <- quote(centroids)
+    }
+
     # avoid infinite recursion (see https://bugs.r-project.org/bugzilla/show_bug.cgi?id=16629)
-    if (is.null(dots$call)) {
+    if (is.null(parent_dots$call)) {
         call <- match.call()
     }
     else {
-        call <- dots$call
+        call <- parent_dots$call
         dots$call <- NULL
     }
+
     # apparently a non-NULL value is needed if proc_time class is virtual?
-    if (is.null(dots$proctime)) {
-        dots$proctime <- tic
+    if (is.null(parent_dots$proctime)) {
+        dots$proctime <- quote(tic)
         fill_proctime <- TRUE
     }
     else {
         fill_proctime <- FALSE # nocov
     }
 
-    # no quoted_call here, apparently do.call evaluates as parent and callNextMethod needs that
-    .Object <- do.call(methods::callNextMethod, enlist(.Object = .Object, dots = dots), TRUE)
+    # no shenanigans here, apparently do.call evaluates as parent and callNextMethod needs that
+    .Object <- do.call(methods::callNextMethod, dots)
     .Object@call <- call
 
     # some "defaults"
