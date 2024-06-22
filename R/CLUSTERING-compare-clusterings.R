@@ -631,7 +631,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
         export <- c("trace", "score.clus", "return.objects",
                     "dots",
                     "centroids_included",
-                    "check_consistency", "quoted_call", "enlist", "subset_dots", "get_from_callers",
+                    "check_consistency", "do_call", "quoted_call", "enlist", "subset_dots", "get_from_callers",
                     "setnames_inplace",
                     custom_preprocs, custom_centroids)
 
@@ -682,7 +682,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
             })
 
             setnames_inplace(args, c("preproc", "dist", "cent"))
-            args <- do.call(tsclust_args, args, TRUE)
+            args <- do_call("tsclust_args", args)
 
             # ----------------------------------------------------------------------------------
             # controls for this configuration
@@ -691,7 +691,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
             control_fun <- match.fun(paste0(type, "_control"))
             control_args <- subset_dots(as.list(cfg), control_fun)
             control_args <- lapply(control_args, unlist, recursive = FALSE)
-            control <- do.call(control_fun, control_args, TRUE)
+            control <- do_call(control_fun, control_args)
 
             # ----------------------------------------------------------------------------------
             # get processed series
@@ -719,7 +719,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
                 distance <- cfg$distance
                 dist_entry <- dist_entries[[distance]]
                 if (!check_consistency(dist_entry$names[1L], "dist"))
-                    do.call(proxy::pr_DB$set_entry, dist_entry, TRUE) # nocov
+                    do_call(proxy::pr_DB$set_entry, dist_entry) # nocov
             }
             else distance <- NULL # dummy
 
@@ -749,7 +749,7 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
 
             if (centroid_char == "default") {
                 # do not specify centroid
-                tsc <- do.call(tsclust, this_args, TRUE)
+                tsc <- do_call("tsclust", this_args)
             }
             else if (type %in% c("partitional", "fuzzy") && centroid_char %in% centroids_included) {
                 # with included centroid
@@ -982,7 +982,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
                                f = function(result, cols) {
                                    order_args <- as.list(result[cols])
                                    names(order_args) <- NULL
-                                   result[do.call(base::order, order_args, TRUE), , drop = FALSE]
+                                   .f <- base::order
+                                   result[do_call(".f", order_args), , drop = FALSE]
                                })
     # return results
     results

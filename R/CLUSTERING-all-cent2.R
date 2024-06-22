@@ -41,6 +41,7 @@ reinit_clusters <- function(x, cent, cent_case, num_empty, empty_clusters, distm
 # --------------------------------------------------------------------------------------------------
 # shape
 shape_cent <- function(x, x_split, cent, id_changed, cl_id, ..., distmat) {
+    force(x)
     # not all arguments are used, but I want them to be isolated from ellipsis
     dots <- list(...)
     dots$error.check <- FALSE
@@ -106,12 +107,12 @@ mean_cent <- function(x_split, ...) {
         if (is_multivariate(xx)) {
             ncols <- ncol(xx[[1L]]) # number of dimensions should be equal
             ncols <- rep(1L:ncols, length(xx))
-            xx <- do.call(cbind, xx, TRUE)
+            xx <- call_cbind(xx)
             xx <- split.data.frame(t(xx), ncols)
-            do.call(cbind, lapply(xx, colMeans), TRUE)
+            call_cbind(lapply(xx, colMeans))
         }
         else {
-            xx <- do.call(cbind, xx, TRUE)
+            xx <- call_cbind(xx)
             rowMeans(xx)
         }
     })
@@ -125,12 +126,12 @@ median_cent <- function(x_split, ...) {
         if (is_multivariate(xx)) {
             ncols <- ncol(xx[[1L]]) # number of dimensions should be equal
             ncols <- rep(1L:ncols, length(xx))
-            xx <- do.call(cbind, xx, TRUE)
+            xx <- call_cbind(xx)
             xx <- split.data.frame(t(xx), ncols)
-            do.call(cbind, lapply(xx, colMedians), TRUE)
+            call_cbind(lapply(xx, colMedians))
         }
         else {
-            xx <- do.call(rbind, xx, TRUE)
+            xx <- call_rbind(xx)
             colMedians(xx)
         }
     })
@@ -150,7 +151,7 @@ fcm_cent <- function(x, u, k, ..., distmat) {
         cent
     }
     else {
-        cent <- t(u) %*% do.call(rbind, x, TRUE)
+        cent <- t(u) %*% call_rbind(x)
         apply(cent, 2L, "/", e2 = colSums(u))
     }
 }

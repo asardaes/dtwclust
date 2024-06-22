@@ -141,6 +141,37 @@ quoted_call <- function(fun, ..., dots = NULL) {
     do.call(fun, enlist(..., dots = dots), quote = TRUE)
 }
 
+#' @importFrom rlang as_environment
+#' @importFrom rlang syms
+call_cbind <- function(args) {
+    original_names <- names(args)
+    names(args) <- paste0(".arg", seq_along(args))
+    ans <- do.call("cbind", rlang::syms(names(args)), envir = rlang::as_environment(args, .GlobalEnv))
+
+    if (!is.null(original_names) && ncol(ans) == length(original_names)) {
+        colnames(ans) <- original_names
+    }
+    else {
+        ans <- unname(ans)
+    }
+
+    ans
+}
+
+#' @importFrom rlang as_environment
+#' @importFrom rlang syms
+call_rbind <- function(args) {
+    names(args) <- paste0(".arg", seq_along(args))
+    ans <- do.call("rbind", rlang::syms(names(args)), envir = rlang::as_environment(args, .GlobalEnv))
+    rownames(ans) <- NULL
+    ans
+}
+
+# TODO
+do_call <- function(f, args) {
+    do.call(f, args, envir = parent.frame())
+}
+
 # ==================================================================================================
 # Helper C/C++ functions
 # ==================================================================================================

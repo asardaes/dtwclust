@@ -95,7 +95,7 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
     }
 
     # set control args
-    args$control <- do.call(paste0(clus_type, "_control"), control_args, TRUE)
+    args$control <- do_call(paste0(clus_type, "_control"), control_args)
 
     # set remaining tsclust args
     centroid_char <- args$centroid
@@ -114,14 +114,15 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
     args$series <- series
     args$type <- clus_type
     args$seed <- seed
-    args$args <- do.call(tsclust_args, quote = TRUE, args = list(
+    args$args <- do_call("tsclust_args", args = list(
         preproc = preproc_args,
         dist = distance_args,
-        cent = centroid_args)
-    )
+        cent = centroid_args
+    ))
 
     # create TSClusters
-    ret <- do.call(tsclust, c(args, list(...)), FALSE)
+    args <- c(args, list(...))
+    ret <- do_call("tsclust", args)
     ret@args <- lapply(ret@args, function(arg) { arg$.rng_ <- NULL; arg })
     ret@dots$.rng_ <- NULL
     ret@preproc <- preproc_char

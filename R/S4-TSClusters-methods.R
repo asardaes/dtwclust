@@ -651,8 +651,8 @@ plot.TSClusters <- function(x, y, ...,
                       })
 
     # bind
-    dfm <- data.frame(dfm, do.call(rbind, dfm_tcc, TRUE))
-    dfcm <- data.frame(dfcm, do.call(rbind, dfcm_tc, TRUE))
+    dfm <- data.frame(dfm, call_rbind(dfm_tcc))
+    dfcm <- data.frame(dfcm, call_rbind(dfcm_tc))
     # make factor
     dfm$cl <- factor(dfm$cl)
     dfcm$cl <- factor(dfcm$cl)
@@ -727,7 +727,7 @@ plot.TSClusters <- function(x, y, ...,
         }
         labels$data <- labels$data[labels$data$cl %in% clus,]
         labels$inherit.aes <- FALSE
-        gg <- gg + do.call(ggrepel::geom_label_repel, labels, TRUE)
+        gg <- gg + do_call(ggrepel::geom_label_repel, labels)
     }
 
     # add facets, remove legend, apply kinda black-white theme
