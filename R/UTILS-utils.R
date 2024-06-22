@@ -137,9 +137,23 @@ get_from_callers <- function(obj_name, mode = "any") {
 }
 
 #' @importFrom rlang as_environment
+#' @importFrom rlang as_string
+#' @importFrom rlang enexpr
+#' @importFrom rlang is_call
 quoted_call <- function(fun, ..., dots = NULL) {
-    parent <- rlang::as_environment(list(.fun_ = match.fun(fun)), parent = parent.frame())
-    do_call(".fun_", enlist(..., dots = dots), parent = parent)
+    fun_expr <- rlang::enexpr(fun)
+    fun_name <- if (rlang::is_call(fun_expr)) {
+        fn <- as.character(fun_expr)
+        paste0(fn[2L], fn[1L], fn[3L], collapse = "")
+    } else {
+        rlang::as_string(fun_expr)
+    }
+    fun_name <- gsub("[@$:]", "_", fun_name)
+
+    l <- list(match.fun(fun))
+    names(l) <- fun_name
+    parent <- rlang::as_environment(l, parent = parent.frame())
+    do_call(fun_name, enlist(..., dots = dots), parent = parent)
 }
 
 #' @importFrom rlang as_environment
