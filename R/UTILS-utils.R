@@ -136,9 +136,10 @@ get_from_callers <- function(obj_name, mode = "any") {
     stop("Could not find object '", obj_name, "' of mode '", mode, "'") # nocov
 }
 
-# do.call but always quoted
+#' @importFrom rlang as_environment
 quoted_call <- function(fun, ..., dots = NULL) {
-    do.call(fun, enlist(..., dots = dots), quote = TRUE)
+    parent <- rlang::as_environment(list(.fun_ = match.fun(fun)), parent = parent.frame())
+    do_call(".fun_", enlist(..., dots = dots), parent = parent)
 }
 
 #' @importFrom rlang as_environment
@@ -169,8 +170,7 @@ call_rbind <- function(args) {
 
 #' @importFrom rlang as_environment
 #' @importFrom rlang syms
-do_call <- function(f, args, dots = NULL) {
-    args <- c(args, dots)
+do_call <- function(f, args, parent = parent.frame()) {
     original_names <- tmp_names <- names(args)
     unnamed <- tmp_names == ""
 
@@ -187,7 +187,7 @@ do_call <- function(f, args, dots = NULL) {
         names(tmp_names) <- original_names
     }
 
-    envir <- rlang::as_environment(args, parent.frame())
+    envir <- rlang::as_environment(args, parent)
     do.call(f, rlang::syms(tmp_names), envir = envir)
 }
 

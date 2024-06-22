@@ -62,7 +62,7 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
     if (length(shared) > 0L && length(share.config) > 0L) {
         # careful, singular and plural below
         shared_cfg <- Map(shared, names(shared), f = function(shared_args, fun) {
-            cfg <- quoted_call(expand.grid, foo = fun, stringsAsFactors = FALSE, dots = shared_args)
+            cfg <- quoted_call(expand.grid, fun, stringsAsFactors = FALSE, dots = shared_args)
             names(cfg)[1L] <- type
             cfg
         })
@@ -86,7 +86,7 @@ pdc_configs <- function(type = c("preproc", "distance", "centroid"), ...,
             if (!is.list(config) || is.null(config_names))
                 stop("All parameters must be named lists.") # nocov
             cfg <- Map(config, config_names, f = function(config_args, fun) {
-                cfg <- quoted_call(expand.grid, foo = fun, stringsAsFactors = FALSE, dots = config_args)
+                cfg <- quoted_call(expand.grid, fun, stringsAsFactors = FALSE, dots = config_args)
                 names(cfg)[1L] <- type
                 cfg
             })
