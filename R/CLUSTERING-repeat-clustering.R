@@ -101,16 +101,22 @@ repeat_clustering <- function(series, clusterings, config_id, ...) {
     centroid_char <- args$centroid
     if (centroid_char != "default") {
         if (clus_type %in% c("hierarchical", "tadpole") || !(centroid_char %in% centroids_included)) {
-            centroid <- get_from_callers(centroid_char, "function")
-            args$centroid <- as.name("centroid")
+            args$centroid <- get_from_callers(centroid_char, "function")
+        } else {
+            args$centroid <- centroid_char
         }
     }
     else {
         args$centroid <- NULL
     }
+
     preproc_char <- if (is.null(args$preproc)) "none" else args$preproc
-    preproc <- if (preproc_char == "none") NULL else get_from_callers(preproc_char, "function")
-    args$preproc <- as.name("preproc")
+    if (preproc_char != "none") {
+        args$preproc <- get_from_callers(preproc_char, "function")
+    } else {
+        args$preproc <- NULL
+    }
+
     args$series <- series
     args$type <- clus_type
     args$seed <- seed

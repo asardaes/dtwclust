@@ -688,10 +688,11 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
             # controls for this configuration
             # ----------------------------------------------------------------------------------
 
-            control_fun <- match.fun(paste0(type, "_control"))
+            control_fun_name <- paste0(type, "_control")
+            control_fun <- match.fun(control_fun_name)
             control_args <- subset_dots(as.list(cfg), control_fun)
             control_args <- lapply(control_args, unlist, recursive = FALSE)
-            control <- do_call(control_fun, control_args)
+            control <- do_call(control_fun_name, control_args)
 
             # ----------------------------------------------------------------------------------
             # get processed series
@@ -982,8 +983,8 @@ compare_clusterings <- function(series = NULL, types = c("p", "h", "f", "t"),
                                f = function(result, cols) {
                                    order_args <- as.list(result[cols])
                                    names(order_args) <- NULL
-                                   .f <- base::order
-                                   result[do_call(".f", order_args), , drop = FALSE]
+                                   base_order <- base::order
+                                   result[do_call("base_order", order_args), , drop = FALSE]
                                })
     # return results
     results

@@ -167,9 +167,28 @@ call_rbind <- function(args) {
     ans
 }
 
-# TODO
-do_call <- function(f, args) {
-    do.call(f, args, envir = parent.frame())
+#' @importFrom rlang as_environment
+#' @importFrom rlang syms
+do_call <- function(f, args, dots = NULL) {
+    args <- c(args, dots)
+    original_names <- tmp_names <- names(args)
+    unnamed <- tmp_names == ""
+
+    if (is.null(original_names)) {
+        tmp_names <- paste0(".arg", seq_along(args))
+        names(args) <- tmp_names
+    }
+    else if (any(unnamed)) {
+        tmp_names[unnamed] <- paste0(".arg", seq_len(sum(unnamed)))
+        names(args) <- tmp_names
+        names(tmp_names) <- original_names
+    }
+    else {
+        names(tmp_names) <- original_names
+    }
+
+    envir <- rlang::as_environment(args, parent.frame())
+    do.call(f, rlang::syms(tmp_names), envir = envir)
 }
 
 # ==================================================================================================
