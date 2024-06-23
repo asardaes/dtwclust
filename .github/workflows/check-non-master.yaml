@@ -4,6 +4,7 @@ on:
       - master
 
 name: R-CMD-check non-master
+permissions: read-all
 
 jobs:
   R-CMD-check:
@@ -19,6 +20,7 @@ jobs:
           - {os: macOS-latest, r: 'release'}
           - {os: ubuntu-latest, r: 'release'}
           - {os: ubuntu-latest, r: 'devel', http-user-agent: 'release'}
+          - {os: ubuntu-latest,   r: 'oldrel-1'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -37,10 +39,10 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
+          needs: check
           extra-packages: |
             any::rcmdcheck
             any::bigmemory
-            any::dtwclust
 
       - uses: r-lib/actions/setup-tinytex@v2
 
@@ -51,6 +53,7 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
         with:
           build_args: 'c("--compact-vignettes=both", "--no-manual")'
+          upload-snapshots: true
         continue-on-error: ${{ matrix.config.r == 'devel' }}
 
       - name: Test coverage
