@@ -1,7 +1,8 @@
 # Changelog
 
-## Version master
+## Version 5.6.0
 * Update Makevars for ARM version of Windows.
+* Sanitize internal usage of `do.call` to avoid huge backtraces.
 
 ## Version 5.5.12
 * Remove explicit C++ requirements.

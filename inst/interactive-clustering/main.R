@@ -79,7 +79,7 @@ main <- quote({
             args$centroid <- NULL
         if (type == "t")
             args$distance <- NULL
-        do.call(tsclust, args, TRUE)
+        do_call("tsclust", args)
     },
     error = function(e) {
         e

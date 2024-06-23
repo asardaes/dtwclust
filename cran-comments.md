@@ -1,6 +1,7 @@
 
-## Update to version TBD
+## Update to version 5.6.0
 * Update Makevars for ARM version of Windows.
+* Internal optimizations of do.call usages.
 
 ## Test environments
 * Local GNU/Linux, R release

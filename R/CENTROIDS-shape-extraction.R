@@ -73,7 +73,7 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check
         new_c <- Map(mv$series, mv$cent, f = function(xx, cc, ...) {
             new_c <- shape_extraction(xx, cc, znorm = znorm, ..., error.check = FALSE)
         })
-        return(do.call(cbind, new_c, TRUE))
+        return(call_cbind(new_c))
     }
 
     Xz <- if (znorm) zscore(X, ..., error.check = FALSE) else X
@@ -87,18 +87,18 @@ shape_extraction <- function(X, centroid = NULL, znorm = FALSE, ..., error.check
 
     if (is.null(centroid)) {
         if (!different_lengths(Xz)) {
-            A <- do.call(rbind, Xz, TRUE) # use all
+            A <- call_rbind(Xz) # use all
         }
         else {
             centroid <- Xz[[sample(length(Xz), 1L)]] # random choice as reference
             A <- lapply(Xz, function(a) { SBD(centroid, a)$yshift })
-            A <- do.call(rbind, A, TRUE)
+            A <- call_rbind(A)
         }
     }
     else {
         centroid <- zscore(centroid, ..., error.check = FALSE) # use given reference
         A <- lapply(Xz, function(a) { SBD(centroid, a)$yshift })
-        A <- do.call(rbind, A, TRUE)
+        A <- call_rbind(A)
     }
 
     Y <- zscore(A, ..., error.check = FALSE)

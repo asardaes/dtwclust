@@ -78,7 +78,7 @@ cvi_evaluators <- function(type = "valid", fuzzy = FALSE, ground.truth = NULL) {
     }
 
     score <- function(objs, ...) {
-        do.call(rbind, lapply(objs, function(obj) {
+        call_rbind(lapply(objs, function(obj) {
             if (length(internal) > 0L)
                 cvis <- cvi(a = obj, type = internal, ...)
             else
@@ -115,7 +115,7 @@ cvi_evaluators <- function(type = "valid", fuzzy = FALSE, ground.truth = NULL) {
         best_overall <- Map(results, best_by_type, f = function(result, row_id) {
             result[row_id, type, drop = FALSE]
         })
-        best_overall <- do.call(rbind, best_overall)
+        best_overall <- call_rbind(best_overall)
         best_overall <- apply(best_overall, 2L, which.max)
         if (length(type) > 1L && length(unique(best_overall)) == length(best_overall))
             stop("All votes are distinct, so majority voting is inconclusive.")

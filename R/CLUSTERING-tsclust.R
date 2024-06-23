@@ -442,7 +442,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             else {
                 # I need to re-register any custom distances in each parallel worker
                 dist_entry <- proxy::pr_DB$get_entry(distance)
-                export <- c("pfclust", "check_consistency", "quoted_call")
+                export <- c("pfclust", "check_consistency", "quoted_call", "do_call")
                 if (is.null(.rng_))
                     .rng_ <- rng_seq(length(k) * nrep, seed = seed, simplify = FALSE) # UTILS-rng.R
                 # if %do% is used, the outer loop replaces values in this envir
@@ -475,7 +475,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                 assign(".Random.seed", rng[[i]], .GlobalEnv)
 
                                 if (!check_consistency(dist_entry$names[1L], "dist"))
-                                    do.call(proxy::pr_DB$set_entry, dist_entry, TRUE) # nocov
+                                    do_call(proxy::pr_DB$set_entry, dist_entry) # nocov
 
                                 # return
                                 list(quoted_call(

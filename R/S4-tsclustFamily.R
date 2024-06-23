@@ -123,19 +123,20 @@ f_cluster <- function(distmat, m) {
 #' @importFrom methods callNextMethod
 #' @importFrom methods initialize
 #' @importFrom methods setMethod
+#' @importFrom rlang enexprs
+#' @importFrom rlang env_bind
 #'
 setMethod("initialize", "tsclustFamily",
           function(.Object, dist, allcent, ..., control = list(), fuzzy = FALSE) {
-              dots <- list(...)
-              dots$.Object <- .Object
+              rlang::env_bind(environment(), ...)
+              dots <- rlang::enexprs(...)
+              dots$.Object <- quote(.Object)
               if (!missing(dist)) {
-                  if (is.character(dist))
-                      dots$dist <- ddist2(dist, control)
-                  else
-                      dots$dist <- dist
+                  if (is.character(dist)) dist <- ddist2(dist, control)
+                  dots$dist <- quote(dist)
               }
               if (fuzzy) {
-                  dots$cluster <- f_cluster
+                  dots$cluster <- quote(f_cluster)
                   if (!missing(allcent) && is.character(allcent))
                       allcent <- match.arg(allcent, c("fcm", "fcmdd"))
               }
@@ -147,12 +148,12 @@ setMethod("initialize", "tsclustFamily",
                                   distmat = base::as.matrix(control$distmat)
                               )
                       }
-                      dots$allcent <- all_cent2(allcent, control)
+                      allcent <- all_cent2(allcent, control)
                   }
-                  else if (is.function(allcent))
-                      dots$allcent <- allcent
-                  else
+                  else if (!is.function(allcent)) {
                       stop("Centroid definition must be either a function or a character")
+                  }
+                  dots$allcent <- quote(allcent)
               }
-              do.call(methods::callNextMethod, dots, TRUE)
+              do.call(methods::callNextMethod, dots)
           })

@@ -100,7 +100,9 @@ check_consistency <- function(obj, case, ..., clus_type,
 different_lengths <- function(x) { any(diff(lengths(x)) != 0L) }
 
 # Enlist parameters for do.calls
-enlist <- function(..., dots = NULL) { c(list(...), dots) }
+#' @importFrom rlang !!!
+#' @importFrom rlang list2
+enlist <- function(..., dots = NULL) { rlang::list2(..., !!!dots) }
 
 # Check if a function has the ellipsis in its formals
 has_dots <- function(foo) { is.function(foo) && !is.null(formals(foo)$`...`) }
@@ -134,9 +136,73 @@ get_from_callers <- function(obj_name, mode = "any") {
     stop("Could not find object '", obj_name, "' of mode '", mode, "'") # nocov
 }
 
-# do.call but always quoted
+#' @importFrom rlang as_environment
+#' @importFrom rlang as_string
+#' @importFrom rlang enexpr
+#' @importFrom rlang is_call
 quoted_call <- function(fun, ..., dots = NULL) {
-    do.call(fun, enlist(..., dots = dots), quote = TRUE)
+    fun_expr <- rlang::enexpr(fun)
+    fun_name <- if (rlang::is_call(fun_expr)) {
+        fn <- as.character(fun_expr)
+        paste0(fn[2L], fn[1L], fn[3L], collapse = "")
+    } else {
+        rlang::as_string(fun_expr)
+    }
+    fun_name <- gsub("[@$:]", "_", fun_name)
+
+    l <- list(match.fun(fun))
+    names(l) <- fun_name
+    parent <- rlang::as_environment(l, parent = parent.frame())
+    do_call(fun_name, enlist(..., dots = dots), parent = parent)
+}
+
+#' @importFrom rlang as_environment
+#' @importFrom rlang syms
+call_cbind <- function(args) {
+    original_names <- names(args)
+    names(args) <- paste0(".arg", seq_along(args))
+    ans <- do.call("cbind", rlang::syms(names(args)), envir = rlang::as_environment(args, .GlobalEnv))
+
+    if (!is.null(original_names) && ncol(ans) == length(original_names)) {
+        colnames(ans) <- original_names
+    }
+    else {
+        ans <- unname(ans)
+    }
+
+    ans
+}
+
+#' @importFrom rlang as_environment
+#' @importFrom rlang syms
+call_rbind <- function(args) {
+    names(args) <- paste0(".arg", seq_along(args))
+    ans <- do.call("rbind", rlang::syms(names(args)), envir = rlang::as_environment(args, .GlobalEnv))
+    rownames(ans) <- NULL
+    ans
+}
+
+#' @importFrom rlang as_environment
+#' @importFrom rlang syms
+do_call <- function(f, args, parent = parent.frame()) {
+    original_names <- tmp_names <- names(args)
+    unnamed <- tmp_names == ""
+
+    if (is.null(original_names)) {
+        tmp_names <- paste0(".arg", seq_along(args))
+        names(args) <- tmp_names
+    }
+    else if (any(unnamed)) {
+        tmp_names[unnamed] <- paste0(".arg", seq_len(sum(unnamed)))
+        names(args) <- tmp_names
+        names(tmp_names) <- original_names
+    }
+    else {
+        names(tmp_names) <- original_names
+    }
+
+    envir <- rlang::as_environment(args, parent)
+    do.call(f, rlang::syms(tmp_names), envir = envir)
 }
 
 # ==================================================================================================

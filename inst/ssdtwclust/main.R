@@ -94,7 +94,7 @@ main <- quote({
             score.clus = score_fun,
             dots = dots
         )
-        do.call(compare_clusterings, args, TRUE)
+        do_call("compare_clusterings", args)
     },
     error = function(e) {
         e
