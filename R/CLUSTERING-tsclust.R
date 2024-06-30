@@ -407,9 +407,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 distmat_provided <- dm$distmat_provided
                 # Redefine new distmat if appropriate
                 control$distmat <- distmat
-                environment(family@allcent)$control$distmat <- distmat
+                environment(family@allcent)$control <- control
                 if (!(distance == "dtw_lb" && !isTRUE(control$pam.precompute)))
-                    environment(family@dist)$control$distmat <- distmat
+                    environment(family@dist)$control <- control
             }
             else {
                 distmat <- NULL
