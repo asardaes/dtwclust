@@ -84,6 +84,7 @@ Collate:
     'DISTANCES-sdtw.R'
     'GENERICS-cvi.R'
     'S4-Distmat.R'
+    'S4-DistmatLowerTriangular.R'
     'S4-PairTracker.R'
     'S4-SparseDistmat.R'
     'S4-tsclustFamily.R'

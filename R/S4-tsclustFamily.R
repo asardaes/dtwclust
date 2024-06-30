@@ -143,10 +143,14 @@ setMethod("initialize", "tsclustFamily",
               if (!missing(allcent)) {
                   if (is.character(allcent)) {
                       if (allcent %in% c("pam", "fcmdd")) {
-                          if (!is.null(control$distmat) && !inherits(control$distmat, "Distmat"))
-                              control$distmat <- Distmat$new( # see S4-Distmat.R
-                                  distmat = base::as.matrix(control$distmat)
-                              )
+                          if (!is.null(control$distmat) && !inherits(control$distmat, "Distmat")) {
+                              control$distmat <- if (inherits(control$distmat, "dist")) {
+                                  DistmatLowerTriangular$new(distmat = control$distmat)
+                              }
+                              else {
+                                  Distmat$new(distmat = control$distmat)
+                              }
+                          }
                       }
                       allcent <- all_cent2(allcent, control)
                   }

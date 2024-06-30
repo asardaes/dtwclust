@@ -3,16 +3,31 @@
 # ==================================================================================================
 
 # Get an appropriate distance matrix object for internal use with PAM/FCMdd centroids
+#' @importFrom methods as
 pam_distmat <- function(series, control, distance, cent_char, family, args, trace) {
     distmat <- control$distmat
     distmat_provided <- FALSE
 
     if (!is.null(distmat)) {
-        if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
-            stop("Dimensions of provided cross-distance matrix don't correspond ",
-                 "to length of provided data")
-        # see S4-Distmat.R
-        if (!inherits(distmat, "Distmat")) distmat <- Distmat$new(distmat = distmat)
+        if (inherits(distmat, "dist")) {
+            n <- attr(distmat, "Size")
+            if (n != length(series))
+                stop("Dimensions of provided cross-distance matrix don't correspond ",
+                     "to length of provided data")
+
+            # see S4-Distmat.R
+            if (!inherits(distmat, "Distmat"))
+                distmat <- DistmatLowerTriangular$new(distmat = distmat)
+        }
+        else {
+            if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
+                stop("Dimensions of provided cross-distance matrix don't correspond ",
+                     "to length of provided data")
+
+            # see S4-Distmat.R
+            if (!inherits(distmat, "Distmat")) distmat <- Distmat$new(distmat = distmat)
+        }
+
         distmat_provided <- TRUE
         if (trace) cat("\n\tDistance matrix provided...\n\n") # nocov
     }
@@ -20,13 +35,21 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
         if (distance == "dtw_lb")
             warning("Using dtw_lb with control$pam.precompute = TRUE is not advised.") # nocov
         if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
-        # see S4-Distmat.R
-        distmat <- Distmat$new(distmat = quoted_call(
-            family@dist,
-            x = series,
-            centroids = NULL,
-            dots = args$dist
-        ))
+
+        if (control$symmetric) {
+            distfun <- ddist2(distance, control, lower_triangular_only = TRUE)
+            distmat <- methods::as(quoted_call(distfun, x = series, centroids = NULL, dots = args$dist),
+                                   "Distmat")
+        }
+        else {
+            # see S4-Distmat.R
+            distmat <- Distmat$new(distmat = quoted_call(
+                family@dist,
+                x = series,
+                centroids = NULL,
+                dots = args$dist
+            ))
+        }
     }
     else {
         if (isTRUE(control$pam.sparse) && distance != "dtw_lb") {
