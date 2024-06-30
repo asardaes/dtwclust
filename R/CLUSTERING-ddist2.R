@@ -188,7 +188,7 @@ ddist2 <- function(distance, control, lower_triangular_only = FALSE) {
                 return(ret(dm, class = "pairdist"))
             }
             else if (lower_triangular_only && inherits(dm, "dist")) {
-                return(ret(dm, class = "dist", Size = length(x)))
+                return(ret(dm, class = "dist"))
             }
             else {
                 return(ret(base::as.matrix(dm), class = "crossdist"))
@@ -245,7 +245,7 @@ ddist2 <- function(distance, control, lower_triangular_only = FALSE) {
                 )
 
                 if (lower_triangular_only && inherits(dm, "dist")) {
-                    return(ret(dm, class = "dist", Size = length(x)))
+                    return(ret(dm, class = "dist"))
                 }
                 else {
                     return(ret(base::as.matrix(dm), class = "crossdist"))

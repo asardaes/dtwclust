@@ -69,6 +69,10 @@ NULL
 #'
 setMethod("show", "DistmatLowerTriangular", function(object) { methods::show(object$distmat) }) # nocov
 
+lti <- function(i) {
+    if (is.logical(i)) which(i) else i
+}
+
 #' @rdname DistmatLowerTriangular-generics
 #' @aliases [,DistmatLowerTriangular,ANY,ANY,ANY
 #'
@@ -80,11 +84,13 @@ setMethod("show", "DistmatLowerTriangular", function(object) { methods::show(obj
 setMethod(`[`, "DistmatLowerTriangular", function(x, i, j, ...) {
     if (missing(j)) {
         stopifnot(inherits(i, "matrix"), ncol(i) == 2L)
-        j <- i[, 2L]
-        i <- i[, 1L]
+        j <- lti(i[, 2L])
+        i <- lti(i[, 1L])
         drop <- TRUE
     }
     else {
+        i <- lti(i)
+        j <- lti(j)
         out_dim <- c(length(i), length(j))
         out_dimnames <- list(i, j)
         combinations <- expand.grid(i = i, j = j)

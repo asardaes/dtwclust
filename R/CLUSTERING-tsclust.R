@@ -608,10 +608,10 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             # Take advantage of the function I defined for the partitional methods
             # Which can do calculations in parallel if appropriate
-            distfun <- ddist2(distance = distance, control = control)
+            distfun <- ddist2(distance = distance, control = control, control$symmetric)
 
             if (!is.null(distmat)) {
-                if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
+                if (inherits(distmat, "matrix") && nrow(distmat) != length(series) || ncol(distmat) != length(series))
                     stop("Dimensions of provided cross-distance matrix don't correspond to ",
                          "length of provided data")
                 if (trace) cat("\nDistance matrix provided...\n")
@@ -631,10 +631,11 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # --------------------------------------------------------------------------------------
 
             if (trace) cat("Performing hierarchical clustering...\n")
-            if (!base::isSymmetric(base::as.matrix(distmat)))
+            if (inherits(distmat, "matrix") && !base::isSymmetric(base::as.matrix(distmat)))
                 warning("Distance matrix is not symmetric, ",
                         "and hierarchical clustering assumes it is ",
                         "(it ignores the upper triangular).")
+
             if (is.character(method)) {
                 # Using hclust
                 hc <- lapply(method, function(method) {
@@ -652,6 +653,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # --------------------------------------------------------------------------------------
 
             if (trace) cat("Extracting centroids...\n\n")
+
+            distmat <- methods::as(distmat, "Distmat")
+
             RET <- lapply(k, function(k) {
                 lapply(hc, function(hc) {
                     # cutree and corresponding centroids
@@ -696,7 +700,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                  k = as.integer(k),
                                  cluster = cluster,
                                  centroids = centroids,
-                                 distmat = distmat,
+                                 distmat = distmat$distmat,
 
                                  dots = dots,
                                  args = args,
