@@ -200,8 +200,8 @@ public:
                         const int grain,
                         const int nrows)
         : ParallelWorker(grain, 10, 1000)
-        , dist_calculator_(dist_calculator)
         , distmat_(distmat)
+        , dist_calculator_(dist_calculator)
         , nrows_(nrows)
     { }
 
