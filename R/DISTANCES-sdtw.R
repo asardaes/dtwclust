@@ -42,7 +42,9 @@ sdtw <- function(x, y, gamma = 0.01, ..., error.check = TRUE)
 # Wrapper for proxy::dist
 # ==================================================================================================
 
-sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ..., error.check = TRUE, pairwise = FALSE) {
+sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ...,
+                       error.check = TRUE, pairwise = FALSE, lower_triangular_only = FALSE)
+{
     x <- tslist(x)
     if (error.check) check_consistency(x, "vltslist")
     if (is.null(y)) {
@@ -56,10 +58,11 @@ sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ..., error.check = TRUE, pairw
     }
 
     fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
+    diagonal <- TRUE
     eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
-    if (!pairwise && symmetric)
+    if (!pairwise && symmetric && !lower_triangular_only)
         diagonal <- sdtw_proxy(x, gamma = gamma, error.check = FALSE, pairwise = TRUE)
     if (gamma <= 0) stop("The 'gamma' parameter must be positive")
     mv <- is_multivariate(c(x, y))
@@ -77,6 +80,14 @@ sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ..., error.check = TRUE, pairw
     if (pairwise) {
         dim(D) <- NULL
         class(D) <- "pairdist"
+    }
+    else if (lower_triangular_only) {
+        dim(D) <- NULL
+        class(D) <- c("distdiag", "dist")
+        attr(D, "Size") <- length(x)
+        attr(D, "Diag") <- TRUE
+        attr(D, "Upper") <- FALSE
+        attr(D, "Labels") <- names(x)
     }
     else {
         dimnames(D) <- dim_names

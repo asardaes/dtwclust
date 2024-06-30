@@ -37,7 +37,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
         if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
 
         if (control$symmetric) {
-            distfun <- ddist2(distance, control, lower_triangular_only = TRUE)
+            distfun <- ddist2(distance, control, lower_triangular_only = cent_char != "fcmdd")
             distmat <- methods::as(quoted_call(distfun, x = series, centroids = NULL, dots = args$dist),
                                    "Distmat")
         }

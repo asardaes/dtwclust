@@ -132,7 +132,9 @@ sbd <- SBD
 #' @importFrom stats fft
 #' @importFrom stats nextn
 #'
-sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairwise = FALSE) {
+sbd_proxy <- function(x, y = NULL, znorm = FALSE, ...,
+                      error.check = TRUE, pairwise = FALSE, lower_triangular_only = FALSE)
+{
     x <- tslist(x)
 
     if (error.check) check_consistency(x, "vltslist")
@@ -163,6 +165,7 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
 
     if (is_multivariate(c(x,y))) stop("SBD does not support multivariate series.") # nocov
     fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
+    diagonal <- FALSE
     eval(prepare_expr) # UTILS-expressions.R
 
     # calculate distance matrix
@@ -181,6 +184,14 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     if (pairwise) {
         dim(D) <- NULL
         class(D) <- "pairdist"
+    }
+    else if (lower_triangular_only) {
+        dim(D) <- NULL
+        class(D) <- "dist"
+        attr(D, "Size") <- length(x)
+        attr(D, "Diag") <- FALSE
+        attr(D, "Upper") <- FALSE
+        attr(D, "Labels") <- names(x)
     }
     else {
         dimnames(D) <- dim_names

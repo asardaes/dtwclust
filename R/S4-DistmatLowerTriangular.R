@@ -127,3 +127,17 @@ methods::setOldClass("crossdist")
 setAs("matrix", "Distmat", function(from) { Distmat$new(distmat = from) })
 setAs("crossdist", "Distmat", function(from) { Distmat$new(distmat = from) })
 setAs("dist", "Distmat", function(from) { DistmatLowerTriangular$new(distmat = from) })
+
+#' @exportS3Method base::as.matrix
+as.matrix.distdiag <- function(x) {
+    n <- attr(x, "Size")
+    m <- matrix(0, n, n)
+    m[lower.tri(m, diag = TRUE)] <- x
+
+    lbls <- attr(x, "Labels")
+    if (!is.null(lbls)) {
+        names(m) <- list(lbls, lbls)
+    }
+
+    m
+}
