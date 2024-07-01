@@ -44,10 +44,16 @@ sdtw <- function(x, y, gamma = 0.01, ..., error.check = TRUE)
 
 sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ...,
                        error.check = TRUE, pairwise = FALSE, lower_triangular_only = FALSE,
-                       diagonal = TRUE)
+                       diagonal = TRUE, .internal_ = FALSE)
 {
     x <- tslist(x)
-    if (error.check) check_consistency(x, "vltslist")
+    if (error.check) {
+        check_consistency(x, "vltslist")
+    }
+    if (lower_triangular_only && !diagonal && !.internal_) {
+        warning("proxy calls using 'sdtw' should specify diag = TRUE")
+    }
+
     if (is.null(y)) {
         y <- x
         symmetric <- TRUE

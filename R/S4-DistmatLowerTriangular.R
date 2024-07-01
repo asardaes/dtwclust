@@ -1,17 +1,13 @@
 lower_triangular_index <- function(i, j, n, diagonal) {
     stopifnot(i > 0L, i <= n, j > 0L, j <= i)
+    if (!diagonal) stopifnot(i != j)
 
-    i <- i - 1L
-    j <- j - 1L
+    diagonal <- as.integer(diagonal)
+    adjustment <- Reduce(x = 1L:j, init = 0L, f = function(a, b) {
+        a + b - diagonal
+    })
 
-    adjustment <- if (diagonal) {
-        0L
-    }
-    else {
-        Reduce(x = 0L:j, init = 0L, f = function(a, b) { a + b + 1L })
-    }
-
-    i + j * n - adjustment + 1L
+    i + (j - 1L) * n - adjustment
 }
 
 #' Distance matrix's lower triangular
@@ -97,7 +93,6 @@ setMethod(`[`, "DistmatLowerTriangular", function(x, i, j, ...) {
         i <- combinations$i
         j <- combinations$j
         drop <- FALSE
-
     }
 
     n <- attr(x$distmat, "Size")
@@ -138,7 +133,7 @@ setAs("dist", "Distmat", function(from) { DistmatLowerTriangular$new(distmat = f
 as.matrix.distdiag <- function(x) {
     n <- attr(x, "Size")
     m <- matrix(0, n, n)
-    m[lower.tri(m, diag = TRUE)] <- x
+    m[lower.tri(m, diag = attr(x, "Diag"))] <- x
 
     lbls <- attr(x, "Labels")
     if (!is.null(lbls)) {

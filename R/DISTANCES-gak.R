@@ -161,7 +161,7 @@ gak <- GAK
 
 gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
                       error.check = TRUE, pairwise = FALSE, .internal_ = FALSE,
-                      lower_triangular_only = FALSE)
+                      lower_triangular_only = FALSE, diagonal = TRUE)
 {
     # normalization will be done manually to avoid multiple calculations of gak_x and gak_y
     if (!.internal_ && !normalize) { # nocov start
@@ -186,7 +186,6 @@ gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         stop("Parameter 'sigma' must be positive.")
 
     fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
-    diagonal <- FALSE
     eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
@@ -234,18 +233,22 @@ gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
     else if (lower_triangular_only) {
         dim(D) <- NULL
         if (normalize) {
+            j_upper <- if (diagonal) length(x) else length(x) - 1L
+            i_lower <- if (diagonal) 0L else 1L
             k <- 1L
-            for (j in 1L:(length(x) - 1L)) {
-                for (i in (j+1L):length(x)) {
-                    D[k] <- 1 - exp(D[k] - (gak_x[i] + gak_x[j]) / 2)
+            for (j in 1L:j_upper) {
+                for (i in (j + i_lower):length(x)) {
+                    if (i != j) {
+                        D[k] <- 1 - exp(D[k] - (gak_x[i] + gak_x[j]) / 2)
+                    }
                     k <- k + 1L
                 }
             }
         }
 
-        class(D) <- "dist"
+        class(D) <- c("distdiag", "dist")
         attr(D, "Size") <- length(x)
-        attr(D, "Diag") <- FALSE
+        attr(D, "Diag") <- diagonal
         attr(D, "Upper") <- FALSE
         attr(D, "Labels") <- names(x)
     }

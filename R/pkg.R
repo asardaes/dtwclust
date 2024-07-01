@@ -68,13 +68,9 @@
 "_PACKAGE"
 
 # PREFUN for some of my proxy distances so that they support 'pairwise' directly
-#' @importFrom rlang caller_env
-#' @importFrom rlang env_bind
 proxy_prefun <- function(x, y, pairwise, params, reg_entry) {
-    if (!is.null(reg_entry) && "sdtw" %in% reg_entry$names) {
-        rlang::env_bind(rlang::caller_env(), diag = TRUE)
-    }
     params$pairwise <- pairwise
+    params$diagonal <- get_from_callers("diag", "logical")
     list(x = x, y = y, pairwise = pairwise, p = params, reg_entry = reg_entry)
 }
 

@@ -115,7 +115,8 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
                             step.pattern = dtw::symmetric2,
                             normalize = FALSE, sqrt.dist = TRUE, ...,
-                            error.check = TRUE, pairwise = FALSE, lower_triangular_only = FALSE)
+                            error.check = TRUE, pairwise = FALSE,
+                            lower_triangular_only = FALSE, diagonal = TRUE)
 {
     x <- tslist(x)
     if (error.check) check_consistency(x, "vltslist")
@@ -130,7 +131,6 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
     }
 
     fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
-    diagonal <- FALSE
     eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
@@ -179,9 +179,9 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
     }
     else if (lower_triangular_only) {
         dim(D) <- NULL
-        class(D) <- "dist"
+        class(D) <- c("distdiag", "dist")
         attr(D, "Size") <- length(x)
-        attr(D, "Diag") <- FALSE
+        attr(D, "Diag") <- diagonal
         attr(D, "Upper") <- FALSE
         attr(D, "Labels") <- names(x)
     }

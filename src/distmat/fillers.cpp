@@ -351,8 +351,10 @@ public:
         for (id_t id = begin; id < end; id++) {
             if (is_interrupted(id)) break; // nocov
 
-            double dist = dist_calculator->calculate(i,j);
-            (*distmat_)(id,0) = dist;
+            if (dist_calculator->distance == "SDTW" || i != j) {
+                double dist = dist_calculator->calculate(i,j);
+                (*distmat_)(id,0) = dist;
+            }
 
             i++;
             if (i >= nrows_) {

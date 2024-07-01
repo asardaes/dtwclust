@@ -399,7 +399,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             if (!inherits(control, "PtCtrl") && !inherits(control, "FzCtrl"))
                 stop("Invalid control provided") # nocov
+
             nrep <- if (is.null(control$nrep)) 1L else control$nrep
+
             if (!is.character(centroid) || !(cent_char %in% c("pam", "fcmdd")))
                 control$distmat <- NULL
 
@@ -425,6 +427,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             # precompute distance matrix?
             if (cent_char %in% c("pam", "fcmdd")) {
+                if (distance == "sdtw" && control$pam.precompute) {
+                    args$dist$diag <- TRUE
+                }
                 dm <- pam_distmat(series, control, distance, cent_char, family, args, trace)
                 distmat <- dm$distmat
                 distmat_provided <- dm$distmat_provided
@@ -623,7 +628,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 # Which can do calculations in parallel if appropriate
                 distfun <- ddist2(distance = distance, control = control, control$symmetric)
                 dist_dots <- if ("sdtw" %in% proxy::pr_DB$get_entry(distance)$names) {
-                    c(args$dist, list(diagonal = FALSE))
+                    c(args$dist, list(diagonal = FALSE, .internal_ = TRUE))
                 } else {
                     args$dist
                 }
