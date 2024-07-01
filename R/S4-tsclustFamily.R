@@ -120,6 +120,7 @@ f_cluster <- function(distmat, m) {
 # Custom initialize
 # ==================================================================================================
 
+#' @importFrom methods as
 #' @importFrom methods callNextMethod
 #' @importFrom methods initialize
 #' @importFrom methods setMethod
@@ -144,12 +145,7 @@ setMethod("initialize", "tsclustFamily",
                   if (is.character(allcent)) {
                       if (allcent %in% c("pam", "fcmdd")) {
                           if (!is.null(control$distmat) && !inherits(control$distmat, "Distmat")) {
-                              control$distmat <- if (inherits(control$distmat, "dist")) {
-                                  DistmatLowerTriangular$new(distmat = control$distmat)
-                              }
-                              else {
-                                  Distmat$new(distmat = control$distmat)
-                              }
+                              control$distmat <- methods::as(control$distmat, "Distmat")
                           }
                       }
                       allcent <- all_cent2(allcent, control)

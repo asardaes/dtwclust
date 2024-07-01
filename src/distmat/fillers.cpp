@@ -200,8 +200,8 @@ public:
                         const int grain,
                         const int nrows)
         : ParallelWorker(grain, 10, 1000)
-        , distmat_(distmat)
         , dist_calculator_(dist_calculator)
+        , distmat_(distmat)
         , nrows_(nrows)
     { }
 
@@ -233,6 +233,9 @@ public:
         mutex_.unlock();
     }
 
+private:
+    const std::shared_ptr<DistanceCalculator> dist_calculator_;
+
 protected:
     std::shared_ptr<Distmat> distmat_;
 
@@ -242,7 +245,6 @@ protected:
     }
 
 private:
-    const std::shared_ptr<DistanceCalculator> dist_calculator_;
     const id_t nrows_;
 };
 

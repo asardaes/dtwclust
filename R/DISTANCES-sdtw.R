@@ -43,7 +43,8 @@ sdtw <- function(x, y, gamma = 0.01, ..., error.check = TRUE)
 # ==================================================================================================
 
 sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ...,
-                       error.check = TRUE, pairwise = FALSE, lower_triangular_only = FALSE)
+                       error.check = TRUE, pairwise = FALSE, lower_triangular_only = FALSE,
+                       diagonal = TRUE)
 {
     x <- tslist(x)
     if (error.check) check_consistency(x, "vltslist")
@@ -58,7 +59,6 @@ sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ...,
     }
 
     fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
-    diagonal <- TRUE
     eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
@@ -85,7 +85,7 @@ sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ...,
         dim(D) <- NULL
         class(D) <- c("distdiag", "dist")
         attr(D, "Size") <- length(x)
-        attr(D, "Diag") <- TRUE
+        attr(D, "Diag") <- diagonal
         attr(D, "Upper") <- FALSE
         attr(D, "Labels") <- names(x)
     }

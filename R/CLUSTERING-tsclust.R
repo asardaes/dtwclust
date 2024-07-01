@@ -606,10 +606,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # Calculate distance matrix
             # --------------------------------------------------------------------------------------
 
-            # Take advantage of the function I defined for the partitional methods
-            # Which can do calculations in parallel if appropriate
-            distfun <- ddist2(distance = distance, control = control, control$symmetric)
-
             if (!is.null(distmat)) {
                 if (inherits(distmat, "matrix") && nrow(distmat) != length(series) || ncol(distmat) != length(series))
                     stop("Dimensions of provided cross-distance matrix don't correspond to ",
@@ -623,7 +619,15 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             }
             else {
                 if (trace) cat("\nCalculating distance matrix...\n")
-                distmat <- quoted_call(distfun, x = series, centroids = NULL, dots = args$dist)
+                # Take advantage of the function I defined for the partitional methods
+                # Which can do calculations in parallel if appropriate
+                distfun <- ddist2(distance = distance, control = control, control$symmetric)
+                dist_dots <- if ("sdtw" %in% proxy::pr_DB$get_entry(distance)$names) {
+                    c(args$dist, list(diagonal = FALSE))
+                } else {
+                    args$dist
+                }
+                distmat <- quoted_call(distfun, x = series, centroids = NULL, dots = dist_dots)
             }
 
             # --------------------------------------------------------------------------------------
@@ -631,7 +635,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # --------------------------------------------------------------------------------------
 
             if (trace) cat("Performing hierarchical clustering...\n")
-            if (inherits(distmat, "matrix") && !base::isSymmetric(base::as.matrix(distmat)))
+            if (!inherits(distmat, "dist") && !base::isSymmetric(base::as.matrix(distmat)))
                 warning("Distance matrix is not symmetric, ",
                         "and hierarchical clustering assumes it is ",
                         "(it ignores the upper triangular).")
@@ -686,7 +690,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                  stats::as.hclust(hc),
                                  call = MYCALL,
                                  family = methods::new("tsclustFamily",
-                                                       dist = distfun,
+                                                       dist = ddist2(distance = distance,
+                                                                     control = control),
                                                        allcent = allcent,
                                                        preproc = preproc),
                                  control = control,

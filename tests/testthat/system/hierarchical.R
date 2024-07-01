@@ -32,7 +32,8 @@ test_that("Hierarchical clustering works as expected.", {
 
     ## ---------------------------------------------------------- with provided distmat
     id_avg <- which(sapply(hc_all, slot, "method") == "average")
-    distmat <- hc_all[[1L]]@distmat
+    distmat <- as.matrix(hc_all[[1L]]@distmat)
+    attr(distmat, "method") <- attr(hc_all[[1L]]@distmat, "method")
     expect_output(
         hc_avg <- tsclust(data, type = "hierarchical", k = 20L,
                           distance = "sbd", trace = TRUE,
