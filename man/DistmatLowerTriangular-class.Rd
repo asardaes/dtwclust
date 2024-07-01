@@ -9,6 +9,10 @@
 Reference class that is used internally for PAM centroids when \code{pam.precompute = TRUE} and
 \code{pam.sparse = FALSE}. It contains \linkS4class{Distmat}.
 }
+\details{
+If you wish to, you can use this class to access \code{dist} elements with \code{[} as if it were a normal
+matrix. You can use \link[methods:new]{methods::new} passing the \code{dist} object in a \code{distmat} argument.
+}
 \section{Fields}{
 
 \describe{
@@ -21,4 +25,12 @@ Reference class that is used internally for PAM centroids when \code{pam.precomp
 \item{\code{initialize(..., distmat, series, distance, control, error.check = TRUE)}}{Initialization based on needed parameters}
 }}
 
-\keyword{internal}
+\examples{
+
+dm <- new("DistmatLowerTriangular",
+          distmat = proxy::dist(CharTraj[1:5], method = "gak", sigma = 5.5, window.size = 10L,
+                                lower_triangular_only = TRUE, diag = TRUE))
+
+dm[2:3, 4:5]
+
+}

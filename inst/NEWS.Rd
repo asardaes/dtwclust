@@ -11,6 +11,6 @@
 \itemize{
     \item Update Makevars for ARM version of Windows.
     \item Sanitize internal usage of \code{do.call} to avoid huge backtraces.
-    \item Support lower triangular \code{distmat} objects for symmetric distances.
+    \item Support lower triangular \code{distmat} objects for symmetric distances. See PR #77 on GitHub.
 }
 }

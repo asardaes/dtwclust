@@ -20,7 +20,18 @@ lower_triangular_index <- function(i, j, n, diagonal) {
 #'
 #' @field distmat The lower triangular.
 #'
-#' @keywords internal
+#' @details
+#'
+#' If you wish to, you can use this class to access `dist` elements with `[` as if it were a normal
+#' matrix. You can use [methods::new] passing the `dist` object in a `distmat` argument.
+#'
+#' @examples
+#'
+#' dm <- new("DistmatLowerTriangular",
+#'           distmat = proxy::dist(CharTraj[1:5], method = "gak", sigma = 5.5, window.size = 10L,
+#'                                 lower_triangular_only = TRUE, diag = TRUE))
+#'
+#' dm[2:3, 4:5]
 #'
 DistmatLowerTriangular <- methods::setRefClass(
     "DistmatLowerTriangular",
