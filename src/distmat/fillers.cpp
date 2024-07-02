@@ -26,9 +26,9 @@ DistmatFillerFactory::create(const SEXP& FILL_TYPE,
     if (type == "PAIRWISE") {
         return std::make_shared<PairwiseFiller>(distmat, dist_calculator, NUM_THREADS);
     }
-    else if (type == "SYMMETRIC") {
-        return std::make_shared<SymmetricFiller>(distmat, dist_calculator, NUM_THREADS);
-    }
+    // else if (type == "SYMMETRIC") {
+    //     return std::make_shared<SymmetricFiller>(distmat, dist_calculator, NUM_THREADS);
+    // }
     else if (type == "LOWER_TRIANGULAR") {
         return std::make_shared<LowerTriangularFiller>(distmat, dist_calculator, NUM_THREADS);
     }
@@ -183,11 +183,11 @@ void PrimaryFiller::fill() const {
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 // -------------------------------------------------------------------------------------------------
-SymmetricFiller::SymmetricFiller(std::shared_ptr<Distmat>& distmat,
-                                 const std::shared_ptr<DistanceCalculator>& dist_calculator,
-                                 const SEXP& NUM_THREADS)
-    : DistmatFiller(distmat, dist_calculator, NUM_THREADS)
-{ }
+// SymmetricFiller::SymmetricFiller(std::shared_ptr<Distmat>& distmat,
+//                                  const std::shared_ptr<DistanceCalculator>& dist_calculator,
+//                                  const SEXP& NUM_THREADS)
+//     : DistmatFiller(distmat, dist_calculator, NUM_THREADS)
+// { }
 
 // -------------------------------------------------------------------------------------------------
 /* parallel worker */
@@ -239,10 +239,10 @@ private:
 protected:
     std::shared_ptr<Distmat> distmat_;
 
-    virtual void update_distmat(id_t id, id_t i, id_t j, double dist) {
-        (*distmat_)(i,j) = dist;
-        (*distmat_)(j,i) = dist;
-    }
+    virtual void update_distmat(id_t id, id_t i, id_t j, double dist) = 0;
+    //     (*distmat_)(i,j) = dist;
+    //     (*distmat_)(j,i) = dist;
+    // }
 
 private:
     const id_t nrows_;
@@ -251,14 +251,14 @@ private:
 // -------------------------------------------------------------------------------------------------
 /* public fill method */
 // -------------------------------------------------------------------------------------------------
-void SymmetricFiller::fill() const {
-    // number of elements in square matrix without including diagonal
-    int nrows = distmat_->nrow();
-    int size = nrows * (nrows - 1) / 2;
-    int grain = get_grain(size, num_threads_);
-    SymmetricFillWorker fill_worker(dist_calculator_, distmat_, grain, distmat_->nrow());
-    parallel_for(0, size, fill_worker, grain);
-}
+// void SymmetricFiller::fill() const {
+//     // number of elements in square matrix without including diagonal
+//     int nrows = distmat_->nrow();
+//     int size = nrows * (nrows - 1) / 2;
+//     int grain = get_grain(size, num_threads_);
+//     SymmetricFillWorker fill_worker(dist_calculator_, distmat_, grain, distmat_->nrow());
+//     parallel_for(0, size, fill_worker, grain);
+// }
 
 // =================================================================================================
 /* multi-threaded lower triangular filler

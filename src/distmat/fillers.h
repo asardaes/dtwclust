@@ -73,14 +73,14 @@ public:
 // -------------------------------------------------------------------------------------------------
 /* symmetric filler */
 // -------------------------------------------------------------------------------------------------
-class SymmetricFiller : public DistmatFiller
-{
-public:
-    SymmetricFiller(std::shared_ptr<Distmat>& distmat,
-                    const std::shared_ptr<DistanceCalculator>& dist_calculator,
-                    const SEXP& NUM_THREADS);
-    void fill() const override;
-};
+// class SymmetricFiller : public DistmatFiller
+// {
+// public:
+//     SymmetricFiller(std::shared_ptr<Distmat>& distmat,
+//                     const std::shared_ptr<DistanceCalculator>& dist_calculator,
+//                     const SEXP& NUM_THREADS);
+//     void fill() const override;
+// };
 
 // -------------------------------------------------------------------------------------------------
 /* lower triangular filler */

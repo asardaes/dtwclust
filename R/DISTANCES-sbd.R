@@ -132,10 +132,7 @@ sbd <- SBD
 #' @importFrom stats fft
 #' @importFrom stats nextn
 #'
-sbd_proxy <- function(x, y = NULL, znorm = FALSE, ...,
-                      error.check = TRUE, pairwise = FALSE,
-                      lower_triangular_only = FALSE, diagonal = TRUE)
-{
+sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairwise = FALSE) {
     x <- tslist(x)
 
     if (error.check) check_consistency(x, "vltslist")
@@ -165,6 +162,7 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ...,
     }
 
     if (is_multivariate(c(x,y))) stop("SBD does not support multivariate series.") # nocov
+
     fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
     eval(prepare_expr) # UTILS-expressions.R
 
@@ -185,19 +183,17 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ...,
         dim(D) <- NULL
         class(D) <- "pairdist"
     }
-    else if (lower_triangular_only) {
+    else if (symmetric) {
         dim(D) <- NULL
-        class(D) <- c("distdiag", "dist")
+        class(D) <- "dist"
         attr(D, "Size") <- length(x)
-        attr(D, "Diag") <- diagonal
-        attr(D, "Upper") <- FALSE
         attr(D, "Labels") <- names(x)
     }
     else {
         dimnames(D) <- dim_names
         class(D) <- "crossdist"
     }
+
     attr(D, "method") <- "SBD"
-    # return
     D
 }

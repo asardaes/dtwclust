@@ -143,7 +143,7 @@ parallel_symmetric <- function(d_desc, ids, x, distance, dots) {
 #' @importFrom proxy dist
 #' @importFrom proxy pr_DB
 #'
-ddist2 <- function(distance, control, lower_triangular_only = FALSE) {
+ddist2 <- function(distance, control) {
     # I need to re-register any custom distances in each parallel worker
     dist_entry <- proxy::pr_DB$get_entry(distance)
     symmetric <- isTRUE(control$symmetric)
@@ -175,7 +175,7 @@ ddist2 <- function(distance, control, lower_triangular_only = FALSE) {
             return(ret(use_distmat(control$distmat, x, centroids)))
         }
 
-        dots <- get_dots(dist_entry, x, centroids, ..., lower_triangular_only = lower_triangular_only)
+        dots <- get_dots(dist_entry, x, centroids, ...)
 
         if (!dist_entry$loop) {
             # CUSTOM LOOP, LET THEM HANDLE OPTIMIZATIONS
@@ -187,8 +187,8 @@ ddist2 <- function(distance, control, lower_triangular_only = FALSE) {
                 dim(dm) <- NULL
                 return(ret(dm, class = "pairdist"))
             }
-            else if (lower_triangular_only && inherits(dm, "dist")) {
-                return(ret(dm, class = "dist"))
+            else if (inherits(dm, "dist")) {
+                return(ret(dm))
             }
             else {
                 return(ret(base::as.matrix(dm), class = "crossdist"))
@@ -244,8 +244,8 @@ ddist2 <- function(distance, control, lower_triangular_only = FALSE) {
                     proxy::dist, x = x, y = NULL, method = distance, dots = dots
                 )
 
-                if (lower_triangular_only && inherits(dm, "dist")) {
-                    return(ret(dm, class = "dist"))
+                if (inherits(dm, "dist")) {
+                    return(ret(dm))
                 }
                 else {
                     return(ret(base::as.matrix(dm), class = "crossdist"))

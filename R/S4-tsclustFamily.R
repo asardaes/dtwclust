@@ -31,7 +31,6 @@
 #'   - If `control$distmat` is *not* `NULL`, the function will try to subset it.
 #'   - If `control$symmetric` is `TRUE`, `centroids` is `NULL`, *and* there is no argument
 #'     `pairwise` that is `TRUE`, only half the distance matrix will be computed.
-#'   - The function always returns a `crossdist` matrix.
 #'
 #'   Note that all distances implemented as part of \pkg{dtwclust} have custom proxy loops that use
 #'   multi-threading independently of \pkg{foreach}, so see their respective documentation to see

@@ -9,15 +9,17 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
     distmat_provided <- FALSE
 
     if (!is.null(distmat)) {
-        if (inherits(distmat, "dist")) {
+        if (inherits(distmat, "Distmat")) {
+            stop("Can this happen?")
+        }
+        else if (inherits(distmat, "dist")) {
             n <- attr(distmat, "Size")
-            if (n != length(series))
+            if (is.null(n) || n != length(series))
                 stop("Dimensions of provided cross-distance matrix don't correspond ",
                      "to length of provided data")
 
             # see S4-Distmat.R
-            if (!inherits(distmat, "Distmat"))
-                distmat <- DistmatLowerTriangular$new(distmat = distmat)
+            distmat <- DistmatLowerTriangular$new(distmat = distmat)
         }
         else {
             if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
@@ -25,7 +27,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
                      "to length of provided data")
 
             # see S4-Distmat.R
-            if (!inherits(distmat, "Distmat")) distmat <- Distmat$new(distmat = distmat)
+            distmat <- Distmat$new(distmat = distmat)
         }
 
         distmat_provided <- TRUE
@@ -36,20 +38,10 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
             warning("Using dtw_lb with control$pam.precompute = TRUE is not advised.") # nocov
         if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
 
-        if (control$symmetric) {
-            distfun <- ddist2(distance, control, lower_triangular_only = cent_char != "fcmdd")
-            distmat <- methods::as(quoted_call(distfun, x = series, centroids = NULL, dots = args$dist),
-                                   "Distmat")
-        }
-        else {
-            # see S4-Distmat.R
-            distmat <- Distmat$new(distmat = quoted_call(
-                family@dist,
-                x = series,
-                centroids = NULL,
-                dots = args$dist
-            ))
-        }
+        distfun <- if (distance == "sdtw") sdtw_wrapper else ddist2(distance, control)
+        centroids <- if (cent_char == "fcmdd") series else NULL
+        distmat <- methods::as(quoted_call(distfun, x = series, centroids = centroids, dots = args$dist),
+                               "Distmat")
     }
     else {
         if (isTRUE(control$pam.sparse) && distance != "dtw_lb") {
@@ -427,9 +419,6 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             # precompute distance matrix?
             if (cent_char %in% c("pam", "fcmdd")) {
-                if (distance == "sdtw" && control$pam.precompute) {
-                    args$dist$diag <- TRUE
-                }
                 dm <- pam_distmat(series, control, distance, cent_char, family, args, trace)
                 distmat <- dm$distmat
                 distmat_provided <- dm$distmat_provided
@@ -626,13 +615,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                 if (trace) cat("\nCalculating distance matrix...\n")
                 # Take advantage of the function I defined for the partitional methods
                 # Which can do calculations in parallel if appropriate
-                distfun <- ddist2(distance = distance, control = control, control$symmetric)
-                dist_dots <- if ("sdtw" %in% proxy::pr_DB$get_entry(distance)$names) {
-                    c(args$dist, list(diagonal = FALSE, .internal_ = TRUE))
-                } else {
-                    args$dist
-                }
-                distmat <- quoted_call(distfun, x = series, centroids = NULL, dots = dist_dots)
+                distfun <- ddist2(distance = distance, control = control)
+                distmat <- quoted_call(distfun, x = series, centroids = NULL, dots = args$dist)
             }
 
             # --------------------------------------------------------------------------------------

@@ -46,7 +46,6 @@ the following considerations.
 \item If \code{control$distmat} is \emph{not} \code{NULL}, the function will try to subset it.
 \item If \code{control$symmetric} is \code{TRUE}, \code{centroids} is \code{NULL}, \emph{and} there is no argument
 \code{pairwise} that is \code{TRUE}, only half the distance matrix will be computed.
-\item The function always returns a \code{crossdist} matrix.
 }
 
 Note that all distances implemented as part of \pkg{dtwclust} have custom proxy loops that use

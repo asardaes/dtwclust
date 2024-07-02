@@ -28,8 +28,7 @@ lower_triangular_index <- function(i, j, n, diagonal) {
 #' @examples
 #'
 #' dm <- new("DistmatLowerTriangular",
-#'           distmat = proxy::dist(CharTraj[1:5], method = "gak", sigma = 5.5, window.size = 10L,
-#'                                 lower_triangular_only = TRUE, diag = TRUE))
+#'           distmat = proxy::dist(CharTraj[1:5], method = "gak", sigma = 5.5, window.size = 10L))
 #'
 #' dm[2:3, 4:5]
 #'
@@ -90,14 +89,30 @@ lti <- function(i) {
 #'
 setMethod(`[`, "DistmatLowerTriangular", function(x, i, j, ...) {
     if (missing(j)) {
-        stopifnot(inherits(i, "matrix"), ncol(i) == 2L)
-        j <- lti(i[, 2L])
-        i <- lti(i[, 1L])
+        stopifnot(inherits(i, "matrix"))
+        if (is.logical(i)) {
+            stopifnot(attr(x$distmat, "Size") == dim(i))
+            j <- rep(1:ncol(i), apply(i, 2L, sum))
+            i <- as.integer(apply(i, 2L, which))
+        }
+        else {
+            stopifnot(ncol(i) == 2L)
+            j <- lti(i[, 2L])
+            i <- lti(i[, 1L])
+        }
         drop <- TRUE
     }
     else {
         i <- lti(i)
+        if (any(i < 0L)) {
+            i <- seq_len(attr(x$distmat, "Size"))[i]
+        }
+
         j <- lti(j)
+        if (any(j < 0L)) {
+            j <- seq_len(attr(x$distmat, "Size"))[j]
+        }
+
         out_dim <- c(length(i), length(j))
         out_dimnames <- list(i, j)
         combinations <- expand.grid(i = i, j = j)
@@ -107,7 +122,7 @@ setMethod(`[`, "DistmatLowerTriangular", function(x, i, j, ...) {
     }
 
     n <- attr(x$distmat, "Size")
-    diagonal <- isTRUE(attr(x$distmat, "Diag"))
+    diagonal <- attr(x$distmat, "method") == "SDTW" & isTRUE(attr(x$distmat, "Diag"))
     entries <- mapply(i, j, FUN = function(i, j) {
         if (!diagonal && i == j) {
             0
@@ -139,17 +154,3 @@ methods::setOldClass("crossdist")
 setAs("matrix", "Distmat", function(from) { Distmat$new(distmat = from) })
 setAs("crossdist", "Distmat", function(from) { Distmat$new(distmat = from) })
 setAs("dist", "Distmat", function(from) { DistmatLowerTriangular$new(distmat = from) })
-
-#' @exportS3Method base::as.matrix
-as.matrix.distdiag <- function(x) {
-    n <- attr(x, "Size")
-    m <- matrix(0, n, n)
-    m[lower.tri(m, diag = attr(x, "Diag"))] <- x
-
-    lbls <- attr(x, "Labels")
-    if (!is.null(lbls)) {
-        names(m) <- list(lbls, lbls)
-    }
-
-    m
-}

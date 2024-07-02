@@ -115,8 +115,7 @@ dtw_basic <- function(x, y, window.size = NULL, norm = "L1",
 dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
                             step.pattern = dtw::symmetric2,
                             normalize = FALSE, sqrt.dist = TRUE, ...,
-                            error.check = TRUE, pairwise = FALSE,
-                            lower_triangular_only = FALSE, diagonal = TRUE)
+                            error.check = TRUE, pairwise = FALSE)
 {
     x <- tslist(x)
     if (error.check) check_consistency(x, "vltslist")
@@ -177,19 +176,17 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
         dim(D) <- NULL
         class(D) <- "pairdist"
     }
-    else if (lower_triangular_only) {
+    else if (symmetric) {
         dim(D) <- NULL
-        class(D) <- c("distdiag", "dist")
+        class(D) <- "dist"
         attr(D, "Size") <- length(x)
-        attr(D, "Diag") <- diagonal
-        attr(D, "Upper") <- FALSE
         attr(D, "Labels") <- names(x)
     }
     else {
         dimnames(D) <- dim_names
         class(D) <- "crossdist"
     }
+
     attr(D, "method") <- "DTW_BASIC"
-    # return
     D
 }

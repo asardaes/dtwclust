@@ -129,8 +129,8 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     if (error.check) check_consistency(c(x,y), "tslist")
     if (is_multivariate(c(x,y))) stop("lb_improved does not support multivariate series.") # nocov end
 
-    lower_triangular_only <- symmetric <- FALSE
     fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
+    symmetric <- FALSE
     eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
@@ -169,7 +169,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         else
             .Call(C_force_lb_symmetry, D, PACKAGE = "dtwclust")
     }
+
     attr(D, "method") <- "LB_Improved"
-    # return
     D
 }

@@ -51,11 +51,11 @@ test_that("Operations with tsclustFamily@dist and lbk give expected results", {
     whole_distmat <- family@dist(x, window.size = window.size)
     sub_distmat <- family@dist(x, centroids, window.size = window.size)
 
-    expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
+    expect_equal(whole_distmat, unclass(distmat), info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
 
-    expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
-                 tolerance = 0, check.attributes = FALSE)
+    expect_equal(unclass(sub_distmat), distmat[ , c(1L, 15L), drop = FALSE],
+                 info = "Sub, with distmat", tolerance = 0, check.attributes = FALSE)
 
     ## ---------------------------------------------------------- ref
     assign("distmat_lbk", whole_distmat, persistent)
@@ -121,10 +121,10 @@ test_that("Operations with tsclustFamily@dist and lbi give expected results", {
     whole_distmat <- family@dist(x, window.size = window.size)
     sub_distmat <- family@dist(x, centroids, window.size = window.size)
 
-    expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
+    expect_equal(whole_distmat, unclass(distmat), info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
 
-    expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
+    expect_equal(unclass(sub_distmat), distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
                  tolerance = 0, check.attributes = FALSE)
 
     ## ---------------------------------------------------------- ref
@@ -165,7 +165,7 @@ test_that("Operations with tsclustFamily@dist and sbd give expected results", {
                   control = ts_ctrl,
                   dist = "sbd")
 
-    whole_distmat <- family@dist(x)
+    whole_distmat <- family@dist(x, x)
     sub_distmat <- family@dist(x, centroids)
     pdist <- family@dist(x, pairwise = TRUE)
     class(pdist) <- NULL
@@ -177,7 +177,7 @@ test_that("Operations with tsclustFamily@dist and sbd give expected results", {
     expect_equal(whole_distmat, distmat, info = "Whole, NULL distmat",
                  check.attributes = FALSE)
 
-    expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, NULL distmat",
+    expect_equal(unclass(sub_distmat), distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, NULL distmat",
                  check.attributes = FALSE)
 
     ## ---------------------------------------------------------- tsclustFamily, with distmat
@@ -191,10 +191,10 @@ test_that("Operations with tsclustFamily@dist and sbd give expected results", {
     whole_distmat <- family@dist(x)
     sub_distmat <- family@dist(x, centroids)
 
-    expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
+    expect_equal(whole_distmat, unclass(distmat), info = "Whole, with distmat",
                  check.attributes = FALSE)
 
-    expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
+    expect_equal(unclass(sub_distmat), distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
                  check.attributes = FALSE)
 
     ## ---------------------------------------------------------- ref
@@ -260,7 +260,7 @@ test_that("Operations with tsclustFamily@dist and dtw_lb give expected results",
     whole_distmat <- family@dist(x, window.size = window.size)
     sub_distmat <- family@dist(x, centroids, window.size = window.size)
 
-    expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
+    expect_equal(whole_distmat, unclass(distmat), info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
 
     sdm <- distmat[ , c(1L, 15L), drop = FALSE]
@@ -310,7 +310,7 @@ test_that("Operations with tsclustFamily@dist and dtw give expected results", {
     whole_distmat <- family@dist(x, window.size = window.size)
     sub_distmat <- family@dist(x, centroids, window.size = window.size)
 
-    expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
+    expect_equal(whole_distmat, unclass(distmat), info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
 
     expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
@@ -358,7 +358,7 @@ test_that("Operations with tsclustFamily@dist and dtw2 give expected results", {
     whole_distmat <- family@dist(x, window.size = window.size)
     sub_distmat <- family@dist(x, centroids, window.size = window.size)
 
-    expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
+    expect_equal(whole_distmat, unclass(distmat), info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
 
     expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
@@ -380,7 +380,7 @@ test_that("Operations with tsclustFamily@dist and dtw_basic give expected result
                   control = ts_ctrl,
                   dist = "dtw_basic")
 
-    whole_distmat <- family@dist(x, window.size = window.size)
+    whole_distmat <- family@dist(x, x, window.size = window.size)
     sub_distmat <- family@dist(x, centroids, window.size = window.size)
     pdist <- family@dist(x, window.size = window.size, pairwise = TRUE)
     class(pdist) <- NULL
@@ -406,10 +406,10 @@ test_that("Operations with tsclustFamily@dist and dtw_basic give expected result
     whole_distmat <- family@dist(x, window.size = window.size)
     sub_distmat <- family@dist(x, centroids, window.size = window.size)
 
-    expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
+    expect_equal(whole_distmat, unclass(distmat), info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
 
-    expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
+    expect_equal(unclass(sub_distmat), distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
                  tolerance = 0, check.attributes = FALSE)
 
     ## ---------------------------------------------------------- ref
@@ -452,7 +452,7 @@ test_that("Operations with tsclustFamily@dist and gak give expected results", {
                   control = ts_ctrl,
                   dist = "gak")
 
-    whole_distmat <- family@dist(x, window.size = window.size, sigma = 100)
+    whole_distmat <- family@dist(x, x, window.size = window.size, sigma = 100)
     sub_distmat <- family@dist(x, centroids, window.size = window.size, sigma = 100)
     pdist <- family@dist(x, window.size = window.size, pairwise = TRUE, sigma = 100)
     class(pdist) <- NULL
@@ -478,10 +478,10 @@ test_that("Operations with tsclustFamily@dist and gak give expected results", {
     whole_distmat <- family@dist(x, window.size = window.size, sigma = 100)
     sub_distmat <- family@dist(x, centroids, window.size = window.size, sigma = 100)
 
-    expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
+    expect_equal(whole_distmat, unclass(distmat), info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
 
-    expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
+    expect_equal(unclass(sub_distmat), distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
                  tolerance = 0, check.attributes = FALSE)
 
     ## ---------------------------------------------------------- ref
@@ -523,7 +523,7 @@ test_that("Operations with tsclustFamily@dist and sdtw give expected results", {
                   control = ts_ctrl,
                   dist = "sdtw")
 
-    whole_distmat <- family@dist(x)
+    whole_distmat <- family@dist(x, x)
     sub_distmat <- family@dist(x, centroids)
     pdist <- family@dist(x, pairwise = TRUE)
     class(sub_distmat) <- c("matrix", "array")
@@ -548,10 +548,10 @@ test_that("Operations with tsclustFamily@dist and sdtw give expected results", {
     whole_distmat <- family@dist(x)
     sub_distmat <- family@dist(x, centroids)
 
-    expect_equal(whole_distmat, distmat, info = "Whole, with distmat",
+    expect_equal(whole_distmat, unclass(distmat), info = "Whole, with distmat",
                  tolerance = 0, check.attributes = FALSE)
 
-    expect_equal(sub_distmat, distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
+    expect_equal(unclass(sub_distmat), distmat[ , c(1L, 15L), drop = FALSE], info = "Sub, with distmat",
                  tolerance = 0, check.attributes = FALSE)
 
     ## ---------------------------------------------------------- ref

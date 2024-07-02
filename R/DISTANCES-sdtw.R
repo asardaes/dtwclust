@@ -42,16 +42,10 @@ sdtw <- function(x, y, gamma = 0.01, ..., error.check = TRUE)
 # Wrapper for proxy::dist
 # ==================================================================================================
 
-sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ...,
-                       error.check = TRUE, pairwise = FALSE, lower_triangular_only = FALSE,
-                       diagonal = TRUE, .internal_ = FALSE)
-{
+sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ..., error.check = TRUE, pairwise = FALSE) {
     x <- tslist(x)
     if (error.check) {
         check_consistency(x, "vltslist")
-    }
-    if (lower_triangular_only && !diagonal && !.internal_) {
-        warning("proxy calls using 'sdtw' should specify diag = TRUE")
     }
 
     if (is.null(y)) {
@@ -68,8 +62,6 @@ sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ...,
     eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
-    if (!pairwise && symmetric && !lower_triangular_only)
-        diagonal <- sdtw_proxy(x, gamma = gamma, error.check = FALSE, pairwise = TRUE)
     if (gamma <= 0) stop("The 'gamma' parameter must be positive")
     mv <- is_multivariate(c(x, y))
 
@@ -87,20 +79,50 @@ sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ...,
         dim(D) <- NULL
         class(D) <- "pairdist"
     }
-    else if (lower_triangular_only) {
+    else if (symmetric) {
         dim(D) <- NULL
-        class(D) <- c("distdiag", "dist")
+        class(D) <- "dist"
         attr(D, "Size") <- length(x)
-        attr(D, "Diag") <- diagonal
-        attr(D, "Upper") <- FALSE
         attr(D, "Labels") <- names(x)
     }
     else {
         dimnames(D) <- dim_names
-        if (symmetric) diag(D) <- diagonal
         class(D) <- "crossdist"
     }
+
     attr(D, "method") <- "SDTW"
-    # return
+    D
+}
+
+sdtw_wrapper <- function(x, gamma = 0.01, ...) {
+    x <- tslist(x)
+    check_consistency(x, "vltslist")
+
+    D <- allocate_distmat(length(x), length(x), FALSE, TRUE, TRUE) # UTILS-utils.R
+    fill_type <- "LOWER_TRIANGULAR_DIAGONAL"
+    mat_type <- "R_MATRIX"
+
+    # adjust parameters for this distance
+    if (gamma <= 0) stop("The 'gamma' parameter must be positive")
+    mv <- is_multivariate(x)
+
+    # calculate distance matrix
+    distance <- "SDTW" # read in C++, can't be temporary!
+    distargs <- list(
+        gamma = gamma
+    )
+    num_threads <- get_nthreads()
+
+    .Call(C_distmat_loop,
+          D, x, x, distance, distargs, fill_type, mat_type, num_threads,
+          PACKAGE = "dtwclust")
+
+    dim(D) <- NULL
+    class(D) <- "dist"
+    attr(D, "Size") <- length(x)
+    attr(D, "Labels") <- names(x)
+    attr(D, "Diag") <- TRUE
+    attr(D, "method") <- "SDTW"
+
     D
 }

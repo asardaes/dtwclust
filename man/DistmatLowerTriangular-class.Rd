@@ -28,8 +28,7 @@ matrix. You can use \link[methods:new]{methods::new} passing the \code{dist} obj
 \examples{
 
 dm <- new("DistmatLowerTriangular",
-          distmat = proxy::dist(CharTraj[1:5], method = "gak", sigma = 5.5, window.size = 10L,
-                                lower_triangular_only = TRUE, diag = TRUE))
+          distmat = proxy::dist(CharTraj[1:5], method = "gak", sigma = 5.5, window.size = 10L))
 
 dm[2:3, 4:5]
 

@@ -3,6 +3,7 @@
 #' Extract the medoid time series based on a distance measure.
 #'
 #' @export
+#' @importFrom methods as
 #' @importFrom rlang exprs
 #' @importFrom Matrix rowSums
 #'
@@ -43,24 +44,21 @@ pam_cent <- function(series, distance, ids = seq_along(series), distmat = NULL, 
         if (missing(distance))
             distance <- attr(distmat, "method")
 
-        args <- rlang::exprs(
-            distmat = distmat,
-            series = series,
-            dist_args = dots,
-            distance = distance,
-            control = partitional_control(),
-            error.check = error.check
-        )
-
         if (is.null(distmat)) {
             if (is.null(distance))
                 stop("If 'distmat' is missing, 'distance' must be provided.")
 
-            args$distmat <- NULL
+            distmat <- Distmat$new(
+                series = series,
+                dist_args = dots,
+                distance = distance,
+                control = partitional_control(),
+                error.check = error.check
+            )
         }
-
-        # S4-Distmat.R
-        distmat <- do.call(Distmat$new, args)
+        else {
+            distmat <- methods::as(distmat, "Distmat")
+        }
     }
 
     d <- distmat[ids, ids, drop = FALSE]
