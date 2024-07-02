@@ -33,7 +33,8 @@ class DtwBacktrackCalculator : public DistanceCalculator
 public:
     // constructor
     DtwBacktrackCalculator(const Rcpp::List& dist_args, const Rcpp::List& x, const Rcpp::List& y)
-        : x_(x)
+        : DistanceCalculator("DTW_BACTRACK")
+        , x_(x)
         , y_(y)
     {
         window_ = Rcpp::as<int>(dist_args["window.size"]);

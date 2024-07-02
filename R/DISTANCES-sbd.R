@@ -132,7 +132,10 @@ sbd <- SBD
 #' @importFrom stats fft
 #' @importFrom stats nextn
 #'
-sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairwise = FALSE) {
+sbd_proxy <- function(x, y = NULL, znorm = FALSE, ...,
+                      error.check = TRUE, pairwise = FALSE,
+                      lower_triangular_only = FALSE, diagonal = TRUE)
+{
     x <- tslist(x)
 
     if (error.check) check_consistency(x, "vltslist")
@@ -181,6 +184,14 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     if (pairwise) {
         dim(D) <- NULL
         class(D) <- "pairdist"
+    }
+    else if (lower_triangular_only) {
+        dim(D) <- NULL
+        class(D) <- c("distdiag", "dist")
+        attr(D, "Size") <- length(x)
+        attr(D, "Diag") <- diagonal
+        attr(D, "Upper") <- FALSE
+        attr(D, "Labels") <- names(x)
     }
     else {
         dimnames(D) <- dim_names

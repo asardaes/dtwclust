@@ -44,6 +44,11 @@ DistanceCalculatorFactory::create(const std::string& dist, const SEXP& DIST_ARGS
         Rcpp::stop("Unknown distance measure"); // nocov
 }
 
+// base constuctor
+DistanceCalculator::DistanceCalculator(std::string&& distance)
+    : distance(distance)
+{ }
+
 // =================================================================================================
 /* DtwBasic */
 // =================================================================================================
@@ -51,7 +56,8 @@ DistanceCalculatorFactory::create(const std::string& dist, const SEXP& DIST_ARGS
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 DtwBasicCalculator::DtwBasicCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
-    : x_(X)
+    : DistanceCalculator("DTW_BASIC")
+    , x_(X)
     , y_(Y)
 {
     Rcpp::List dist_args(DIST_ARGS);
@@ -95,7 +101,8 @@ double DtwBasicCalculator::calculate(const arma::mat& x, const arma::mat& y) {
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 GakCalculator::GakCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
-    : x_(X)
+    : DistanceCalculator("GAK")
+    , x_(X)
     , y_(Y)
 {
     Rcpp::List dist_args(DIST_ARGS);
@@ -137,7 +144,8 @@ double GakCalculator::calculate(const arma::mat& x, const arma::mat& y) {
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 LbiCalculator::LbiCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
-    : x_(X)
+    : DistanceCalculator("LBI")
+    , x_(X)
     , y_(Y)
 {
     Rcpp::List dist_args(DIST_ARGS);
@@ -189,7 +197,8 @@ double LbiCalculator::calculate(const arma::mat& x, const arma::mat& y,
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 LbkCalculator::LbkCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
-    : x_(X)
+    : DistanceCalculator("LBK")
+    , x_(X)
 {
     Rcpp::List dist_args(DIST_ARGS);
     p_ = Rcpp::as<int>(dist_args["p"]);
@@ -235,7 +244,8 @@ double LbkCalculator::calculate(const arma::mat& x,
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 SbdCalculator::SbdCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
-    : x_(X)
+    : DistanceCalculator("SBD")
+    , x_(X)
     , y_(Y)
 {
     // note cc_seq_truncated_ is not set here, it is allocated for each clone
@@ -296,7 +306,8 @@ double SbdCalculator::calculate(const arma::mat& x, const arma::mat& y,
 // -------------------------------------------------------------------------------------------------
 /* constructor */
 SdtwCalculator::SdtwCalculator(const SEXP& DIST_ARGS, const SEXP& X, const SEXP& Y)
-    : x_(X)
+    : DistanceCalculator("SDTW")
+    , x_(X)
     , y_(Y)
 {
     Rcpp::List dist_args(DIST_ARGS);

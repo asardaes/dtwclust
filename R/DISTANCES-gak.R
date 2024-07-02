@@ -160,7 +160,8 @@ gak <- GAK
 # ==================================================================================================
 
 gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normalize = TRUE,
-                      error.check = TRUE, pairwise = FALSE, .internal_ = FALSE)
+                      error.check = TRUE, pairwise = FALSE, .internal_ = FALSE,
+                      lower_triangular_only = FALSE, diagonal = TRUE)
 {
     # normalization will be done manually to avoid multiple calculations of gak_x and gak_y
     if (!.internal_ && !normalize) { # nocov start
@@ -229,12 +230,36 @@ gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         if (normalize) D <- 1 - exp(D - 0.5 * (gak_x + gak_y))
         class(D) <- "pairdist"
     }
+    else if (lower_triangular_only) {
+        dim(D) <- NULL
+        if (normalize) {
+            j_upper <- if (diagonal) length(x) else length(x) - 1L
+            i_lower <- if (diagonal) 0L else 1L
+            k <- 1L
+            for (j in 1L:j_upper) {
+                for (i in (j + i_lower):length(x)) {
+                    if (i != j) {
+                        D[k] <- 1 - exp(D[k] - (gak_x[i] + gak_x[j]) / 2)
+                    }
+                    k <- k + 1L
+                }
+            }
+        }
+
+        class(D) <- c("distdiag", "dist")
+        attr(D, "Size") <- length(x)
+        attr(D, "Diag") <- diagonal
+        attr(D, "Upper") <- FALSE
+        attr(D, "Labels") <- names(x)
+    }
     else {
         if (normalize) D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
         dimnames(D) <- dim_names
         class(D) <- "crossdist"
     }
-    if (!pairwise && symmetric && normalize) diag(D) <- 0
+
+    if (!pairwise && symmetric && !lower_triangular_only) diag(D) <- 0
+
     attr(D, "method") <- "GAK"
     attr(D, "sigma") <- sigma
     # return

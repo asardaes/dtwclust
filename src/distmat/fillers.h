@@ -59,6 +59,18 @@ public:
 };
 
 // -------------------------------------------------------------------------------------------------
+/* primary filler */
+// -------------------------------------------------------------------------------------------------
+class PrimaryFiller : public DistmatFiller
+{
+public:
+    PrimaryFiller(std::shared_ptr<Distmat>& distmat,
+                  const std::shared_ptr<DistanceCalculator>& dist_calculator,
+                  const SEXP& NUM_THREADS);
+    void fill() const override;
+};
+
+// -------------------------------------------------------------------------------------------------
 /* symmetric filler */
 // -------------------------------------------------------------------------------------------------
 class SymmetricFiller : public DistmatFiller
@@ -71,14 +83,26 @@ public:
 };
 
 // -------------------------------------------------------------------------------------------------
-/* primary filler */
+/* lower triangular filler */
 // -------------------------------------------------------------------------------------------------
-class PrimaryFiller : public DistmatFiller
+class LowerTriangularFiller : public DistmatFiller
 {
 public:
-    PrimaryFiller(std::shared_ptr<Distmat>& distmat,
-                  const std::shared_ptr<DistanceCalculator>& dist_calculator,
-                  const SEXP& NUM_THREADS);
+    LowerTriangularFiller(std::shared_ptr<Distmat>& distmat,
+                          const std::shared_ptr<DistanceCalculator>& dist_calculator,
+                          const SEXP& NUM_THREADS);
+    void fill() const override;
+};
+
+// -------------------------------------------------------------------------------------------------
+/* lower triangular and diagonal filler */
+// -------------------------------------------------------------------------------------------------
+class LowerTriangularDiagonalFiller : public DistmatFiller
+{
+public:
+    LowerTriangularDiagonalFiller(std::shared_ptr<Distmat>& distmat,
+                                  const std::shared_ptr<DistanceCalculator>& dist_calculator,
+                                  const SEXP& NUM_THREADS);
     void fill() const override;
 };
 

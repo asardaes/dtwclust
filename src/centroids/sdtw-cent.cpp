@@ -63,7 +63,8 @@ class SdtwCentCalculator : public DistanceCalculator
 public:
     // constructor
     SdtwCentCalculator(const Rcpp::List& x, const Rcpp::List& y, const double gamma)
-        : gamma_(gamma)
+        : DistanceCalculator("SDTW_CENT")
+        , gamma_(gamma)
         , x_(x)
         , y_(y)
     {
