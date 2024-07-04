@@ -50,12 +50,13 @@ SparseDistmat <- methods::setRefClass(
             distmat_indices <<- .Call(C_SparseDistmatIndices__new,
                                       nrow(distmat),
                                       PACKAGE = "dtwclust")
+
             sapply(1L:length(series), function(id) {
                 .Call(C_SparseDistmatIndices__getNewIndices,
                       distmat_indices, id, id, symmetric,
                       PACKAGE = "dtwclust")
             })
-            # return
+
             invisible(NULL)
         }
     )

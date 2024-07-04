@@ -26,8 +26,7 @@
 #' Cuturi, M., & Blondel, M. (2017). Soft-DTW: a Differentiable Loss Function for Time-Series. arXiv
 #' preprint arXiv:1703.01541.
 #'
-sdtw <- function(x, y, gamma = 0.01, ..., error.check = TRUE)
-{
+sdtw <- function(x, y, gamma = 0.01, ..., error.check = TRUE) {
     if (error.check) {
         check_consistency(x, "ts")
         check_consistency(y, "ts")
@@ -81,6 +80,8 @@ sdtw_proxy <- function(x, y = NULL, gamma = 0.01, ..., error.check = TRUE, pairw
         class(D) <- "pairdist"
     }
     else if (symmetric) {
+        warning("The distance between a series and itself is not always 0 with soft-DTW,",
+                " and this will be hidden in the 'dist' object that only includes lower triangular values.")
         dim(D) <- NULL
         class(D) <- "dist"
         attr(D, "Size") <- length(x)

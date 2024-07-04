@@ -16,7 +16,9 @@ x <- data_reinterpolated[3L:8L]
 
 test_that("Included proxy distances can be called and give expected dimensions.", {
     for (distance in dtwclust:::distances_included) {
-        d <- proxy::dist(x, method = distance, window.size = 15L, sigma = 100, normalize = TRUE)
+        suppressWarnings(
+            d <- proxy::dist(x, method = distance, window.size = 15L, sigma = 100, normalize = TRUE)
+        )
         expect_identical(dim(d), c(length(x), length(x)), info = paste(distance, "single-arg"))
 
         d2 <- proxy::dist(x, x, method = distance, window.size = 15L, sigma = 100, normalize = TRUE)
