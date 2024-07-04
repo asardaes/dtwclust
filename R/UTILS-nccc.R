@@ -7,7 +7,7 @@
 #' @importFrom stats convolve
 #'
 #' @param x,y Univariate time series.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #'
 #' @return The cross-correlation sequence with length `length(x) + length(y) - 1L`.
 #'

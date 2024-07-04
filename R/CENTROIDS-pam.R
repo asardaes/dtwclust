@@ -13,7 +13,7 @@
 #' @param ids Integer vector indicating which of the `series` should be considered.
 #' @param distmat Optionally, a pre-computed cross-distance matrix of *all* `series`.
 #' @param ... Any extra parameters for the `distance` function that may be used.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #'
 #' @details
 #'

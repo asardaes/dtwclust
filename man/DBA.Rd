@@ -75,34 +75,27 @@ If a given series reference is provided in \code{centroid}, the algorithm should
 the same result provided the elements of \code{X} keep the same values, although their order may
 change.
 
-The windowing constraint uses a centered window. The calculations expect a value in
-\code{window.size} that represents the distance between the point considered and one of the edges
-of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
-observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
-in \code{10(2) + 1 = 21} observations falling within the window.
+The windowing constraint uses a centered window.
+The calculations expect a value in \code{window.size} that represents the distance between the point considered and one of the edges of the window.
+Therefore, if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}},
+resulting in \code{10(2) + 1 = 21} observations falling within the window.
 }
 \note{
 The indices of the DTW alignment are obtained by calling \code{\link[=dtw_basic]{dtw_basic()}} with \code{backtrack = TRUE}.
 }
 \section{Parallel Computing}{
 
+Please note that running tasks in parallel does \strong{not} guarantee faster computations.
+The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 
-Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
-overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+This function uses the \link[RcppParallel:RcppParallel-package]{RcppParallel} package for parallelization.
+It uses all available threads by default (see \code{\link[RcppParallel:setThreadOptions]{RcppParallel::defaultNumThreads()}}),
+but this can be changed by the user with \code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
 
-This function uses the \code{\link[RcppParallel:RcppParallel-package]{RcppParallel}} package
-for parallelization. It uses all available threads by default (see
-\code{\link[RcppParallel:defaultNumThreads]{RcppParallel::defaultNumThreads()}}), but this can
-be changed by the user with
-\code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
-
-An exception to the above is when this function is called within a
-\code{\link[foreach:foreach]{foreach}} parallel loop \strong{made by dtwclust}. If the parallel
-workers do not have the number of threads explicitly specified, this function will default to 1
-thread per worker. See the parallelization vignette for more information
-(\code{browseVignettes("dtwclust")}).
-
-
+An exception to the above is when it is called within a \code{\link[foreach:foreach]{foreach}} parallel loop \strong{made by dtwclust}.
+If the parallel workers do not have the number of threads explicitly specified,
+this function will default to 1 thread per worker.
+See the parallelization vignette for more information - \code{browseVignettes("dtwclust")}
 
 This function appears to be very sensitive to numerical inaccuracies if multi-threading is used
 in a \strong{32 bit} installation. In such systems, consider limiting calculations to 1 thread.

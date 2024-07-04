@@ -83,6 +83,7 @@ Collate:
     'DISTANCES-sbd.R'
     'DISTANCES-sdtw.R'
     'GENERICS-cvi.R'
+    'RD-helpers.R'
     'S4-Distmat.R'
     'S4-DistmatLowerTriangular.R'
     'S4-PairTracker.R'

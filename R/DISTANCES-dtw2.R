@@ -26,7 +26,7 @@
 #' This wrapper simply returns the appropriate DTW distance using L2 norm (Euclidean norm). A
 #' [proxy::dist()] version is also registered.
 #'
-#' @template window
+#' `r roxygen_window_details()`
 #'
 #' @return An object of class `dtw`.
 #'

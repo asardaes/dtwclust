@@ -56,11 +56,10 @@ effectively returning a matrix filled with the LB_Improved values.
 This could be useful in case one is interested in only the nearest neighbor of one or more series
 within a dataset.
 
-The windowing constraint uses a centered window. The calculations expect a value in
-\code{window.size} that represents the distance between the point considered and one of the edges
-of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
-observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
-in \code{10(2) + 1 = 21} observations falling within the window.
+The windowing constraint uses a centered window.
+The calculations expect a value in \code{window.size} that represents the distance between the point considered and one of the edges of the window.
+Therefore, if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}},
+resulting in \code{10(2) + 1 = 21} observations falling within the window.
 }
 \note{
 This function uses a lower bound that is only defined for time series of equal length.
@@ -73,21 +72,17 @@ in \code{y}, so be careful with the provided order and \code{nn.margin} (see exa
 }
 \section{Parallel Computing}{
 
+Please note that running tasks in parallel does \strong{not} guarantee faster computations.
+The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 
-Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
-overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+This function uses the \link[RcppParallel:RcppParallel-package]{RcppParallel} package for parallelization.
+It uses all available threads by default (see \code{\link[RcppParallel:setThreadOptions]{RcppParallel::defaultNumThreads()}}),
+but this can be changed by the user with \code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
 
-This function uses the \code{\link[RcppParallel:RcppParallel-package]{RcppParallel}} package
-for parallelization. It uses all available threads by default (see
-\code{\link[RcppParallel:defaultNumThreads]{RcppParallel::defaultNumThreads()}}), but this can
-be changed by the user with
-\code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
-
-An exception to the above is when this function is called within a
-\code{\link[foreach:foreach]{foreach}} parallel loop \strong{made by dtwclust}. If the parallel
-workers do not have the number of threads explicitly specified, this function will default to 1
-thread per worker. See the parallelization vignette for more information
-(\code{browseVignettes("dtwclust")}).
+An exception to the above is when it is called within a \code{\link[foreach:foreach]{foreach}} parallel loop \strong{made by dtwclust}.
+If the parallel workers do not have the number of threads explicitly specified,
+this function will default to 1 thread per worker.
+See the parallelization vignette for more information - \code{browseVignettes("dtwclust")}
 }
 
 \examples{

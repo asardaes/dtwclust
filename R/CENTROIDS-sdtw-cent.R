@@ -41,7 +41,7 @@ sdtw_cent_stats_gr <- function(ignored, .shared_env_, ...) {
 #'   for `optim`, and `...` for both).
 #' @param opts List of options to pass to `nloptr` or [stats::optim()]'s `control`. The defaults in
 #'   the function's formals are for `nloptr`, but the value will be adjusted for `optim` if needed.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #'
 #' @details
 #'
@@ -52,9 +52,7 @@ sdtw_cent_stats_gr <- function(ignored, .shared_env_, ...) {
 #' @return The resulting centroid, with the optimization results as attributes (except for the
 #'   returned centroid).
 #'
-#' @template rcpp-parallel
-#'
-#' @section Parallel Computing:
+#' @section `r roxygen_rcpp_parallel_section()`
 #'
 #'   For unknown reasons, this function has returned different results (in the order of 1e-6) when
 #'   using multi-threading in x64 Windows installations in comparison to other environments (using

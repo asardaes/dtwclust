@@ -8,7 +8,7 @@
 #'   spanning the columns.
 #' @param gamma Positive regularization parameter, with lower values resulting in less smoothing.
 #' @param ... Currently ignored.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #'
 #' @details
 #'
@@ -17,8 +17,9 @@
 #'
 #' @return The Soft DTW distance.
 #'
-#' @template proxy
-#' @template symmetric
+#' @section `r roxygen_proxy_section()`
+#'
+#' `r roxygen_proxy_symmetric()`
 #'
 #' @references
 #'

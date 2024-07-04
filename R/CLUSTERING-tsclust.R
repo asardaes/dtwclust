@@ -106,7 +106,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'   See [tsclust_args()] and the examples.
 #' @param seed Random seed for reproducibility.
 #' @param trace Logical flag. If `TRUE`, more output regarding the progress is printed to screen.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #'
 #' @details
 #'
@@ -262,9 +262,14 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'   Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is
 #'   precomputed, since said matrix is reused for every repetition.
 #'
-#' @template parallel
-#'
 #' @section Parallel Computing:
+#'
+#'   Please note that running tasks in parallel does **not** guarantee faster computations. The
+#'   overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+#'
+#'   The user can register a parallel backend, e.g. with the \pkg{doParallel} package, in order to
+#'   attempt to speed up the calculations (see the examples). This relies on [foreach::foreach()],
+#'   i.e. it uses multi-processing.
 #'
 #'   Multi-processing is used in partitional and fuzzy clustering for multiple values of `k` and/or
 #'   `nrep` (in [partitional_control()]). See [TADPole()] to know how it uses parallelization. For

@@ -21,7 +21,7 @@
 #' @param max.iter Maximum number of iterations allowed.
 #' @param delta At iteration `i`, if `all(abs(centroid_{i}` `-` `centroid_{i-1})` `< delta)`,
 #'   convergence is assumed.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #' @param trace If `TRUE`, the current iteration is printed to output.
 #' @param mv.ver Multivariate version to use. See below.
 #'
@@ -34,14 +34,12 @@
 #' the same result provided the elements of `X` keep the same values, although their order may
 #' change.
 #'
-#' @template rcpp-parallel
+#' `r roxygen_window_details()`
 #'
-#' @section Parallel Computing:
+#' @section `r roxygen_rcpp_parallel_section()`
 #'
 #'   This function appears to be very sensitive to numerical inaccuracies if multi-threading is used
 #'   in a **32 bit** installation. In such systems, consider limiting calculations to 1 thread.
-#'
-#' @template window
 #'
 #' @return The average time series.
 #'

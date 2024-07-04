@@ -7,9 +7,11 @@
 #'
 #' @param x A univariate time series.
 #' @param window.size Window size for envelope calculation. See details.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #'
-#' @template window
+#' @details
+#'
+#' `r roxygen_window_details()`
 #'
 #' @return A list with two elements (lower and upper envelopes respectively): `lower` and `upper`.
 #'

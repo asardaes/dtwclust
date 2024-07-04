@@ -10,7 +10,7 @@
 #' @inherit lb_improved details
 #' @inheritSection lb_improved Note
 #'
-#' @template proxy
+#' @section `r roxygen_proxy_section()`
 #'
 #' @return A list with:
 #'

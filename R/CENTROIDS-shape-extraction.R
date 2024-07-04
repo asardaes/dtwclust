@@ -14,7 +14,7 @@
 #'   the matrices in `X`. **It will be z-normalized**.
 #' @param znorm Logical flag. Should z-scores be calculated for `X` before processing?
 #' @param ... Further arguments for [zscore()].
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #'
 #' @details
 #'

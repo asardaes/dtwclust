@@ -32,7 +32,7 @@ estimate_sigma <- function(x, y, within_proxy) {
 #'   `NULL`.
 #' @param window.size Parameterization of the constraining band (*T* in Cuturi (2011)). See details.
 #' @param normalize Normalize the result by considering diagonal terms.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #'
 #' @details
 #'
@@ -55,8 +55,9 @@ estimate_sigma <- function(x, y, within_proxy) {
 #' The logarithm of the GAK if `normalize = FALSE`, otherwise 1 minus the normalized GAK. The value
 #' of `sigma` is assigned as an attribute of the result.
 #'
-#' @template proxy
-#' @template symmetric
+#' @section `r roxygen_proxy_section()`
+#'
+#' `r roxygen_proxy_symmetric()`
 #'
 #' @note
 #'

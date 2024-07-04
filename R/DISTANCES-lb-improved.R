@@ -16,7 +16,7 @@
 #' @param force.symmetry If `TRUE`, a second lower bound is calculated by swapping `x` and `y`, and
 #'   whichever result has a *higher* distance value is returned. The proxy version can only work if
 #'   a square matrix is obtained, but use carefully.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #'
 #' @details
 #'
@@ -25,11 +25,11 @@
 #' If the envelopes are provided, they should be provided together. If either one is missing, both
 #' will be computed.
 #'
-#' @template window
+#' `r roxygen_window_details()`
 #'
 #' @return The improved lower bound for the DTW distance.
 #'
-#' @template proxy
+#' @section `r roxygen_proxy_section()`
 #'
 #' @section Note:
 #'
