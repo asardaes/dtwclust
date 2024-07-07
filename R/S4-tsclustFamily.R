@@ -31,7 +31,6 @@
 #'   - If `control$distmat` is *not* `NULL`, the function will try to subset it.
 #'   - If `control$symmetric` is `TRUE`, `centroids` is `NULL`, *and* there is no argument
 #'     `pairwise` that is `TRUE`, only half the distance matrix will be computed.
-#'   - The function always returns a `crossdist` matrix.
 #'
 #'   Note that all distances implemented as part of \pkg{dtwclust} have custom proxy loops that use
 #'   multi-threading independently of \pkg{foreach}, so see their respective documentation to see
@@ -120,6 +119,7 @@ f_cluster <- function(distmat, m) {
 # Custom initialize
 # ==================================================================================================
 
+#' @importFrom methods as
 #' @importFrom methods callNextMethod
 #' @importFrom methods initialize
 #' @importFrom methods setMethod
@@ -143,10 +143,9 @@ setMethod("initialize", "tsclustFamily",
               if (!missing(allcent)) {
                   if (is.character(allcent)) {
                       if (allcent %in% c("pam", "fcmdd")) {
-                          if (!is.null(control$distmat) && !inherits(control$distmat, "Distmat"))
-                              control$distmat <- Distmat$new( # see S4-Distmat.R
-                                  distmat = base::as.matrix(control$distmat)
-                              )
+                          if (!is.null(control$distmat) && !inherits(control$distmat, "Distmat")) {
+                              control$distmat <- methods::as(control$distmat, "Distmat")
+                          }
                       }
                       allcent <- all_cent2(allcent, control)
                   }

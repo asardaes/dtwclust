@@ -27,7 +27,11 @@ public:
     // a clone method to make life easier when copying objects in each thread
     virtual DistanceCalculator* clone() const = 0;
 
+    std::string distance;
+
 protected:
+    DistanceCalculator(std::string&& distance);
+
     int maxLength(const TSTSList<arma::mat>& list) const {
         unsigned int max_len = 0;
         for (const arma::mat& x : list) {

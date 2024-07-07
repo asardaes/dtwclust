@@ -78,25 +78,21 @@ consider reinterpolating the time series (see \code{\link[=reinterpolate]{reinte
 \section{Proxy version}{
 
 
-The version registered with \code{\link[proxy]{dist}} is custom (\code{loop = FALSE} in
-\code{\link[proxy]{pr_DB}}). The custom function handles multi-threaded parallelization
-directly (with \code{\link[RcppParallel:RcppParallel-package]{RcppParallel}}). It uses all
-available threads by default (see
-\code{\link[RcppParallel:defaultNumThreads]{RcppParallel::defaultNumThreads()}}), but this can
-be changed by the user with
-\code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
+The version registered with \code{\link[proxy:dist]{proxy::dist()}} is custom (\code{loop = FALSE} in \link[proxy:registry]{proxy::pr_DB}).
+The custom function handles multi-threaded parallelization directly with \link[RcppParallel:RcppParallel-package]{RcppParallel}.
+It uses all available threads by default (see \code{\link[RcppParallel:setThreadOptions]{RcppParallel::defaultNumThreads()}}),
+but this can be changed by the user with \code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
 
-An exception to the above is when it is called within a \code{\link[foreach:foreach]{foreach}}
-parallel loop \strong{made by dtwclust}. If the parallel workers do not have the number of
-threads explicitly specified, this function will default to 1 thread per worker. See the
-parallelization vignette for more information (\code{browseVignettes("dtwclust")}).
+An exception to the above is when it is called within a \code{\link[foreach:foreach]{foreach}} parallel loop \strong{made by dtwclust}.
+If the parallel workers do not have the number of threads explicitly specified,
+this function will default to 1 thread per worker.
+See the parallelization vignette for more information - \code{browseVignettes("dtwclust")}
 
-
-
-It also includes symmetric optimizations to calculate only half a distance matrix when
-appropriate---only one list of series should be provided in \code{x}. If you want to avoid this
-optimization, call \code{\link[proxy]{dist}} by giving the same list of series in both \code{x}
-and \code{y}.
+It also includes symmetric optimizations to calculate only half a distance matrix when appropriate---only one list of series should be provided in \code{x}.
+Starting with version 6.0.0, this optimization means that the function returns an array with the lower triangular values of the distance matrix,
+similar to what \code{\link[stats:dist]{stats::dist()}} does;
+see \linkS4class{DistmatLowerTriangular} for a helper to access elements as it if were a normal matrix.
+If you want to avoid this optimization, call \link[proxy:dist]{proxy::dist} by giving the same list of series in both \code{x} and \code{y}.
 }
 
 \examples{

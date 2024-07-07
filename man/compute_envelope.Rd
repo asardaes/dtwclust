@@ -22,11 +22,10 @@ This function computes the envelopes for DTW lower bound calculations with a Sak
 a given univariate time series using the streaming algorithm proposed by Lemire (2009).
 }
 \details{
-The windowing constraint uses a centered window. The calculations expect a value in
-\code{window.size} that represents the distance between the point considered and one of the edges
-of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
-observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
-in \code{10(2) + 1 = 21} observations falling within the window.
+The windowing constraint uses a centered window.
+The calculations expect a value in \code{window.size} that represents the distance between the point considered and one of the edges of the window.
+Therefore, if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}},
+resulting in \code{10(2) + 1 = 21} observations falling within the window.
 }
 \note{
 This envelope is calculated assuming a Sakoe-Chiba constraint for DTW.

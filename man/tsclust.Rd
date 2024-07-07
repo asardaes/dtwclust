@@ -233,10 +233,8 @@ Please note that running tasks in parallel does \strong{not} guarantee faster co
 overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 
 The user can register a parallel backend, e.g. with the \pkg{doParallel} package, in order to
-attempt to speed up the calculations (see the examples). This relies on
-\code{\link[foreach:foreach]{foreach}}, i.e. it uses multi-processing.
-
-
+attempt to speed up the calculations (see the examples). This relies on \code{\link[foreach:foreach]{foreach::foreach()}},
+i.e. it uses multi-processing.
 
 Multi-processing is used in partitional and fuzzy clustering for multiple values of \code{k} and/or
 \code{nrep} (in \code{\link[=partitional_control]{partitional_control()}}). See \code{\link[=TADPole]{TADPole()}} to know how it uses parallelization. For

@@ -759,6 +759,7 @@ setMethod("plot", methods::signature(x = "TSClusters", y = "missing"), plot.TSCl
 # ==================================================================================================
 
 #' @importFrom cluster silhouette
+#' @importFrom methods as
 #'
 cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
     type <- match.arg(type, several.ok = TRUE,
@@ -807,7 +808,7 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
                     distmat <- quoted_call(
                         a@family@dist,
                         x = a@datalist,
-                        centroids = NULL,
+                        centroids = if (isTRUE(a@control$symmetric)) NULL else a@datalist,
                         dots = a@args$dist
                     )
                 }
@@ -833,14 +834,18 @@ cvi_TSClusters <- function(a, b = NULL, type = "valid", ...) {
             distcent <- quoted_call(
                 a@family@dist,
                 x = a@centroids,
-                centroids = NULL,
+                centroids = if (isTRUE(a@control$symmetric)) NULL else a@centroids,
                 dots = a@args$dist
             )
-            distcent <- base::as.matrix(distcent)
-            if (!base::isSymmetric(distcent))
-                warning("Internal CVIs: centroids' cross-distance matrix is NOT symmetric, ",
-                        "which can be problematic for:",
-                        "\n\tDB\tDB*")
+            if (base::is.matrix(distcent)) {
+                if (!base::isSymmetric(unclass(distcent)))
+                    warning("Internal CVIs: centroids' cross-distance matrix is NOT symmetric, ",
+                            "which can be problematic for:",
+                            "\n\tDB\tDB*")
+            }
+            else {
+                distcent <- methods::as(distcent, "Distmat")
+            }
         }
 
         # calculate global centroids if needed
@@ -949,6 +954,7 @@ setMethod("cvi", methods::signature(a = "HierarchicalTSClusters"), cvi_TSCluster
 #' @rdname cvi
 #' @aliases cvi,FuzzyTSClusters
 #' @exportMethod cvi
+#' @importFrom methods as
 #' @importFrom methods signature
 #'
 setMethod(
@@ -1008,8 +1014,10 @@ setMethod(
             if (any(type %in% c("K", "T", "PBMF"))) {
                 distcent <- quoted_call(a@family@dist,
                                         x = a@centroids,
-                                        centroids = NULL,
+                                        centroids = if (a@control$symmetric) NULL else a@centroids,
                                         dots = a@args$dist)
+
+                if (inherits(distcent, "dist")) distcent <- methods::as(distcent, "Distmat")
             }
             # distance between series and centroids
             if (any(type %in% c("K", "T", "SC", "PBMF"))) {

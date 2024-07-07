@@ -10,7 +10,7 @@
 #' @inherit lb_improved details
 #' @inheritSection lb_improved Note
 #'
-#' @template proxy
+#' @section `r roxygen_proxy_section()`
 #'
 #' @return A list with:
 #'
@@ -102,8 +102,9 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     if (length(x) == 0L || length(y) == 0L) stop("Empty list received in x or y.") # nocov start
     if (error.check) check_consistency(c(x,y), "tslist")
     if (is_multivariate(c(x,y))) stop("lb_keogh does not support multivariate series.") # nocov end
-    symmetric <- FALSE
+
     fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
+    symmetric <- FALSE
     eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
@@ -141,7 +142,7 @@ lb_keogh_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         else
             .Call(C_force_lb_symmetry, D, PACKAGE = "dtwclust")
     }
+
     attr(D, "method") <- "LB_Keogh"
-    # return
     D
 }

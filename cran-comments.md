@@ -1,5 +1,5 @@
 
-## Update to version 5.6.0
+## Update to version 6.0.0
 * Update Makevars for ARM version of Windows.
 * Internal optimizations of do.call usages.
 

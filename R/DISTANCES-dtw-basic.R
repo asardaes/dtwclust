@@ -19,13 +19,13 @@
 #' @param normalize Should the distance be normalized? Only supported for `symmetric2`.
 #' @param sqrt.dist Only relevant for `norm = "L2"`, see notes.
 #' @param ... Currently ignored.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #'
 #' @details
 #'
 #' If `backtrack` is `TRUE`, the mapping of indices between series is returned in a list.
 #'
-#' @template window
+#' `r roxygen_window_details()`
 #'
 #' @return The DTW distance. For `backtrack` `=` `TRUE`, a list with:
 #'
@@ -33,9 +33,9 @@
 #'   - `index1`: `x` indices for the matched elements in the warping path.
 #'   - `index2`: `y` indices for the matched elements in the warping path.
 #'
-#' @template proxy
-#' @template symmetric
-#' @section Proxy version:
+#' @section `r roxygen_proxy_section()`
+#'
+#' `r roxygen_proxy_symmetric()`
 #'
 #'   In order for symmetry to apply here, the following must be true: no window constraint is used
 #'   (`window.size` is `NULL`) or, if one is used, all series have the same length.
@@ -176,11 +176,17 @@ dtw_basic_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1",
         dim(D) <- NULL
         class(D) <- "pairdist"
     }
+    else if (symmetric) {
+        dim(D) <- NULL
+        class(D) <- "dist"
+        attr(D, "Size") <- length(x)
+        attr(D, "Labels") <- names(x)
+    }
     else {
         dimnames(D) <- dim_names
         class(D) <- "crossdist"
     }
+
     attr(D, "method") <- "DTW_BASIC"
-    # return
     D
 }

@@ -450,9 +450,11 @@ test_that("Compare clusterings works for the minimum set with all possibilities.
                                               score.clus = score_fun)
     })
 
-    sdtwc_comparison <- compare_clusterings(data_subset, "h",
-                                            configs = cfgs_sdtwc, seed = 3290L,
-                                            score.clus = score_fun)
+    suppressWarnings(
+        sdtwc_comparison <- compare_clusterings(data_subset, "h",
+                                                configs = cfgs_sdtwc, seed = 3290L,
+                                                score.clus = score_fun)
+    )
 
     ## rds
     all_comparisons$pick$object <- reset_nondeterministic(all_comparisons$pick$object)

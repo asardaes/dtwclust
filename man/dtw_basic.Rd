@@ -56,11 +56,10 @@ options.
 \details{
 If \code{backtrack} is \code{TRUE}, the mapping of indices between series is returned in a list.
 
-The windowing constraint uses a centered window. The calculations expect a value in
-\code{window.size} that represents the distance between the point considered and one of the edges
-of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
-observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
-in \code{10(2) + 1 = 21} observations falling within the window.
+The windowing constraint uses a centered window.
+The calculations expect a value in \code{window.size} that represents the distance between the point considered and one of the edges of the window.
+Therefore, if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}},
+resulting in \code{10(2) + 1 = 21} observations falling within the window.
 }
 \note{
 The elements of the local cost matrix are calculated by using either Manhattan or squared
@@ -78,27 +77,21 @@ a too small \code{window.size} or a very large length difference between the ser
 \section{Proxy version}{
 
 
-The version registered with \code{\link[proxy]{dist}} is custom (\code{loop = FALSE} in
-\code{\link[proxy]{pr_DB}}). The custom function handles multi-threaded parallelization
-directly (with \code{\link[RcppParallel:RcppParallel-package]{RcppParallel}}). It uses all
-available threads by default (see
-\code{\link[RcppParallel:defaultNumThreads]{RcppParallel::defaultNumThreads()}}), but this can
-be changed by the user with
-\code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
+The version registered with \code{\link[proxy:dist]{proxy::dist()}} is custom (\code{loop = FALSE} in \link[proxy:registry]{proxy::pr_DB}).
+The custom function handles multi-threaded parallelization directly with \link[RcppParallel:RcppParallel-package]{RcppParallel}.
+It uses all available threads by default (see \code{\link[RcppParallel:setThreadOptions]{RcppParallel::defaultNumThreads()}}),
+but this can be changed by the user with \code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
 
-An exception to the above is when it is called within a \code{\link[foreach:foreach]{foreach}}
-parallel loop \strong{made by dtwclust}. If the parallel workers do not have the number of
-threads explicitly specified, this function will default to 1 thread per worker. See the
-parallelization vignette for more information (\code{browseVignettes("dtwclust")}).
+An exception to the above is when it is called within a \code{\link[foreach:foreach]{foreach}} parallel loop \strong{made by dtwclust}.
+If the parallel workers do not have the number of threads explicitly specified,
+this function will default to 1 thread per worker.
+See the parallelization vignette for more information - \code{browseVignettes("dtwclust")}
 
-
-
-It also includes symmetric optimizations to calculate only half a distance matrix when
-appropriate---only one list of series should be provided in \code{x}. If you want to avoid this
-optimization, call \code{\link[proxy]{dist}} by giving the same list of series in both \code{x}
-and \code{y}.
-
-
+It also includes symmetric optimizations to calculate only half a distance matrix when appropriate---only one list of series should be provided in \code{x}.
+Starting with version 6.0.0, this optimization means that the function returns an array with the lower triangular values of the distance matrix,
+similar to what \code{\link[stats:dist]{stats::dist()}} does;
+see \linkS4class{DistmatLowerTriangular} for a helper to access elements as it if were a normal matrix.
+If you want to avoid this optimization, call \link[proxy:dist]{proxy::dist} by giving the same list of series in both \code{x} and \code{y}.
 
 In order for symmetry to apply here, the following must be true: no window constraint is used
 (\code{window.size} is \code{NULL}) or, if one is used, all series have the same length.

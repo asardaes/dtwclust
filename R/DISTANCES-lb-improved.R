@@ -16,7 +16,7 @@
 #' @param force.symmetry If `TRUE`, a second lower bound is calculated by swapping `x` and `y`, and
 #'   whichever result has a *higher* distance value is returned. The proxy version can only work if
 #'   a square matrix is obtained, but use carefully.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #'
 #' @details
 #'
@@ -25,11 +25,11 @@
 #' If the envelopes are provided, they should be provided together. If either one is missing, both
 #' will be computed.
 #'
-#' @template window
+#' `r roxygen_window_details()`
 #'
 #' @return The improved lower bound for the DTW distance.
 #'
-#' @template proxy
+#' @section `r roxygen_proxy_section()`
 #'
 #' @section Note:
 #'
@@ -128,8 +128,9 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
     if (length(x) == 0L || length(y) == 0L) stop("Empty list received in x or y.") # nocov start
     if (error.check) check_consistency(c(x,y), "tslist")
     if (is_multivariate(c(x,y))) stop("lb_improved does not support multivariate series.") # nocov end
-    symmetric <- FALSE
+
     fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
+    symmetric <- FALSE
     eval(prepare_expr) # UTILS-expressions.R
 
     # adjust parameters for this distance
@@ -168,7 +169,7 @@ lb_improved_proxy <- function(x, y = NULL, window.size = NULL, norm = "L1", ...,
         else
             .Call(C_force_lb_symmetry, D, PACKAGE = "dtwclust")
     }
+
     attr(D, "method") <- "LB_Improved"
-    # return
     D
 }

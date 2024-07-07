@@ -179,16 +179,19 @@ ddist2 <- function(distance, control) {
 
         if (!dist_entry$loop) {
             # CUSTOM LOOP, LET THEM HANDLE OPTIMIZATIONS
-            dm <- base::as.matrix(quoted_call(
+            dm <- quoted_call(
                 proxy::dist, x = x, y = centroids, method = distance, dots = dots
-            ))
+            )
 
             if (isTRUE(dots$pairwise)) {
                 dim(dm) <- NULL
                 return(ret(dm, class = "pairdist"))
             }
+            else if (inherits(dm, "dist")) {
+                return(ret(dm))
+            }
             else {
-                return(ret(dm, class = "crossdist"))
+                return(ret(base::as.matrix(dm), class = "crossdist"))
             }
         }
 
@@ -237,11 +240,16 @@ ddist2 <- function(distance, control) {
             }
             else if (!multiple_workers) {
                 # WHOLE SYMMETRIC DISTMAT WITHOUT CUSTOM LOOP OR USING SEQUENTIAL proxy LOOP
-                dm <- base::as.matrix(quoted_call(
+                dm <- quoted_call(
                     proxy::dist, x = x, y = NULL, method = distance, dots = dots
-                ))
+                )
 
-                return(ret(dm, class = "crossdist"))
+                if (inherits(dm, "dist")) {
+                    return(ret(dm))
+                }
+                else {
+                    return(ret(base::as.matrix(dm), class = "crossdist"))
+                }
             }
         }
 

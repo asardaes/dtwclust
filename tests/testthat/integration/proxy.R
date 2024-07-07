@@ -16,12 +16,16 @@ x <- data_reinterpolated[3L:8L]
 
 test_that("Included proxy distances can be called and give expected dimensions.", {
     for (distance in dtwclust:::distances_included) {
-        d <- proxy::dist(x, method = distance, window.size = 15L, sigma = 100, normalize = TRUE)
+        suppressWarnings(
+            d <- proxy::dist(x, method = distance, window.size = 15L, sigma = 100, normalize = TRUE)
+        )
         expect_identical(dim(d), c(length(x), length(x)), info = paste(distance, "single-arg"))
 
         d2 <- proxy::dist(x, x, method = distance, window.size = 15L, sigma = 100, normalize = TRUE)
-        expect_equal(d2, d, check.attributes = FALSE,
-                     info = paste(distance, "double-arg"))
+        if (distance != "sdtw") {
+            expect_equal(unclass(d2), as.matrix(d), check.attributes = FALSE,
+                         info = paste(distance, "double-arg"))
+        }
 
         d3 <- proxy::dist(x[1L], x, method = distance, window.size = 15L, sigma = 100, normalize = TRUE)
         class(d3) <- c("matrix", "array")
@@ -34,9 +38,9 @@ test_that("Included proxy distances can be called and give expected dimensions."
         # dtw_lb will give different results below because of how it works
         if (distance == "dtw_lb") next
 
-        expect_equal(d3, d[1L, , drop = FALSE], check.attributes = FALSE,
+        expect_equal(d3, d2[1L, , drop = FALSE], check.attributes = FALSE,
                      info = paste(distance, "one-vs-many-vs-distmat"))
-        expect_equal(d4, d[ , 1L, drop = FALSE], check.attributes = FALSE,
+        expect_equal(d4, d2[ , 1L, drop = FALSE], check.attributes = FALSE,
                      info = paste(distance, "many-vs-one-vs-distmat"))
 
         dots <- list()
@@ -54,6 +58,7 @@ test_that("Included proxy distances can be called and give expected dimensions."
                 d
             })
         })
+        if (distance == "sdtw") diag(manual_distmat) <- 0
         expect_equal(as.matrix(d), manual_distmat, check.attributes = FALSE,
                      info = paste("manual distmat vs proxy version using", distance))
     }

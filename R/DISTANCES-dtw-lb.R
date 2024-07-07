@@ -9,7 +9,7 @@
 #' @param x,y A matrix or data frame where rows are time series, or a list of time series.
 #' @param window.size Window size to use with the LB and DTW calculation. See details.
 #' @param norm Either `"L1"` for Manhattan distance or `"L2"` for Euclidean.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #' @param pairwise Calculate pairwise distances?
 #' @param dtw.func Which function to use for the core DTW calculations, either "dtw" or "dtw_basic".
 #'   See [dtw::dtw()] and [dtw_basic()].
@@ -31,11 +31,11 @@
 #' This could be useful in case one is interested in only the nearest neighbor of one or more series
 #' within a dataset.
 #'
-#' @template window
+#' `r roxygen_window_details()`
 #'
 #' @return The distance matrix with class `crossdist`.
 #'
-#' @template rcpp-parallel
+#' @section `r roxygen_rcpp_parallel_section()`
 #'
 #' @note
 #'

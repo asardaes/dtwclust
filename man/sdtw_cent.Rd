@@ -50,23 +50,17 @@ not fulfilled, the function will delegate to \code{\link[stats:optim]{stats::opt
 }
 \section{Parallel Computing}{
 
+Please note that running tasks in parallel does \strong{not} guarantee faster computations.
+The overhead introduced is sometimes too large, and it's better to run tasks sequentially.
 
-Please note that running tasks in parallel does \strong{not} guarantee faster computations. The
-overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+This function uses the \link[RcppParallel:RcppParallel-package]{RcppParallel} package for parallelization.
+It uses all available threads by default (see \code{\link[RcppParallel:setThreadOptions]{RcppParallel::defaultNumThreads()}}),
+but this can be changed by the user with \code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
 
-This function uses the \code{\link[RcppParallel:RcppParallel-package]{RcppParallel}} package
-for parallelization. It uses all available threads by default (see
-\code{\link[RcppParallel:defaultNumThreads]{RcppParallel::defaultNumThreads()}}), but this can
-be changed by the user with
-\code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
-
-An exception to the above is when this function is called within a
-\code{\link[foreach:foreach]{foreach}} parallel loop \strong{made by dtwclust}. If the parallel
-workers do not have the number of threads explicitly specified, this function will default to 1
-thread per worker. See the parallelization vignette for more information
-(\code{browseVignettes("dtwclust")}).
-
-
+An exception to the above is when it is called within a \code{\link[foreach:foreach]{foreach}} parallel loop \strong{made by dtwclust}.
+If the parallel workers do not have the number of threads explicitly specified,
+this function will default to 1 thread per worker.
+See the parallelization vignette for more information - \code{browseVignettes("dtwclust")}
 
 For unknown reasons, this function has returned different results (in the order of 1e-6) when
 using multi-threading in x64 Windows installations in comparison to other environments (using

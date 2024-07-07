@@ -12,7 +12,7 @@ Description: Time series clustering along with optimized techniques related
     All included distance functions have custom loops optimized for the 
     calculation of cross-distance matrices, including parallelization support.
     Several cluster validity indices are included.
-Version: 5.5.12
+Version: 5.5.12.9000
 Depends:
     R (>= 3.3.0),
     methods,
@@ -47,7 +47,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
-Date: 2024-06-22
+Date: 2024-07-01
 Author: Alexis Sarda-Espinosa
 Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
 BugReports: https://github.com/asardaes/dtwclust/issues
@@ -83,7 +83,9 @@ Collate:
     'DISTANCES-sbd.R'
     'DISTANCES-sdtw.R'
     'GENERICS-cvi.R'
+    'RD-helpers.R'
     'S4-Distmat.R'
+    'S4-DistmatLowerTriangular.R'
     'S4-PairTracker.R'
     'S4-SparseDistmat.R'
     'S4-tsclustFamily.R'

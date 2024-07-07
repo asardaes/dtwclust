@@ -344,15 +344,15 @@ get_nthreads <- function() {
 # ==================================================================================================
 
 # allocate distance matrix for custom proxy loops
-allocate_distmat <- function(x_len, y_len, pairwise, symmetric) {
-    if (pairwise)
-        D <- matrix(0, x_len, 1L)
-    else if (symmetric)
-        D <- matrix(0, x_len, x_len)
-    else
-        D <- matrix(0, x_len, y_len)
-    # return
-    D
+allocate_distmat <- function(x_len, y_len, pairwise, symmetric, diagonal) {
+    if (pairwise) {
+        matrix(0, x_len, 1L)
+    } else if (symmetric) {
+        diagonal_factor <- if (diagonal) 1L else -1L
+        matrix(0, x_len * (x_len + diagonal_factor) / 2L, 1L)
+    } else {
+        matrix(0, x_len, y_len)
+    }
 }
 
 # Euclidean norm

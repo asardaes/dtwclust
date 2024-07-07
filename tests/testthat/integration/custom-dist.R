@@ -44,6 +44,8 @@ test_that("Calling tsclust after registering a custom distance works as expected
     ## just for expect below
     pc_ndtw@control$symmetric <- TRUE
     pc_ndtw@call <- pc_ndtw_sym@call <- as.call(list("foo", bar = 1))
+    pc_ndtw@control$distmat <- pc_ndtw@distmat <- as.matrix(pc_ndtw@distmat)
+    pc_ndtw_sym@control$distmat <- pc_ndtw_sym@distmat <- as.matrix(pc_ndtw_sym@distmat)
 
     expect_identical(pc_ndtw, pc_ndtw_sym)
 

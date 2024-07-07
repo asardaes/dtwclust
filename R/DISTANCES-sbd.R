@@ -7,7 +7,7 @@
 #'
 #' @param x,y Univariate time series.
 #' @param znorm Logical. Should each series be z-normalized before calculating the distance?
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #' @param return.shifted Logical. Should the shifted version of `y` be returned? See details.
 #'
 #' @details
@@ -26,9 +26,9 @@
 #' - `dist`: The shape-based distance between `x` and `y`.
 #' - `yshift`: A shifted version of `y` so that it optimally matches `x` (based on [NCCc()]).
 #'
-#' @template proxy
-#' @template symmetric
-#' @section Proxy version:
+#' @section `r roxygen_proxy_section()`
+#'
+#' `r roxygen_proxy_symmetric()`
 #'
 #'   In some situations, e.g. for relatively small distance matrices, the overhead introduced by the
 #'   logic that computes only half the distance matrix can be bigger than just calculating the whole
@@ -162,6 +162,7 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
     }
 
     if (is_multivariate(c(x,y))) stop("SBD does not support multivariate series.") # nocov
+
     fill_type <- mat_type <- dim_names <- NULL # avoid warning about undefined globals
     eval(prepare_expr) # UTILS-expressions.R
 
@@ -182,11 +183,17 @@ sbd_proxy <- function(x, y = NULL, znorm = FALSE, ..., error.check = TRUE, pairw
         dim(D) <- NULL
         class(D) <- "pairdist"
     }
+    else if (symmetric) {
+        dim(D) <- NULL
+        class(D) <- "dist"
+        attr(D, "Size") <- length(x)
+        attr(D, "Labels") <- names(x)
+    }
     else {
         dimnames(D) <- dim_names
         class(D) <- "crossdist"
     }
+
     attr(D, "method") <- "SBD"
-    # return
     D
 }

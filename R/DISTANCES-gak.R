@@ -32,7 +32,7 @@ estimate_sigma <- function(x, y, within_proxy) {
 #'   `NULL`.
 #' @param window.size Parameterization of the constraining band (*T* in Cuturi (2011)). See details.
 #' @param normalize Normalize the result by considering diagonal terms.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #'
 #' @details
 #'
@@ -55,8 +55,9 @@ estimate_sigma <- function(x, y, within_proxy) {
 #' The logarithm of the GAK if `normalize = FALSE`, otherwise 1 minus the normalized GAK. The value
 #' of `sigma` is assigned as an attribute of the result.
 #'
-#' @template proxy
-#' @template symmetric
+#' @section `r roxygen_proxy_section()`
+#'
+#' `r roxygen_proxy_symmetric()`
 #'
 #' @note
 #'
@@ -170,6 +171,7 @@ gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
 
     x <- tslist(x)
     if (error.check) check_consistency(x, "vltslist")
+
     if (is.null(y)) {
         symmetric <- normalize
         y <- x
@@ -179,6 +181,7 @@ gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         y <- tslist(y)
         if (error.check) check_consistency(y, "vltslist")
     }
+
     if (is.null(sigma))
         sigma <- estimate_sigma(x, y, TRUE)
     else if (sigma <= 0)
@@ -229,12 +232,33 @@ gak_proxy <- function(x, y = NULL, ..., sigma = NULL, window.size = NULL, normal
         if (normalize) D <- 1 - exp(D - 0.5 * (gak_x + gak_y))
         class(D) <- "pairdist"
     }
+    else if (symmetric) {
+        dim(D) <- NULL
+
+        # normalize
+        j_upper <- length(x) - 1L
+        i_lower <- 1L
+        k <- 1L
+        for (j in 1L:j_upper) {
+            for (i in (j + i_lower):length(x)) {
+                if (i != j) {
+                    D[k] <- 1 - exp(D[k] - (gak_x[i] + gak_x[j]) / 2)
+                }
+                k <- k + 1L
+            }
+        }
+
+        class(D) <- "dist"
+        attr(D, "Size") <- length(x)
+        attr(D, "Labels") <- names(x)
+    }
     else {
         if (normalize) D <- 1 - exp(D - outer(gak_x, gak_y, function(x, y) { (x + y) / 2 }))
         dimnames(D) <- dim_names
         class(D) <- "crossdist"
     }
-    if (!pairwise && symmetric && normalize) diag(D) <- 0
+
+
     attr(D, "method") <- "GAK"
     attr(D, "sigma") <- sigma
     # return

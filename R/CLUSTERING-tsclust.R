@@ -3,16 +3,33 @@
 # ==================================================================================================
 
 # Get an appropriate distance matrix object for internal use with PAM/FCMdd centroids
+#' @importFrom methods as
 pam_distmat <- function(series, control, distance, cent_char, family, args, trace) {
     distmat <- control$distmat
     distmat_provided <- FALSE
 
     if (!is.null(distmat)) {
-        if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
-            stop("Dimensions of provided cross-distance matrix don't correspond ",
-                 "to length of provided data")
-        # see S4-Distmat.R
-        if (!inherits(distmat, "Distmat")) distmat <- Distmat$new(distmat = distmat)
+        if (inherits(distmat, "Distmat")) {
+            stop("Can this happen?")
+        }
+        else if (inherits(distmat, "dist")) {
+            n <- attr(distmat, "Size")
+            if (is.null(n) || n != length(series))
+                stop("Dimensions of provided cross-distance matrix don't correspond ",
+                     "to length of provided data")
+
+            # see S4-Distmat.R
+            distmat <- DistmatLowerTriangular$new(distmat = distmat)
+        }
+        else {
+            if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
+                stop("Dimensions of provided cross-distance matrix don't correspond ",
+                     "to length of provided data")
+
+            # see S4-Distmat.R
+            distmat <- Distmat$new(distmat = distmat)
+        }
+
         distmat_provided <- TRUE
         if (trace) cat("\n\tDistance matrix provided...\n\n") # nocov
     }
@@ -20,13 +37,11 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
         if (distance == "dtw_lb")
             warning("Using dtw_lb with control$pam.precompute = TRUE is not advised.") # nocov
         if (trace) cat("\n\tPrecomputing distance matrix...\n\n")
-        # see S4-Distmat.R
-        distmat <- Distmat$new(distmat = quoted_call(
-            family@dist,
-            x = series,
-            centroids = NULL,
-            dots = args$dist
-        ))
+
+        distfun <- if (distance == "sdtw") sdtw_wrapper else ddist2(distance, control)
+        centroids <- if (cent_char == "fcmdd") series else NULL
+        distmat <- methods::as(quoted_call(distfun, x = series, centroids = centroids, dots = args$dist),
+                               "Distmat")
     }
     else {
         if (isTRUE(control$pam.sparse) && distance != "dtw_lb") {
@@ -91,7 +106,7 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'   See [tsclust_args()] and the examples.
 #' @param seed Random seed for reproducibility.
 #' @param trace Logical flag. If `TRUE`, more output regarding the progress is printed to screen.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #'
 #' @details
 #'
@@ -247,9 +262,14 @@ pam_distmat <- function(series, control, distance, cent_char, family, args, trac
 #'   Repetitions are greatly optimized when PAM centroids are used and the whole distance matrix is
 #'   precomputed, since said matrix is reused for every repetition.
 #'
-#' @template parallel
-#'
 #' @section Parallel Computing:
+#'
+#'   Please note that running tasks in parallel does **not** guarantee faster computations. The
+#'   overhead introduced is sometimes too large, and it's better to run tasks sequentially.
+#'
+#'   The user can register a parallel backend, e.g. with the \pkg{doParallel} package, in order to
+#'   attempt to speed up the calculations (see the examples). This relies on [foreach::foreach()],
+#'   i.e. it uses multi-processing.
 #'
 #'   Multi-processing is used in partitional and fuzzy clustering for multiple values of `k` and/or
 #'   `nrep` (in [partitional_control()]). See [TADPole()] to know how it uses parallelization. For
@@ -376,7 +396,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
 
             if (!inherits(control, "PtCtrl") && !inherits(control, "FzCtrl"))
                 stop("Invalid control provided") # nocov
+
             nrep <- if (is.null(control$nrep)) 1L else control$nrep
+
             if (!is.character(centroid) || !(cent_char %in% c("pam", "fcmdd")))
                 control$distmat <- NULL
 
@@ -583,12 +605,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # Calculate distance matrix
             # --------------------------------------------------------------------------------------
 
-            # Take advantage of the function I defined for the partitional methods
-            # Which can do calculations in parallel if appropriate
-            distfun <- ddist2(distance = distance, control = control)
-
             if (!is.null(distmat)) {
-                if (nrow(distmat) != length(series) || ncol(distmat) != length(series))
+                if (inherits(distmat, "matrix") && nrow(distmat) != length(series) || ncol(distmat) != length(series))
                     stop("Dimensions of provided cross-distance matrix don't correspond to ",
                          "length of provided data")
                 if (trace) cat("\nDistance matrix provided...\n")
@@ -600,6 +618,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             }
             else {
                 if (trace) cat("\nCalculating distance matrix...\n")
+                # Take advantage of the function I defined for the partitional methods
+                # Which can do calculations in parallel if appropriate
+                distfun <- ddist2(distance = distance, control = control)
                 distmat <- quoted_call(distfun, x = series, centroids = NULL, dots = args$dist)
             }
 
@@ -608,10 +629,11 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # --------------------------------------------------------------------------------------
 
             if (trace) cat("Performing hierarchical clustering...\n")
-            if (!base::isSymmetric(base::as.matrix(distmat)))
+            if (!inherits(distmat, "dist") && !base::isSymmetric(base::as.matrix(distmat)))
                 warning("Distance matrix is not symmetric, ",
                         "and hierarchical clustering assumes it is ",
                         "(it ignores the upper triangular).")
+
             if (is.character(method)) {
                 # Using hclust
                 hc <- lapply(method, function(method) {
@@ -629,6 +651,9 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
             # --------------------------------------------------------------------------------------
 
             if (trace) cat("Extracting centroids...\n\n")
+
+            distmat <- methods::as(distmat, "Distmat")
+
             RET <- lapply(k, function(k) {
                 lapply(hc, function(hc) {
                     # cutree and corresponding centroids
@@ -659,7 +684,8 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                  stats::as.hclust(hc),
                                  call = MYCALL,
                                  family = methods::new("tsclustFamily",
-                                                       dist = distfun,
+                                                       dist = ddist2(distance = distance,
+                                                                     control = control),
                                                        allcent = allcent,
                                                        preproc = preproc),
                                  control = control,
@@ -673,7 +699,7 @@ tsclust <- function(series = NULL, type = "partitional", k = 2L, ...,
                                  k = as.integer(k),
                                  cluster = cluster,
                                  centroids = centroids,
-                                 distmat = distmat,
+                                 distmat = distmat$distmat,
 
                                  dots = dots,
                                  args = args,

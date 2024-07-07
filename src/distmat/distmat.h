@@ -3,7 +3,6 @@
 
 #include <memory> // *_ptr
 
-#define R_NO_REMAP
 #include <RcppParallel.h>
 #include <Rinternals.h>
 

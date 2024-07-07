@@ -10,7 +10,7 @@
 #' @param window.size Window size constraint for DTW (Sakoe-Chiba). See details.
 #' @param k The number of desired clusters. Can be a vector with several values.
 #' @param dc The cutoff distance(s). Can be a vector with several values.
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #' @param lb Which lower bound to use, "lbk" for [lb_keogh()] or "lbi" for [lb_improved()].
 #' @param trace Logical flag. If `TRUE`, more output regarding the progress is printed to screen.
 #'
@@ -39,7 +39,7 @@
 #' - For multiple `dc` values, multi-processing with [foreach::foreach()].
 #' - The internal distance calculations use multi-threading with [RcppParallel::RcppParallel].
 #'
-#' @template window
+#' `r roxygen_window_details()`
 #'
 #' @return
 #'
@@ -52,7 +52,7 @@
 #' For multiple `k`/`dc` values, a list of lists is returned, each internal list having the
 #' aforementioned elements.
 #'
-#' @template rcpp-parallel
+#' @section `r roxygen_rcpp_parallel_section()`
 #'
 #' @references
 #'

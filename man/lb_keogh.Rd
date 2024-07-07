@@ -55,27 +55,23 @@ The reference time series should go in \code{x}, whereas the query time series s
 If the envelopes are provided, they should be provided together. If either one is missing, both
 will be computed.
 
-The windowing constraint uses a centered window. The calculations expect a value in
-\code{window.size} that represents the distance between the point considered and one of the edges
-of the window. Therefore, if, for example, \code{window.size = 10}, the warping for an
-observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}}, resulting
-in \code{10(2) + 1 = 21} observations falling within the window.
+The windowing constraint uses a centered window.
+The calculations expect a value in \code{window.size} that represents the distance between the point considered and one of the edges of the window.
+Therefore, if, for example, \code{window.size = 10}, the warping for an observation \eqn{x_i} considers the points between \eqn{x_{i-10}} and \eqn{x_{i+10}},
+resulting in \code{10(2) + 1 = 21} observations falling within the window.
 }
 \section{Proxy version}{
 
 
-The version registered with \code{\link[proxy]{dist}} is custom (\code{loop = FALSE} in
-\code{\link[proxy]{pr_DB}}). The custom function handles multi-threaded parallelization
-directly (with \code{\link[RcppParallel:RcppParallel-package]{RcppParallel}}). It uses all
-available threads by default (see
-\code{\link[RcppParallel:defaultNumThreads]{RcppParallel::defaultNumThreads()}}), but this can
-be changed by the user with
-\code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
+The version registered with \code{\link[proxy:dist]{proxy::dist()}} is custom (\code{loop = FALSE} in \link[proxy:registry]{proxy::pr_DB}).
+The custom function handles multi-threaded parallelization directly with \link[RcppParallel:RcppParallel-package]{RcppParallel}.
+It uses all available threads by default (see \code{\link[RcppParallel:setThreadOptions]{RcppParallel::defaultNumThreads()}}),
+but this can be changed by the user with \code{\link[RcppParallel:setThreadOptions]{RcppParallel::setThreadOptions()}}.
 
-An exception to the above is when it is called within a \code{\link[foreach:foreach]{foreach}}
-parallel loop \strong{made by dtwclust}. If the parallel workers do not have the number of
-threads explicitly specified, this function will default to 1 thread per worker. See the
-parallelization vignette for more information (\code{browseVignettes("dtwclust")}).
+An exception to the above is when it is called within a \code{\link[foreach:foreach]{foreach}} parallel loop \strong{made by dtwclust}.
+If the parallel workers do not have the number of threads explicitly specified,
+this function will default to 1 thread per worker.
+See the parallelization vignette for more information - \code{browseVignettes("dtwclust")}
 }
 
 \section{Note}{

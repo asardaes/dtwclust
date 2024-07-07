@@ -12,7 +12,7 @@
 #'   list is provided in `x`.
 #' @param keep.attributes Should the mean and standard deviation returned by [base::scale()] be
 #'   preserved?
-#' @template error-check
+#' @param error.check `r roxygen_error_check_param()`
 #'
 #' @details
 #'
