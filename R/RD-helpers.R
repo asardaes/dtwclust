@@ -26,6 +26,9 @@ See the parallelization vignette for more information - `browseVignettes(\"dtwcl
 
 roxygen_proxy_symmetric <- function() {
     "It also includes symmetric optimizations to calculate only half a distance matrix when appropriate---only one list of series should be provided in `x`.
+Starting with version 6.0.0, this optimization means that the function returns an array with the lower triangular values of the distance matrix,
+similar to what [stats::dist()] does;
+see [DistmatLowerTriangular-class] for a helper to access elements as it if were a normal matrix.
 If you want to avoid this optimization, call [proxy::dist] by giving the same list of series in both `x` and `y`."
 }
 

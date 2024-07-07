@@ -21,6 +21,12 @@
 #'
 #' `r roxygen_proxy_symmetric()`
 #'
+#' Note that, due to the fact that this distance is not always zero when a series is compared
+#' against itself, this optimization is likely problematic for soft-DTW, as the `dist` object will
+#' be handled by many functions as if it had only zeroes in the diagonal. An exception is
+#' [tsclust()] when using partitional clustering with PAM centroids---actual diagonal values will
+#' be calculated and considered internally in that case.
+#'
 #' @references
 #'
 #' Cuturi, M., & Blondel, M. (2017). Soft-DTW: a Differentiable Loss Function for Time-Series. arXiv

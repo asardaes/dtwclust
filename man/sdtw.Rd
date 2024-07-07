@@ -41,7 +41,16 @@ this function will default to 1 thread per worker.
 See the parallelization vignette for more information - \code{browseVignettes("dtwclust")}
 
 It also includes symmetric optimizations to calculate only half a distance matrix when appropriate---only one list of series should be provided in \code{x}.
+Starting with version 6.0.0, this optimization means that the function returns an array with the lower triangular values of the distance matrix,
+similar to what \code{\link[stats:dist]{stats::dist()}} does;
+see \linkS4class{DistmatLowerTriangular} for a helper to access elements as it if were a normal matrix.
 If you want to avoid this optimization, call \link[proxy:dist]{proxy::dist} by giving the same list of series in both \code{x} and \code{y}.
+
+Note that, due to the fact that this distance is not always zero when a series is compared
+against itself, this optimization is likely problematic for soft-DTW, as the \code{dist} object will
+be handled by many functions as if it had only zeroes in the diagonal. An exception is
+\code{\link[=tsclust]{tsclust()}} when using partitional clustering with PAM centroids---actual diagonal values will
+be calculated and considered internally in that case.
 }
 
 \references{

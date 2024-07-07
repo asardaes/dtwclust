@@ -3,7 +3,7 @@
 ## Version 6.0.0
 * Update Makevars for ARM version of Windows.
 * Sanitize internal usage of `do.call` to avoid huge backtraces.
-* Support lower triangular `distmat` objects for symmetric distances (#77).
+* Support lower triangular `distmat` objects for symmetric distances (#77) - breaking change.
 
 ## Version 5.5.12
 * Remove explicit C++ requirements.
