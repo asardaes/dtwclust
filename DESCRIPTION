@@ -44,6 +44,7 @@ LinkingTo:
     RcppThread
 Suggests:
     doParallel,
+    iterators,
     knitr,
     rmarkdown,
     testthat
@@ -60,6 +61,7 @@ LazyData: TRUE
 RoxygenNote: 7.3.1
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
+Config/testthat/edition: 3
 Collate: 
     'CENTROIDS-dba.R'
     'CENTROIDS-pam.R'

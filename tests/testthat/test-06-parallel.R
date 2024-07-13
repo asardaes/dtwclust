@@ -36,6 +36,7 @@ test_that("Parallel computation gives the same results as sequential", {
     registerDoParallel(cl)
 
     # Filter excludes files that have "parallel" in them, otherwise it would be recursive
+    options(testthat.default_reporter = "summary")
     res <- test_dir("./", filter = "parallel", invert = TRUE)
 
     sapply(clusterEvalQ(cl, RNGkind()[1L]), function(current_rngkind) {
