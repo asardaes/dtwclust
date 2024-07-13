@@ -44,6 +44,7 @@ LinkingTo:
     RcppThread
 Suggests:
     doParallel,
+    iterators,
     knitr,
     rmarkdown,
     testthat
