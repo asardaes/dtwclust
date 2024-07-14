@@ -133,6 +133,19 @@ test_that("Partitional clustering works as expected.", {
     assign("pc_sdtw", pc_sdtw, persistent)
 })
 
+test_that("sDTW is handled correctly when PAM is used", {
+    ans <- tsclust(data_multivariate, type = "p", k = 4L,
+                   distance = "sdtw", seed = 938)
+
+    expect_equal(class(ans@distmat), "dist")
+    expect_equal(attr(ans@distmat, "method"), "SDTW")
+
+    dm <- new("DistmatLowerTriangular", distmat = ans@distmat)
+    n <- attr(ans@distmat, "Size")
+    diagonal <- dm[cbind(1:n, 1:n)]
+    expect_false(any(diagonal == 0.0))
+})
+
 # ==================================================================================================
 # TADPole
 # ==================================================================================================
