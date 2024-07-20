@@ -1,3 +1,4 @@
+R/RD-*
 R/SHINY-*
 R/pkg.R
 src/*.h
