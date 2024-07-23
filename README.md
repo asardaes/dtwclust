@@ -1,10 +1,10 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/dtwclust)](https://cran.r-project.org/package=dtwclust)
+[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/dtwclust)](https://cran.r-project.org/package=dtwclust)
 [![R-CMD-check](https://github.com/asardaes/dtwclust/workflows/R-CMD-check/badge.svg)](https://github.com/asardaes/dtwclust/actions)
 [![codecov](https://codecov.io/gh/asardaes/dtwclust/branch/master/graph/badge.svg)](https://codecov.io/gh/asardaes/dtwclust)
-[![Downloads](http://cranlogs.r-pkg.org/badges/dtwclust)](https://cran.r-project.org/package=dtwclust)
+[![Downloads](https://cranlogs.r-pkg.org/badges/dtwclust)](https://cran.r-project.org/package=dtwclust)
 
 # Time Series Clustering Along with Optimizations for the Dynamic Time Warping (DTW) Distance
 
