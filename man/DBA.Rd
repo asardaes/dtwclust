@@ -174,6 +174,5 @@ all.equal(newer_cent, new_cent, check.attributes = FALSE) # ignore names
 \references{
 Petitjean F, Ketterlin A and Gancarski P (2011). ``A global averaging method for dynamic time
 warping, with applications to clustering.'' \emph{Pattern Recognition}, \strong{44}(3), pp. 678 - 693. ISSN
-0031-3203, \doi{10.1016/j.patcog.2010.09.013},
-\url{https://www.sciencedirect.com/science/article/pii/S003132031000453X}.
+0031-3203, \doi{10.1016/j.patcog.2010.09.013}.
 }

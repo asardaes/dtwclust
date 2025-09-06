@@ -131,8 +131,7 @@ identical(NN1, NN4)
 \references{
 Lemire D (2009). ``Faster retrieval with a two-pass dynamic-time-warping lower bound .'' \emph{Pattern
 Recognition}, \strong{42}(9), pp. 2169 - 2180. ISSN 0031-3203,
-\doi{10.1016/j.patcog.2008.11.030},
-\url{https://www.sciencedirect.com/science/article/pii/S0031320308004925}.
+\doi{10.1016/j.patcog.2008.11.030}.
 }
 \seealso{
 \code{\link[=lb_keogh]{lb_keogh()}}, \code{\link[=lb_improved]{lb_improved()}}
