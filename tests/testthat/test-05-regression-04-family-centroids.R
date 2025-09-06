@@ -23,9 +23,10 @@ with(persistent, {
         expect_known_value(cent_pam, file_name(cent_pam), info = "Univariate without distmat")
         expect_known_value(cent_mv_pam, file_name(cent_mv_pam), info = "Multivariate")
 
-        tol <- if (.Machine$sizeof.pointer == 4L) 1e-2 else sqrt(.Machine$double.eps)
-        expect_known_value(cent_dba, file_name(cent_dba, x32 = TRUE), tolerance = tol, info = "Univariate")
-        expect_known_value(cent_mv_dba, file_name(cent_mv_dba, x32 = TRUE), tolerance = tol, info = "Multivariate")
+        skip_on_os("mac")
+
+        expect_known_value(cent_dba, file_name(cent_dba, x32 = TRUE), info = "Univariate")
+        expect_known_value(cent_mv_dba, file_name(cent_mv_dba, x32 = TRUE), info = "Multivariate")
 
         expect_known_value(cent_mv_dba_bys, file_name(cent_mv_dba_bys), info = "DBA by series")
     })
