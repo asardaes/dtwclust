@@ -51,7 +51,7 @@ ui <- tagList(
                     )
                 ),
                 column(
-                    2L, offset = 8L,
+                    2L, offset = 2L,
                     h2("Plot parameters")
                 )
             ),

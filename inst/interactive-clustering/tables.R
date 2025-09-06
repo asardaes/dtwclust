@@ -50,5 +50,5 @@ cl_table <- quote({
 
 # Evaluate tab, distmat
 distmat_table <- quote({
-    as.data.frame(dm)
+    as.matrix(dm)
 })
