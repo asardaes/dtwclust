@@ -48,9 +48,10 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
-Date: 2024-07-23
-Author: Alexis Sarda-Espinosa
-Maintainer: Alexis Sarda <alexis.sarda@gmail.com>
+Date: 2025-09-06
+Authors@R: c(
+        person("Alexis", "Sarda-Espinosa", role=c("cre", "aut"), email="alexis.sarda@gmail.com")
+    )
 BugReports: https://github.com/asardaes/dtwclust/issues
 License: GPL-3
 URL: https://github.com/asardaes/dtwclust
@@ -58,7 +59,7 @@ NeedsCompilation: yes
 SystemRequirements: GNU make
 Encoding: UTF-8
 LazyData: TRUE
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.3
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
